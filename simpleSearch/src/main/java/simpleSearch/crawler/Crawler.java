@@ -1,13 +1,11 @@
 package simpleSearch.crawler;
 
-import simpleSearch.crawler.document.Document;
-
-import java.util.List;
+import simpleSearch.crawler.document.MyDocument;
 
 public interface Crawler {
 
-    long getID(Document document);
+    long getID(MyDocument myDocument);
 
-    Document getDocument(long iD);
+    MyDocument getDocument(long iD);
 
 }
