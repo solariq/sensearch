@@ -2,7 +2,7 @@ package simpleSearch.crawler.document;
 
 import java.util.List;
 
-public interface Document {
+public interface MyDocument {
 
     boolean checkWord(String word);
 
