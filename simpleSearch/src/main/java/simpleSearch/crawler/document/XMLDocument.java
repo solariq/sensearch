@@ -10,7 +10,10 @@ import java.io.*;
 
 public class XMLDocument implements MyDocument {
 
+    File file;
+
     XMLDocument(Path path) {
+        file = new File(path.toString());
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
         try {
             DocumentBuilder builder = factory.newDocumentBuilder();
