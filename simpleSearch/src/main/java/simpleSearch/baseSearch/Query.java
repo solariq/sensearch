@@ -1,5 +1,7 @@
 package simpleSearch.baseSearch;
 
+import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -8,4 +10,15 @@ import java.util.List;
 public class Query {
   private String rawQuery;
   private List<Term> allQueryTerms;
+
+  public Query(String query) {
+    allQueryTerms = new ArrayList<>();
+    for (String token : query.split("\\s")) {
+      allQueryTerms.add(new Term(token.toLowerCase()));
+    }
+  }
+
+  public List<Term> getTermsList() {
+    return allQueryTerms;
+  }
 }

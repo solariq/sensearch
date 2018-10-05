@@ -7,11 +7,12 @@ import java.util.Set;
 
 /**
  * Created by sandulmv on 03.10.18.
+ * Assumed interface of InvertedIndex
  */
 public interface InvertedIndex {
-  Map<Term, Set<DocumentInfo>> getRelatedDocuments(List<Term> terms);
+  List<TermInfo> getRelatedDocuments(List<Term> terms);
   // Maybe get some general information about index?
-  long getTermCount();
+  long getTermsCount();
   long getDocumentsCount();
   Date lastTimeUpdated();
 }
