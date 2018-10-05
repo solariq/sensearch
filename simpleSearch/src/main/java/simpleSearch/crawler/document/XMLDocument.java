@@ -5,25 +5,37 @@ import org.w3c.dom.*;
 import java.nio.file.Path;
 import java.util.List;
 
-import javax.xml.parsers.*;
+
 import java.io.*;
+
+import javax.xml.namespace.QName;
+import javax.xml.stream.XMLEventReader;
+import javax.xml.stream.XMLInputFactory;
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.events.Attribute;
+import javax.xml.stream.events.EndElement;
+import javax.xml.stream.events.StartElement;
+import javax.xml.stream.events.XMLEvent;
 
 public class XMLDocument implements MyDocument {
 
     File file;
+    XMLInputFactory xmlInputFactory = XMLInputFactory.newInstance();
+    XMLEventReader reader;
 
     XMLDocument(Path path) {
         file = new File(path.toString());
-        DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
         try {
-            DocumentBuilder builder = factory.newDocumentBuilder();
+            reader = xmlInputFactory.createXMLEventReader(new FileInputStream(path.toString()));
+            while (reader.hasNext()) {
+                XMLEvent xmlEvent = reader.nextEvent();
+                if (xmlEvent.isStartElement()) {
+                    StartElement startElement = xmlEvent.asStartElement();
 
-            StringBuilder xmlStringBuilder = new StringBuilder();
-            xmlStringBuilder.append("<?xml version=\"1.0\"?> <class> </class>");
-            ByteArrayInputStream input = new ByteArrayInputStream(
-                    xmlStringBuilder.toString().getBytes("UTF-8"));
-            Document doc = builder.parse(input);
-        } catch (Exception e) {
+                }
+            }
+
+        } catch (XMLStreamException | FileNotFoundException e) {
             e.printStackTrace();
         }
     }
