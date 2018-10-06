@@ -14,7 +14,7 @@ public abstract class DocumentRanker {
     this.index = index;
   }
 
-  public abstract List<DocumentId> sortDocuments(Query initialQuery, List<TermInfo> documents);
+  public abstract TLongList sortDocuments(Query initialQuery, TLongList documents);
 
   public void setIndex(Index index) {
     this.index = index;

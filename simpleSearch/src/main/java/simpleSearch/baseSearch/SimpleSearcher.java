@@ -1,8 +1,5 @@
 package simpleSearch.baseSearch;
 
-import java.util.LinkedList;
-import java.util.List;
-
 /**
  * Created by sandulmv on 03.10.18.
  */
@@ -14,26 +11,25 @@ import java.util.List;
  */
 public final class SimpleSearcher {
 
-  private InvertedIndex invertedIndex;
   private DocumentRanker documentRanker;
+  private DocumentFetcher documentFetcher;
 
-  public SimpleSearcher(InvertedIndex invertedIndex, DocumentRanker documentRanker) {
-    this.invertedIndex = invertedIndex;
+  public SimpleSearcher(DocumentFetcher documentFilter, DocumentRanker documentRanker) {
+    this.documentFetcher = documentFilter;
     this.documentRanker = documentRanker;
   }
 
-  public List<DocumentId> getRankedDocuments(Query query) {
+  public TLongList getRankedDocuments(Query query) {
     return documentRanker.sortDocuments(
-        query, invertedIndex.getRelatedDocuments(query.getTermsList())
+        query, documentFetcher.fetchDocumentsFromIndex(query)
     );
   }
 
-  void setInvertedIndex(InvertedIndex invertedIndex) {
-    this.invertedIndex = invertedIndex;
-  }
-
-
   void setDocumentRanker(DocumentRanker documentRanker) {
     this.documentRanker = documentRanker;
+  }
+
+  void setDocumentFetcher(DocumentFetcher documentFetcher) {
+    this.documentFetcher = documentFetcher;
   }
 }
