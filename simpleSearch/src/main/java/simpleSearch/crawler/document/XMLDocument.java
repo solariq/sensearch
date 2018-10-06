@@ -38,13 +38,15 @@ public class XMLDocument implements CrawlerDocument {
             XMLEventReader reader = xmlInputFactory.
                     createXMLEventReader(new FileInputStream(path.toString()));
             int i = 0;
-            while (reader.hasNext() && i <= 3) {
+            StringBuilder text = null;
+            while (reader.hasNext() && i <= 1) {
                 XMLEvent xmlEvent = reader.nextEvent();
                 if (xmlEvent.isStartElement()) {
                     i++;
                     StartElement startElement = xmlEvent.asStartElement();
                     if (startElement.getName().getLocalPart().equals("page")) {
                         page = new WikiPage();
+                        text = new StringBuilder();
 
                         Attribute idAttr = startElement.getAttributeByName(new QName("id"));
                         if (idAttr != null) {
@@ -55,17 +57,18 @@ public class XMLDocument implements CrawlerDocument {
                         if (titleAttr != null) {
                             page.setTitle(titleAttr.getValue());
                         }
-                        
-                        xmlEvent = reader.nextEvent();
 
-                        page.setPage(xmlEvent.asCharacters().getData());
-
-                        System.err.println(page.toString());
-                    } else if (xmlEvent.isEndElement()) {
-                        EndElement endElement = xmlEvent.asEndElement();
-                        if (endElement.getName().getLocalPart().equals("page")) {
-                            //end of parse
+                        while (reader.hasNext() && (xmlEvent = reader.nextEvent()).isCharacters()) {
+                            System.err.println(xmlEvent.asCharacters().getData());
+                            text.append(xmlEvent.asCharacters().getData());
                         }
+                    }
+                }
+                if (xmlEvent.isEndElement()) {
+                    EndElement endElement = xmlEvent.asEndElement();
+                    if (endElement.getName().getLocalPart().equals("page")) {
+                        page.setPage(text);
+                        System.err.println(page.toString());
                     }
                 }
             }
@@ -85,7 +88,7 @@ public class XMLDocument implements CrawlerDocument {
     }
 
     @Override
-    public List<String> returnSentences(String word) {
+    public List<CharSequence> returnSentences(String word) {
         return null;
     }
 

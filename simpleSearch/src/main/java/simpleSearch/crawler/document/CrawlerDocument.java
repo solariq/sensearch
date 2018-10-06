@@ -8,7 +8,7 @@ public interface CrawlerDocument {
 
     List<Boolean> checkWords(List<String> words);
 
-    List<String> returnSentences(String word);
+    List<CharSequence> returnSentences(String word);
 
     CharSequence returnContent();
 
