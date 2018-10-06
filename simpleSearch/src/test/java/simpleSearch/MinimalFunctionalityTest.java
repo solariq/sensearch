@@ -5,6 +5,7 @@ import gnu.trove.list.TLongList;
 import gnu.trove.list.array.TLongArrayList;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.NoSuchElementException;
 import org.junit.Assert;
 import org.junit.Test;
 import java.util.List;
@@ -27,14 +28,14 @@ public class MinimalFunctionalityTest {
   };
 
   private static class SimpleTextDocument implements CrawlerDocument {
-    private String documentConent;
-    public SimpleTextDocument(String documentConent) {
-      this.documentConent = documentConent;
+    private String documentContent;
+    public SimpleTextDocument(String documentContent) {
+      this.documentContent = documentContent;
     }
 
     @Override
     public boolean checkWord(String word) {
-      return documentConent.contains(word);
+      return documentContent.contains(word);
     }
 
     @Override
@@ -54,7 +55,7 @@ public class MinimalFunctionalityTest {
 
     @Override
     public CharSequence returnContent() {
-      return documentConent;
+      return documentContent;
     }
 
     @Override
@@ -91,12 +92,15 @@ public class MinimalFunctionalityTest {
         private int curIndex = -1;
         @Override
         public boolean hasNext() {
-          return curIndex < indexedDocuments.length;
+          return (curIndex + 1) < indexedDocuments.length;
         }
 
         @Override
         public Pair<Long, CrawlerDocument> next() {
-          ++curIndex;
+          if (++curIndex >= indexedDocuments.length) {
+            throw new NoSuchElementException();
+          }
+
           return new Pair<>((long)curIndex, indexedDocuments[curIndex]);
         }
       };
