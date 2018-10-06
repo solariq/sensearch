@@ -4,7 +4,8 @@ package simpleSearch.baseSearch;
  * Created by sandulmv on 03.10.18.
  */
 
-// TODO: should be singleton?
+import gnu.trove.list.TLongList;
+import simpleSearch.queryTmp.Query;
 
 /**
  * The implementation of the base search.
@@ -19,9 +20,9 @@ public final class SimpleSearcher {
     this.documentRanker = documentRanker;
   }
 
-  public TLongList getRankedDocuments(Query query) {
+  public TLongList getSortedDocuments(Query query) {
     return documentRanker.sortDocuments(
-        query, documentFetcher.fetchDocumentsFromIndex(query)
+        query, documentFetcher.fetchDocuments(query)
     );
   }
 

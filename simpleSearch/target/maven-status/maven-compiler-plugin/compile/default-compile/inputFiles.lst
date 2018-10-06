@@ -1,0 +1,14 @@
+/home/sandulmv/IdeaProjects/SimpleSearch/simpleSearch/src/main/java/simpleSearch/snippets/snippet/Snippet.java
+/home/sandulmv/IdeaProjects/SimpleSearch/simpleSearch/src/main/java/simpleSearch/baseSearch/SimpleSearcher.java
+/home/sandulmv/IdeaProjects/SimpleSearch/simpleSearch/src/main/java/simpleSearch/crawler/document/WikiPage.java
+/home/sandulmv/IdeaProjects/SimpleSearch/simpleSearch/src/main/java/simpleSearch/crawler/Crawler.java
+/home/sandulmv/IdeaProjects/SimpleSearch/simpleSearch/src/main/java/simpleSearch/snippets/SnippetsCreator.java
+/home/sandulmv/IdeaProjects/SimpleSearch/simpleSearch/src/main/java/simpleSearch/baseSearch/DocumentFetcher.java
+/home/sandulmv/IdeaProjects/SimpleSearch/simpleSearch/src/main/java/simpleSearch/TestSnippetProvider.java
+/home/sandulmv/IdeaProjects/SimpleSearch/simpleSearch/src/main/java/simpleSearch/crawler/document/CrawlerDocument.java
+/home/sandulmv/IdeaProjects/SimpleSearch/simpleSearch/src/main/java/simpleSearch/snippets/Utils.java
+/home/sandulmv/IdeaProjects/SimpleSearch/simpleSearch/src/main/java/simpleSearch/baseSearch/DocumentRanker.java
+/home/sandulmv/IdeaProjects/SimpleSearch/simpleSearch/src/main/java/simpleSearch/crawler/document/MyDocument.java
+/home/sandulmv/IdeaProjects/SimpleSearch/simpleSearch/src/main/java/simpleSearch/SearchServer.java
+/home/sandulmv/IdeaProjects/SimpleSearch/simpleSearch/src/main/java/simpleSearch/snippets/Query.java
+/home/sandulmv/IdeaProjects/SimpleSearch/simpleSearch/src/main/java/simpleSearch/crawler/document/XMLDocument.java

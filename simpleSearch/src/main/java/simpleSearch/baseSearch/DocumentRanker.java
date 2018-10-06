@@ -1,8 +1,10 @@
 package simpleSearch.baseSearch;
 
+import gnu.trove.list.TLongList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import simpleSearch.queryTmp.Query;
 
 /**
  * Created by sandulmv on 03.10.18.
