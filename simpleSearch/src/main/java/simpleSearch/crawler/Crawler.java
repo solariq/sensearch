@@ -7,5 +7,4 @@ public interface Crawler {
     long getID(CrawlerDocument crawlerDocument);
 
     CrawlerDocument getDocument(long iD);
-
 }

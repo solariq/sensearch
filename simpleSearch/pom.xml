@@ -32,5 +32,21 @@
       <version>4.12</version>
       <scope>test</scope>
     </dependency>
+    <!-- https://mvnrepository.com/artifact/org.eclipse.jetty/jetty-server -->
+	  <dependency>
+	    <groupId>org.eclipse.jetty</groupId>
+	    <artifactId>jetty-server</artifactId>
+	    <version>9.4.12.v20180830</version>
+	  </dependency>
+    <dependency>
+      <groupId>net.sf.trove4j</groupId>
+      <artifactId>trove4j</artifactId>
+      <version>3.0.3</version>
+    </dependency>
+    <dependency>
+      <groupId>com.expleague</groupId>
+      <artifactId>commons</artifactId>
+      <version>1.4.1</version>
+    </dependency>
   </dependencies>
 </project>
