@@ -1,11 +1,11 @@
 package simpleSearch.crawler;
 
-import simpleSearch.crawler.document.MyDocument;
+import simpleSearch.crawler.document.CrawlerDocument;
 
 public interface Crawler {
 
-    long getID(MyDocument myDocument);
+    long getID(CrawlerDocument crawlerDocument);
 
-    MyDocument getDocument(long iD);
+    CrawlerDocument getDocument(long iD);
 
 }
