@@ -32,18 +32,15 @@
       <version>4.12</version>
       <scope>test</scope>
     </dependency>
-<<<<<<< HEAD
     <dependency>
       <groupId>net.sf.trove4j</groupId>
       <artifactId>trove4j</artifactId>
       <version>3.0.3</version>
-=======
-
+    </dependency>
     <dependency>
       <groupId>com.expleague</groupId>
       <artifactId>commons</artifactId>
       <version>1.4.1</version>
->>>>>>> 461138cf6dfa7ceb3d11f13d6c17ecc28f26802e
     </dependency>
   </dependencies>
 </project>
