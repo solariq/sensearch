@@ -1,21 +1,14 @@
 package components.searcher;
 
-import com.expleague.commons.util.Pair;
-import gnu.trove.list.TLongList;
-import gnu.trove.list.array.TLongArrayList;
+import components.queryTmp.Term;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.NoSuchElementException;
 import org.junit.Assert;
 import org.junit.Test;
 import java.util.List;
-import components.searcher.DocumentFetcher;
-import components.searcher.DocumentRanker;
-import components.searcher.Index;
-import components.searcher.SimpleSearcher;
+import components.index.Index;
 import components.crawler.document.CrawlerDocument;
 import components.queryTmp.Query;
-import components.queryTmp.Term;
 
 /**
  * Created by sandulmv on 06.10.18.
@@ -65,12 +58,11 @@ public class MinimalFunctionalityTest {
 
   }
 
-  private static class SimpleIndex extends Index {
+  private static class SimpleIndex implements Index {
 
     private CrawlerDocument[] indexedDocuments;
 
     public SimpleIndex() {
-      super("");
       indexedDocuments = new CrawlerDocument[TEST_DOCUMENTS.length];
       for (int i = 0; i < TEST_DOCUMENTS.length; ++i) {
         indexedDocuments[i] = new SimpleTextDocument(TEST_DOCUMENTS[i]);
@@ -79,75 +71,47 @@ public class MinimalFunctionalityTest {
 
     @Override
     public CrawlerDocument getDocument(long documentId) {
-      if (documentId >= 0 && documentId < indexedDocuments.length) {
-        return indexedDocuments[(int) documentId];
+      if (documentId < 0 && documentId >= indexedDocuments.length) {
+        throw new NoSuchElementException();
       }
-
-      throw new IndexOutOfBoundsException();
+      return indexedDocuments[(int) documentId];
     }
 
     @Override
-    public Iterator<Pair<Long, CrawlerDocument>> iterator() {
-      return new Iterator<Pair<Long, CrawlerDocument>>() {
-        private int curIndex = -1;
-        @Override
-        public boolean hasNext() {
-          return (curIndex + 1) < indexedDocuments.length;
-        }
+    public long[] getDocumentIds() {
+      long[] ids = new long[indexedDocuments.length];
+      for (int i = 0; i < ids.length; ++i) {
+        ids[i] = i;
+      }
+      return ids;
+    }
 
-        @Override
-        public Pair<Long, CrawlerDocument> next() {
-          if (++curIndex >= indexedDocuments.length) {
-            throw new NoSuchElementException();
-          }
-
-          return new Pair<>((long)curIndex, indexedDocuments[curIndex]);
-        }
-      };
+    @Override
+    public int size() {
+      return indexedDocuments.length;
     }
   }
 
-  private static class SimpleFetcher extends DocumentFetcher {
-
-    public SimpleFetcher(Index index) {
-      super(index);
-    }
-
+  public class SimpleDocumentFilter implements DocumentFilter {
     @Override
-    public TLongList fetchDocuments(Query query) {
-      TLongList fetchedDocumentIds = new TLongArrayList();
-      for (Pair<Long, CrawlerDocument> idAndDocument : index) {
-        long documentId = idAndDocument.getFirst();
-        CrawlerDocument document = idAndDocument.getSecond();
-        for (Term term : query.getTermsList()) {
-          if (document.checkWord(term.getRawTerm())) {
-            fetchedDocumentIds.add(documentId);
-          }
+    public boolean filterDocument(Query query, CrawlerDocument document) {
+      for (Term queryTerm : query.getTermsList()) {
+        if (document.checkWord(queryTerm.getRawTerm())) {
+          return true;
         }
       }
 
-      return fetchedDocumentIds;
+      return false;
     }
   }
 
-  private static class SimpleRanker extends DocumentRanker {
-    public SimpleRanker(Index index) {
-      super(index);
-    }
-
-    @Override
-    public TLongList sortDocuments(Query query, TLongList documentIds) {
-      return documentIds;
-    }
-
-  }
   @Test
   public void test() {
     Index index = new SimpleIndex();
-    DocumentFetcher fetcher = new SimpleFetcher(index);
-    DocumentRanker ranker = new SimpleRanker(index);
-    SimpleSearcher searcher = new SimpleSearcher(fetcher, ranker);
-    TLongList foundDocuments = searcher.getSortedDocuments(new Query("web"));
-    Assert.assertEquals(foundDocuments.size(), 2);
+    DocumentFilter filter = new SimpleDocumentFilter();
+
+    SimpleSearcher searcher = new SimpleSearcher(index, filter);
+    long[] foundDocuments = searcher.getSortedDocuments(new Query("web"));
+    Assert.assertEquals(foundDocuments.length, 2);
   }
 }

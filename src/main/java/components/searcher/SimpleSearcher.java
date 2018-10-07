@@ -4,33 +4,43 @@ package components.searcher;
  * Created by sandulmv on 03.10.18.
  */
 
-import gnu.trove.list.TLongList;
+import components.index.Index;
 import components.queryTmp.Query;
+import java.util.stream.LongStream;
 
 /**
  * The implementation of the base search.
  */
 public final class SimpleSearcher {
 
-  private DocumentRanker documentRanker;
-  private DocumentFetcher documentFetcher;
+  private Index index;
+  private DocumentFilter documentFilter;
 
-  public SimpleSearcher(DocumentFetcher documentFilter, DocumentRanker documentRanker) {
-    this.documentFetcher = documentFilter;
-    this.documentRanker = documentRanker;
+  public SimpleSearcher(Index index, DocumentFilter documentFilter) {
+    this.index = index;
+    this.documentFilter = documentFilter;
+
   }
 
-  public TLongList getSortedDocuments(Query query) {
-    return documentRanker.sortDocuments(
-        query, documentFetcher.fetchDocuments(query)
-    );
+  public long[] getSortedDocuments(Query query) {
+    return fetchDocuments(query);
   }
 
-  void setDocumentRanker(DocumentRanker documentRanker) {
-    this.documentRanker = documentRanker;
+  private long[] fetchDocuments(final Query query) {
+    return
+        LongStream.of(index.getDocumentIds())
+            .parallel()
+            .filter(
+                id -> this.documentFilter.filterDocument(query, index.getDocument(id))
+            )
+            .toArray();
   }
 
-  void setDocumentFetcher(DocumentFetcher documentFetcher) {
-    this.documentFetcher = documentFetcher;
+  public void setDocumentFilter(DocumentFilter documentFilter) {
+    this.documentFilter = documentFilter;
+  }
+
+  public void setIndex(Index index) {
+    this.index = index;
   }
 }
