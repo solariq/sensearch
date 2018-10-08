@@ -19,6 +19,7 @@ public class BaseQuery implements Query{
         String regex = " ";
         Pattern pattern = Pattern.compile(regex);
 
+        terms = new ArrayList<>();
         for (CharSequence word: pattern.split(queryString)) {
             this.terms.add(new BaseTerm(word));
         }
