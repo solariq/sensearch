@@ -1,7 +1,7 @@
 package components.searcher;
 
 import components.crawler.document.CrawlerDocument;
-import components.queryTmp.Query;
+import components.query.Query;
 
 /**
  * Created by sandulmv on 07.10.18.

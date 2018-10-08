@@ -5,7 +5,7 @@ package components.searcher;
  */
 
 import components.index.Index;
-import components.queryTmp.Query;
+import components.query.Query;
 import java.util.stream.LongStream;
 
 /**
