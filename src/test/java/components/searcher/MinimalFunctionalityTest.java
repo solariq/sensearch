@@ -1,6 +1,7 @@
 package components.searcher;
 
-import components.queryTmp.Term;
+import components.query.BaseQuery;
+import components.query.term.Term;
 import java.util.ArrayList;
 import java.util.NoSuchElementException;
 import org.junit.Assert;
@@ -8,7 +9,7 @@ import org.junit.Test;
 import java.util.List;
 import components.index.Index;
 import components.crawler.document.CrawlerDocument;
-import components.queryTmp.Query;
+import components.query.Query;
 
 /**
  * Created by sandulmv on 06.10.18.
@@ -95,8 +96,8 @@ public class MinimalFunctionalityTest {
   public class SimpleDocumentFilter implements DocumentFilter {
     @Override
     public boolean filterDocument(Query query, CrawlerDocument document) {
-      for (Term queryTerm : query.getTermsList()) {
-        if (document.checkWord(queryTerm.getRawTerm())) {
+      for (Term queryTerm : query.getTerms()) {
+        if (document.checkWord(queryTerm.getRaw().toString())) {
           return true;
         }
       }
@@ -111,7 +112,7 @@ public class MinimalFunctionalityTest {
     DocumentFilter filter = new SimpleDocumentFilter();
 
     SimpleSearcher searcher = new SimpleSearcher(index, filter);
-    long[] foundDocuments = searcher.getSortedDocuments(new Query("web"));
+    long[] foundDocuments = searcher.getSortedDocuments(new BaseQuery("web"));
     Assert.assertEquals(foundDocuments.length, 2);
   }
 }
