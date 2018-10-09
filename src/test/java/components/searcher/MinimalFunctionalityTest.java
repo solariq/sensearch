@@ -57,6 +57,11 @@ public class MinimalFunctionalityTest {
       throw new UnsupportedOperationException();
     }
 
+    @Override
+    public Long getID() {
+      return null;
+    }
+
   }
 
   private static class SimpleIndex implements Index {

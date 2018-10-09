@@ -1,6 +1,7 @@
 package components.crawler.document;
 
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -22,27 +23,26 @@ import javax.xml.stream.events.XMLEvent;
 
 public class XMLDocument implements CrawlerDocument {
 
-    File file;
-    Path path;
+    private File file;
+    private WikiPage page;
 
-    XMLDocument(Path path) {
-        file = new File(path.toString());
-        this.path = path;
+    public XMLDocument(File file) {
+        this.file = file;
         parseXML();
     }
 
+
+
     private void parseXML() {
         XMLInputFactory xmlInputFactory = XMLInputFactory.newInstance();
-        WikiPage page = null;
+        page = new WikiPage();
         try {
             XMLEventReader reader = xmlInputFactory.
-                    createXMLEventReader(new FileInputStream(path.toString()));
-            int i = 0;
+                    createXMLEventReader(new FileInputStream(file.getAbsolutePath()));
             StringBuilder text = null;
-            while (reader.hasNext() && i <= 1) {
+            while (reader.hasNext()) {
                 XMLEvent xmlEvent = reader.nextEvent();
                 if (xmlEvent.isStartElement()) {
-                    i++;
                     StartElement startElement = xmlEvent.asStartElement();
                     if (startElement.getName().getLocalPart().equals("page")) {
                         page = new WikiPage();
@@ -59,7 +59,6 @@ public class XMLDocument implements CrawlerDocument {
                         }
 
                         while (reader.hasNext() && (xmlEvent = reader.nextEvent()).isCharacters()) {
-                            System.err.println(xmlEvent.asCharacters().getData());
                             text.append(xmlEvent.asCharacters().getData());
                         }
                     }
@@ -68,7 +67,6 @@ public class XMLDocument implements CrawlerDocument {
                     EndElement endElement = xmlEvent.asEndElement();
                     if (endElement.getName().getLocalPart().equals("page")) {
                         page.setPage(text);
-                        System.err.println(page.toString());
                     }
                 }
             }
@@ -77,28 +75,80 @@ public class XMLDocument implements CrawlerDocument {
         }
     }
 
+
     @Override
     public boolean checkWord(String word) {
-        return false;
+        String text = page.getPage().toString();
+        return text.contains(word);
     }
 
     @Override
     public List<Boolean> checkWords(List<String> words) {
-        return null;
+        String text = page.getPage().toString();
+        List<Boolean> ans = new ArrayList<>();
+        for (String word : words) {
+            ans.add(text.contains(word));
+        }
+        return ans;
     }
 
     @Override
     public List<CharSequence> returnSentences(String word) {
+        //TO DO
         return null;
     }
 
     @Override
     public CharSequence returnContent() {
-        return null;
+        return page.getPage();
     }
 
     @Override
     public String getTitle() {
-        return null;
+        return page.getTitle();
     }
+
+    @Override
+    public Long getID() {
+        return page.getId();
+    }
+
+    /*private void writeXML(WikiPage page) {
+        String fileName = "/home/artem/JetBrains/WikiDocs/Split_Wiki/" + page.getId() + ".xml";
+        String startElement = "page";
+
+        XMLOutputFactory xmlOutputFactory = XMLOutputFactory.newInstance();
+        try {
+            XMLStreamWriter xmlStreamWriter = xmlOutputFactory.
+                    createXMLStreamWriter(new FileOutputStream(fileName), "UTF-8");
+            xmlStreamWriter.writeStartDocument("UTF-8", "1.0");
+            xmlStreamWriter.writeCharacters("\n");
+
+            xmlStreamWriter.writeStartElement("Pages");
+            xmlStreamWriter.writeCharacters("\n");
+
+            xmlStreamWriter.writeStartElement(startElement);
+            xmlStreamWriter.writeAttribute("id", Long.toString(page.getId()));
+            xmlStreamWriter.writeAttribute("title", page.getTitle());
+            xmlStreamWriter.writeAttribute("revision", page.revision);
+            xmlStreamWriter.writeAttribute("type", page.type);
+            xmlStreamWriter.writeAttribute("ns-id", page.nsId);
+            xmlStreamWriter.writeAttribute("ns-name", "");
+            xmlStreamWriter.writeCharacters("\n");
+            xmlStreamWriter.writeCharacters(page.getPage().toString());
+            xmlStreamWriter.writeCharacters("\n");
+            xmlStreamWriter.writeEndElement();
+
+            xmlStreamWriter.writeCharacters("\n");
+            xmlStreamWriter.writeEndElement();
+            xmlStreamWriter.writeEndDocument();
+
+            xmlStreamWriter.flush();
+            xmlStreamWriter.close();
+
+
+        } catch (FileNotFoundException | XMLStreamException e) {
+            e.printStackTrace();
+        }
+    }*/
 }

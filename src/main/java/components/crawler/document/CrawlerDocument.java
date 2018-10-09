@@ -13,4 +13,6 @@ public interface CrawlerDocument {
     CharSequence returnContent();
 
     String getTitle();
+
+    Long getID();
 }

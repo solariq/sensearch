@@ -5,6 +5,9 @@ public class WikiPage {
     private long id;
     private String title;
     private CharSequence page;
+    /*String revision;
+    String type;
+    String nsId;*/
 
     public long getId() {
         return id;
@@ -32,7 +35,6 @@ public class WikiPage {
 
     @Override
     public String toString() {
-        //return "ID = " + id + ";    Title = \"" + title + "\"\n";
         return page.toString();
     }
 }
