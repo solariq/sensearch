@@ -1,4 +1,4 @@
-package components.snippeter;
+package components.snippeter.snippet;
 
 import java.util.List;
 
@@ -19,5 +19,8 @@ public class Cluster {
         return rating;
     }
 
+    public List<Passage> getPassages() {
+        return passages;
+    }
 
 }

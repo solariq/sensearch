@@ -5,19 +5,19 @@ package components.snippeter.snippet;
  * Email: alvinmax@mail.ru
  */
 public class Snippet {
-    private String title;
-    private String sentence;
+    private CharSequence title;
+    private Cluster content;
 
-    public Snippet(String title, String sentence) {
+    public Snippet(CharSequence title, Cluster content) {
         this.title = title;
-        this.sentence = sentence;
+        this.content = content;
     }
 
-    public String getTitle() {
+    public CharSequence getTitle() {
         return title;
     }
 
-    public String getSentence() {
-        return sentence;
+    public Cluster getContent() {
+        return content;
     }
 }

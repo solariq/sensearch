@@ -1,4 +1,4 @@
-package components.snippeter;
+package components.snippeter.snippet;
 
 import components.query.Query;
 
