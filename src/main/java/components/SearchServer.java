@@ -1,65 +1,18 @@
 package components;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
-import java.io.IOException;
-import java.util.List;
-
-import javax.servlet.ServletException;
-
-import org.eclipse.jetty.server.Request;
+import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.server.handler.AbstractHandler;
+import org.eclipse.jetty.server.handler.HandlerCollection;
 
-public class SearchServer extends AbstractHandler
-{
-	TestSnippetProvider snippetProvider = new TestSnippetProvider();
+public class SearchServer {
 	
-    public void handle(String target,
-                       Request baseRequest,
-                       HttpServletRequest request,
-                       HttpServletResponse response) 
-        throws IOException, ServletException
-    {
-        response.setContentType("text/html;charset=utf-8");
-        response.setStatus(HttpServletResponse.SC_OK);
-        baseRequest.setHandled(true);
-        
-        StringBuilder responseBuilder = new StringBuilder();
-        String searchString = request.getParameter("searchform");
-        responseBuilder.append(
-        		"<form>"
-        		+ "<center>"
-        		+ "Введите поисковый запрос <br>"
-        		+ "<input type=\"text\" name=\"searchform\">"
-        		+ "<br>"
-        		+ "<input type = \"submit\">"
-        		+ "<br>"
-        		+ request.getParameter("searchform")
-        		+ "</center>"
-        		+ "</form>"
-        	);
-        
-        responseBuilder.append("<center>");
-        List<String> snippets = snippetProvider.getSuitableSnippets(searchString);
-        int count = 0;
-        
-        for (String s : snippets) {
-        	count++;
-        	responseBuilder.append(count + ". <b>" + s + "</b><br>");
-        }
-        
-        responseBuilder.append("</center>");
-        
-        response.getWriter().println(responseBuilder.toString());
-    }
+	TestSnippetProvider snippetProvider = new TestSnippetProvider();
  
-    public static void main(String[] args) throws Exception
-    {
+    public static void main(String[] args) throws Exception {
         Server server = new Server(8080);
-        server.setHandler(new SearchServer());
- 
+        //server.setHandler(new HandlerCollection(new Handler[] {new PageLoadHandler(), new SuggestionsHandler()}));
+        server.setHandler(new PageLoadHandler());
+
         server.start();
         server.join();
     }
