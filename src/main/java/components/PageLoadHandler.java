@@ -15,13 +15,15 @@ import org.eclipse.jetty.server.handler.AbstractHandler;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import components.snippeter.snippet.Cluster;
+import components.snippeter.SnippetsCreator;
 import components.snippeter.snippet.Passage;
+import components.snippeter.snippet.Snippet;
 
 public class PageLoadHandler extends AbstractHandler {
 	
 	TestSuggessionsProvider suggestor = new TestSuggessionsProvider();
-	TestSnippetProvider testSnip = new TestSnippetProvider();
+	
+	SnippetBox snipBox = new TestSnippetBox();
 	
 	ObjectMapper mapper = new ObjectMapper();
 	
@@ -46,10 +48,15 @@ public class PageLoadHandler extends AbstractHandler {
 			String searchString = request.getParameter("searchForm");
 			if (searchString != null) {
 				response.getWriter().println("<br>Результаты по запросу \"" + searchString + "\":<br><br>");
-				Cluster snippets = testSnip.getSuitableSnippets(searchString);
-				int nsnip = 1;
-				for (Passage p : snippets.getPassages()) {
-					response.getWriter().println(nsnip++ + ". " + p.getSentence() + "<br>");
+				
+				snipBox.makeQuery(searchString);
+				
+				for (int i = 0; i < snipBox.size(); i++) {
+					Snippet snippet = snipBox.getSnippet(i);
+					response.getWriter().println("<br><strong>" + (i+1) + ". " + snippet.getTitle() + "</strong><br>");
+					for (Passage p : snippet.getContent().getPassages()) {
+						response.getWriter().println(p.getSentence() + "...");
+					}
 				}
 				response.getWriter().println("</body></html>");
 			}
