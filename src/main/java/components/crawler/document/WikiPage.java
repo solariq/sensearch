@@ -1,6 +1,9 @@
 package components.crawler.document;
 
-public class WikiPage {
+import java.util.ArrayList;
+import java.util.List;
+
+public class WikiPage implements CrawlerDocument {
 
     private long id;
     private String title;
@@ -9,11 +12,15 @@ public class WikiPage {
     String type;
     String nsId;*/
 
-    public long getId() {
+    /*long getId() {
         return id;
     }
 
-    public void setId(long id) {
+    CharSequence getPage() {
+        return page;
+    }*/
+
+    void setId(long id) {
         this.id = id;
     }
 
@@ -21,16 +28,44 @@ public class WikiPage {
         return title;
     }
 
-    public void setTitle(String title) {
+    void setTitle(String title) {
         this.title = title;
     }
 
-    public CharSequence getPage() {
+    void setPage(CharSequence page) {
+        this.page = page;
+    }
+
+    @Override
+    public boolean checkWord(String word) {
+        String text = page.toString();
+        return text.contains(word);
+    }
+
+    @Override
+    public List<Boolean> checkWords(List<String> words) {
+        String text = page.toString();
+        List<Boolean> ans = new ArrayList<>();
+        for (String word : words) {
+            ans.add(text.contains(word));
+        }
+        return ans;
+    }
+
+    @Override
+    public List<CharSequence> returnSentences(String word) {
+        //TODO
+        return null;
+    }
+
+    @Override
+    public CharSequence returnContent() {
         return page;
     }
 
-    public void setPage(CharSequence page) {
-        this.page = page;
+    @Override
+    public Long getID() {
+        return id;
     }
 
     @Override

@@ -50,7 +50,7 @@ public class CrawlerXML implements Crawler {
                     fileOutputStream.close();
                     File file = new File(fileName);
 
-                    return new XMLDocument(file);
+                    return new XMLDocument(file).parseXML();
                 }
             }
         } catch (IOException e) {

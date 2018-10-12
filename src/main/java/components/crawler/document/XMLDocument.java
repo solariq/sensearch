@@ -21,21 +21,19 @@ import javax.xml.stream.events.XMLEvent;
 <page id="7" title="Литва" revision="1483089236000" type="text/x-wiki" ns-id="0" ns-name="">
  */
 
-public class XMLDocument implements CrawlerDocument {
+public class XMLDocument {
 
     private File file;
-    private WikiPage page;
 
     public XMLDocument(File file) {
         this.file = file;
-        parseXML();
     }
 
 
 
-    private void parseXML() {
+    public WikiPage parseXML() {
         XMLInputFactory xmlInputFactory = XMLInputFactory.newInstance();
-        page = new WikiPage();
+        WikiPage page = new WikiPage();
         try {
             XMLEventReader reader = xmlInputFactory.
                     createXMLEventReader(new FileInputStream(file.getAbsolutePath()));
@@ -70,47 +68,11 @@ public class XMLDocument implements CrawlerDocument {
                     }
                 }
             }
+            return page;
         } catch (FileNotFoundException | XMLStreamException e) {
             e.printStackTrace();
         }
-    }
-
-
-    @Override
-    public boolean checkWord(String word) {
-        String text = page.getPage().toString();
-        return text.contains(word);
-    }
-
-    @Override
-    public List<Boolean> checkWords(List<String> words) {
-        String text = page.getPage().toString();
-        List<Boolean> ans = new ArrayList<>();
-        for (String word : words) {
-            ans.add(text.contains(word));
-        }
-        return ans;
-    }
-
-    @Override
-    public List<CharSequence> returnSentences(String word) {
-        //TO DO
         return null;
-    }
-
-    @Override
-    public CharSequence returnContent() {
-        return page.getPage();
-    }
-
-    @Override
-    public String getTitle() {
-        return page.getTitle();
-    }
-
-    @Override
-    public Long getID() {
-        return page.getId();
     }
 
     /*private void writeXML(WikiPage page) {
