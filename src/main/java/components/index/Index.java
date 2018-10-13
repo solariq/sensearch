@@ -1,12 +1,12 @@
 package components.index;
 
-import components.crawler.document.CrawlerDocument;
+
+import components.query.Query;
+import java.util.stream.Stream;
 
 /**
  * Created by sandulmv on 06.10.18.
  */
 public interface Index {
-  CrawlerDocument getDocument(long documentId);
-  long[] getDocumentIds();
-  int size();
+  Stream<Document> nearestDocumentsStream(Query query);
 }
