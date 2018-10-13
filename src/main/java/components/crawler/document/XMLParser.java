@@ -21,11 +21,11 @@ import javax.xml.stream.events.XMLEvent;
 <page id="7" title="Литва" revision="1483089236000" type="text/x-wiki" ns-id="0" ns-name="">
  */
 
-public class XMLDocument {
+public class XMLParser {
 
     private File file;
 
-    public XMLDocument(File file) {
+    public XMLParser(File file) {
         this.file = file;
     }
 

@@ -1,7 +1,7 @@
 package components.crawler;
 
 import components.crawler.document.CrawlerDocument;
-import components.crawler.document.XMLDocument;
+import components.crawler.document.XMLParser;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -54,7 +54,7 @@ public class CrawlerXML implements Crawler {
                     fileOutputStream.close();
                     File file = new File(fileName);
 
-                    return new XMLDocument(file).parseXML();
+                    return new XMLParser(file).parseXML();
                 }
             }
         } catch (IOException e) {
