@@ -1,8 +1,5 @@
 package components.crawler.document;
 
-import java.util.ArrayList;
-import java.util.List;
-
 public class WikiPage implements CrawlerDocument {
 
     private long id;
@@ -16,16 +13,17 @@ public class WikiPage implements CrawlerDocument {
         this.id = id;
     }
 
-    public String getTitle() {
-        return title;
-    }
-
     void setTitle(String title) {
         this.title = title;
     }
 
     void setPage(CharSequence page) {
         this.page = page;
+    }
+
+    @Override
+    public String getTitle() {
+        return title;
     }
 
     @Override
