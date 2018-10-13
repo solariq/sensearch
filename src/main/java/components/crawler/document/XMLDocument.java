@@ -71,6 +71,8 @@ public class XMLDocument {
             return page;
         } catch (FileNotFoundException | XMLStreamException e) {
             e.printStackTrace();
+        } finally {
+            file.delete();
         }
         return null;
     }
