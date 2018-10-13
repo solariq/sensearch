@@ -43,22 +43,6 @@ public class WikiPage implements CrawlerDocument {
     }
 
     @Override
-    public List<Boolean> checkWords(List<String> words) {
-        String text = page.toString();
-        List<Boolean> ans = new ArrayList<>();
-        for (String word : words) {
-            ans.add(text.contains(word));
-        }
-        return ans;
-    }
-
-    @Override
-    public List<CharSequence> returnSentences(String word) {
-        //TODO
-        return null;
-    }
-
-    @Override
     public CharSequence returnContent() {
         return page;
     }
