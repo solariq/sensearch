@@ -1,10 +1,5 @@
 package components.crawler.document;
 
-import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.List;
-
-
 import java.io.*;
 
 import javax.xml.namespace.QName;
@@ -23,15 +18,7 @@ import javax.xml.stream.events.XMLEvent;
 
 public class XMLParser {
 
-    private File file;
-
-    public XMLParser(File file) {
-        this.file = file;
-    }
-
-
-
-    public WikiPage parseXML() {
+    public WikiPage parseXML(File file) {
         XMLInputFactory xmlInputFactory = XMLInputFactory.newInstance();
         WikiPage page = new WikiPage();
         try {
@@ -71,8 +58,6 @@ public class XMLParser {
             return page;
         } catch (FileNotFoundException | XMLStreamException e) {
             e.printStackTrace();
-        } finally {
-            file.delete();
         }
         return null;
     }

@@ -16,14 +16,10 @@ import java.util.zip.ZipInputStream;
 public class CrawlerXML implements Crawler {
 
     private Path path;
+    private XMLParser parser = new XMLParser();
 
     public CrawlerXML(Path path) {
         this.path = path;
-    }
-
-    @Override
-    public long getID(CrawlerDocument crawlerDocument) {
-        return crawlerDocument.getID();
     }
 
     @Override
@@ -43,6 +39,7 @@ public class CrawlerXML implements Crawler {
                     String fileName = "../WikiDocs/tmp/";
                     Files.createDirectories(Paths.get(fileName));
                     fileName += Long.toString(id) + ".xml";
+
                     FileOutputStream fileOutputStream = new FileOutputStream(fileName);
 
                     for (int c = zipInputStream.read(); c != -1; c = zipInputStream.read()) {
@@ -54,7 +51,11 @@ public class CrawlerXML implements Crawler {
                     fileOutputStream.close();
                     File file = new File(fileName);
 
-                    return new XMLParser(file).parseXML();
+                    CrawlerDocument result = parser.parseXML(file);
+
+                    file.delete();
+
+                    return result;
                 }
             }
         } catch (IOException e) {

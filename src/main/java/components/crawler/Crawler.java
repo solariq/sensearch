@@ -4,7 +4,7 @@ import components.crawler.document.CrawlerDocument;
 
 public interface Crawler {
 
-    long getID(CrawlerDocument crawlerDocument); //???
+    //TODO return Stream
 
     CrawlerDocument getDocument(long iD);
 }
