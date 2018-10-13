@@ -7,7 +7,9 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -38,7 +40,9 @@ public class CrawlerXML implements Crawler {
             while ((zipEntry = zipInputStream.getNextEntry()) != null) {
                 if (zipEntry.getName().equals("Split_Wiki/" + Long.toString(id) + ".xml")) {
 
-                    String fileName = "../WikiDocs/tmp/" + Long.toString(id) + ".xml";
+                    String fileName = "../WikiDocs/tmp/";
+                    Files.createDirectories(Paths.get(fileName));
+                    fileName += Long.toString(id) + ".xml";
                     FileOutputStream fileOutputStream = new FileOutputStream(fileName);
 
                     for (int c = zipInputStream.read(); c != -1; c = zipInputStream.read()) {
