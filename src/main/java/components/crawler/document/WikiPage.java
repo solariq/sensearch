@@ -12,14 +12,6 @@ public class WikiPage implements CrawlerDocument {
     String type;
     String nsId;*/
 
-    /*long getId() {
-        return id;
-    }
-
-    CharSequence getPage() {
-        return page;
-    }*/
-
     void setId(long id) {
         this.id = id;
     }
