@@ -4,15 +4,15 @@ import java.io.*;
 import java.util.HashMap;
 import java.util.Scanner;
 
-public class DataFilling {
+class DataFilling {
 
     private static final int VEC_SIZE = 50;
-    public static final String SER_FILENAME = "resources/hashmap.ser";
+    static final String SER_FILENAME = "resources/hashmap.ser";
 
     private HashMap<String, double[]> hashMap;
     private Scanner scanner;
 
-    public DataFilling(String filename) {
+    DataFilling(String filename) {
         try {
             scanner = new Scanner(new File(filename));
             hashMap = new HashMap<>();
@@ -21,18 +21,18 @@ public class DataFilling {
         }
     }
 
-    public void fill() {
+    void fill() {
         while (scanner.hasNext()) {
             String word = scanner.next();
-            double[] coord = new double[VEC_SIZE];
-            for (int i = 0; i < coord.length; i++) {
-                coord[i] = Double.parseDouble(scanner.next());
+            double[] vec = new double[VEC_SIZE];
+            for (int i = 0; i < vec.length; i++) {
+                vec[i] = Double.parseDouble(scanner.next());
             }
-            hashMap.put(word, coord);
+            hashMap.put(word, vec);
         }
     }
 
-    public void save() {
+    void save() {
         try(FileOutputStream fos = new FileOutputStream(SER_FILENAME);
             ObjectOutputStream oos = new ObjectOutputStream(fos)) {
 

@@ -2,14 +2,14 @@ package tools.embedding;
 
 import java.io.*;
 import java.util.*;
+import java.util.function.BiFunction;
 
 public class EmbeddingUtilitiesImpl implements EmbeddingUtilities {
 
-    private static EmbeddingUtilitiesImpl instance;
-
     private static final int NEAREST_WORD_CNT = 50;
+    private static final BiFunction<double[], double[], Double> defaultMethod = EmbeddingUtilitiesImpl::euclideanDistance;
 
-    private HashMap<String, double[]> hashMap;
+    private static EmbeddingUtilitiesImpl instance;
 
     public static synchronized EmbeddingUtilitiesImpl getInstance() {
         if (instance == null) {
@@ -17,6 +17,8 @@ public class EmbeddingUtilitiesImpl implements EmbeddingUtilities {
         }
         return instance;
     }
+
+    private HashMap<String, double[]> hashMap;
 
     @SuppressWarnings("unchecked cast")
     private EmbeddingUtilitiesImpl() {
@@ -31,31 +33,43 @@ public class EmbeddingUtilitiesImpl implements EmbeddingUtilities {
     }
 
     @Override
-    public List<String> getNearestSemanticWords(String word) {
+    public List<String> getNearestNeighbors(String word) {
+        return getNearestNeighbors(word, defaultMethod);
+    }
+
+    List<String> getNearestNeighbors(String word, BiFunction<double[], double[], Double> measureFunction) {
         double[] mainVec = hashMap.get(word);
-        TreeMap<double[], String> treeMap = new TreeMap<>(Comparator.comparing(vec -> cosine(mainVec, vec)));
+        TreeMap<double[], String> nearestNeighbors = new TreeMap<>(Comparator.comparing(vec -> measureFunction.apply(vec, mainVec)));
         for (HashMap.Entry<String, double[]> e : hashMap.entrySet()) {
             if (e.getValue() != mainVec) {
-                if (treeMap.size() < NEAREST_WORD_CNT) {
-                    treeMap.put(e.getValue(), e.getKey());
-                } else if (cosine(mainVec, treeMap.lastKey()) > cosine(mainVec, e.getValue())) {
-                    treeMap.remove(treeMap.lastKey());
-                    treeMap.put(e.getValue(), e.getKey());
+                if (nearestNeighbors.size() < NEAREST_WORD_CNT) {
+                    nearestNeighbors.put(e.getValue(), e.getKey());
+                } else if (measureFunction.apply(mainVec, nearestNeighbors.lastKey()) > measureFunction.apply(mainVec, e.getValue())) {
+                    nearestNeighbors.remove(nearestNeighbors.lastKey());
+                    nearestNeighbors.put(e.getValue(), e.getKey());
                 }
             }
         }
-        return new ArrayList<>(treeMap.values());
+        return new ArrayList<>(nearestNeighbors.values());
     }
 
-    private double cosine(double[] v1, double[] v2) {
+    static double euclideanDistance(double[] vec1, double[] vec2) {
+        double dist = 0.0;
+        for (int i = 0; i < vec1.length; i++) {
+            dist += (vec1[i] - vec2[i]) * (vec1[i] - vec2[i]);
+        }
+        return Math.sqrt(dist);
+    }
+
+    static double cosineSimilarity(double[] vec1, double[] vec2) {
         double dotProduct = 0.0, norm1 = 0.0, norm2 = 0.0;
-        for (int i = 0; i < v1.length; i++) {
-            dotProduct += v1[i] * v2[i];
-            norm1 += v1[i] * v1[i];
-            norm2 += v2[i] * v2[i];
+        for (int i = 0; i < vec1.length; i++) {
+            dotProduct += vec1[i] * vec2[i];
+            norm1 += vec1[i] * vec1[i];
+            norm2 += vec2[i] * vec2[i];
         }
         norm1 = Math.sqrt(norm1);
         norm2 = Math.sqrt(norm2);
-        return 1.0 - dotProduct / (norm1 * norm2);
+        return 1 - dotProduct / (norm1 * norm2);
     }
 }

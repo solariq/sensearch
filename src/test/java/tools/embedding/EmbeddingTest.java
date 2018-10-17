@@ -4,39 +4,45 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import java.io.File;
+import java.util.HashMap;
+import java.util.function.BiFunction;
 
 public class EmbeddingTest {
 
     private static final String VEC_FILENAME = "resources/vectors.txt";
 
-    @Test
+    /*@Test
     public void dataFillingTest() {
         DataFilling dataFilling = new DataFilling(VEC_FILENAME);
         dataFilling.fill();
         dataFilling.save();
         Assert.assertTrue(new File(DataFilling.SER_FILENAME).exists());
-    }
+    }*/
 
-    private boolean contains(String word, String sinonim) {
-        return EmbeddingUtilitiesImpl.getInstance().getNearestSemanticWords(word).contains(sinonim);
+    private static final HashMap<String, String[]> tests;
+    static {
+        HashMap<String, String[]> hashMap = new HashMap<>();
+        hashMap.put("женщина", new String[]{"девушка", "девочка", "молодая", "красивая", "беременная"});
+        hashMap.put("вода", new String[]{"пресная", "влага", "рыба", "солёная", "питьевая"});
+        hashMap.put("телефон", new String[]{"мобильный", "звонок", "сотовый", "компьютер", "клиент"});
+        tests = hashMap;
+    };
+
+    private void neighborsTest(BiFunction<double[], double[], Double> measureFunction) {
+        for (HashMap.Entry<String, String[]> e : tests.entrySet()) {
+            for (String neighbor : e.getValue()) {
+                Assert.assertTrue(EmbeddingUtilitiesImpl.getInstance().getNearestNeighbors(e.getKey(), measureFunction).contains(neighbor));
+            }
+        }
     }
 
     @Test
-    public void embeddingUtilitiesTest() {
-        Assert.assertTrue(contains("женщина", "девушка"));
-        Assert.assertTrue(contains("женщина", "молодая"));
-        Assert.assertTrue(contains("женщина", "красивая"));
-        Assert.assertTrue(contains("женщина", "беременная"));
-        Assert.assertTrue(contains("женщина", "мать"));
-        Assert.assertTrue(contains("вода", "пресная"));
-        Assert.assertTrue(contains("вода", "влага"));
-        Assert.assertTrue(contains("вода", "рыба"));
-        Assert.assertTrue(contains("вода", "жидкость"));
-        Assert.assertTrue(contains("вода", "питьевая"));
-        Assert.assertTrue(contains("телефон", "мобильный"));
-        Assert.assertTrue(contains("телефон", "звонок"));
-        Assert.assertTrue(contains("телефон", "сотовый"));
-        Assert.assertTrue(contains("телефон", "компьютер"));
-        Assert.assertTrue(contains("телефон", "интернет"));
+    public void embeddingUtilitiesEuclideanTest() {
+        neighborsTest(EmbeddingUtilitiesImpl::euclideanDistance);
+    }
+
+    @Test
+    public void embeddingUtilitiesCosineTest() {
+        neighborsTest(EmbeddingUtilitiesImpl::cosineSimilarity);
     }
 }
