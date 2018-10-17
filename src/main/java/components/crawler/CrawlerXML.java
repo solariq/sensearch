@@ -25,10 +25,10 @@ public class CrawlerXML implements Crawler {
     }
 
     @Override
-    public Stream makeStream() {
+    public Stream<CrawlerDocument> makeStream() {
         return StreamSupport.stream(
                 Spliterators.spliteratorUnknownSize(new DocumentIterator(path),
-                Spliterator.ORDERED | Spliterator.SORTED),
+                        Spliterator.ORDERED | Spliterator.SORTED),
                 false);
     }
 
@@ -64,7 +64,7 @@ public class CrawlerXML implements Crawler {
 
                     CrawlerDocument result = parser.parseXML(file);
 
-                    file.delete();
+                    file.deleteOnExit();
 
                     return result;
                 }
@@ -76,11 +76,12 @@ public class CrawlerXML implements Crawler {
     }
 }
 
-class DocumentIterator implements Iterator {
+class DocumentIterator implements Iterator<CrawlerDocument> {
 
     private Path path;
     private ZipInputStream zipInputStream;
     private ZipEntry zipEntry;
+    private ZipEntry nextZipEntry;
     private XMLParser parser = new XMLParser();
 
     DocumentIterator(Path path) {
@@ -97,6 +98,7 @@ class DocumentIterator implements Iterator {
         zipInputStream = new ZipInputStream(fileInputStream);
         try {
             zipEntry = zipInputStream.getNextEntry();
+            nextZipEntry = zipInputStream.getNextEntry();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -104,41 +106,47 @@ class DocumentIterator implements Iterator {
 
     @Override
     public boolean hasNext() {
-        try {
-            zipEntry = zipInputStream.getNextEntry();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return zipEntry != null;
+        return nextZipEntry != null;
     }
 
     @Override
     public CrawlerDocument next() {
         try {
-                String fileName = "../WikiDocs/tmp/";
-                Files.createDirectories(Paths.get(fileName));
-                String[] n = zipEntry.getName().split("/");
-                fileName += n[1];
+             while (zipEntry.isDirectory()) {
+                zipEntry = nextZipEntry;
+                nextZipEntry = zipInputStream.getNextEntry();
+            }
+            String fileName = "../WikiDocs/tmp/";
+            Files.createDirectories(Paths.get(fileName));
+            String[] n = zipEntry.getName().split("/");
+            fileName += n[1];
 
-                FileOutputStream fileOutputStream = new FileOutputStream(fileName);
+            FileOutputStream fileOutputStream = new FileOutputStream(fileName);
 
-                //Need refactor
-                for (int c = zipInputStream.read(); c != -1; c = zipInputStream.read()) {
-                    fileOutputStream.write(c);
-                }
+            //Need refactor
+            for (int c = zipInputStream.read(); c != -1; c = zipInputStream.read()) {
+                fileOutputStream.write(c);
+            }
 
-                fileOutputStream.flush();
-                zipInputStream.closeEntry();
-                fileOutputStream.close();
-                File file = new File(fileName);
+            fileOutputStream.flush();
+            zipInputStream.closeEntry();
+            fileOutputStream.close();
+            File file = new File(fileName);
 
-                CrawlerDocument result = parser.parseXML(file);
+            CrawlerDocument result = parser.parseXML(file);
 
-                file.delete();
+            file.delete();
 
-                return result;
+            return result;
         } catch (IOException e) {
             e.printStackTrace();
+        } finally {
+            zipEntry = nextZipEntry;
+            try {
+                nextZipEntry = zipInputStream.getNextEntry();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
         return null;
     }

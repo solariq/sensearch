@@ -6,7 +6,7 @@ import java.util.stream.Stream;
 
 public interface Crawler {
 
-    Stream makeStream();
+    Stream<CrawlerDocument> makeStream();
 
     CrawlerDocument getDocument(long iD);
 }
