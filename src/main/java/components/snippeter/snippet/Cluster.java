@@ -22,5 +22,4 @@ public class Cluster {
     public List<Passage> getPassages() {
         return passages;
     }
-
 }

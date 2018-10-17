@@ -1,23 +1,11 @@
 package components.snippeter.snippet;
 
-/**
- * Created by Maxim on 06.10.2018.
- * Email: alvinmax@mail.ru
- */
-public class Snippet {
-    private CharSequence title;
-    private Cluster content;
+import java.util.List;
 
-    public Snippet(CharSequence title, Cluster content) {
-        this.title = title;
-        this.content = content;
-    }
+public interface Snippet {
+    CharSequence getTitle();
 
-    public CharSequence getTitle() {
-        return title;
-    }
+    CharSequence getContent();
 
-    public Cluster getContent() {
-        return content;
-    }
+    List<Segment> getSelection();
 }
