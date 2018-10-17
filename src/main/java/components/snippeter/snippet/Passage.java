@@ -3,7 +3,6 @@ package components.snippeter.snippet;
 import components.query.Query;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 /**
