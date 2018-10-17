@@ -2,9 +2,11 @@ package components.crawler;
 
 import components.crawler.document.CrawlerDocument;
 
+import java.util.stream.Stream;
+
 public interface Crawler {
 
-    //TODO return Stream
+    Stream<CrawlerDocument> makeStream();
 
     CrawlerDocument getDocument(long iD);
 }

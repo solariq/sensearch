@@ -27,12 +27,6 @@ public class WikiPage implements CrawlerDocument {
     }
 
     @Override
-    public boolean checkWord(String word) {
-        String text = page.toString();
-        return text.contains(word);
-    }
-
-    @Override
     public CharSequence returnContent() {
         return page;
     }
