@@ -42,8 +42,10 @@ public class PageLoadHandler extends AbstractHandler {
 		baseRequest.setHandled(true);
 		
 		if (requestText == null || requestText.isEmpty()) {
-			BufferedReader in = new BufferedReader(new FileReader(new File("resources/mainPage.html")));
-			response.getWriter().println(in.lines().collect(Collectors.joining("\n")));
+			
+			try(BufferedReader in = new BufferedReader(new FileReader(new File("resources/mainPage.html")))) {
+				response.getWriter().println(in.lines().collect(Collectors.joining("\n")));
+			}
 			
 			String searchString = request.getParameter("searchForm");
 			if (searchString != null) {
@@ -54,9 +56,9 @@ public class PageLoadHandler extends AbstractHandler {
 				for (int i = 0; i < snipBox.size(); i++) {
 					Snippet snippet = snipBox.getSnippet(i);
 					response.getWriter().println("<br><strong>" + (i+1) + ". " + snippet.getTitle() + "</strong><br>");
-					for (Passage p : snippet.getContent().getPassages()) {
-						response.getWriter().println(p.getSentence() + "...");
-					}
+					//for (Passage p : snippet.getContent().getSentence()) {
+						response.getWriter().println(snippet.getContent() + "...");
+					//}
 				}
 				response.getWriter().println("</body></html>");
 			}
