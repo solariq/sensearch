@@ -33,6 +33,9 @@ cmake-build-debug/
 # IntelliJ
 out/
 
+# Compiled classes
+target/
+
 # Idea config files
 *.iml
 
