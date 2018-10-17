@@ -18,7 +18,6 @@ public class Passage {
     public Passage(CharSequence sentence, Query query) {
         this.sentence = sentence;
         rating = query.getTerms().stream().filter(x -> contains(sentence, x.getRaw())).count();
-        Collections.sort(selection, (x, y) -> x.getLeft() < y.getLeft() ? -1 : 0);
     }
 
     public long getRating() {
