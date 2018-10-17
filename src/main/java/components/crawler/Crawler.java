@@ -8,5 +8,4 @@ public interface Crawler {
 
     Stream<CrawlerDocument> makeStream();
 
-    CrawlerDocument getDocument(long iD);
 }
