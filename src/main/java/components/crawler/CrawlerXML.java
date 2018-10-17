@@ -24,67 +24,56 @@ public class CrawlerXML implements Crawler {
     }
 
     @Override
-    public Stream<CrawlerDocument> makeStream() {
+    public Stream<CrawlerDocument> makeStream() throws FileNotFoundException {
         return StreamSupport.stream(
                 Spliterators.spliteratorUnknownSize(new DocumentIterator(path),
                         Spliterator.ORDERED | Spliterator.SORTED),
                 false);
     }
-}
 
-class DocumentIterator implements Iterator<CrawlerDocument> {
 
-    private Path path;
-    private ZipInputStream zipInputStream;
-    private ZipEntry zipEntry;
-    private ZipEntry nextZipEntry;
-    private XMLParser parser = new XMLParser();
+    class DocumentIterator implements Iterator<CrawlerDocument> {
 
-    DocumentIterator(Path path) {
-        try {
+        private Path path;
+        private ZipInputStream zipInputStream;
+        private ZipEntry zipEntry;
+        private ZipEntry nextZipEntry;
+        private XMLParser parser = new XMLParser();
+
+        DocumentIterator(Path path) throws FileNotFoundException {
             this.path = path;
             init();
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
         }
-    }
 
-    private void init() throws FileNotFoundException {
-        FileInputStream fileInputStream = new FileInputStream(path.toString());
-        zipInputStream = new ZipInputStream(fileInputStream);
-        try {
-            zipEntry = zipInputStream.getNextEntry();
-            nextZipEntry = zipInputStream.getNextEntry();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    @Override
-    public boolean hasNext() {
-        return nextZipEntry != null;
-    }
-
-    @Override
-    public CrawlerDocument next() {
-        try {
-            while (zipEntry.isDirectory()) {
-                zipEntry = nextZipEntry;
+        private void init() throws FileNotFoundException {
+            FileInputStream fileInputStream = new FileInputStream(path.toString());
+            zipInputStream = new ZipInputStream(fileInputStream);
+            try {
+                zipEntry = zipInputStream.getNextEntry();
                 nextZipEntry = zipInputStream.getNextEntry();
+            } catch (IOException e) {
+                e.printStackTrace();
             }
-            String fileName = "../WikiDocs/tmp/";
-            Files.createDirectories(Paths.get(fileName));
-            String[] n = zipEntry.getName().split("/");
-            fileName += n[1];
+        }
 
-            try (FileOutputStream fileOutputStream = new FileOutputStream(fileName)) {
+        @Override
+        public boolean hasNext() {
+            return nextZipEntry != null;
+        }
 
-                //Need refactor
-                for (int c = zipInputStream.read(); c != -1; c = zipInputStream.read()) {
-                    fileOutputStream.write(c);
+        @Override
+        public CrawlerDocument next() {
+            try {
+                while (zipEntry.isDirectory()) {
+                    zipEntry = nextZipEntry;
+                    nextZipEntry = zipInputStream.getNextEntry();
                 }
+                String fileName = "../WikiDocs/tmp/";
+                Files.createDirectories(Paths.get(fileName));
+                String[] n = zipEntry.getName().split("/");
+                fileName += n[n.length - 1];
 
-                zipInputStream.closeEntry();
+                Files.copy(zipInputStream, Paths.get(fileName));
                 File file = new File(fileName);
 
                 CrawlerDocument result = parser.parseXML(file);
@@ -92,17 +81,18 @@ class DocumentIterator implements Iterator<CrawlerDocument> {
                 file.delete();
 
                 return result;
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        } finally {
-            zipEntry = nextZipEntry;
-            try {
-                nextZipEntry = zipInputStream.getNextEntry();
             } catch (IOException e) {
                 e.printStackTrace();
+            } finally {
+                zipEntry = nextZipEntry;
+                try {
+                    nextZipEntry = zipInputStream.getNextEntry();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             }
+            return null;
         }
-        return null;
     }
 }
+
