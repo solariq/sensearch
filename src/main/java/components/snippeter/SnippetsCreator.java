@@ -23,7 +23,7 @@ public class SnippetsCreator {
 
     public Snippet getSnippet(CrawlerDocument document, Query query) {
 
-
+/*
         CharSequence test = "Emperor Akbar was in the habit of putting riddles and puzzles to his courtiers. He often asked questions which were strange and witty. It took much wisdom to answer these questions.\n" +
                 "Once he asked a very strange question. The courtiers were dumb folded by his question.\n" +
                 "Akbar glanced at his courtiers. As he looked, one by one the heads began to hang low in search of an answer. It was at this moment that Birbal entered the courtyard. Birbal who knew the nature of the emperor quickly grasped the situation and asked, \"May I know the question so that I can try for an answer\".\n" +
@@ -34,10 +34,10 @@ public class SnippetsCreator {
                 "Akbar was pleased very much by Birbal's wit.\n\n\n";
 
         System.out.print(test);
+*/
 
-
-        CharSequence title = "ZZZ";//document.getTitle();
-        CharSequence content = test;//document.returnContent();
+        CharSequence title = document.getTitle();
+        CharSequence content = document.returnContent();
 
         List<Passage> passages = Arrays
                 .asList(splitPattern.split(content))
