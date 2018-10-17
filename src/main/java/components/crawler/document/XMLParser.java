@@ -3,9 +3,7 @@ package components.crawler.document;
 import java.io.*;
 
 import javax.xml.namespace.QName;
-import javax.xml.stream.XMLEventReader;
-import javax.xml.stream.XMLInputFactory;
-import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.*;
 import javax.xml.stream.events.Attribute;
 import javax.xml.stream.events.EndElement;
 import javax.xml.stream.events.StartElement;
@@ -43,6 +41,22 @@ public class XMLParser {
                             page.setTitle(titleAttr.getValue());
                         }
 
+                        /*Attribute a;
+                        a = startElement.getAttributeByName(new QName("revision"));
+                        if (a != null) {
+                            page.revision = a.getValue();
+                        }
+
+                        a = startElement.getAttributeByName(new QName("type"));
+                        if (a != null) {
+                            page.type = a.getValue();
+                        }
+
+                        a = startElement.getAttributeByName(new QName("ns-id"));
+                        if (a != null) {
+                            page.nsId = a.getValue();
+                        }*/
+
                         while (reader.hasNext() && (xmlEvent = reader.nextEvent()).isCharacters()) {
                             text.append(xmlEvent.asCharacters().getData());
                         }
@@ -55,6 +69,7 @@ public class XMLParser {
                     }
                 }
             }
+            //writeXML(page);
             return page;
         } catch (FileNotFoundException | XMLStreamException e) {
             e.printStackTrace();
@@ -62,8 +77,9 @@ public class XMLParser {
         return null;
     }
 
-    /*private void writeXML(WikiPage page) {
-        String fileName = "/home/artem/JetBrains/WikiDocs/Split_Wiki/" + page.getId() + ".xml";
+    /*
+    private void writeXML(WikiPage page) {
+        String fileName = "/home/artem/JetBrains/WikiDocs/Mini_Wiki/" + page.getID() + ".xml";
         String startElement = "page";
 
         XMLOutputFactory xmlOutputFactory = XMLOutputFactory.newInstance();
@@ -77,14 +93,14 @@ public class XMLParser {
             xmlStreamWriter.writeCharacters("\n");
 
             xmlStreamWriter.writeStartElement(startElement);
-            xmlStreamWriter.writeAttribute("id", Long.toString(page.getId()));
+            xmlStreamWriter.writeAttribute("id", Long.toString(page.getID()));
             xmlStreamWriter.writeAttribute("title", page.getTitle());
             xmlStreamWriter.writeAttribute("revision", page.revision);
             xmlStreamWriter.writeAttribute("type", page.type);
             xmlStreamWriter.writeAttribute("ns-id", page.nsId);
             xmlStreamWriter.writeAttribute("ns-name", "");
             xmlStreamWriter.writeCharacters("\n");
-            xmlStreamWriter.writeCharacters(page.getPage().toString());
+            xmlStreamWriter.writeCharacters(page.returnContent().toString());
             xmlStreamWriter.writeCharacters("\n");
             xmlStreamWriter.writeEndElement();
 
@@ -99,5 +115,5 @@ public class XMLParser {
         } catch (FileNotFoundException | XMLStreamException e) {
             e.printStackTrace();
         }
-    }*/
+    }//*/
 }

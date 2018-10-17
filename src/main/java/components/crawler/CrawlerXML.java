@@ -7,6 +7,7 @@ import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.Iterator;
 import java.util.Spliterator;
 import java.util.Spliterators;
@@ -30,7 +31,6 @@ public class CrawlerXML implements Crawler {
                         Spliterator.ORDERED | Spliterator.SORTED),
                 false);
     }
-
 
     class DocumentIterator implements Iterator<CrawlerDocument> {
 
@@ -73,8 +73,9 @@ public class CrawlerXML implements Crawler {
                 String[] n = zipEntry.getName().split("/");
                 fileName += n[n.length - 1];
 
-                Files.copy(zipInputStream, Paths.get(fileName));
+                Files.copy(zipInputStream, Paths.get(fileName), StandardCopyOption.REPLACE_EXISTING);
                 File file = new File(fileName);
+                zipInputStream.closeEntry();
 
                 CrawlerDocument result = parser.parseXML(file);
 
@@ -94,5 +95,40 @@ public class CrawlerXML implements Crawler {
             return null;
         }
     }
+
+
+
+    /*
+    public void makeZIP(int num) {
+        try {
+            FileInputStream fileInputStream = new FileInputStream(path.toString());
+            ZipInputStream zipInputStream = new ZipInputStream(fileInputStream);
+            ZipEntry zipEntry;
+            int cnt = 0;
+            XMLParser parser = new XMLParser();
+            while ((zipEntry = zipInputStream.getNextEntry()) != null) {
+                if (zipEntry.isDirectory()) {
+                    continue;
+                }
+                cnt++;
+                String fileName = "../WikiDocs/Mini_Wiki/";
+                Files.createDirectories(Paths.get(fileName));
+                String[] n = zipEntry.getName().split("/");
+                fileName += n[n.length - 1];
+
+                Files.copy(zipInputStream, Paths.get(fileName), StandardCopyOption.REPLACE_EXISTING);
+
+                zipInputStream.closeEntry();
+                File file = new File(fileName);
+                parser.parseXML(file);
+                if (cnt == num) {
+                    break;
+                }
+            }
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }*/
 }
 

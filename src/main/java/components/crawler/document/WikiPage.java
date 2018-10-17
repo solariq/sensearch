@@ -5,9 +5,11 @@ public class WikiPage implements CrawlerDocument {
     private long id;
     private String title;
     private CharSequence page;
-    /*String revision;
+    /*
+    String revision;
     String type;
-    String nsId;*/
+    String nsId;
+    //*/
 
     void setId(long id) {
         this.id = id;
