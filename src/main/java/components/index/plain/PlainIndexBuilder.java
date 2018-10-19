@@ -71,7 +71,7 @@ public class PlainIndexBuilder {
     } catch (IOException e) {
       throw new RuntimeException(
           String.format(
-              "Failed to cread directory for the new index entry by the path: %s",
+              "Failed to create directory for the new index entry by the path: %s",
               indexRoot.toAbsolutePath().toString()
           ), e
       );
@@ -80,7 +80,7 @@ public class PlainIndexBuilder {
 
   private static void flushNewIndexEntry(Path indexRoot, CrawlerDocument parsedDocument) {
     Path newIndexEntryPath = createNewIndexEntryRoot(indexRoot);
-    
+
     try (
         BufferedWriter contentWriter = new BufferedWriter(
             new OutputStreamWriter(

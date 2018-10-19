@@ -61,11 +61,11 @@ public class EmbeddingTools {
                     .collect(Collectors.toList())
             );
         } else if (t instanceof IndexedDocument) {
-            try {
-                return getArithmeticMean(Arrays.stream(
-                        ((IndexedDocument) t).getTitle().toString()
-                                .split(" ")).map(this::getVec).collect(Collectors.toList()));
-            } catch (IOException ignored) {}
+            return getArithmeticMean(Arrays.stream(
+                ((IndexedDocument) t)
+                    .getTitle()
+                    .toString()
+                    .split(" ")).map(this::getVec).collect(Collectors.toList()));
         }
         throw new IllegalArgumentException("Incorrect argument for getting Vec");
     }
