@@ -78,11 +78,7 @@ public class ComponentsInteractionTest {
 
     private boolean filterByWord(Query query, IndexedDocument document) {
       String docContent = null;
-      try {
-        docContent = document.getContent().toString();
-      } catch (IOException e) {
-        e.printStackTrace();
-      }
+      docContent = document.getContent().toString();
       for (Term term : query.getTerms()) {
         if (docContent.contains(term.getRaw())) {
           return true;

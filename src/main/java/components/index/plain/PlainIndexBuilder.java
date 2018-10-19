@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Random;
 import java.util.logging.Logger;
 import java.util.stream.Stream;
 import org.apache.commons.io.FileUtils;
@@ -22,29 +23,64 @@ public class PlainIndexBuilder {
   static final String CONTENT_FILE = "content";
   static final String META_FILE = "meta";
 
+  private static final Random RNG = new Random();
+
   private static final Logger LOG = Logger.getLogger(PlainIndexBuilder.class.getName());
 
   private Path indexRoot;
 
-  public PlainIndexBuilder(Path indexRoot) {
+  public PlainIndexBuilder(Path indexRoot) throws RuntimeException {
     this.indexRoot = indexRoot;
+    if (!isPathSuitableForIndex(indexRoot)) {
+      String errMsg = String.format(
+          "Index already exists by the given path %s",
+          indexRoot.toAbsolutePath().toString()
+      );
+      LOG.severe(errMsg);
+      throw new RuntimeException(errMsg);
+    }
+    try {
+      if (!Files.exists(indexRoot)) {
+        Files.createDirectories(indexRoot);
+      }
+    } catch (IOException e) {
+      throw new RuntimeException(
+          String.format(
+              "Failed to create index by given path %s",
+              indexRoot.toAbsolutePath().toString()
+          ), e
+      );
+    }
+  }
+
+  private static boolean isPathSuitableForIndex(Path indexRoot) {
+    try {
+      return !Files.exists(indexRoot) || Files.list(indexRoot).count() == 0;
+    } catch (IOException e) {
+      throw new RuntimeException(
+          String.format(
+              "Failed to check whether given path %s is suitable for creating the index",
+              indexRoot.toAbsolutePath().toString()
+          ), e);
+    }
+  }
+
+  private static Path createNewIndexEntryRoot(Path indexRoot) {
+    try {
+      return Files.createTempDirectory(indexRoot, "");
+    } catch (IOException e) {
+      throw new RuntimeException(
+          String.format(
+              "Failed to cread directory for the new index entry by the path: %s",
+              indexRoot.toAbsolutePath().toString()
+          ), e
+      );
+    }
   }
 
   private static void flushNewIndexEntry(Path indexRoot, CrawlerDocument parsedDocument) {
-    Path newIndexEntryPath = indexRoot.resolve(Long.toString(System.currentTimeMillis()));
-    if (Files.exists(newIndexEntryPath)) {
-      LOG.warning(
-          String.format(
-              "Entry already exists: %s. Will delete old entry...",
-              newIndexEntryPath.toAbsolutePath().toString()
-          )
-      );
-      try {
-        FileUtils.deleteDirectory(newIndexEntryPath.toFile());
-      } catch (IOException e) {
-        throw new RuntimeException("Failed to create new index entry!", e);
-      }
-    }
+    Path newIndexEntryPath = createNewIndexEntryRoot(indexRoot);
+    
     try (
         BufferedWriter contentWriter = new BufferedWriter(
             new OutputStreamWriter(

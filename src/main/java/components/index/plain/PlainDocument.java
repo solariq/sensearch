@@ -27,22 +27,30 @@ public class PlainDocument implements IndexedDocument {
   }
 
   @Override
-  public CharSequence getContent() throws IOException {
+  public CharSequence getContent() {
     StringBuilder contentBuilder = new StringBuilder();
     try(BufferedReader bufferedReader = Files.newBufferedReader(documentContentPath)) {
       bufferedReader.lines().forEach(contentBuilder::append);
+    } catch (IOException e) {
+      throw new RuntimeException(
+          String.format("Can not get content for the document with id %d", this.getId()), e
+      );
     }
-    //Why toString()?
-    return contentBuilder.toString();
+
+    return contentBuilder;
   }
 
   @Override
-  public CharSequence getTitle() throws IOException{
+  public CharSequence getTitle() {
     StringBuilder titleBuilder = new StringBuilder();
     try(BufferedReader bufferedReader = Files.newBufferedReader(documentTitlePath)) {
       bufferedReader.lines().forEach(titleBuilder::append);
+    } catch (IOException e) {
+      throw new RuntimeException(
+          String.format("Can not get title for the document with id %d", this.getId()), e
+      );
     }
 
-    return titleBuilder.toString();
+    return titleBuilder;
   }
 }

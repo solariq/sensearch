@@ -8,6 +8,6 @@ import java.io.IOException;
  */
 public interface IndexedDocument {
   long getId();
-  CharSequence getContent() throws IOException;
-  CharSequence getTitle() throws IOException;
+  CharSequence getContent();
+  CharSequence getTitle();
 }
