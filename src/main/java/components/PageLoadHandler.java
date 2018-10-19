@@ -15,18 +15,24 @@ import org.eclipse.jetty.server.handler.AbstractHandler;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import components.snippeter.SnippetsCreator;
-import components.snippeter.snippet.Passage;
 import components.snippeter.snippet.Snippet;
+import components.suggestor.BigramsBasedSuggestor;
+import components.suggestor.BigramsGenerator;
+import components.suggestor.Suggestor;
 
 public class PageLoadHandler extends AbstractHandler {
 	
-	TestSuggessionsProvider suggestor = new TestSuggessionsProvider();
+	//SuggestsProvider suggestor = new TestSuggessionsProvider();
+	Suggestor suggestor = new BigramsBasedSuggestor(BigramsGenerator.mapPath);
 	
 	SnippetBox snipBox = new TestSnippetBox();
 	
 	ObjectMapper mapper = new ObjectMapper();
 	
+	public PageLoadHandler() throws IOException{
+		// TODO Auto-generated constructor stub
+	}
+
 	@Override
 	public void handle(String target,
             Request baseRequest,
