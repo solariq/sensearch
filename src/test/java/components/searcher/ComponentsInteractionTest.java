@@ -2,6 +2,8 @@ package components.searcher;
 
 import components.index.IndexedDocument;
 import components.query.term.Term;
+
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -75,7 +77,12 @@ public class ComponentsInteractionTest {
     }
 
     private boolean filterByWord(Query query, IndexedDocument document) {
-      String docContent = document.getContent().toString();
+      String docContent = null;
+      try {
+        docContent = document.getContent().toString();
+      } catch (IOException e) {
+        e.printStackTrace();
+      }
       for (Term term : query.getTerms()) {
         if (docContent.contains(term.getRaw())) {
           return true;

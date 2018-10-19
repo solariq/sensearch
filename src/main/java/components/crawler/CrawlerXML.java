@@ -46,8 +46,7 @@ public class CrawlerXML implements Crawler {
         }
 
         private void init() throws FileNotFoundException {
-            FileInputStream fileInputStream = new FileInputStream(path.toString());
-            zipInputStream = new ZipInputStream(fileInputStream);
+            zipInputStream = new ZipInputStream(new FileInputStream(path.toString()));
             try {
                 zipEntry = zipInputStream.getNextEntry();
                 nextZipEntry = zipInputStream.getNextEntry();
@@ -79,7 +78,9 @@ public class CrawlerXML implements Crawler {
 
                 CrawlerDocument result = parser.parseXML(file);
 
-                file.delete();
+                if (!file.delete()) {
+                    System.err.println("File " + result.getID() + ".xml isn't deleted");
+                }
 
                 return result;
             } catch (IOException e) {
