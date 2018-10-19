@@ -100,7 +100,7 @@ public class XMLParser {
             xmlStreamWriter.writeAttribute("ns-id", page.nsId);
             xmlStreamWriter.writeAttribute("ns-name", "");
             xmlStreamWriter.writeCharacters("\n");
-            xmlStreamWriter.writeCharacters(page.returnContent().toString());
+            xmlStreamWriter.writeCharacters(page.getContent().toString());
             xmlStreamWriter.writeCharacters("\n");
             xmlStreamWriter.writeEndElement();
 

@@ -29,7 +29,7 @@ public class WikiPage implements CrawlerDocument {
     }
 
     @Override
-    public CharSequence returnContent() {
+    public CharSequence getContent() {
         return page;
     }
 

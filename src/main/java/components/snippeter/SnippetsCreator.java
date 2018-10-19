@@ -37,7 +37,7 @@ public class SnippetsCreator {
 */
 
         CharSequence title = document.getTitle();
-        CharSequence content = document.returnContent();
+        CharSequence content = document.getContent();
 
         List<Passage> passages = Arrays
                 .asList(splitPattern.split(content))

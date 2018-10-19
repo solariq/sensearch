@@ -2,7 +2,7 @@ package components.crawler.document;
 
 public interface CrawlerDocument {
 
-    CharSequence returnContent();
+    CharSequence getContent();
 
     String getTitle();
 

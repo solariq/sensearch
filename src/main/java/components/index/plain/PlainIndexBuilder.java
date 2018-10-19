@@ -58,7 +58,7 @@ public class PlainIndexBuilder {
             )
         )
     ) {
-      contentWriter.write(parsedDocument.returnContent().toString());
+      contentWriter.write(parsedDocument.getContent().toString());
       titleWriter.write(parsedDocument.getTitle());
     } catch (Exception e) {
       LOG.warning

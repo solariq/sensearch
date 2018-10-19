@@ -32,6 +32,7 @@ public class PlainDocument implements IndexedDocument {
     try(BufferedReader bufferedReader = Files.newBufferedReader(documentContentPath)) {
       bufferedReader.lines().forEach(contentBuilder::append);
     }
+    //Why toString()?
     return contentBuilder.toString();
   }
 
