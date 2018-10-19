@@ -32,7 +32,7 @@ public class PlainIndex implements Index {
   }
 
   @Override
-  public Stream<IndexedDocument> nearestDocumentsStream(Query query) {
+  public Stream<IndexedDocument> fetchDocuments(Query query) {
     return LongStream.of(availableDocuments.toArray())
         .mapToObj(id -> indexRoot.resolve(Long.toString(id)))
         .map(PlainDocument::new);

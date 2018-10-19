@@ -8,5 +8,5 @@ import java.util.stream.Stream;
  * Created by sandulmv on 06.10.18.
  */
 public interface Index {
-  Stream<IndexedDocument> nearestDocumentsStream(Query query);
+  Stream<IndexedDocument> fetchDocuments(Query query);
 }

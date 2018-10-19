@@ -63,7 +63,7 @@ public class ComponentsInteractionTest {
     }
 
     @Override
-    public Stream<IndexedDocument> nearestDocumentsStream(Query query) {
+    public Stream<IndexedDocument> fetchDocuments(Query query) {
       return availableDocuments.stream();
     }
   }
@@ -88,7 +88,7 @@ public class ComponentsInteractionTest {
     @Override
     public List<IndexedDocument> getSortedDocuments(Query query) {
       return index
-          .nearestDocumentsStream(query)
+          .fetchDocuments(query)
           .filter(d -> filterByWord(query, d))
           .collect(Collectors.toList());
     }
