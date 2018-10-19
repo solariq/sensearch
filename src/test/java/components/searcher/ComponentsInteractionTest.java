@@ -1,6 +1,6 @@
 package components.searcher;
 
-import components.index.Document;
+import components.index.IndexedDocument;
 import components.query.term.Term;
 import java.util.ArrayList;
 import java.util.stream.Collectors;
@@ -21,7 +21,7 @@ public class ComponentsInteractionTest {
       "Web Search Course".toLowerCase()
   };
 
-  private static class SimpleTextDocument implements Document{
+  private static class SimpleTextDocument implements IndexedDocument {
     private CharSequence documentContent;
     private long documentId;
 
@@ -53,7 +53,7 @@ public class ComponentsInteractionTest {
 
   private static class SimpleIndex implements Index {
 
-    List<Document> availableDocuments;
+    List<IndexedDocument> availableDocuments;
 
     public SimpleIndex() {
       availableDocuments = new ArrayList<>();
@@ -63,7 +63,7 @@ public class ComponentsInteractionTest {
     }
 
     @Override
-    public Stream<Document> nearestDocumentsStream(Query query) {
+    public Stream<IndexedDocument> nearestDocumentsStream(Query query) {
       return availableDocuments.stream();
     }
   }
@@ -74,7 +74,7 @@ public class ComponentsInteractionTest {
       super(index);
     }
 
-    private boolean filterByWord(Query query, Document document) {
+    private boolean filterByWord(Query query, IndexedDocument document) {
       String docContent = document.getContent().toString();
       for (Term term : query.getTerms()) {
         if (docContent.contains(term.getRaw())) {
@@ -86,7 +86,7 @@ public class ComponentsInteractionTest {
     }
 
     @Override
-    public List<Document> getSortedDocuments(Query query) {
+    public List<IndexedDocument> getSortedDocuments(Query query) {
       return index
           .nearestDocumentsStream(query)
           .filter(d -> filterByWord(query, d))
@@ -131,7 +131,7 @@ public class ComponentsInteractionTest {
   public void test() {
     Searcher wordFilterSearcher = new WordFilterSearcher(new SimpleIndex());
     Query query = new SimpleQuery("web search");
-    List<Document> foundDocuments = wordFilterSearcher.getSortedDocuments(query);
+    List<IndexedDocument> foundDocuments = wordFilterSearcher.getSortedDocuments(query);
     System.out.print(foundDocuments);
     Assert.assertEquals(foundDocuments.size(), 3);
   }
