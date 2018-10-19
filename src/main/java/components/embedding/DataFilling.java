@@ -1,4 +1,4 @@
-package tools.embedding;
+package components.embedding;
 
 import java.io.*;
 import java.util.HashMap;
@@ -24,11 +24,11 @@ class DataFilling {
     void fill() {
         while (scanner.hasNext()) {
             String word = scanner.next();
-            double[] vec = new double[VEC_SIZE];
-            for (int i = 0; i < vec.length; i++) {
-                vec[i] = Double.parseDouble(scanner.next());
+            double[] coord = new double[VEC_SIZE];
+            for (int i = 0; i < coord.length; i++) {
+                coord[i] = Double.parseDouble(scanner.next());
             }
-            hashMap.put(word, vec);
+            hashMap.put(word, coord);
         }
     }
 
