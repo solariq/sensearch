@@ -3,7 +3,6 @@ package components.searcher;
 import components.index.IndexedDocument;
 import components.query.term.Term;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -89,7 +88,7 @@ public class ComponentsInteractionTest {
     }
 
     @Override
-    public List<IndexedDocument> getSortedDocuments(Query query) {
+    public List<IndexedDocument> getRankedDocuments(Query query) {
       return index
           .fetchDocuments(query)
           .filter(d -> filterByWord(query, d))
@@ -134,7 +133,7 @@ public class ComponentsInteractionTest {
   public void test() {
     Searcher wordFilterSearcher = new WordFilterSearcher(new SimpleIndex());
     Query query = new SimpleQuery("web search");
-    List<IndexedDocument> foundDocuments = wordFilterSearcher.getSortedDocuments(query);
+    List<IndexedDocument> foundDocuments = wordFilterSearcher.getRankedDocuments(query);
     System.out.print(foundDocuments);
     Assert.assertEquals(foundDocuments.size(), 3);
   }

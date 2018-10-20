@@ -13,7 +13,7 @@ public abstract class Searcher {
     this.index = index;
   }
 
-  public abstract List<IndexedDocument> getSortedDocuments(Query query);
+  public abstract List<IndexedDocument> getRankedDocuments(Query query);
 
   public void setIndex(Index index) {
     this.index = index;
