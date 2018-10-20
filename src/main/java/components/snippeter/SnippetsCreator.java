@@ -3,6 +3,7 @@ package components.snippeter;
 import java.util.Arrays;
 import java.util.List;
 import components.crawler.document.CrawlerDocument;
+import components.index.IndexedDocument;
 import components.query.Query;
 import components.snippeter.snippet.Cluster;
 import components.snippeter.snippet.Passage;
@@ -21,7 +22,7 @@ public class SnippetsCreator {
     private static final int PASSAGES_IN_CLUSTER = 4;
     private static final Pattern splitPattern = Pattern.compile("(?<=[.!?])");
 
-    public Snippet getSnippet(CrawlerDocument document, Query query) {
+    public Snippet getSnippet(IndexedDocument document, Query query) {
 
 /*
         CharSequence test = "Emperor Akbar was in the habit of putting riddles and puzzles to his courtiers. He often asked questions which were strange and witty. It took much wisdom to answer these questions.\n" +
