@@ -63,6 +63,9 @@ FuzzySearcher implements Searcher {
           if (!termsCooccurrences.containsKey(token)) {
             termsCooccurrences.put(token, new TObjectLongHashMap<>());
           }
+          if (!termsCooccurrences.get(token).containsKey(neighbour)) {
+            termsCooccurrences.get(token).put(neighbour, 0);
+          }
           termsCooccurrences.get(token).increment(neighbour);
         }
       } else {
