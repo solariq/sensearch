@@ -20,8 +20,7 @@ import org.apache.commons.lang3.tuple.Pair;
  * Created by sandulmv on 20.10.18.
  * Ranking based on fuzzy set theory
  */
-public class
-FuzzySearcher implements Searcher {
+public class FuzzySearcher implements Searcher {
   private int windowSize;
   private Index index;
   public FuzzySearcher(Index index, int windowSize) {
