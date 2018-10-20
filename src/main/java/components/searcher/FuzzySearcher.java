@@ -33,6 +33,7 @@ public class FuzzySearcher implements Searcher {
     return index.fetchDocuments(query)
         .map(doc -> Pair.of(doc, getFuzzyRank(query, doc)))
         .sorted(Comparator.comparingDouble(Pair::getRight))
+        .filter(p -> p.getRight() > 0.1)
         .map(Pair::getLeft)
         .collect(Collectors.toList());
   }
@@ -100,7 +101,7 @@ public class FuzzySearcher implements Searcher {
       totalScore += (1 - wordScore);
     }
 
-    return totalScore;
+    return coocurrencesMap.size() - totalScore;
   }
 
 }
