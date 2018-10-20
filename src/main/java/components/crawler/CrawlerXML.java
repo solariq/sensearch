@@ -37,7 +37,6 @@ public class CrawlerXML implements Crawler {
         private Path path;
         private ZipInputStream zipInputStream;
         private ZipEntry zipEntry;
-        private ZipEntry nextZipEntry;
         private XMLParser parser = new XMLParser();
 
         DocumentIterator(Path path) throws FileNotFoundException {
@@ -49,7 +48,6 @@ public class CrawlerXML implements Crawler {
             zipInputStream = new ZipInputStream(new FileInputStream(path.toString()));
             try {
                 zipEntry = zipInputStream.getNextEntry();
-                nextZipEntry = zipInputStream.getNextEntry();
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -57,15 +55,14 @@ public class CrawlerXML implements Crawler {
 
         @Override
         public boolean hasNext() {
-            return nextZipEntry != null;
+            return zipEntry != null;
         }
 
         @Override
         public CrawlerDocument next() {
             try {
                 while (zipEntry.isDirectory()) {
-                    zipEntry = nextZipEntry;
-                    nextZipEntry = zipInputStream.getNextEntry();
+                    zipEntry = zipInputStream.getNextEntry();
                 }
                 String fileName = "../WikiDocs/tmp/";
                 Files.createDirectories(Paths.get(fileName));
@@ -74,7 +71,6 @@ public class CrawlerXML implements Crawler {
 
                 Files.copy(zipInputStream, Paths.get(fileName), StandardCopyOption.REPLACE_EXISTING);
                 File file = new File(fileName);
-                zipInputStream.closeEntry();
 
                 CrawlerDocument result = parser.parseXML(file);
 
@@ -86,9 +82,8 @@ public class CrawlerXML implements Crawler {
             } catch (IOException e) {
                 e.printStackTrace();
             } finally {
-                zipEntry = nextZipEntry;
                 try {
-                    nextZipEntry = zipInputStream.getNextEntry();
+                    zipEntry = zipInputStream.getNextEntry();
                 } catch (IOException e) {
                     e.printStackTrace();
                 }

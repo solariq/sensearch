@@ -25,7 +25,8 @@ public class PageLoadHandler extends AbstractHandler {
 	//SuggestsProvider suggestor = new TestSuggessionsProvider();
 	Suggestor suggestor = new BigramsBasedSuggestor(BigramsGenerator.mapPath);
 	
-	SnippetBox snipBox = new TestSnippetBox();
+	//SnippetBox snipBox = new TestSnippetBox();
+	SnippetBox snipBox = new SnippetBoxImpl();
 	
 	ObjectMapper mapper = new ObjectMapper();
 	

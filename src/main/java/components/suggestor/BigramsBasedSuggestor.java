@@ -35,13 +35,13 @@ public class BigramsBasedSuggestor implements Suggestor{
 		
 		String[] words = searchString.split("[^a-zA-Z]+");
 		
-		String lastWord = words[words.length - 1].trim();
+		String lastWord = words.length > 0 ? words[words.length - 1].trim() : null;
 		String lastBigram = words.length > 1 ? 
 				words[words.length - 2] + " " + words[words.length - 1]
 						: null;
 
 		for (Entry<String, Integer> ent : map.entrySet()) {
-			if (ent.getKey().startsWith(lastWord)
+			if ((lastWord != null && ent.getKey().startsWith(lastWord))
 					|| (lastBigram != null && ent.getKey().startsWith(lastBigram))) {
 				resSet.add(ent);
 			}
