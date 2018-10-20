@@ -20,7 +20,10 @@ public class ClusteredSnippet implements Snippet{
         int shift = 0;
         for (Passage passage : content.getPassages()) {
             int finalShift = shift;
-            selection.addAll(passage.getSelection().stream().map(x -> new Segment(x.getLeft() + finalShift, x.getRight() + finalShift)).collect(Collectors.toList()));
+            selection.addAll(passage.getSelection()
+                    .stream()
+                    .map(x -> new Segment(x.getLeft() + finalShift, x.getRight() + finalShift))
+                    .collect(Collectors.toList()));
             shift += passage.getSentence().length();
         }
     }
@@ -32,7 +35,10 @@ public class ClusteredSnippet implements Snippet{
 
     @Override
     public CharSequence getContent() {
-        return content.getPassages().stream().map(Passage::getSentence).collect(Collectors.joining());
+        return content.getPassages()
+                .stream()
+                .map(Passage::getSentence)
+                .collect(Collectors.joining());
     }
 
     @Override
