@@ -2,6 +2,7 @@ package components.suggestor;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Map;
@@ -53,11 +54,11 @@ public class BigramsGenerator {
 		});
 		
 		ObjectMapper mapper = new ObjectMapper();
-		
+		Files.createDirectories(Paths.get(output.getCanonicalPath()).getParent());
 		mapper.writeValue(output, result);
 	}
 	
 	public static void main(String[] args) throws JsonGenerationException, JsonMappingException, IOException {
-		generateBigramsFromTitles(Paths.get("suggestions_data/Mini_Wiki.zip"), new File(mapPath));
+		generateBigramsFromTitles(Paths.get("../WikiDocs/Mini_Wiki.zip"), new File(mapPath));
 	}
 }
