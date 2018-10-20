@@ -30,10 +30,11 @@ public class FuzzySearcher implements Searcher {
 
   @Override
   public List<IndexedDocument> getRankedDocuments(Query query) {
+    final double threshold = query.getTerms().size() / 2.;
     return index.fetchDocuments(query)
         .map(doc -> Pair.of(doc, getFuzzyRank(query, doc)))
-        .sorted(Comparator.comparingDouble(Pair::getRight))
-        .filter(p -> p.getRight() > 0.1)
+        .sorted(Comparator.<Pair<IndexedDocument, Double>>comparingDouble(Pair::getRight).reversed())
+        .filter(p -> p.getRight() > threshold)
         .map(Pair::getLeft)
         .collect(Collectors.toList());
   }
@@ -101,7 +102,7 @@ public class FuzzySearcher implements Searcher {
       totalScore += (1 - wordScore);
     }
 
-    return coocurrencesMap.size() - totalScore;
+    return totalScore;
   }
 
 }
