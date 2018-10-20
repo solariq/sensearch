@@ -5,17 +5,8 @@ import components.index.Index;
 import components.query.Query;
 import java.util.List;
 
-public abstract class Searcher {
+public interface Searcher {
 
-  Index index;
+  List<IndexedDocument> getRankedDocuments(Query query);
 
-  Searcher(Index index) {
-    this.index = index;
-  }
-
-  public abstract List<IndexedDocument> getRankedDocuments(Query query);
-
-  public void setIndex(Index index) {
-    this.index = index;
-  }
 }
