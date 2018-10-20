@@ -2,6 +2,7 @@ package components.suggestor;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map.Entry;
@@ -17,10 +18,10 @@ public class BigramsBasedSuggestor implements Suggestor{
 
 	private TreeMap<String, Integer> map;
 
-	public BigramsBasedSuggestor(String filepath) throws JsonParseException, JsonMappingException, IOException {
+	public BigramsBasedSuggestor(Path filepath) throws JsonParseException, JsonMappingException, IOException {
 
 		ObjectMapper mapper = new ObjectMapper();
-		map = mapper.readValue(new File(filepath), TreeMap.class);
+		map = mapper.readValue(filepath.getParent().resolve("BigramsMap/result").toFile(), TreeMap.class);
 	}
 
 	public List<String> getSuggestions(String searchString) {
@@ -33,7 +34,7 @@ public class BigramsBasedSuggestor implements Suggestor{
 			}
 		});
 		
-		String[] words = searchString.split("[^a-zA-Z]+");
+		String[] words = searchString.split("[^a-zA-Zа-яА-ЯЁё]+");
 		
 		String lastWord = words.length > 0 ? words[words.length - 1].trim() : null;
 		String lastBigram = words.length > 1 ? 

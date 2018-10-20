@@ -1,5 +1,7 @@
 package components.index.plain;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import components.crawler.Crawler;
 import components.crawler.document.CrawlerDocument;
 import components.index.Index;
 import java.io.BufferedWriter;
@@ -7,10 +9,14 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.Map;
 import java.util.Random;
+import java.util.TreeMap;
 import java.util.logging.Logger;
 import java.util.stream.Stream;
 import org.apache.commons.io.FileUtils;
+import scala.Int;
 
 /**
  * Created by sandulmv on 17.10.18.
@@ -112,10 +118,44 @@ public class PlainIndexBuilder {
     }
   }
 
+  static void incInMap(Map<String, Integer> m, String key) {
+    Integer currVal = m.get(key);
+
+    if (currVal == null) {
+      m.put(key, 0);
+    } else {
+      m.put(key, currVal + 1);
+    }
+  }
+
+  private void flushBigrams(String title, TreeMap<String, Integer> map) {
+    String t = title.toLowerCase();
+    String[] words = t.split("[^a-zA-Zа-яА-ЯёЁ]+");
+    for (int i = 0; i < words.length - 1; i++) {
+      if (words[i].isEmpty()) {
+        continue;
+      }
+      String bigram = words[i] + " " + words[i + 1];
+      incInMap(map, bigram);
+    }
+  }
+
   public Index buildIndex(Stream<CrawlerDocument> parsedDocumentsStream) throws IOException {
+    Path bigramPath = indexRoot.getParent().resolve(Paths.get("BigramsMap"));
+    Files.createDirectories(bigramPath);
+
+    TreeMap<String, Integer> result = new TreeMap<>();
+
     parsedDocumentsStream.forEach(
-        doc -> flushNewIndexEntry(this.indexRoot, doc)
+        doc -> {
+          flushBigrams(doc.getTitle(), result);
+          flushNewIndexEntry(this.indexRoot, doc);
+        }
     );
+
+    ObjectMapper mapper = new ObjectMapper();
+    mapper.writeValue(bigramPath.resolve("result").toFile(), result);
+
     try {
       return new PlainIndex(indexRoot);
     } catch (IOException e) {

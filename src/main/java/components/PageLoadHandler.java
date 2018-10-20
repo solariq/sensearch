@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.stream.Collectors;
 
 import javax.servlet.ServletException;
@@ -17,21 +18,21 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import components.snippeter.snippet.Snippet;
 import components.suggestor.BigramsBasedSuggestor;
-import components.suggestor.BigramsGenerator;
 import components.suggestor.Suggestor;
 
 public class PageLoadHandler extends AbstractHandler {
 	
 	//SuggestsProvider suggestor = new TestSuggessionsProvider();
-	Suggestor suggestor = new BigramsBasedSuggestor(BigramsGenerator.mapPath);
+	Suggestor suggestor;
 	
 	//SnippetBox snipBox = new TestSnippetBox();
-	SnippetBox snipBox = new SnippetBoxImpl();
+	SnippetBox snipBox;
 	
 	ObjectMapper mapper = new ObjectMapper();
 	
-	public PageLoadHandler() throws IOException{
-		// TODO Auto-generated constructor stub
+	public PageLoadHandler(Path path) throws IOException{
+		snipBox = new SnippetBoxImpl(path);
+		suggestor = new BigramsBasedSuggestor(path);
 	}
 
 	@Override

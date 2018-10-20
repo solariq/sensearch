@@ -35,6 +35,7 @@ public class CrawlerXML implements Crawler {
     class DocumentIterator implements Iterator<CrawlerDocument> {
 
         private Path path;
+        private Path pathTmp;
         private ZipInputStream zipInputStream;
         private ZipEntry zipEntry;
         private XMLParser parser = new XMLParser();
@@ -45,6 +46,7 @@ public class CrawlerXML implements Crawler {
         }
 
         private void init() throws FileNotFoundException {
+            pathTmp = path.getParent().resolve("tmpPages");
             zipInputStream = new ZipInputStream(new FileInputStream(path.toString()));
             try {
                 zipEntry = zipInputStream.getNextEntry();
@@ -64,13 +66,12 @@ public class CrawlerXML implements Crawler {
                 while (zipEntry.isDirectory()) {
                     zipEntry = zipInputStream.getNextEntry();
                 }
-                String fileName = "../WikiDocs/tmp/";
-                Files.createDirectories(Paths.get(fileName));
+                Files.createDirectories(pathTmp);
                 String[] n = zipEntry.getName().split("/");
-                fileName += n[n.length - 1];
+                Path filePath = pathTmp.resolve(n[n.length - 1]);
 
-                Files.copy(zipInputStream, Paths.get(fileName), StandardCopyOption.REPLACE_EXISTING);
-                File file = new File(fileName);
+                Files.copy(zipInputStream, filePath, StandardCopyOption.REPLACE_EXISTING);
+                File file = new File(filePath.toString());
 
                 CrawlerDocument result = parser.parseXML(file);
 
