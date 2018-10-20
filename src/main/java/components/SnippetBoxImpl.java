@@ -33,7 +33,7 @@ public class SnippetBoxImpl implements SnippetBox {
 
     private final Searcher searcher = new FuzzySearcher(index, 4);
     private Query query;
-    private List<IndexedDocument> docList;
+    private List<IndexedDocument> docList = new ArrayList<>();
     private ArrayList<Snippet> snippets = new ArrayList<>();
 
     @Override
@@ -43,6 +43,8 @@ public class SnippetBoxImpl implements SnippetBox {
 
     @Override
     public boolean makeQuery(CharSequence s) {
+        docList.clear();
+        snippets.clear();
         query = new BaseQuery(s);
         docList = searcher.getRankedDocuments(query);
         for (IndexedDocument doc : docList) {
