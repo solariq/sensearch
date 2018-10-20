@@ -69,10 +69,11 @@ public class ComponentsInteractionTest {
     }
   }
 
-  private static class WordFilterSearcher extends Searcher {
+  private static class WordFilterSearcher implements Searcher {
+    private Index index;
 
     WordFilterSearcher(Index index) {
-      super(index);
+      this.index = index;
     }
 
     private boolean filterByWord(Query query, IndexedDocument document) {
