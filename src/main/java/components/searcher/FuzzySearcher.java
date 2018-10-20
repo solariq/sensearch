@@ -20,7 +20,8 @@ import org.apache.commons.lang3.tuple.Pair;
  * Created by sandulmv on 20.10.18.
  * Ranking based on fuzzy set theory
  */
-public class FuzzySearcher implements Searcher {
+public class
+FuzzySearcher implements Searcher {
   private int windowSize;
   private Index index;
   public FuzzySearcher(Index index, int windowSize) {
@@ -86,7 +87,7 @@ public class FuzzySearcher implements Searcher {
 
   private double calculateScore(TObjectLongMap<String> termsCounts,
       Map<String, TObjectLongMap<String>> coocurrencesMap) {
-    double totalScore = 1.;
+    double totalScore = 0.;
     for (Entry<String, TObjectLongMap<String>> coocEntry : coocurrencesMap.entrySet()) {
       double wordScore = 1.;
       double keyCount = termsCounts.get(coocEntry.getKey());
