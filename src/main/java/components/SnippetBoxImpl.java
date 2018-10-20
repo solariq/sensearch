@@ -10,6 +10,7 @@ import components.searcher.FuzzySearcher;
 import components.searcher.Searcher;
 import components.snippeter.SnippetsCreator;
 import components.snippeter.snippet.Snippet;
+import org.apache.commons.io.FileUtils;
 
 import java.io.IOException;
 import java.nio.file.Paths;
@@ -22,6 +23,7 @@ public class SnippetBoxImpl implements SnippetBox {
 
     {
         try {
+            FileUtils.deleteDirectory(Paths.get("../WikiDocs/IndexTmp").toFile());
             index = new PlainIndexBuilder(Paths.get("../WikiDocs/IndexTmp"))
                         .buildIndex(new CrawlerXML(Paths.get("../WikiDocs/Mini_Wiki.zip")).makeStream());
         } catch (IOException e) {
@@ -31,7 +33,7 @@ public class SnippetBoxImpl implements SnippetBox {
 
     private final Searcher searcher = new FuzzySearcher(index, 4);
     private Query query;
-    private List<IndexedDocument> docList;
+    private List<IndexedDocument> docList = new ArrayList<>();
     private ArrayList<Snippet> snippets = new ArrayList<>();
 
     @Override
@@ -41,6 +43,8 @@ public class SnippetBoxImpl implements SnippetBox {
 
     @Override
     public boolean makeQuery(CharSequence s) {
+        docList.clear();
+        snippets.clear();
         query = new BaseQuery(s);
         docList = searcher.getRankedDocuments(query);
         for (IndexedDocument doc : docList) {
