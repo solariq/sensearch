@@ -67,7 +67,7 @@ public class CrawlerXML implements Crawler {
                     zipEntry = zipInputStream.getNextEntry();
                 }
                 Files.createDirectories(pathTmp);
-                String[] n = zipEntry.getName().split("/");
+                String[] n = zipEntry.getName().split("[\\\\/]");
                 Path filePath = pathTmp.resolve(n[n.length - 1]);
 
                 Files.copy(zipInputStream, filePath, StandardCopyOption.REPLACE_EXISTING);

@@ -8,3 +8,12 @@
 `wikiforia_dump_splitted.zip` - Полный архив. (Тестится минимум 4 часа)
 
 [1]: https://drive.google.com/drive/folders/1JGMrne_8oFg5V6bvbEb88nTbRJ830u1C?usp=sharing
+
+### Запуск
+
+Перед запуском приложения необходимо в классе `SearchServer.java` изменить значение переменной `pathToZIP` на путь до архива с Википедией. 
+
+Например: 
+```
+pathToZIP = Paths.get("../WikiDocs/wikiforia_dump_splitted.zip");
+```
