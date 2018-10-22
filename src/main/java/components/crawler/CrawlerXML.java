@@ -1,12 +1,12 @@
 package components.crawler;
 
+import components.Constants;
 import components.crawler.document.CrawlerDocument;
 import components.crawler.document.XMLParser;
 
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.Iterator;
 import java.util.Spliterator;
@@ -18,9 +18,12 @@ import java.util.zip.ZipInputStream;
 
 public class CrawlerXML implements Crawler {
 
+    private final Constants constants;
+
     private Path path;
 
-    public CrawlerXML(Path path) {
+    public CrawlerXML(Path path, Constants constants) {
+        this.constants = constants;
         this.path = path;
     }
 
@@ -46,7 +49,7 @@ public class CrawlerXML implements Crawler {
         }
 
         private void init() throws FileNotFoundException {
-            pathTmp = path.getParent().resolve("tmpPages");
+            pathTmp = path.getParent().resolve(constants.getTemporaryDocuments());
             zipInputStream = new ZipInputStream(new FileInputStream(path.toString()));
             try {
                 zipEntry = zipInputStream.getNextEntry();

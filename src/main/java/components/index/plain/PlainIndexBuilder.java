@@ -1,6 +1,7 @@
 package components.index.plain;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import components.Constants;
 import components.crawler.Crawler;
 import components.crawler.document.CrawlerDocument;
 import components.index.Index;
@@ -26,6 +27,8 @@ import scala.Int;
  */
 public class PlainIndexBuilder {
 
+  private final Constants constants;
+
   static final String CONTENT_FILE = "content";
   static final String META_FILE = "meta";
 
@@ -35,7 +38,9 @@ public class PlainIndexBuilder {
 
   private Path indexRoot;
 
-  public PlainIndexBuilder(Path indexRoot) throws RuntimeException {
+  public PlainIndexBuilder(Path indexRoot, Constants constants) throws RuntimeException {
+    this.constants = constants;
+
     this.indexRoot = indexRoot;
     if (!isPathSuitableForIndex(indexRoot)) {
       String errMsg = String.format(
@@ -118,7 +123,7 @@ public class PlainIndexBuilder {
     }
   }
 
-  static void incInMap(Map<String, Integer> m, String key) {
+  private static void incInMap(Map<String, Integer> m, String key) {
     Integer currVal = m.get(key);
 
     if (currVal == null) {
@@ -141,9 +146,8 @@ public class PlainIndexBuilder {
   }
 
   public Index buildIndex(Stream<CrawlerDocument> parsedDocumentsStream) throws IOException {
-    Path bigramPath = indexRoot.getParent().resolve(Paths.get("BigramsMap"));
+    Path bigramPath = indexRoot.getParent().resolve(Paths.get(constants.getTemporaryBigrams()));
     Files.createDirectories(bigramPath);
-
     TreeMap<String, Integer> result = new TreeMap<>();
 
     parsedDocumentsStream.forEach(
@@ -154,7 +158,7 @@ public class PlainIndexBuilder {
     );
 
     ObjectMapper mapper = new ObjectMapper();
-    mapper.writeValue(bigramPath.resolve("result").toFile(), result);
+    mapper.writeValue(bigramPath.resolve(constants.getBigramsFileName()).toFile(), result);
 
     try {
       return new PlainIndex(indexRoot);

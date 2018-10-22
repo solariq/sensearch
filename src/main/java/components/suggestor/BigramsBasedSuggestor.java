@@ -1,6 +1,5 @@
 package components.suggestor;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Comparator;
@@ -13,15 +12,20 @@ import java.util.TreeSet;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import components.Constants;
 
 public class BigramsBasedSuggestor implements Suggestor{
 
+	private final Constants constants;
+
 	private TreeMap<String, Integer> map;
 
-	public BigramsBasedSuggestor(Path filepath) throws JsonParseException, JsonMappingException, IOException {
+	public BigramsBasedSuggestor(Path filepath, Constants constants) throws JsonParseException, JsonMappingException, IOException {
+		this.constants = constants;
 
 		ObjectMapper mapper = new ObjectMapper();
-		map = mapper.readValue(filepath.getParent().resolve("BigramsMap/result").toFile(), TreeMap.class);
+		map = mapper.readValue(filepath.getParent().resolve(constants.getTemporaryBigrams())
+				.resolve(constants.getBigramsFileName()).toFile(), TreeMap.class);
 	}
 
 	public List<String> getSuggestions(String searchString) {

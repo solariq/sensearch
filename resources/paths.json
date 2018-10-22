@@ -1,0 +1,10 @@
+{
+  "temporaryDocuments": "tmpPages",
+
+  "temporaryBigrams": "BigramsMap",
+  "bigramsFileName": "result",
+
+  "temporaryIndex": "IndexTmp",
+
+  "mainPageHTML": "./resources/mainPage.html"
+}
