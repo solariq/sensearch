@@ -2,52 +2,52 @@ package components;
 
 public class Constants {
 
-    private String temporaryDocuments;
+    private static String temporaryDocuments;
 
-    private String temporaryBigrams;
-    private String bigramsFileName;
+    private static String temporaryBigrams;
+    private static String bigramsFileName;
 
-    private String temporaryIndex;
+    private static String temporaryIndex;
 
-    private String mainPageHTML;
+    private static String mainPageHTML;
 
-    public String getTemporaryDocuments() {
+    public static String getTemporaryDocuments() {
         return temporaryDocuments;
     }
 
     public void setTemporaryDocuments(String temporaryDocuments) {
-        this.temporaryDocuments = temporaryDocuments;
+        Constants.temporaryDocuments = temporaryDocuments;
     }
 
-    public String getTemporaryBigrams() {
+    public static String getTemporaryBigrams() {
         return temporaryBigrams;
     }
 
     public void setBigramsFileName(String bigramsFileName) {
-        this.bigramsFileName = bigramsFileName;
+        Constants.bigramsFileName = bigramsFileName;
     }
 
-    public String getBigramsFileName() {
+    public static String getBigramsFileName() {
         return bigramsFileName;
     }
 
     public void setTemporaryBigrams(String temporaryBigrams) {
-        this.temporaryBigrams = temporaryBigrams;
+        Constants.temporaryBigrams = temporaryBigrams;
     }
 
-    public String getTemporaryIndex() {
+    public static String getTemporaryIndex() {
         return temporaryIndex;
     }
 
     public void setTemporaryIndex(String temporaryIndex) {
-        this.temporaryIndex = temporaryIndex;
+        Constants.temporaryIndex = temporaryIndex;
     }
 
-    public String getMainPageHTML() {
+    public static String getMainPageHTML() {
         return mainPageHTML;
     }
 
     public void setMainPageHTML(String mainPageHTML) {
-        this.mainPageHTML = mainPageHTML;
+        Constants.mainPageHTML = mainPageHTML;
     }
 }

@@ -19,20 +19,18 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class SnippetBoxImpl implements SnippetBox {
-    private final Constants constants;
 
     final private SnippetsCreator snippetsCreator = new SnippetsCreator();
     private Index index;
     private Searcher searcher;
 
-    public SnippetBoxImpl (Path path, Constants constants) {
-        this.constants = constants;
+    public SnippetBoxImpl (Path path) {
         try {
-            Path pathInd = path.getParent().resolve(constants.getTemporaryIndex());
+            Path pathInd = path.getParent().resolve(Constants.getTemporaryIndex());
             Files.createDirectories(pathInd);
             FileUtils.deleteDirectory(pathInd.toFile());
-            index = new PlainIndexBuilder(pathInd, constants)
-                        .buildIndex(new CrawlerXML(path, constants).makeStream());
+            index = new PlainIndexBuilder(pathInd)
+                        .buildIndex(new CrawlerXML(path).makeStream());
             searcher = new FuzzySearcher(index, 4);
         } catch (IOException e) {
             e.printStackTrace();

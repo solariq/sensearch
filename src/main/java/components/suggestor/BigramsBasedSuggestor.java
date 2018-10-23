@@ -16,16 +16,13 @@ import components.Constants;
 
 public class BigramsBasedSuggestor implements Suggestor{
 
-	private final Constants constants;
-
 	private TreeMap<String, Integer> map;
 
-	public BigramsBasedSuggestor(Path filepath, Constants constants) throws JsonParseException, JsonMappingException, IOException {
-		this.constants = constants;
+	public BigramsBasedSuggestor(Path filepath) throws JsonParseException, JsonMappingException, IOException {
 
 		ObjectMapper mapper = new ObjectMapper();
-		map = mapper.readValue(filepath.getParent().resolve(constants.getTemporaryBigrams())
-				.resolve(constants.getBigramsFileName()).toFile(), TreeMap.class);
+		map = mapper.readValue(filepath.getParent().resolve(Constants.getTemporaryBigrams())
+				.resolve(Constants.getBigramsFileName()).toFile(), TreeMap.class);
 	}
 
 	public List<String> getSuggestions(String searchString) {

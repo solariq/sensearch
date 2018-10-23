@@ -22,8 +22,6 @@ import components.suggestor.Suggestor;
 
 public class PageLoadHandler extends AbstractHandler {
 
-	private final Constants constants;
-
 	//SuggestsProvider suggestor = new TestSuggessionsProvider();
 	Suggestor suggestor;
 	
@@ -32,10 +30,9 @@ public class PageLoadHandler extends AbstractHandler {
 	
 	ObjectMapper mapper = new ObjectMapper();
 	
-	public PageLoadHandler(Path path, Constants constants) throws IOException {
-		this.constants = constants;
-		snipBox = new SnippetBoxImpl(path, constants);
-		suggestor = new BigramsBasedSuggestor(path, constants);
+	public PageLoadHandler(Path path) throws IOException {
+		snipBox = new SnippetBoxImpl(path);
+		suggestor = new BigramsBasedSuggestor(path);
 	}
 
 	@Override
@@ -54,7 +51,7 @@ public class PageLoadHandler extends AbstractHandler {
 		
 		if (requestText == null || requestText.isEmpty()) {
 			
-			try(BufferedReader in = new BufferedReader(new FileReader(new File(constants.getMainPageHTML())))) {
+			try(BufferedReader in = new BufferedReader(new FileReader(new File(Constants.getMainPageHTML())))) {
 				response.getWriter().println(in.lines().collect(Collectors.joining("\n")));
 			}
 			

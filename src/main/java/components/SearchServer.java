@@ -14,12 +14,11 @@ public class SearchServer {
 	private static Path pathToZIP = Paths.get("../WikiDocs/Mini_Wiki.zip");
 
     private static ObjectMapper  objectMapper = new ObjectMapper();
-	private static Constants constants;
 
     private static void init() {
         try {
             byte[] jsonData = Files.readAllBytes(Paths.get("./resources/paths.json"));
-            constants = objectMapper.readValue(jsonData, Constants.class);
+            Constants constants = objectMapper.readValue(jsonData, Constants.class);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -32,7 +31,7 @@ public class SearchServer {
         Server server = new Server(8081);
 
         //server.setHandler(new HandlerCollection(new Handler[] {new PageLoadHandler(), new SuggestionsHandler()}));
-        server.setHandler(new PageLoadHandler(pathToZIP.toAbsolutePath(), constants));
+        server.setHandler(new PageLoadHandler(pathToZIP.toAbsolutePath()));
 
         server.start();
         server.join();

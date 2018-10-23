@@ -18,12 +18,9 @@ import java.util.zip.ZipInputStream;
 
 public class CrawlerXML implements Crawler {
 
-    private final Constants constants;
-
     private Path path;
 
-    public CrawlerXML(Path path, Constants constants) {
-        this.constants = constants;
+    public CrawlerXML(Path path) {
         this.path = path;
     }
 
@@ -49,7 +46,7 @@ public class CrawlerXML implements Crawler {
         }
 
         private void init() throws FileNotFoundException {
-            pathTmp = path.getParent().resolve(constants.getTemporaryDocuments());
+            pathTmp = path.getParent().resolve(Constants.getTemporaryDocuments());
             zipInputStream = new ZipInputStream(new FileInputStream(path.toString()));
             try {
                 zipEntry = zipInputStream.getNextEntry();

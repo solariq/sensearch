@@ -27,8 +27,6 @@ import scala.Int;
  */
 public class PlainIndexBuilder {
 
-  private final Constants constants;
-
   static final String CONTENT_FILE = "content";
   static final String META_FILE = "meta";
 
@@ -38,8 +36,7 @@ public class PlainIndexBuilder {
 
   private Path indexRoot;
 
-  public PlainIndexBuilder(Path indexRoot, Constants constants) throws RuntimeException {
-    this.constants = constants;
+  public PlainIndexBuilder(Path indexRoot) throws RuntimeException {
 
     this.indexRoot = indexRoot;
     if (!isPathSuitableForIndex(indexRoot)) {
@@ -146,7 +143,7 @@ public class PlainIndexBuilder {
   }
 
   public Index buildIndex(Stream<CrawlerDocument> parsedDocumentsStream) throws IOException {
-    Path bigramPath = indexRoot.getParent().resolve(Paths.get(constants.getTemporaryBigrams()));
+    Path bigramPath = indexRoot.getParent().resolve(Paths.get(Constants.getTemporaryBigrams()));
     Files.createDirectories(bigramPath);
     TreeMap<String, Integer> result = new TreeMap<>();
 
@@ -158,7 +155,7 @@ public class PlainIndexBuilder {
     );
 
     ObjectMapper mapper = new ObjectMapper();
-    mapper.writeValue(bigramPath.resolve(constants.getBigramsFileName()).toFile(), result);
+    mapper.writeValue(bigramPath.resolve(Constants.getBigramsFileName()).toFile(), result);
 
     try {
       return new PlainIndex(indexRoot);
