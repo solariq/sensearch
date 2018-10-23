@@ -35,7 +35,7 @@ public class BigramsBasedSuggestor implements Suggestor{
 			}
 		});
 		
-		String[] words = searchString.split("[^a-zA-Zа-яА-ЯЁё]+");
+		String[] words = searchString.split(Constants.getBigramsRegexp());
 		
 		String lastWord = words.length > 0 ? words[words.length - 1].trim() : null;
 		String lastBigram = words.length > 1 ? 

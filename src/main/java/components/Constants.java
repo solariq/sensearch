@@ -11,6 +11,8 @@ public class Constants {
 
     private static String mainPageHTML;
 
+    private static String bigramsRegexp;
+
     public static String getTemporaryDocuments() {
         return temporaryDocuments;
     }
@@ -49,5 +51,13 @@ public class Constants {
 
     public void setMainPageHTML(String mainPageHTML) {
         Constants.mainPageHTML = mainPageHTML;
+    }
+
+    public static String getBigramsRegexp() {
+        return bigramsRegexp;
+    }
+
+    public void setBigramsRegexp(String bigramsRegexp) {
+        Constants.bigramsRegexp = bigramsRegexp;
     }
 }

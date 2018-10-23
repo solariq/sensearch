@@ -6,5 +6,7 @@
 
   "temporaryIndex": "IndexTmp",
 
-  "mainPageHTML": "./resources/mainPage.html"
+  "mainPageHTML": "./resources/mainPage.html",
+
+  "bigramsRegexp": "[^a-zA-Zа-яА-ЯЁё]+"
 }
