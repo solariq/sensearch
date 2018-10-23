@@ -2,7 +2,6 @@ package components.snippeter;
 
 import java.util.Arrays;
 import java.util.List;
-import components.crawler.document.CrawlerDocument;
 import components.index.IndexedDocument;
 import components.query.Query;
 import components.snippeter.snippet.Cluster;
@@ -20,29 +19,19 @@ import java.util.stream.Collectors;
 public class SnippetsCreator {
 
     private static final int PASSAGES_IN_CLUSTER = 4;
-    private static final Pattern splitPattern = Pattern.compile("(?<=[.!?])");
+
+    private static final Pattern splitEnglish = Pattern.compile("(?<=[.!?]|[.!?]['\"])(?<!Mr\\.|Mrs\\.|Ms\\.|Jr\\.|Dr\\.|Prof\\.|Vol\\.|A\\.D\\.|B\\.C\\.|Sr\\.|T\\.V\\.A\\.)\\s+");
+    private static final Pattern splitRussian = Pattern.compile("(?<=[.!?]|[.!?]['\"])(?<!\\(р\\.|\\(род\\.|[А-Я]\\.)");
+
+    private static final Pattern splitPattern = splitRussian;
 
     public Snippet getSnippet(IndexedDocument document, Query query) {
-
-/*
-        CharSequence test = "Emperor Akbar was in the habit of putting riddles and puzzles to his courtiers. He often asked questions which were strange and witty. It took much wisdom to answer these questions.\n" +
-                "Once he asked a very strange question. The courtiers were dumb folded by his question.\n" +
-                "Akbar glanced at his courtiers. As he looked, one by one the heads began to hang low in search of an answer. It was at this moment that Birbal entered the courtyard. Birbal who knew the nature of the emperor quickly grasped the situation and asked, \"May I know the question so that I can try for an answer\".\n" +
-                "Akbar said, \"How many crows are there in this city?\"\n" +
-                "Without even a moment's thought, Birbal replied \"There are fifty thousand five hundred and eighty nine crows, my lord\". \n" +
-                "\"How can you be so sure?\" asked Akbar. \n" +
-                "Birbal said, \"Make you men count, My lord. If you find more crows it means some have come to visit their relatives here. If you find less number of crows it means some have gone to visit their relatives elsewhere\". \n" +
-                "Akbar was pleased very much by Birbal's wit.\n\n\n";
-
-        System.out.print(test);
-*/
 
         CharSequence title = document.getTitle();
         CharSequence content = document.getContent();
 
         List<Passage> passages = Arrays
-                .asList(splitPattern.split(content))
-                .stream()
+                .stream(splitPattern.split(content))
                 .map(x -> new Passage(x, query))
                 .collect(Collectors.toList());
 
