@@ -118,6 +118,7 @@ function autocomplete(inp, arr) {
           b = document.createElement("DIV");
           /*make the matching letters bold:*/
           b.innerHTML = arr[i];
+          b.innerHTML += "<input type='hidden' value='" + arr[i] + "'>";
           /*execute a function when someone clicks on the item value (DIV element):*/
           b.addEventListener("click", function(e) {
               /*insert the value for the autocomplete text field:*/
@@ -147,7 +148,7 @@ function autocomplete(inp, arr) {
         addActive(x);
       } else if (e.keyCode == 13) {
         /*If the ENTER key is pressed, prevent the form from being submitted,*/
-        e.preventDefault();
+        //e.preventDefault();
         if (currentFocus > -1) {
           /*and simulate a click on the "active" item:*/
           if (x) x[currentFocus].click();
