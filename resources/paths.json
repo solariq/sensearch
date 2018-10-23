@@ -1,8 +1,8 @@
 {
-  "temporaryDocuments": "tmpPages",
+  "temporaryDocuments": "PagesTmp",
 
-  "temporaryBigrams": "BigramsMap",
-  "bigramsFileName": "result",
+  "temporaryBigrams": "BigramsMapTmp",
+  "bigramsFileName": "BigramsData",
 
   "temporaryIndex": "IndexTmp",
 

@@ -18,7 +18,7 @@ public class SearchServer {
     private static void init() {
         try {
             byte[] jsonData = Files.readAllBytes(Paths.get("./resources/paths.json"));
-            Constants constants = objectMapper.readValue(jsonData, Constants.class);
+            objectMapper.readValue(jsonData, Constants.class);
         } catch (IOException e) {
             e.printStackTrace();
         }
