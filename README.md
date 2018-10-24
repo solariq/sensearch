@@ -18,7 +18,7 @@
 Необходимо добавить в папку resources файл [mystem][2].
 
 Добавьте в папку `resources` архив `vectors.txt.gz`, чтобы иметь возможность
-работать с *Words Embedding*. Если хотите убедиться, что всё сделали правильно, запустите тест `NearestFinderTest`.
+работать с *Words Embedding*. Если хотите убедиться, что всё сделали правильно, запустите тест `NearestFinderTest`. 
 **P.s.** При необходимости используйте флаг `-Xmx<size>`, чтобы увеличить размер heap.
 
 [1]: https://drive.google.com/drive/folders/1JGMrne_8oFg5V6bvbEb88nTbRJ830u1C?usp=sharing
