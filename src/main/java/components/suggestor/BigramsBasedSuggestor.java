@@ -9,8 +9,6 @@ import java.util.stream.Collectors;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
-import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import components.Constants;
 
@@ -18,11 +16,10 @@ public class BigramsBasedSuggestor implements Suggestor{
 
 	private TreeMap<String, Integer> map;
 
-	public BigramsBasedSuggestor(Path filepath) throws JsonParseException, JsonMappingException, IOException {
+	public BigramsBasedSuggestor(Path filepath) throws IOException {
 
 		ObjectMapper mapper = new ObjectMapper();
-		map = mapper.readValue(filepath.getParent().resolve(Constants.getTemporaryBigrams())
-				.resolve(Constants.getBigramsFileName()).toFile(), TreeMap.class);
+		map = mapper.readValue(filepath.toFile(), TreeMap.class);
 	}
 
 	public List<String> getSuggestions(String searchString) {

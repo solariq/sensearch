@@ -4,7 +4,6 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-import java.nio.file.Path;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -24,19 +23,15 @@ import components.suggestor.Suggestor;
 
 public class PageLoadHandler extends AbstractHandler {
 
-	//SuggestsProvider suggestor = new TestSuggessionsProvider();
-	Suggestor suggestor;
+	private Suggestor suggestor;
+
+	private SnippetBox snipBox;
 	
-	//SnippetBox snipBox = new TestSnippetBox();
-	SnippetBox snipBox;
+	private ObjectMapper mapper = new ObjectMapper();
 	
-	ObjectMapper mapper = new ObjectMapper();
-	
-	public PageLoadHandler(Path path) throws IOException {
-		snipBox = new SnippetBoxImpl(path);
-		//snipBox = new TestSnippetBox();
-		suggestor = new BigramsBasedSuggestor(path);
-		//suggestor = new TestSuggessionsProvider();
+	public PageLoadHandler(SnippetBox snippetBox, BigramsBasedSuggestor bigramsBasedSuggestor) {
+		snipBox = snippetBox;
+		suggestor = bigramsBasedSuggestor;
 	}
 	
 	CharSequence generateBoldedText(CharSequence plain, List<Segment> segments) {

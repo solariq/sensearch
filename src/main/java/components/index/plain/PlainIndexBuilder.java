@@ -36,7 +36,11 @@ public class PlainIndexBuilder {
 
   private Path indexRoot;
 
-  public PlainIndexBuilder(Path indexRoot) throws RuntimeException {
+  public PlainIndexBuilder(Path indexRoot) throws RuntimeException, IOException {
+
+
+    Files.createDirectories(indexRoot);
+    FileUtils.deleteDirectory(indexRoot.toFile());
 
     this.indexRoot = indexRoot;
     if (!isPathSuitableForIndex(indexRoot)) {
@@ -132,7 +136,7 @@ public class PlainIndexBuilder {
 
   private void flushBigrams(String title, TreeMap<String, Integer> map) {
     String t = title.toLowerCase();
-    String[] words = t.split("[^a-zA-Zа-яА-ЯёЁ]+");
+    String[] words = t.split(Constants.getBigramsRegexp());
     for (int i = 0; i < words.length - 1; i++) {
       if (words[i].isEmpty()) {
         continue;

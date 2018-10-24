@@ -1,7 +1,9 @@
 package components;
 
+import java.nio.file.Path;
+import java.nio.file.Paths;
+
 public class Constants {
-    //TODO Вынести из ресурсов JSON, поменять конструкторы, вынести всё в один билдер
 
     private static String temporaryDocuments;
 
@@ -17,8 +19,10 @@ public class Constants {
 
     private static String bigramsRegexp;
 
+    private static String pathToZIP;
+
     public static String getTemporaryDocuments() {
-        return Constants.temporaryDocuments;
+        return temporaryDocuments;
     }
 
     public void setTemporaryDocuments(String temporaryDocuments) {
@@ -26,23 +30,23 @@ public class Constants {
     }
 
     public static String getTemporaryBigrams() {
-        return Constants.temporaryBigrams;
+        return temporaryBigrams;
     }
 
     public void setBigramsFileName(String bigramsFileName) {
         Constants.bigramsFileName = bigramsFileName;
     }
 
-    public static String getBigramsFileName() {
-        return Constants.bigramsFileName;
+    public static Path getBigramsFileName() {
+        return getPathToZIP().toAbsolutePath().getParent().resolve(getTemporaryBigrams()).resolve(bigramsFileName);
     }
 
     public void setTemporaryBigrams(String temporaryBigrams) {
         Constants.temporaryBigrams = temporaryBigrams;
     }
 
-    public static String getTemporaryIndex() {
-        return Constants.temporaryIndex;
+    public static Path getTemporaryIndex() {
+        return getPathToZIP().toAbsolutePath().getParent().resolve(temporaryIndex);
     }
 
     public void setTemporaryIndex(String temporaryIndex) {
@@ -50,7 +54,7 @@ public class Constants {
     }
 
     public static String getMainPageHTML() {
-        return Constants.mainPageHTML;
+        return mainPageHTML;
     }
 
     public void setMainPageHTML(String mainPageHTML) {
@@ -58,7 +62,7 @@ public class Constants {
     }
 
     public static String getMyStem() {
-        return Constants.myStem;
+        return myStem;
     }
 
     public void setMyStem(String myStem) {
@@ -66,10 +70,19 @@ public class Constants {
     }
 
     public static String getBigramsRegexp() {
-        return Constants.bigramsRegexp;
+        return bigramsRegexp;
     }
 
     public void setBigramsRegexp(String bigramsRegexp) {
         Constants.bigramsRegexp = bigramsRegexp;
     }
+
+    public static Path getPathToZIP() {
+        return Paths.get(pathToZIP);
+    }
+
+    public void setPathToZIP(String pathToZIP) {
+        Constants.pathToZIP = pathToZIP;
+    }
+
 }

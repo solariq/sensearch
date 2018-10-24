@@ -10,5 +10,7 @@
 
   "myStem": "./resources/mystem",
 
-  "bigramsRegexp": "[^a-zA-Zа-яА-ЯЁё]+"
+  "bigramsRegexp": "[^a-zA-Zа-яА-ЯЁё]+",
+
+  "pathToZIP": "../WikiDocs/Mini_Wiki.zip"
 }
