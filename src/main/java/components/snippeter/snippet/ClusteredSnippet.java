@@ -1,6 +1,7 @@
 package components.snippeter.snippet;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -26,6 +27,7 @@ public class ClusteredSnippet implements Snippet{
                     .collect(Collectors.toList()));
             shift += passage.getSentence().length();
         }
+        selection.sort(Comparator.comparingInt(Segment::getLeft));
     }
 
     @Override
