@@ -5,5 +5,5 @@ public interface Term {
 
     public CharSequence getNormalized();
 
-    //public Lemma getLemma();
+    //public LemmaInfo getLemma();
 }

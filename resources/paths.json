@@ -8,5 +8,7 @@
 
   "mainPageHTML": "./resources/mainPage.html",
 
+  "myStem": "./resources/mystem",
+
   "bigramsRegexp": "[^a-zA-Zа-яА-ЯЁё]+"
 }

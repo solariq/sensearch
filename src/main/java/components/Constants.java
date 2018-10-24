@@ -5,16 +5,19 @@ public class Constants {
     private static String temporaryDocuments;
 
     private static String temporaryBigrams;
+
     private static String bigramsFileName;
 
     private static String temporaryIndex;
 
     private static String mainPageHTML;
 
+    private static String myStem;
+
     private static String bigramsRegexp;
 
     public static String getTemporaryDocuments() {
-        return temporaryDocuments;
+        return Constants.temporaryDocuments;
     }
 
     public void setTemporaryDocuments(String temporaryDocuments) {
@@ -22,7 +25,7 @@ public class Constants {
     }
 
     public static String getTemporaryBigrams() {
-        return temporaryBigrams;
+        return Constants.temporaryBigrams;
     }
 
     public void setBigramsFileName(String bigramsFileName) {
@@ -30,7 +33,7 @@ public class Constants {
     }
 
     public static String getBigramsFileName() {
-        return bigramsFileName;
+        return Constants.bigramsFileName;
     }
 
     public void setTemporaryBigrams(String temporaryBigrams) {
@@ -38,7 +41,7 @@ public class Constants {
     }
 
     public static String getTemporaryIndex() {
-        return temporaryIndex;
+        return Constants.temporaryIndex;
     }
 
     public void setTemporaryIndex(String temporaryIndex) {
@@ -46,15 +49,23 @@ public class Constants {
     }
 
     public static String getMainPageHTML() {
-        return mainPageHTML;
+        return Constants.mainPageHTML;
     }
 
     public void setMainPageHTML(String mainPageHTML) {
         Constants.mainPageHTML = mainPageHTML;
     }
 
+    public static String getMyStem() {
+        return Constants.myStem;
+    }
+
+    public void setMyStem(String myStem) {
+        Constants.myStem = myStem;
+    }
+
     public static String getBigramsRegexp() {
-        return bigramsRegexp;
+        return Constants.bigramsRegexp;
     }
 
     public void setBigramsRegexp(String bigramsRegexp) {

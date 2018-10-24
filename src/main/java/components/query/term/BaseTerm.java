@@ -1,32 +1,28 @@
 package components.query.term;
 
+import com.expleague.commons.math.vectors.Vec;
+import com.expleague.commons.text.lemmer.LemmaInfo;
+import com.expleague.commons.text.lemmer.WordInfo;
 
 public class BaseTerm implements Term{
 
-    CharSequence rawWord;
-    CharSequence normalizedWord;
-    //Lemma lemma;
+    private WordInfo wordInfo;
+    private Vec vector;
 
-    public BaseTerm() {
-        this.rawWord = "";
-        this.normalizedWord = "";
-    }
-
-    public BaseTerm(CharSequence word) {
-        this.rawWord = word;
-        //todo: normalize word
-        this.normalizedWord = word;
+    public BaseTerm(WordInfo wordInfo) {
+        this.wordInfo = wordInfo;
+        //this.vector = getVec() ?
     }
 
     public CharSequence getRaw() {
-        return this.rawWord;
+        return wordInfo.token();
     }
 
     public CharSequence getNormalized(){
-        return this.normalizedWord;
+        return this.wordInfo.lemma().lemma();
     }
 
-    /*public Lemma getLemma() {
-        return this.lemma;
-     */
+    public LemmaInfo getLemma() {
+        return this.wordInfo.lemma();
+    }
 }
