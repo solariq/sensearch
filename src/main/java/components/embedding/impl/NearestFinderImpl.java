@@ -1,32 +1,28 @@
-package components.embedding;
+package components.embedding.impl;
 
 import com.expleague.commons.math.vectors.Vec;
 import com.expleague.commons.math.vectors.VecTools;
+import components.embedding.NearestFinder;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.TreeMap;
+import java.util.*;
 import java.util.function.BiFunction;
 
-public class NearestFinderImpl<T> implements NearestFinder<T> {
+public class NearestFinderImpl implements NearestFinder {
 
-    private static final BiFunction<Vec, Vec, Double> defaultMethod = VecTools::distanceAV;
+    private static final BiFunction<Vec, Vec, Double> defaultMeasure = VecTools::distanceAV;
     private static final double epsilon = 10e-9;
 
-    private HashMap<T, Vec> hashMap;
-
-    @SuppressWarnings("unchecked cast")
-    public NearestFinderImpl() {
-        hashMap = (HashMap<T, Vec>) EmbeddingTools.getInstance().stringVecHashMap;
+    @Override
+    public List<String> getNearestWords(Vec mainVec, int numberOfNeighbors) {
+        return getNearest(mainVec, numberOfNeighbors, EmbeddingImpl.getInstance().getWordVecMap(), defaultMeasure);
     }
 
-    public List<T> getNearest(T main, int numberOfNeighbors) {
-        return getNearest(main, numberOfNeighbors, defaultMethod);
+    @Override
+    public List<Long> getNearestDocuments(Vec mainVec, int numberOfNeighbors) {
+        return getNearest(mainVec, numberOfNeighbors, EmbeddingImpl.getInstance().getDocIdVecMap(), defaultMeasure);
     }
 
-    public List<T> getNearest(T main, int numberOfNeighbors, BiFunction<Vec, Vec, Double> measureFunction) {
-        Vec mainVec = EmbeddingTools.getInstance().getVec(main);
+    private <T> List<T> getNearest(Vec mainVec, int numberOfNeighbors, Map<T, Vec> map, BiFunction<Vec, Vec, Double> measureFunction) {
         TreeMap<Vec, T> nearest = new TreeMap<>(
                 (vec1, vec2) -> {
                     double val1 = measureFunction.apply(mainVec, vec1);
@@ -37,7 +33,7 @@ public class NearestFinderImpl<T> implements NearestFinder<T> {
                     return val1 < val2 ? -1 : 1;
                 }
         );
-        for (HashMap.Entry<T, Vec> e : hashMap.entrySet()) {
+        for (Map.Entry<T, Vec> e : map.entrySet()) {
             if (e.getValue() != mainVec) {
                 if (nearest.size() < numberOfNeighbors) {
                     nearest.put(e.getValue(), e.getKey());

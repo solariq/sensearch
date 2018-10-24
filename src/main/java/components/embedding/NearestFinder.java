@@ -1,15 +1,26 @@
 package components.embedding;
 
+import com.expleague.commons.math.vectors.Vec;
+
 import java.util.List;
 
-public interface NearestFinder<T> {
+public interface NearestFinder {
 
     /**
-     * Returns a list of the nearest neighbors of a word
-     * that is ordered from the closest neighbor to the farthest
+     * Returns list of the nearest words
      *
-     * @param numberOfNeighbors is how many neighbors you need
-     * @return list of the nearest neighbors
+     * @param mainVec, for which you need nearest words
+     * @param numberOfNeighbors, how many neighbors you need
+     * @return list of words
      */
-     List<T> getNearest(T t, int numberOfNeighbors);
+    List<String> getNearestWords(Vec mainVec, int numberOfNeighbors);
+
+    /**
+     * Returns list of the nearest documents
+     *
+     * @param mainVec, for which you need nearest words
+     * @param numberOfNeighbors, how many neighbors you need
+     * @return list of ids of documents
+     */
+    List<Long> getNearestDocuments(Vec mainVec, int numberOfNeighbors);
 }
