@@ -1,6 +1,7 @@
 package components;
 
 public class Constants {
+    //TODO Вынести из ресурсов JSON, поменять конструкторы, вынести всё в один билдер
 
     private static String temporaryDocuments;
 

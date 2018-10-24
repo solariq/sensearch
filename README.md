@@ -7,7 +7,6 @@
 
 `wikiforia_dump_splitted.zip` - Полный архив. (Тестится минимум 4 часа)
 
-[1]: https://drive.google.com/drive/folders/1JGMrne_8oFg5V6bvbEb88nTbRJ830u1C?usp=sharing
 
 ### Запуск
 
@@ -17,3 +16,12 @@
 ```
 pathToZIP = Paths.get("../WikiDocs/wikiforia_dump_splitted.zip");
 ```
+
+### Ресурсы (папка resources)
+
+Необходимо добавить в папку resources файл [mystem][2].
+
+
+
+[1]: https://drive.google.com/drive/folders/1JGMrne_8oFg5V6bvbEb88nTbRJ830u1C?usp=sharing
+[2]: https://tech.yandex.ru/mystem/
