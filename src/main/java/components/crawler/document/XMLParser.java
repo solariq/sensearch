@@ -16,30 +16,30 @@ import javax.xml.stream.events.XMLEvent;
 
 public class XMLParser {
 
-    public WikiPage parseXML(File file) {
-        XMLInputFactory xmlInputFactory = XMLInputFactory.newInstance();
-        WikiPage page = new WikiPage();
-        try {
-            XMLEventReader reader = xmlInputFactory.
-                    createXMLEventReader(new FileInputStream(file.getAbsolutePath()));
-            StringBuilder text = null;
-            while (reader.hasNext()) {
-                XMLEvent xmlEvent = reader.nextEvent();
-                if (xmlEvent.isStartElement()) {
-                    StartElement startElement = xmlEvent.asStartElement();
-                    if (startElement.getName().getLocalPart().equals("page")) {
-                        page = new WikiPage();
-                        text = new StringBuilder();
+  public WikiPage parseXML(File file) {
+    XMLInputFactory xmlInputFactory = XMLInputFactory.newInstance();
+    WikiPage page = new WikiPage();
+    try {
+      XMLEventReader reader = xmlInputFactory.
+          createXMLEventReader(new FileInputStream(file.getAbsolutePath()));
+      StringBuilder text = null;
+      while (reader.hasNext()) {
+        XMLEvent xmlEvent = reader.nextEvent();
+        if (xmlEvent.isStartElement()) {
+          StartElement startElement = xmlEvent.asStartElement();
+          if (startElement.getName().getLocalPart().equals("page")) {
+            page = new WikiPage();
+            text = new StringBuilder();
 
-                        Attribute idAttr = startElement.getAttributeByName(new QName("id"));
-                        if (idAttr != null) {
-                            page.setId(Integer.parseInt(idAttr.getValue()));
-                        }
+            Attribute idAttr = startElement.getAttributeByName(new QName("id"));
+            if (idAttr != null) {
+              page.setId(Integer.parseInt(idAttr.getValue()));
+            }
 
-                        Attribute titleAttr = startElement.getAttributeByName(new QName("title"));
-                        if (titleAttr != null) {
-                            page.setTitle(titleAttr.getValue());
-                        }
+            Attribute titleAttr = startElement.getAttributeByName(new QName("title"));
+            if (titleAttr != null) {
+              page.setTitle(titleAttr.getValue());
+            }
 
                         /*Attribute a;
                         a = startElement.getAttributeByName(new QName("revision"));
@@ -57,25 +57,25 @@ public class XMLParser {
                             page.nsId = a.getValue();
                         }*/
 
-                        while (reader.hasNext() && (xmlEvent = reader.nextEvent()).isCharacters()) {
-                            text.append(xmlEvent.asCharacters().getData());
-                        }
-                    }
-                }
-                if (xmlEvent.isEndElement()) {
-                    EndElement endElement = xmlEvent.asEndElement();
-                    if (endElement.getName().getLocalPart().equals("page")) {
-                        page.setPage(text);
-                    }
-                }
+            while (reader.hasNext() && (xmlEvent = reader.nextEvent()).isCharacters()) {
+              text.append(xmlEvent.asCharacters().getData());
             }
-            //writeXML(page);
-            return page;
-        } catch (FileNotFoundException | XMLStreamException e) {
-            e.printStackTrace();
+          }
         }
-        return null;
+        if (xmlEvent.isEndElement()) {
+          EndElement endElement = xmlEvent.asEndElement();
+          if (endElement.getName().getLocalPart().equals("page")) {
+            page.setPage(text);
+          }
+        }
+      }
+      //writeXML(page);
+      return page;
+    } catch (FileNotFoundException | XMLStreamException e) {
+      e.printStackTrace();
     }
+    return null;
+  }
 
     /*
     private void writeXML(WikiPage page) {

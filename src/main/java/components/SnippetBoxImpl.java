@@ -12,36 +12,36 @@ import java.util.List;
 
 public class SnippetBoxImpl implements SnippetBox {
 
-    final private SnippetsCreator snippetsCreator = new SnippetsCreator();
-    private Searcher searcher;
+  final private SnippetsCreator snippetsCreator = new SnippetsCreator();
+  private Searcher searcher;
 
-    public SnippetBoxImpl (Searcher searcher) {
-        this.searcher = searcher;
+  public SnippetBoxImpl(Searcher searcher) {
+    this.searcher = searcher;
+  }
+
+  private Query query;
+  private List<IndexedDocument> docList = new ArrayList<>();
+  private ArrayList<Snippet> snippets = new ArrayList<>();
+
+  @Override
+  public int size() {
+    return docList.size();
+  }
+
+  @Override
+  public boolean makeQuery(CharSequence s) {
+    docList.clear();
+    snippets.clear();
+    query = new BaseQuery(s);
+    docList = searcher.getRankedDocuments(query);
+    for (IndexedDocument doc : docList) {
+      snippets.add(snippetsCreator.getSnippet(doc, query));
     }
+    return true;
+  }
 
-    private Query query;
-    private List<IndexedDocument> docList = new ArrayList<>();
-    private ArrayList<Snippet> snippets = new ArrayList<>();
-
-    @Override
-    public int size() {
-        return docList.size();
-    }
-
-    @Override
-    public boolean makeQuery(CharSequence s) {
-        docList.clear();
-        snippets.clear();
-        query = new BaseQuery(s);
-        docList = searcher.getRankedDocuments(query);
-        for (IndexedDocument doc : docList) {
-            snippets.add(snippetsCreator.getSnippet(doc, query));
-        }
-        return true;
-    }
-
-    @Override
-    public Snippet getSnippet(int idx) {
-        return snippets.get(idx);
-    }
+  @Override
+  public Snippet getSnippet(int idx) {
+    return snippets.get(idx);
+  }
 }

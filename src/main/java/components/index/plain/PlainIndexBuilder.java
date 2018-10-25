@@ -20,10 +20,9 @@ import org.apache.commons.io.FileUtils;
 import scala.Int;
 
 /**
- * Created by sandulmv on 17.10.18.
- * Should be replaced with interface or abstract class?
- * Straightforward index builder that saves all documents received from Crawler
- * in separate text documents. Saves only title and content of each document
+ * Created by sandulmv on 17.10.18. Should be replaced with interface or abstract class?
+ * Straightforward index builder that saves all documents received from Crawler in separate text
+ * documents. Saves only title and content of each document
  */
 public class PlainIndexBuilder {
 
@@ -37,7 +36,6 @@ public class PlainIndexBuilder {
   private Path indexRoot;
 
   public PlainIndexBuilder(Path indexRoot) throws RuntimeException, IOException {
-
 
     Files.createDirectories(indexRoot);
     FileUtils.deleteDirectory(indexRoot.toFile());

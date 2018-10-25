@@ -4,25 +4,25 @@ import com.expleague.commons.math.vectors.Vec;
 import com.expleague.commons.text.lemmer.LemmaInfo;
 import com.expleague.commons.text.lemmer.WordInfo;
 
-public class BaseTerm implements Term{
+public class BaseTerm implements Term {
 
-    private WordInfo wordInfo;
-    private Vec vector;
+  private WordInfo wordInfo;
+  private Vec vector;
 
-    public BaseTerm(WordInfo wordInfo) {
-        this.wordInfo = wordInfo;
-        //this.vector = getVec() ?
-    }
+  public BaseTerm(WordInfo wordInfo) {
+    this.wordInfo = wordInfo;
+    //this.vector = getVec() ?
+  }
 
-    public CharSequence getRaw() {
-        return wordInfo.token();
-    }
+  public CharSequence getRaw() {
+    return wordInfo.token();
+  }
 
-    public CharSequence getNormalized(){
-        return this.wordInfo.lemma().lemma();
-    }
+  public CharSequence getNormalized() {
+    return this.wordInfo.lemma().lemma();
+  }
 
-    public LemmaInfo getLemma() {
-        return this.wordInfo.lemma();
-    }
+  public LemmaInfo getLemma() {
+    return this.wordInfo.lemma();
+  }
 }

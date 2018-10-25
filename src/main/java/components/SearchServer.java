@@ -4,15 +4,15 @@ import org.eclipse.jetty.server.Server;
 
 public class SearchServer {
 
- 
-    public static void main(String[] args) throws Exception {
-        Builder.build();
 
-        Server server = new Server(8081);
+  public static void main(String[] args) throws Exception {
+    Builder.build();
 
-        server.setHandler(Builder.getPageLoadHendler());
+    Server server = new Server(8081);
 
-        server.start();
-        server.join();
-    }
+    server.setHandler(Builder.getPageLoadHendler());
+
+    server.start();
+    server.join();
+  }
 }

@@ -7,7 +7,10 @@ import java.io.IOException;
  * Index interface
  */
 public interface IndexedDocument {
+
   long getId();
+
   CharSequence getContent();
+
   CharSequence getTitle();
 }

@@ -5,5 +5,6 @@ import components.query.term.Term;
 import java.util.List;
 
 public interface Query {
-    public List<Term> getTerms();
+
+  public List<Term> getTerms();
 }

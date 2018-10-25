@@ -29,7 +29,7 @@ public class PlainDocument implements IndexedDocument {
   @Override
   public CharSequence getContent() {
     StringBuilder contentBuilder = new StringBuilder();
-    try(BufferedReader bufferedReader = Files.newBufferedReader(documentContentPath)) {
+    try (BufferedReader bufferedReader = Files.newBufferedReader(documentContentPath)) {
       bufferedReader.lines().forEach(contentBuilder::append);
     } catch (IOException e) {
       throw new RuntimeException(
@@ -43,7 +43,7 @@ public class PlainDocument implements IndexedDocument {
   @Override
   public CharSequence getTitle() {
     StringBuilder titleBuilder = new StringBuilder();
-    try(BufferedReader bufferedReader = Files.newBufferedReader(documentTitlePath)) {
+    try (BufferedReader bufferedReader = Files.newBufferedReader(documentTitlePath)) {
       bufferedReader.lines().forEach(titleBuilder::append);
     } catch (IOException e) {
       throw new RuntimeException(

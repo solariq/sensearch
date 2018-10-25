@@ -3,23 +3,23 @@ package components.snippeter.snippet;
 import java.util.List;
 
 /**
- * Created by Maxim on 10.10.2018.
- * Email: alvinmax@mail.ru
+ * Created by Maxim on 10.10.2018. Email: alvinmax@mail.ru
  */
 public class Cluster {
-    List<Passage> passages;
-    long rating;
 
-    public Cluster(List<Passage> passages) {
-        this.passages = passages;
-        rating = passages.stream().mapToLong(Passage::getRating).sum();
-    }
+  List<Passage> passages;
+  long rating;
 
-    public long getRating() {
-        return rating;
-    }
+  public Cluster(List<Passage> passages) {
+    this.passages = passages;
+    rating = passages.stream().mapToLong(Passage::getRating).sum();
+  }
 
-    public List<Passage> getPassages() {
-        return passages;
-    }
+  public long getRating() {
+    return rating;
+  }
+
+  public List<Passage> getPassages() {
+    return passages;
+  }
 }

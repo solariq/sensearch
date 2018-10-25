@@ -17,12 +17,13 @@ import java.util.stream.Collectors;
 import org.apache.commons.lang3.tuple.Pair;
 
 /**
- * Created by sandulmv on 20.10.18.
- * Ranking based on fuzzy set theory
+ * Created by sandulmv on 20.10.18. Ranking based on fuzzy set theory
  */
 public class FuzzySearcher implements Searcher {
+
   private int windowSize;
   private Index index;
+
   public FuzzySearcher(Index index, int windowSize) {
     this.index = index;
     this.windowSize = windowSize;
@@ -33,7 +34,8 @@ public class FuzzySearcher implements Searcher {
     final double threshold = query.getTerms().size() / 2.;
     return index.fetchDocuments(query)
         .map(doc -> Pair.of(doc, getFuzzyRank(query, doc)))
-        .sorted(Comparator.<Pair<IndexedDocument, Double>>comparingDouble(Pair::getRight).reversed())
+        .sorted(
+            Comparator.<Pair<IndexedDocument, Double>>comparingDouble(Pair::getRight).reversed())
         .filter(p -> p.getRight() > threshold)
         .map(Pair::getLeft)
         .collect(Collectors.toList());
@@ -41,7 +43,7 @@ public class FuzzySearcher implements Searcher {
 
   private double getFuzzyRank(Query query, IndexedDocument document) {
     TObjectLongMap<String> termsCounts = new TObjectLongHashMap<>();
-    Map<String, TObjectLongMap<String>> termsCooccurrences= new HashMap<>();
+    Map<String, TObjectLongMap<String>> termsCooccurrences = new HashMap<>();
 
     Set<String> rawQueryTerms = query
         .getTerms()
