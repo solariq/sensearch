@@ -16,6 +16,12 @@ import java.nio.file.Paths;
 public class Builder {
 
     private static ObjectMapper objectMapper = new ObjectMapper();
+    private static Index index;
+    private static Searcher searcher;
+    private static PageLoadHandler pageLoadHandler;
+    private static SnippetBox snippetBox;
+    private static Crawler crawler;
+    private static BigramsBasedSuggestor bigramsBasedSuggestor;
 
     private static void init() {
         try {
@@ -25,13 +31,6 @@ public class Builder {
             e.printStackTrace();
         }
     }
-
-    private static Index index;
-    private static Searcher searcher;
-    private static PageLoadHandler pageLoadHandler;
-    private static SnippetBox snippetBox;
-    private static Crawler crawler;
-    private static BigramsBasedSuggestor bigramsBasedSuggestor;
 
     static void build() throws IOException {
         init();

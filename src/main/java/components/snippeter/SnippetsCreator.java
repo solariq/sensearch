@@ -1,14 +1,14 @@
 package components.snippeter;
 
-import java.util.Arrays;
-import java.util.List;
 import components.index.IndexedDocument;
 import components.query.Query;
 import components.snippeter.snippet.Cluster;
-import components.snippeter.snippet.Passage;
 import components.snippeter.snippet.ClusteredSnippet;
+import components.snippeter.snippet.Passage;
 import components.snippeter.snippet.Snippet;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 

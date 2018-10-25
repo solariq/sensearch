@@ -9,7 +9,7 @@ import java.util.stream.Collectors;
  * Created by Maxim on 06.10.2018.
  * Email: alvinmax@mail.ru
  */
-public class ClusteredSnippet implements Snippet{
+public class ClusteredSnippet implements Snippet {
     private CharSequence title;
     private Cluster content;
     private List<Segment> selection = new ArrayList<>();

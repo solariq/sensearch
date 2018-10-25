@@ -9,7 +9,7 @@ public interface NearestFinder {
     /**
      * Returns list of the nearest words
      *
-     * @param mainVec, for which you need nearest words
+     * @param mainVec,           for which you need nearest words
      * @param numberOfNeighbors, how many neighbors you need
      * @return list of words
      */
@@ -18,7 +18,7 @@ public interface NearestFinder {
     /**
      * Returns list of the nearest documents
      *
-     * @param mainVec, for which you need nearest words
+     * @param mainVec,           for which you need nearest words
      * @param numberOfNeighbors, how many neighbors you need
      * @return list of ids of documents
      */

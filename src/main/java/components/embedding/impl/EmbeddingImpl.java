@@ -6,6 +6,7 @@ import com.expleague.commons.seq.CharSeqTools;
 import components.embedding.Embedding;
 import components.index.IndexedDocument;
 import components.query.Query;
+import components.query.term.Term;
 
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -24,17 +25,11 @@ public class EmbeddingImpl implements Embedding {
 
     private static EmbeddingImpl instance;
 
-    public static synchronized EmbeddingImpl getInstance() {
-        if (instance == null) {
-            instance = new EmbeddingImpl();
-        }
-        return instance;
-    }
-
     private final Map<String, Vec> wordVecMap = new HashMap<>();
+    private final Map<Long, Vec> docIdVecMap = new HashMap<>();
 
     private EmbeddingImpl() {
-        try (Reader input = new InputStreamReader(new GZIPInputStream(new FileInputStream("resources/vectors.txt.gz")), StandardCharsets.UTF_8)){
+        try (Reader input = new InputStreamReader(new GZIPInputStream(new FileInputStream("resources/vectors.txt.gz")), StandardCharsets.UTF_8)) {
             CharSeqTools.lines(input)
                     .parallel()
                     .forEach(line -> {
@@ -54,18 +49,23 @@ public class EmbeddingImpl implements Embedding {
 
     }
 
-    private final Map<Long, Vec> docIdVecMap = new HashMap<>();
+    public static synchronized EmbeddingImpl getInstance() {
+        if (instance == null) {
+            instance = new EmbeddingImpl();
+        }
+        return instance;
+    }
 
     public void setDocuments(Stream<IndexedDocument> documentStream) {
         documentStream.forEach(document -> docIdVecMap.put(document.getId(), getVec(document)));
     }
 
     Map<String, Vec> getWordVecMap() {
-        return wordVecMap;
+        return this.wordVecMap;
     }
 
     Map<Long, Vec> getDocIdVecMap() {
-        return docIdVecMap;
+        return this.docIdVecMap;
     }
 
     private Vec getArithmeticMean(List<Vec> vecs) {
@@ -79,17 +79,23 @@ public class EmbeddingImpl implements Embedding {
 
     @Override
     public Vec getVec(String word) {
-        return wordVecMap.get(word);
+        return this.wordVecMap.get(word);
     }
 
     @Override
     public Vec getVec(Long documentId) {
-        return docIdVecMap.get(documentId);
+        return this.docIdVecMap.get(documentId);
     }
 
     @Override
     public Vec getVec(Query query) {
         return getArithmeticMean(getVecsForTerms(query));
+    }
+
+    public Vec getVec(List<Term> terms) {
+        return getArithmeticMean(terms.stream()
+                .map(t -> getVec(t.getNormalized().toString()))
+                .collect(Collectors.toList()));
     }
 
     @Override
@@ -100,7 +106,7 @@ public class EmbeddingImpl implements Embedding {
     }
 
     private Vec getVec(IndexedDocument document) {
-        //temporary solution, waiting for tokenizer
+        //todo replace for "smart" tokenizer when it zavezut
         return getArithmeticMean(Arrays.stream(
                 document.getTitle().toString().split(" "))
                 .map(this::getVec)

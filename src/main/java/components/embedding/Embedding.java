@@ -32,7 +32,7 @@ public interface Embedding {
     Vec getVec(Query query);
 
     /**
-     *  Returns list of vectors for query's terms
+     * Returns list of vectors for query's terms
      *
      * @param query, for which you need vectors
      * @return list of vectors

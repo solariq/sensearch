@@ -4,7 +4,10 @@ import components.Constants;
 import components.crawler.document.CrawlerDocument;
 import components.crawler.document.XMLParser;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
@@ -57,7 +60,7 @@ public class CrawlerXML implements Crawler {
 
         @Override
         public boolean hasNext() {
-            return zipEntry != null;
+            return this.zipEntry != null;
         }
 
         @Override

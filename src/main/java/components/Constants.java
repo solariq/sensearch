@@ -33,16 +33,16 @@ public class Constants {
         return temporaryBigrams;
     }
 
-    public void setBigramsFileName(String bigramsFileName) {
-        Constants.bigramsFileName = bigramsFileName;
+    public void setTemporaryBigrams(String temporaryBigrams) {
+        Constants.temporaryBigrams = temporaryBigrams;
     }
 
     public static Path getBigramsFileName() {
         return getPathToZIP().toAbsolutePath().getParent().resolve(getTemporaryBigrams()).resolve(bigramsFileName);
     }
 
-    public void setTemporaryBigrams(String temporaryBigrams) {
-        Constants.temporaryBigrams = temporaryBigrams;
+    public void setBigramsFileName(String bigramsFileName) {
+        Constants.bigramsFileName = bigramsFileName;
     }
 
     public static Path getTemporaryIndex() {

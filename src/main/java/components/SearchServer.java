@@ -4,7 +4,7 @@ import org.eclipse.jetty.server.Server;
 
 public class SearchServer {
 
- 
+
     public static void main(String[] args) throws Exception {
         Builder.build();
 

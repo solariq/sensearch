@@ -15,31 +15,31 @@ public class WikiPage implements CrawlerDocument {
         this.id = id;
     }
 
-    void setTitle(String title) {
-        this.title = title;
-    }
-
     void setPage(CharSequence page) {
         this.page = page;
     }
 
     @Override
     public String getTitle() {
-        return title;
+        return this.title;
+    }
+
+    void setTitle(String title) {
+        this.title = title;
     }
 
     @Override
     public CharSequence getContent() {
-        return page;
+        return this.page;
     }
 
     @Override
     public Long getID() {
-        return id;
+        return this.id;
     }
 
     @Override
     public String toString() {
-        return page.toString();
+        return this.page.toString();
     }
 }

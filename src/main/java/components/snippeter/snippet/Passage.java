@@ -50,7 +50,7 @@ public class Passage {
 
         for (int j = 1, maxJ = 0, maxZ = 0; j < m; ++j) {
             if (j <= maxZ) {
-                z[j] = Math.min(maxZ -j + 1, z[j - maxJ]);
+                z[j] = Math.min(maxZ - j + 1, z[j - maxJ]);
             }
             while (j + z[j] < m && t.charAt(m - 1 - z[j]) == t.charAt(m - 1 - (j + z[j]))) {
                 z[j]++;
@@ -73,8 +73,8 @@ public class Passage {
 
         boolean ok = false;
         int j, bound = 0;
-        for (int i = 0; i <= n - m; i += suffixShift[j+1]) {
-            for (j = m - 1; j >= bound && t.charAt(j) == s.charAt(i + j); j--);
+        for (int i = 0; i <= n - m; i += suffixShift[j + 1]) {
+            for (j = m - 1; j >= bound && t.charAt(j) == s.charAt(i + j); j--) ;
             if (j < bound) {
                 ok = true;
                 if ((i == 0 || !Character.isAlphabetic(s.charAt(i - 1))) && (i + m == n || !Character.isAlphabetic(s.charAt(i + m)))) {

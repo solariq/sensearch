@@ -14,14 +14,12 @@ public class SnippetBoxImpl implements SnippetBox {
 
     final private SnippetsCreator snippetsCreator = new SnippetsCreator();
     private Searcher searcher;
-
-    public SnippetBoxImpl (Searcher searcher) {
-        this.searcher = searcher;
-    }
-
     private Query query;
     private List<IndexedDocument> docList = new ArrayList<>();
     private ArrayList<Snippet> snippets = new ArrayList<>();
+    public SnippetBoxImpl(Searcher searcher) {
+        this.searcher = searcher;
+    }
 
     @Override
     public int size() {
