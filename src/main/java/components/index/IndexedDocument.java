@@ -5,9 +5,10 @@ package components.index;
  * Index interface
  */
 public interface IndexedDocument {
-    long getId();
 
-    CharSequence getContent();
+  long getId();
 
-    CharSequence getTitle();
+  CharSequence getContent();
+
+  CharSequence getTitle();
 }

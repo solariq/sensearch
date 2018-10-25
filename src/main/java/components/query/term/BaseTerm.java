@@ -6,34 +6,34 @@ import com.expleague.commons.text.lemmer.WordInfo;
 
 public class BaseTerm implements Term {
 
-    private WordInfo wordInfo;
-    private Vec vector;
+  private WordInfo wordInfo;
+  private Vec vector;
 
-    public BaseTerm(WordInfo wordInfo) {
-        this.wordInfo = wordInfo;
-    }
+  public BaseTerm(WordInfo wordInfo) {
+    this.wordInfo = wordInfo;
+  }
 
-    public BaseTerm(WordInfo wordInfo, Vec vector) {
-        this.wordInfo = wordInfo;
-        this.vector = vector;
-    }
+  public BaseTerm(WordInfo wordInfo, Vec vector) {
+    this.wordInfo = wordInfo;
+    this.vector = vector;
+  }
 
-    @Override
-    public CharSequence getRaw() {
-        return wordInfo.token();
-    }
+  @Override
+  public CharSequence getRaw() {
+    return wordInfo.token();
+  }
 
-    @Override
-    public CharSequence getNormalized() {
-        return this.wordInfo.lemma().lemma();
-    }
+  @Override
+  public CharSequence getNormalized() {
+    return this.wordInfo.lemma().lemma();
+  }
 
-    @Override
-    public Vec getVector() {
-        return this.vector;
-    }
+  @Override
+  public Vec getVector() {
+    return this.vector;
+  }
 
-    public LemmaInfo getLemma() {
-        return this.wordInfo.lemma();
-    }
+  public LemmaInfo getLemma() {
+    return this.wordInfo.lemma();
+  }
 }

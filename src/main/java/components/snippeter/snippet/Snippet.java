@@ -3,9 +3,10 @@ package components.snippeter.snippet;
 import java.util.List;
 
 public interface Snippet {
-    CharSequence getTitle();
 
-    CharSequence getContent();
+  CharSequence getTitle();
 
-    List<Segment> getSelection();
+  CharSequence getContent();
+
+  List<Segment> getSelection();
 }

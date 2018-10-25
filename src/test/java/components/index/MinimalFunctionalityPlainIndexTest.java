@@ -9,11 +9,11 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import java.util.List;
 import org.apache.commons.io.FileUtils;
 import org.junit.After;
 import org.junit.Assert;
@@ -57,6 +57,51 @@ public class MinimalFunctionalityPlainIndexTest {
     );
   }
 
+  private Index plainIndex;
+  private Path indexRoot;
+
+  @Before
+  public void initIndex() throws Exception {
+    indexRoot = Files.createTempDirectory(Paths.get(System.getProperty("user.dir")), "tmp");
+    LOG.info(String.format("Will use the following path as index root: %s",
+        indexRoot.toAbsolutePath().toString()));
+
+    Crawler localCrawler = new LocalCrawler();
+    plainIndex = new PlainIndexBuilder(indexRoot).buildIndex(localCrawler.makeStream());
+  }
+
+  @Test
+  public void indexStructureTest() throws Exception {
+    int documentsCount = DOCUMENTS_AND_TITLES.size();
+    Assert.assertTrue(Files.exists(indexRoot));
+
+    List<Path> indexEntries = Files.list(indexRoot).collect(Collectors.toList());
+    Assert.assertEquals(indexEntries.size(), documentsCount);
+
+    for (Path indexEntry : indexEntries) {
+      Assert.assertTrue(Files.exists(indexEntry.resolve(CONTENT_FILE)));
+      Assert.assertTrue(Files.exists(indexEntry.resolve(META_FILE)));
+    }
+  }
+
+  @Test
+  public void indexFunctionalityTest() throws Exception {
+    plainIndex.fetchDocuments(new BaseQuery("empty")).forEach(
+        doc -> {
+          Assert.assertTrue(DOCUMENTS_AND_TITLES.containsKey(doc.getTitle().toString()));
+          Assert.assertEquals(
+              DOCUMENTS_AND_TITLES.get(doc.getTitle().toString()),
+              doc.getContent().toString()
+          );
+        }
+    );
+  }
+
+  @After
+  public void cleanup() throws Exception {
+    FileUtils.deleteDirectory(indexRoot.toFile());
+  }
+
   private static class TextDocument implements CrawlerDocument {
 
     private final String title;
@@ -98,51 +143,6 @@ public class MinimalFunctionalityPlainIndexTest {
     public Stream<CrawlerDocument> makeStream() {
       return crawledDocuments.stream();
     }
-  }
-
-  private Index plainIndex;
-  private Path indexRoot;
-
-  @Before
-  public void initIndex() throws Exception {
-    indexRoot = Files.createTempDirectory(Paths.get(System.getProperty("user.dir")), "tmp");
-    LOG.info(String.format("Will use the following path as index root: %s",
-        indexRoot.toAbsolutePath().toString()));
-
-    Crawler localCrawler = new LocalCrawler();
-    plainIndex = new PlainIndexBuilder(indexRoot).buildIndex(localCrawler.makeStream());
-  }
-
-  @Test
-  public void indexStructureTest() throws Exception {
-    int documentsCount = DOCUMENTS_AND_TITLES.size();
-    Assert.assertTrue(Files.exists(indexRoot));
-
-    List<Path> indexEntries = Files.list(indexRoot).collect(Collectors.toList());
-    Assert.assertEquals(indexEntries.size(), documentsCount);
-
-    for (Path indexEntry : indexEntries) {
-      Assert.assertTrue(Files.exists(indexEntry.resolve(CONTENT_FILE)));
-      Assert.assertTrue(Files.exists(indexEntry.resolve(META_FILE)));
-    }
-  }
-
-  @Test
-  public void indexFunctionalityTest() throws Exception {
-    plainIndex.fetchDocuments(new BaseQuery("empty")).forEach(
-      doc -> {
-        Assert.assertTrue(DOCUMENTS_AND_TITLES.containsKey(doc.getTitle().toString()));
-        Assert.assertEquals(
-            DOCUMENTS_AND_TITLES.get(doc.getTitle().toString()),
-            doc.getContent().toString()
-        );
-      }
-    );
-  }
-
-  @After
-  public void cleanup() throws Exception {
-    FileUtils.deleteDirectory(indexRoot.toFile());
   }
 
 }

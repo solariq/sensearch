@@ -1,28 +1,38 @@
 package components.searcher;
 
+import components.index.Index;
 import components.index.IndexedDocument;
+import components.query.Query;
 import components.query.term.Term;
-
 import java.util.ArrayList;
+import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.junit.Assert;
 import org.junit.Test;
-import java.util.List;
-import components.index.Index;
-import components.query.Query;
 
 /**
  * Created by sandulmv on 06.10.18.
  */
 public class ComponentsInteractionTest {
-  private static final String[] TEST_DOCUMENTS = new String[] {
+
+  private static final String[] TEST_DOCUMENTS = new String[]{
       "Information Retrieval and Web Search".toLowerCase(),
       "Search Engine Ranking".toLowerCase(),
       "Web Search Course".toLowerCase()
   };
 
+  @Test
+  public void test() {
+    Searcher wordFilterSearcher = new WordFilterSearcher(new SimpleIndex());
+    Query query = new SimpleQuery("web search");
+    List<IndexedDocument> foundDocuments = wordFilterSearcher.getRankedDocuments(query);
+    System.out.print(foundDocuments);
+    Assert.assertEquals(foundDocuments.size(), 3);
+  }
+
   private static class SimpleTextDocument implements IndexedDocument {
+
     private CharSequence documentContent;
     private long documentId;
 
@@ -70,6 +80,7 @@ public class ComponentsInteractionTest {
   }
 
   private static class WordFilterSearcher implements Searcher {
+
     private Index index;
 
     WordFilterSearcher(Index index) {
@@ -98,7 +109,9 @@ public class ComponentsInteractionTest {
   }
 
   private static class SimpleTerm implements Term {
+
     private CharSequence word;
+
     SimpleTerm(CharSequence word) {
       this.word = word;
     }
@@ -115,6 +128,7 @@ public class ComponentsInteractionTest {
   }
 
   private static class SimpleQuery implements Query {
+
     private List<Term> terms;
 
     SimpleQuery(CharSequence query) {
@@ -128,14 +142,5 @@ public class ComponentsInteractionTest {
     public List<Term> getTerms() {
       return terms;
     }
-  }
-
-  @Test
-  public void test() {
-    Searcher wordFilterSearcher = new WordFilterSearcher(new SimpleIndex());
-    Query query = new SimpleQuery("web search");
-    List<IndexedDocument> foundDocuments = wordFilterSearcher.getRankedDocuments(query);
-    System.out.print(foundDocuments);
-    Assert.assertEquals(foundDocuments.size(), 3);
   }
 }

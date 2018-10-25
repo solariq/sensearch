@@ -2,9 +2,9 @@ package components.crawler.document;
 
 public interface CrawlerDocument {
 
-    CharSequence getContent();
+  CharSequence getContent();
 
-    String getTitle();
+  String getTitle();
 
-    Long getID();
+  Long getID();
 }

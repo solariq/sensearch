@@ -1,56 +1,57 @@
 package components.searcher;
 
-import components.index.IndexedDocument;
-import components.query.BaseQuery;
-import org.junit.Test;
-
-import java.util.Arrays;
-import java.util.stream.Stream;
-
 import static org.junit.Assert.assertEquals;
 
+import components.index.IndexedDocument;
+import components.query.BaseQuery;
+import java.util.Arrays;
+import java.util.stream.Stream;
+import org.junit.Test;
+
 public class FuzzySearcherTest {
-    @Test
-    public void testRelevantDocumentIsOnTop() {
-        IndexedDocument relevantDocument = new IndexedDocument() {
-            @Override
-            public long getId() {
-                return 0;
-            }
 
-            @Override
-            public CharSequence getContent() {
-                return "а а а а слово еще а а слово и еще одно слово в документе";
-            }
+  @Test
+  public void testRelevantDocumentIsOnTop() {
+    IndexedDocument relevantDocument = new IndexedDocument() {
+      @Override
+      public long getId() {
+        return 0;
+      }
 
-            @Override
-            public CharSequence getTitle() {
-                return "странный тупой заголовок";
-            }
-        };
+      @Override
+      public CharSequence getContent() {
+        return "а а а а слово еще а а слово и еще одно слово в документе";
+      }
 
-        IndexedDocument irrelevantDocument = new IndexedDocument() {
-            @Override
-            public long getId() {
-                return 0;
-            }
+      @Override
+      public CharSequence getTitle() {
+        return "странный тупой заголовок";
+      }
+    };
 
-            @Override
-            public CharSequence getContent() {
-                return "нет слов в документе";
-            }
+    IndexedDocument irrelevantDocument = new IndexedDocument() {
+      @Override
+      public long getId() {
+        return 0;
+      }
 
-            @Override
-            public CharSequence getTitle() {
-                return "еще один странный тупой заголовок";
-            }
-        };
+      @Override
+      public CharSequence getContent() {
+        return "нет слов в документе";
+      }
 
-        Searcher searcher = new FuzzySearcher(query -> Stream.<IndexedDocument>builder()
-                .add(irrelevantDocument)
-                .add(relevantDocument)
-                .build(), 4);
+      @Override
+      public CharSequence getTitle() {
+        return "еще один странный тупой заголовок";
+      }
+    };
 
-        assertEquals(Arrays.asList(relevantDocument), searcher.getRankedDocuments(new BaseQuery("слово")));
-    }
+    Searcher searcher = new FuzzySearcher(query -> Stream.<IndexedDocument>builder()
+        .add(irrelevantDocument)
+        .add(relevantDocument)
+        .build(), 4);
+
+    assertEquals(Arrays.asList(relevantDocument),
+        searcher.getRankedDocuments(new BaseQuery("слово")));
+  }
 }
