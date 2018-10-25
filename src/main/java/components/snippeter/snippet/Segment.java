@@ -14,12 +14,13 @@ public class Segment {
     return left;
   }
 
-  public void setLeft(int left) {
-    this.left = left;
-  }
-
   public int getRight() {
     return right;
+  }
+
+  public void setLeft(int left) {
+    this.left = left;
+
   }
 
   public void setRight(int right) {

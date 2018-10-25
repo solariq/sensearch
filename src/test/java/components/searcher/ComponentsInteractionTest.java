@@ -1,5 +1,6 @@
 package components.searcher;
 
+import com.expleague.commons.math.vectors.Vec;
 import components.index.Index;
 import components.index.IndexedDocument;
 import components.query.Query;
@@ -125,6 +126,11 @@ public class ComponentsInteractionTest {
     public CharSequence getNormalized() {
       throw new UnsupportedOperationException();
     }
+
+    @Override
+    public Vec getVector() {
+      return null;
+    }
   }
 
   private static class SimpleQuery implements Query {
@@ -141,6 +147,11 @@ public class ComponentsInteractionTest {
     @Override
     public List<Term> getTerms() {
       return terms;
+    }
+
+    @Override
+    public Vec getQueryVector() {
+      return null;
     }
   }
 }

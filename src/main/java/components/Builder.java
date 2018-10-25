@@ -15,6 +15,7 @@ import java.nio.file.Paths;
 public class Builder {
 
   private static ObjectMapper objectMapper = new ObjectMapper();
+
   private static Index index;
   private static Searcher searcher;
   private static PageLoadHandler pageLoadHandler;
