@@ -10,7 +10,7 @@ public class SearchServer {
 
     Server server = new Server(8081);
 
-    server.setHandler(Builder.getPageLoadHendler());
+    server.setHandler(Builder.getPageLoadHandler());
 
     server.start();
     server.join();
