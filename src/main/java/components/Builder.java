@@ -11,6 +11,7 @@ import components.suggestor.BigramsBasedSuggestor;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import javax.xml.stream.XMLStreamException;
 
 public class Builder {
 
@@ -32,7 +33,7 @@ public class Builder {
     }
   }
 
-  static void build() throws IOException {
+  static void build() throws IOException, XMLStreamException {
     init();
 
     crawler = new CrawlerXML(Constants.getPathToZIP());
