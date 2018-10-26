@@ -50,6 +50,7 @@ public class FuzzySearcher implements Searcher {
         .stream()
         .map(Term::getRaw)
         .map(CharSequence::toString)
+        .map(String::toLowerCase)
         .collect(Collectors.toSet());
     LinkedList<String> window = new LinkedList<>();
     int currentWindowSize = 0;

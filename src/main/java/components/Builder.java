@@ -45,7 +45,7 @@ public class Builder {
   }
 
 
-  static PageLoadHandler getPageLoadHendler() {
+  static PageLoadHandler getPageLoadHandler() {
     return pageLoadHandler;
   }
 
