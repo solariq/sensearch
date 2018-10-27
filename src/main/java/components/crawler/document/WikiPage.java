@@ -11,11 +11,11 @@ public class WikiPage implements CrawlerDocument {
     String nsId;
     //*/
 
-  void setId(long id) {
+  public void setId(long id) {
     this.id = id;
   }
 
-  void setPage(CharSequence page) {
+  public void setPage(CharSequence page) {
     this.page = page;
   }
 
@@ -24,7 +24,7 @@ public class WikiPage implements CrawlerDocument {
     return this.title;
   }
 
-  void setTitle(String title) {
+  public void setTitle(String title) {
     this.title = title;
   }
 
