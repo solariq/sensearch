@@ -58,7 +58,7 @@ public class EmbeddingImpl implements Embedding {
     return instance;
   }
 
-  public void setDocuments(Stream<IndexedDocument> documentStream) {
+  void setDocuments(Stream<IndexedDocument> documentStream) {
     documentStream.forEach(document -> docIdVecMap.put(document.getId(), getVec(document)));
   }
 
@@ -81,7 +81,7 @@ public class EmbeddingImpl implements Embedding {
 
   @Override
   public Vec getVec(String word) {
-    return this.wordVecMap.get(word);
+    return this.wordVecMap.get(word.toLowerCase());
   }
 
   @Override

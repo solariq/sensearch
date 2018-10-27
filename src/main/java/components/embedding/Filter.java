@@ -1,6 +1,8 @@
 package components.embedding;
 
 import components.query.Query;
+
+import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
 public interface Filter {
@@ -11,5 +13,5 @@ public interface Filter {
    * @param query, for which you need nearest documents
    * @return stream of ids of documents
    */
-  Stream<Long> filtrate(Query query);
+  LongStream filtrate(Query query);
 }
