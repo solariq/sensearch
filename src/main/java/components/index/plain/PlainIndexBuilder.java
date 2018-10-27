@@ -3,7 +3,13 @@ package components.index.plain;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import components.Constants;
 import components.crawler.document.CrawlerDocument;
+import components.embedding.Embedding;
+import components.embedding.impl.EmbeddingImpl;
+import components.embedding.impl.FilterImpl;
 import components.index.Index;
+import components.index.IndexedDocument;
+import gnu.trove.set.TLongSet;
+import gnu.trove.set.hash.TLongHashSet;
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
@@ -14,6 +20,8 @@ import java.util.Map;
 import java.util.Random;
 import java.util.TreeMap;
 import java.util.logging.Logger;
+import java.util.regex.Pattern;
+import java.util.stream.LongStream;
 import java.util.stream.Stream;
 import org.apache.commons.io.FileUtils;
 
@@ -157,8 +165,10 @@ public class PlainIndexBuilder {
     ObjectMapper mapper = new ObjectMapper();
     mapper.writeValue(bigramPath.resolve(Constants.getBigramsFileName()).toFile(), result);
 
+
+
     try {
-      return new PlainIndex(indexRoot);
+      return new PlainIndex(indexRoot, new FilterImpl(getDocumentStream(indexRoot)));
     } catch (IOException e) {
       try {
         FileUtils.deleteDirectory(indexRoot.toFile());
@@ -175,4 +185,12 @@ public class PlainIndexBuilder {
     }
   }
 
+  private Stream<IndexedDocument> getDocumentStream(Path indexRoot) throws IOException {
+    final Pattern indexEntryNamePattern = Pattern.compile("\\d+");
+    return Files.list(indexRoot)
+        .filter(entry -> indexEntryNamePattern.matcher(
+            entry.getFileName().toString()).matches()
+        )
+        .map(PlainDocument::new);
+  }
 }

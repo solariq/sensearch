@@ -1,5 +1,6 @@
 package components.index.plain;
 
+import components.embedding.Filter;
 import components.index.Index;
 import components.index.IndexedDocument;
 import components.query.Query;
@@ -19,8 +20,10 @@ public class PlainIndex implements Index {
   private final Path indexRoot;
   private final TLongSet availableDocuments;
 
-  PlainIndex(Path indexRoot) throws IOException {
+  private final Filter filter;
+  PlainIndex(Path indexRoot, Filter filter) throws IOException {
     this.indexRoot = indexRoot;
+    this.filter = filter;
 
     availableDocuments = new TLongHashSet();
     Files.list(indexRoot)
@@ -33,7 +36,7 @@ public class PlainIndex implements Index {
 
   @Override
   public Stream<IndexedDocument> fetchDocuments(Query query) {
-    return LongStream.of(availableDocuments.toArray())
+    return filter.filtrate(query)
         .mapToObj(id -> indexRoot.resolve(Long.toString(id)))
         .map(PlainDocument::new);
   }
