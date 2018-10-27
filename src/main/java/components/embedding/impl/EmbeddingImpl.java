@@ -7,7 +7,6 @@ import components.embedding.Embedding;
 import components.index.IndexedDocument;
 import components.query.Query;
 import components.query.term.Term;
-
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;

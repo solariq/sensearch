@@ -1,19 +1,17 @@
 package components.query;
 
 import com.expleague.commons.math.vectors.Vec;
-import com.expleague.commons.text.lemmer.MyStem;
-import components.Constants;
+import components.Lemmer;
 import components.embedding.impl.EmbeddingImpl;
 import components.query.term.BaseTerm;
 import components.query.term.Term;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
 
 public class BaseQuery implements Query {
 
-  private MyStem myStem = new MyStem(Paths.get(Constants.getMyStem()));
+  private Lemmer lemmer = Lemmer.getInstance();
   private List<Term> terms;
   private Vec queryVector;
 
@@ -24,7 +22,7 @@ public class BaseQuery implements Query {
     terms = new ArrayList<>();
 
     for (CharSequence word : pattern.split(queryString)) {
-      this.terms.add(new BaseTerm(myStem.parse(word).get(0),
+      this.terms.add(new BaseTerm(lemmer.myStem.parse(word).get(0),
           EmbeddingImpl.getInstance().getVec(word.toString())));
     }
 
