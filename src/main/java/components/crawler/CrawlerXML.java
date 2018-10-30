@@ -9,6 +9,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.Iterator;
 import java.util.Spliterator;
@@ -27,7 +28,7 @@ public class CrawlerXML implements Crawler {
   }
 
   @Override
-  public Stream<CrawlerDocument> makeStream() throws FileNotFoundException {
+  public Stream<CrawlerDocument> makeStream() throws IOException {
     return StreamSupport.stream(
         Spliterators.spliteratorUnknownSize(new DocumentIterator(path),
             Spliterator.ORDERED | Spliterator.SORTED),
@@ -42,13 +43,14 @@ public class CrawlerXML implements Crawler {
     private ZipEntry zipEntry;
     private XMLParser parser = new XMLParser();
 
-    DocumentIterator(Path path) throws FileNotFoundException {
+    DocumentIterator(Path path) throws IOException {
       this.path = path;
       init();
     }
 
-    private void init() throws FileNotFoundException {
+    private void init() throws IOException {
       pathTmp = path.getParent().resolve(Constants.getTemporaryDocuments());
+      Files.createDirectories(pathTmp);
       zipInputStream = new ZipInputStream(new FileInputStream(path.toString()));
       try {
         zipEntry = zipInputStream.getNextEntry();
@@ -68,10 +70,7 @@ public class CrawlerXML implements Crawler {
         while (zipEntry.isDirectory()) {
           zipEntry = zipInputStream.getNextEntry();
         }
-        Files.createDirectories(pathTmp);
-        //Todo path.getFilename
-        String[] n = zipEntry.getName().split("[\\\\/]");
-        Path filePath = pathTmp.resolve(n[n.length - 1]);
+        Path filePath = pathTmp.resolve(Paths.get(zipEntry.getName()).getFileName());
 
         Files.copy(zipInputStream, filePath, StandardCopyOption.REPLACE_EXISTING);
         File file = new File(filePath.toString());
