@@ -56,7 +56,7 @@ public class EmbeddingImpl implements Embedding {
   }
 
   void setDocuments(Stream<IndexedDocument> documentStream) {
-    documentStream.forEach(document -> docIdVecMap.put(document.getId(), Vec.EMPTY));
+    documentStream.forEach(document -> docIdVecMap.put(document.getId(), getVec(document)));
   }
 
   Map<String, Vec> getWordVecMap() {
