@@ -3,6 +3,7 @@ package components.embedding.impl;
 import com.expleague.commons.math.vectors.Vec;
 import com.expleague.commons.math.vectors.impl.vectors.ArrayVec;
 import com.expleague.commons.seq.CharSeqTools;
+import components.crawler.document.CrawlerDocument;
 import components.embedding.Embedding;
 import components.index.IndexedDocument;
 import components.query.Query;
@@ -12,10 +13,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.zip.GZIPInputStream;
@@ -58,7 +56,7 @@ public class EmbeddingImpl implements Embedding {
   }
 
   void setDocuments(Stream<IndexedDocument> documentStream) {
-    documentStream.forEach(document -> docIdVecMap.put(document.getId(), getVec(document)));
+    documentStream.forEach(document -> docIdVecMap.put(document.getId(), Vec.EMPTY));
   }
 
   Map<String, Vec> getWordVecMap() {
@@ -69,12 +67,17 @@ public class EmbeddingImpl implements Embedding {
     return this.docIdVecMap;
   }
 
-  private Vec getArithmeticMean(List<Vec> vecs) {
-    Vec mean = Vec.EMPTY;
+  private static Vec getArithmeticMean(List<Vec> vecs) {
+    ArrayVec mean = new ArrayVec(new double[130]);
+    int nullNumber = 0;
     for (Vec vec : vecs) {
-      ((ArrayVec) mean).add((ArrayVec) vec);
+      if (vec != null) {
+        mean.add((ArrayVec) vec);
+      } else {
+        nullNumber++;
+      }
     }
-    ((ArrayVec) mean).scale(1.0 / ((double) vecs.size()));
+    mean.scale(1.0 / ((double) vecs.size() - nullNumber));
     return mean;
   }
 
