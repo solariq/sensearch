@@ -74,5 +74,11 @@ public class StatisticsTest {
 		assertEquals(Long.valueOf(1), stats.getNumberOfDocumentsWithWord().get("a"));
 		assertEquals(Long.valueOf(2), stats.getNumberOfWordOccurences().get("b"));
 		assertEquals(Long.valueOf(1), stats.getTermFrequencyInDocument("b", 2l));
+		
+		assertEquals(Long.valueOf(4), stats.getDocumentLength().get(1l));
+		assertEquals(Long.valueOf(3), stats.getDocumentLength().get(2l));
+		
+		assertEquals(2l, stats.getTotalNumberOfDocuments());
+		assertEquals(7l, stats.getTotalLength());
 	}
 }
