@@ -1,47 +1,49 @@
-package com.expleague.sensearch;
+package com.expleague.sensearch.ranking;
 
+import com.expleague.sensearch.Page;
+import com.expleague.sensearch.core.SearchPhase;
+import com.expleague.sensearch.core.Whiteboard;
 import com.expleague.sensearch.index.Index;
-import com.expleague.sensearch.index.IndexedDocument;
+import com.expleague.sensearch.index.IndexedPage;
 import com.expleague.sensearch.query.Query;
 import com.expleague.sensearch.query.term.Term;
 import gnu.trove.map.TObjectLongMap;
 import gnu.trove.map.hash.TObjectLongHashMap;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-import java.util.stream.Collectors;
 import org.apache.commons.lang3.tuple.Pair;
 
-/**
- * Created by sandulmv on 20.10.18. Ranking based on fuzzy set theory
- */
-public class FuzzySearcher implements SenSeArch {
+import java.util.*;
+import java.util.stream.Collectors;
 
-  private int windowSize;
-  private Index index;
+public class RankingPhase implements SearchPhase {
+  private final Index index;
+  private final int windowSize;
+  private final int pageSize;
 
-  public FuzzySearcher(Index index, int windowSize) {
+  public RankingPhase(Index index, int windowSize, int pageSize) {
     this.index = index;
     this.windowSize = windowSize;
+    this.pageSize = pageSize;
   }
 
   @Override
-  public List<IndexedDocument> getRankedDocuments(Query query) {
-    final double threshold = query.getTerms().size() / 2.;
-    return index.fetchDocuments(query)
-        .map(doc -> Pair.of(doc, getFuzzyRank(query, doc)))
-        .sorted(
-            Comparator.<Pair<IndexedDocument, Double>>comparingDouble(Pair::getRight).reversed())
-        .filter(p -> p.getRight() > threshold)
-        .map(Pair::getLeft)
-        .collect(Collectors.toList());
+  public boolean test(Whiteboard whiteboard) {
+    return whiteboard.query() != null;
   }
 
-  private double getFuzzyRank(Query query, IndexedDocument document) {
+  @Override
+  public void accept(Whiteboard whiteboard) {
+    final Query query = whiteboard.query();
+    final double threshold = query.getTerms().size() / 2.;
+    whiteboard.putResults(index.fetchDocuments(query)
+        .map(doc -> Pair.of(doc, getFuzzyRank(query, doc)))
+        .sorted(
+            Comparator.<Pair<IndexedPage, Double>>comparingDouble(Pair::getRight).reversed())
+        .filter(p -> p.getRight() > threshold)
+        .skip(whiteboard.pageNo() * pageSize).limit(pageSize)
+        .map(Pair::getLeft).toArray(Page[]::new));
+  }
+
+  private double getFuzzyRank(Query query, IndexedPage document) {
     TObjectLongMap<String> termsCounts = new TObjectLongHashMap<>();
     Map<String, TObjectLongMap<String>> termsCooccurrences = new HashMap<>();
 
@@ -56,7 +58,7 @@ public class FuzzySearcher implements SenSeArch {
     int currentWindowSize = 0;
 
     for (String token : document
-        .getContent()
+        .text()
         .toString()
         .toLowerCase()
         .split("[\\s.,:;\\-\\n\\t\\r]")) {
@@ -91,9 +93,9 @@ public class FuzzySearcher implements SenSeArch {
   }
 
   private double calculateScore(TObjectLongMap<String> termsCounts,
-      Map<String, TObjectLongMap<String>> coocurrencesMap) {
+                                Map<String, TObjectLongMap<String>> coocurrencesMap) {
     double totalScore = 0.;
-    for (Entry<String, TObjectLongMap<String>> coocEntry : coocurrencesMap.entrySet()) {
+    for (Map.Entry<String, TObjectLongMap<String>> coocEntry : coocurrencesMap.entrySet()) {
       double wordScore = 1.;
       double keyCount = termsCounts.get(coocEntry.getKey());
 
@@ -110,5 +112,4 @@ public class FuzzySearcher implements SenSeArch {
 
     return totalScore;
   }
-
 }

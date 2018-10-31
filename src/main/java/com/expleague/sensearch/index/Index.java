@@ -9,6 +9,6 @@ import java.util.stream.Stream;
  */
 public interface Index {
 
-  Stream<IndexedDocument> fetchDocuments(Query query);
+  Stream<IndexedPage> fetchDocuments(Query query);
 
 }

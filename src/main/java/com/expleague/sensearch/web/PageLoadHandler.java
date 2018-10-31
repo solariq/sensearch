@@ -1,36 +1,30 @@
 package com.expleague.sensearch.web;
 
 import com.expleague.sensearch.Constants;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.expleague.sensearch.SenSeArch;
+import com.expleague.sensearch.core.SenSeArchImpl;
 import com.expleague.sensearch.snippet.Segment;
-import com.expleague.sensearch.snippet.Snippet;
 import com.expleague.sensearch.web.suggest.BigramsBasedSuggestor;
 import com.expleague.sensearch.web.suggest.Suggestor;
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
-import java.util.List;
-import java.util.stream.Collectors;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
-import com.expleague.sensearch.snippet.SnippetBox;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.handler.AbstractHandler;
 
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.*;
+import java.util.List;
+import java.util.stream.Collectors;
+
 public class PageLoadHandler extends AbstractHandler {
-
-  private Suggestor suggestor;
-
-  private SnippetBox snipBox;
-
+  private final SenSeArch search;
+  private final Suggestor suggestor;
   private ObjectMapper mapper = new ObjectMapper();
 
-  public PageLoadHandler(SnippetBox snippetBox, BigramsBasedSuggestor bigramsBasedSuggestor) {
-    snipBox = snippetBox;
+  public PageLoadHandler(SenSeArch searcher, BigramsBasedSuggestor bigramsBasedSuggestor) {
     suggestor = bigramsBasedSuggestor;
+    this.search = searcher;
   }
 
   CharSequence generateBoldedText(CharSequence plain, List<Segment> segments) {
@@ -49,7 +43,6 @@ public class PageLoadHandler extends AbstractHandler {
 
     return strb.toString();
   }
-
   @Override
   public void handle(String target,
       Request baseRequest,
@@ -63,34 +56,31 @@ public class PageLoadHandler extends AbstractHandler {
     response.setStatus(HttpServletResponse.SC_OK);
     baseRequest.setHandled(true);
 
+    final PrintWriter writer = response.getWriter();
     if (requestText == null || requestText.isEmpty()) {
 
       try (BufferedReader in = new BufferedReader(
           new FileReader(new File(Constants.getMainPageHTML())))) {
-        response.getWriter().println(in.lines().collect(Collectors.joining("\n")));
+        writer.println(in.lines().collect(Collectors.joining("\n")));
       }
 
       String searchString = request.getParameter("searchForm");
+      String pageNo = request.getParameter("page");
+      int page = pageNo != null ? Integer.parseInt(pageNo) : 0;
       if (searchString != null) {
-        response.getWriter().println("<br>Результаты по запросу \"" + searchString + "\":<br><br>");
+        writer.println("<br>Результаты по запросу \"" + searchString + "\":<br><br>");
 
-        snipBox.makeQuery(searchString);
+        final SenSeArch.ResultPage serp = this.search.search(searchString, page);
 
-        for (int i = 0; i < snipBox.size(); i++) {
-          Snippet snippet = snipBox.getSnippet(i);
-          response.getWriter()
-              .println("<br><strong>" + (i + 1) + ". " + snippet.getTitle() + "</strong><br>");
-          //for (Passage p : clustered_snippet.getContent().getSentence()) {
-          response.getWriter().println(
-              generateBoldedText(snippet.getContent(),
-                  snippet.getSelection()) + "...");
-          //}
+        final SenSeArch.ResultItem[] results = serp.results();
+        for (int i = 0; i < results.length; i++) {
+          writer.println("<br><strong>" + (i + 1) + ". " + results[i].title() + "</strong><br>");
+          results[i].passages().stream().map(pair -> generateBoldedText(pair.first, pair.second)).forEach(writer::println);
         }
-        response.getWriter().println("</body></html>");
+        writer.println("</body></html>");
       }
     } else {
-      response.getWriter()
-          .println(mapper.writeValueAsString(suggestor.getSuggestions(requestText)));
+      writer.println(mapper.writeValueAsString(suggestor.getSuggestions(requestText)));
     }
   }
 

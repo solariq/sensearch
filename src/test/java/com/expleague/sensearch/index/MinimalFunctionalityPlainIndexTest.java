@@ -85,13 +85,13 @@ public class MinimalFunctionalityPlainIndexTest {
   }
 
   @Test
-  public void indexFunctionalityTest() throws Exception {
+  public void indexFunctionalityTest() {
     plainIndex.fetchDocuments(new BaseQuery("empty")).forEach(
         doc -> {
-          Assert.assertTrue(DOCUMENTS_AND_TITLES.containsKey(doc.getTitle().toString()));
+          Assert.assertTrue(DOCUMENTS_AND_TITLES.containsKey(doc.title().toString()));
           Assert.assertEquals(
-              DOCUMENTS_AND_TITLES.get(doc.getTitle().toString()),
-              doc.getContent().toString()
+              DOCUMENTS_AND_TITLES.get(doc.title().toString()),
+              doc.text().toString()
           );
         }
     );

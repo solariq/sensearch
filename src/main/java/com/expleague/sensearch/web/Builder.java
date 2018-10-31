@@ -1,16 +1,13 @@
 package com.expleague.sensearch.web;
 
 import com.expleague.sensearch.Constants;
-import com.expleague.sensearch.FuzzySearcher;
 import com.expleague.sensearch.SenSeArch;
+import com.expleague.sensearch.core.SenSeArchImpl;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.expleague.sensearch.donkey.crawler.Crawler;
 import com.expleague.sensearch.donkey.crawler.CrawlerXML;
 import com.expleague.sensearch.index.Index;
 import com.expleague.sensearch.index.plain.PlainIndexBuilder;
-import com.expleague.sensearch.web.PageLoadHandler;
-import com.expleague.sensearch.snippet.SnippetBox;
-import com.expleague.sensearch.snippet.SnippetBoxImpl;
 import com.expleague.sensearch.web.suggest.BigramsBasedSuggestor;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -22,9 +19,8 @@ public class Builder {
   private static ObjectMapper objectMapper = new ObjectMapper();
 
   private static Index index;
-  private static SenSeArch searcher;
+  private static SenSeArch searcher = new SenSeArchImpl();
   private static PageLoadHandler pageLoadHandler;
-  private static SnippetBox snippetBox;
   private static Crawler crawler;
   private static BigramsBasedSuggestor bigramsBasedSuggestor;
   private static Stats statistics;
@@ -43,11 +39,8 @@ public class Builder {
 
     crawler = new CrawlerXML(Constants.getPathToZIP());
     index = new PlainIndexBuilder(Constants.getTemporaryIndex()).buildIndex(crawler.makeStream());
-    searcher = new FuzzySearcher(index, 4);
-    snippetBox = new SnippetBoxImpl(searcher);
     bigramsBasedSuggestor = new BigramsBasedSuggestor(Constants.getBigramsFileName());
-    pageLoadHandler = new PageLoadHandler(snippetBox, bigramsBasedSuggestor);
-    //statistics = Stats.readStatsFromFile(Constants.getStatisticsFileName());
+    pageLoadHandler = new PageLoadHandler(searcher, bigramsBasedSuggestor);
   }
 
 
@@ -55,11 +48,7 @@ public class Builder {
     return pageLoadHandler;
   }
 
-  static SnippetBox getSnippetBox() {
-    return snippetBox;
-  }
-
-  static Index getIndex() {
+  public static Index getIndex() {
     return index;
   }
 
@@ -71,7 +60,15 @@ public class Builder {
     return crawler;
   }
 
+  public int pageSize() {
+    return 10;
+  }
+
+  public int windowSize() {
+    return 4;
+  }
+
   static Stats getStatistics() {
-	  return statistics;
+    return statistics;
   }
 }

@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.function.BiFunction;
+import java.util.function.Function;
 
 public class NearestFinderImpl implements NearestFinder {
 
@@ -26,8 +27,7 @@ public class NearestFinderImpl implements NearestFinder {
         DEFAULT_MEASURE);
   }
 
-  private <T> List<T> getNearest(Vec mainVec, int numberOfNeighbors, Map<T, Vec> map,
-      BiFunction<Vec, Vec, Double> measureFunction) {
+  private <T> List<T> getNearest(Vec mainVec, int numberOfNeighbors, Map<T, Vec> map, BiFunction<Vec, Vec, Double> measureFunction) {
     TreeMap<Vec, T> nearest = new TreeMap<>(
         (vec1, vec2) -> {
           double val1 = measureFunction.apply(mainVec, vec1);

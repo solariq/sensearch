@@ -1,11 +1,25 @@
 package com.expleague.sensearch;
 
-import com.expleague.sensearch.index.IndexedDocument;
-import com.expleague.sensearch.query.Query;
+import com.expleague.commons.util.Pair;
+import com.expleague.sensearch.snippet.Segment;
+
+import java.net.URI;
 import java.util.List;
 
 public interface SenSeArch {
+  ResultPage search(String query, int pageNo);
 
-  List<IndexedDocument> getRankedDocuments(Query query);
+  interface ResultPage {
+    int number();
+    int totalResultsFound();
 
+    ResultItem[] results();
+  }
+
+  interface ResultItem {
+    URI reference();
+    CharSequence title();
+    List<Pair<CharSequence, List<Segment>>> passages();
+    double score();
+  }
 }

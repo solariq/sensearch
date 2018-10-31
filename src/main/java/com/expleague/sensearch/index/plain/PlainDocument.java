@@ -1,15 +1,16 @@
 package com.expleague.sensearch.index.plain;
 
-import com.expleague.sensearch.index.IndexedDocument;
+import com.expleague.sensearch.index.IndexedPage;
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
 /**
  *
  */
-public class PlainDocument implements IndexedDocument {
+public class PlainDocument implements IndexedPage {
 
   private final long documentId;
   private final Path documentContentPath;
@@ -22,18 +23,23 @@ public class PlainDocument implements IndexedDocument {
   }
 
   @Override
-  public long getId() {
+  public long id() {
     return this.documentId;
   }
 
   @Override
-  public CharSequence getContent() {
+  public URI reference() {
+    throw new UnsupportedOperationException();
+  }
+
+  @Override
+  public CharSequence text() {
     StringBuilder contentBuilder = new StringBuilder();
     try (BufferedReader bufferedReader = Files.newBufferedReader(documentContentPath)) {
       bufferedReader.lines().forEach(contentBuilder::append);
     } catch (IOException e) {
       throw new RuntimeException(
-          String.format("Can not get content for the document with id %d", this.getId()), e
+          String.format("Can not get content for the document with id %d", this.id()), e
       );
     }
 
@@ -41,13 +47,13 @@ public class PlainDocument implements IndexedDocument {
   }
 
   @Override
-  public CharSequence getTitle() {
+  public CharSequence title() {
     StringBuilder titleBuilder = new StringBuilder();
     try (BufferedReader bufferedReader = Files.newBufferedReader(documentTitlePath)) {
       bufferedReader.lines().forEach(titleBuilder::append);
     } catch (IOException e) {
       throw new RuntimeException(
-          String.format("Can not get title for the document with id %d", this.getId()), e
+          String.format("Can not get title for the document with id %d", this.id()), e
       );
     }
 

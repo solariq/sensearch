@@ -4,7 +4,7 @@ import com.expleague.commons.math.vectors.Vec;
 import com.expleague.commons.math.vectors.impl.vectors.ArrayVec;
 import com.expleague.commons.seq.CharSeqTools;
 import com.expleague.sensearch.core.Embedding;
-import com.expleague.sensearch.index.IndexedDocument;
+import com.expleague.sensearch.index.IndexedPage;
 import com.expleague.sensearch.query.Query;
 import com.expleague.sensearch.query.term.Term;
 import java.io.FileInputStream;
@@ -54,8 +54,8 @@ public class EmbeddingImpl implements Embedding {
     return instance;
   }
 
-  void setDocuments(Stream<IndexedDocument> documentStream) {
-    documentStream.forEach(document -> docIdVecMap.put(document.getId(), getVec(document)));
+  void setDocuments(Stream<IndexedPage> documentStream) {
+    documentStream.forEach(document -> docIdVecMap.put(document.id(), getVec(document)));
   }
 
   Map<String, Vec> getWordVecMap() {
@@ -108,10 +108,10 @@ public class EmbeddingImpl implements Embedding {
         .collect(Collectors.toList());
   }
 
-  private Vec getVec(IndexedDocument document) {
+  private Vec getVec(IndexedPage document) {
     //todo replace for "smart" tokenizer when it zavezut
     return getArithmeticMean(Arrays.stream(
-        document.getTitle().toString().split(" "))
+        document.title().toString().split(" "))
         .map(this::getVec)
         .collect(Collectors.toList()));
   }

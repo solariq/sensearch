@@ -1,11 +1,9 @@
 package com.expleague.sensearch.snippet;
 
-import com.expleague.sensearch.index.IndexedDocument;
+import com.expleague.sensearch.Page;
+import com.expleague.sensearch.index.IndexedPage;
 import com.expleague.sensearch.query.Query;
-import com.expleague.sensearch.snippet.Cluster;
-import com.expleague.sensearch.snippet.ClusteredSnippet;
-import com.expleague.sensearch.snippet.Passage;
-import com.expleague.sensearch.snippet.Snippet;
+
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
@@ -30,10 +28,10 @@ public class SnippetsCreator {
   private static final Pattern splitPattern = splitRussian;
   private static final Lemmer lemmer = Lemmer.getInstance();
 
-  public Snippet getSnippet(IndexedDocument document, Query query) {
+  public Snippet getSnippet(Page document, Query query) {
 
-    CharSequence title = document.getTitle();
-    CharSequence content = document.getContent();
+    CharSequence title = document.title();
+    CharSequence content = document.text();
 
     List<Passage> passages = Arrays
         .stream(splitPattern.split(content))

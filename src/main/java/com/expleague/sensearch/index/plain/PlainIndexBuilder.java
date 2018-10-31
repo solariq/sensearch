@@ -5,7 +5,7 @@ import com.expleague.sensearch.Constants;
 import com.expleague.sensearch.donkey.crawler.document.CrawlerDocument;
 import com.expleague.sensearch.core.impl.FilterImpl;
 import com.expleague.sensearch.index.Index;
-import com.expleague.sensearch.index.IndexedDocument;
+import com.expleague.sensearch.index.IndexedPage;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
@@ -184,7 +184,7 @@ public class PlainIndexBuilder {
     }
   }
 
-  private Stream<IndexedDocument> getDocumentStream(Path indexRoot) throws IOException {
+  private Stream<IndexedPage> getDocumentStream(Path indexRoot) throws IOException {
     final Pattern indexEntryNamePattern = Pattern.compile("\\d+");
     return Files.list(indexRoot)
         .filter(entry -> indexEntryNamePattern.matcher(

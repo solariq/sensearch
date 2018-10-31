@@ -2,7 +2,7 @@ package com.expleague.sensearch.index.plain;
 
 import com.expleague.sensearch.core.Filter;
 import com.expleague.sensearch.index.Index;
-import com.expleague.sensearch.index.IndexedDocument;
+import com.expleague.sensearch.index.IndexedPage;
 import com.expleague.sensearch.query.Query;
 import gnu.trove.set.TLongSet;
 import gnu.trove.set.hash.TLongHashSet;
@@ -34,7 +34,7 @@ public class PlainIndex implements Index {
   }
 
   @Override
-  public Stream<IndexedDocument> fetchDocuments(Query query) {
+  public Stream<IndexedPage> fetchDocuments(Query query) {
     return filter.filtrate(query)
         .mapToObj(id -> indexRoot.resolve(Long.toString(id)))
         .map(PlainDocument::new);

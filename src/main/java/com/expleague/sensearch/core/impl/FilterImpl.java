@@ -1,7 +1,7 @@
 package com.expleague.sensearch.core.impl;
 
 import com.expleague.sensearch.core.Filter;
-import com.expleague.sensearch.index.IndexedDocument;
+import com.expleague.sensearch.index.IndexedPage;
 import com.expleague.sensearch.query.Query;
 
 import java.util.stream.LongStream;
@@ -11,7 +11,7 @@ public class FilterImpl implements Filter {
 
   private static final int numberOfNeighbors = 50;
 
-  public FilterImpl(Stream<IndexedDocument> documentStream) {
+  public FilterImpl(Stream<IndexedPage> documentStream) {
     EmbeddingImpl.getInstance().setDocuments(documentStream);
   }
 
