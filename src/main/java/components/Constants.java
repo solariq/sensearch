@@ -10,12 +10,14 @@ public class Constants {
   private static String temporaryBigrams;
 
   private static String bigramsFileName;
-  
+
   private static String statisticsFileName;
 
   private static String temporaryIndex;
 
   private static String mainPageHTML;
+
+  private static String embeddingVectors;
 
   private static String myStem;
 
@@ -23,10 +25,6 @@ public class Constants {
 
   private static String pathToZIP;
 
-
-  public void setStatisticsFileName(String statisticsFileName) {
-	Constants.statisticsFileName = statisticsFileName;
-  }
 
   public static String getTemporaryDocuments() {
     return temporaryDocuments;
@@ -94,7 +92,21 @@ public class Constants {
   }
 
   public static String getStatisticsFileName() {
-	return statisticsFileName;
+    return getPathToZIP().toAbsolutePath().getParent().resolve(getTemporaryBigrams())
+        .resolve(statisticsFileName).toString();
+  }
+
+  public void setStatisticsFileName(String statisticsFileName) {
+    Constants.statisticsFileName = statisticsFileName;
+  }
+
+
+  public static String getEmbeddingVectors() {
+    return embeddingVectors;
+  }
+
+  public static void setEmbeddingVectors(String embeddingVectors) {
+    Constants.embeddingVectors = embeddingVectors;
   }
 
 }
