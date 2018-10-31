@@ -92,8 +92,7 @@ public class Constants {
   }
 
   public static String getStatisticsFileName() {
-    return getPathToZIP().toAbsolutePath().getParent().resolve(getTemporaryBigrams())
-        .resolve(statisticsFileName).toString();
+    return statisticsFileName;
   }
 
   public void setStatisticsFileName(String statisticsFileName) {
