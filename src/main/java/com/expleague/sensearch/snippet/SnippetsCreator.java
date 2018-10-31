@@ -54,12 +54,14 @@ public class SnippetsCreator {
 */
     Set<CharSequence> uniqueWords = passages
         .stream()
-        .flatMap(x -> Arrays
-            .stream(x
+        .flatMap(x -> lemmer.myStem
+            .parse(x
                 .getSentence()
                 .toString()
-                .toLowerCase()
-                .split("[\\s\\p{Punct}]+")))
+                .toLowerCase())
+            .stream()
+            .map(WordInfo::token)
+        )
         .collect(Collectors.toSet());
 /*
     System.out.println(uniqueWords.size());
@@ -68,10 +70,14 @@ public class SnippetsCreator {
     }
 */
 
-    Predicate<Passage> queryRelevant = y -> query.getTerms().stream()
+    Predicate<Passage> queryRelevant = y -> query
+        .getTerms()
+        .stream()
         .anyMatch(x -> Passages.contains(y.getSentence(), x.getRaw()));
 
-    Predicate<Passage> notQueryRelevant = y -> query.getTerms().stream()
+    Predicate<Passage> notQueryRelevant = y -> query
+        .getTerms()
+        .stream()
         .noneMatch(x -> Passages.contains(y.getSentence(), x.getRaw()));
 
     List<Passage> passagesWithQueryWords = passages
@@ -109,7 +115,11 @@ public class SnippetsCreator {
         .sorted(Comparator.comparingDouble(KeyWord::getRank).reversed())
         .collect(Collectors.toList())
         .subList(0, Math.min(6, passages.size()));
-
+/*
+    for (KeyWord word : keyWords) {
+      System.out.println(word.getWord() + " " + word.getRank());
+    }
+*/
     passages = passages
         .stream()
         .peek(x -> {
