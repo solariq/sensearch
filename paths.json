@@ -4,6 +4,8 @@
   "temporaryBigrams": "BigramsMapTmp",
   "bigramsFileName": "BigramsData",
 
+  "statisticsFileName" : "StatisticsData",
+
   "temporaryIndex": "IndexTmp",
 
   "mainPageHTML": "./resources/mainPage.html",

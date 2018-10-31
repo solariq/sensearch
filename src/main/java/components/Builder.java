@@ -7,6 +7,7 @@ import components.index.Index;
 import components.index.plain.PlainIndexBuilder;
 import components.searcher.FuzzySearcher;
 import components.searcher.Searcher;
+import components.statistics.Stats;
 import components.suggestor.BigramsBasedSuggestor;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -23,6 +24,7 @@ public class Builder {
   private static SnippetBox snippetBox;
   private static Crawler crawler;
   private static BigramsBasedSuggestor bigramsBasedSuggestor;
+  private static Stats statistics;
 
   private static void init() {
     try {
@@ -42,6 +44,7 @@ public class Builder {
     snippetBox = new SnippetBoxImpl(searcher);
     bigramsBasedSuggestor = new BigramsBasedSuggestor(Constants.getBigramsFileName());
     pageLoadHandler = new PageLoadHandler(snippetBox, bigramsBasedSuggestor);
+    //statistics = Stats.readStatsFromFile(Constants.getStatisticsFileName());
   }
 
 
@@ -63,5 +66,9 @@ public class Builder {
 
   static Crawler getCrawler() {
     return crawler;
+  }
+  
+  static Stats getStatistics() {
+	  return statistics;
   }
 }

@@ -8,6 +8,7 @@ import components.embedding.impl.EmbeddingImpl;
 import components.embedding.impl.FilterImpl;
 import components.index.Index;
 import components.index.IndexedDocument;
+import components.statistics.Stats;
 import gnu.trove.set.TLongSet;
 import gnu.trove.set.hash.TLongHashSet;
 import java.io.BufferedWriter;
@@ -154,18 +155,21 @@ public class PlainIndexBuilder {
     Path bigramPath = indexRoot.getParent().resolve(Paths.get(Constants.getTemporaryBigrams()));
     Files.createDirectories(bigramPath);
     TreeMap<String, Integer> result = new TreeMap<>();
+    
+    Stats stats = new Stats();
 
     parsedDocumentsStream.forEach(
         doc -> {
           flushBigrams(doc.getTitle(), result);
           flushNewIndexEntry(this.indexRoot, doc);
+          //stats.acceptDocument(doc);
         }
     );
 
     ObjectMapper mapper = new ObjectMapper();
     mapper.writeValue(bigramPath.resolve(Constants.getBigramsFileName()).toFile(), result);
 
-
+    stats.writeToFile(Constants.getStatisticsFileName());
 
     try {
       return new PlainIndex(indexRoot, new FilterImpl(getDocumentStream(indexRoot)));
