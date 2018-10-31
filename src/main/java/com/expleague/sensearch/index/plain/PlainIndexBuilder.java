@@ -83,7 +83,13 @@ public class PlainIndexBuilder {
       pageId = pageId == Long.MIN_VALUE ? 0 : Math.abs(pageId);
       Path newEntry = indexRoot.resolve(Long.toString(pageId));
       if (!Files.exists(newEntry)) {
-        return newEntry;
+        try {
+          Files.createDirectory(newEntry);
+          return newEntry;
+        } catch (IOException e) {
+          LOG.severe(String.format("Failed to create new index entry %s",
+              newEntry.toAbsolutePath().toString()));
+        }
       }
     }
   }

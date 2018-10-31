@@ -1,5 +1,6 @@
 package com.expleague.sensearch.index.statistics;
 
+import gnu.trove.map.TLongObjectMap;
 import java.io.IOException;
 import java.io.StringWriter;
 
