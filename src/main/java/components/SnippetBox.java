@@ -1,6 +1,6 @@
 package components;
 
-import components.snippeter.snippet.Snippet;
+import components.snippeter.Snippet;
 
 public interface SnippetBox {
 

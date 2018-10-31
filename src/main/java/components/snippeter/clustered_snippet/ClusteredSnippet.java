@@ -1,5 +1,8 @@
-package components.snippeter.snippet;
+package components.snippeter.clustered_snippet;
 
+import components.snippeter.Segment;
+import components.snippeter.Snippet;
+import components.snippeter.passage.Passage;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -37,7 +40,8 @@ public class ClusteredSnippet implements Snippet {
 
   @Override
   public CharSequence getContent() {
-    return content.getPassages()
+    return content
+        .getPassages()
         .stream()
         .map(Passage::getSentence)
         .collect(Collectors.joining());

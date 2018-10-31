@@ -1,4 +1,4 @@
-package components.snippeter.snippet;
+package components.snippeter;
 
 import java.util.List;
 

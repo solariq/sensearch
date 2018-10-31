@@ -1,8 +1,8 @@
 package components;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import components.snippeter.snippet.Segment;
-import components.snippeter.snippet.Snippet;
+import components.snippeter.Segment;
+import components.snippeter.Snippet;
 import components.suggestor.BigramsBasedSuggestor;
 import components.suggestor.Suggestor;
 import java.io.BufferedReader;
@@ -77,7 +77,7 @@ public class PageLoadHandler extends AbstractHandler {
           Snippet snippet = snipBox.getSnippet(i);
           response.getWriter()
               .println("<br><strong>" + (i + 1) + ". " + snippet.getTitle() + "</strong><br>");
-          //for (Passage p : snippet.getContent().getSentence()) {
+          //for (Passage p : clustered_snippet.getContent().getSentence()) {
           response.getWriter().println(
               generateBoldedText(snippet.getContent(),
                   snippet.getSelection()) + "...");

@@ -1,7 +1,7 @@
 package components;
 
-import components.snippeter.snippet.Segment;
-import components.snippeter.snippet.Snippet;
+import components.snippeter.Segment;
+import components.snippeter.Snippet;
 import java.util.Arrays;
 import java.util.List;
 

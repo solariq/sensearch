@@ -5,7 +5,7 @@ import components.query.BaseQuery;
 import components.query.Query;
 import components.searcher.Searcher;
 import components.snippeter.SnippetsCreator;
-import components.snippeter.snippet.Snippet;
+import components.snippeter.Snippet;
 import java.util.ArrayList;
 import java.util.List;
 

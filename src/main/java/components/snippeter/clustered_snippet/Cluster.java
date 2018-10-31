@@ -1,5 +1,6 @@
-package components.snippeter.snippet;
+package components.snippeter.clustered_snippet;
 
+import components.snippeter.passage.Passage;
 import java.util.List;
 
 /**
@@ -8,14 +9,14 @@ import java.util.List;
 public class Cluster {
 
   List<Passage> passages;
-  long rating;
+  double rating;
 
   public Cluster(List<Passage> passages) {
     this.passages = passages;
-    rating = passages.stream().mapToLong(Passage::getRating).sum();
+    rating = passages.stream().mapToDouble(Passage::getRating).sum();
   }
 
-  public long getRating() {
+  public double getRating() {
     return rating;
   }
 
