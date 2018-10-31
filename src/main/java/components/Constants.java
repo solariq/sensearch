@@ -10,7 +10,7 @@ public class Constants {
   private static String temporaryBigrams;
 
   private static String bigramsFileName;
-  
+
   private static String statisticsFileName;
 
   private static String temporaryIndex;
@@ -23,10 +23,6 @@ public class Constants {
 
   private static String pathToZIP;
 
-
-  public void setStatisticsFileName(String statisticsFileName) {
-	Constants.statisticsFileName = statisticsFileName;
-  }
 
   public static String getTemporaryDocuments() {
     return temporaryDocuments;
@@ -94,7 +90,11 @@ public class Constants {
   }
 
   public static String getStatisticsFileName() {
-	return statisticsFileName;
+    return statisticsFileName;
+  }
+
+  public void setStatisticsFileName(String statisticsFileName) {
+    Constants.statisticsFileName = statisticsFileName;
   }
 
 }
