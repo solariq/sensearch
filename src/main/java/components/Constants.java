@@ -17,6 +17,8 @@ public class Constants {
 
   private static String mainPageHTML;
 
+  private static String embeddingVectors;
+
   private static String myStem;
 
   private static String bigramsRegexp;
@@ -95,6 +97,15 @@ public class Constants {
 
   public void setStatisticsFileName(String statisticsFileName) {
     Constants.statisticsFileName = statisticsFileName;
+  }
+
+
+  public static String getEmbeddingVectors() {
+    return embeddingVectors;
+  }
+
+  public static void setEmbeddingVectors(String embeddingVectors) {
+    Constants.embeddingVectors = embeddingVectors;
   }
 
 }

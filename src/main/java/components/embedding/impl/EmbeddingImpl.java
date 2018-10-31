@@ -3,7 +3,7 @@ package components.embedding.impl;
 import com.expleague.commons.math.vectors.Vec;
 import com.expleague.commons.math.vectors.impl.vectors.ArrayVec;
 import com.expleague.commons.seq.CharSeqTools;
-import components.crawler.document.CrawlerDocument;
+import components.Constants;
 import components.embedding.Embedding;
 import components.index.IndexedDocument;
 import components.query.Query;
@@ -27,7 +27,7 @@ public class EmbeddingImpl implements Embedding {
 
   private EmbeddingImpl() {
     try (Reader input = new InputStreamReader(
-        new GZIPInputStream(new FileInputStream("resources/vectors.txt.gz")),
+        new GZIPInputStream(new FileInputStream(Constants.getEmbeddingVectors())),
         StandardCharsets.UTF_8)) {
       CharSeqTools.lines(input)
           .parallel()
