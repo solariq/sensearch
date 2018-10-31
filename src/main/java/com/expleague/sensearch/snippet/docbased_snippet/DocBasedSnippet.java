@@ -1,13 +1,11 @@
-package components.snippeter.docbased_snippet;
+package com.expleague.sensearch.snippet.docbased_snippet;
 
-import components.query.Query;
-import components.snippeter.Segment;
-import components.snippeter.Snippet;
-import components.snippeter.passage.Passage;
-import components.snippeter.passage.Passages;
+import com.expleague.sensearch.query.Query;
+import com.expleague.sensearch.snippet.Segment;
+import com.expleague.sensearch.snippet.Snippet;
+import com.expleague.sensearch.snippet.passage.Passage;
+import com.expleague.sensearch.snippet.passage.Passages;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;

@@ -6,11 +6,11 @@
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
-        <module name="SenSeArch" />
+        <module name="sensearch" />
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
-      <module name="SenSeArch" target="1.8" />
+      <module name="sensearch" target="1.8" />
     </bytecodeTargetLevel>
   </component>
 </project>

@@ -1,8 +1,6 @@
-package components.snippeter.passage;
+package com.expleague.sensearch.snippet.passage;
 
-import components.query.Query;
-import components.snippeter.Segment;
-import components.snippeter.passage.Passages;
+import com.expleague.sensearch.snippet.Segment;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -10,7 +8,6 @@ import java.util.List;
  * Created by Maxim on 10.10.2018. Email: alvinmax@mail.ru
  */
 public class Passage {
-
   private CharSequence sentence;
   private List<Segment> selection = new ArrayList<>();
   private double rating;

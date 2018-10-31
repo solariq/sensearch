@@ -3,6 +3,7 @@ package com.expleague.sensearch.core.impl;
 import com.expleague.commons.math.vectors.Vec;
 import com.expleague.commons.math.vectors.impl.vectors.ArrayVec;
 import com.expleague.commons.seq.CharSeqTools;
+import com.expleague.sensearch.Constants;
 import com.expleague.sensearch.core.Embedding;
 import com.expleague.sensearch.index.IndexedPage;
 import com.expleague.sensearch.query.Query;

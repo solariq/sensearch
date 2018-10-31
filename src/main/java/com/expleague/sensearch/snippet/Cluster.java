@@ -1,6 +1,6 @@
-package components.snippeter.clustered_snippet;
+package com.expleague.sensearch.snippet.clustered_snippet;
 
-import components.snippeter.passage.Passage;
+import com.expleague.sensearch.snippet.passage.Passage;
 import java.util.List;
 
 /**

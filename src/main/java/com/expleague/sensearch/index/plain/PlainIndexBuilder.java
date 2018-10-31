@@ -1,5 +1,6 @@
 package com.expleague.sensearch.index.plain;
 
+import com.expleague.sensearch.index.statistics.Stats;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.expleague.sensearch.Constants;
 import com.expleague.sensearch.donkey.crawler.document.CrawlerDocument;
@@ -19,6 +20,7 @@ import java.util.TreeMap;
 import java.util.logging.Logger;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
+
 import org.apache.commons.io.FileUtils;
 
 /**

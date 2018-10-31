@@ -1,4 +1,4 @@
-package components.snippeter.docbased_snippet;
+package com.expleague.sensearch.snippet.docbased_snippet;
 
 public class KeyWord {
   private CharSequence word;

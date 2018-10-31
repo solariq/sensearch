@@ -1,9 +1,12 @@
-package components.statistics;
+package com.expleague.sensearch.index.statistics;
 
 import static org.junit.Assert.assertEquals;
 
 import java.io.File;
 import java.io.IOException;
+
+import com.expleague.sensearch.Constants;
+import com.expleague.sensearch.donkey.crawler.document.CrawlerDocument;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -11,8 +14,6 @@ import com.fasterxml.jackson.core.JsonGenerationException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import components.Constants;
-import components.crawler.document.CrawlerDocument;
 
 public class StatisticsTest {
 	

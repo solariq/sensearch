@@ -1,4 +1,4 @@
-package components.statistics;
+package com.expleague.sensearch.index.statistics;
 
 import java.io.IOException;
 import java.io.StringWriter;

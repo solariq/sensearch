@@ -1,6 +1,6 @@
-package components.snippeter.passage;
+package com.expleague.sensearch.snippet.passage;
 
-import components.snippeter.Segment;
+import com.expleague.sensearch.snippet.Segment;
 import java.util.ArrayList;
 import java.util.List;
 

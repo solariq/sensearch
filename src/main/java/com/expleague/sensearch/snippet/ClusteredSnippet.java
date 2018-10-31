@@ -1,8 +1,8 @@
-package components.snippeter.clustered_snippet;
+package com.expleague.sensearch.snippet.clustered_snippet;
 
-import components.snippeter.Segment;
-import components.snippeter.Snippet;
-import components.snippeter.passage.Passage;
+import com.expleague.sensearch.snippet.Segment;
+import com.expleague.sensearch.snippet.Snippet;
+import com.expleague.sensearch.snippet.passage.Passage;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;

@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/SenSeArch.iml" filepath="$PROJECT_DIR$/SenSeArch.iml" />
+      <module fileurl="file://$PROJECT_DIR$/sensearch.iml" filepath="$PROJECT_DIR$/sensearch.iml" />
     </modules>
   </component>
 </project>

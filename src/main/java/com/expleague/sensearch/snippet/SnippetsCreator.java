@@ -1,8 +1,14 @@
 package com.expleague.sensearch.snippet;
 
+import com.expleague.commons.text.lemmer.PartOfSpeech;
+import com.expleague.commons.text.lemmer.WordInfo;
 import com.expleague.sensearch.Page;
-import com.expleague.sensearch.index.IndexedPage;
+import com.expleague.sensearch.core.Lemmer;
 import com.expleague.sensearch.query.Query;
+import com.expleague.sensearch.snippet.docbased_snippet.DocBasedSnippet;
+import com.expleague.sensearch.snippet.docbased_snippet.KeyWord;
+import com.expleague.sensearch.snippet.passage.Passage;
+import com.expleague.sensearch.snippet.passage.Passages;
 
 import java.util.Arrays;
 import java.util.Comparator;
@@ -11,7 +17,6 @@ import java.util.Set;
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-import com.expleague.commons.text.lemmer.WordInfo;
 
 /**
  * Created by Maxim on 06.10.2018. Email: alvinmax@mail.ru

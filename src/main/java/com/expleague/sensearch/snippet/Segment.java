@@ -1,4 +1,4 @@
-package components.snippeter;
+package com.expleague.sensearch.snippet;
 
 public class Segment {
 

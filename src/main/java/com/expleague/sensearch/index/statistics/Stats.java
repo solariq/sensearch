@@ -1,4 +1,4 @@
-package components.statistics;
+package com.expleague.sensearch.index.statistics;
 
 import java.io.File;
 import java.io.IOException;
@@ -6,8 +6,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
-import java.util.stream.Stream;
 
+import com.expleague.sensearch.Constants;
+import com.expleague.sensearch.donkey.crawler.document.CrawlerDocument;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.core.JsonGenerationException;
 import com.fasterxml.jackson.core.JsonParseException;
@@ -15,9 +16,6 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-
-import components.Constants;
-import components.crawler.document.CrawlerDocument;
 
 public class Stats {
 	

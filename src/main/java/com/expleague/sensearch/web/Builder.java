@@ -3,12 +3,14 @@ package com.expleague.sensearch.web;
 import com.expleague.sensearch.Constants;
 import com.expleague.sensearch.SenSeArch;
 import com.expleague.sensearch.core.SenSeArchImpl;
+import com.expleague.sensearch.index.statistics.Stats;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.expleague.sensearch.donkey.crawler.Crawler;
 import com.expleague.sensearch.donkey.crawler.CrawlerXML;
 import com.expleague.sensearch.index.Index;
 import com.expleague.sensearch.index.plain.PlainIndexBuilder;
 import com.expleague.sensearch.web.suggest.BigramsBasedSuggestor;
+
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
