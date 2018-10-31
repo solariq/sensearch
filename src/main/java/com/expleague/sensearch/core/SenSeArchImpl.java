@@ -27,7 +27,7 @@ public class SenSeArchImpl implements SenSeArch {
 
 
     final Whiteboard wb = new WhiteboardImpl(query, pageNo);
-    final ThreadPoolExecutor executor = new ThreadPoolExecutor(Runtime.getRuntime().availableProcessors() - 1, 1, 1, TimeUnit.SECONDS, new LinkedBlockingQueue<>());
+    final ThreadPoolExecutor executor = new ThreadPoolExecutor(Runtime.getRuntime().availableProcessors() - 1, Runtime.getRuntime().availableProcessors() - 1 , 1, TimeUnit.SECONDS, new LinkedBlockingQueue<>());
     while(wb.snippets() == null) {
       for (final SearchPhase phase : new ArrayList<>(phases)) {
         if (!phase.test(wb))
