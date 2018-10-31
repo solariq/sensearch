@@ -1,13 +1,12 @@
 package com.expleague.sensearch.index.plain;
 
-import com.expleague.sensearch.index.statistics.Stats;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.expleague.sensearch.Constants;
-import com.expleague.sensearch.donkey.crawler.document.CrawlerDocument;
 import com.expleague.sensearch.core.impl.FilterImpl;
+import com.expleague.sensearch.donkey.crawler.document.CrawlerDocument;
 import com.expleague.sensearch.index.Index;
 import com.expleague.sensearch.index.IndexedPage;
-
+import com.expleague.sensearch.index.statistics.Stats;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
@@ -20,7 +19,6 @@ import java.util.TreeMap;
 import java.util.logging.Logger;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
-
 import org.apache.commons.io.FileUtils;
 
 /**
@@ -80,15 +78,13 @@ public class PlainIndexBuilder {
   }
 
   private static Path createNewIndexEntryRoot(Path indexRoot) {
-    try {
-      return Files.createTempDirectory(indexRoot, "");
-    } catch (IOException e) {
-      throw new RuntimeException(
-          String.format(
-              "Failed to create directory for the new index entry by the path: %s",
-              indexRoot.toAbsolutePath().toString()
-          ), e
-      );
+    while (true) {
+      long pageId = RNG.nextLong();
+      pageId = pageId == Long.MIN_VALUE ? 0 : Math.abs(pageId);
+      Path newEntry = indexRoot.resolve(Long.toString(pageId));
+      if (!Files.exists(newEntry)) {
+        return newEntry;
+      }
     }
   }
 
