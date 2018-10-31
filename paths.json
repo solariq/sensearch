@@ -4,9 +4,12 @@
   "temporaryBigrams": "BigramsMapTmp",
   "bigramsFileName": "BigramsData",
 
+  "statisticsFileName" : "StatisticsData",
+
   "temporaryIndex": "IndexTmp",
 
   "mainPageHTML": "./resources/mainPage.html",
+  "embeddingVectors": "./resources/vectors.txt.gz",
 
   "myStem": "./resources/mystem",
 
