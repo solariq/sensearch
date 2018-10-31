@@ -1,29 +1,21 @@
 package components.snippeter;
 
-import com.expleague.commons.text.lemmer.MyStem;
 import com.expleague.commons.text.lemmer.PartOfSpeech;
 import components.Lemmer;
 import components.index.IndexedDocument;
 import components.query.Query;
-import components.query.term.BaseTerm;
 import components.query.term.Term;
-import components.snippeter.clustered_snippet.Cluster;
-import components.snippeter.clustered_snippet.ClusteredSnippet;
 import components.snippeter.docbased_snippet.DocBasedSnippet;
 import components.snippeter.docbased_snippet.KeyWord;
 import components.snippeter.passage.Passage;
 import components.snippeter.passage.Passages;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.function.Predicate;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-
-
-import com.expleague.commons.text.lemmer.LemmaInfo;
 import com.expleague.commons.text.lemmer.WordInfo;
 
 /**
@@ -75,32 +67,21 @@ public class SnippetsCreator {
       System.out.println(word);
     }
 */
+
+    Predicate<Passage> queryRelevant = y -> query.getTerms().stream()
+        .anyMatch(x -> Passages.contains(y.getSentence(), x.getRaw()));
+
+    Predicate<Passage> notQueryRelevant = y -> query.getTerms().stream()
+        .noneMatch(x -> Passages.contains(y.getSentence(), x.getRaw()));
+
     List<Passage> passagesWithQueryWords = passages
         .stream()
-        .filter(
-            x -> {
-              boolean ok = false;
-              for (Term term : query.getTerms()) {
-                CharSequence word = term.getRaw();
-                ok |= Passages.contains(x.getSentence(), word);
-              }
-              return ok;
-            }
-        )
+        .filter(queryRelevant)
         .collect(Collectors.toList());
 
     List<Passage> passagesWithoutQueryWords = passages
         .stream()
-        .filter(
-            x -> {
-              boolean ok = false;
-              for (Term term : query.getTerms()) {
-                CharSequence word = term.getRaw();
-                ok |= Passages.contains(x.getSentence(), word);
-              }
-              return !ok;
-            }
-        )
+        .filter(notQueryRelevant)
         .collect(Collectors.toList());
 
     List<KeyWord> keyWords = uniqueWords

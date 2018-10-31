@@ -105,7 +105,7 @@ public class Constants {
     return embeddingVectors;
   }
 
-  public static void setEmbeddingVectors(String embeddingVectors) {
+  public void setEmbeddingVectors(String embeddingVectors) {
     Constants.embeddingVectors = embeddingVectors;
   }
 
