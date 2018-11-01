@@ -29,6 +29,7 @@ public class PlainDocument implements IndexedPage {
 
   @Override
   public URI reference() {
+    // TODO: return an actual URL
     return URI.create("http://ru.wikipedia.org");
   }
 
