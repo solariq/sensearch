@@ -7,6 +7,10 @@ import com.expleague.sensearch.snippet.Segment;
 import com.expleague.sensearch.snippet.Snippet;
 import com.expleague.sensearch.web.Builder;
 
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.databind.SerializerProvider;
+import com.fasterxml.jackson.databind.ser.std.StdSerializer;
+import java.io.IOException;
 import java.net.URI;
 import java.util.*;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -47,48 +51,86 @@ public class SenSeArchImpl implements SenSeArch {
       }
     }
 
-    return new ResultPage() {
-      @Override
-      public int number() {
-        return wb.pageNo();
-      }
+    final com.expleague.sensearch.Page[] pages = Objects.requireNonNull(wb.results());
+    final Snippet[] snippets = wb.snippets();
+    final ResultItem[] result = new ResultItem[snippets.length];
 
-      @Override
-      public int totalResultsFound() {
-        return wb.totalResults();
-      }
+    ResultItem[] results = new ResultItemImpl[snippets.length];
+    for (int i = 0; i < snippets.length; i++) {
+      results[i] = new ResultItemImpl(
+          pages[i].reference(),
+          pages[i].title(),
+          Arrays.asList(Pair.create(snippets[i].getContent(), snippets[i].getSelection())),
+          0);
+    }
 
-      @Override
-      public ResultItem[] results() {
-        final com.expleague.sensearch.Page[] pages = Objects.requireNonNull(wb.results());
-        final Snippet[] snippets = wb.snippets();
-        final ResultItem[] result = new ResultItem[snippets.length];
-        for (int i = 0; i < result.length; i++) {
-          int finalI = i;
-          result[i] = new ResultItem() {
-            @Override
-            public URI reference() {
-              return pages[finalI].reference();
-            }
+    return new ResultPageImpl(0, snippets.length, results);
+  }
 
-            @Override
-            public CharSequence title() {
-              return pages[finalI].title();
-            }
+  public class ResultItemImpl implements ResultItem {
+    private final URI reference;
+    private final CharSequence title;
+    private final List<Pair<CharSequence, List<Segment>>> passages;
+    private final double score;
 
-            @Override
-            public List<Pair<CharSequence, List<Segment>>> passages() {
-              return Collections.singletonList(Pair.create(snippets[finalI].getContent(), snippets[finalI].getSelection()));
-            }
+    ResultItemImpl(
+        URI reference,
+        CharSequence title,
+        List<Pair<CharSequence, List<Segment>>> passages,
+        double score) {
+      this.reference = reference;
+      this.title = title;
+      this.passages = passages;
+      this.score = score;
+    }
 
-            @Override
-            public double score() {
-              return 0;
-            }
-          };
-        }
-        return result;
-      }
-    };
+
+    @Override
+    public URI reference() {
+      return reference;
+    }
+
+    @Override
+    public CharSequence title() {
+      return title;
+    }
+
+    @Override
+    public List<Pair<CharSequence, List<Segment>>> passages() {
+      return passages;
+    }
+
+    @Override
+    public double score() {
+      return score;
+    }
+  }
+
+  public class ResultPageImpl implements ResultPage {
+
+    private final int number;
+    private final int totalResults;
+    private final ResultItem[] results;
+
+    public ResultPageImpl(int number, int totalResults, ResultItem[] results) {
+      this.number = number;
+      this.totalResults = totalResults;
+      this.results = results;
+    }
+
+    @Override
+    public int number() {
+      return number;
+    }
+
+    @Override
+    public int totalResultsFound() {
+      return totalResults;
+    }
+
+    @Override
+    public ResultItem[] results() {
+      return results;
+    }
   }
 }

@@ -4,6 +4,7 @@ import com.expleague.sensearch.Constants;
 import com.expleague.sensearch.SenSeArch;
 import com.expleague.sensearch.core.SenSeArchImpl;
 import com.expleague.sensearch.index.statistics.Stats;
+import com.expleague.sensearch.web.suggest.Suggestor;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.expleague.sensearch.donkey.crawler.Crawler;
 import com.expleague.sensearch.donkey.crawler.CrawlerXML;
@@ -22,7 +23,6 @@ public class Builder {
 
   private static Index index;
   private static SenSeArch searcher = new SenSeArchImpl();
-  private static PageLoadHandler pageLoadHandler;
   private static Crawler crawler;
   private static BigramsBasedSuggestor bigramsBasedSuggestor;
   private static Stats statistics;
@@ -42,12 +42,6 @@ public class Builder {
     crawler = new CrawlerXML(Constants.getPathToZIP());
     index = new PlainIndexBuilder(Constants.getTemporaryIndex()).buildIndex(crawler.makeStream());
     bigramsBasedSuggestor = new BigramsBasedSuggestor(Constants.getBigramsFileName());
-    pageLoadHandler = new PageLoadHandler(searcher, bigramsBasedSuggestor);
-  }
-
-
-  static PageLoadHandler getPageLoadHandler() {
-    return pageLoadHandler;
   }
 
   public static Index getIndex() {
@@ -60,6 +54,10 @@ public class Builder {
 
   static Crawler getCrawler() {
     return crawler;
+  }
+
+  public static Suggestor getSuggestor() {
+    return bigramsBasedSuggestor;
   }
 
   public int pageSize() {

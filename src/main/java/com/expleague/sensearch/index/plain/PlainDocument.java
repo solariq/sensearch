@@ -29,7 +29,7 @@ public class PlainDocument implements IndexedPage {
 
   @Override
   public URI reference() {
-    throw new UnsupportedOperationException();
+    return URI.create("http://ru.wikipedia.org");
   }
 
   @Override
