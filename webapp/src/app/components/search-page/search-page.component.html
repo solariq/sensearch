@@ -1,0 +1,22 @@
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons"
+      rel="stylesheet">
+
+<form class="search-box-form">
+  <mat-form-field class="search-box" appearance="outline">
+    <input #autocompleteInput type="text" matInput placeholder="Поиск" [formControl]="autocompleteControl" [matAutocomplete]="autocomplete">
+
+    <button matSuffix mat-icon-button class="search-button" (click)="search();">
+      <mat-icon>search</mat-icon>
+    </button>
+    <mat-autocomplete #autocomplete="matAutocomplete">
+      <mat-option *ngFor="let suggestion of suggestions | async" [value]="suggestion">
+        {{suggestion}}
+      </mat-option>
+    </mat-autocomplete>
+
+  </mat-form-field>
+
+</form>
+
+<app-search-result *ngFor="let searchItem of searchResults" [searchItem]="searchItem">
+</app-search-result>
