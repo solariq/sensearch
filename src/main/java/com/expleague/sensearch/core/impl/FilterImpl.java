@@ -9,15 +9,17 @@ import java.util.stream.Stream;
 
 public class FilterImpl implements Filter {
 
-  private static final int numberOfNeighbors = 50;
+  private static final int numberOfNeighbors = 10;
+
+  private EmbeddingImpl embedding = EmbeddingImpl.getInstance();
 
   public FilterImpl(Stream<IndexedPage> documentStream) {
-    EmbeddingImpl.getInstance().setDocuments(documentStream);
+    embedding.setDocuments(documentStream);
   }
 
   @Override
   public LongStream filtrate(Query query) {
-    return new NearestFinderImpl().getNearestDocuments(EmbeddingImpl.getInstance().getVec(query), numberOfNeighbors)
+    return embedding.getNearestDocuments(embedding.getVec(query), numberOfNeighbors)
             .stream().mapToLong(l -> l);
   }
 }
