@@ -32,9 +32,9 @@ export class SearchPageComponent implements OnInit {
 
   search() {
     this.triggerAutocompleteInput.closePanel();
-
     this.searchService.getResults$(this.autocompleteControl.value, 0).subscribe(
-      results => this.searchResults = results
-    )
+      results => this.searchResults = results);
+
+    this.triggerAutocompleteInput.closePanel();
   }
 }
