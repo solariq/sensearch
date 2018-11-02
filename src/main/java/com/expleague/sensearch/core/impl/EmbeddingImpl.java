@@ -114,12 +114,12 @@ public class EmbeddingImpl implements Embedding {
 
   void setDocuments(Stream<IndexedPage> documentStream) {
     documentStream.forEach(document -> {
-      //docIdVecMap.put(document.id(), getVec(document));
-      docIdVecsMap.put(document.id(),
+      docIdVecMap.put(document.id(), getVec(document));
+      /*docIdVecsMap.put(document.id(),
               Arrays.stream(document.text().toString()
                       .split("\n\n"))
                       .map(p -> getArithmeticMean(
-                              Arrays.stream(p.split(" ")).map(this::getVec))));
+                              Arrays.stream(p.split(" ")).map(this::getVec))));*/
     });
   }
 
@@ -168,6 +168,7 @@ public class EmbeddingImpl implements Embedding {
 
   private Stream<String> split(CharSequence charSequence) {
     //todo replace with tokenizer
+    //return Arrays.stream(charSequence.toString().split(" "));
     return Arrays.stream(CharSeqTools.split(charSequence, ' ')).map(CharSequence::toString);
   }
 }

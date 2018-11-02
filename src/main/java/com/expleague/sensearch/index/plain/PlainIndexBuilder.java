@@ -1,6 +1,6 @@
 package com.expleague.sensearch.index.plain;
 
-import com.expleague.sensearch.Constants;
+import com.expleague.sensearch.Config;
 import com.expleague.sensearch.core.impl.FilterImpl;
 import com.expleague.sensearch.donkey.crawler.document.CrawlerDocument;
 import com.expleague.sensearch.index.Index;
@@ -36,13 +36,15 @@ public class PlainIndexBuilder {
   private static final Logger LOG = Logger.getLogger(PlainIndexBuilder.class.getName());
 
   private Path indexRoot;
+  private final Config config;
 
-  public PlainIndexBuilder(Path indexRoot) throws RuntimeException, IOException {
+  public PlainIndexBuilder(Config config) throws RuntimeException, IOException {
+    this.config = config;
+    this.indexRoot = config.getTemporaryIndex();
 
     Files.createDirectories(indexRoot);
     FileUtils.deleteDirectory(indexRoot.toFile());
 
-    this.indexRoot = indexRoot;
     if (!isPathSuitableForIndex(indexRoot)) {
       String errMsg = String.format(
           "Index already exists by the given path %s",
@@ -140,7 +142,7 @@ public class PlainIndexBuilder {
 
   private void flushBigrams(String title, TreeMap<String, Integer> map) {
     String t = title.toLowerCase();
-    String[] words = t.split(Constants.getBigramsRegexp());
+    String[] words = t.split("[^a-zA-Zа-яА-ЯЁё]+");
     for (int i = 0; i < words.length - 1; i++) {
       if (words[i].isEmpty()) {
         continue;
@@ -151,7 +153,7 @@ public class PlainIndexBuilder {
   }
 
   public Index buildIndex(Stream<CrawlerDocument> parsedDocumentsStream) throws IOException {
-    Path bigramPath = indexRoot.getParent().resolve(Paths.get(Constants.getTemporaryBigrams()));
+    Path bigramPath = indexRoot.getParent().resolve(Paths.get(config.getTemporaryBigrams()));
     Files.createDirectories(bigramPath);
     TreeMap<String, Integer> result = new TreeMap<>();
 
@@ -166,9 +168,9 @@ public class PlainIndexBuilder {
     );
 
     ObjectMapper mapper = new ObjectMapper();
-    mapper.writeValue(bigramPath.resolve(Constants.getBigramsFileName()).toFile(), result);
+    mapper.writeValue(bigramPath.resolve(config.getBigramsFileName()).toFile(), result);
 
-    stats.writeToFile(Constants.getStatisticsFileName());
+    stats.writeToFile(config.getStatisticsFileName());
 
     try {
       return new PlainIndex(indexRoot, new FilterImpl(getDocumentStream(indexRoot)));

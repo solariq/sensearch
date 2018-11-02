@@ -12,6 +12,7 @@ import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 import java.io.IOException;
 import java.net.URI;
+import java.nio.file.Paths;
 import java.util.*;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -20,7 +21,12 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class SenSeArchImpl implements SenSeArch {
-  private final Builder builder = new Builder();
+  private final Builder builder;
+
+  public SenSeArchImpl(Builder builder){
+    this.builder = builder;
+  }
+
   @Override
   public ResultPage search(String query, int pageNo) {
     final Set<? extends SearchPhase> phases = Stream.of(SearchPhase.FACTORIES).map(f -> {

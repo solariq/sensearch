@@ -1,6 +1,6 @@
 package com.expleague.sensearch.web;
 
-import com.expleague.sensearch.Constants;
+import com.expleague.sensearch.Config;
 import com.expleague.sensearch.SenSeArch;
 import com.expleague.sensearch.snippet.Segment;
 import com.expleague.sensearch.web.suggest.BigramsBasedSuggestor;
@@ -23,9 +23,11 @@ public class PageLoadHandler extends AbstractHandler {
   private final SenSeArch search;
   private final Suggestor suggestor;
   private ObjectMapper mapper = new ObjectMapper();
+  private final Config config;
 
-  public PageLoadHandler(SenSeArch searcher, BigramsBasedSuggestor bigramsBasedSuggestor) {
+  public PageLoadHandler(SenSeArch searcher, BigramsBasedSuggestor bigramsBasedSuggestor, Config config) {
     suggestor = bigramsBasedSuggestor;
+    this.config = config;
     this.search = searcher;
   }
 
@@ -62,7 +64,7 @@ public class PageLoadHandler extends AbstractHandler {
     if (requestText == null || requestText.isEmpty()) {
 
       try (BufferedReader in = new BufferedReader(
-          new FileReader(new File(Constants.getWebRoot())))) {
+          new FileReader(new File(config.getWebRoot())))) {
         writer.println(in.lines().collect(Collectors.joining("\n")));
       }
 

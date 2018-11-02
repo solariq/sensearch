@@ -1,6 +1,6 @@
 package com.expleague.sensearch.donkey.crawler;
 
-import com.expleague.sensearch.Constants;
+import com.expleague.sensearch.Config;
 import com.expleague.sensearch.donkey.crawler.document.CrawlerDocument;
 import com.expleague.sensearch.donkey.crawler.document.XMLParser;
 import java.io.File;
@@ -21,15 +21,17 @@ import java.util.zip.ZipInputStream;
 public class CrawlerXML implements Crawler {
 
   private Path path;
+  private final Config config;
 
-  public CrawlerXML(Path path) {
-    this.path = path;
+  public CrawlerXML(Config config) {
+    this.path = config.getPathToZIP();
+    this.config = config;
   }
 
   @Override
   public Stream<CrawlerDocument> makeStream() throws IOException {
     return StreamSupport.stream(
-        Spliterators.spliteratorUnknownSize(new DocumentIterator(path),
+        Spliterators.spliteratorUnknownSize(new DocumentIterator(path, config.getTemporaryDocuments()),
             Spliterator.ORDERED | Spliterator.SORTED),
         false);
   }
@@ -42,13 +44,14 @@ public class CrawlerXML implements Crawler {
     private ZipEntry zipEntry;
     private XMLParser parser = new XMLParser();
 
-    DocumentIterator(Path path) throws IOException {
+    DocumentIterator(Path path, Path tmpPath) throws IOException {
       this.path = path;
+      pathTmp = tmpPath;
       init();
     }
 
     private void init() throws IOException {
-      pathTmp = path.getParent().resolve(Constants.getTemporaryDocuments());
+      pathTmp = path.getParent().resolve(pathTmp);
       Files.createDirectories(pathTmp);
       zipInputStream = new ZipInputStream(new FileInputStream(path.toString()));
       try {

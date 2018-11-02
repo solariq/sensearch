@@ -30,9 +30,13 @@ public class SearchEndpoint {
     mapper.registerModule(module);
   }
 
-  // TODO: refactor this and inject via constructor
-  private final SenSeArch search = Builder.getSearcher();
-  private final Suggestor suggestor = Builder.getSuggestor();
+  private final SenSeArch search;
+  private final Suggestor suggestor;
+
+  public SearchEndpoint(Builder builder) {
+    search = builder.getSearcher();
+    suggestor = builder.getSuggestor();
+  }
 
   @GET
   @Path("/suggest")
@@ -55,7 +59,7 @@ public class SearchEndpoint {
 //  @GET
 //  @Produces(MediaType.TEXT_HTML)
 //  public String index() throws IOException {
-//    return String.join("\n", Files.readAllLines(Paths.get(Constants.getMainPageHTML())));
+//    return String.join("\n", Files.readAllLines(Paths.get(Config.getMainPageHTML())));
 //  }
 
   public static class ResultItemSerializer extends StdSerializer<ResultItem> {

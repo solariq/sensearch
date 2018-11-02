@@ -7,7 +7,6 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
-import com.expleague.sensearch.Constants;
 import com.expleague.sensearch.donkey.crawler.document.CrawlerDocument;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.core.JsonGenerationException;
@@ -35,7 +34,7 @@ public class Stats {
 	
 	public double getBM25(Long documentID, String query) {
 		double res = 0;
-		for (String w : query.split(Constants.getBigramsRegexp())) {
+		for (String w : query.split("[^a-zA-Zа-яА-ЯЁё]+")) {
 			Long ni = numberOfDocumentsWithWord.get(w);
 			if (ni == null)
 				ni = 0l;
@@ -75,7 +74,7 @@ public class Stats {
 		Set<String> wordSet = new TreeSet<>();
 		totalNumberOfDocuments++;
 		
-		String[] words = doc.getContent().toString().split(Constants.getBigramsRegexp());
+		String[] words = doc.getContent().toString().split("[^a-zA-Zа-яА-ЯЁё]+");
 		long docLength = 0;
 		
 		documentLength.put(doc.getID(), Long.valueOf(words.length));
