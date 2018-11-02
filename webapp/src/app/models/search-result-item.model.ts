@@ -7,5 +7,5 @@ export class SearchResultItemModel {
 
 export class Passage {
   text: string;
-  highlight: [number, number][];
+  highlights: [number, number][];
 }

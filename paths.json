@@ -8,7 +8,8 @@
 
   "temporaryIndex": "IndexTmp",
 
-  "mainPageHTML": "./resources/mainPage.html",
+  "webRoot": "webapp/dist/webapp",
+
   "embeddingVectors": "./resources/vectors.txt.gz",
 
   "myStem": "./resources/mystem",

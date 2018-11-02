@@ -15,7 +15,7 @@ public class Constants {
 
   private static String temporaryIndex;
 
-  private static String mainPageHTML;
+  private static String webRoot;
 
   private static String embeddingVectors;
 
@@ -59,12 +59,12 @@ public class Constants {
     Constants.temporaryIndex = temporaryIndex;
   }
 
-  public static String getMainPageHTML() {
-    return mainPageHTML;
+  public static String getWebRoot() {
+    return webRoot;
   }
 
-  public void setMainPageHTML(String mainPageHTML) {
-    Constants.mainPageHTML = mainPageHTML;
+  public void setWebRoot(String webRoot) {
+    Constants.webRoot = webRoot;
   }
 
   public static String getMyStem() {

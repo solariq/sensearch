@@ -2,20 +2,22 @@ package com.expleague.sensearch.web;
 
 import com.expleague.sensearch.Constants;
 import com.expleague.sensearch.SenSeArch;
-import com.expleague.sensearch.core.SenSeArchImpl;
 import com.expleague.sensearch.snippet.Segment;
 import com.expleague.sensearch.web.suggest.BigramsBasedSuggestor;
 import com.expleague.sensearch.web.suggest.Suggestor;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.eclipse.jetty.server.Request;
-import org.eclipse.jetty.server.handler.AbstractHandler;
-
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.util.List;
+import java.util.stream.Collectors;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.*;
-import java.util.List;
-import java.util.stream.Collectors;
+import org.eclipse.jetty.server.Request;
+import org.eclipse.jetty.server.handler.AbstractHandler;
 
 public class PageLoadHandler extends AbstractHandler {
   private final SenSeArch search;
@@ -60,7 +62,7 @@ public class PageLoadHandler extends AbstractHandler {
     if (requestText == null || requestText.isEmpty()) {
 
       try (BufferedReader in = new BufferedReader(
-          new FileReader(new File(Constants.getMainPageHTML())))) {
+          new FileReader(new File(Constants.getWebRoot())))) {
         writer.println(in.lines().collect(Collectors.joining("\n")));
       }
 
