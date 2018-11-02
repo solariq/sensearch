@@ -1,9 +1,11 @@
 package com.expleague.sensearch.index.plain;
 
+import com.expleague.sensearch.Page;
 import com.expleague.sensearch.core.Filter;
 import com.expleague.sensearch.index.Index;
 import com.expleague.sensearch.index.IndexedPage;
 import com.expleague.sensearch.query.Query;
+import com.expleague.sensearch.query.term.Term;
 import gnu.trove.set.TLongSet;
 import gnu.trove.set.hash.TLongHashSet;
 import java.io.IOException;
@@ -34,9 +36,34 @@ public class PlainIndex implements Index {
   }
 
   @Override
-  public Stream<IndexedPage> fetchDocuments(Query query) {
+  public Stream<Page> fetchDocuments(Query query) {
     return filter.filtrate(query)
         .mapToObj(id -> indexRoot.resolve(Long.toString(id)))
-        .map(PlainDocument::new);
+        .map(PlainPage::new);
+  }
+
+  @Override
+  public int indexSize() {
+    return availableDocuments.size();
+  }
+
+  @Override
+  public double averageWordsPerPage() {
+    throw new UnsupportedOperationException();
+  }
+
+  @Override
+  public int pagesWithTerm(Term term) {
+    throw new UnsupportedOperationException();
+  }
+
+  @Override
+  public long termCollectionFrequency(Term term) {
+    throw new UnsupportedOperationException();
+  }
+
+  @Override
+  public int vocabularySize() {
+    throw new UnsupportedOperationException();
   }
 }

@@ -1,5 +1,6 @@
 package com.expleague.sensearch.index;
 
+import com.expleague.sensearch.Config;
 import com.expleague.sensearch.donkey.crawler.Crawler;
 import com.expleague.sensearch.donkey.crawler.document.CrawlerDocument;
 import com.expleague.sensearch.index.plain.PlainIndexBuilder;
@@ -67,7 +68,7 @@ public class MinimalFunctionalityPlainIndexTest {
         indexRoot.toAbsolutePath().toString()));
 
     Crawler localCrawler = new LocalCrawler();
-    plainIndex = new PlainIndexBuilder(indexRoot).buildIndex(localCrawler.makeStream());
+    plainIndex = new PlainIndexBuilder(new Config()).buildIndex(localCrawler.makeStream());
   }
 
   @Test

@@ -7,24 +7,21 @@ import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-/**
- *
- */
-public class PlainDocument implements IndexedPage {
+public class PlainPage implements IndexedPage {
 
-  private final long documentId;
-  private final Path documentContentPath;
-  private final Path documentTitlePath;
+  private final long id;
+  private final Path contentPath;
+  private final Path titlePath;
 
-  PlainDocument(Path pathToIndexEntry) {
-    this.documentId = Long.parseLong(pathToIndexEntry.getFileName().toString());
-    this.documentContentPath = pathToIndexEntry.resolve(PlainIndexBuilder.CONTENT_FILE);
-    this.documentTitlePath = pathToIndexEntry.resolve(PlainIndexBuilder.META_FILE);
+  PlainPage(Path pathToIndexEntry) {
+    this.id = Long.parseLong(pathToIndexEntry.getFileName().toString());
+    this.contentPath = pathToIndexEntry.resolve(PlainIndexBuilder.CONTENT_FILE);
+    this.titlePath = pathToIndexEntry.resolve(PlainIndexBuilder.META_FILE);
   }
 
   @Override
   public long id() {
-    return this.documentId;
+    return this.id;
   }
 
   @Override
@@ -36,7 +33,7 @@ public class PlainDocument implements IndexedPage {
   @Override
   public CharSequence text() {
     StringBuilder contentBuilder = new StringBuilder();
-    try (BufferedReader bufferedReader = Files.newBufferedReader(documentContentPath)) {
+    try (BufferedReader bufferedReader = Files.newBufferedReader(contentPath)) {
       bufferedReader.lines().forEach(contentBuilder::append);
     } catch (IOException e) {
       throw new RuntimeException(
@@ -50,7 +47,7 @@ public class PlainDocument implements IndexedPage {
   @Override
   public CharSequence title() {
     StringBuilder titleBuilder = new StringBuilder();
-    try (BufferedReader bufferedReader = Files.newBufferedReader(documentTitlePath)) {
+    try (BufferedReader bufferedReader = Files.newBufferedReader(titlePath)) {
       bufferedReader.lines().forEach(titleBuilder::append);
     } catch (IOException e) {
       throw new RuntimeException(
@@ -59,5 +56,16 @@ public class PlainDocument implements IndexedPage {
     }
 
     return titleBuilder;
+  }
+
+  @Override
+  public boolean equals(Object other) {
+    return (other instanceof PlainPage) &&
+        (this == other || ((PlainPage) other).id == this.id);
+  }
+
+  @Override
+  public int hashCode() {
+    return Long.hashCode(this.id);
   }
 }

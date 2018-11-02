@@ -23,6 +23,8 @@ public class Config {
 
   private String pathToZIP;
 
+  private int pageSize = 10;
+
 
   public Path getTemporaryDocuments() {
     return Paths.get(temporaryDocuments);

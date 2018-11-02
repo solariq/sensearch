@@ -196,6 +196,6 @@ public class PlainIndexBuilder {
         .filter(entry -> indexEntryNamePattern.matcher(
             entry.getFileName().toString()).matches()
         )
-        .map(PlainDocument::new);
+        .map(PlainPage::new);
   }
 }

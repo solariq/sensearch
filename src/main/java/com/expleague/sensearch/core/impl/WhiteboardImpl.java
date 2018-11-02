@@ -2,20 +2,34 @@ package com.expleague.sensearch.core.impl;
 
 import com.expleague.sensearch.Page;
 import com.expleague.sensearch.core.Whiteboard;
+import com.expleague.sensearch.miner.Features;
 import com.expleague.sensearch.query.Query;
 import com.expleague.sensearch.snippet.Snippet;
+import java.util.stream.Stream;
+import org.apache.commons.lang3.tuple.Pair;
 import org.jetbrains.annotations.Nullable;
 
 public class WhiteboardImpl implements Whiteboard {
   private Page[] results;
   private Snippet[] snippets;
   private Query query;
+  private Stream<Pair<Page, Features>> textFeatures;
   private final String input;
   private final int page;
 
   public WhiteboardImpl(String input, int page) {
     this.input = input;
     this.page = page;
+  }
+
+  @Override
+  public synchronized Stream<Pair<Page, Features>> textFeatures() {
+    return textFeatures;
+  }
+
+  @Override
+  public synchronized void putTextFeatures(Stream<Pair<Page, Features>> textFeatures) {
+    this.textFeatures = textFeatures;
   }
 
   @Nullable

@@ -1,6 +1,6 @@
-package components.other;
+package com.expleague.sensearch.other;
 
-import components.SpellChecker;
+import com.expleague.sensearch.SpellChecker;
 import java.nio.file.Paths;
 import org.junit.Assert;
 import org.junit.Before;

@@ -1,4 +1,4 @@
-package components;
+package com.expleague.sensearch;
 
 import java.io.*;
 import java.nio.CharBuffer;
