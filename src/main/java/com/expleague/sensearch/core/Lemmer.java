@@ -1,8 +1,8 @@
 package com.expleague.sensearch.core;
 
 import com.expleague.commons.text.lemmer.MyStem;
-import com.expleague.sensearch.Constants;
 
+import java.nio.file.Path;
 import java.nio.file.Paths;
 
 public class Lemmer {
@@ -10,9 +10,11 @@ public class Lemmer {
   private static Lemmer instance;
 
   public MyStem myStem;
+  private static Path myStemPath;
 
-  private Lemmer() {
-    this.myStem = new MyStem(Paths.get(Constants.getMyStem()));
+  private Lemmer(Path myStemPath) {
+    Lemmer.myStemPath = myStemPath;
+    this.myStem = new MyStem(myStemPath);
   }
 
   private Lemmer(String path) {
@@ -21,7 +23,7 @@ public class Lemmer {
 
   public static synchronized Lemmer getInstance() {
     if (instance == null) {
-      instance = new Lemmer();
+      instance = new Lemmer(myStemPath);
     }
     return instance;
   }

@@ -1,6 +1,6 @@
 package com.expleague.sensearch.web;
 
-import com.expleague.sensearch.Constants;
+import com.expleague.sensearch.Config;
 import com.expleague.sensearch.SenSeArch;
 import com.expleague.sensearch.core.SenSeArchImpl;
 import com.expleague.sensearch.index.statistics.Stats;
@@ -14,49 +14,55 @@ import com.expleague.sensearch.web.suggest.BigramsBasedSuggestor;
 
 import java.io.IOException;
 import java.nio.file.Files;
-import java.nio.file.Paths;
+import java.nio.file.Path;
 import javax.xml.stream.XMLStreamException;
 
 public class Builder {
 
-  private static ObjectMapper objectMapper = new ObjectMapper();
+  private ObjectMapper objectMapper = new ObjectMapper();
+  private Index index;
+  private SenSeArch searcher;
+  private Crawler crawler;
+  private BigramsBasedSuggestor bigramsBasedSuggestor;
+  private Stats statistics;
+  private Path configPath;
+  private Config config;
 
-  private static Index index;
-  private static SenSeArch searcher = new SenSeArchImpl();
-  private static Crawler crawler;
-  private static BigramsBasedSuggestor bigramsBasedSuggestor;
-  private static Stats statistics;
+  public Builder(Path pathToConfig) {
+    configPath = pathToConfig;
+    init();
+  }
 
-  private static void init() {
+  private void init() {
     try {
-      byte[] jsonData = Files.readAllBytes(Paths.get("./paths.json"));
-      objectMapper.readValue(jsonData, Constants.class);
+      byte[] jsonData = Files.readAllBytes(configPath);
+      config = objectMapper.readValue(jsonData, Config.class);
     } catch (IOException e) {
       e.printStackTrace();
     }
   }
 
-  static void build() throws IOException, XMLStreamException {
-    init();
-
-    crawler = new CrawlerXML(Constants.getPathToZIP());
-    index = new PlainIndexBuilder(Constants.getTemporaryIndex()).buildIndex(crawler.makeStream());
-    bigramsBasedSuggestor = new BigramsBasedSuggestor(Constants.getBigramsFileName());
+  Config build() throws IOException, XMLStreamException {
+    crawler = new CrawlerXML(config);
+    index = new PlainIndexBuilder(config).buildIndex(crawler.makeStream());
+    bigramsBasedSuggestor = new BigramsBasedSuggestor(config);
+    searcher = new SenSeArchImpl(this);
+    return config;
   }
 
-  public static Index getIndex() {
+  public Index getIndex() {
     return index;
   }
 
-  static SenSeArch getSearcher() {
+  SenSeArch getSearcher() {
     return searcher;
   }
 
-  static Crawler getCrawler() {
+  Crawler getCrawler() {
     return crawler;
   }
 
-  public static Suggestor getSuggestor() {
+  public Suggestor getSuggestor() {
     return bigramsBasedSuggestor;
   }
 
@@ -68,7 +74,7 @@ public class Builder {
     return 4;
   }
 
-  static Stats getStatistics() {
+  Stats getStatistics() {
     return statistics;
   }
 }

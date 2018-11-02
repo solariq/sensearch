@@ -22,7 +22,7 @@ public class StatisticsTest {
 	@Before
 	public void prepare() throws JsonGenerationException, JsonMappingException, IOException {
 		ObjectMapper objectMapper = new ObjectMapper();
-		objectMapper.readValue(new File("./paths.json"), Constants.class);
+		objectMapper.readValue(new File("./config.json"), Constants.class);
 		
 		d1 = new CrawlerDocument() {
 			

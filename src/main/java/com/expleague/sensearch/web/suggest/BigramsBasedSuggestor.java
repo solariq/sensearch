@@ -1,9 +1,8 @@
 package com.expleague.sensearch.web.suggest;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.expleague.sensearch.Constants;
+import com.expleague.sensearch.Config;
 import java.io.IOException;
-import java.nio.file.Path;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map.Entry;
@@ -14,11 +13,13 @@ import java.util.stream.Collectors;
 public class BigramsBasedSuggestor implements Suggestor {
 
   private TreeMap<String, Integer> map;
+  private final Config config;
 
-  public BigramsBasedSuggestor(Path filepath) throws IOException {
+  public BigramsBasedSuggestor(Config config) throws IOException {
+    this.config = config;
 
     ObjectMapper mapper = new ObjectMapper();
-    map = mapper.readValue(filepath.toFile(), TreeMap.class);
+    map = mapper.readValue(this.config.getBigramsFileName().toFile(), TreeMap.class);
   }
 
   public List<String> getSuggestions(String searchString) {
@@ -32,7 +33,7 @@ public class BigramsBasedSuggestor implements Suggestor {
           }
         });
 
-    String[] words = searchString.split(Constants.getBigramsRegexp());
+    String[] words = searchString.split("[^a-zA-Zа-яА-ЯЁё]+");
 
     String lastWord = words.length > 0 ? words[words.length - 1].trim() : null;
     String lastBigram = words.length > 1 ?

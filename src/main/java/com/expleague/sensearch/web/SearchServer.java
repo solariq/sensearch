@@ -1,6 +1,6 @@
 package com.expleague.sensearch.web;
 
-import com.expleague.sensearch.Constants;
+import com.expleague.sensearch.Config;
 import java.nio.file.Paths;
 import java.util.EnumSet;
 import javax.servlet.DispatcherType;
@@ -19,7 +19,8 @@ public class SearchServer {
 
 
   public static void main(String[] args) throws Exception {
-    Builder.build();
+    Builder builder = new Builder(Paths.get("./config.json"));
+    Config config = builder.build();
 
     ServletContextHandler context = new ServletContextHandler(ServletContextHandler.SESSIONS);
     context.setContextPath("/api");
@@ -34,7 +35,7 @@ public class SearchServer {
     Server server = new Server(8081);
 
     ResourceHandler resHandler = new ResourceHandler();
-    resHandler.setBaseResource(Resource.newResource(Paths.get(Constants.getWebRoot()).toFile()));
+    resHandler.setBaseResource(Resource.newResource(Paths.get(config.getWebRoot()).toFile()));
 
     HandlerCollection handlerCollection = new HandlerCollection();
     handlerCollection.setHandlers(new Handler[] {context, resHandler});

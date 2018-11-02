@@ -3,7 +3,7 @@ package com.expleague.sensearch.core.impl;
 import com.expleague.commons.math.vectors.Vec;
 import com.expleague.commons.math.vectors.impl.vectors.ArrayVec;
 import com.expleague.commons.seq.CharSeqTools;
-import com.expleague.sensearch.Constants;
+import com.expleague.sensearch.Config;
 import com.expleague.sensearch.core.Embedding;
 import com.expleague.sensearch.index.IndexedPage;
 import com.expleague.sensearch.query.Query;
@@ -26,8 +26,9 @@ public class EmbeddingImpl implements Embedding {
   private final Map<Long, Vec> docIdVecMap = new HashMap<>();
 
   private EmbeddingImpl() {
+
     try (Reader input = new InputStreamReader(
-        new GZIPInputStream(new FileInputStream(Constants.getEmbeddingVectors())),
+        new GZIPInputStream(new FileInputStream("./resources/vectors.txt.gz")),
         StandardCharsets.UTF_8)) {
       CharSeqTools.lines(input)
           .parallel()
