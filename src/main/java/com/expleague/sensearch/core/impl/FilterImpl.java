@@ -1,5 +1,6 @@
 package com.expleague.sensearch.core.impl;
 
+import com.expleague.sensearch.core.Embedding;
 import com.expleague.sensearch.core.Filter;
 import com.expleague.sensearch.index.IndexedPage;
 import com.expleague.sensearch.query.Query;
@@ -11,10 +12,11 @@ public class FilterImpl implements Filter {
 
   private static final int numberOfNeighbors = 10;
 
-  private EmbeddingImpl embedding = EmbeddingImpl.getInstance();
+  private Embedding embedding;
 
-  public FilterImpl(Stream<IndexedPage> documentStream) {
-    embedding.setDocuments(documentStream);
+  public FilterImpl(Stream<IndexedPage> documentStream, Embedding embedding) {
+    this.embedding = embedding;
+    ((EmbeddingImpl) this.embedding).setDocuments(documentStream);
   }
 
   @Override

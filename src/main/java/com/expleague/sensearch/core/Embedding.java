@@ -2,6 +2,7 @@ package com.expleague.sensearch.core;
 
 import com.expleague.commons.math.vectors.Vec;
 import com.expleague.sensearch.query.Query;
+import com.expleague.sensearch.query.term.Term;
 import java.util.List;
 
 public interface Embedding {
@@ -29,6 +30,8 @@ public interface Embedding {
    * @return vector
    */
   Vec getVec(Query query);
+
+  Vec getVec(List<Term> terms);
 
   /**
    * Returns list of vectors for query's terms

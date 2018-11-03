@@ -1,6 +1,8 @@
 package com.expleague.sensearch.index.plain;
 
 import com.expleague.sensearch.Config;
+import com.expleague.sensearch.core.Embedding;
+import com.expleague.sensearch.core.impl.EmbeddingImpl;
 import com.expleague.sensearch.core.impl.FilterImpl;
 import com.expleague.sensearch.donkey.crawler.document.CrawlerDocument;
 import com.expleague.sensearch.index.Index;
@@ -37,10 +39,12 @@ public class PlainIndexBuilder {
 
   private Path indexRoot;
   private final Config config;
+  private final Embedding embedding;
 
   public PlainIndexBuilder(Config config) throws RuntimeException, IOException {
     this.config = config;
     this.indexRoot = config.getTemporaryIndex();
+    embedding = new EmbeddingImpl(config);
 
     Files.createDirectories(indexRoot);
     FileUtils.deleteDirectory(indexRoot.toFile());
@@ -173,7 +177,7 @@ public class PlainIndexBuilder {
     stats.writeToFile(config.getStatisticsFileName());
 
     try {
-      return new PlainIndex(indexRoot, new FilterImpl(getDocumentStream(indexRoot)));
+      return new PlainIndex(indexRoot, embedding);
     } catch (IOException e) {
       try {
         FileUtils.deleteDirectory(indexRoot.toFile());
@@ -188,14 +192,5 @@ public class PlainIndexBuilder {
       }
       throw new IOException("Failed to create index!", e);
     }
-  }
-
-  private Stream<IndexedPage> getDocumentStream(Path indexRoot) throws IOException {
-    final Pattern indexEntryNamePattern = Pattern.compile("\\d+");
-    return Files.list(indexRoot)
-        .filter(entry -> indexEntryNamePattern.matcher(
-            entry.getFileName().toString()).matches()
-        )
-        .map(PlainPage::new);
   }
 }

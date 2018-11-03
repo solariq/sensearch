@@ -1,8 +1,11 @@
 package com.expleague.sensearch.query;
 
 import com.expleague.commons.math.vectors.Vec;
+import com.expleague.sensearch.Config;
+import com.expleague.sensearch.core.Embedding;
 import com.expleague.sensearch.core.Lemmer;
 import com.expleague.sensearch.core.impl.EmbeddingImpl;
+import com.expleague.sensearch.index.Index;
 import com.expleague.sensearch.query.term.BaseTerm;
 import com.expleague.sensearch.query.term.Term;
 import java.util.ArrayList;
@@ -15,7 +18,7 @@ public class BaseQuery implements Query {
   private List<Term> terms;
   private Vec queryVector;
 
-  public BaseQuery(CharSequence queryString) {
+  public BaseQuery(CharSequence queryString, Index index) {
     //todo replace for "smart" tokenizer when it zavezut
     String regex = " ";
     Pattern pattern = Pattern.compile(regex);
@@ -23,10 +26,10 @@ public class BaseQuery implements Query {
 
     for (CharSequence word : pattern.split(queryString)) {
       this.terms.add(new BaseTerm(lemmer.myStem.parse(word).get(0),
-          EmbeddingImpl.getInstance().getVec(word.toString())));
+          index.getVec(word.toString())));
     }
 
-    this.queryVector = EmbeddingImpl.getInstance().getVec(this.terms);
+    this.queryVector = index.getVec(this.terms);
   }
 
   @Override
