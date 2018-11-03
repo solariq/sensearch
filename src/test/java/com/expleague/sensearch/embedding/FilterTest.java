@@ -1,6 +1,6 @@
 package com.expleague.sensearch.embedding;
 
-import com.expleague.sensearch.Constants;
+import com.expleague.sensearch.Config;
 import com.expleague.sensearch.donkey.crawler.CrawlerXML;
 import com.expleague.sensearch.index.Index;
 import com.expleague.sensearch.index.IndexedPage;
@@ -8,14 +8,13 @@ import com.expleague.sensearch.index.plain.PlainIndexBuilder;
 import com.expleague.sensearch.query.BaseQuery;
 import com.expleague.sensearch.query.Query;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.Before;
-import org.junit.Test;
-
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Stream;
+import org.junit.Before;
+import org.junit.Test;
 
 public class FilterTest {
 
@@ -32,8 +31,8 @@ public class FilterTest {
     @Before
     public void initIndex() throws Exception {
         byte[] jsonData = Files.readAllBytes(Paths.get("./paths.json"));
-        new ObjectMapper().readValue(jsonData, Constants.class);
-        index = new PlainIndexBuilder(Constants.getTemporaryIndex()).buildIndex(new CrawlerXML(Constants.getPathToZIP()).makeStream());
+        Config config = new ObjectMapper().readValue(jsonData, Config.class);
+        index = new PlainIndexBuilder(config).buildIndex(new CrawlerXML(config).makeStream());
     }
 
     @Test
