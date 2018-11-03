@@ -30,7 +30,7 @@ public class Config {
     return Paths.get(temporaryDocuments);
   }
 
-  public void setTemporaryDocuments(String temporaryDocuments) {
+  private void setTemporaryDocuments(String temporaryDocuments) {
     this.temporaryDocuments = temporaryDocuments;
   }
 
@@ -38,7 +38,7 @@ public class Config {
     return temporaryBigrams;
   }
 
-  public void setTemporaryBigrams(String temporaryBigrams) {
+  private void setTemporaryBigrams(String temporaryBigrams) {
     this.temporaryBigrams = temporaryBigrams;
   }
 
@@ -47,7 +47,7 @@ public class Config {
         .resolve(bigramsFileName);
   }
 
-  public void setBigramsFileName(String bigramsFileName) {
+  private void setBigramsFileName(String bigramsFileName) {
     this.bigramsFileName = bigramsFileName;
   }
 
@@ -55,7 +55,7 @@ public class Config {
     return getPathToZIP().toAbsolutePath().getParent().resolve(temporaryIndex);
   }
 
-  public void setTemporaryIndex(String temporaryIndex) {
+  private void setTemporaryIndex(String temporaryIndex) {
     this.temporaryIndex = temporaryIndex;
   }
 
@@ -63,7 +63,7 @@ public class Config {
     return webRoot;
   }
 
-  public void setWebRoot(String webRoot) {
+  private void setWebRoot(String webRoot) {
     this.webRoot = webRoot;
   }
 
@@ -71,7 +71,7 @@ public class Config {
     return myStem;
   }
 
-  public void setMyStem(String myStem) {
+  private void setMyStem(String myStem) {
     this.myStem = myStem;
   }
 
@@ -79,7 +79,7 @@ public class Config {
     return Paths.get(pathToZIP);
   }
 
-  public void setPathToZIP(String pathToZIP) {
+  private void setPathToZIP(String pathToZIP) {
     this.pathToZIP = pathToZIP;
   }
 
@@ -87,7 +87,7 @@ public class Config {
     return statisticsFileName;
   }
 
-  public void setStatisticsFileName(String statisticsFileName) {
+  private void setStatisticsFileName(String statisticsFileName) {
     this.statisticsFileName = statisticsFileName;
   }
 
@@ -96,7 +96,7 @@ public class Config {
     return embeddingVectors;
   }
 
-  public void setEmbeddingVectors(String embeddingVectors) {
+  private void setEmbeddingVectors(String embeddingVectors) {
     this.embeddingVectors = embeddingVectors;
   }
 
