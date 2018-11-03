@@ -4,6 +4,7 @@ import com.expleague.commons.math.vectors.Vec;
 import com.expleague.commons.math.vectors.VecTools;
 import com.expleague.commons.math.vectors.impl.vectors.ArrayVec;
 import com.expleague.commons.seq.CharSeqTools;
+import com.expleague.sensearch.Config;
 import com.expleague.sensearch.core.Embedding;
 import com.expleague.sensearch.index.IndexedPage;
 import com.expleague.sensearch.query.Query;
@@ -36,9 +37,9 @@ public class EmbeddingImpl implements Embedding {
   private Function<IndexedPage, Stream<String>> keyWordsFunc = page -> split(page.title());
   private boolean vecForDocMode = true;
 
-  private EmbeddingImpl() {
+  public EmbeddingImpl(Config config) {
     try (Reader input = new InputStreamReader(
-            new GZIPInputStream(new FileInputStream("resources/vectors.txt.gz")),
+            new GZIPInputStream(new FileInputStream(config.getEmbeddingVectors())),
             StandardCharsets.UTF_8)) {
       CharSeqTools.lines(input)
               .parallel()
@@ -58,13 +59,6 @@ public class EmbeddingImpl implements Embedding {
     }
   }
 
-  public static synchronized EmbeddingImpl getInstance() {
-    if (instance == null) {
-      instance = new EmbeddingImpl();
-    }
-    return instance;
-  }
-
   @Override
   public Vec getVec(String word) {
     return wordVecMap.get(word.toLowerCase());
@@ -80,6 +74,7 @@ public class EmbeddingImpl implements Embedding {
     return getArithmeticMean(getVecsForTerms(query).stream());
   }
 
+  @Override
   public Vec getVec(List<Term> terms) {
     return getArithmeticMean(terms.stream()
             .map(t -> getVec(t.getNormalized().toString()))
