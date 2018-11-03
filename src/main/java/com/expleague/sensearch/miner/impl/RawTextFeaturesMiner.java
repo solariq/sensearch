@@ -46,7 +46,7 @@ public class RawTextFeaturesMiner implements FeaturesMiner {
         .toArray(String[]::new);
 
     return new TextFeaturesImpl(
-        bm25Rank(query.getTerms(), contentTokens),
+        0,//bm25Rank(query.getTerms(), contentTokens),
         fuzzyRank(rawTerms, contentTokens),
         lmRank(rawTerms, contentTokens),
         dlhRank(rawTerms, contentTokens),
