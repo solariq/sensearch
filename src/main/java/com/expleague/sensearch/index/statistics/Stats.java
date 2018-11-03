@@ -7,7 +7,7 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
-import com.expleague.sensearch.donkey.crawler.document.CrawlerDocument;
+import com.expleague.sensearch.index.IndexedPage;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.core.JsonGenerationException;
 import com.fasterxml.jackson.core.JsonParseException;
@@ -18,13 +18,13 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 public class Stats {
 	
-	private Map<String, Long> numberOfDocumentsWithWord = new TreeMap<>();
-	private Map<String, Long> numberOfWordOccurences = new TreeMap<>();
-	private Map<Long, Long> documentLength = new TreeMap<>();
+	private Map<String, Integer> numberOfDocumentsWithWord = new TreeMap<>();
+	private Map<String, Integer> numberOfWordOccurences = new TreeMap<>();
+	private Map<Long, Integer> documentLength = new TreeMap<>();
 	
 	@JsonSerialize(keyUsing = PairSerializer.class)
 	@JsonDeserialize(keyUsing = PairDeserializer.class)
-	private Map<Pair, Long> frequencyInDocument = new TreeMap<>();
+	private Map<Pair, Integer> frequencyInDocument = new TreeMap<>();
 	
 	private long totalNumberOfDocuments;
 	private long totalLength;
@@ -35,13 +35,13 @@ public class Stats {
 	public double getBM25(Long documentID, String query) {
 		double res = 0;
 		for (String w : query.split("[^a-zA-Zа-яА-ЯЁё]+")) {
-			Long ni = numberOfDocumentsWithWord.get(w);
+			Integer ni = numberOfDocumentsWithWord.get(w);
 			if (ni == null)
-				ni = 0l;
+				ni = 0;
 			
-			Long fi = frequencyInDocument.get(new Pair(w, documentID));
+			Integer fi = frequencyInDocument.get(new Pair(w, documentID));
 			if (fi == null)
-				fi = 0l;
+				fi = 0;
 			
 			res += Math.log((totalNumberOfDocuments - ni + 0.5) / (ni + 0.5))
 					* fi * (k1 + 1) / (fi + k1 * (1 - b +
@@ -61,33 +61,33 @@ public class Stats {
 		mapper.writeValue(new File(filename), this);
 	}
 
-	private static <K, V> void inc(Map<K, Long> m, K key) {
-		Long value = m.get(key);
+	private static <K, V> void inc(Map<K, Integer> m, K key) {
+		Integer value = m.get(key);
 		if (value == null) {
-			value = 0l;
+			value = 0;
 		}
 		value = value + 1;
 		m.put(key, value);
 	}
 	
-	public void acceptDocument(CrawlerDocument doc) {
+	public void acceptDocument(IndexedPage doc) {
 		Set<String> wordSet = new TreeSet<>();
 		totalNumberOfDocuments++;
 		
-		String[] words = doc.getContent().toString().split("[^a-zA-Zа-яА-ЯЁё]+");
-		long docLength = 0;
+		String[] words = doc.text().toString().split("[^a-zA-Zа-яА-ЯЁё]+");
+		int docLength = 0;
 		
-		documentLength.put(doc.getID(), Long.valueOf(words.length));
+		documentLength.put(doc.id(), Integer.valueOf(words.length));
 		for (String w : words) {
 			if (!w.isEmpty()) {
 				docLength++;
 				wordSet.add(w);
 				inc(numberOfWordOccurences, w);
-				inc(frequencyInDocument, new Pair(w, doc.getID()));
+				inc(frequencyInDocument, new Pair(w, doc.id()));
 			}
 		}
 		
-		documentLength.put(doc.getID(), docLength);
+		documentLength.put(doc.id(), docLength);
 		totalLength += docLength;
 		
 		for (String w : wordSet) {
@@ -95,7 +95,7 @@ public class Stats {
 		}
 	}
 	
-	public Long getTermFrequencyInDocument(String term, Long document) {
+	public Integer getTermFrequencyInDocument(String term, Long document) {
 		return frequencyInDocument.get(new Pair(term, document));
 	}
 	
@@ -105,32 +105,32 @@ public class Stats {
 	}
 	
 	@JsonIgnore
-	public long getAverageDocumentLength() {
+	public double getAverageDocumentLength() {
 		return totalLength / totalNumberOfDocuments;
 	}
 	
 	// auto generated getters and setters for serialization
-	public Map<String, Long> getNumberOfDocumentsWithWord() {
+	public Map<String, Integer> getNumberOfDocumentsWithWord() {
 		return numberOfDocumentsWithWord;
 	}
 
-	public void setNumberOfDocumentsWithWord(Map<String, Long> numberOfDocumentsWithWord) {
+	public void setNumberOfDocumentsWithWord(Map<String, Integer> numberOfDocumentsWithWord) {
 		this.numberOfDocumentsWithWord = numberOfDocumentsWithWord;
 	}
 
-	public Map<String, Long> getNumberOfWordOccurences() {
+	public Map<String, Integer> getNumberOfWordOccurences() {
 		return numberOfWordOccurences;
 	}
 
-	public void setNumberOfWordOccurences(Map<String, Long> numberOfWordOccurences) {
+	public void setNumberOfWordOccurences(Map<String, Integer> numberOfWordOccurences) {
 		this.numberOfWordOccurences = numberOfWordOccurences;
 	}
 
-	public Map<Pair, Long> getFrequencyInDocument() {
+	public Map<Pair, Integer> getFrequencyInDocument() {
 		return frequencyInDocument;
 	}
 
-	public void setFrequencyInDocument(Map<Pair, Long> frequencyInDocument) {
+	public void setFrequencyInDocument(Map<Pair, Integer> frequencyInDocument) {
 		this.frequencyInDocument = frequencyInDocument;
 	}
 
@@ -150,11 +150,11 @@ public class Stats {
 		this.totalLength = totalLength;
 	}
 	
-	public Map<Long, Long> getDocumentLength() {
+	public Map<Long, Integer> getDocumentLength() {
 		return documentLength;
 	}
 
-	public void setDocumentLength(Map<Long, Long> documentLength) {
+	public void setDocumentLength(Map<Long, Integer> documentLength) {
 		this.documentLength = documentLength;
 	}
 }

@@ -3,7 +3,7 @@ package com.expleague.sensearch.index.plain;
 import com.expleague.sensearch.Page;
 import com.expleague.sensearch.core.Filter;
 import com.expleague.sensearch.index.Index;
-import com.expleague.sensearch.index.IndexedPage;
+import com.expleague.sensearch.index.statistics.Stats;
 import com.expleague.sensearch.query.Query;
 import com.expleague.sensearch.query.term.Term;
 import gnu.trove.set.TLongSet;
@@ -22,6 +22,9 @@ public class PlainIndex implements Index {
   private final TLongSet availableDocuments;
 
   private final Filter filter;
+  
+  private Stats statistics = new Stats();
+  
   PlainIndex(Path indexRoot, Filter filter) throws IOException {
     this.indexRoot = indexRoot;
     this.filter = filter;
@@ -31,6 +34,7 @@ public class PlainIndex implements Index {
         .filter(entry -> INDEX_ENTRY_NAME_PATTERN.matcher(
             entry.getFileName().toString()).matches()
         )
+        .peek(p -> statistics.acceptDocument(new PlainPage(p)))
         .mapToLong(entry -> Long.parseLong(entry.getFileName().toString()))
         .forEach(availableDocuments::add);
   }
@@ -49,21 +53,21 @@ public class PlainIndex implements Index {
 
   @Override
   public double averageWordsPerPage() {
-    throw new UnsupportedOperationException();
+    return statistics.getAverageDocumentLength();
   }
 
   @Override
   public int pagesWithTerm(Term term) {
-    throw new UnsupportedOperationException();
+    return statistics.getNumberOfDocumentsWithWord().get(term.getNormalized());
   }
 
   @Override
   public long termCollectionFrequency(Term term) {
-    throw new UnsupportedOperationException();
+    return statistics.getNumberOfDocumentsWithWord().get(term.getNormalized());
   }
 
   @Override
   public int vocabularySize() {
-    throw new UnsupportedOperationException();
+    return statistics.getVocabularySize();
   }
 }
