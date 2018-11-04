@@ -7,12 +7,7 @@ import com.expleague.sensearch.snippet.Segment;
 import com.expleague.sensearch.snippet.Snippet;
 import com.expleague.sensearch.web.Builder;
 
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.databind.SerializerProvider;
-import com.fasterxml.jackson.databind.ser.std.StdSerializer;
-import java.io.IOException;
 import java.net.URI;
-import java.nio.file.Paths;
 import java.util.*;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -29,7 +24,7 @@ public class SenSeArchImpl implements SenSeArch {
 
   @Override
   public ResultPage search(String query, int pageNo) {
-    final Set<? extends SearchPhase> phases = Stream.of(SearchPhase.FACTORIES).map(f -> {
+    final Set<SearchPhase> phases = Stream.of(SearchPhase.FACTORIES).map(f -> {
       f.setConfig(builder);
       return f.get();
     }).collect(Collectors.toSet());
@@ -39,9 +34,13 @@ public class SenSeArchImpl implements SenSeArch {
     final Whiteboard wb = new WhiteboardImpl(query, pageNo, builder);
     final ThreadPoolExecutor executor = new ThreadPoolExecutor(Runtime.getRuntime().availableProcessors() - 1, Runtime.getRuntime().availableProcessors() - 1 , 1, TimeUnit.SECONDS, new LinkedBlockingQueue<>());
     while(wb.snippets() == null) {
-      for (final SearchPhase phase : new ArrayList<>(phases)) {
-        if (!phase.test(wb))
+      List<SearchPhase> curPhases = new ArrayList<>(phases);
+      phases.clear();
+      for (final SearchPhase phase : curPhases) {
+        if (!phase.test(wb)) {
+          phases.add(phase);
           continue;
+        }
         executor.execute(() -> {
           phase.accept(wb);
           synchronized (wb) {

@@ -1,6 +1,9 @@
 package com.expleague.sensearch.core;
 
 import com.expleague.commons.text.lemmer.MyStem;
+import com.expleague.sensearch.Config;
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -23,7 +26,10 @@ public class Lemmer {
 
   public static synchronized Lemmer getInstance() {
     if (instance == null) {
-      instance = new Lemmer(myStemPath);
+      // TODO(tehnar): REFACTOR THIS
+      // Making Lemmer @Singleton and @Inject-ing Config right now is a bit hard as we'll have to propagate
+      // changes along all the codebase up to refactoring SearchPhase
+      instance = new Lemmer(Paths.get("./resources/mystem"));
     }
     return instance;
   }
