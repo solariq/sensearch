@@ -11,12 +11,15 @@ import com.expleague.sensearch.donkey.crawler.CrawlerXML;
 import com.expleague.sensearch.index.Index;
 import com.expleague.sensearch.index.plain.PlainIndexBuilder;
 import com.expleague.sensearch.web.suggest.BigramsBasedSuggestor;
+import com.google.inject.Singleton;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import javax.inject.Inject;
 import javax.xml.stream.XMLStreamException;
 
+@Singleton
 public class Builder {
 
   private ObjectMapper objectMapper = new ObjectMapper();
@@ -28,18 +31,9 @@ public class Builder {
   private Path configPath;
   private Config config;
 
-  public Builder(Path pathToConfig) {
-    configPath = pathToConfig;
-    init();
-  }
-
-  private void init() {
-    try {
-      byte[] jsonData = Files.readAllBytes(configPath);
-      config = objectMapper.readValue(jsonData, Config.class);
-    } catch (IOException e) {
-      e.printStackTrace();
-    }
+  @Inject
+  public Builder(Config config) {
+    this.config = config;
   }
 
   Config build() throws IOException, XMLStreamException {

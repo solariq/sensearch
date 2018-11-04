@@ -13,6 +13,7 @@ import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 import java.io.IOException;
 import java.util.List;
+import javax.inject.Inject;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -33,6 +34,8 @@ public class SearchEndpoint {
   private final SenSeArch search;
   private final Suggestor suggestor;
 
+  // Note: this is javax @Inject, not Guice's as Jersey uses HK2 DI under the hood
+  @Inject
   public SearchEndpoint(Builder builder) {
     search = builder.getSearcher();
     suggestor = builder.getSuggestor();

@@ -5,6 +5,8 @@
 .idea/**/workspace.xml
 .idea/**/tasks.xml
 .idea/dictionaries
+.idea/compiler.xml
+.idea/modules.xml
 
 # Sensitive or high-churn files:
 .idea/**/dataSources/
