@@ -23,7 +23,9 @@ import java.util.stream.Collectors;
  */
 public class SnippetsCreator {
 
-  private static final int PASSAGES_IN_SNIPPET = 4;
+  private static final long PASSAGES_IN_SNIPPET = 4;
+  private static final long NUMBER_OF_KEYWORDS = 6;
+  private static final double ALPHA = .4;
 
   private static final Pattern splitEnglish = Pattern.compile(
       "(?<=[.!?]|[.!?]['\"])(?<!Mr\\.|Mrs\\.|Ms\\.|Jr\\.|Dr\\.|Prof\\.|Vol\\.|A\\.D\\.|B\\.C\\.|Sr\\.|T\\.V\\.A\\.)\\s+");
@@ -113,8 +115,8 @@ public class SnippetsCreator {
           return new KeyWord(x, w);
         })
         .sorted(Comparator.comparingDouble(KeyWord::getRank).reversed())
-        .collect(Collectors.toList())
-        .subList(0, Math.min(6, uniqueWords.size()));
+        .limit(NUMBER_OF_KEYWORDS)
+        .collect(Collectors.toList());
 /*
     for (KeyWord word : keyWords) {
       System.out.println(word.getWord() + " " + word.getRank());
@@ -138,18 +140,19 @@ public class SnippetsCreator {
         .get()
         .getRating();
 
-    double alpha = 0.4;
 
     for (int i = 0; i < passages.size(); i++) {
       double rating = passages.get(i).getRating();
-      double newRating = alpha * rating / best + (1 - alpha) * (1.0 - (i - 1.0) / passages.size());
+      double newRating = ALPHA * rating / best + (1 - ALPHA) * (1. - (i - 1.) / passages.size());
       passages.get(i).setRating(newRating);
     }
 
-    passages.sort(Comparator.comparing(Passage::getRating).reversed());
-
-    List<Passage> bestPassages = passages.subList(0, Math.min(PASSAGES_IN_SNIPPET, passages.size()));
-    bestPassages.sort(Comparator.comparingLong(Passage::getId));
+    List<Passage> bestPassages = passages
+        .stream()
+        .sorted(Comparator.comparing(Passage::getRating).reversed())
+        .limit(PASSAGES_IN_SNIPPET)
+        .sorted(Comparator.comparingLong(Passage::getId))
+        .collect(Collectors.toList());
 
     return new DocBasedSnippet(title, bestPassages, query);
   }
