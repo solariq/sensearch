@@ -114,7 +114,7 @@ public class SnippetsCreator {
         })
         .sorted(Comparator.comparingDouble(KeyWord::getRank).reversed())
         .collect(Collectors.toList())
-        .subList(0, Math.min(6, passages.size()));
+        .subList(0, Math.min(6, uniqueWords.size()));
 /*
     for (KeyWord word : keyWords) {
       System.out.println(word.getWord() + " " + word.getRank());
