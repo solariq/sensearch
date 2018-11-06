@@ -18,7 +18,7 @@ export class SearchPageComponent implements OnInit {
 
   suggestions: Observable<string[]>;
   searchResults: SearchResultItemModel[];
-
+  isSearchActive: boolean;
   autocompleteControl = new FormControl();
 
   constructor(private searchService: SearchService) { }
@@ -31,10 +31,12 @@ export class SearchPageComponent implements OnInit {
   }
 
   search() {
+    this.isSearchActive = true;
     this.triggerAutocompleteInput.closePanel();
     this.searchService.getResults$(this.autocompleteControl.value, 0).subscribe(
-      results => this.searchResults = results);
-
-    this.triggerAutocompleteInput.closePanel();
+      results => {
+        this.isSearchActive = false;
+        this.searchResults = results;
+      });
   }
 }

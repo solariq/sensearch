@@ -1,14 +1,16 @@
-import { BrowserModule } from '@angular/platform-browser';
-import { NgModule } from '@angular/core';
+import {BrowserModule} from '@angular/platform-browser';
+import {NgModule} from '@angular/core';
 
-import { AppComponent } from './app.component';
-import { SearchPageComponent } from './components/search-page/search-page.component';
+import {AppComponent} from './app.component';
+import {SearchPageComponent} from './components/search-page/search-page.component';
 import {SearchResultComponent} from "./components/search-result/search-result.component";
 import {
   MatAutocompleteModule,
   MatButtonModule,
-  MatFormFieldModule, MatIconModule,
-  MatInputModule
+  MatFormFieldModule,
+  MatIconModule,
+  MatInputModule,
+  MatProgressBarModule
 } from "@angular/material";
 import {FormsModule, ReactiveFormsModule} from "@angular/forms";
 import {HttpClientModule} from "@angular/common/http";
@@ -31,6 +33,7 @@ import {BrowserAnimationsModule} from "@angular/platform-browser/animations";
     MatFormFieldModule,
     MatIconModule,
     MatInputModule,
+    MatProgressBarModule,
     ReactiveFormsModule,
   ],
   providers: [],
