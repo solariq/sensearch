@@ -15,6 +15,7 @@ import {
 import {FormsModule, ReactiveFormsModule} from "@angular/forms";
 import {HttpClientModule} from "@angular/common/http";
 import {BrowserAnimationsModule} from "@angular/platform-browser/animations";
+import {RouterModule} from "@angular/router";
 
 @NgModule({
   bootstrap: [AppComponent],
@@ -35,6 +36,7 @@ import {BrowserAnimationsModule} from "@angular/platform-browser/animations";
     MatInputModule,
     MatProgressBarModule,
     ReactiveFormsModule,
+    RouterModule.forRoot([]),
   ],
   providers: [],
 })

@@ -6,9 +6,12 @@ import com.expleague.sensearch.core.impl.WhiteboardImpl;
 import com.expleague.sensearch.snippet.Segment;
 import com.expleague.sensearch.snippet.Snippet;
 import com.expleague.sensearch.web.Builder;
-
 import java.net.URI;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Objects;
+import java.util.Set;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -33,7 +36,10 @@ public class SenSeArchImpl implements SenSeArch {
 
     final Whiteboard wb = new WhiteboardImpl(query, pageNo, builder);
     final ThreadPoolExecutor executor = new ThreadPoolExecutor(Runtime.getRuntime().availableProcessors() - 1, Runtime.getRuntime().availableProcessors() - 1 , 1, TimeUnit.SECONDS, new LinkedBlockingQueue<>());
-    while(wb.snippets() == null) {
+
+    boolean[] hasError = new boolean[1];
+
+    while(!hasError[0] && wb.snippets() == null) {
       List<SearchPhase> curPhases = new ArrayList<>(phases);
       phases.clear();
       for (final SearchPhase phase : curPhases) {
@@ -42,9 +48,17 @@ public class SenSeArchImpl implements SenSeArch {
           continue;
         }
         executor.execute(() -> {
-          phase.accept(wb);
-          synchronized (wb) {
-            wb.notify();
+          try {
+            phase.accept(wb);
+            synchronized (wb) {
+              wb.notify();
+            }
+          } catch (Exception e) {
+            synchronized (wb) {
+              e.printStackTrace();
+              hasError[0] = true;
+              wb.notify();
+            }
           }
         });
       }
@@ -54,6 +68,10 @@ public class SenSeArchImpl implements SenSeArch {
         }
         catch (InterruptedException ignore) { }
       }
+    }
+
+    if (hasError[0]) {
+      throw new RuntimeException("Failed to process query");
     }
 
     final com.expleague.sensearch.Page[] pages = Objects.requireNonNull(wb.results());

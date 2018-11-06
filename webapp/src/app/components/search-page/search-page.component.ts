@@ -5,6 +5,7 @@ import {debounceTime, switchMap} from "rxjs/operators";
 import {FormControl} from "@angular/forms";
 import {SearchResultItemModel} from "../../models/search-result-item.model";
 import {MatAutocompleteTrigger} from "@angular/material";
+import {ActivatedRoute, Router} from "@angular/router";
 
 @Component({
   selector: 'app-search-page',
@@ -17,26 +18,48 @@ export class SearchPageComponent implements OnInit {
   @ViewChild('autocompleteInput', { read: MatAutocompleteTrigger }) triggerAutocompleteInput: MatAutocompleteTrigger;
 
   suggestions: Observable<string[]>;
+
   searchResults: SearchResultItemModel[];
+  error: string;
+
   isSearchActive: boolean;
   autocompleteControl = new FormControl();
 
-  constructor(private searchService: SearchService) { }
+  constructor(
+    private searchService: SearchService,
+    private router: Router,
+    private route: ActivatedRoute) { }
 
   ngOnInit() {
     this.suggestions = this.autocompleteControl.valueChanges.pipe(
       debounceTime(this.DEBOUNCE_TIME),
       switchMap(query => this.searchService.getSuggestions$(query))
-    )
+    );
+
+    this.route.queryParams.subscribe(params => {
+      if (params['search']) {
+        this.autocompleteControl.setValue(params['search']);
+        this.search();
+      }
+    });
   }
 
   search() {
+    this.router.navigate(['.'], {queryParams: {search: this.autocompleteControl.value}});
+    console.log(this.autocompleteControl.value);
     this.isSearchActive = true;
     this.triggerAutocompleteInput.closePanel();
+
     this.searchService.getResults$(this.autocompleteControl.value, 0).subscribe(
       results => {
         this.isSearchActive = false;
+        this.error = undefined;
         this.searchResults = results;
+      },
+      error => {
+        this.isSearchActive = false;
+        this.error = error.statusText;
+        this.searchResults = undefined;
       });
   }
 }

@@ -21,3 +21,7 @@
 
 <app-search-result *ngFor="let searchItem of searchResults" [searchItem]="searchItem">
 </app-search-result>
+
+<div *ngIf="error">
+  {{error}}
+</div>
