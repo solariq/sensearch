@@ -24,7 +24,7 @@ import java.util.zip.GZIPInputStream;
 
 public class EmbeddingImpl implements Embedding {
 
-  private static final int VEC_SIZE = 130;
+  private static final int VEC_SIZE = 50;
   private static final double EPSILON = 10e-9;
 
   private static EmbeddingImpl instance;

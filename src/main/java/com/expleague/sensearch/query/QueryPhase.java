@@ -2,7 +2,6 @@ package com.expleague.sensearch.query;
 
 import com.expleague.sensearch.core.SearchPhase;
 import com.expleague.sensearch.core.Whiteboard;
-import com.expleague.sensearch.web.Builder;
 
 public class QueryPhase implements SearchPhase {
   @Override
@@ -13,6 +12,6 @@ public class QueryPhase implements SearchPhase {
   @Override
   public void accept(Whiteboard whiteboard) {
     final String input = whiteboard.input();
-    whiteboard.putQuery(new BaseQuery(input, whiteboard.builder().getIndex()));
+    whiteboard.putQuery(new BaseQuery(input, whiteboard.builder().getIndex(), whiteboard.builder().getLemmer()));
   }
 }

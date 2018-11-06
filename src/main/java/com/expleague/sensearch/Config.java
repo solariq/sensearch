@@ -67,8 +67,8 @@ public class Config {
     this.webRoot = webRoot;
   }
 
-  public String getMyStem() {
-    return myStem;
+  public Path getMyStem() {
+    return Paths.get(myStem);
   }
 
   private void setMyStem(String myStem) {

@@ -33,10 +33,8 @@ public class SnippetsCreator {
       .compile("(?<=[.!?]|[.!?]['\"])(?<!\\(р\\.|\\(род\\.|[А-Я]\\.)");
 
   private static final Pattern splitPattern = splitRussian;
-  private static final Lemmer lemmer = Lemmer.getInstance();
 
-  public Snippet getSnippet(Page document, Query query) {
-
+  public Snippet getSnippet(Page document, Query query, Lemmer lemmer) {
     CharSequence title = document.title();
     CharSequence content = document.text();
 

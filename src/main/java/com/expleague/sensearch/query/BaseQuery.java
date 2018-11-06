@@ -12,11 +12,10 @@ import java.util.regex.Pattern;
 
 public class BaseQuery implements Query {
 
-  private Lemmer lemmer = Lemmer.getInstance();
   private List<Term> terms;
   private Vec queryVector;
 
-  public BaseQuery(CharSequence queryString, Index index) {
+  public BaseQuery(CharSequence queryString, Index index, Lemmer lemmer) {
     //todo replace for "smart" tokenizer when it zavezut
     String regex = " ";
     Pattern pattern = Pattern.compile(regex);
