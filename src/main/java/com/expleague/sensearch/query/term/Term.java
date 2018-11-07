@@ -1,6 +1,7 @@
 package com.expleague.sensearch.query.term;
 
 import com.expleague.commons.math.vectors.Vec;
+import com.expleague.commons.text.lemmer.LemmaInfo;
 
 public interface Term {
 
@@ -9,4 +10,6 @@ public interface Term {
   public CharSequence getNormalized();
 
   public Vec getVector();
+
+  public LemmaInfo getLemma();
 }

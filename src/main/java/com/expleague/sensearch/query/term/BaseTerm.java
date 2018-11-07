@@ -34,6 +34,7 @@ public class BaseTerm implements Term {
     return this.vector;
   }
 
+  @Override
   public LemmaInfo getLemma() {
     return this.wordInfo.lemma();
   }
