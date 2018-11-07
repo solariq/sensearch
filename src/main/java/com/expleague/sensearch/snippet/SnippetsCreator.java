@@ -1,15 +1,14 @@
 package com.expleague.sensearch.snippet;
 
+import com.expleague.commons.text.lemmer.LemmaInfo;
 import com.expleague.commons.text.lemmer.PartOfSpeech;
-import com.expleague.commons.text.lemmer.WordInfo;
 import com.expleague.sensearch.Page;
 import com.expleague.sensearch.core.Lemmer;
 import com.expleague.sensearch.query.Query;
+import com.expleague.sensearch.query.term.BaseTerm;
 import com.expleague.sensearch.snippet.docbased_snippet.DocBasedSnippet;
 import com.expleague.sensearch.snippet.docbased_snippet.KeyWord;
 import com.expleague.sensearch.snippet.passage.Passage;
-import com.expleague.sensearch.snippet.passage.Passages;
-
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
@@ -34,6 +33,13 @@ public class SnippetsCreator {
 
   private static final Pattern splitPattern = splitRussian;
 
+  private boolean contains(Lemmer lemmer, CharSequence s, CharSequence t) {
+    return lemmer.myStem
+        .parse(s)
+        .stream()
+        .anyMatch(x -> (x.lemma() == null ? x.token() : x.lemma().lemma()) == t);
+  }
+
   public Snippet getSnippet(Page document, Query query, Lemmer lemmer) {
     CharSequence title = document.title();
     CharSequence content = document.text();
@@ -46,39 +52,28 @@ public class SnippetsCreator {
     for (int i = 0; i < passages.size(); i++) {
       passages.get(i).setId(i);
     }
-/*
-    System.out.println(passages.size());
-    for (Passage x : passages) {
-      System.out.println(x.getSentence());
-    }
-*/
-    Set<CharSequence> uniqueWords = passages
+
+    Set<KeyWord> uniqueWords = passages
         .stream()
-        .flatMap(x -> lemmer.myStem
-            .parse(x
+        .flatMap(passage -> lemmer.myStem
+            .parse(passage
                 .getSentence()
                 .toString()
                 .toLowerCase())
             .stream()
-            .map(WordInfo::token)
+            .map(wordInfo -> new KeyWord(new BaseTerm(wordInfo), 0))
         )
         .collect(Collectors.toSet());
-/*
-    System.out.println(uniqueWords.size());
-    for (CharSequence word : uniqueWords) {
-      System.out.println(word);
-    }
-*/
 
     Predicate<Passage> queryRelevant = y -> query
         .getTerms()
         .stream()
-        .anyMatch(x -> Passages.contains(y.getSentence(), x.getRaw()));
+        .anyMatch(x -> contains(lemmer, y.getSentence(), x.getNormalized()));
 
     Predicate<Passage> notQueryRelevant = y -> query
         .getTerms()
         .stream()
-        .noneMatch(x -> Passages.contains(y.getSentence(), x.getRaw()));
+        .noneMatch(x -> contains(lemmer, y.getSentence(), x.getNormalized()));
 
     List<Passage> passagesWithQueryWords = passages
         .stream()
@@ -93,39 +88,35 @@ public class SnippetsCreator {
     List<KeyWord> keyWords = uniqueWords
         .stream()
         .filter(x -> {
-          WordInfo wordInfo = lemmer.myStem.parse(x).get(0);
-          if (wordInfo == null || wordInfo.lemma() == null) {
+          LemmaInfo lemmaInfo = x.getWord().getLemma();
+          if (lemmaInfo == null) {
             return false;
           }
-          PartOfSpeech partOfSpeech = wordInfo.lemma().pos();
+          PartOfSpeech partOfSpeech = lemmaInfo.pos();
           return partOfSpeech == PartOfSpeech.S || partOfSpeech == PartOfSpeech.V;
         })
-        .map(x -> {
+        .peek(x -> {
           long r = passagesWithQueryWords.stream()
-              .filter(y -> Passages.contains(y.getSentence(), x))
+              .filter(y -> contains(lemmer, y.getSentence(), x.getWord().getNormalized()))
               .count();
           long R = passagesWithQueryWords.size();
           long s = passagesWithoutQueryWords.stream()
-              .filter(y -> Passages.contains(y.getSentence(), x))
+              .filter(y -> contains(lemmer, y.getSentence(), x.getWord().getNormalized()))
               .count();
           long S = passagesWithoutQueryWords.size();
           double w = Math.log((r + 0.5) * (S - s + 0.5) / ((R - r + 0.5) * (s + 0.5)));
-          return new KeyWord(x, w);
+          x.setRank(w);
         })
         .sorted(Comparator.comparingDouble(KeyWord::getRank).reversed())
         .limit(NUMBER_OF_KEYWORDS)
         .collect(Collectors.toList());
-/*
-    for (KeyWord word : keyWords) {
-      System.out.println(word.getWord() + " " + word.getRank());
-    }
-*/
+
     passages = passages
         .stream()
         .peek(x -> {
           double rank = keyWords
               .stream()
-              .filter(y -> Passages.contains(x.getSentence(), y.getWord()))
+              .filter(y -> contains(lemmer, x.getSentence(), y.getWord().getNormalized()))
               .mapToDouble(KeyWord::getRank)
               .sum();
           x.setRating(rank);
@@ -137,7 +128,6 @@ public class SnippetsCreator {
         .max(Comparator.comparingDouble(Passage::getRating))
         .get()
         .getRating();
-
 
     for (int i = 0; i < passages.size(); i++) {
       double rating = passages.get(i).getRating();
