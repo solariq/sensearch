@@ -1,19 +1,37 @@
 package com.expleague.sensearch.snippet.docbased_snippet;
 
+import com.expleague.sensearch.query.term.Term;
+
 public class KeyWord {
-  private CharSequence word;
+  private Term word;
   private double rank;
 
-  public KeyWord(CharSequence word, double rank) {
+  public KeyWord(Term word, double rank) {
     this.word = word;
     this.rank = rank;
   }
 
-  public CharSequence getWord() {
+  public Term getWord() {
     return word;
   }
 
   public double getRank() {
     return rank;
+  }
+  public void setRank(double rank) {
+    this.rank = rank;
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (o instanceof KeyWord) {
+      return this.word.getNormalized() == ((KeyWord) o).word.getNormalized();
+    }
+    return false;
+  }
+
+  @Override
+  public int hashCode() {
+    return word.getNormalized().hashCode();
   }
 }
