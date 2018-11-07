@@ -25,6 +25,7 @@ public class BaseTerm implements Term {
 
   @Override
   public CharSequence getNormalized() {
+    if (wordInfo.lemma() == null) return getRaw();
     return this.wordInfo.lemma().lemma();
   }
 
