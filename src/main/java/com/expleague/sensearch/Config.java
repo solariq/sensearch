@@ -23,6 +23,8 @@ public class Config {
 
   private String pathToZIP;
 
+  private String pathToMetrics;
+
   private int pageSize = 10;
 
 
@@ -100,4 +102,11 @@ public class Config {
     this.embeddingVectors = embeddingVectors;
   }
 
+  public Path getPathToMetrics() {
+    return Paths.get(pathToMetrics);
+  }
+
+  private void setPathToMetrics(String pathToMetrics) {
+    this.pathToMetrics = pathToMetrics;
+  }
 }

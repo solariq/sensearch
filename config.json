@@ -14,5 +14,7 @@
 
   "myStem": "./resources/mystem",
 
-  "pathToZIP": "../WikiDocs/Mini_Wiki.zip"
+  "pathToZIP": "../WikiDocs/Mini_Wiki.zip",
+
+  "pathToMetrics": "./resources/Metrics"
 }
