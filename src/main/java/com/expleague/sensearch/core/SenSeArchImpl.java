@@ -3,6 +3,7 @@ package com.expleague.sensearch.core;
 import com.expleague.commons.util.Pair;
 import com.expleague.sensearch.SenSeArch;
 import com.expleague.sensearch.core.impl.WhiteboardImpl;
+import com.expleague.sensearch.metrics.Metric;
 import com.expleague.sensearch.snippet.Segment;
 import com.expleague.sensearch.snippet.Snippet;
 import com.expleague.sensearch.web.Builder;
@@ -20,9 +21,11 @@ import java.util.stream.Stream;
 
 public class SenSeArchImpl implements SenSeArch {
   private final Builder builder;
+  private final Metric metric;
 
   public SenSeArchImpl(Builder builder){
     this.builder = builder;
+    metric = new Metric(builder.getPathToMetrics());
   }
 
   @Override
@@ -87,6 +90,7 @@ public class SenSeArchImpl implements SenSeArch {
           0);
     }
 
+    metric.calculate(query, result);
     return new ResultPageImpl(0, snippets.length, results);
   }
 

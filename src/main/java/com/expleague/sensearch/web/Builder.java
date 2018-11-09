@@ -13,6 +13,7 @@ import com.expleague.sensearch.web.suggest.BigramsBasedSuggestor;
 import com.expleague.sensearch.web.suggest.Suggestor;
 import com.google.inject.Singleton;
 import java.io.IOException;
+import java.nio.file.Path;
 import javax.inject.Inject;
 import javax.xml.stream.XMLStreamException;
 
@@ -71,5 +72,9 @@ public class Builder {
 
   public Lemmer getLemmer() {
     return lemmer;
+  }
+
+  public Path getPathToMetrics() {
+    return config.getPathToMetrics();
   }
 }

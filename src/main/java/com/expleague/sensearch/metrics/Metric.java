@@ -2,25 +2,34 @@ package com.expleague.sensearch.metrics;
 
 import com.expleague.sensearch.SenSeArch.ResultItem;
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.net.URL;
 import java.net.URLConnection;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class Metric {
+
   private String googleRequest = "https://www.google.ru/search?q=Википедия:";
   private Path pathToMetrics;
   private UserAgents userAgents = new UserAgents();
 
-  public Metric(Path pathToMetric) throws IOException {
+  public Metric(Path pathToMetric) {
     pathToMetrics = pathToMetric;
-    Files.createDirectories(pathToMetrics);
+    try {
+      Files.createDirectories(pathToMetrics);
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
   }
 
   private List<String> getCookies() throws IOException {
@@ -49,49 +58,83 @@ public class Metric {
     return null;
   }
 
-  private List<String> getGoogleTitles(Integer size, String query) throws IOException {
+  private Map<String, Integer> getGoogleTitles(Integer size, String query) {
     List<String> result = new ArrayList<>();
     while (result.size() < size) {
-      String request = googleRequest + query.replace(" ", "%20")
-          + "&start=" + result.size();
-      URL url = new URL(request);
-      URLConnection connection = url.openConnection();
-      setCookies(connection);
-      userAgents.setAnyAgent(connection);
+      try {
+        String request = googleRequest + query.replace(" ", "%20")
+            + "&start=" + result.size();
+        URL url = new URL(request);
+        URLConnection connection = url.openConnection();
+        setCookies(connection);
+        userAgents.setAnyAgent(connection);
 
-      BufferedReader br = new BufferedReader(
-          new InputStreamReader(connection.getInputStream()));
-      boolean check = false;
+        BufferedReader br = new BufferedReader(
+            new InputStreamReader(connection.getInputStream()));
+        boolean check = false;
 
-      String line;
-      while ((line = br.readLine()) != null) {
-        Matcher matcher = Pattern.compile("<h3 class=\"LC20lb\">.*?</h3>").matcher(line);
-        while (matcher.find()) {
-          String title = normalizeTitle(matcher.group(0));
-          if (title != null) {
-            check = true;
-            result.add(title);
+        String line;
+        while ((line = br.readLine()) != null) {
+          Matcher matcher = Pattern.compile("<h3 class=\"LC20lb\">.*?</h3>").matcher(line);
+          while (matcher.find()) {
+            String title = normalizeTitle(matcher.group(0));
+            if (title != null) {
+              check = true;
+              result.add(title);
+            }
           }
         }
-      }
-      br.close();
+        br.close();
 
-      if (!check) {
-        break;
+        if (!check) {
+          break;
+        }
+      } catch (IOException ignored) {
       }
     }
-    return null;
+    Integer cnt = 1;
+    Map<String, Integer> answer = new HashMap<>();
+    for (String title : result) {
+      answer.put(title, cnt++);
+    }
+    return answer;
   }
 
-  public void calculate(String query, ResultItem[] resultItems) throws IOException {
+  public void calculate(String query, ResultItem[] resultItems) {
 
     List<String> ourTitles = new ArrayList<>();
     for (ResultItem r : resultItems) {
       ourTitles.add(r.title().toString());
     }
 
-    List<String> googleTitles = getGoogleTitles(ourTitles.size(), query);
+    Map<String, Integer> googleTitles = getGoogleTitles(ourTitles.size(), query);
 
+    Path tmpPath = pathToMetrics.resolve(String.valueOf(query.hashCode()));
+    try {
+      Files.createDirectories(tmpPath);
+    } catch (IOException e) {
+      System.err.println("Can't create dir: " + query);
+    }
+
+    Double DCG = 0.0;
+    int ind = 0;
+    for (String title : ourTitles) {
+      Integer num = googleTitles.get(title);
+      if (num == null) {
+        num = 0;
+      } else {
+        num = 1 / num;
+      }
+      DCG += num / Math.log(2 + ind);
+      ind++;
+    }
+
+    try (BufferedWriter DCGWriter = new BufferedWriter(
+        new OutputStreamWriter(
+            Files.newOutputStream(tmpPath.resolve("METRIC"))))) {
+      DCGWriter.write(String.valueOf(DCG));
+    } catch (IOException ignored) {
+    }
   }
 
 }
