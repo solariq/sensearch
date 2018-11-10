@@ -19,7 +19,7 @@ import java.util.regex.Pattern;
 
 public class Metric {
 
-  private final String googleRequest = "https://www.google.ru/search?q=Википедия:";
+  private final String googleRequest = "https://www.google.ru/search?q=site:wikipedia.com";
   private Path pathToMetrics;
   private UserAgents userAgents = new UserAgents();
 
