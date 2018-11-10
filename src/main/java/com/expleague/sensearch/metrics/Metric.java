@@ -24,6 +24,8 @@ public class Metric {
   private final String googleRequest = "https://www.google.ru/search?q=site:wikipedia.com%20";
   private Path pathToMetrics;
   private UserAgents userAgents = new UserAgents();
+  private final String MAP_FILE = "MAP";
+  private final String METRIC_FILE = "METRIC";
 
   public Metric(Path pathToMetric) {
     pathToMetrics = pathToMetric;
@@ -36,17 +38,18 @@ public class Metric {
 
   private List<String> getCookies() throws IOException {
     URL urlG = new URL("https://www.google.ru/");
-    URLConnection con = urlG.openConnection();
+    URLConnection connection = urlG.openConnection();
 
-    return con.getHeaderFields().get("Set-Cookie");
+    return connection.getHeaderFields().get("Set-Cookie");
   }
 
   private void setCookies(URLConnection urlConnection) throws IOException {
     List<String> cookies = getCookies();
-    for (String cookie : cookies) {
-      urlConnection.addRequestProperty("Cookie", cookie.split(";", 2)[0]);
+    if (cookies != null) {
+      for (String cookie : cookies) {
+        urlConnection.addRequestProperty("Cookie", cookie.split(";", 2)[0]);
+      }
     }
-
   }
 
   private String normalizeTitle(String title) {
@@ -117,17 +120,18 @@ public class Metric {
       googleTitles = getGoogleTitles(ourTitles.size(), query);
       ObjectMapper objectMapper = new ObjectMapper();
       try {
-        objectMapper.writeValue(tmpPath.resolve("MAP").toFile(), googleTitles);
+        objectMapper.writeValue(tmpPath.resolve(MAP_FILE).toFile(), googleTitles);
       } catch (IOException e) {
         e.printStackTrace();
       }
     } else {
       ObjectMapper objectMapper = new ObjectMapper();
 
-      TypeReference<Map<String, Integer>> mapType = new TypeReference<Map<String,Integer>>() {};
+      TypeReference<Map<String, Integer>> mapType = new TypeReference<Map<String, Integer>>() {
+      };
 
       try {
-        googleTitles = objectMapper.readValue(tmpPath.resolve("MAP").toFile(), mapType);
+        googleTitles = objectMapper.readValue(tmpPath.resolve(MAP_FILE).toFile(), mapType);
       } catch (IOException e) {
         e.printStackTrace();
       }
@@ -149,7 +153,7 @@ public class Metric {
     System.err.println(DCG);
     try (BufferedWriter DCGWriter = new BufferedWriter(
         new OutputStreamWriter(
-            Files.newOutputStream(tmpPath.resolve("METRIC"))))) {
+            Files.newOutputStream(tmpPath.resolve(METRIC_FILE))))) {
       DCGWriter.write(String.valueOf(DCG));
     } catch (IOException e) {
       e.printStackTrace();
