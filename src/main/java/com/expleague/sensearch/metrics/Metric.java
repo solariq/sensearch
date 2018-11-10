@@ -19,7 +19,7 @@ import java.util.regex.Pattern;
 
 public class Metric {
 
-  private String googleRequest = "https://www.google.ru/search?q=Википедия:";
+  private final String googleRequest = "https://www.google.ru/search?q=Википедия:";
   private Path pathToMetrics;
   private UserAgents userAgents = new UserAgents();
 
@@ -59,11 +59,12 @@ public class Metric {
   }
 
   private Map<String, Integer> getGoogleTitles(Integer size, String query) {
-    List<String> result = new ArrayList<>();
-    while (result.size() < size) {
+    Map<String, Integer> answer = new HashMap<>();
+    Integer ourSize = 0;
+    while (ourSize < size) {
       try {
         String request = googleRequest + query.replace(" ", "%20")
-            + "&start=" + result.size();
+            + "&start=" + ourSize;
         URL url = new URL(request);
         URLConnection connection = url.openConnection();
         setCookies(connection);
@@ -78,24 +79,19 @@ public class Metric {
           Matcher matcher = Pattern.compile("<h3 class=\"LC20lb\">.*?</h3>").matcher(line);
           while (matcher.find()) {
             String title = normalizeTitle(matcher.group(0));
+            ourSize++;
             if (title != null) {
               check = true;
-              result.add(title);
+              answer.put(title, ourSize);
             }
           }
         }
         br.close();
-
         if (!check) {
           break;
         }
       } catch (IOException ignored) {
       }
-    }
-    Integer cnt = 1;
-    Map<String, Integer> answer = new HashMap<>();
-    for (String title : result) {
-      answer.put(title, cnt++);
     }
     return answer;
   }
@@ -113,7 +109,7 @@ public class Metric {
     try {
       Files.createDirectories(tmpPath);
     } catch (IOException e) {
-      System.err.println("Can't create dir: " + query);
+      System.err.println("Can't create directory: " + query);
     }
 
     Double DCG = 0.0;
