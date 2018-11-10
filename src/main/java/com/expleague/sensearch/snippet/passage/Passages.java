@@ -1,13 +1,23 @@
 package com.expleague.sensearch.snippet.passage;
 
+import com.expleague.sensearch.core.Lemmer;
+import com.expleague.sensearch.query.term.BaseTerm;
+import com.expleague.sensearch.query.term.Term;
 import com.expleague.sensearch.snippet.Segment;
 import java.util.ArrayList;
 import java.util.List;
 
 public class Passages {
 
-  public static boolean contains(CharSequence s, CharSequence t) {
-    return containsSelection(s, t).size() > 0;
+  public static boolean contains(Lemmer lemmer, CharSequence s, CharSequence t) {
+    /*return lemmer.myStem
+        .parse(s)
+        .stream()
+        .anyMatch(x -> {
+          Term term = new BaseTerm(x);
+          return term.getNormalized() == t;
+        });*/
+    return !containsSelection(s, t).isEmpty();
   }
 
   public static List<Segment> containsSelection(CharSequence text, CharSequence t) {

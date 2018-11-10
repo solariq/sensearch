@@ -13,20 +13,27 @@ import java.util.stream.Collectors;
 public class DocBasedSnippet implements Snippet {
   private CharSequence title;
   private CharSequence content;
-  private List<Segment> selection = new ArrayList<>();
+  private List<Segment> selection;
 
   public DocBasedSnippet(CharSequence title, List<Passage> passages, Query query) {
     this.title = title;
-    this.content = passages.stream()
-        .map(Passage::getSentence)
-        .collect(Collectors.joining());
+
+    StringBuilder sb = new StringBuilder();
+    for (int i = 0; i < passages.size(); ++i) {
+      if (i > 0 && passages.get(i-1).getId() + 1 < passages.get(i).getId()) {
+        sb.append(" ... ");
+      }
+      sb.append(passages.get(i).getSentence());
+    }
+    this.content = sb;
+
     this.selection = query
         .getTerms()
         .stream()
         .flatMap(x -> Passages.containsSelection(content, x.getRaw())
             .stream())
+        .sorted(Comparator.comparingInt(Segment::getLeft))
         .collect(Collectors.toList());
-    selection.sort(Comparator.comparingInt(Segment::getLeft));
   }
 
   @Override

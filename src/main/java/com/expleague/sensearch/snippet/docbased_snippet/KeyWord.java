@@ -25,7 +25,7 @@ public class KeyWord {
   @Override
   public boolean equals(Object o) {
     if (o instanceof KeyWord) {
-      return this.word.getNormalized() == ((KeyWord) o).word.getNormalized();
+      return this.word.getNormalized().equals(((KeyWord) o).word.getNormalized());
     }
     return false;
   }
