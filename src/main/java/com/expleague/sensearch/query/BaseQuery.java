@@ -21,8 +21,7 @@ public class BaseQuery implements Query {
     terms = new ArrayList<>();
 
     for (CharSequence word : pattern.split(queryString)) {
-      this.terms.add(new BaseTerm(lemmer.myStem.parse(word).get(0),
-          index.getVec(word.toString())));
+      this.terms.add(new BaseTerm(lemmer.myStem.parse(word).get(0)));
     }
 
   }

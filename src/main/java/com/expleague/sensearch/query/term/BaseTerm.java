@@ -7,15 +7,9 @@ import com.expleague.commons.text.lemmer.WordInfo;
 public class BaseTerm implements Term {
 
   private WordInfo wordInfo;
-  private Vec vector;
 
   public BaseTerm(WordInfo wordInfo) {
     this.wordInfo = wordInfo;
-  }
-
-  public BaseTerm(WordInfo wordInfo, Vec vector) {
-    this.wordInfo = wordInfo;
-    this.vector = vector;
   }
 
   @Override
@@ -27,11 +21,6 @@ public class BaseTerm implements Term {
   public CharSequence getNormalized() {
     if (wordInfo.lemma() == null) return getRaw();
     return this.wordInfo.lemma().lemma();
-  }
-
-  @Override
-  public Vec getVector() {
-    return this.vector;
   }
 
   @Override
