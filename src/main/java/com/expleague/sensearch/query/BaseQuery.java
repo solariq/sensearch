@@ -13,7 +13,6 @@ import java.util.regex.Pattern;
 public class BaseQuery implements Query {
 
   private List<Term> terms;
-  private Vec queryVector;
 
   public BaseQuery(CharSequence queryString, Index index, Lemmer lemmer) {
     //todo replace for "smart" tokenizer when it zavezut
@@ -26,7 +25,6 @@ public class BaseQuery implements Query {
           index.getVec(word.toString())));
     }
 
-    this.queryVector = index.getVec(this.terms);
   }
 
   @Override
@@ -34,8 +32,4 @@ public class BaseQuery implements Query {
     return this.terms;
   }
 
-  @Override
-  public Vec getQueryVector() {
-    return this.queryVector;
-  }
 }

@@ -8,5 +8,4 @@ public interface Query {
 
   public List<Term> getTerms();
 
-  public Vec getQueryVector();
 }

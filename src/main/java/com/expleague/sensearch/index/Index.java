@@ -16,23 +16,4 @@ public interface Index extends IndexStatistics {
 
   Stream<Page> fetchDocuments(Query query);
 
-
-  /**
-   * Returns vector for the word
-   *
-   * @param word, for which you need vector
-   * @return vector
-   */
-  Vec getVec(String word);
-
-  /**
-   * Returns vector for the query
-   *
-   * @param query, for which you need vector
-   * @return vector
-   */
-  Vec getVec(Query query);
-
-  Vec getVec(List<Term> terms);
-
 }

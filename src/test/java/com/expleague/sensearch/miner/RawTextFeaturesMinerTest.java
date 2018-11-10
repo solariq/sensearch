@@ -1,6 +1,7 @@
 package com.expleague.sensearch.miner;
 
 import com.expleague.commons.math.vectors.Vec;
+import com.expleague.commons.text.lemmer.LemmaInfo;
 import com.expleague.sensearch.Page;
 import com.expleague.sensearch.index.Index;
 import com.expleague.sensearch.index.IndexedPage;
@@ -98,7 +99,7 @@ public class RawTextFeaturesMinerTest {
     }
 
     @Override
-    public Vec getVector() {
+    public LemmaInfo getLemma() {
       throw new UnsupportedOperationException();
     }
   }
@@ -118,10 +119,6 @@ public class RawTextFeaturesMinerTest {
       return terms;
     }
 
-    @Override
-    public Vec getQueryVector() {
-      throw new UnsupportedOperationException();
-    }
   }
 
   private static class PageStub implements IndexedPage {

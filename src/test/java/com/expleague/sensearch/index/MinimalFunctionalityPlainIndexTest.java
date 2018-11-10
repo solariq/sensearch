@@ -1,10 +1,13 @@
 package com.expleague.sensearch.index;
 
+import com.expleague.commons.text.lemmer.LemmaInfo;
 import com.expleague.sensearch.Config;
 import com.expleague.sensearch.donkey.crawler.Crawler;
 import com.expleague.sensearch.donkey.crawler.document.CrawlerDocument;
 import com.expleague.sensearch.index.plain.PlainIndexBuilder;
 import com.expleague.sensearch.query.BaseQuery;
+import com.expleague.sensearch.query.Query;
+import com.expleague.sensearch.query.term.Term;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -85,9 +88,47 @@ public class MinimalFunctionalityPlainIndexTest {
     }
   }
 
+  private static class QueryStub implements Query {
+    private List<Term> terms;
+    QueryStub(String query) {
+        terms = new LinkedList<>();
+        for (String w : query.split("[^А-ЯЁа-яёA-Za-z0-9]")) {
+          terms.add(new TermStub(w));
+        }
+    }
+
+    @Override
+    public List<Term> getTerms() {
+      return terms;
+    }
+  }
+
+  private static class TermStub implements Term {
+    private String rawTerm;
+
+    TermStub(String term) {
+      rawTerm = term;
+    }
+
+    @Override
+    public CharSequence getRaw() {
+      return rawTerm;
+    }
+
+    @Override
+    public CharSequence getNormalized() {
+      return null;
+    }
+
+    @Override
+    public LemmaInfo getLemma() {
+      return null;
+    }
+  }
+
   @Test
   public void indexFunctionalityTest() {
-    plainIndex.fetchDocuments(new BaseQuery("empty")).forEach(
+    plainIndex.fetchDocuments(new QueryStub("empty")).forEach(
         doc -> {
           Assert.assertTrue(DOCUMENTS_AND_TITLES.containsKey(doc.title().toString()));
           Assert.assertEquals(

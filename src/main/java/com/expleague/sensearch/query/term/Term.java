@@ -9,7 +9,5 @@ public interface Term {
 
   public CharSequence getNormalized();
 
-  public Vec getVector();
-
   public LemmaInfo getLemma();
 }
