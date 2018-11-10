@@ -21,7 +21,7 @@ import java.util.regex.Pattern;
 
 public class Metric {
 
-  private final String googleRequest = "https://www.google.ru/search?q=site:wikipedia.com%20";
+  private final String googleRequest = "https://www.google.ru/search?q=site:ru.wikipedia.org%20";
   private Path pathToMetrics;
   private UserAgents userAgents = new UserAgents();
   private final String MAP_FILE = "MAP";
@@ -141,12 +141,11 @@ public class Metric {
     int ind = 0;
     for (String title : ourTitles) {
       Integer num = googleTitles.get(title);
-      if (num == null) {
-        num = 0;
-      } else {
-        num = 1 / num;
+      double numDouble = 0;
+      if (num != null) {
+        numDouble = 1.0 / num;
       }
-      DCG += num / Math.log(2 + ind);
+      DCG += numDouble / (Math.log(2 + ind) / Math.log(2));
       ind++;
     }
 
