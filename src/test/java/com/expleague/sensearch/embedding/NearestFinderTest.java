@@ -1,10 +1,15 @@
 package com.expleague.sensearch.embedding;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.expleague.sensearch.Config;
 import com.expleague.sensearch.core.impl.EmbeddingImpl;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -27,8 +32,10 @@ public class NearestFinderTest {
   private EmbeddingImpl embedding;
 
   @Before
-  public void initEmbedding() {
-    embedding = EmbeddingImpl.getInstance();
+  public void initEmbedding() throws IOException {
+      byte[] jsonData = Files.readAllBytes(Paths.get("./config.json"));
+      Config config = new ObjectMapper().readValue(jsonData, Config.class);
+      embedding = new EmbeddingImpl(config);
   }
 
   private void nearestFinderTest() {
