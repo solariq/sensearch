@@ -1,6 +1,7 @@
 package com.expleague.sensearch.metrics;
 
 import com.expleague.sensearch.SenSeArch.ResultItem;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -20,7 +21,7 @@ import java.util.regex.Pattern;
 
 public class Metric {
 
-  private final String googleRequest = "https://www.google.ru/search?q=site:wikipedia.com";
+  private final String googleRequest = "https://www.google.ru/search?q=site:wikipedia.com%20";
   private Path pathToMetrics;
   private UserAgents userAgents = new UserAgents();
 
@@ -103,14 +104,33 @@ public class Metric {
     for (ResultItem r : resultItems) {
       ourTitles.add(r.title().toString());
     }
-
-    Map<String, Integer> googleTitles = getGoogleTitles(ourTitles.size(), query);
-
     Path tmpPath = pathToMetrics.resolve(String.valueOf(query));
-    try {
-      Files.createDirectories(tmpPath);
-    } catch (IOException e) {
-      System.err.println("Can't create directory: " + query);
+    Map<String, Integer> googleTitles = new HashMap<>();
+
+    if (!Files.exists(tmpPath)) {
+      try {
+        Files.createDirectories(tmpPath);
+      } catch (IOException e) {
+        System.err.println("Can't create directory: " + query);
+      }
+
+      googleTitles = getGoogleTitles(ourTitles.size(), query);
+      ObjectMapper objectMapper = new ObjectMapper();
+      try {
+        objectMapper.writeValue(tmpPath.resolve("MAP").toFile(), googleTitles);
+      } catch (IOException e) {
+        e.printStackTrace();
+      }
+    } else {
+      ObjectMapper objectMapper = new ObjectMapper();
+
+      TypeReference<Map<String, Integer>> mapType = new TypeReference<Map<String,Integer>>() {};
+
+      try {
+        googleTitles = objectMapper.readValue(tmpPath.resolve("MAP").toFile(), mapType);
+      } catch (IOException e) {
+        e.printStackTrace();
+      }
     }
 
     Double DCG = 0.0;
@@ -131,9 +151,8 @@ public class Metric {
         new OutputStreamWriter(
             Files.newOutputStream(tmpPath.resolve("METRIC"))))) {
       DCGWriter.write(String.valueOf(DCG));
-      ObjectMapper objectMapper = new ObjectMapper();
-      objectMapper.writeValue(tmpPath.resolve("MAP").toFile(), googleTitles);
-    } catch (IOException ignored) {
+    } catch (IOException e) {
+      e.printStackTrace();
     }
   }
 
