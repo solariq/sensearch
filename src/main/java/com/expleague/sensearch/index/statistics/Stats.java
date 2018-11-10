@@ -2,11 +2,10 @@ package com.expleague.sensearch.index.statistics;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.TreeMap;
-import java.util.TreeSet;
-
 import com.expleague.sensearch.index.IndexedPage;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.core.JsonGenerationException;
@@ -18,13 +17,13 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 public class Stats {
 	
-	private Map<String, Integer> numberOfDocumentsWithWord = new TreeMap<>();
-	private Map<String, Integer> numberOfWordOccurences = new TreeMap<>();
-	private Map<Long, Integer> documentLength = new TreeMap<>();
+	private Map<String, Integer> numberOfDocumentsWithWord = new HashMap<>();
+	private Map<String, Integer> numberOfWordOccurences = new HashMap<>();
+	private Map<Long, Integer> documentLength = new HashMap<>();
 	
 	@JsonSerialize(keyUsing = PairSerializer.class)
 	@JsonDeserialize(keyUsing = PairDeserializer.class)
-	private Map<Pair, Integer> frequencyInDocument = new TreeMap<>();
+	private Map<Pair, Integer> frequencyInDocument = new HashMap<>();
 	
 	private long totalNumberOfDocuments;
 	private long totalLength;
@@ -71,7 +70,7 @@ public class Stats {
 	}
 	
 	public void acceptDocument(IndexedPage doc) {
-		Set<String> wordSet = new TreeSet<>();
+		Set<String> wordSet = new HashSet<>();
 		totalNumberOfDocuments++;
 		
 		String[] words = doc.text().toString().split("[^a-zA-Zа-яА-ЯЁё]+");
