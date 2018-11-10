@@ -39,7 +39,7 @@ public class PlainIndex implements Index {
         .filter(entry -> INDEX_ENTRY_NAME_PATTERN.matcher(
             entry.getFileName().toString()).matches()
         )
-        .peek(p -> statistics.acceptDocument(new PlainPage(p)))
+        //.peek(p -> statistics.acceptDocument(new PlainPage(p)))
         .mapToLong(entry -> Long.parseLong(entry.getFileName().toString()))
         .forEach(availableDocuments::add);
   }
