@@ -1,6 +1,5 @@
 package com.expleague.sensearch.index.plain;
 
-import com.expleague.commons.math.vectors.Vec;
 import com.expleague.sensearch.Page;
 import com.expleague.sensearch.core.Embedding;
 import com.expleague.sensearch.core.Filter;
@@ -15,7 +14,6 @@ import gnu.trove.set.hash.TLongHashSet;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.List;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
@@ -61,21 +59,6 @@ public class PlainIndex implements Index {
     return filter.filtrate(query)
         .mapToObj(id -> indexRoot.resolve(Long.toString(id)))
         .map(PlainPage::new);
-  }
-
-  @Override
-  public Vec getVec(String word) {
-    return embedding.getVec(word);
-  }
-
-  @Override
-  public Vec getVec(Query query) {
-    return embedding.getVec(query);
-  }
-
-  @Override
-  public Vec getVec(List<Term> terms) {
-    return embedding.getVec(terms);
   }
 
   @Override
