@@ -1,6 +1,7 @@
 package com.expleague.sensearch.metrics;
 
 import com.expleague.sensearch.SenSeArch.ResultItem;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.IOException;
@@ -105,7 +106,7 @@ public class Metric {
 
     Map<String, Integer> googleTitles = getGoogleTitles(ourTitles.size(), query);
 
-    Path tmpPath = pathToMetrics.resolve(String.valueOf(query.hashCode()));
+    Path tmpPath = pathToMetrics.resolve(String.valueOf(query));
     try {
       Files.createDirectories(tmpPath);
     } catch (IOException e) {
@@ -125,10 +126,13 @@ public class Metric {
       ind++;
     }
 
+    System.err.println(DCG);
     try (BufferedWriter DCGWriter = new BufferedWriter(
         new OutputStreamWriter(
             Files.newOutputStream(tmpPath.resolve("METRIC"))))) {
       DCGWriter.write(String.valueOf(DCG));
+      ObjectMapper objectMapper = new ObjectMapper();
+      objectMapper.writeValue(tmpPath.resolve("MAP").toFile(), googleTitles);
     } catch (IOException ignored) {
     }
   }
