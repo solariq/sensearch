@@ -79,9 +79,8 @@ public class SenSeArchImpl implements SenSeArch {
 
     final com.expleague.sensearch.Page[] pages = Objects.requireNonNull(wb.results());
     final Snippet[] snippets = wb.snippets();
-    final ResultItem[] result = new ResultItem[snippets.length];
+    final ResultItem[] results = new ResultItem[snippets.length];
 
-    ResultItem[] results = new ResultItemImpl[snippets.length];
     for (int i = 0; i < snippets.length; i++) {
       results[i] = new ResultItemImpl(
           pages[i].reference(),
@@ -90,7 +89,7 @@ public class SenSeArchImpl implements SenSeArch {
           0);
     }
 
-    metric.calculate(query, result);
+    metric.calculate(query, results);
     return new ResultPageImpl(0, snippets.length, results);
   }
 

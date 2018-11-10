@@ -10,7 +10,7 @@
 
   "webRoot": "webapp/dist/webapp",
 
-  "embeddingVectors": "./resources/vectors50.txt.gz",
+  "embeddingVectors": "./resources/vectors.txt.gz",
 
   "myStem": "./resources/mystem",
 
