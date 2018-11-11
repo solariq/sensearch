@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.expleague.sensearch.Config;
-import com.expleague.sensearch.core.impl.EmbeddingImpl;
+import com.expleague.sensearch.index.embedding.impl.EmbeddingImpl;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Assert;
 import org.junit.Before;

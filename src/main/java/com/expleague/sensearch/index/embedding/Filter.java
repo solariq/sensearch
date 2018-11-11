@@ -1,4 +1,4 @@
-package com.expleague.sensearch.core;
+package com.expleague.sensearch.index.embedding;
 
 import com.expleague.sensearch.query.Query;
 

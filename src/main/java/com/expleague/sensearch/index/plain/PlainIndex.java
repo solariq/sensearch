@@ -1,9 +1,9 @@
 package com.expleague.sensearch.index.plain;
 
 import com.expleague.sensearch.Page;
-import com.expleague.sensearch.core.Embedding;
-import com.expleague.sensearch.core.Filter;
-import com.expleague.sensearch.core.impl.FilterImpl;
+import com.expleague.sensearch.index.embedding.Embedding;
+import com.expleague.sensearch.index.embedding.Filter;
+import com.expleague.sensearch.index.embedding.impl.FilterImpl;
 import com.expleague.sensearch.index.Index;
 import com.expleague.sensearch.index.IndexedPage;
 import com.expleague.sensearch.index.statistics.Stats;
@@ -25,7 +25,6 @@ public class PlainIndex implements Index {
   private final TLongSet availableDocuments;
   private final Filter filter;
   
-  private Stats statistics = new Stats();
 
   private final Embedding embedding;
 
@@ -68,21 +67,21 @@ public class PlainIndex implements Index {
 
   @Override
   public double averageWordsPerPage() {
-    return statistics.getAverageDocumentLength();
+    return 0;
   }
 
   @Override
   public int pagesWithTerm(Term term) {
-    return statistics.getNumberOfDocumentsWithWord().get(term.getNormalized());
+    return 0;
   }
 
   @Override
   public long termCollectionFrequency(Term term) {
-    return statistics.getNumberOfDocumentsWithWord().get(term.getNormalized());
+    return 0;
   }
 
   @Override
   public int vocabularySize() {
-    return statistics.getVocabularySize();
+    return 0;
   }
 }

@@ -8,7 +8,6 @@ import com.expleague.sensearch.donkey.crawler.Crawler;
 import com.expleague.sensearch.donkey.crawler.CrawlerXML;
 import com.expleague.sensearch.index.Index;
 import com.expleague.sensearch.index.plain.PlainIndexBuilder;
-import com.expleague.sensearch.index.statistics.Stats;
 import com.expleague.sensearch.web.suggest.BigramsBasedSuggestor;
 import com.expleague.sensearch.web.suggest.Suggestor;
 import com.google.inject.Singleton;
@@ -24,7 +23,6 @@ public class Builder {
   private SenSeArch searcher;
   private Crawler crawler;
   private BigramsBasedSuggestor bigramsBasedSuggestor;
-  private Stats statistics;
   private Config config;
   private Lemmer lemmer;
 
@@ -64,10 +62,6 @@ public class Builder {
 
   public int windowSize() {
     return 4;
-  }
-
-  Stats getStatistics() {
-    return statistics;
   }
 
   public Lemmer getLemmer() {

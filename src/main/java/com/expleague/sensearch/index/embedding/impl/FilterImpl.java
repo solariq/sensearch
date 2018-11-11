@@ -1,7 +1,7 @@
-package com.expleague.sensearch.core.impl;
+package com.expleague.sensearch.index.embedding.impl;
 
-import com.expleague.sensearch.core.Embedding;
-import com.expleague.sensearch.core.Filter;
+import com.expleague.sensearch.index.embedding.Embedding;
+import com.expleague.sensearch.index.embedding.Filter;
 import com.expleague.sensearch.index.IndexedPage;
 import com.expleague.sensearch.query.Query;
 

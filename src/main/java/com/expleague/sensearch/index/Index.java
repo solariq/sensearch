@@ -1,12 +1,8 @@
 package com.expleague.sensearch.index;
 
 
-import com.expleague.commons.math.vectors.Vec;
 import com.expleague.sensearch.Page;
-import com.expleague.sensearch.core.Embedding;
 import com.expleague.sensearch.query.Query;
-import com.expleague.sensearch.query.term.Term;
-import java.util.List;
 import java.util.stream.Stream;
 
 /**

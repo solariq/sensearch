@@ -1,11 +1,11 @@
-package com.expleague.sensearch.core.impl;
+package com.expleague.sensearch.index.embedding.impl;
 
 import com.expleague.commons.math.vectors.Vec;
 import com.expleague.commons.math.vectors.VecTools;
 import com.expleague.commons.math.vectors.impl.vectors.ArrayVec;
 import com.expleague.commons.seq.CharSeqTools;
 import com.expleague.sensearch.Config;
-import com.expleague.sensearch.core.Embedding;
+import com.expleague.sensearch.index.embedding.Embedding;
 import com.expleague.sensearch.index.IndexedPage;
 import com.expleague.sensearch.query.Query;
 import com.expleague.sensearch.query.term.Term;
@@ -34,7 +34,6 @@ public class EmbeddingImpl implements Embedding {
   private final Map<Long, Stream<Vec>> docIdVecsMap = new HashMap<>();
 
   private BiFunction<Vec, Vec, Double> nearestMeasure = VecTools::distanceAV;
-  private Function<IndexedPage, Stream<String>> keyWordsFunc = page -> split(page.title());
   private boolean vecForDocMode = true;
 
   public EmbeddingImpl(Config config) {
