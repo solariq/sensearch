@@ -4,10 +4,7 @@ package com.expleague.sensearch.donkey.plain;
 import com.expleague.sensearch.donkey.crawler.document.CrawlerDocument;
 import java.nio.file.Path;
 
-/**
- * Created by sandulmv on 11.11.18.
- */
-public class PlainPageBuilder {
+class PlainPageBuilder {
 
   private static final long PAGE_ID_SHIFT = 1L << 32;
 
@@ -22,6 +19,7 @@ public class PlainPageBuilder {
 
   void createAndFlushNewPage(CrawlerDocument crawlerDocument) {
     ++flushedPagesCount;
+    // TODO: save page to disk
   }
 
   long currentDocumentId() {

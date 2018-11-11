@@ -1,5 +1,6 @@
 package com.expleague.sensearch.index.plain;
 
+import com.expleague.sensearch.Config;
 import com.expleague.sensearch.Page;
 import com.expleague.sensearch.index.embedding.Embedding;
 import com.expleague.sensearch.index.embedding.Filter;
@@ -28,7 +29,7 @@ public class PlainIndex implements Index {
 
   private final Embedding embedding;
 
-  PlainIndex(Path indexRoot, Embedding embedding) throws IOException {
+  public PlainIndex(Config config) throws IOException {
     this.indexRoot = indexRoot;
     this.filter = new FilterImpl(getDocumentStream(indexRoot), embedding);
     this.embedding = embedding;

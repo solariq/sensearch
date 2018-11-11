@@ -9,7 +9,8 @@ import gnu.trove.map.hash.TLongLongHashMap;
 import gnu.trove.map.hash.TObjectIntHashMap;
 import java.nio.file.Path;
 
-public class StatisticsBuilder {
+class StatisticsBuilder {
+
   private final TObjectIntMap<String> wordToIdMappings = new TObjectIntHashMap<>();
 
   private final TLongLongMap wordFrequencyMap = new TLongLongHashMap();
@@ -26,7 +27,7 @@ public class StatisticsBuilder {
   }
 
   void flushStatics(Path statisticsRoot) {
-
+    // TODO: save statistics to disk
   }
 
   TObjectIntMap<String> wordToIntMappings() {

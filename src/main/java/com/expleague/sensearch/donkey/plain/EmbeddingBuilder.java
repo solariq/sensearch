@@ -28,16 +28,18 @@ import java.util.zip.GZIPInputStream;
  * Created by sandulmv on 11.11.18.
  */
 public class EmbeddingBuilder {
+
+  private static final Logger LOG = Logger.getLogger(EmbeddingBuilder.class.getName());
   private final TLongObjectMap<Vec> vectorsMap = new TLongObjectHashMap<>();
   private final Map<String, Vec> wordVectorsMap = new HashMap<>();
   private final Function<CrawlerDocument, Stream<String>> keyWordsFunc =
       page -> Stream.of(Tokenizer.tokenize(page.getTitle()));
-
   private final int VEC_SIZE = 50;
 
-  private static final Logger LOG = Logger.getLogger(EmbeddingBuilder.class.getName());
-
+  private final Config config;
   EmbeddingBuilder(Config config) {
+
+    this.config = config;;
     try (Reader input = new InputStreamReader(
         new GZIPInputStream(new FileInputStream(config.getEmbeddingVectors())),
         StandardCharsets.UTF_8)) {
@@ -69,20 +71,27 @@ public class EmbeddingBuilder {
   }
 
   /**
-   * @param knownWordIds String to Long map, contains all know mapping to ids for words from collection
+   * @param knownWordIds String to Long map, contains all know mapping to ids for words from
+   * collection
    * @return String->Long map enriched with words from already existing String->Vec map
    */
   TObjectIntMap<String> replaceWordsWithIds(TObjectIntMap<String> knownWordIds) {
-    TObjectIntMap<String> enrichedMap = new TObjectIntHashMap<>(knownWordIds);
-    int currentWordId = enrichedMap.size();
+    TObjectIntMap<String> enrichedIdMap = new TObjectIntHashMap<>(knownWordIds);
+    int currentWordId = enrichedIdMap.size();
     for (Map.Entry<String, Vec> gloveEntry : wordVectorsMap.entrySet()) {
-      if (!enrichedMap.containsKey(gloveEntry.getKey())) {
-        enrichedMap.putIfAbsent(gloveEntry.getKey(), currentWordId++);
+      String word = gloveEntry.getKey();
+      if (!enrichedIdMap.containsKey(word)) {
+        enrichedIdMap.putIfAbsent(word, currentWordId++);
       }
 
-      long vecId = enrichedMap.
+      long vecId = enrichedIdMap.get(word);
+      vectorsMap.put(vecId, gloveEntry.getValue());
     }
-    return enrichedMap;
+    return enrichedIdMap;
+  }
+
+  void flushVectors() {
+    // TODO: save vectors to disk
   }
 
   private Vec getArithmeticMean(Stream<Vec> vecs) {
