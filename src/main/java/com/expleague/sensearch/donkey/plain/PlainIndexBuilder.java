@@ -16,7 +16,7 @@ public class PlainIndexBuilder implements IndexBuilder {
   public void buildIndex(Crawler crawler, Config config) throws IOException {
     final Path indexRoot = config.getTemporaryIndex();
     final PlainPageBuilder plainPageBuilder = new PlainPageBuilder(indexRoot);
-    final StatisticsBuilder statisticsBuilder = new StatisticsBuilder();
+    final StatisticsBuilder statisticsBuilder = new StatisticsBuilder(config);
     final EmbeddingBuilder embeddingBuilder = new EmbeddingBuilder(config);
     try {
       crawler.makeStream().forEach(
@@ -29,8 +29,8 @@ public class PlainIndexBuilder implements IndexBuilder {
 
       TObjectIntMap<String> wordMappings =
           embeddingBuilder.replaceWordsWithIds(statisticsBuilder.wordToIntMappings());
-      statisticsBuilder.flushStatics(indexRoot);
-      embeddingBuilder.
+      statisticsBuilder.flushStatics();
+      embeddingBuilder.flushVectors();
     } catch (Exception e) {
       throw new IOException(e);
     }
