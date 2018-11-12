@@ -110,7 +110,7 @@ public class Metric {
     Path tmpPath = pathToMetrics.resolve(String.valueOf(query));
     Map<String, Integer> googleTitles = new HashMap<>();
 
-    if (!Files.exists(tmpPath)) {
+    if (!Files.exists(tmpPath.resolve(MAP_FILE))) {
       try {
         Files.createDirectories(tmpPath);
       } catch (IOException e) {
