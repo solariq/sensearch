@@ -9,6 +9,7 @@ import com.expleague.sensearch.donkey.crawler.CrawlerXML;
 import com.expleague.sensearch.index.Index;
 import com.expleague.sensearch.index.plain.PlainIndexBuilder;
 import com.expleague.sensearch.index.statistics.Stats;
+import com.expleague.sensearch.metrics.Metric;
 import com.expleague.sensearch.web.suggest.BigramsBasedSuggestor;
 import com.expleague.sensearch.web.suggest.Suggestor;
 import com.google.inject.Singleton;
@@ -27,6 +28,7 @@ public class Builder {
   private Stats statistics;
   private Config config;
   private Lemmer lemmer;
+  private Metric metric;
 
   @Inject
   public Builder(Config config) {
@@ -39,6 +41,7 @@ public class Builder {
     bigramsBasedSuggestor = new BigramsBasedSuggestor(config);
     searcher = new SenSeArchImpl(this);
     lemmer = new Lemmer(config.getMyStem());
+    metric = new Metric(config.getPathToMetrics());
     return config;
   }
 
@@ -74,7 +77,7 @@ public class Builder {
     return lemmer;
   }
 
-  public Path getPathToMetrics() {
-    return config.getPathToMetrics();
+  public Metric metric() {
+    return metric;
   }
 }

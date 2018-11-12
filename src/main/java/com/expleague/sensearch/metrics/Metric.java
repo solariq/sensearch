@@ -1,5 +1,6 @@
 package com.expleague.sensearch.metrics;
 
+import com.expleague.sensearch.Page;
 import com.expleague.sensearch.SenSeArch.ResultItem;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -24,7 +25,7 @@ public class Metric {
   private final String googleRequest = "https://www.google.ru/search?q=site:ru.wikipedia.org%20";
   private Path pathToMetrics;
   private UserAgents userAgents = new UserAgents();
-  private final String MAP_FILE = "MAP";
+  private final String MAP_FILE = "MAP.json";
   private final String METRIC_FILE = "METRIC";
 
   public Metric(Path pathToMetric) {
@@ -101,10 +102,10 @@ public class Metric {
     return answer;
   }
 
-  public void calculate(String query, ResultItem[] resultItems) {
+  public void calculate(String query, Page[] resultItems) {
 
     List<String> ourTitles = new ArrayList<>();
-    for (ResultItem r : resultItems) {
+    for (Page r : resultItems) {
       ourTitles.add(r.title().toString());
     }
     Path tmpPath = pathToMetrics.resolve(String.valueOf(query));
@@ -149,7 +150,7 @@ public class Metric {
       ind++;
     }
 
-    System.err.println(DCG);
+    System.err.println("Query: " + query + " DCG: " + DCG);
     try (BufferedWriter DCGWriter = new BufferedWriter(
         new OutputStreamWriter(
             Files.newOutputStream(tmpPath.resolve(METRIC_FILE))))) {

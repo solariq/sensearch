@@ -21,11 +21,9 @@ import java.util.stream.Stream;
 
 public class SenSeArchImpl implements SenSeArch {
   private final Builder builder;
-  private final Metric metric;
 
   public SenSeArchImpl(Builder builder){
     this.builder = builder;
-    metric = new Metric(builder.getPathToMetrics());
   }
 
   @Override
@@ -89,7 +87,6 @@ public class SenSeArchImpl implements SenSeArch {
           0);
     }
 
-    metric.calculate(query, results);
     return new ResultPageImpl(0, snippets.length, results);
   }
 
