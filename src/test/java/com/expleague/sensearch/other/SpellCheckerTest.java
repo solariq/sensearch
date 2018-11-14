@@ -1,6 +1,6 @@
 package com.expleague.sensearch.other;
 
-import com.expleague.sensearch.SpellChecker;
+import com.expleague.sensearch.core.SpellChecker;
 import java.nio.file.Paths;
 import org.junit.Assert;
 import org.junit.Before;
@@ -21,5 +21,8 @@ public class SpellCheckerTest {
   @Test
   public void testSpellChecker() {
     Assert.assertEquals("Привет", checker.correct("Привет"));
+    Assert.assertEquals("Будапешт", checker.correct("Будашпет"));
+    Assert.assertEquals("Абракадабра", checker.correct("Абракадабра"));
+    Assert.assertEquals("Лол кек", checker.correct("Лол \nкек"));
   }
 }

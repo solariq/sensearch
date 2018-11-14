@@ -1,7 +1,6 @@
-package com.expleague.sensearch;
+package com.expleague.sensearch.core;
 
 import java.io.*;
-import java.nio.CharBuffer;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.util.concurrent.*;
@@ -15,7 +14,7 @@ public class SpellChecker {
     try {
       Process spellChecker = Runtime.getRuntime().exec(spellCheckerExecutable.toString() + " correct " + " " + modelFile.toString());
       toSpellChecker = new OutputStreamWriter(spellChecker.getOutputStream(), StandardCharsets.UTF_8);
-      fromSpellChecker = new InputStreamReader(spellChecker.getInputStream(), StandardCharsets.UTF_8);
+      fromSpellChecker = new InputStreamReader(spellChecker.getErrorStream(), StandardCharsets.UTF_8);
     }
     catch (IOException e) {
       throw new RuntimeException(e);
@@ -32,7 +31,7 @@ public class SpellChecker {
     final FutureTask<CharSequence> ftask = new FutureTask<>(task, task.answer);
     executor.execute(ftask);
     try {
-      final CharSequence result = ftask.get();
+      final CharSequence result = ftask.get().toString();
       if (task.e instanceof RuntimeException)
         throw (RuntimeException) task.e;
       else if (task.e != null)
@@ -57,14 +56,19 @@ public class SpellChecker {
     public void run() {
       try {
         toSpellChecker.append(request);
-        toSpellChecker.append(" ").append("\n");
+        toSpellChecker.append(" ").append("eol").append("\n");
         toSpellChecker.flush();
-        CharBuffer buffer = CharBuffer.allocate(1024);
+        BufferedReader reader = new BufferedReader(fromSpellChecker);
+        String line;
 
-        while(fromSpellChecker.read(buffer) >= 0) {
-          answer.append(buffer);
-          buffer.clear();
-        }
+        do {
+          line = reader.readLine();
+          if (!line.startsWith("[info]")) {
+            int splitFrom = line.startsWith(">>") ? 3 : 0;
+            int splitTo = line.length() - (line.endsWith("eol") ? 4 : 0);
+            answer.append(line.subSequence(splitFrom, splitTo));
+          }
+        } while (!line.endsWith("eol"));
       }
       catch (Exception e) {
         this.e = e;
