@@ -1,7 +1,6 @@
 package com.expleague.sensearch.metrics;
 
 import com.expleague.sensearch.Page;
-import com.expleague.sensearch.SenSeArch.ResultItem;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.BufferedReader;
@@ -17,6 +16,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -27,6 +27,7 @@ public class Metric {
   private UserAgents userAgents = new UserAgents();
   private final String MAP_FILE = "MAP.json";
   private final String METRIC_FILE = "METRIC";
+  private Set<String> allTitles;
 
   public Metric(Path pathToMetric) {
     pathToMetrics = pathToMetric;
@@ -35,6 +36,10 @@ public class Metric {
     } catch (IOException e) {
       e.printStackTrace();
     }
+  }
+
+  public void pushTitles(Set<String> allTitles) {
+    this.allTitles = allTitles;
   }
 
   private List<String> getCookies() throws IOException {
@@ -59,7 +64,9 @@ public class Metric {
         .replace("</h3>", "");
     if (ans.endsWith(" — Википедия")) {
       ans = ans.replace(" — Википедия", "");
-      return ans;
+      if (allTitles.contains(ans)) {
+        return ans;
+      }
     }
     return null;
   }
@@ -85,9 +92,9 @@ public class Metric {
           Matcher matcher = Pattern.compile("<h3 class=\"LC20lb\">.*?</h3>").matcher(line);
           while (matcher.find()) {
             String title = normalizeTitle(matcher.group(0));
-            ourSize++;
             if (title != null) {
               check = true;
+              ourSize++;
               answer.put(title, ourSize);
             }
           }
@@ -158,6 +165,10 @@ public class Metric {
     } catch (IOException e) {
       e.printStackTrace();
     }
+  }
+
+  void calculateRebase(String query, Page[] pages) {
+
   }
 
 }

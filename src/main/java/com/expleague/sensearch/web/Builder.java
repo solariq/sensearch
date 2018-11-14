@@ -14,7 +14,6 @@ import com.expleague.sensearch.web.suggest.BigramsBasedSuggestor;
 import com.expleague.sensearch.web.suggest.Suggestor;
 import com.google.inject.Singleton;
 import java.io.IOException;
-import java.nio.file.Path;
 import javax.inject.Inject;
 import javax.xml.stream.XMLStreamException;
 
@@ -35,13 +34,13 @@ public class Builder {
     this.config = config;
   }
 
-  Config build() throws IOException, XMLStreamException {
-    crawler = new CrawlerXML(config);
-    index = new PlainIndexBuilder(config).buildIndex(crawler.makeStream());
-    bigramsBasedSuggestor = new BigramsBasedSuggestor(config);
-    searcher = new SenSeArchImpl(this);
-    lemmer = new Lemmer(config.getMyStem());
+  public Config build() throws IOException, XMLStreamException {
     metric = new Metric(config.getPathToMetrics());
+    crawler = new CrawlerXML(config);
+    index = new PlainIndexBuilder(config).buildIndex(crawler.makeStream(), metric);
+    bigramsBasedSuggestor = new BigramsBasedSuggestor(config);
+    lemmer = new Lemmer(config.getMyStem());
+    searcher = new SenSeArchImpl(this);
     return config;
   }
 

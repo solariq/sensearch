@@ -3,7 +3,6 @@ package com.expleague.sensearch.core;
 import com.expleague.commons.util.Pair;
 import com.expleague.sensearch.SenSeArch;
 import com.expleague.sensearch.core.impl.WhiteboardImpl;
-import com.expleague.sensearch.metrics.Metric;
 import com.expleague.sensearch.snippet.Segment;
 import com.expleague.sensearch.snippet.Snippet;
 import com.expleague.sensearch.web.Builder;

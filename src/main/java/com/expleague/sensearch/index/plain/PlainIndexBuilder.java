@@ -3,11 +3,10 @@ package com.expleague.sensearch.index.plain;
 import com.expleague.sensearch.Config;
 import com.expleague.sensearch.core.Embedding;
 import com.expleague.sensearch.core.impl.EmbeddingImpl;
-import com.expleague.sensearch.core.impl.FilterImpl;
 import com.expleague.sensearch.donkey.crawler.document.CrawlerDocument;
 import com.expleague.sensearch.index.Index;
-import com.expleague.sensearch.index.IndexedPage;
 import com.expleague.sensearch.index.statistics.Stats;
+import com.expleague.sensearch.metrics.Metric;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.BufferedWriter;
 import java.io.IOException;
@@ -15,11 +14,12 @@ import java.io.OutputStreamWriter;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Random;
+import java.util.Set;
 import java.util.TreeMap;
 import java.util.logging.Logger;
-import java.util.regex.Pattern;
 import java.util.stream.Stream;
 import org.apache.commons.io.FileUtils;
 
@@ -156,20 +156,25 @@ public class PlainIndexBuilder {
     }
   }
 
-  public Index buildIndex(Stream<CrawlerDocument> parsedDocumentsStream) throws IOException {
+  public Index buildIndex(Stream<CrawlerDocument> parsedDocumentsStream, Metric metric) throws IOException {
     Path bigramPath = indexRoot.getParent().resolve(Paths.get(config.getTemporaryBigrams()));
     Files.createDirectories(bigramPath);
     TreeMap<String, Integer> result = new TreeMap<>();
 
     Stats stats = new Stats();
 
+    Set<String> allTitles = new HashSet<>();
+
     parsedDocumentsStream.forEach(
         doc -> {
+          allTitles.add(doc.getTitle());
           flushBigrams(doc.getTitle(), result);
           flushNewIndexEntry(this.indexRoot, doc);
           //stats.acceptDocument(doc);
         }
     );
+
+    metric.pushTitles(allTitles);
 
     ObjectMapper mapper = new ObjectMapper();
     mapper.writeValue(bigramPath.resolve(config.getBigramsFileName()).toFile(), result);
