@@ -38,6 +38,9 @@ public class Metric {
     }
   }
 
+  public Metric() {
+  }
+
   public void pushTitles(Set<String> allTitles) {
     this.allTitles = allTitles;
   }

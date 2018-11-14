@@ -5,7 +5,7 @@ import com.expleague.sensearch.Config;
 import com.expleague.sensearch.donkey.crawler.Crawler;
 import com.expleague.sensearch.donkey.crawler.document.CrawlerDocument;
 import com.expleague.sensearch.index.plain.PlainIndexBuilder;
-import com.expleague.sensearch.query.BaseQuery;
+import com.expleague.sensearch.metrics.Metric;
 import com.expleague.sensearch.query.Query;
 import com.expleague.sensearch.query.term.Term;
 import java.nio.file.Files;
@@ -31,6 +31,8 @@ public class MinimalFunctionalityPlainIndexTest {
 
   private static final String CONTENT_FILE = "content";
   private static final String META_FILE = "meta";
+
+  private static final Metric metric = new Metric();
 
   private static final Logger LOG =
       Logger.getLogger(MinimalFunctionalityPlainIndexTest.class.getName());
@@ -71,7 +73,7 @@ public class MinimalFunctionalityPlainIndexTest {
         indexRoot.toAbsolutePath().toString()));
 
     Crawler localCrawler = new LocalCrawler();
-    plainIndex = new PlainIndexBuilder(new Config()).buildIndex(localCrawler.makeStream());
+    plainIndex = new PlainIndexBuilder(new Config()).buildIndex(localCrawler.makeStream(), metric);
   }
 
   @Test

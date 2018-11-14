@@ -6,6 +6,7 @@ import com.expleague.sensearch.Page;
 import com.expleague.sensearch.donkey.crawler.CrawlerXML;
 import com.expleague.sensearch.index.Index;
 import com.expleague.sensearch.index.plain.PlainIndexBuilder;
+import com.expleague.sensearch.metrics.Metric;
 import com.expleague.sensearch.query.Query;
 import com.expleague.sensearch.query.term.Term;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -14,6 +15,7 @@ import java.nio.file.Paths;
 import java.util.*;
 import java.util.stream.Stream;
 
+import org.apache.commons.math3.stat.descriptive.moment.Mean;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -21,6 +23,7 @@ import org.junit.Test;
 public class FilterTest {
 
     private Index index;
+    private Metric metric = new Metric();
 
     private static final Map<String, String[]> tests;
 
@@ -34,7 +37,7 @@ public class FilterTest {
     public void initIndex() throws Exception {
         byte[] jsonData = Files.readAllBytes(Paths.get("./config.json"));
         Config config = new ObjectMapper().readValue(jsonData, Config.class);
-        index = new PlainIndexBuilder(config).buildIndex(new CrawlerXML(config).makeStream());
+        index = new PlainIndexBuilder(config).buildIndex(new CrawlerXML(config).makeStream(), metric);
     }
 
     @Test
