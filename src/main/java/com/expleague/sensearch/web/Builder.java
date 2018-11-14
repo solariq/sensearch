@@ -7,9 +7,12 @@ import com.expleague.sensearch.core.SenSeArchImpl;
 import com.expleague.sensearch.donkey.crawler.Crawler;
 import com.expleague.sensearch.donkey.crawler.CrawlerXML;
 import com.expleague.sensearch.index.Index;
+import com.expleague.sensearch.index.plain.PlainIndex;
 import com.expleague.sensearch.index.plain.PlainIndexBuilder;
 import com.expleague.sensearch.index.statistics.Stats;
 import com.expleague.sensearch.metrics.Metric;
+import com.expleague.sensearch.metrics.RequestCrawler;
+import com.expleague.sensearch.metrics.WebCrawler;
 import com.expleague.sensearch.web.suggest.BigramsBasedSuggestor;
 import com.expleague.sensearch.web.suggest.Suggestor;
 import com.google.inject.Singleton;
@@ -35,12 +38,17 @@ public class Builder {
   }
 
   public Config build() throws IOException, XMLStreamException {
-    metric = new Metric(config.getPathToMetrics());
+    return build(new RequestCrawler());
+  }
+
+  public Config build(WebCrawler webCrawler) throws IOException, XMLStreamException {
     crawler = new CrawlerXML(config);
-    index = new PlainIndexBuilder(config).buildIndex(crawler.makeStream(), metric);
+    index = new PlainIndexBuilder(config).buildIndex(crawler.makeStream());
     bigramsBasedSuggestor = new BigramsBasedSuggestor(config);
     lemmer = new Lemmer(config.getMyStem());
     searcher = new SenSeArchImpl(this);
+    webCrawler.setAllTitles(((PlainIndex)index).allTitles());
+    metric = new Metric(webCrawler, config.getPathToMetrics());
     return config;
   }
 
@@ -48,7 +56,7 @@ public class Builder {
     return index;
   }
 
-  SenSeArch getSearcher() {
+  public SenSeArch getSearcher() {
     return searcher;
   }
 

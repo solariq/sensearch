@@ -14,6 +14,7 @@ import gnu.trove.set.hash.TLongHashSet;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Set;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
@@ -24,15 +25,17 @@ public class PlainIndex implements Index {
   private final Path indexRoot;
   private final TLongSet availableDocuments;
   private final Filter filter;
+  private final Set<String> allTitles;
   
   private Stats statistics = new Stats();
 
   private final Embedding embedding;
 
-  PlainIndex(Path indexRoot, Embedding embedding) throws IOException {
+  PlainIndex(Path indexRoot, Embedding embedding, Set<String> allTitles) throws IOException {
     this.indexRoot = indexRoot;
     this.filter = new FilterImpl(getDocumentStream(indexRoot), embedding);
     this.embedding = embedding;
+    this.allTitles = allTitles;
 
     availableDocuments = new TLongHashSet();
     Files.list(indexRoot)
@@ -52,6 +55,10 @@ public class PlainIndex implements Index {
             entry.getFileName().toString()).matches()
         )
         .map(PlainPage::new);
+  }
+
+  public Set<String> allTitles() {
+    return allTitles;
   }
 
   @Override
