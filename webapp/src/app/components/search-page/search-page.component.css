@@ -8,3 +8,17 @@
 .search-box {
   width: 700px;
 }
+
+.search-results {
+  display: grid;
+  grid-column-gap: 50px;
+  grid-template-columns: auto auto;
+}
+
+.our-result {
+  grid-column: 1;
+}
+
+.google-result {
+  grid-column: 2;
+}
