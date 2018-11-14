@@ -57,11 +57,15 @@ public class PlainIndex implements Index {
       return embeddingVectorsPath;
     }
 
-    public static void createConfigFile() {
+    public static void createConfigFile(Path root,
+        Path bigrasMapPath,
+        Path termFrequencyMapPath,
+        Path documentFrequencyMapPath,
+        Path embeddingVectorsPath) {
 
     }
 
-    private static PlainIndexConfig parseFromFile(Path configFile) {
+    private static PlainIndexConfig parseIndexConfig(Path root) {
       return null;
     }
 
@@ -79,7 +83,7 @@ public class PlainIndex implements Index {
   }
 
   public static void initialize(Config config) throws Exception {
-
+    // parse paths and maps
   }
 
   @Override

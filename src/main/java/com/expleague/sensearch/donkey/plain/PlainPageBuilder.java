@@ -2,17 +2,18 @@ package com.expleague.sensearch.donkey.plain;
 
 
 import com.expleague.sensearch.donkey.crawler.document.CrawlerDocument;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 
 class PlainPageBuilder {
 
-  private static final long PAGE_ID_SHIFT = 1L << 32;
-
   private final Path plainRoot;
 
-  private long flushedPagesCount;
+  private int flushedPagesCount = 1;
 
-  PlainPageBuilder(Path plainRoot) {
+  PlainPageBuilder(Path plainRoot) throws IOException {
+    Files.createDirectories(plainRoot);
     this.plainRoot = plainRoot;
     this.flushedPagesCount = 0;
   }
@@ -22,7 +23,7 @@ class PlainPageBuilder {
     // TODO: save page to disk
   }
 
-  long currentDocumentId() {
-    return flushedPagesCount + PAGE_ID_SHIFT;
+  int currentDocumentId() {
+    return -flushedPagesCount - 1;
   }
 }

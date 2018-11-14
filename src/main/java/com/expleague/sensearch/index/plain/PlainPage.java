@@ -1,6 +1,7 @@
 package com.expleague.sensearch.index.plain;
 
 import com.expleague.sensearch.index.IndexedPage;
+import com.google.gson.JsonParser;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.net.URI;
@@ -8,15 +9,14 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 
 public class PlainPage implements IndexedPage {
+  private static final JsonParser JSON_PARSER = new JsonParser();
+  private static final String ID_FIELD = "id";
+  private static final String TITLE_FIELD = "title";
 
-  private final long id;
-  private final Path contentPath;
-  private final Path titlePath;
+  private int id;
 
-  PlainPage(Path pathToIndexEntry) {
-    this.id = Long.parseLong(pathToIndexEntry.getFileName().toString());
-    this.contentPath = pathToIndexEntry.resolve(PlainIndexBuilder.CONTENT_FILE);
-    this.titlePath = pathToIndexEntry.resolve(PlainIndexBuilder.META_FILE);
+  PlainPage(String plainPageJson) {
+
   }
 
   @Override
