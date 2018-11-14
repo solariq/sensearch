@@ -1,6 +1,7 @@
 package com.expleague.sensearch.core.impl;
 
 import com.expleague.sensearch.Page;
+import com.expleague.sensearch.SenSeArch.ResultItem;
 import com.expleague.sensearch.core.Whiteboard;
 import com.expleague.sensearch.miner.Features;
 import com.expleague.sensearch.query.Query;
@@ -18,6 +19,7 @@ public class WhiteboardImpl implements Whiteboard {
   private final String input;
   private final int page;
   private final Builder builder;
+  private ResultItem[] googleResults;
 
   public WhiteboardImpl(String input, int page, Builder builder) {
     this.input = input;
@@ -86,5 +88,16 @@ public class WhiteboardImpl implements Whiteboard {
   @Override
   public int totalResults() {
     return results.length;
+  }
+
+  @Override
+  public void putGoogleResults(ResultItem[] googleResults) {
+    this.googleResults = googleResults;
+  }
+
+  @Nullable
+  @Override
+  public ResultItem[] googleResults() {
+    return googleResults;
   }
 }

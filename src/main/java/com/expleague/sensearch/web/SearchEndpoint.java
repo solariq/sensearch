@@ -3,6 +3,7 @@ package com.expleague.sensearch.web;
 import com.expleague.commons.util.Pair;
 import com.expleague.sensearch.SenSeArch;
 import com.expleague.sensearch.SenSeArch.ResultItem;
+import com.expleague.sensearch.SenSeArch.ResultPage;
 import com.expleague.sensearch.snippet.Segment;
 import com.expleague.sensearch.web.suggest.Suggestor;
 import com.fasterxml.jackson.core.JsonGenerator;
@@ -28,6 +29,7 @@ public class SearchEndpoint {
   static {
     SimpleModule module = new SimpleModule();
     module.addSerializer(ResultItem.class, new ResultItemSerializer());
+    module.addSerializer(ResultPage.class, new ResultPageSerializer());
     mapper.registerModule(module);
   }
 
@@ -56,7 +58,7 @@ public class SearchEndpoint {
       @DefaultValue("") @QueryParam("query") String query,
       @DefaultValue("0") @QueryParam("page") int pageNumber)
       throws JsonProcessingException {
-    return mapper.writeValueAsString(search.search(query, pageNumber).results());
+    return mapper.writeValueAsString(search.search(query, pageNumber));
   }
 
 //  @GET
@@ -98,6 +100,28 @@ public class SearchEndpoint {
         jsonGenerator.writeEndObject();
       }
       jsonGenerator.writeEndArray();
+
+      jsonGenerator.writeEndObject();
+    }
+  }
+
+  public static class ResultPageSerializer extends StdSerializer<ResultPage> {
+
+    protected ResultPageSerializer(Class<ResultPage> t) {
+      super(t);
+    }
+
+    public ResultPageSerializer() {
+      this(null);
+    }
+
+    @Override
+    public void serialize(ResultPage resultPage, JsonGenerator jsonGenerator,
+        SerializerProvider serializerProvider) throws IOException {
+      jsonGenerator.writeStartObject();
+
+      jsonGenerator.writeObjectField("results", resultPage.results());
+      jsonGenerator.writeObjectField("googleResults", resultPage.googleResults());
 
       jsonGenerator.writeEndObject();
     }

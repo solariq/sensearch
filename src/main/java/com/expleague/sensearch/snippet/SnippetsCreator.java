@@ -25,7 +25,7 @@ public class SnippetsCreator {
 
   private static final long PASSAGES_IN_SNIPPET = 4;
   private static final long NUMBER_OF_KEYWORDS = 8;
-  private static final double ALPHA = .87;
+  private static final double ALPHA = 1;
 
   private static final Pattern splitEnglish = Pattern.compile(
       "(?<=[.!?]|[.!?]['\"])(?<!Mr\\.|Mrs\\.|Ms\\.|Jr\\.|Dr\\.|Prof\\.|Vol\\.|A\\.D\\.|B\\.C\\.|Sr\\.|T\\.V\\.A\\.)\\s+");

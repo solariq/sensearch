@@ -1,24 +1,27 @@
 package com.expleague.sensearch.metrics;
 
+import com.expleague.commons.util.Pair;
 import com.expleague.sensearch.Page;
+import com.expleague.sensearch.SenSeArch.ResultItem;
+import com.expleague.sensearch.core.impl.ResultItemImpl;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.select.Elements;
 
 public class Metric {
 
@@ -67,95 +70,95 @@ public class Metric {
         .replace("</h3>", "");
     if (ans.endsWith(" — Википедия")) {
       ans = ans.replace(" — Википедия", "");
-      if (allTitles.contains(ans)) {
-        return ans;
-      }
+      return ans;
     }
     return null;
   }
 
-  private Map<String, Integer> getGoogleTitles(Integer size, String query) {
-    Map<String, Integer> answer = new HashMap<>();
-    Integer ourSize = 0;
-    while (ourSize < size) {
+  private List<ResultItem> getGoogleResults(Integer size, String query) {
+    List<ResultItem> results = new ArrayList<>();
+
+    while (results.size() < size) {
       try {
         String request = googleRequest + query.replace(" ", "%20")
-            + "&start=" + ourSize;
+            + "&start=" + results.size();
         URL url = new URL(request);
         URLConnection connection = url.openConnection();
         setCookies(connection);
         userAgents.setAnyAgent(connection);
 
-        BufferedReader br = new BufferedReader(
-            new InputStreamReader(connection.getInputStream()));
-        boolean check = false;
+        Document document = Jsoup.parse(connection.getInputStream(), "UTF-8", url.toString());
 
-        String line;
-        while ((line = br.readLine()) != null) {
-          Matcher matcher = Pattern.compile("<h3 class=\"LC20lb\">.*?</h3>").matcher(line);
-          while (matcher.find()) {
-            String title = normalizeTitle(matcher.group(0));
-            if (title != null) {
-              check = true;
-              ourSize++;
-              answer.put(title, ourSize);
-            }
+        Elements googleSnippets = document.select("div.g");
+        googleSnippets.forEach(element -> {
+          String title = normalizeTitle(element.select("h3.LC20lb").text());
+          if (title == null) {
+            return;
           }
-        }
-        br.close();
-        if (!check) {
-          break;
-        }
-      } catch (IOException ignored) {
+
+          String snippet = element.select("span.st").text();
+          String snippetUrl = element.select("a[href]").attr("href");
+          try {
+            results.add(new ResultItemImpl(new URI(snippetUrl), title,
+                Arrays.asList(new Pair<>(snippet, new ArrayList<>())), 0));
+          } catch (URISyntaxException e) {
+            e.printStackTrace();
+          }
+        });
+      } catch (IOException e) {
+        e.printStackTrace();
       }
     }
-    return answer;
+    return results;
   }
 
-  public void calculate(String query, Page[] resultItems) {
+  public ResultItem[] calculate(String query, Page[] resultItems) {
 
     List<String> ourTitles = new ArrayList<>();
     for (Page r : resultItems) {
       ourTitles.add(r.title().toString());
     }
     Path tmpPath = pathToMetrics.resolve(String.valueOf(query));
-    Map<String, Integer> googleTitles = new HashMap<>();
+    List<ResultItem> googleResults = new ArrayList<>();
 
-    if (!Files.exists(tmpPath.resolve(MAP_FILE))) {
+    if (true) {
       try {
         Files.createDirectories(tmpPath);
       } catch (IOException e) {
         System.err.println("Can't create directory: " + query);
       }
 
-      googleTitles = getGoogleTitles(ourTitles.size(), query);
+      googleResults = getGoogleResults(ourTitles.size(), query);
       ObjectMapper objectMapper = new ObjectMapper();
-      try {
-        objectMapper.writeValue(tmpPath.resolve(MAP_FILE).toFile(), googleTitles);
-      } catch (IOException e) {
-        e.printStackTrace();
-      }
+//      try {
+//        objectMapper.writeValue(tmpPath.resolve(MAP_FILE).toFile(), googleResults);
+//      } catch (IOException e) {
+//        e.printStackTrace();
+//      }
     } else {
       ObjectMapper objectMapper = new ObjectMapper();
 
-      TypeReference<Map<String, Integer>> mapType = new TypeReference<Map<String, Integer>>() {
+      TypeReference<List<ResultItem>> mapType = new TypeReference<List<ResultItem>>() {
       };
 
       try {
-        googleTitles = objectMapper.readValue(tmpPath.resolve(MAP_FILE).toFile(), mapType);
+        googleResults = objectMapper.readValue(tmpPath.resolve(MAP_FILE).toFile(), mapType);
       } catch (IOException e) {
         e.printStackTrace();
       }
     }
 
-    Double DCG = 0.0;
+    double DCG = 0.0;
     int ind = 0;
     for (String title : ourTitles) {
-      Integer num = googleTitles.get(title);
-      double numDouble = 0;
-      if (num != null) {
-        numDouble = 1.0 / num;
+      ResultItem googleResult = googleResults.stream()
+          .filter(item -> item.title().equals(title)).findFirst()
+          .orElse(null);
+      if (googleResult == null) {
+        continue;
       }
+      double numDouble = googleResults.indexOf(googleResult) + 1;
+      numDouble = 1.0 / numDouble;
       DCG += numDouble / (Math.log(2 + ind) / Math.log(2));
       ind++;
     }
@@ -168,10 +171,10 @@ public class Metric {
     } catch (IOException e) {
       e.printStackTrace();
     }
+
+    return googleResults.toArray(new ResultItem[0]);
   }
 
   void calculateRebase(String query, Page[] pages) {
-
   }
-
 }

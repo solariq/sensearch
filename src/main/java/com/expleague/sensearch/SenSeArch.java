@@ -2,7 +2,6 @@ package com.expleague.sensearch;
 
 import com.expleague.commons.util.Pair;
 import com.expleague.sensearch.snippet.Segment;
-
 import java.net.URI;
 import java.util.List;
 
@@ -14,6 +13,7 @@ public interface SenSeArch {
     int totalResultsFound();
 
     ResultItem[] results();
+    ResultItem[] googleResults();
   }
 
   interface ResultItem {
