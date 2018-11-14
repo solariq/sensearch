@@ -20,6 +20,7 @@ public interface SearchPhase extends Predicate<Whiteboard>, Consumer<Whiteboard>
 
       new Factory<RankingPhase>() {
         Builder builder;
+
         @Override
         public void setConfig(Builder builder) {
           this.builder = builder;

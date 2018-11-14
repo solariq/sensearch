@@ -4,7 +4,6 @@ import com.expleague.sensearch.core.Embedding;
 import com.expleague.sensearch.core.Filter;
 import com.expleague.sensearch.index.IndexedPage;
 import com.expleague.sensearch.query.Query;
-
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
@@ -22,6 +21,6 @@ public class FilterImpl implements Filter {
   @Override
   public LongStream filtrate(Query query) {
     return embedding.getNearestDocuments(embedding.getVec(query), numberOfNeighbors)
-            .stream().mapToLong(l -> l);
+        .stream().mapToLong(l -> l);
   }
 }

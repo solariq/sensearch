@@ -87,13 +87,33 @@ public class MinimalFunctionalityPlainIndexTest {
     }
   }
 
-  private static class QueryStub implements Query {
-    private List<Term> terms;
-    QueryStub(String query) {
-        terms = new LinkedList<>();
-        for (String w : query.split("[^А-ЯЁа-яёA-Za-z0-9]")) {
-          terms.add(new TermStub(w));
+  @Test
+  public void indexFunctionalityTest() {
+    plainIndex.fetchDocuments(new QueryStub("empty")).forEach(
+        doc -> {
+          Assert.assertTrue(DOCUMENTS_AND_TITLES.containsKey(doc.title().toString()));
+          Assert.assertEquals(
+              DOCUMENTS_AND_TITLES.get(doc.title().toString()),
+              doc.text().toString()
+          );
         }
+    );
+  }
+
+  @After
+  public void cleanup() throws Exception {
+    FileUtils.deleteDirectory(indexRoot.toFile());
+  }
+
+  private static class QueryStub implements Query {
+
+    private List<Term> terms;
+
+    QueryStub(String query) {
+      terms = new LinkedList<>();
+      for (String w : query.split("[^А-ЯЁа-яёA-Za-z0-9]")) {
+        terms.add(new TermStub(w));
+      }
     }
 
     @Override
@@ -103,6 +123,7 @@ public class MinimalFunctionalityPlainIndexTest {
   }
 
   private static class TermStub implements Term {
+
     private String rawTerm;
 
     TermStub(String term) {
@@ -123,24 +144,6 @@ public class MinimalFunctionalityPlainIndexTest {
     public LemmaInfo getLemma() {
       return null;
     }
-  }
-
-  @Test
-  public void indexFunctionalityTest() {
-    plainIndex.fetchDocuments(new QueryStub("empty")).forEach(
-        doc -> {
-          Assert.assertTrue(DOCUMENTS_AND_TITLES.containsKey(doc.title().toString()));
-          Assert.assertEquals(
-              DOCUMENTS_AND_TITLES.get(doc.title().toString()),
-              doc.text().toString()
-          );
-        }
-    );
-  }
-
-  @After
-  public void cleanup() throws Exception {
-    FileUtils.deleteDirectory(indexRoot.toFile());
   }
 
   private static class TextDocument implements CrawlerDocument {

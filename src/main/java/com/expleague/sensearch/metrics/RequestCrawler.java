@@ -18,6 +18,7 @@ import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
 
 public class RequestCrawler implements WebCrawler {
+
   private final String googleRequest = "https://www.google.ru/search?q=site:ru.wikipedia.org%20";
   private UserAgents userAgents = new UserAgents();
   private Set<String> allTitles;

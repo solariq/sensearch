@@ -95,7 +95,7 @@ public class SnippetsCreator {
           }
           PartOfSpeech partOfSpeech = lemmaInfo.pos();
           return partOfSpeech == PartOfSpeech.S; //|| partOfSpeech == PartOfSpeech.V
-             // || partOfSpeech == PartOfSpeech.SPRO;
+          // || partOfSpeech == PartOfSpeech.SPRO;
         })
         .peek(x -> {
           long r = passagesWithQueryWords.stream()

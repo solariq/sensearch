@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Set;
 
 public class LocalRequestCrawler implements WebCrawler {
+
   private final String MAP_FILE = "MAP";
   private Set<String> allTitles;
   private Path pathToMetric;

@@ -5,12 +5,12 @@ import com.expleague.sensearch.snippet.Segment;
 import com.expleague.sensearch.snippet.Snippet;
 import com.expleague.sensearch.snippet.passage.Passage;
 import com.expleague.sensearch.snippet.passage.Passages;
-import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
 public class DocBasedSnippet implements Snippet {
+
   private static final long MAX_LENGTH = 300; //🚜🚜🚜
 
   private CharSequence title;
@@ -26,7 +26,7 @@ public class DocBasedSnippet implements Snippet {
         .max()
         .getAsDouble();
 
-    List <Passage> bestPassages = passages
+    List<Passage> bestPassages = passages
         .stream()
         .filter(passage -> passage.getRating() * 2 > bestPassage)
         .sorted(Comparator.comparingLong(Passage::getId))
@@ -34,8 +34,10 @@ public class DocBasedSnippet implements Snippet {
 
     StringBuilder sb = new StringBuilder();
     for (int i = 0; i < bestPassages.size(); ++i) {
-      if (sb.length() + bestPassages.get(i).getSentence().length() > MAX_LENGTH) break;
-      if (i > 0 && bestPassages.get(i-1).getId() + 1 < bestPassages.get(i).getId()) {
+      if (sb.length() + bestPassages.get(i).getSentence().length() > MAX_LENGTH) {
+        break;
+      }
+      if (i > 0 && bestPassages.get(i - 1).getId() + 1 < bestPassages.get(i).getId()) {
         sb.append(" ... ");
       }
       sb.append(bestPassages.get(i).getSentence());

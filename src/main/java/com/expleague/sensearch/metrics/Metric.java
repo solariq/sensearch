@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Metric {
+
   private final String METRIC_FILE = "METRIC";
   private WebCrawler crawler;
   private Path pathToMetrics;

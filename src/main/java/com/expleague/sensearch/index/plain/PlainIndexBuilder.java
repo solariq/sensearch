@@ -35,10 +35,9 @@ public class PlainIndexBuilder {
   private static final Random RNG = new Random();
 
   private static final Logger LOG = Logger.getLogger(PlainIndexBuilder.class.getName());
-
-  private Path indexRoot;
   private final Config config;
   private final Embedding embedding;
+  private Path indexRoot;
 
   public PlainIndexBuilder(Config config) throws RuntimeException, IOException {
     this.config = config;

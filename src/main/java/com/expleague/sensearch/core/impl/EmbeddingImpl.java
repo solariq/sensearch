@@ -9,13 +9,20 @@ import com.expleague.sensearch.core.Embedding;
 import com.expleague.sensearch.index.IndexedPage;
 import com.expleague.sensearch.query.Query;
 import com.expleague.sensearch.query.term.Term;
-
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.nio.charset.StandardCharsets;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.TreeMap;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -39,21 +46,21 @@ public class EmbeddingImpl implements Embedding {
 
   public EmbeddingImpl(Config config) {
     try (Reader input = new InputStreamReader(
-            new GZIPInputStream(new FileInputStream(config.getEmbeddingVectors())),
-            StandardCharsets.UTF_8)) {
+        new GZIPInputStream(new FileInputStream(config.getEmbeddingVectors())),
+        StandardCharsets.UTF_8)) {
       CharSeqTools.lines(input)
-              .parallel()
-              .forEach(line -> {
-                CharSequence[] parts = CharSeqTools.split(line, ' ');
-                final String word = parts[0].toString();
-                double[] doubles = Arrays.stream(parts, 1, parts.length)
-                        .mapToDouble(CharSeqTools::parseDouble)
-                        .toArray();
-                final Vec vec = new ArrayVec(doubles);
-                synchronized (wordVecMap) {
-                  wordVecMap.put(word, vec);
-                }
-              });
+          .parallel()
+          .forEach(line -> {
+            CharSequence[] parts = CharSeqTools.split(line, ' ');
+            final String word = parts[0].toString();
+            double[] doubles = Arrays.stream(parts, 1, parts.length)
+                .mapToDouble(CharSeqTools::parseDouble)
+                .toArray();
+            final Vec vec = new ArrayVec(doubles);
+            synchronized (wordVecMap) {
+              wordVecMap.put(word, vec);
+            }
+          });
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
@@ -77,15 +84,15 @@ public class EmbeddingImpl implements Embedding {
   @Override
   public Vec getVec(List<Term> terms) {
     return getArithmeticMean(terms.stream()
-            .map(t -> getVec(t.getNormalized().toString()))
+        .map(t -> getVec(t.getNormalized().toString()))
     );
   }
 
   @Override
   public List<Vec> getVecsForTerms(Query query) {
     return query.getTerms().stream()
-            .map(t -> getVec(t.getNormalized().toString()))
-            .collect(Collectors.toList());
+        .map(t -> getVec(t.getNormalized().toString()))
+        .collect(Collectors.toList());
   }
 
   @Override
@@ -129,7 +136,8 @@ public class EmbeddingImpl implements Embedding {
     return getArithmeticMean(keyWordsFunc.apply(document).map(this::getVec));
   }
 
-  private Comparator<Vec> getComparator(Vec mainVec) { ;
+  private Comparator<Vec> getComparator(Vec mainVec) {
+    ;
     return (vec1, vec2) -> {
       double val1 = nearestMeasure.apply(mainVec, vec1);
       double val2 = nearestMeasure.apply(mainVec, vec2);
@@ -140,7 +148,8 @@ public class EmbeddingImpl implements Embedding {
     };
   }
 
-  private <T> List<T> getNearest(int numberOfNeighbors, Comparator<Vec> comparator, Map<T, Vec> map) {
+  private <T> List<T> getNearest(int numberOfNeighbors, Comparator<Vec> comparator,
+      Map<T, Vec> map) {
     TreeMap<Vec, T> nearest = new TreeMap<>(comparator);
     for (Map.Entry<T, Vec> e : map.entrySet()) {
       if (nearest.size() < numberOfNeighbors) {

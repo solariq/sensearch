@@ -10,6 +10,7 @@ import java.util.List;
  * Created by Maxim on 10.10.2018. Email: alvinmax@mail.ru
  */
 public class Passage {
+
   private CharSequence sentence;
   private List<WordInfo> words;
   private List<Segment> selection = new ArrayList<>();
@@ -26,12 +27,12 @@ public class Passage {
     return rating;
   }
 
-  public long getId() {
-    return id;
-  }
-
   public void setRating(double rating) {
     this.rating = rating;
+  }
+
+  public long getId() {
+    return id;
   }
 
   public void setId(long id) {

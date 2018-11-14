@@ -26,10 +26,8 @@ public class PlainIndex implements Index {
   private final TLongSet availableDocuments;
   private final Filter filter;
   private final Set<String> allTitles;
-  
-  private Stats statistics = new Stats();
-
   private final Embedding embedding;
+  private Stats statistics = new Stats();
 
   PlainIndex(Path indexRoot, Embedding embedding, Set<String> allTitles) throws IOException {
     this.indexRoot = indexRoot;

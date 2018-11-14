@@ -19,9 +19,10 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class SenSeArchImpl implements SenSeArch {
+
   private final Builder builder;
 
-  public SenSeArchImpl(Builder builder){
+  public SenSeArchImpl(Builder builder) {
     this.builder = builder;
   }
 
@@ -32,14 +33,15 @@ public class SenSeArchImpl implements SenSeArch {
       return f.get();
     }).collect(Collectors.toSet());
 
-
-
     final Whiteboard wb = new WhiteboardImpl(query, pageNo, builder);
-    final ThreadPoolExecutor executor = new ThreadPoolExecutor(Runtime.getRuntime().availableProcessors() - 1, Runtime.getRuntime().availableProcessors() - 1 , 1, TimeUnit.SECONDS, new LinkedBlockingQueue<>());
+    final ThreadPoolExecutor executor = new ThreadPoolExecutor(
+        Runtime.getRuntime().availableProcessors() - 1,
+        Runtime.getRuntime().availableProcessors() - 1, 1, TimeUnit.SECONDS,
+        new LinkedBlockingQueue<>());
 
     boolean[] hasError = new boolean[1];
 
-    while(!hasError[0] && (wb.snippets() == null || wb.googleResults() == null)) {
+    while (!hasError[0] && (wb.snippets() == null || wb.googleResults() == null)) {
       List<SearchPhase> curPhases = new ArrayList<>(phases);
       phases.clear();
       for (final SearchPhase phase : curPhases) {
@@ -65,8 +67,8 @@ public class SenSeArchImpl implements SenSeArch {
       synchronized (wb) {
         try {
           wb.wait();
+        } catch (InterruptedException ignore) {
         }
-        catch (InterruptedException ignore) { }
       }
     }
 

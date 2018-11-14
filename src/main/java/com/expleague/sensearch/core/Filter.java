@@ -1,7 +1,6 @@
 package com.expleague.sensearch.core;
 
 import com.expleague.sensearch.query.Query;
-
 import java.util.stream.LongStream;
 
 public interface Filter {

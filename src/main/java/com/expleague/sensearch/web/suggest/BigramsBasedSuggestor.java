@@ -1,7 +1,7 @@
 package com.expleague.sensearch.web.suggest;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.expleague.sensearch.Config;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.util.Comparator;
 import java.util.List;
@@ -12,8 +12,8 @@ import java.util.stream.Collectors;
 
 public class BigramsBasedSuggestor implements Suggestor {
 
-  private TreeMap<String, Integer> map;
   private final Config config;
+  private TreeMap<String, Integer> map;
 
   public BigramsBasedSuggestor(Config config) throws IOException {
     this.config = config;

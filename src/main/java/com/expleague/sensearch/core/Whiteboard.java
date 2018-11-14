@@ -16,20 +16,25 @@ public interface Whiteboard {
 
   @Nullable
   Stream<Pair<Page, Features>> textFeatures();
+
   void putTextFeatures(Stream<Pair<Page, Features>> textFeatures);
 
   @Nullable
   Page[] results();
+
   void putResults(Page[] pages);
 
   Snippet[] snippets();
+
   void putSnippets(Snippet[] snippets);
 
   @Nullable
   Query query();
+
   void putQuery(Query baseQuery);
 
   String input();
+
   int pageNo();
 
   int totalResults();

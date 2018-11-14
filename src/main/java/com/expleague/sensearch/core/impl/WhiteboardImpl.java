@@ -12,13 +12,14 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.jetbrains.annotations.Nullable;
 
 public class WhiteboardImpl implements Whiteboard {
+
+  private final String input;
+  private final int page;
+  private final Builder builder;
   private Page[] results;
   private Snippet[] snippets;
   private Query query;
   private Stream<Pair<Page, Features>> textFeatures;
-  private final String input;
-  private final int page;
-  private final Builder builder;
   private ResultItem[] googleResults;
 
   public WhiteboardImpl(String input, int page, Builder builder) {

@@ -2,8 +2,8 @@ package com.expleague.sensearch.miner;
 
 import com.expleague.sensearch.core.SearchPhase;
 import com.expleague.sensearch.core.Whiteboard;
-import com.expleague.sensearch.miner.impl.RawTextFeaturesMiner;
 import com.expleague.sensearch.index.Index;
+import com.expleague.sensearch.miner.impl.RawTextFeaturesMiner;
 import com.expleague.sensearch.query.Query;
 import org.apache.commons.lang3.tuple.Pair;
 

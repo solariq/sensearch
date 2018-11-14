@@ -7,6 +7,7 @@ import java.net.URI;
 import java.util.List;
 
 public class ResultItemImpl implements ResultItem {
+
   private final URI reference;
   private final CharSequence title;
   private final List<Pair<CharSequence, List<Segment>>> passages;

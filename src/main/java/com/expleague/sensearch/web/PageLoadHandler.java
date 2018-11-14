@@ -20,12 +20,14 @@ import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.handler.AbstractHandler;
 
 public class PageLoadHandler extends AbstractHandler {
+
   private final SenSeArch search;
   private final Suggestor suggestor;
-  private ObjectMapper mapper = new ObjectMapper();
   private final Config config;
+  private ObjectMapper mapper = new ObjectMapper();
 
-  public PageLoadHandler(SenSeArch searcher, BigramsBasedSuggestor bigramsBasedSuggestor, Config config) {
+  public PageLoadHandler(SenSeArch searcher, BigramsBasedSuggestor bigramsBasedSuggestor,
+      Config config) {
     suggestor = bigramsBasedSuggestor;
     this.config = config;
     this.search = searcher;
@@ -47,6 +49,7 @@ public class PageLoadHandler extends AbstractHandler {
 
     return strb.toString();
   }
+
   @Override
   public void handle(String target,
       Request baseRequest,
@@ -79,7 +82,8 @@ public class PageLoadHandler extends AbstractHandler {
         final SenSeArch.ResultItem[] results = serp.results();
         for (int i = 0; i < results.length; i++) {
           writer.println("<br><strong>" + (i + 1) + ". " + results[i].title() + "</strong><br>");
-          results[i].passages().stream().map(pair -> generateBoldedText(pair.first, pair.second)).forEach(writer::println);
+          results[i].passages().stream().map(pair -> generateBoldedText(pair.first, pair.second))
+              .forEach(writer::println);
         }
         writer.println("</body></html>");
       }

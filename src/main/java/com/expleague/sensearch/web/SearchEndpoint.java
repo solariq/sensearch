@@ -24,7 +24,9 @@ import javax.ws.rs.core.MediaType;
 
 @Path("/")
 public class SearchEndpoint {
+
   private static final ObjectMapper mapper = new ObjectMapper();
+
   // TODO: refactor this
   static {
     SimpleModule module = new SimpleModule();
@@ -93,8 +95,8 @@ public class SearchEndpoint {
         jsonGenerator.writeStringField("text", passage.first.toString());
 
         jsonGenerator.writeArrayFieldStart("highlights");
-        for (Segment highlight: passage.second) {
-          jsonGenerator.writeArray(new int[] {highlight.getLeft(), highlight.getRight()}, 0, 2);
+        for (Segment highlight : passage.second) {
+          jsonGenerator.writeArray(new int[]{highlight.getLeft(), highlight.getRight()}, 0, 2);
         }
         jsonGenerator.writeEndArray();
         jsonGenerator.writeEndObject();

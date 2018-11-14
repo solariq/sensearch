@@ -47,7 +47,7 @@ public class Builder {
     bigramsBasedSuggestor = new BigramsBasedSuggestor(config);
     lemmer = new Lemmer(config.getMyStem());
     searcher = new SenSeArchImpl(this);
-    webCrawler.setAllTitles(((PlainIndex)index).allTitles());
+    webCrawler.setAllTitles(((PlainIndex) index).allTitles());
     metric = new Metric(webCrawler, config.getPathToMetrics());
     return config;
   }
