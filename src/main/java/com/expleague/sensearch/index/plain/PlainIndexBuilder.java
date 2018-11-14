@@ -6,7 +6,6 @@ import com.expleague.sensearch.core.impl.EmbeddingImpl;
 import com.expleague.sensearch.donkey.crawler.document.CrawlerDocument;
 import com.expleague.sensearch.index.Index;
 import com.expleague.sensearch.index.statistics.Stats;
-import com.expleague.sensearch.metrics.Metric;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.BufferedWriter;
 import java.io.IOException;
@@ -156,7 +155,7 @@ public class PlainIndexBuilder {
     }
   }
 
-  public Index buildIndex(Stream<CrawlerDocument> parsedDocumentsStream, Metric metric) throws IOException {
+  public Index buildIndex(Stream<CrawlerDocument> parsedDocumentsStream) throws IOException {
     Path bigramPath = indexRoot.getParent().resolve(Paths.get(config.getTemporaryBigrams()));
     Files.createDirectories(bigramPath);
     TreeMap<String, Integer> result = new TreeMap<>();
@@ -174,15 +173,13 @@ public class PlainIndexBuilder {
         }
     );
 
-    metric.pushTitles(allTitles);
-
     ObjectMapper mapper = new ObjectMapper();
     mapper.writeValue(bigramPath.resolve(config.getBigramsFileName()).toFile(), result);
 
     stats.writeToFile(config.getStatisticsFileName());
 
     try {
-      return new PlainIndex(indexRoot, embedding);
+      return new PlainIndex(indexRoot, embedding, allTitles);
     } catch (IOException e) {
       try {
         FileUtils.deleteDirectory(indexRoot.toFile());
