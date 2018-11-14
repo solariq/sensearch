@@ -199,12 +199,12 @@ public class RawTextFeaturesMinerTest {
     }
 
     @Override
-    public double averageWordsPerPage() {
+    public double averagePageSize() {
       return averageWordsPerPage;
     }
 
     @Override
-    public int pagesWithTerm(Term term) {
+    public int documentFrequency(Term term) {
       return pagesWithTermCounts.get(term.getRaw());
     }
 
@@ -214,7 +214,7 @@ public class RawTextFeaturesMinerTest {
     }
 
     @Override
-    public long termCollectionFrequency(Term term) {
+    public long termFrequncy(Term term) {
       return termsRawCounts.get(term.getRaw());
     }
   }

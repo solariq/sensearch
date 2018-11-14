@@ -70,7 +70,7 @@ public class RawTextFeaturesMiner implements FeaturesMiner {
 
     int indexSize = indexStatistics.indexSize();
     for (int i = 0; i < rawTerms.length; ++i) {
-      int pagesWithTerm = indexStatistics.pagesWithTerm(terms.get(i));
+      int pagesWithTerm = indexStatistics.documentFrequency(terms.get(i));
       idf[i] = pagesWithTerm == 0 ? 0 :
           Math.log((indexSize - pagesWithTerm + 0.5) / (pagesWithTerm + 0.5));
       idf[i] = idf[i] < 0 ? 0 : idf[i];
@@ -86,7 +86,7 @@ public class RawTextFeaturesMiner implements FeaturesMiner {
 
     double totalScore = 0;
     int pageSize = contentTokens.length;
-    double averagePageSize = indexStatistics.averageWordsPerPage();
+    double averagePageSize = indexStatistics.averagePageSize();
     for (int i = 0; i < idf.length; ++i) {
       if (idf[i] > 0) {
         double tf = rawCounts[i] / pageSize;

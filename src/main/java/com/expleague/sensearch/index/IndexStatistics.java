@@ -9,8 +9,8 @@ public interface IndexStatistics {
   int indexSize();
 
   int vocabularySize();
-  double averageWordsPerPage();
+  double averagePageSize();
 
-  int pagesWithTerm(Term term);
-  long termCollectionFrequency(Term term);
+  int documentFrequency(Term term);
+  long termFrequency(Term term);
 }

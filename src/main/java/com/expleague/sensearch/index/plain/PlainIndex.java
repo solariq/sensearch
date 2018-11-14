@@ -10,6 +10,10 @@ import com.expleague.sensearch.index.IndexedPage;
 import com.expleague.sensearch.index.statistics.Stats;
 import com.expleague.sensearch.query.Query;
 import com.expleague.sensearch.query.term.Term;
+import com.google.gson.Gson;
+import gnu.trove.map.TIntIntMap;
+import gnu.trove.map.TIntLongMap;
+import gnu.trove.map.TObjectIntMap;
 import gnu.trove.set.TLongSet;
 import gnu.trove.set.hash.TLongHashSet;
 import java.io.IOException;
@@ -20,69 +24,96 @@ import java.util.stream.Stream;
 
 public class PlainIndex implements Index {
 
-  private static final Pattern INDEX_ENTRY_NAME_PATTERN = Pattern.compile("\\d+");
+  public static class PlainIndexConfig {
+    private static final Gson GSON_CONVERTER = new Gson();
 
-  private final Path indexRoot;
-  private final TLongSet availableDocuments;
-  private final Filter filter;
-  
+    private long version;
+    private Path bigramsMapPath;
+    private Path termFrequencyMapPath;
+    private Path documentFrequencyMapPath;
+    private Path embeddingVectorsPath;
 
-  private final Embedding embedding;
+    private PlainIndexConfig() {
 
-  public PlainIndex(Config config) throws IOException {
-    this.indexRoot = indexRoot;
-    this.filter = new FilterImpl(getDocumentStream(indexRoot), embedding);
-    this.embedding = embedding;
+    }
 
-    availableDocuments = new TLongHashSet();
-    Files.list(indexRoot)
-        .filter(entry -> INDEX_ENTRY_NAME_PATTERN.matcher(
-            entry.getFileName().toString()).matches()
-        )
-        //.peek(p -> statistics.acceptDocument(new PlainPage(p)))
-        .mapToLong(entry -> Long.parseLong(entry.getFileName().toString()))
-        .forEach(availableDocuments::add);
+    private long version() {
+      return version;
+    }
+
+    private Path bigramsMapPath() {
+      return bigramsMapPath;
+    }
+
+    private Path termFrequencyMapPath() {
+      return termFrequencyMapPath;
+    }
+
+    private Path documentFrequencyMapPath() {
+      return documentFrequencyMapPath;
+    }
+
+    private Path embeddingVectorsPath() {
+      return embeddingVectorsPath;
+    }
+
+    public static void createConfigFile() {
+
+    }
+
+    private static PlainIndexConfig parseFromFile(Path configFile) {
+      return null;
+    }
+
   }
 
+  private static TIntLongMap termFrequencyMap;
+  private static TIntIntMap documentFrequencyMap;
+  private static TObjectIntMap<String> wordToIdMap;
+  private static double averagePageSize;
+  private static int indexSize;
+  private static int vocabularySize;
+  // private static Embedding embedding;
 
-  private Stream<IndexedPage> getDocumentStream(Path indexRoot) throws IOException {
-    final Pattern indexEntryNamePattern = Pattern.compile("\\d+");
-    return Files.list(indexRoot)
-        .filter(entry -> indexEntryNamePattern.matcher(
-            entry.getFileName().toString()).matches()
-        )
-        .map(PlainPage::new);
+  public PlainIndex() {
+  }
+
+  public static void initialize(Config config) throws Exception {
+
   }
 
   @Override
   public Stream<Page> fetchDocuments(Query query) {
-    return filter.filtrate(query)
-        .mapToObj(id -> indexRoot.resolve(Long.toString(id)))
-        .map(PlainPage::new);
+    // there should be some call to embedding
+    return null;
   }
 
   @Override
   public int indexSize() {
-    return availableDocuments.size();
+    return indexSize;
   }
 
   @Override
-  public double averageWordsPerPage() {
-    return 0;
+  public double averagePageSize() {
+    return averagePageSize;
   }
 
   @Override
-  public int pagesWithTerm(Term term) {
-    return 0;
+  public int documentFrequency(Term term) {
+    return documentFrequencyMap.get(
+        wordToIdMap.get(term.getRaw().toString().toLowerCase())
+    );
   }
 
   @Override
-  public long termCollectionFrequency(Term term) {
-    return 0;
+  public long termFrequency(Term term) {
+    return termFrequencyMap.get(
+        wordToIdMap.get(term.getRaw().toString().toLowerCase())
+    );
   }
 
   @Override
   public int vocabularySize() {
-    return 0;
+    return vocabularySize;
   }
 }
