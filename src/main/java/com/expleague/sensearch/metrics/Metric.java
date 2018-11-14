@@ -4,8 +4,6 @@ import com.expleague.commons.util.Pair;
 import com.expleague.sensearch.Page;
 import com.expleague.sensearch.SenSeArch.ResultItem;
 import com.expleague.sensearch.core.impl.ResultItemImpl;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
@@ -28,7 +26,7 @@ public class Metric {
   private final String googleRequest = "https://www.google.ru/search?q=site:ru.wikipedia.org%20";
   private Path pathToMetrics;
   private UserAgents userAgents = new UserAgents();
-  private final String MAP_FILE = "MAP.json";
+  private final String MAP_FILE = "MAP";
   private final String METRIC_FILE = "METRIC";
   private Set<String> allTitles;
 
@@ -65,12 +63,12 @@ public class Metric {
   }
 
   private String normalizeTitle(String title) {
-    String ans = title
-        .replace("<h3 class=\"LC20lb\">", "")
-        .replace("</h3>", "");
+    String ans = title;
     if (ans.endsWith(" — Википедия")) {
       ans = ans.replace(" — Википедия", "");
-      return ans;
+      if (allTitles.contains(ans)) {
+        return ans;
+      }
     }
     return null;
   }
@@ -118,35 +116,16 @@ public class Metric {
     for (Page r : resultItems) {
       ourTitles.add(r.title().toString());
     }
-    Path tmpPath = pathToMetrics.resolve(String.valueOf(query));
-    List<ResultItem> googleResults = new ArrayList<>();
+    Path tmpPath = pathToMetrics.resolve(query);
+    List<ResultItem> googleResults;
 
-    if (true) {
-      try {
-        Files.createDirectories(tmpPath);
-      } catch (IOException e) {
-        System.err.println("Can't create directory: " + query);
-      }
-
-      googleResults = getGoogleResults(ourTitles.size(), query);
-      ObjectMapper objectMapper = new ObjectMapper();
-//      try {
-//        objectMapper.writeValue(tmpPath.resolve(MAP_FILE).toFile(), googleResults);
-//      } catch (IOException e) {
-//        e.printStackTrace();
-//      }
-    } else {
-      ObjectMapper objectMapper = new ObjectMapper();
-
-      TypeReference<List<ResultItem>> mapType = new TypeReference<List<ResultItem>>() {
-      };
-
-      try {
-        googleResults = objectMapper.readValue(tmpPath.resolve(MAP_FILE).toFile(), mapType);
-      } catch (IOException e) {
-        e.printStackTrace();
-      }
+    try {
+      Files.createDirectories(tmpPath);
+    } catch (IOException e) {
+      System.err.println("Can't create directory: " + query);
     }
+
+    googleResults = getGoogleResults(ourTitles.size(), query);
 
     double DCG = 0.0;
     int ind = 0;
@@ -173,8 +152,5 @@ public class Metric {
     }
 
     return googleResults.toArray(new ResultItem[0]);
-  }
-
-  void calculateRebase(String query, Page[] pages) {
   }
 }
