@@ -35,7 +35,7 @@ public class EmbeddingBuilder {
 
   void add(long id, Vec v) {}
 
-  void addAll(TIntObjectMap<Vec> vectors) {}
+  void addAll(TLongObjectMap<Vec> vectors) {}
 
   void build(Path to) {}
 

@@ -7,15 +7,17 @@ import com.expleague.sensearch.Config;
 import com.expleague.sensearch.core.Tokenizer;
 import com.expleague.sensearch.donkey.IndexBuilder;
 import com.expleague.sensearch.donkey.crawler.Crawler;
+import com.expleague.sensearch.index.plain.PlainIndex;
+import com.expleague.sensearch.index.plain.PlainPage;
 import gnu.trove.list.TIntList;
 import gnu.trove.list.linked.TIntLinkedList;
 import gnu.trove.map.TIntIntMap;
-import gnu.trove.map.TIntObjectMap;
 import gnu.trove.map.TLongIntMap;
+import gnu.trove.map.TLongObjectMap;
 import gnu.trove.map.TObjectIntMap;
 import gnu.trove.map.hash.TIntIntHashMap;
-import gnu.trove.map.hash.TIntObjectHashMap;
 import gnu.trove.map.hash.TLongIntHashMap;
+import gnu.trove.map.hash.TLongObjectHashMap;
 import gnu.trove.map.hash.TObjectIntHashMap;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -25,6 +27,8 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
+import java.util.logging.Logger;
+import java.util.stream.Stream;
 import java.util.zip.GZIPInputStream;
 
 public class PlainIndexBuilder implements IndexBuilder {
@@ -34,12 +38,14 @@ public class PlainIndexBuilder implements IndexBuilder {
   private static final String EMBEDDING_ROOT = "embedding";
   private static final int VEC_SIZE = 50;
 
+  private static final Logger LOG = Logger.getLogger(PlainIndexBuilder.class.getName());
+
   public PlainIndexBuilder() {
   }
 
   @Override
   public void buildIndex(Crawler crawler, Config config) throws IOException {
-    final TIntObjectMap<Vec> gloveVectors = new TIntObjectHashMap<>();
+    final TLongObjectMap<Vec> gloveVectors = new TLongObjectHashMap<>();
     final TObjectIntMap<String> idMappings = new TObjectIntHashMap<>();
     readGloveVectors(Paths.get(config.getEmbeddingVectors()), idMappings, gloveVectors);
 
@@ -51,10 +57,11 @@ public class PlainIndexBuilder implements IndexBuilder {
       crawler.makeStream().forEach(
           doc -> {
             long pageId = plainPageBuilder.add(doc);
+
             embeddingBuilder.add(
                 pageId,
-                idsToVector(
-                    wordsToIds(
+                toVector(
+                    toWordIds(
                         Tokenizer.tokenize(doc.getTitle().toLowerCase()),
                         idMappings
                     ),
@@ -62,16 +69,24 @@ public class PlainIndexBuilder implements IndexBuilder {
                 )
             );
 
+            int[] tokens = toWordIds(
+                Tokenizer.tokenize((doc.getTitle() + " " + doc.getTitle()).toLowerCase()),
+                idMappings
+            );
+
             final TIntIntMap termFrequencyMap = new TIntIntHashMap();
             final TLongIntMap bigramFrequencyMap = new TLongIntHashMap();
-            int pageSize = 0;
+            enrichFrequencies(tokens, termFrequencyMap, bigramFrequencyMap);
             statisticsBuilder.enrich(
                 termFrequencyMap,
                 bigramFrequencyMap,
-                pageSize
+                tokens.length
             );
           }
       );
+
+      embeddingBuilder.addAll(gloveVectors);
+
       Path indexRoot = config.getTemporaryIndex();
       plainPageBuilder.build(indexRoot.resolve(PLAIN_ROOT));
       embeddingBuilder.build(indexRoot.resolve(EMBEDDING_ROOT));
@@ -81,18 +96,35 @@ public class PlainIndexBuilder implements IndexBuilder {
     }
   }
 
-  private int[] wordsToIds(String[] words, TObjectIntMap<String> mappings) {
-    TIntList ids = new TIntLinkedList();
+  private int[] toWordIds(String[] words, TObjectIntMap<String> mappings) {
+    TIntList wordIdsList = new TIntLinkedList();
     for (int i = 0; i < words.length; ++i) {
       if (mappings.containsKey(words[i])) {
-        ids.add(mappings.get(words[i]));
+        wordIdsList.add(mappings.get(words[i]));
+      } else {
+        LOG.warning(String.format("For word '%s' was not found vector representation!", words[i]));
       }
     }
 
-    return ids.toArray();
+    return wordIdsList.toArray();
   }
 
-  private Vec idsToVector(int[] tokens, TIntObjectMap<Vec> vectors) {
+  private void enrichFrequencies(int[] tokens, TIntIntMap termFrequencyMap,
+      TLongIntMap bigramFrequencyMap) {
+    if (tokens.length < 1) {
+      return;
+    }
+    termFrequencyMap.put(tokens[0], 1);
+    long prevToken = tokens[0];
+    for (int i = 1; i < tokens.length; ++i) {
+      termFrequencyMap.adjustOrPutValue(tokens[i], 1, 1);
+      long bigramId = (prevToken << 32) + tokens[i];
+      bigramFrequencyMap.adjustOrPutValue(bigramId, 1, 1);
+      prevToken = tokens[i];
+    }
+  }
+
+  private Vec toVector(int[] tokens, TLongObjectMap<Vec> vectors) {
     ArrayVec mean = new ArrayVec(new double[VEC_SIZE]);
     for (int i : tokens) {
       mean.add((ArrayVec) vectors.get(i));
@@ -102,7 +134,7 @@ public class PlainIndexBuilder implements IndexBuilder {
   }
 
   private void readGloveVectors(Path glovePath, TObjectIntMap<String> idMappings,
-      TIntObjectMap<Vec> vectors) {
+      TLongObjectMap<Vec> vectors) {
     try (Reader input =
         new InputStreamReader(
             new GZIPInputStream(
