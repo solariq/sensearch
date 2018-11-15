@@ -9,9 +9,13 @@ import com.expleague.sensearch.donkey.IndexBuilder;
 import com.expleague.sensearch.donkey.crawler.Crawler;
 import gnu.trove.list.TIntList;
 import gnu.trove.list.linked.TIntLinkedList;
+import gnu.trove.map.TIntIntMap;
 import gnu.trove.map.TIntObjectMap;
+import gnu.trove.map.TLongIntMap;
 import gnu.trove.map.TObjectIntMap;
+import gnu.trove.map.hash.TIntIntHashMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
+import gnu.trove.map.hash.TLongIntHashMap;
 import gnu.trove.map.hash.TObjectIntHashMap;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -46,7 +50,7 @@ public class PlainIndexBuilder implements IndexBuilder {
     try {
       crawler.makeStream().forEach(
           doc -> {
-            int pageId = plainPageBuilder.add(doc);
+            long pageId = plainPageBuilder.add(doc);
             embeddingBuilder.add(
                 pageId,
                 idsToVector(
@@ -58,13 +62,13 @@ public class PlainIndexBuilder implements IndexBuilder {
                 )
             );
 
+            final TIntIntMap termFrequencyMap = new TIntIntHashMap();
+            final TLongIntMap bigramFrequencyMap = new TLongIntHashMap();
+            int pageSize = 0;
             statisticsBuilder.enrich(
-                wordsToIds(
-                    Tokenizer.tokenize(
-                        (doc.getTitle() + " " + doc.getContent()).toLowerCase()
-                    ),
-                    idMappings
-                )
+                termFrequencyMap,
+                bigramFrequencyMap,
+                pageSize
             );
           }
       );

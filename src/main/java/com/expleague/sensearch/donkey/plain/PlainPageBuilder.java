@@ -8,21 +8,18 @@ import java.nio.file.Path;
 
 class PlainPageBuilder {
 
-  private int flushedPagesCount;
+  private static final long PAGE_ID_SHIFT = 1L << 32;
+  private int flushedPagesCount = 0;
 
   PlainPageBuilder() throws IOException {
   }
 
-  int add(CrawlerDocument newPage) {
+  long add(CrawlerDocument newPage) {
     ++flushedPagesCount;
-    return flushedPagesCount;
+    return PAGE_ID_SHIFT + flushedPagesCount;
   }
 
   void build(Path plainPath) {
 
-  }
-
-  int currentDocumentId() {
-    return -flushedPagesCount - 1;
   }
 }

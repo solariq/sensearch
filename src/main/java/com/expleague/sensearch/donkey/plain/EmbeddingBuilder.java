@@ -33,7 +33,7 @@ public class EmbeddingBuilder {
 
   }
 
-  void add(int id, Vec v) {}
+  void add(long id, Vec v) {}
 
   void addAll(TIntObjectMap<Vec> vectors) {}
 
