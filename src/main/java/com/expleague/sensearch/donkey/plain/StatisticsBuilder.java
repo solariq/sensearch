@@ -1,30 +1,16 @@
 package com.expleague.sensearch.donkey.plain;
 
-import com.expleague.sensearch.Config;
-import com.expleague.sensearch.core.Tokenizer;
-import com.expleague.sensearch.donkey.crawler.document.CrawlerDocument;
-import gnu.trove.list.TIntList;
-import gnu.trove.list.array.TIntArrayList;
-import gnu.trove.list.linked.TIntLinkedList;
 import gnu.trove.map.TIntIntMap;
+import gnu.trove.map.TIntLongMap;
 import gnu.trove.map.TIntObjectMap;
 import gnu.trove.map.TLongIntMap;
-import gnu.trove.map.TLongLongMap;
-import gnu.trove.map.TObjectIntMap;
 import gnu.trove.map.hash.TIntIntHashMap;
-import gnu.trove.map.hash.TIntObjectHashMap;
+import gnu.trove.map.hash.TIntLongHashMap;
 import gnu.trove.map.hash.TLongIntHashMap;
-import gnu.trove.map.hash.TLongLongHashMap;
-import gnu.trove.map.hash.TObjectIntHashMap;
-import gnu.trove.set.TIntSet;
-import gnu.trove.set.hash.TIntHashSet;
 import java.nio.file.Path;
-import java.util.Comparator;
-import java.util.NavigableMap;
-import java.util.TreeMap;
-import java.util.stream.Stream;
 
 class StatisticsBuilder {
+
   static final String WORD_FREQUENCY_MAP_FILE = "";
   static final String DOCUMENT_FREQUENCY_MAP_FILE = "";
   static final String BIGRAMS_MAP_FILE = "";
@@ -32,52 +18,37 @@ class StatisticsBuilder {
 
   private static final int MOST_FREQUENT_BIGRAMS_COUNT = 10;
 
-  private final TObjectIntMap<String> wordIdMappings;
-
-  private final TLongLongMap wordFrequencyMap = new TLongLongHashMap();
-  private final TLongIntMap documentFrequencyMap = new TLongIntHashMap();
-  private final TIntObjectMap<int[]> bigramsMap = new TIntObjectHashMap<>();
+  private final TIntLongMap wordFrequencyMap = new TIntLongHashMap();
+  private final TIntIntMap documentFrequencyMap = new TIntIntHashMap();
+  private final TLongIntMap largeBigramsMap = new TLongIntHashMap();
   // docsAndWordsCounts[0] -- current documents count
   // docsAndWordsCounts[1] -- overall tokens count in observed documents
   private final long[] docsAndWordsCounts = new long[2];
 
-  StatisticsBuilder(TObjectIntMap<String> wordIdMappings) {
-    this.wordIdMappings = wordIdMappings;
+  StatisticsBuilder() {
   }
 
-  void enrichStatistics(CrawlerDocument crawlerDocument) {
+  void enrich(TIntIntMap pageWiseTf, TLongIntMap pageWiseBigramTf, int pageSize) {
     ++docsAndWordsCounts[0];
-    final TIntObjectMap<TIntIntMap> largeBigramsMap = new TIntObjectHashMap<>();
-    int[] prevTokenId = new int[]{-1};
-    Stream.of(Tokenizer
-        .tokenize((crawlerDocument.getTitle() + " " + crawlerDocument.getContent()).toLowerCase()))
-        .filter(s -> !s.isEmpty())
-        .forEach(
-            token -> {
-              ++docsAndWordsCounts[1];
-              TIntSet uniqueTerms = new TIntHashSet();
-              wordIdMappings.putIfAbsent(token, wordFrequencyMap.size() + 1);
-              int wordId = wordIdMappings.get(token);
-              uniqueTerms.add(wordId);
-              wordFrequencyMap.adjustOrPutValue(wordId, 1, 1);
-              uniqueTerms.forEach(
-                  id -> {
-                    documentFrequencyMap.adjustOrPutValue(id, 1, 1);
-                    return true;
-                  }
-              );
-              largeBigramsMap.putIfAbsent(wordId, new TIntIntHashMap());
-              if (prevTokenId[0] >= 0) {
-                largeBigramsMap.get(wordId).adjustOrPutValue(prevTokenId[0], 1, 1);
-              }
-              prevTokenId[0] = wordId;
-            }
-        );
+    docsAndWordsCounts[1] += pageSize;
+    pageWiseTf.forEachEntry(
+        (tok, freq) -> {
+          wordFrequencyMap.adjustOrPutValue(tok, freq, freq);
+          documentFrequencyMap.adjustOrPutValue(tok, 1, 1);
+          return true;
+        }
+    );
 
+    pageWiseBigramTf.forEachEntry(
+        (tok, freq) -> {
+          largeBigramsMap.adjustOrPutValue(tok, freq, freq);
+          return true;
+        }
+    );
   }
 
   private void trimBigrams(TIntObjectMap<TIntIntMap> largeBigramsMap) {
-    final NavigableMap<Integer, TIntLinkedList> freqHeap = new TreeMap<>(Comparator.reverseOrder());
+//    final NavigableMap<Integer, TIntLinkedList> freqHeap = new TreeMap<>(Comparator.reverseOrder());
 //    int[] currentMapSize = new int[]{0};
 //    largeBigramsMap.forEachEntry(
 //        (tokId, neighMap) -> {
@@ -104,11 +75,8 @@ class StatisticsBuilder {
 //    );
   }
 
-  void flushStatics(Path statsRoot) {
+  void build(Path statsRoot) {
     // TODO: save statistics to disk
   }
 
-  TObjectIntMap<String> wordToIntMappings() {
-    return wordToIdMappings;
-  }
 }

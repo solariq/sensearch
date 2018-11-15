@@ -24,53 +24,6 @@ import java.util.stream.Stream;
 
 public class PlainIndex implements Index {
 
-  public static class PlainIndexConfig {
-    private static final Gson GSON_CONVERTER = new Gson();
-
-    private long version;
-    private Path bigramsMapPath;
-    private Path termFrequencyMapPath;
-    private Path documentFrequencyMapPath;
-    private Path embeddingVectorsPath;
-
-    private PlainIndexConfig() {
-
-    }
-
-    private long version() {
-      return version;
-    }
-
-    private Path bigramsMapPath() {
-      return bigramsMapPath;
-    }
-
-    private Path termFrequencyMapPath() {
-      return termFrequencyMapPath;
-    }
-
-    private Path documentFrequencyMapPath() {
-      return documentFrequencyMapPath;
-    }
-
-    private Path embeddingVectorsPath() {
-      return embeddingVectorsPath;
-    }
-
-    public static void createConfigFile(Path root,
-        Path bigrasMapPath,
-        Path termFrequencyMapPath,
-        Path documentFrequencyMapPath,
-        Path embeddingVectorsPath) {
-
-    }
-
-    private static PlainIndexConfig parseIndexConfig(Path root) {
-      return null;
-    }
-
-  }
-
   private static TIntLongMap termFrequencyMap;
   private static TIntIntMap documentFrequencyMap;
   private static TObjectIntMap<String> wordToIdMap;

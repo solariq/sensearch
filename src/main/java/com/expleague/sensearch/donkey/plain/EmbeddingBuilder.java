@@ -6,6 +6,7 @@ import com.expleague.commons.seq.CharSeqTools;
 import com.expleague.sensearch.Config;
 import com.expleague.sensearch.core.Tokenizer;
 import com.expleague.sensearch.donkey.crawler.document.CrawlerDocument;
+import gnu.trove.map.TIntObjectMap;
 import gnu.trove.map.TLongObjectMap;
 import gnu.trove.map.TObjectIntMap;
 import gnu.trove.map.hash.TLongObjectHashMap;
@@ -15,6 +16,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
@@ -24,20 +26,17 @@ import java.util.logging.Logger;
 import java.util.stream.Stream;
 import java.util.zip.GZIPInputStream;
 
-/**
- * Created by sandulmv on 11.11.18.
- */
 public class EmbeddingBuilder {
   private static final Logger LOG = Logger.getLogger(EmbeddingBuilder.class.getName());
 
-  private final Config config;
-  private final TObjectIntMap<String> wordIdMappings;
-  EmbeddingBuilder(Config config, TObjectIntMap<String> wordIdMappings) {
-    this.wordIdMappings = wordIdMappings;
-    this.config = config;;
+  EmbeddingBuilder() {
 
   }
 
-  void addNewPageVector(CrawlerDocument crawlerDocument, long pageId) {
-  }
+  void add(int id, Vec v) {}
+
+  void addAll(TIntObjectMap<Vec> vectors) {}
+
+  void build(Path to) {}
+
 }

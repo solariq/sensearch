@@ -8,19 +8,18 @@ import java.nio.file.Path;
 
 class PlainPageBuilder {
 
-  private final Path plainRoot;
+  private int flushedPagesCount;
 
-  private int flushedPagesCount = 1;
-
-  PlainPageBuilder(Path plainRoot) throws IOException {
-    Files.createDirectories(plainRoot);
-    this.plainRoot = plainRoot;
-    this.flushedPagesCount = 0;
+  PlainPageBuilder() throws IOException {
   }
 
-  void createAndFlushNewPage(CrawlerDocument crawlerDocument) {
+  int add(CrawlerDocument newPage) {
     ++flushedPagesCount;
-    // TODO: save page to disk
+    return flushedPagesCount;
+  }
+
+  void build(Path plainPath) {
+
   }
 
   int currentDocumentId() {
