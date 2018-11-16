@@ -56,11 +56,12 @@ public class RequestCrawler implements WebCrawler {
     List<ResultItem> results = new ArrayList<>();
 
     int page = 0;
+    final int[] article = {0};
     while (results.size() < size && page < 5) {
       page++;
       try {
         String request = googleRequest + query.replace(" ", "%20")
-            + "&start=" + results.size();
+            + "&start=" + article[0];
         URL url = new URL(request);
         URLConnection connection = url.openConnection();
         setCookies(connection);
@@ -71,6 +72,7 @@ public class RequestCrawler implements WebCrawler {
         Elements googleSnippets = document.select("div.g");
         googleSnippets.forEach(element -> {
           String title = normalizeTitle(element.select("h3.LC20lb").text());
+          article[0]++;
           if (title == null) {
             return;
           }
