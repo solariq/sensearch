@@ -7,7 +7,6 @@ import com.expleague.sensearch.core.SenSeArchImpl;
 import com.expleague.sensearch.donkey.crawler.Crawler;
 import com.expleague.sensearch.donkey.crawler.CrawlerXML;
 import com.expleague.sensearch.index.Index;
-import com.expleague.sensearch.index.plain.PlainIndexBuilder;
 import com.expleague.sensearch.web.suggest.BigramsBasedSuggestor;
 import com.expleague.sensearch.web.suggest.Suggestor;
 import com.google.inject.Singleton;

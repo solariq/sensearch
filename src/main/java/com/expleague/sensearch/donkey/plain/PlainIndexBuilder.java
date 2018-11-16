@@ -36,6 +36,7 @@ public class PlainIndexBuilder implements IndexBuilder {
   private static final String STATISTICS_ROOT = "stats";
   private static final String PLAIN_ROOT = "plain";
   private static final String EMBEDDING_ROOT = "embedding";
+
   private static final int VEC_SIZE = 50;
 
   private static final Logger LOG = Logger.getLogger(PlainIndexBuilder.class.getName());
@@ -53,13 +54,15 @@ public class PlainIndexBuilder implements IndexBuilder {
     final StatisticsBuilder statisticsBuilder = new StatisticsBuilder();
     final EmbeddingBuilder embeddingBuilder = new EmbeddingBuilder();
 
+    final long[] pagesAndTokensCounts = new long[] {0, 0};
+
     try {
       crawler.makeStream().forEach(
           doc -> {
-            long pageId = plainPageBuilder.add(doc);
+            int pageId = plainPageBuilder.add(doc);
 
             embeddingBuilder.add(
-                pageId,
+                toLongPageId(pageId),
                 toVector(
                     toWordIds(
                         Tokenizer.tokenize(doc.getTitle().toLowerCase()),
@@ -79,9 +82,11 @@ public class PlainIndexBuilder implements IndexBuilder {
             enrichFrequencies(tokens, termFrequencyMap, bigramFrequencyMap);
             statisticsBuilder.enrich(
                 termFrequencyMap,
-                bigramFrequencyMap,
-                tokens.length
+                bigramFrequencyMap
             );
+
+            ++pagesAndTokensCounts[0];
+            pagesAndTokensCounts[1] += tokens.length;
           }
       );
 
@@ -94,6 +99,22 @@ public class PlainIndexBuilder implements IndexBuilder {
     } catch (Exception e) {
       throw new IOException(e);
     }
+  }
+
+  private long toBigramId(int word1, int word2) {
+    return (long)word1 << 32 + word2;
+  }
+
+  private int firstWord(long bigram) {
+    return (int) (bigram >>> 32);
+  }
+
+  private int secondWord(long bigram) {
+    return (int) bigram;
+  }
+
+  private long toLongPageId(int pageId) {
+    return -pageId;
   }
 
   private int[] toWordIds(String[] words, TObjectIntMap<String> mappings) {
@@ -115,10 +136,10 @@ public class PlainIndexBuilder implements IndexBuilder {
       return;
     }
     termFrequencyMap.put(tokens[0], 1);
-    long prevToken = tokens[0];
+    int prevToken = tokens[0];
     for (int i = 1; i < tokens.length; ++i) {
       termFrequencyMap.adjustOrPutValue(tokens[i], 1, 1);
-      long bigramId = (prevToken << 32) + tokens[i];
+      long bigramId = toBigramId(prevToken, tokens[i]);
       bigramFrequencyMap.adjustOrPutValue(bigramId, 1, 1);
       prevToken = tokens[i];
     }
@@ -151,7 +172,7 @@ public class PlainIndexBuilder implements IndexBuilder {
                     .mapToDouble(CharSeqTools::parseDouble)
                     .toArray();
                 synchronized (idMappings) {
-                  idMappings.put(word, idMappings.size() + 1);
+                  idMappings.put(word, idMappings.size());
                 }
                 synchronized (vectors) {
                   vectors.put(idMappings.get(word), new ArrayVec(doubles));
