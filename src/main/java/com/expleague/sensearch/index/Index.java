@@ -3,13 +3,19 @@ package com.expleague.sensearch.index;
 
 import com.expleague.sensearch.Page;
 import com.expleague.sensearch.query.Query;
+import com.expleague.sensearch.query.term.Term;
 import java.util.stream.Stream;
 
-/**
- * Created by sandulmv on 06.10.18.
- */
-public interface Index extends IndexStatistics {
+public interface Index {
 
   Stream<Page> fetchDocuments(Query query);
+
+  int indexSize();
+
+  int vocabularySize();
+  double averagePageSize();
+
+  int documentFrequency(Term term);
+  long termFrequency(Term term);
 
 }

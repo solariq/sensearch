@@ -1,6 +1,7 @@
 package com.expleague.sensearch.miner.impl;
 
 import com.expleague.sensearch.Page;
+import com.expleague.sensearch.index.Index;
 import com.expleague.sensearch.index.IndexStatistics;
 import com.expleague.sensearch.miner.Features;
 import com.expleague.sensearch.miner.FeaturesMiner;
@@ -17,9 +18,6 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-/**
- * Created by sandulmv on 02.11.18.
- */
 public class RawTextFeaturesMiner implements FeaturesMiner {
   private static final Pattern SIMPLE_SPLITTER =  Pattern.compile("[^а-яёa-z0-9]+");
   // fuzzy rank parameter
@@ -29,9 +27,9 @@ public class RawTextFeaturesMiner implements FeaturesMiner {
   private static final double K = 1.2;
   private static final double B = 0.75;
 
-  private final IndexStatistics indexStatistics;
+  private final Index indexStatistics;
 
-  public RawTextFeaturesMiner(IndexStatistics indexStatistics) {
+  public RawTextFeaturesMiner(Index indexStatistics) {
     this.indexStatistics = indexStatistics;
   }
 
