@@ -23,7 +23,7 @@ public class ResultPageDeserializer extends StdDeserializer<ResultPage> {
   public ResultPage deserialize(JsonParser jsonParser,
       DeserializationContext deserializationContext) throws IOException, JsonProcessingException {
     JsonNode node = jsonParser.getCodec().readTree(jsonParser);
-    int number = (Integer) node.get("number").numberValue();
+    int number = node.get("number").intValue();
     int totalResults = (Integer) node.get("totalResults").numberValue();
     ResultItem[] results;
     ResultItem[] googleResults;

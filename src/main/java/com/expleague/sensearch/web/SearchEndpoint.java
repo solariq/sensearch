@@ -1,14 +1,9 @@
 package com.expleague.sensearch.web;
 
 import com.expleague.sensearch.SenSeArch;
-import com.expleague.sensearch.SenSeArch.ResultItem;
-import com.expleague.sensearch.SenSeArch.ResultPage;
-import com.expleague.sensearch.core.serializers.ResultItemSerializer;
-import com.expleague.sensearch.core.serializers.ResultPageSerializer;
 import com.expleague.sensearch.web.suggest.Suggestor;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.module.SimpleModule;
 import javax.inject.Inject;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
@@ -21,14 +16,6 @@ import javax.ws.rs.core.MediaType;
 public class SearchEndpoint {
 
   private static final ObjectMapper mapper = new ObjectMapper();
-
-  // TODO: refactor this
-  static {
-    SimpleModule module = new SimpleModule();
-    module.addSerializer(ResultItem.class, new ResultItemSerializer());
-    module.addSerializer(ResultPage.class, new ResultPageSerializer());
-    mapper.registerModule(module);
-  }
 
   private final SenSeArch search;
   private final Suggestor suggestor;
