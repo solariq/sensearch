@@ -1,5 +1,6 @@
 package com.expleague.sensearch.core;
 
+import com.expleague.sensearch.metrics.MetricPhase;
 import com.expleague.sensearch.miner.MinerPhase;
 import com.expleague.sensearch.query.QueryPhase;
 import com.expleague.sensearch.ranking.RankingPhase;
@@ -42,7 +43,9 @@ public interface SearchPhase extends Predicate<Whiteboard>, Consumer<Whiteboard>
         public MinerPhase get() {
           return new MinerPhase(config.getIndex());
         }
-      }
+      },
+
+      MetricPhase::new
   };
 
   interface Factory<T> extends Supplier<T> {
