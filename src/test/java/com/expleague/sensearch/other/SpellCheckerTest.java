@@ -24,5 +24,11 @@ public class SpellCheckerTest {
     Assert.assertEquals("Будапешт", checker.correct("Будашпет"));
     Assert.assertEquals("Абракадабра", checker.correct("Абракадабра"));
     Assert.assertEquals("Лол кек", checker.correct("Лол \nкек"));
+    Assert.assertEquals("Полка", checker.correct("Полва"));
+    Assert.assertEquals("Пока", checker.correct("Поеа"));
+    Assert.assertEquals("Два", checker.correct("Гва"));
+    Assert.assertEquals("Красно-чёрный", checker.correct("Красно-чрный"));
+    Assert.assertEquals("Дважды", checker.correct("Джыжды"));
+    Assert.assertEquals("Белый", checker.correct("Блый"));
   }
 }
