@@ -25,7 +25,7 @@ public class RequestCrawler implements WebCrawler {
   private Path pathToMetric;
 
   private List<String> getCookies() throws IOException {
-    URL urlG = new URL("https://www.google.ru/");
+    URL urlG = new URL("https://www.google.com/");
     URLConnection connection = urlG.openConnection();
 
     return connection.getHeaderFields().get("Set-Cookie");
