@@ -5,6 +5,7 @@ import org.glassfish.hk2.api.Factory;
 import org.glassfish.hk2.utilities.binding.AbstractBinder;
 
 public class HK2ToGuiceModule extends AbstractBinder {
+
   private Injector guiceInjector;
 
   public HK2ToGuiceModule(Injector guiceInjector) {

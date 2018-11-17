@@ -10,8 +10,10 @@ import org.apache.commons.lang3.tuple.Pair;
  * Point-wise ranker
  */
 public class RankingPhase implements SearchPhase {
-  private PointWiseRanker ranker;
+
   private final int pageSize;
+  private PointWiseRanker ranker;
+
   public RankingPhase(PointWiseRanker ranker, int pageSize) {
     this.ranker = ranker;
     this.pageSize = pageSize;
@@ -26,13 +28,13 @@ public class RankingPhase implements SearchPhase {
   public void accept(Whiteboard whiteboard) {
     final int pageNo = whiteboard.pageNo();
     whiteboard.putResults(
-      whiteboard.textFeatures()
-          .map(p -> Pair.of(p.getLeft(), p.getRight().fuzzy()))
-          .sorted(Comparator.<Pair<Page, Double>>comparingDouble(Pair::getRight).reversed())
-          .map(Pair::getLeft)
-          .skip(pageNo * pageSize)
-          .limit(pageSize)
-          .toArray(Page[]::new)
+        whiteboard.textFeatures()
+            .map(p -> Pair.of(p.getLeft(), p.getRight().fuzzy()))
+            .sorted(Comparator.<Pair<Page, Double>>comparingDouble(Pair::getRight).reversed())
+            .map(Pair::getLeft)
+            .skip(pageNo * pageSize)
+            .limit(pageSize)
+            .toArray(Page[]::new)
     );
   }
 }

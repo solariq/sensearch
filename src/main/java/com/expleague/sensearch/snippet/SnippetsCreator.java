@@ -24,8 +24,8 @@ import java.util.stream.Collectors;
 public class SnippetsCreator {
 
   private static final long PASSAGES_IN_SNIPPET = 4;
-  private static final long NUMBER_OF_KEYWORDS = 8;
-  private static final double ALPHA = .87;
+  private static final long NUMBER_OF_KEYWORDS = 6;
+  private static final double ALPHA = .6;
 
   private static final Pattern splitEnglish = Pattern.compile(
       "(?<=[.!?]|[.!?]['\"])(?<!Mr\\.|Mrs\\.|Ms\\.|Jr\\.|Dr\\.|Prof\\.|Vol\\.|A\\.D\\.|B\\.C\\.|Sr\\.|T\\.V\\.A\\.)\\s+");
@@ -94,8 +94,8 @@ public class SnippetsCreator {
             return false;
           }
           PartOfSpeech partOfSpeech = lemmaInfo.pos();
-          return partOfSpeech == PartOfSpeech.S || partOfSpeech == PartOfSpeech.V
-              || partOfSpeech == PartOfSpeech.SPRO;
+          return partOfSpeech == PartOfSpeech.S; //|| partOfSpeech == PartOfSpeech.V
+          // || partOfSpeech == PartOfSpeech.SPRO;
         })
         .peek(x -> {
           long r = passagesWithQueryWords.stream()
@@ -106,6 +106,9 @@ public class SnippetsCreator {
               .filter(y -> contains(y, x.getWord().getNormalized()))
               .count();
           long S = passagesWithoutQueryWords.size();
+
+          //System.out.println(x.getWord().getNormalized() + " r: " + r + " R : " + R + " s : " + s + " S : " + S);
+
           double w = Math.log((r + 0.5) * (S - s + 0.5) / ((R - r + 0.5) * (s + 0.5)));
           x.setRank(w);
         })
@@ -127,27 +130,21 @@ public class SnippetsCreator {
 
     double best = passages
         .stream()
-        .max(Comparator.comparingDouble(Passage::getRating))
-        .get()
-        .getRating();
+        .mapToDouble(Passage::getRating)
+        .max()
+        .getAsDouble();
 
     for (int i = 0; i < passages.size(); i++) {
       double rating = passages.get(i).getRating();
       double newRating = ALPHA * rating / best + (1 - ALPHA) * (1. - (i + .0) / passages.size());
       passages.get(i).setRating(newRating);
     }
-/*
-    System.out.println("-----------------------------");
-    for (Passage passage : passages) {
-      System.out.println(passage.getRating() + passage.getSentence().toString());
-    }
-    System.out.println("-----------------------------");
-*/
+
     List<Passage> bestPassages = passages
         .stream()
         .sorted(Comparator.comparing(Passage::getRating).reversed())
         .limit(PASSAGES_IN_SNIPPET)
-        .sorted(Comparator.comparingLong(Passage::getId))
+        //.sorted(Comparator.comparingLong(Passage::getId))
         .collect(Collectors.toList());
 
     return new DocBasedSnippet(title, bestPassages, query);

@@ -20,8 +20,8 @@ import java.util.zip.ZipInputStream;
 
 public class CrawlerXML implements Crawler {
 
-  private Path path;
   private final Config config;
+  private Path path;
 
   public CrawlerXML(Config config) {
     this.path = config.getPathToZIP();
@@ -31,8 +31,9 @@ public class CrawlerXML implements Crawler {
   @Override
   public Stream<CrawlerDocument> makeStream() throws IOException {
     return StreamSupport.stream(
-        Spliterators.spliteratorUnknownSize(new DocumentIterator(path, config.getTemporaryDocuments()),
-            Spliterator.ORDERED | Spliterator.SORTED),
+        Spliterators
+            .spliteratorUnknownSize(new DocumentIterator(path, config.getTemporaryDocuments()),
+                Spliterator.ORDERED | Spliterator.SORTED),
         false);
   }
 

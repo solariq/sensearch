@@ -39,9 +39,9 @@ public class CrawlerOneXML implements Crawler {
 
   class XMLIterator implements Iterator<CrawlerDocument> {
 
+    XMLEvent xmlEvent = null;
     private File file;
     private XMLEventReader reader;
-    XMLEvent xmlEvent = null;
 
     XMLIterator(File file) throws FileNotFoundException, XMLStreamException {
       this.file = file;

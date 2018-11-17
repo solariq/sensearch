@@ -1,7 +1,7 @@
 package com.expleague.sensearch.web.suggest;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.expleague.sensearch.Config;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.util.Comparator;
 import java.util.List;
@@ -12,8 +12,8 @@ import java.util.stream.Collectors;
 
 public class BigramsBasedSuggestor implements Suggestor {
 
-  private TreeMap<String, Integer> map;
   private final Config config;
+  private TreeMap<String, Integer> map;
 
   public BigramsBasedSuggestor(Config config) throws IOException {
     this.config = config;
@@ -35,13 +35,13 @@ public class BigramsBasedSuggestor implements Suggestor {
 
     String[] words = searchString.split("[^a-zA-Zа-яА-ЯЁё]+");
 
-    String lastWord = words.length > 0 ? words[words.length - 1].trim() : null;
+    String lastWord = words.length > 0 ? words[words.length - 1].trim() : "";
     String lastBigram = words.length > 1 ?
         words[words.length - 2] + " " + words[words.length - 1]
         : null;
 
     for (Entry<String, Integer> ent : map.entrySet()) {
-      if ((lastWord != null && ent.getKey().startsWith(lastWord))
+      if ((!lastWord.equals("") && ent.getKey().startsWith(lastWord))
           || (lastBigram != null && ent.getKey().startsWith(lastBigram))) {
         resSet.add(ent);
       }

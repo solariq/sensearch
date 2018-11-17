@@ -9,7 +9,7 @@ public class MetricPhase implements SearchPhase {
   @Override
   public void accept(Whiteboard whiteboard) {
     Metric metric = whiteboard.builder().metric();
-    metric.calculate(whiteboard.input(), whiteboard.results());
+    whiteboard.putGoogleResults(metric.calculate(whiteboard.input(), whiteboard.results()));
   }
 
   @Override

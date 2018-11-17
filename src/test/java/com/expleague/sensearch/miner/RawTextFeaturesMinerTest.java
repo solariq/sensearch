@@ -1,6 +1,5 @@
 package com.expleague.sensearch.miner;
 
-import com.expleague.commons.math.vectors.Vec;
 import com.expleague.commons.text.lemmer.LemmaInfo;
 import com.expleague.sensearch.Page;
 import com.expleague.sensearch.index.Index;
@@ -17,7 +16,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
-import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 

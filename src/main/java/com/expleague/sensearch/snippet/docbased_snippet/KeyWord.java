@@ -3,6 +3,7 @@ package com.expleague.sensearch.snippet.docbased_snippet;
 import com.expleague.sensearch.query.term.Term;
 
 public class KeyWord {
+
   private Term word;
   private double rank;
 
@@ -18,6 +19,7 @@ public class KeyWord {
   public double getRank() {
     return rank;
   }
+
   public void setRank(double rank) {
     this.rank = rank;
   }

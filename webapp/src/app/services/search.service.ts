@@ -1,8 +1,8 @@
-import { Injectable } from '@angular/core';
+import {Injectable} from '@angular/core';
 import {HttpClient} from "@angular/common/http";
 import {Observable} from "rxjs";
 import {environment} from "../../environments/environment";
-import {SearchResultItemModel} from "../models/search-result-item.model";
+import {SearchResultPageModel} from "../models/search-result-item.model";
 
 @Injectable({
   providedIn: 'root'
@@ -15,8 +15,8 @@ export class SearchService {
     return this.http.get(`${environment.backendUrl}/suggest`, {params: {query: query}}) as Observable<string[]>
   }
 
-  getResults$(query: string, page: number): Observable<SearchResultItemModel[]> {
+  getResults$(query: string, page: number): Observable<SearchResultPageModel> {
     let response = this.http.get(`${environment.backendUrl}/search`, {params: {query: query, page: page.toString()}});
-    return response as Observable<SearchResultItemModel[]>
+    return response as Observable<SearchResultPageModel>
   }
 }

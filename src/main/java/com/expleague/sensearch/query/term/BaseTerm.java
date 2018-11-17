@@ -1,6 +1,5 @@
 package com.expleague.sensearch.query.term;
 
-import com.expleague.commons.math.vectors.Vec;
 import com.expleague.commons.text.lemmer.LemmaInfo;
 import com.expleague.commons.text.lemmer.WordInfo;
 
@@ -19,7 +18,9 @@ public class BaseTerm implements Term {
 
   @Override
   public CharSequence getNormalized() {
-    if (wordInfo.lemma() == null) return getRaw();
+    if (wordInfo.lemma() == null) {
+      return getRaw();
+    }
     return this.wordInfo.lemma().lemma();
   }
 

@@ -1,21 +1,5 @@
 package com.expleague.sensearch.searcher;
 
-import com.expleague.commons.math.vectors.Vec;
-import com.expleague.sensearch.Page;
-import com.expleague.sensearch.SenSeArch;
-import com.expleague.sensearch.index.Index;
-import com.expleague.sensearch.index.IndexedPage;
-import com.expleague.sensearch.query.Query;
-import com.expleague.sensearch.query.term.Term;
-
-import java.net.URI;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-import org.junit.Assert;
-import org.junit.Test;
-
 /**
  * Created by sandulmv on 06.10.18.
  */

@@ -19,7 +19,8 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class RawTextFeaturesMiner implements FeaturesMiner {
-  private static final Pattern SIMPLE_SPLITTER =  Pattern.compile("[^а-яёa-z0-9]+");
+
+  private static final Pattern SIMPLE_SPLITTER = Pattern.compile("[^а-яёa-z0-9]+");
   // fuzzy rank parameter
   private static final int CONTEXT_WINDOW_SIZE = 4;
 
@@ -35,7 +36,8 @@ public class RawTextFeaturesMiner implements FeaturesMiner {
 
   @Override
   public Features extractFeatures(Query query, Page page) {
-    String[] contentTokens = SIMPLE_SPLITTER.split((page.title() + " " + page.text()).toLowerCase());
+    String[] contentTokens = SIMPLE_SPLITTER
+        .split((page.title() + " " + page.text()).toLowerCase());
     String[] rawTerms = query.getTerms()
         .stream()
         .map(Term::getRaw)

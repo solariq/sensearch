@@ -10,6 +10,10 @@ public class UserAgents {
   private List<String> agentsList = new ArrayList<>();
   private Random randomGenerator = new Random();
 
+  public UserAgents() {
+    initAgents();
+  }
+
   private void initAgents() {
     agentsList.add("Mozilla/5.0 (Windows NT 6.3; WOW64; rv:36.0) Gecko/20100101 Firefox/36.0");
     agentsList.add(
@@ -24,12 +28,6 @@ public class UserAgents {
     agentsList.add(
         "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/46.0.2486.0 Safari/537.36 Edge/13.10586");
   }
-
-
-  public UserAgents() {
-    initAgents();
-  }
-
 
   private String anyUserAgent() {
     int index = randomGenerator.nextInt(agentsList.size());
