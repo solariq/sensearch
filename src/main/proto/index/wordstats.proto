@@ -1,0 +1,14 @@
+syntax = "proto2";
+
+package com.expeague.sensearch.index;
+
+option java_package = "com.expleague.sensearch.containers";
+option java_outer_classname = "WordStatisticsData";
+
+message WordStatistics {
+  
+  optional int32 docuement_frequency = 1;
+  optional int64 term_frequency = 2;
+
+  map<int32, int32> bigram_frequency = 3;
+}

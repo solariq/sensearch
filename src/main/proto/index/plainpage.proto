@@ -1,0 +1,11 @@
+syntax = "proto2";
+
+package com.expeague.sensearch.index;
+
+option java_package = "com.expleague.sensearch.containers";
+option java_outer_classname = "PlainPageData";
+
+message PlainPage {
+  optional string title = 1;
+  optional string content = 2;
+}

@@ -1,0 +1,13 @@
+syntax = "proto2";
+
+package com.expeague.sensearch.index;
+
+option java_package = "com.expleague.sensearch.containers";
+option java_outer_classname = "IndexStatisticsData";
+
+message IndexStatistics {
+  optional int32 pages_count = 1;
+  optional double average_page_size = 2;
+
+  optional int32 vocabulary_size = 3;
+}
