@@ -27,14 +27,13 @@ public class ResultPageDeserializer extends StdDeserializer<ResultPage> {
   public ResultPage deserialize(JsonParser jsonParser,
       DeserializationContext deserializationContext) throws IOException, JsonProcessingException {
     JsonNode node = jsonParser.getCodec().readTree(jsonParser);
-    int number = node.get("number").intValue();
-    int totalResults = (Integer) node.get("totalResults").numberValue();
     ObjectMapper mapper = new ObjectMapper();
     TypeReference<List<ResultItem>> typeReference = new TypeReference<List<ResultItem>>() {};
-    List<ResultItem> results = mapper.readValue(node.get("results").traverse(), typeReference);
+    JsonNode resultsNode = node.get("results");
+    List<ResultItem> results = mapper.readValue(resultsNode.traverse(), typeReference);
     List<ResultItem> googleResults = mapper.readValue(node.get("googleResults").traverse(), typeReference);
 
-    return new ResultPageImpl(number, totalResults,
+    return new ResultPageImpl(0, 0,
         results.toArray(new ResultItem[results.size()]),
         googleResults.toArray(new ResultItem[googleResults.size()]));
   }
