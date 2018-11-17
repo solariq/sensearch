@@ -2,7 +2,7 @@ syntax = "proto2";
 
 package com.expeague.sensearch.index;
 
-option java_package = "com.expleague.sensearch.containers";
+option java_package = "com.expleague.sensearch.protobuf.index";
 option java_outer_classname = "WordStatisticsData";
 
 message WordStatistics {

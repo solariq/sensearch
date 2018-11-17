@@ -44,7 +44,6 @@
                                 <outputTarget>
                                     <type>java</type>
                                     <addSources>main</addSources>
-                                    <cleanOutputFolder>true</cleanOutputFolder>
                                     <outputDirectory>src/main/java</outputDirectory>
                                 </outputTarget>
                             </outputTargets>
