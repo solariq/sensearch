@@ -1,3 +1,8 @@
+export class SearchResultPageModel {
+  results: SearchResultItemModel[];
+  googleResults: SearchResultItemModel[];
+}
+
 export class SearchResultItemModel {
   reference: string;
   title: string;

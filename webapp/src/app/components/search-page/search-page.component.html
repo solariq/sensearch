@@ -19,8 +19,15 @@
 
 </form>
 
-<app-search-result *ngFor="let searchItem of searchResults" [searchItem]="searchItem">
-</app-search-result>
+<div class="search-results" *ngIf="searchResults">
+  <ng-container *ngFor="let item of pairedResults">
+    <app-search-result class="our-result" *ngIf="item[0]" [searchItem]="item[0]">
+    </app-search-result>
+
+    <app-search-result class="google-result" *ngIf="item[1]" [searchItem]="item[1]">
+    </app-search-result>
+  </ng-container>
+</div>
 
 <div *ngIf="error">
   {{error}}
