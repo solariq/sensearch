@@ -4,7 +4,6 @@ import com.expleague.sensearch.AppModule;
 import com.expleague.sensearch.Config;
 import com.expleague.sensearch.SenSeArch;
 import com.expleague.sensearch.web.Builder;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import java.io.BufferedReader;
@@ -34,7 +33,6 @@ public class MetricTest {
   public void metricTest() {
     try (BufferedReader reader = Files.newBufferedReader(Paths.get("./resources/Queries.txt"))) {
       String line;
-      ObjectMapper objectMapper = new ObjectMapper();
       while ((line = reader.readLine()) != null) {
         webCrawler.query = line;
         builder.getSearcher().search(line, 0);
