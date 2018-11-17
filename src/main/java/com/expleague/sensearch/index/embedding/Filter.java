@@ -1,16 +1,11 @@
-package com.expleague.sensearch.index.embedding;
+package com.expleague.sensearch.core;
 
-import com.expleague.sensearch.query.Query;
+import com.expleague.commons.math.vectors.Vec;
 
+import java.util.function.LongPredicate;
 import java.util.stream.LongStream;
 
 public interface Filter {
 
-  /**
-   * Returns stream of the nearest (for query) documents
-   *
-   * @param query, for which you need nearest documents
-   * @return stream of ids of documents
-   */
-  LongStream filtrate(Query query);
+  LongStream filtrate(Vec mainVec, int number, LongPredicate predicate);
 }

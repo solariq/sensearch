@@ -33,7 +33,7 @@ public class PlainPage implements IndexedPage {
   @Override
   public CharSequence text() {
     StringBuilder contentBuilder = new StringBuilder();
-    try (BufferedReader bufferedReader = Files.newBufferedReader(contentPath)) {
+    try (BufferedReader bufferedReader = Files.newBufferedReader(/*contentPath*/null)) {
       bufferedReader.lines().forEach(contentBuilder::append);
     } catch (IOException e) {
       throw new RuntimeException(
@@ -47,14 +47,13 @@ public class PlainPage implements IndexedPage {
   @Override
   public CharSequence title() {
     StringBuilder titleBuilder = new StringBuilder();
-    try (BufferedReader bufferedReader = Files.newBufferedReader(titlePath)) {
+    try (BufferedReader bufferedReader = Files.newBufferedReader(/*titlePath*/null)) {
       bufferedReader.lines().forEach(titleBuilder::append);
     } catch (IOException e) {
       throw new RuntimeException(
           String.format("Can not get title for the document with id %d", this.id()), e
       );
     }
-
     return titleBuilder;
   }
 

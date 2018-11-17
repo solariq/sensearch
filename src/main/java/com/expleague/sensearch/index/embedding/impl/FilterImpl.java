@@ -1,27 +1,37 @@
 package com.expleague.sensearch.index.embedding.impl;
 
-import com.expleague.sensearch.index.embedding.Embedding;
-import com.expleague.sensearch.index.embedding.Filter;
-import com.expleague.sensearch.index.IndexedPage;
-import com.expleague.sensearch.query.Query;
+import com.expleague.commons.math.vectors.Vec;
+import com.expleague.sensearch.core.Embedding;
+import com.expleague.sensearch.core.Filter;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.LongPredicate;
 import java.util.stream.LongStream;
-import java.util.stream.Stream;
 
 public class FilterImpl implements Filter {
 
-  private static final int numberOfNeighbors = 10;
+  private static final int START_MULTIPLIER = 2;
+  private static final int MAX_NUMBER = 2_000_000;
 
   private Embedding embedding;
 
-  public FilterImpl(Stream<IndexedPage> documentStream, Embedding embedding) {
+  public FilterImpl(Embedding embedding) {
     this.embedding = embedding;
-    ((EmbeddingImpl) this.embedding).setDocuments(documentStream);
   }
 
   @Override
-  public LongStream filtrate(Query query) {
-    return embedding.getNearestDocuments(embedding.getVec(query), numberOfNeighbors)
-            .stream().mapToLong(l -> l);
+  public LongStream filtrate(Vec mainVec, int number, LongPredicate predicate) {
+    int embNumber = number * START_MULTIPLIER;
+    List<Long> result = new ArrayList<>();
+    while (embNumber < MAX_NUMBER) {
+      result.clear();
+      embedding.getNearest(mainVec, number).filter(predicate).forEach(result::add);
+      if (result.size() >= number) {
+        return result.subList(0, number).stream().mapToLong(Long::longValue);
+      }
+      embNumber += number;
+    }
+    throw new IllegalArgumentException("number is too large");
   }
 }

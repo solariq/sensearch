@@ -33,10 +33,16 @@ public class EmbeddingBuilder {
 
   }
 
-  void add(long id, Vec v) {}
+  void add(long id, Vec v) {
 
-  void addAll(TLongObjectMap<Vec> vectors) {}
+  }
 
-  void build(Path to) {}
+  void addAll(TLongObjectMap<Vec> vectors) {
+
+  }
+
+  void build(Path to) {
+
+  }
 
 }

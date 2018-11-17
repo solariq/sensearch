@@ -1,13 +1,14 @@
 package com.expleague.sensearch.index.plain;
 
+import com.expleague.commons.math.vectors.Vec;
 import com.expleague.sensearch.Config;
 import com.expleague.sensearch.Page;
-import com.expleague.sensearch.index.embedding.Embedding;
-import com.expleague.sensearch.index.embedding.Filter;
+import com.expleague.sensearch.core.Embedding;
+import com.expleague.sensearch.core.Filter;;
+import com.expleague.sensearch.index.embedding.impl.EmbeddingImpl;
 import com.expleague.sensearch.index.embedding.impl.FilterImpl;
 import com.expleague.sensearch.index.Index;
 import com.expleague.sensearch.index.IndexedPage;
-import com.expleague.sensearch.index.statistics.Stats;
 import com.expleague.sensearch.query.Query;
 import com.expleague.sensearch.query.term.Term;
 import com.google.gson.Gson;
@@ -22,7 +23,11 @@ import java.nio.file.Path;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
+//todo сделать собсна
 public class PlainIndex implements Index {
+
+  private static final int DOC_NUMBER = 50;
+  private static final int SYN_NUMBER = 50;
 
   private static TIntLongMap termFrequencyMap;
   private static TIntIntMap documentFrequencyMap;
@@ -30,7 +35,8 @@ public class PlainIndex implements Index {
   private static double averagePageSize;
   private static int indexSize;
   private static int vocabularySize;
-  // private static Embedding embedding;
+  private static final Embedding embedding = new EmbeddingImpl(/*smth*/null);
+  private static final Filter filter = new FilterImpl(/*smth*/null);
 
   public PlainIndex() {
   }
@@ -39,10 +45,43 @@ public class PlainIndex implements Index {
     // parse paths and maps
   }
 
+  //todo implement
+  private Page getPageById(long id) {
+    return null;
+  }
+
+  //todo implement
+  private String getWordById(long id) {
+    return null;
+  }
+
   @Override
   public Stream<Page> fetchDocuments(Query query) {
-    // there should be some call to embedding
-    return null;
+    return filter.filtrate(
+            //todo replace with smart tokenizer for terms
+            embedding.getVec(query.getTerms().stream().mapToLong(t -> wordToIdMap.get(t.getRaw().toString()))),
+            DOC_NUMBER,
+            this::isPage
+    ).mapToObj(this::getPageById);
+  }
+
+  @Override
+  public Stream<String> getSynonyms(String word) {
+    return filter.filtrate(
+            embedding.getVec(wordToIdMap.get(word)),
+            SYN_NUMBER,
+            this::isWord
+    ).mapToObj(this::getWordById);
+  }
+
+  @Override
+  public boolean isPage(long id) {
+    return id >= 0;
+  }
+
+  @Override
+  public boolean isWord(long id) {
+    return id < 0;
   }
 
   @Override
