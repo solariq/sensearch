@@ -3,7 +3,7 @@ package com.expleague.sensearch.index.embedding.impl;
 import com.expleague.commons.math.vectors.Vec;
 import com.expleague.commons.math.vectors.impl.vectors.ArrayVec;
 import com.expleague.sensearch.Config;
-import com.expleague.sensearch.core.Embedding;
+import com.expleague.sensearch.index.embedding.Embedding;
 
 import java.util.*;
 import java.util.stream.LongStream;

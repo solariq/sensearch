@@ -1,8 +1,8 @@
 package com.expleague.sensearch.index.embedding.impl;
 
 import com.expleague.commons.math.vectors.Vec;
-import com.expleague.sensearch.core.Embedding;
-import com.expleague.sensearch.core.Filter;
+import com.expleague.sensearch.index.embedding.Embedding;
+import com.expleague.sensearch.index.embedding.Filter;
 
 import java.util.ArrayList;
 import java.util.List;
