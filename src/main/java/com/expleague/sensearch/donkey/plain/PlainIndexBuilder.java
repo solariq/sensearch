@@ -40,15 +40,7 @@ public class PlainIndexBuilder implements IndexBuilder {
 
   public PlainIndexBuilder() {
   }
-
-  static int firstWordId(long bigramId) {
-    return (int) (bigramId >>> 32);
-  }
-
-  static int secondWordId(long bigramId) {
-    return (int) bigramId;
-  }
-
+  
   @Override
   public void buildIndex(Crawler crawler, Config config) throws IOException {
     final TLongObjectMap<Vec> gloveVectors = new TLongObjectHashMap<>();
