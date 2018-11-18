@@ -1,0 +1,33 @@
+syntax = "proto2";
+
+package index;
+
+option java_package = "com.expleague.sensearch.protobuf.index";
+option java_outer_classname = "IndexUnits";
+
+message IndexStatistics {
+  optional int32 pages_count = 1;
+  optional double average_page_size = 2;
+
+  optional int32 vocabulary_size = 3;
+}
+
+message Page {
+  optional int32 page_id = 1;
+  optional string title = 2;
+  optional string content = 3;
+}
+
+message TermStatistics {
+
+  message TermFrequency {
+    optional int32 term_id = 1;
+    optional int32 term_frequency = 2;
+  }
+
+  optional int32 term_id = 1;
+  optional int32 docuement_frequency = 2;
+  optional int64 term_frequency = 3;
+
+  repeated TermFrequency bigram_frequency = 4;
+}

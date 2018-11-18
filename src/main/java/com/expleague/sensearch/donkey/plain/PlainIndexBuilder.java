@@ -7,16 +7,14 @@ import com.expleague.sensearch.Config;
 import com.expleague.sensearch.core.Tokenizer;
 import com.expleague.sensearch.donkey.IndexBuilder;
 import com.expleague.sensearch.donkey.crawler.Crawler;
-import com.expleague.sensearch.index.plain.PlainIndex;
-import com.expleague.sensearch.index.plain.PlainPage;
 import gnu.trove.list.TIntList;
 import gnu.trove.list.linked.TIntLinkedList;
 import gnu.trove.map.TIntIntMap;
-import gnu.trove.map.TLongIntMap;
+import gnu.trove.map.TIntObjectMap;
 import gnu.trove.map.TLongObjectMap;
 import gnu.trove.map.TObjectIntMap;
 import gnu.trove.map.hash.TIntIntHashMap;
-import gnu.trove.map.hash.TLongIntHashMap;
+import gnu.trove.map.hash.TIntObjectHashMap;
 import gnu.trove.map.hash.TLongObjectHashMap;
 import gnu.trove.map.hash.TObjectIntHashMap;
 import java.io.FileInputStream;
@@ -28,7 +26,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.logging.Logger;
-import java.util.stream.Stream;
 import java.util.zip.GZIPInputStream;
 
 public class PlainIndexBuilder implements IndexBuilder {
@@ -44,17 +41,26 @@ public class PlainIndexBuilder implements IndexBuilder {
   public PlainIndexBuilder() {
   }
 
+  static int firstWordId(long bigramId) {
+    return (int) (bigramId >>> 32);
+  }
+
+  static int secondWordId(long bigramId) {
+    return (int) bigramId;
+  }
+
   @Override
   public void buildIndex(Crawler crawler, Config config) throws IOException {
     final TLongObjectMap<Vec> gloveVectors = new TLongObjectHashMap<>();
     final TObjectIntMap<String> idMappings = new TObjectIntHashMap<>();
     readGloveVectors(Paths.get(config.getEmbeddingVectors()), idMappings, gloveVectors);
 
-    final PlainPageBuilder plainPageBuilder = new PlainPageBuilder();
-    final StatisticsBuilder statisticsBuilder = new StatisticsBuilder();
+    final Path indexRoot = config.getTemporaryIndex();
+    final PlainPageBuilder plainPageBuilder = new PlainPageBuilder(indexRoot.resolve(PLAIN_ROOT));
+    final StatisticsBuilder statisticsBuilder = new StatisticsBuilder(indexRoot.resolve(STATISTICS_ROOT));
     final EmbeddingBuilder embeddingBuilder = new EmbeddingBuilder();
 
-    final long[] pagesAndTokensCounts = new long[] {0, 0};
+    final long[] pagesAndTokensCounts = new long[]{0, 0};
 
     try {
       crawler.makeStream().forEach(
@@ -78,7 +84,7 @@ public class PlainIndexBuilder implements IndexBuilder {
             );
 
             final TIntIntMap termFrequencyMap = new TIntIntHashMap();
-            final TLongIntMap bigramFrequencyMap = new TLongIntHashMap();
+            final TIntObjectMap<TIntIntMap> bigramFrequencyMap = new TIntObjectHashMap<>();
             enrichFrequencies(tokens, termFrequencyMap, bigramFrequencyMap);
             statisticsBuilder.enrich(
                 termFrequencyMap,
@@ -92,25 +98,16 @@ public class PlainIndexBuilder implements IndexBuilder {
 
       embeddingBuilder.addAll(gloveVectors);
 
-      Path indexRoot = config.getTemporaryIndex();
-      plainPageBuilder.build(indexRoot.resolve(PLAIN_ROOT));
+      plainPageBuilder.build();
+      statisticsBuilder.build();
       embeddingBuilder.build(indexRoot.resolve(EMBEDDING_ROOT));
-      statisticsBuilder.build(indexRoot.resolve(STATISTICS_ROOT));
     } catch (Exception e) {
       throw new IOException(e);
     }
   }
 
   private long toBigramId(int word1, int word2) {
-    return (long)word1 << 32 + word2;
-  }
-
-  private int firstWord(long bigram) {
-    return (int) (bigram >>> 32);
-  }
-
-  private int secondWord(long bigram) {
-    return (int) bigram;
+    return (long) word1 << 32 + word2;
   }
 
   private long toLongPageId(int pageId) {
@@ -131,17 +128,16 @@ public class PlainIndexBuilder implements IndexBuilder {
   }
 
   private void enrichFrequencies(int[] tokens, TIntIntMap termFrequencyMap,
-      TLongIntMap bigramFrequencyMap) {
+      TIntObjectMap<TIntIntMap> bigramFrequencyMap) {
     if (tokens.length < 1) {
       return;
     }
     termFrequencyMap.put(tokens[0], 1);
-    int prevToken = tokens[0];
     for (int i = 1; i < tokens.length; ++i) {
       termFrequencyMap.adjustOrPutValue(tokens[i], 1, 1);
-      long bigramId = toBigramId(prevToken, tokens[i]);
-      bigramFrequencyMap.adjustOrPutValue(bigramId, 1, 1);
-      prevToken = tokens[i];
+
+      bigramFrequencyMap.putIfAbsent(tokens[i - 1], new TIntIntHashMap());
+      bigramFrequencyMap.get(tokens[i - 1]).adjustOrPutValue(tokens[i], 1, 1);
     }
   }
 
