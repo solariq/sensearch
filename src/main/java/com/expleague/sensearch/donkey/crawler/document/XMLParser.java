@@ -3,6 +3,7 @@ package com.expleague.sensearch.donkey.crawler.document;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.util.Arrays;
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLEventReader;
 import javax.xml.stream.XMLInputFactory;
@@ -11,11 +12,6 @@ import javax.xml.stream.events.Attribute;
 import javax.xml.stream.events.EndElement;
 import javax.xml.stream.events.StartElement;
 import javax.xml.stream.events.XMLEvent;
-
-/*
-<pages>
-<page id="7" title="Литва" revision="1483089236000" type="text/x-wiki" ns-id="0" ns-name="">
- */
 
 public class XMLParser {
 
@@ -34,14 +30,23 @@ public class XMLParser {
             page = new WikiPage();
             text = new StringBuilder();
 
-            Attribute idAttr = startElement.getAttributeByName(new QName("id"));
+            Attribute idAttr = startElement
+                .getAttributeByName(new QName("id"));
             if (idAttr != null) {
               page.setId(Integer.parseInt(idAttr.getValue()));
             }
 
-            Attribute titleAttr = startElement.getAttributeByName(new QName("title"));
+            Attribute titleAttr = startElement
+                .getAttributeByName(new QName("title"));
             if (titleAttr != null) {
               page.setTitle(titleAttr.getValue());
+            }
+
+            Attribute categoriesAttr = startElement
+                .getAttributeByName(new QName("categories"));
+            if (categoriesAttr != null) {
+              page.setCategories(Arrays.asList(categoriesAttr
+                  .getValue().split("@")));
             }
 
                         /*Attribute a;
@@ -82,7 +87,7 @@ public class XMLParser {
 
     /*
     private void writeXML(WikiPage page) {
-        String fileName = "/home/artem/JetBrains/WikiDocs/Mini_Wiki/" + page.getID() + ".xml";
+        String fileName = "/home/artem/JetBrains/WikiDocs/Mini_Wiki/" + page.iD() + ".xml";
         String startElement = "page";
 
         XMLOutputFactory xmlOutputFactory = XMLOutputFactory.newInstance();
@@ -96,14 +101,14 @@ public class XMLParser {
             xmlStreamWriter.writeCharacters("\n");
 
             xmlStreamWriter.writeStartElement(startElement);
-            xmlStreamWriter.writeAttribute("id", Long.toString(page.getID()));
-            xmlStreamWriter.writeAttribute("title", page.getTitle());
+            xmlStreamWriter.writeAttribute("id", Long.toString(page.iD()));
+            xmlStreamWriter.writeAttribute("title", page.title());
             xmlStreamWriter.writeAttribute("revision", page.revision);
             xmlStreamWriter.writeAttribute("type", page.type);
             xmlStreamWriter.writeAttribute("ns-id", page.nsId);
             xmlStreamWriter.writeAttribute("ns-name", "");
             xmlStreamWriter.writeCharacters("\n");
-            xmlStreamWriter.writeCharacters(page.getContent().toString());
+            xmlStreamWriter.writeCharacters(page.content().toString());
             xmlStreamWriter.writeCharacters("\n");
             xmlStreamWriter.writeEndElement();
 

@@ -114,8 +114,8 @@ public class PlainIndexBuilder {
             )
         )
     ) {
-      contentWriter.write(parsedDocument.getContent().toString());
-      titleWriter.write(parsedDocument.getTitle());
+      contentWriter.write(parsedDocument.content().toString());
+      titleWriter.write(parsedDocument.title());
     } catch (Exception e) {
       LOG.warning
           (String.format("Failed to flush new index entry! Cause: %s",
@@ -165,8 +165,8 @@ public class PlainIndexBuilder {
 
     parsedDocumentsStream.forEach(
         doc -> {
-          allTitles.add(doc.getTitle());
-          flushBigrams(doc.getTitle(), result);
+          allTitles.add(doc.title());
+          flushBigrams(doc.title(), result);
           flushNewIndexEntry(this.indexRoot, doc);
           //stats.acceptDocument(doc);
         }

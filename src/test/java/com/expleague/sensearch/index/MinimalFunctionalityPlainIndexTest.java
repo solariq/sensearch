@@ -10,6 +10,7 @@ import com.expleague.sensearch.query.term.Term;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -157,17 +158,22 @@ public class MinimalFunctionalityPlainIndexTest {
     }
 
     @Override
-    public CharSequence getContent() {
+    public CharSequence content() {
       return content;
     }
 
     @Override
-    public String getTitle() {
+    public String title() {
       return title;
     }
 
     @Override
-    public Long getID() {
+    public List<String> categories() {
+      return new ArrayList<>();
+    }
+
+    @Override
+    public Long iD() {
       throw new UnsupportedOperationException();
     }
   }

@@ -1,10 +1,14 @@
 package com.expleague.sensearch.donkey.crawler.document;
 
+import java.util.List;
+
 public class WikiPage implements CrawlerDocument {
 
   private long id;
   private String title;
   private CharSequence page;
+  private List<String> categories;
+
     /*
     String revision;
     String type;
@@ -19,22 +23,31 @@ public class WikiPage implements CrawlerDocument {
     this.page = page;
   }
 
-  @Override
-  public String getTitle() {
-    return this.title;
-  }
-
   public void setTitle(String title) {
     this.title = title;
   }
 
+  public void setCategories(List<String> categories) {
+    this.categories = categories;
+  }
+
   @Override
-  public CharSequence getContent() {
+  public String title() {
+    return this.title;
+  }
+
+  @Override
+  public List<String> categories() {
+    return this.categories;
+  }
+
+  @Override
+  public CharSequence content() {
     return this.page;
   }
 
   @Override
-  public Long getID() {
+  public Long iD() {
     return this.id;
   }
 
