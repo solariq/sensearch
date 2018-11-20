@@ -11,10 +11,6 @@ public interface Index {
 
   Term[] synonyms(Term term);
 
-  boolean isPage(long id);
-
-  boolean isWord(long id);
-
   int indexSize();
 
   int vocabularySize();

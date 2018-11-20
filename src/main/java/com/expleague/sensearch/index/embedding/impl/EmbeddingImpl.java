@@ -5,6 +5,7 @@ import com.expleague.commons.math.vectors.impl.vectors.ArrayVec;
 import com.expleague.sensearch.Config;
 import com.expleague.sensearch.index.embedding.Embedding;
 
+import gnu.trove.list.TLongList;
 import java.util.*;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
@@ -21,23 +22,34 @@ public class EmbeddingImpl implements Embedding {
   }
 
   @Override
-  public Vec getVec(long id) {
-    return storage.get(id);
+  public Vec getVec(long ... ids) {
+    if (ids.length == 0) {
+      // TODO: determine behaviour
+    }
+
+    if (ids.length == 1) {
+      return storage.get(ids[0]);
+    }
+
+    ArrayVec vectors = new ArrayVec(new double[VEC_SIZE]);
+    int vectorsFound = 0;
+    for (int i = 0; i < ids.length; ++i) {
+      Vec vec = storage.get(ids[i]);
+      if (vec != null) {
+        vectors.add((ArrayVec) vec);
+        ++vectorsFound;
+      }
+    }
+
+    vectors.scale(1. / vectorsFound);
+
+    return vectors;
+
   }
 
   @Override
-  public Vec getVec(LongStream ids) {
-    return getArithmeticMean(ids.mapToObj(this::getVec));
-  }
-
-  private Vec getArithmeticMean(Stream<Vec> vecs) {
-    ArrayVec mean = new ArrayVec(new double[VEC_SIZE]);
-    long number = vecs.filter(Objects::nonNull).peek(vec -> mean.add((ArrayVec) vec)).count();
-    if (number == 0) {
-      return null;
-    }
-    mean.scale(1.0 / ((double) number));
-    return mean;
+  public Vec getVec(TLongList ids) {
+    return getVec(ids.toArray());
   }
 
   @Override

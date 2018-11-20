@@ -7,6 +7,5 @@ import com.expleague.sensearch.Page;
  * Index interface
  */
 public interface IndexedPage extends Page {
-
   long id();
 }

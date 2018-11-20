@@ -7,6 +7,7 @@ import com.expleague.sensearch.Config;
 import com.expleague.sensearch.core.Tokenizer;
 import com.expleague.sensearch.donkey.IndexBuilder;
 import com.expleague.sensearch.donkey.crawler.Crawler;
+import com.expleague.sensearch.protobuf.index.IndexUnits;
 import gnu.trove.list.TIntList;
 import gnu.trove.list.linked.TIntLinkedList;
 import gnu.trove.map.TIntIntMap;
@@ -17,22 +18,29 @@ import gnu.trove.map.hash.TIntIntHashMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import gnu.trove.map.hash.TLongObjectHashMap;
 import gnu.trove.map.hash.TObjectIntHashMap;
+import java.io.BufferedWriter;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.io.Reader;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.logging.Logger;
 import java.util.zip.GZIPInputStream;
+import java.util.zip.GZIPOutputStream;
 
 public class PlainIndexBuilder implements IndexBuilder {
 
-  private static final String STATISTICS_ROOT = "stats";
-  private static final String PLAIN_ROOT = "plain";
-  private static final String EMBEDDING_ROOT = "embedding";
+  public static final String TERM_STATISTICS_ROOT = "stats";
+  public static final String PLAIN_ROOT = "plain";
+  public static final String EMBEDDING_ROOT = "embedding";
+
+  public static final String WORD_ID_MAPPINGS = "word2id.map.gz";
+  public static final String INDEX_STATISTICS = "index.stat";
 
   private static final int VEC_SIZE = 50;
 
@@ -49,11 +57,16 @@ public class PlainIndexBuilder implements IndexBuilder {
 
     final Path indexRoot = config.getTemporaryIndex();
     final PlainPageBuilder plainPageBuilder = new PlainPageBuilder(indexRoot.resolve(PLAIN_ROOT));
-    final StatisticsBuilder statisticsBuilder = new StatisticsBuilder(indexRoot.resolve(STATISTICS_ROOT));
+    final StatisticsBuilder statisticsBuilder = new StatisticsBuilder(
+        indexRoot.resolve(TERM_STATISTICS_ROOT));
     final EmbeddingBuilder embeddingBuilder = new EmbeddingBuilder();
 
     final long[] pagesAndTokensCounts = new long[]{0, 0};
 
+    final TIntIntMap termFrequencyMap = new TIntIntHashMap();
+    final TIntObjectMap<TIntIntMap> bigramFrequencyMap = new TIntObjectHashMap<>();
+
+    // saving page-wise data
     try {
       crawler.makeStream().forEach(
           doc -> {
@@ -75,8 +88,8 @@ public class PlainIndexBuilder implements IndexBuilder {
                 idMappings
             );
 
-            final TIntIntMap termFrequencyMap = new TIntIntHashMap();
-            final TIntObjectMap<TIntIntMap> bigramFrequencyMap = new TIntObjectHashMap<>();
+            termFrequencyMap.clear();
+            bigramFrequencyMap.clear();
             enrichFrequencies(tokens, termFrequencyMap, bigramFrequencyMap);
             statisticsBuilder.enrich(
                 termFrequencyMap,
@@ -87,14 +100,49 @@ public class PlainIndexBuilder implements IndexBuilder {
             pagesAndTokensCounts[1] += tokens.length;
           }
       );
-
       embeddingBuilder.addAll(gloveVectors);
+      embeddingBuilder.build(indexRoot.resolve(EMBEDDING_ROOT));
 
       plainPageBuilder.build();
       statisticsBuilder.build();
-      embeddingBuilder.build(indexRoot.resolve(EMBEDDING_ROOT));
+
+      // saving index-wise data
+      IndexUnits.IndexStatistics
+          .newBuilder()
+          .setAveragePageSize((double) pagesAndTokensCounts[1] / pagesAndTokensCounts[0])
+          .setVocabularySize(idMappings.size())
+          .setPagesCount((int) pagesAndTokensCounts[0])
+          .build()
+          .writeTo(Files.newOutputStream(indexRoot.resolve(INDEX_STATISTICS)));
+
+      flushWordToIdMap(indexRoot.resolve(WORD_ID_MAPPINGS), idMappings);
     } catch (Exception e) {
       throw new IOException(e);
+    }
+  }
+
+  private void flushWordToIdMap(Path pathToMap, TObjectIntMap<String> idMappings)
+      throws IOException {
+    StringBuilder idMappingsSb = new StringBuilder();
+    idMappings.forEachEntry(
+        (s, id) -> {
+          idMappingsSb
+              .append(s)
+              .append("\t")
+              .append(id)
+              .append("\n");
+          return true;
+        }
+    );
+
+    try (
+        BufferedWriter mapWriter = new BufferedWriter(
+            new OutputStreamWriter(
+                new GZIPOutputStream(Files.newOutputStream(pathToMap))
+            )
+        )
+    ) {
+      mapWriter.write(idMappingsSb.toString().trim());
     }
   }
 
@@ -105,6 +153,7 @@ public class PlainIndexBuilder implements IndexBuilder {
   /**
    * Converts an array of words to an array of integer ids. Also if a word was not found in
    * mappings the method adds a new entry to mapping for such word
+   *
    * @param words array of words to be converted to ids
    * @param mappings all known word to int mappings
    * @return array of word ids in the same order as given words
@@ -113,7 +162,9 @@ public class PlainIndexBuilder implements IndexBuilder {
     TIntList wordIdsList = new TIntLinkedList();
     for (int i = 0; i < words.length; ++i) {
       if (!mappings.containsKey(words[i])) {
-        LOG.warning(String.format("For word '%s' was not found vector representation!", words[i]));
+        LOG.warning(String.format("For the word '%s' was not found any vector representation!",
+            words[i])
+        );
         mappings.put(words[i], mappings.size());
       }
       wordIdsList.add(mappings.get(words[i]));

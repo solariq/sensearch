@@ -1,6 +1,7 @@
 package com.expleague.sensearch.index.plain;
 
 import com.expleague.sensearch.index.IndexedPage;
+import com.expleague.sensearch.protobuf.index.IndexUnits;
 import com.google.gson.JsonParser;
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -9,14 +10,23 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 
 public class PlainPage implements IndexedPage {
-  private static final JsonParser JSON_PARSER = new JsonParser();
-  private static final String ID_FIELD = "id";
-  private static final String TITLE_FIELD = "title";
+  private final long id;
+  private final String text;
+  private final String title;
 
-  private int id;
+  /**
+   * Empty Page constructor
+   */
+  PlainPage() {
+    id = 0;
+    text = "";
+    title = "";
+  }
 
-  PlainPage(String plainPageJson) {
-
+  PlainPage(IndexUnits.Page page) {
+    text = page.getContent();
+    title = page.getTitle();
+    id = page.getPageId();
   }
 
   @Override
@@ -32,29 +42,12 @@ public class PlainPage implements IndexedPage {
 
   @Override
   public CharSequence text() {
-    StringBuilder contentBuilder = new StringBuilder();
-    try (BufferedReader bufferedReader = Files.newBufferedReader(/*contentPath*/null)) {
-      bufferedReader.lines().forEach(contentBuilder::append);
-    } catch (IOException e) {
-      throw new RuntimeException(
-          String.format("Can not get content for the document with id %d", this.id()), e
-      );
-    }
-
-    return contentBuilder;
+    return text;
   }
 
   @Override
   public CharSequence title() {
-    StringBuilder titleBuilder = new StringBuilder();
-    try (BufferedReader bufferedReader = Files.newBufferedReader(/*titlePath*/null)) {
-      bufferedReader.lines().forEach(titleBuilder::append);
-    } catch (IOException e) {
-      throw new RuntimeException(
-          String.format("Can not get title for the document with id %d", this.id()), e
-      );
-    }
-    return titleBuilder;
+    return title;
   }
 
   @Override
