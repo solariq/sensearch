@@ -1,5 +1,6 @@
 package com.expleague.sensearch.donkey.crawler.document;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class WikiPage implements CrawlerDocument {
@@ -7,7 +8,7 @@ public class WikiPage implements CrawlerDocument {
   private long id;
   private String title;
   private CharSequence page;
-  private List<String> categories;
+  private List<String> categories = new ArrayList<>();
 
     /*
     String revision;

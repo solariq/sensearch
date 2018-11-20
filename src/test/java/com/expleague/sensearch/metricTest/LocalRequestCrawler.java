@@ -13,7 +13,7 @@ import java.util.Set;
 public class LocalRequestCrawler implements WebCrawler {
 
   private final String MAP_FILE = "PAGE.json";
-  public String query;
+  String query;
   private Set<String> allTitles;
   private Path pathToMetric;
 
