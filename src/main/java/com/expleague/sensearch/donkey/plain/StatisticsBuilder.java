@@ -2,6 +2,7 @@ package com.expleague.sensearch.donkey.plain;
 
 import com.expleague.sensearch.protobuf.index.IndexUnits;
 import com.expleague.sensearch.protobuf.index.IndexUnits.TermStatistics;
+import com.google.common.primitives.Ints;
 import gnu.trove.map.TIntIntMap;
 import gnu.trove.map.TIntLongMap;
 import gnu.trove.map.TIntObjectMap;
@@ -61,7 +62,6 @@ class StatisticsBuilder {
 
     pageWiseBigramTf.forEachEntry(
         (tId, neigh) -> {
-
           largeBigramsMap.putIfAbsent(tId, new TIntIntHashMap());
           TIntIntMap existingNeighStats = largeBigramsMap.get(tId);
           neigh.forEachEntry(
@@ -112,14 +112,15 @@ class StatisticsBuilder {
     wordFrequencyMap.forEachKey(
         k -> {
           writeBatch.put(
-              ByteBuffer.allocate(4).putInt(k).array(),
+              Ints.toByteArray(k),
               IndexUnits.TermStatistics
                   .newBuilder()
                   .setTermId(k)
                   .setTermFrequency(wordFrequencyMap.get(k))
                   .setDocuementFrequency(documentFrequencyMap.get(k))
                   .addAllBigramFrequency(mostFrequentBigrams(largeBigramsMap.get(k)))
-                  .build().toByteArray()
+                  .build()
+                  .toByteArray()
           );
           return true;
         }

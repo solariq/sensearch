@@ -40,7 +40,7 @@ public class PlainIndexBuilder implements IndexBuilder {
 
   public PlainIndexBuilder() {
   }
-  
+
   @Override
   public void buildIndex(Crawler crawler, Config config) throws IOException {
     final TLongObjectMap<Vec> gloveVectors = new TLongObjectHashMap<>();
@@ -98,22 +98,25 @@ public class PlainIndexBuilder implements IndexBuilder {
     }
   }
 
-  private long toBigramId(int word1, int word2) {
-    return (long) word1 << 32 + word2;
-  }
-
   private long toLongPageId(int pageId) {
     return -pageId;
   }
 
+  /**
+   * Converts an array of words to an array of integer ids. Also if a word was not found in
+   * mappings the method adds a new entry to mapping for such word
+   * @param words array of words to be converted to ids
+   * @param mappings all known word to int mappings
+   * @return array of word ids in the same order as given words
+   */
   private int[] toWordIds(String[] words, TObjectIntMap<String> mappings) {
     TIntList wordIdsList = new TIntLinkedList();
     for (int i = 0; i < words.length; ++i) {
-      if (mappings.containsKey(words[i])) {
-        wordIdsList.add(mappings.get(words[i]));
-      } else {
+      if (!mappings.containsKey(words[i])) {
         LOG.warning(String.format("For word '%s' was not found vector representation!", words[i]));
+        mappings.put(words[i], mappings.size());
       }
+      wordIdsList.add(mappings.get(words[i]));
     }
 
     return wordIdsList.toArray();

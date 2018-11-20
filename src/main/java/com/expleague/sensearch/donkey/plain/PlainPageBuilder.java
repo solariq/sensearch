@@ -2,6 +2,7 @@ package com.expleague.sensearch.donkey.plain;
 
 import com.expleague.sensearch.donkey.crawler.document.CrawlerDocument;
 import com.expleague.sensearch.protobuf.index.IndexUnits;
+import com.google.common.primitives.Ints;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.file.Path;
@@ -50,7 +51,7 @@ class PlainPageBuilder {
       writeBatch = plainDataBase.createWriteBatch();
     }
 
-    byte[] pageIdBytes = ByteBuffer.allocate(4).putInt(flushedPagesCount).array();
+    byte[] pageIdBytes = Ints.toByteArray(flushedPagesCount);
     byte[] pageBytes = IndexUnits.Page
         .newBuilder()
         .setPageId(flushedPagesCount)
