@@ -6,6 +6,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.nio.file.Path;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.Spliterator;
 import java.util.Spliterators;
@@ -43,6 +44,15 @@ public class CrawlerOneXML implements Crawler {
     private File file;
     private XMLEventReader reader;
 
+
+    private void init() throws FileNotFoundException, XMLStreamException {
+      XMLInputFactory xmlInputFactory = XMLInputFactory.newInstance();
+      reader = xmlInputFactory.createXMLEventReader(
+          new FileInputStream(file.getAbsolutePath())
+      );
+      nextEvent();
+    }
+
     XMLIterator(File file) throws FileNotFoundException, XMLStreamException {
       this.file = file;
       init();
@@ -66,14 +76,6 @@ public class CrawlerOneXML implements Crawler {
       }
     }
 
-    private void init() throws FileNotFoundException, XMLStreamException {
-      XMLInputFactory xmlInputFactory = XMLInputFactory.newInstance();
-      reader = xmlInputFactory.createXMLEventReader(
-          new FileInputStream(file.getAbsolutePath())
-      );
-      nextEvent();
-    }
-
     @Override
     public boolean hasNext() {
       return xmlEvent != null;
@@ -93,6 +95,13 @@ public class CrawlerOneXML implements Crawler {
       Attribute titleAttr = startElement.getAttributeByName(new QName("title"));
       if (titleAttr != null) {
         page.setTitle(titleAttr.getValue());
+      }
+
+      Attribute categoriesAttr = startElement
+          .getAttributeByName(new QName("categories"));
+      if (categoriesAttr != null) {
+        page.setCategories(Arrays.asList(categoriesAttr
+            .getValue().split("@")));
       }
 
                         /*Attribute a;

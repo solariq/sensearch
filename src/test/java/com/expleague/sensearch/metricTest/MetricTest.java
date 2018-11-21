@@ -9,6 +9,7 @@ import com.google.inject.Injector;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import javax.xml.stream.XMLStreamException;
 import org.junit.Before;
@@ -31,10 +32,13 @@ public class MetricTest {
 
   @Test
   public void metricTest() {
+    Path pathToMetric = Paths.get("./resources/Metrics");
     try (BufferedReader reader = Files.newBufferedReader(Paths.get("./resources/Queries.txt"))) {
       String line;
       while ((line = reader.readLine()) != null) {
         webCrawler.query = line;
+        BufferedReader readOld = Files.newBufferedReader(pathToMetric.resolve(line).resolve("METRIC"));
+        System.err.println(readOld.readLine());
         builder.getSearcher().search(line, 0);
       }
     } catch (IOException e) {

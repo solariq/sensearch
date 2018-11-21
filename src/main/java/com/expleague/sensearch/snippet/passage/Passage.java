@@ -19,7 +19,9 @@ public class Passage {
 
   public Passage(CharSequence sentence, Lemmer lemmer) {
     this.sentence = sentence;
-    this.words = lemmer.myStem.parse(sentence);
+    this.words = lemmer.myStem.parse(sentence
+        .toString()
+        .toLowerCase());
     this.rating = 0;
   }
 

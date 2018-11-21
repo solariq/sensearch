@@ -15,16 +15,17 @@ import java.util.stream.Stream;
 public class LocalRequestCrawler implements WebCrawler {
 
   private final String MAP_FILE = "PAGE.json";
+  String query;
   private Set<String> allTitles;
   private Path pathToMetric;
-  public String query;
 
   @Override
   public List<ResultItem> getGoogleResults(Integer size, String query) {
     ObjectMapper objectMapper = new ObjectMapper();
     try {
-      ResultPage page = objectMapper.readValue(pathToMetric.resolve(query).resolve(MAP_FILE).toFile(),
-          ResultPage.class);
+      ResultPage page = objectMapper
+          .readValue(pathToMetric.resolve(query).resolve(MAP_FILE).toFile(),
+              ResultPage.class);
       return Arrays.asList(page.googleResults());
     } catch (IOException e) {
       e.printStackTrace();

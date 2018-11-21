@@ -25,14 +25,10 @@ public class SnippetsCreator {
 
   private static final long PASSAGES_IN_SNIPPET = 4;
   private static final long NUMBER_OF_KEYWORDS = 6;
-  private static final double ALPHA = .6;
+  private static final double ALPHA = .4 ;
 
-  private static final Pattern splitEnglish = Pattern.compile(
-      "(?<=[.!?]|[.!?]['\"])(?<!Mr\\.|Mrs\\.|Ms\\.|Jr\\.|Dr\\.|Prof\\.|Vol\\.|A\\.D\\.|B\\.C\\.|Sr\\.|T\\.V\\.A\\.)\\s+");
-  private static final Pattern splitRussian = Pattern
-      .compile("(?<=[.!?]|[.!?]['\"])(?<!\\(р\\.|\\(род\\.|[А-Я]\\.)");
-
-  private static final Pattern splitPattern = splitRussian;
+  private static final Pattern splitPattern = Pattern
+      .compile("(?<=[.!?]|[.!?]['\"])(?=\\p{javaWhitespace}*\\p{javaUpperCase})");
 
   private boolean contains(Passage passage, CharSequence word) {
     return passage
@@ -56,11 +52,8 @@ public class SnippetsCreator {
 
     Set<KeyWord> uniqueWords = passages
         .stream()
-        .flatMap(passage -> lemmer.myStem
-            .parse(passage
-                .getSentence()
-                .toString()
-                .toLowerCase())
+        .flatMap(passage -> passage
+            .getWords()
             .stream()
             .map(wordInfo -> new KeyWord(new BaseTerm(wordInfo), 0))
         )
@@ -89,13 +82,14 @@ public class SnippetsCreator {
     List<KeyWord> keyWords = uniqueWords
         .stream()
         .filter(x -> {
-          LemmaInfo lemmaInfo = x.getWord().getLemma();
+          LemmaInfo lemmaInfo = x
+              .getWord()
+              .getLemma();
           if (lemmaInfo == null) {
             return false;
           }
           PartOfSpeech partOfSpeech = lemmaInfo.pos();
-          return partOfSpeech == PartOfSpeech.S; //|| partOfSpeech == PartOfSpeech.V
-          // || partOfSpeech == PartOfSpeech.SPRO;
+          return partOfSpeech == PartOfSpeech.S;
         })
         .peek(x -> {
           long r = passagesWithQueryWords.stream()
@@ -106,9 +100,6 @@ public class SnippetsCreator {
               .filter(y -> contains(y, x.getWord().getNormalized()))
               .count();
           long S = passagesWithoutQueryWords.size();
-
-          //System.out.println(x.getWord().getNormalized() + " r: " + r + " R : " + R + " s : " + s + " S : " + S);
-
           double w = Math.log((r + 0.5) * (S - s + 0.5) / ((R - r + 0.5) * (s + 0.5)));
           x.setRank(w);
         })

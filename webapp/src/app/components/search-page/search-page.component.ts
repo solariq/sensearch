@@ -3,7 +3,7 @@ import {Observable} from "rxjs";
 import {SearchService} from "../../services/search.service";
 import {debounceTime, switchMap} from "rxjs/operators";
 import {FormControl} from "@angular/forms";
-import {SearchResultItemModel, SearchResultPageModel} from "../../models/search-result-item.model";
+import {SearchResultPageModel} from "../../models/search-result-item.model";
 import {MatAutocompleteTrigger} from "@angular/material";
 import {ActivatedRoute, Router} from "@angular/router";
 
@@ -20,7 +20,6 @@ export class SearchPageComponent implements OnInit {
   suggestions: Observable<string[]>;
 
   searchResults: SearchResultPageModel;
-  pairedResults: [SearchResultItemModel?, SearchResultItemModel?][];
 
   error: string;
 
@@ -57,14 +56,6 @@ export class SearchPageComponent implements OnInit {
         this.isSearchActive = false;
         this.error = undefined;
         this.searchResults = results;
-
-        this.pairedResults = [];
-        for (let i = 0; i < Math.max(results.results.length, results.googleResults.length); i++) {
-          const ourItem = i < results.results.length ? results.results[i] : null;
-          const googleItem = i < results.googleResults.length ? results.googleResults[i] : null;
-
-          this.pairedResults.push([ourItem, googleItem]);
-        }
       },
       error => {
         this.isSearchActive = false;
