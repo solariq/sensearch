@@ -59,7 +59,7 @@ public class PlainIndexBuilder implements IndexBuilder {
     final PlainPageBuilder plainPageBuilder = new PlainPageBuilder(indexRoot.resolve(PLAIN_ROOT));
     final StatisticsBuilder statisticsBuilder = new StatisticsBuilder(
         indexRoot.resolve(TERM_STATISTICS_ROOT));
-    final EmbeddingBuilder embeddingBuilder = new EmbeddingBuilder();
+    final EmbeddingBuilder embeddingBuilder = new EmbeddingBuilder(indexRoot.resolve(EMBEDDING_ROOT));
 
     final long[] pagesAndTokensCounts = new long[]{0, 0};
 
@@ -101,7 +101,7 @@ public class PlainIndexBuilder implements IndexBuilder {
           }
       );
       embeddingBuilder.addAll(gloveVectors);
-      embeddingBuilder.build(indexRoot.resolve(EMBEDDING_ROOT));
+      embeddingBuilder.build();
 
       plainPageBuilder.build();
       statisticsBuilder.build();

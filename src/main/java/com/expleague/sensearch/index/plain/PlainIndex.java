@@ -54,8 +54,6 @@ public class PlainIndex implements Index {
 
   private static final int DOC_NUMBER = 50;
   private static final int SYNONYMS_COUNT = 50;
-  private static final Embedding embedding = new EmbeddingImpl(/*smth*/null);
-  private static final Filter filter = new FilterImpl(/*smth*/null);
 
   private final Path indexRoot;
 
@@ -68,11 +66,16 @@ public class PlainIndex implements Index {
   private final double averagePageSize;
   private final int indexSize;
   private final int vocabularySize;
+  private final Embedding embedding;
+  private final Filter filter;
 
   private TermStatistics lastTermStatistics = null;
 
   public PlainIndex(Config config) throws IOException {
     indexRoot = config.getTemporaryIndex();
+
+    embedding = new EmbeddingImpl(indexRoot.resolve(PlainIndexBuilder.EMBEDDING_ROOT));
+    filter = new FilterImpl(embedding);
 
     termStatisticsBase = JniDBFactory.factory.open(
         indexRoot.resolve(PlainIndexBuilder.TERM_STATISTICS_ROOT).toFile(),
