@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
@@ -34,9 +35,8 @@ public class RequestCrawler implements WebCrawler {
   private void setCookies(URLConnection urlConnection) throws IOException {
     List<String> cookies = getCookies();
     if (cookies != null) {
-      for (String cookie : cookies) {
-        urlConnection.addRequestProperty("Cookie", cookie.split(";", 2)[0]);
-      }
+      String resultCookie = cookies.stream().map(cookie -> cookie.split(";", 2)[0]).collect(Collectors.joining("; "));
+      urlConnection.setRequestProperty("Cookie", resultCookie);
     }
   }
 

@@ -45,13 +45,13 @@ public class Metric {
       ResultItem googleResult = googleResults.stream()
           .filter(item -> item.title().equals(title)).findFirst()
           .orElse(null);
+      ind++;
       if (googleResult == null) {
         continue;
       }
       double numDouble = googleResults.indexOf(googleResult) + 1;
       numDouble = 1.0 / numDouble;
-      DCG += numDouble / (Math.log(2 + ind) / Math.log(2));
-      ind++;
+      DCG += numDouble / (Math.log(1 + ind) / Math.log(2));
     }
 
     System.err.println("Query: " + query + " DCG: " + DCG);
