@@ -12,6 +12,7 @@ import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Stream;
 import org.junit.Before;
@@ -59,9 +60,9 @@ public class SamplesTest {
   @Before
   public void prepare() {
     File folder = new File("./src/test/java/com/expleague/sensearch/snippet/samples");
-    try {
-      for (final File fileEntry : folder.listFiles()) {
-        if (fileEntry.isDirectory()) {
+    Arrays.stream(folder.listFiles()).sorted().forEach(fileEntry ->  {
+      if (fileEntry.isDirectory()) {
+        try {
           CharSequence content = String
               .join("", Files.readAllLines(Paths.get(fileEntry.getPath() + "/content")));
           CharSequence query = String
@@ -83,11 +84,12 @@ public class SamplesTest {
             }
           });
           queries.add(new BaseQuery(query, index, lemmer));
+        } catch (IOException e) {
+          e.printStackTrace();
         }
       }
-    } catch (IOException e) {
-      System.err.println(e.getMessage());
-    }
+    });
+
   }
 
 
