@@ -23,7 +23,7 @@ public class XMLParser {
     try {
       XMLEventReader reader = xmlInputFactory.
           createXMLEventReader(new FileInputStream(file.getAbsolutePath()));
-      StringBuilder text = new StringBuilder();
+      StringBuilder text;
       while (reader.hasNext()) {
         XMLEvent xmlEvent = reader.nextEvent();
         if (xmlEvent.isStartElement()) {
@@ -51,46 +51,45 @@ public class XMLParser {
                   .getValue().split("@")));
             }
 
-            // Parse newline after <page>
-            if (!reader.hasNext() || !(xmlEvent = reader.nextEvent()).isCharacters()) {
-              throw new IllegalStateException("Newline expected, found " + xmlEvent.toString());
-            }
+            // Parse <page> tags
+
             List<CrawlerDocument.Section> sections = new ArrayList<>();
+            String sectionTitle = "";
+            StringBuilder sectionText = new StringBuilder();
 
-            while (reader.hasNext() && (xmlEvent = reader.nextEvent()).isStartElement()) {
-              StartElement sectionElement = xmlEvent.asStartElement();
-              String sectionTitle = sectionElement
-                  .getAttributeByName(new QName("title"))
-                  .getValue();
-              StringBuilder sectionText = new StringBuilder();
+            while (reader.hasNext()) {
+              xmlEvent = reader.nextEvent();
+              if (xmlEvent.isStartElement()) {
+                StartElement sectionElement = xmlEvent.asStartElement();
+                if (sectionElement.getName().getLocalPart().equals("section")) {
+                  sectionTitle = sectionElement
+                      .getAttributeByName(new QName("title"))
+                      .getValue();
+                  sectionText = new StringBuilder();
 
-              while (reader.hasNext() && (xmlEvent = reader.nextEvent()).isCharacters()) {
-                String s = xmlEvent.asCharacters().getData();
-                sectionText.append(s);
-                // TODO (tehnar): do not duplicate data in section and in text
-                if (text.length() > 0) {
-                  text.append("\n\n");
+                  while (reader.hasNext() && (xmlEvent = reader.nextEvent()).isCharacters()) {
+                    String s = xmlEvent.asCharacters().getData();
+                    sectionText.append(s);
+                    // TODO (tehnar): do not duplicate data in section and in text
+                    text.append(s);
+                  }
                 }
-                text.append(s);
               }
-              sections.add(new WikiPage.WikiSection(sectionText.toString(), sectionTitle));
-
-              if (!reader.hasNext() || !xmlEvent.isEndElement()) {
-                throw new IllegalStateException("Expected end of <section>, found " + xmlEvent.toString());
-              }
-              // Parse newline after </section>
-              if (!reader.hasNext() || !(xmlEvent = reader.nextEvent()).isCharacters()) {
-                throw new IllegalStateException("Newline expected, found " + xmlEvent.toString());
+              if (xmlEvent.isEndElement()) {
+                EndElement endElement = xmlEvent.asEndElement();
+                if (endElement.getName().getLocalPart().equals("section")) {
+                  sections.add(new WikiPage.WikiSection(sectionText.toString(), sectionTitle));
+                  if (text.length() > 0) {
+                    text.append("\n\n\n");
+                  }
+                }
+                if (endElement.getName().getLocalPart().equals("page")) {
+                  page.setPage(text.toString());
+                  page.setSections(sections);
+                  break;
+                }
               }
             }
-
-            page.setSections(sections);
-          }
-        }
-        if (xmlEvent.isEndElement()) {
-          EndElement endElement = xmlEvent.asEndElement();
-          if (endElement.getName().getLocalPart().equals("page")) {
-            page.setPage(text.toString());
           }
         }
       }
