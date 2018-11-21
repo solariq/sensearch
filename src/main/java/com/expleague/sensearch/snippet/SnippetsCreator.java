@@ -33,7 +33,7 @@ public class SnippetsCreator {
       .compile("(?<=[.!?]|[.!?]['\"])(?<!\\(р\\.|\\(род\\.|[А-Я]\\.)");
 
   private static final Pattern splitPattern = Pattern
-      .compile("(?<=[.!?]|[.!?]['\"])(?=\\p{javaWhitespace}*?\\p{javaUpperCase})");
+      .compile("(?<=[.!?]|[.!?]['\"])(?=\\p{javaWhitespace}*\\p{javaUpperCase})");
 
   private boolean contains(Passage passage, CharSequence word) {
     return passage
@@ -50,6 +50,10 @@ public class SnippetsCreator {
         .stream(splitPattern.split(content))
         .map(x -> new Passage(x, lemmer))
         .collect(Collectors.toList());
+
+    for (Passage passage : passages) {
+      System.out.println(passage.getSentence());
+    }
 
     for (int i = 0; i < passages.size(); i++) {
       passages.get(i).setId(i);
