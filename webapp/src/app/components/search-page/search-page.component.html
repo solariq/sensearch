@@ -20,11 +20,12 @@
 </form>
 
 <div class="search-results" *ngIf="searchResults">
-  <ng-container *ngFor="let item of pairedResults">
-    <app-search-result class="our-result" *ngIf="item[0]" [searchItem]="item[0]">
+  <ng-container *ngFor="let item of searchResults.results; let i = index">
+    <app-search-result class="our-result" *ngIf="item" [searchItem]="item" [style.grid-row]="i + 1">
     </app-search-result>
-
-    <app-search-result class="google-result" *ngIf="item[1]" [searchItem]="item[1]">
+  </ng-container>
+  <ng-container *ngFor="let item of searchResults.googleResults; let i = index">
+    <app-search-result class="google-result" *ngIf="item" [searchItem]="item" [style.grid-row]="i + 1">
     </app-search-result>
   </ng-container>
 </div>
