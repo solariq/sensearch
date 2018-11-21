@@ -12,12 +12,15 @@ import gnu.trove.list.TIntList;
 import gnu.trove.list.linked.TIntLinkedList;
 import gnu.trove.map.TIntIntMap;
 import gnu.trove.map.TIntObjectMap;
+import gnu.trove.map.TLongIntMap;
 import gnu.trove.map.TLongObjectMap;
 import gnu.trove.map.TObjectIntMap;
+import gnu.trove.map.TObjectLongMap;
 import gnu.trove.map.hash.TIntIntHashMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
+import gnu.trove.map.hash.TLongIntHashMap;
 import gnu.trove.map.hash.TLongObjectHashMap;
-import gnu.trove.map.hash.TObjectIntHashMap;
+import gnu.trove.map.hash.TObjectLongHashMap;
 import java.io.BufferedWriter;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -52,7 +55,7 @@ public class PlainIndexBuilder implements IndexBuilder {
   @Override
   public void buildIndex(Crawler crawler, Config config) throws IOException {
     final TLongObjectMap<Vec> gloveVectors = new TLongObjectHashMap<>();
-    final TObjectIntMap<String> idMappings = new TObjectIntHashMap<>();
+    final TObjectLongMap<String> idMappings = new TObjectLongHashMap<>();
     readGloveVectors(Paths.get(config.getEmbeddingVectors()), idMappings, gloveVectors);
 
     final Path indexRoot = config.getTemporaryIndex();
@@ -63,17 +66,17 @@ public class PlainIndexBuilder implements IndexBuilder {
 
     final long[] pagesAndTokensCounts = new long[]{0, 0};
 
-    final TIntIntMap termFrequencyMap = new TIntIntHashMap();
-    final TIntObjectMap<TIntIntMap> bigramFrequencyMap = new TIntObjectHashMap<>();
+    final TLongIntMap termFrequencyMap = new TLongIntHashMap();
+    final TLongObjectMap<TLongIntMap> bigramFrequencyMap = new TLongObjectHashMap<>();
 
     // saving page-wise data
     try {
       crawler.makeStream().forEach(
           doc -> {
-            int pageId = plainPageBuilder.add(doc);
+            long pageId = plainPageBuilder.add(doc);
 
             embeddingBuilder.add(
-                toLongPageId(pageId),
+                pageId,
                 toVector(
                     toWordIds(
                         Tokenizer.tokenize(doc.getTitle().toLowerCase()),
@@ -83,7 +86,7 @@ public class PlainIndexBuilder implements IndexBuilder {
                 )
             );
 
-            int[] tokens = toWordIds(
+            long[] tokens = toWordIds(
                 Tokenizer.tokenize((doc.getTitle() + " " + doc.getTitle()).toLowerCase()),
                 idMappings
             );
@@ -121,7 +124,7 @@ public class PlainIndexBuilder implements IndexBuilder {
     }
   }
 
-  private void flushWordToIdMap(Path pathToMap, TObjectIntMap<String> idMappings)
+  private void flushWordToIdMap(Path pathToMap, TObjectLongMap<String> idMappings)
       throws IOException {
     StringBuilder idMappingsSb = new StringBuilder();
     idMappings.forEachEntry(
@@ -158,8 +161,8 @@ public class PlainIndexBuilder implements IndexBuilder {
    * @param mappings all known word to int mappings
    * @return array of word ids in the same order as given words
    */
-  private int[] toWordIds(String[] words, TObjectIntMap<String> mappings) {
-    TIntList wordIdsList = new TIntLinkedList();
+  private long[] toWordIds(String[] words, TObjectLongMap<String> mappings) {
+    long[] wordIds = new long[words.length];
     for (int i = 0; i < words.length; ++i) {
       if (!mappings.containsKey(words[i])) {
         LOG.warning(String.format("For the word '%s' was not found any vector representation!",
@@ -167,14 +170,14 @@ public class PlainIndexBuilder implements IndexBuilder {
         );
         mappings.put(words[i], mappings.size());
       }
-      wordIdsList.add(mappings.get(words[i]));
+      wordIds[i] = mappings.get(words[i]);
     }
 
-    return wordIdsList.toArray();
+    return wordIds;
   }
 
-  private void enrichFrequencies(int[] tokens, TIntIntMap termFrequencyMap,
-      TIntObjectMap<TIntIntMap> bigramFrequencyMap) {
+  private void enrichFrequencies(long[] tokens, TLongIntMap termFrequencyMap,
+      TLongObjectMap<TLongIntMap> bigramFrequencyMap) {
     if (tokens.length < 1) {
       return;
     }
@@ -182,21 +185,21 @@ public class PlainIndexBuilder implements IndexBuilder {
     for (int i = 1; i < tokens.length; ++i) {
       termFrequencyMap.adjustOrPutValue(tokens[i], 1, 1);
 
-      bigramFrequencyMap.putIfAbsent(tokens[i - 1], new TIntIntHashMap());
+      bigramFrequencyMap.putIfAbsent(tokens[i - 1], new TLongIntHashMap());
       bigramFrequencyMap.get(tokens[i - 1]).adjustOrPutValue(tokens[i], 1, 1);
     }
   }
 
-  private Vec toVector(int[] tokens, TLongObjectMap<Vec> vectors) {
+  private Vec toVector(long[] tokens, TLongObjectMap<Vec> vectors) {
     ArrayVec mean = new ArrayVec(new double[VEC_SIZE]);
-    for (int i : tokens) {
+    for (long i : tokens) {
       mean.add((ArrayVec) vectors.get(i));
     }
     mean.scale(1.0 / tokens.length);
     return mean;
   }
 
-  private void readGloveVectors(Path glovePath, TObjectIntMap<String> idMappings,
+  private void readGloveVectors(Path glovePath, TObjectLongMap<String> idMappings,
       TLongObjectMap<Vec> vectors) {
     try (Reader input =
         new InputStreamReader(
@@ -214,7 +217,7 @@ public class PlainIndexBuilder implements IndexBuilder {
                     .mapToDouble(CharSeqTools::parseDouble)
                     .toArray();
                 synchronized (idMappings) {
-                  idMappings.put(word, idMappings.size());
+                  idMappings.put(word, idMappings.size() + 1);
                 }
                 synchronized (vectors) {
                   vectors.put(idMappings.get(word), new ArrayVec(doubles));

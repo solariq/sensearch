@@ -13,14 +13,14 @@ import com.expleague.sensearch.protobuf.index.IndexUnits;
 import com.expleague.sensearch.protobuf.index.IndexUnits.TermStatistics;
 import com.expleague.sensearch.query.Query;
 import com.expleague.sensearch.query.term.Term;
-import com.google.common.primitives.Ints;
+import com.google.common.primitives.Longs;
 import com.google.protobuf.InvalidProtocolBufferException;
 import gnu.trove.list.TLongList;
 import gnu.trove.list.linked.TLongLinkedList;
-import gnu.trove.map.TIntObjectMap;
-import gnu.trove.map.TObjectIntMap;
-import gnu.trove.map.hash.TIntObjectHashMap;
-import gnu.trove.map.hash.TObjectIntHashMap;
+import gnu.trove.map.TLongObjectMap;
+import gnu.trove.map.TObjectLongMap;
+import gnu.trove.map.hash.TLongObjectHashMap;
+import gnu.trove.map.hash.TObjectLongHashMap;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -57,8 +57,8 @@ public class PlainIndex implements Index {
 
   private final Path indexRoot;
 
-  private final TObjectIntMap<String> wordToIdMap;
-  private final TIntObjectMap<String> idToWordMap;
+  private final TObjectLongMap<String> wordToIdMap;
+  private final TLongObjectMap<String> idToWordMap;
 
   private final DB termStatisticsBase;
   private final DB plainBase;
@@ -94,7 +94,7 @@ public class PlainIndex implements Index {
     indexSize = indexStatistics.getPagesCount();
     vocabularySize = indexStatistics.getVocabularySize();
 
-    wordToIdMap = new TObjectIntHashMap<>();
+    wordToIdMap = new TObjectLongHashMap<>();
     try (BufferedReader mappingsReader =
         new BufferedReader(
             new InputStreamReader(
@@ -105,10 +105,10 @@ public class PlainIndex implements Index {
         )
     ) {
       String[] tokens = mappingsReader.readLine().split("\t");
-      wordToIdMap.put(tokens[0], Integer.parseInt(tokens[1]));
+      wordToIdMap.put(tokens[0], Long.parseLong(tokens[1]));
     }
 
-    idToWordMap = new TIntObjectHashMap<>();
+    idToWordMap = new TLongObjectHashMap<>();
     wordToIdMap.forEachEntry(
         (word, id) -> {
           idToWordMap.put(id, word);
@@ -118,11 +118,11 @@ public class PlainIndex implements Index {
   }
 
   private static boolean isPageId(long id) {
-    return id >= 0;
+    return id <= 0;
   }
 
   private static boolean isWordId(long id) {
-    return id < 0;
+    return id > 0;
   }
 
   private long getWordId(Term term) {
@@ -159,14 +159,14 @@ public class PlainIndex implements Index {
             SYNONYMS_COUNT,
             PlainIndex::isWordId
         )
-        .mapToObj(this::wordById)
+        .mapToObj(this::word)
         .toArray(Term[]::new);
   }
 
-  private IndexedPage pageById(long id) {
+  private IndexedPage page(long id) {
     try {
       return new PlainPage(
-          IndexUnits.Page.parseFrom(plainBase.get(Ints.toByteArray((int) -id)))
+          IndexUnits.Page.parseFrom(plainBase.get(Longs.toByteArray(id)))
       );
     } catch (InvalidProtocolBufferException e) {
       LOG.severe("Encountered invalid protobuf in Plain Base!");
@@ -175,8 +175,8 @@ public class PlainIndex implements Index {
   }
 
   //todo implement
-  private String wordById(long id) {
-    return idToWordMap.get((int) id);
+  private String word(long id) {
+    return idToWordMap.get(id);
   }
 
   public Stream<CharSequence> allTitles() {
@@ -195,7 +195,7 @@ public class PlainIndex implements Index {
         embedding.getVec(queryIds),
         DOC_NUMBER,
         PlainIndex::isPageId
-    ).mapToObj(this::pageById);
+    ).mapToObj(this::page);
   }
 
   @Override
@@ -211,7 +211,7 @@ public class PlainIndex implements Index {
   @Override
   public int documentFrequency(Term term) {
     try {
-      int termId = (int) getWordId(term);
+      long termId = getWordId(term);
       return termStatistics(termId).getDocuementFrequency();
     } catch (DBException | NoSuchElementException e) {
       return 0;
@@ -224,7 +224,7 @@ public class PlainIndex implements Index {
   @Override
   public long termFrequency(Term term) {
     try {
-      int termId = (int) getWordId(term);
+      long termId = getWordId(term);
       return termStatistics(termId).getTermFrequency();
     } catch (DBException | NoSuchElementException e) {
       return 0;
@@ -234,14 +234,15 @@ public class PlainIndex implements Index {
     }
   }
 
-  private TermStatistics termStatistics(int termId) throws InvalidProtocolBufferException {
-    if (lastTermStatistics == null || lastTermStatistics.getTermId() !=  termId) {
+  private TermStatistics termStatistics(long termId) throws InvalidProtocolBufferException {
+    if (lastTermStatistics == null || lastTermStatistics.getTermId() != termId) {
       lastTermStatistics = TermStatistics.parseFrom(
-          termStatisticsBase.get(Ints.toByteArray(termId), DEFAULT_READ_OPTIONS)
+          termStatisticsBase.get(Longs.toByteArray(termId), DEFAULT_READ_OPTIONS)
       );
     }
     return lastTermStatistics;
   }
+
   @Override
   public int vocabularySize() {
     return vocabularySize;

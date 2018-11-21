@@ -3,13 +3,19 @@ package com.expleague.sensearch.donkey.plain;
 import com.expleague.sensearch.protobuf.index.IndexUnits;
 import com.expleague.sensearch.protobuf.index.IndexUnits.TermStatistics;
 import com.google.common.primitives.Ints;
+import com.google.common.primitives.Longs;
 import gnu.trove.map.TIntIntMap;
 import gnu.trove.map.TIntLongMap;
 import gnu.trove.map.TIntObjectMap;
 import gnu.trove.map.TLongIntMap;
+import gnu.trove.map.TLongLongMap;
+import gnu.trove.map.TLongObjectMap;
 import gnu.trove.map.hash.TIntIntHashMap;
 import gnu.trove.map.hash.TIntLongHashMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
+import gnu.trove.map.hash.TLongIntHashMap;
+import gnu.trove.map.hash.TLongLongHashMap;
+import gnu.trove.map.hash.TLongObjectHashMap;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.file.Path;
@@ -25,7 +31,7 @@ import org.iq80.leveldb.Options;
 import org.iq80.leveldb.WriteBatch;
 import org.iq80.leveldb.WriteOptions;
 
-class StatisticsBuilder {
+public class StatisticsBuilder {
 
   private static final long DEFAULT_CACHE_SIZE = 16 * (1 << 20); // 16 MB
 
@@ -41,9 +47,9 @@ class StatisticsBuilder {
 
   private static final int MOST_FREQUENT_BIGRAMS_COUNT = 10;
 
-  private final TIntLongMap wordFrequencyMap = new TIntLongHashMap();
-  private final TIntIntMap documentFrequencyMap = new TIntIntHashMap();
-  private final TIntObjectMap<TIntIntMap> largeBigramsMap = new TIntObjectHashMap<>();
+  private final TLongLongMap wordFrequencyMap = new TLongLongHashMap();
+  private final TLongIntMap documentFrequencyMap = new TLongIntHashMap();
+  private final TLongObjectMap<TLongIntMap> largeBigramsMap = new TLongObjectHashMap<>();
 
   private final DB statisticsDb;
 
@@ -51,7 +57,7 @@ class StatisticsBuilder {
     statisticsDb = JniDBFactory.factory.open(statisticsRoot.toFile(), DEFAULT_DB_OPTIONS);
   }
 
-  void enrich(TIntIntMap pageWiseTf, TIntObjectMap<TIntIntMap> pageWiseBigramTf) {
+  void enrich(TLongIntMap pageWiseTf, TLongObjectMap<TLongIntMap> pageWiseBigramTf) {
     pageWiseTf.forEachEntry(
         (tok, freq) -> {
           wordFrequencyMap.adjustOrPutValue(tok, freq, freq);
@@ -62,8 +68,8 @@ class StatisticsBuilder {
 
     pageWiseBigramTf.forEachEntry(
         (tId, neigh) -> {
-          largeBigramsMap.putIfAbsent(tId, new TIntIntHashMap());
-          TIntIntMap existingNeighStats = largeBigramsMap.get(tId);
+          largeBigramsMap.putIfAbsent(tId, new TLongIntHashMap());
+          TLongIntMap existingNeighStats = largeBigramsMap.get(tId);
           neigh.forEachEntry(
               (nId, freq) -> {
                 existingNeighStats.adjustOrPutValue(nId, freq, freq);
@@ -75,7 +81,7 @@ class StatisticsBuilder {
     );
   }
 
-  private Iterable<TermStatistics.TermFrequency> mostFrequentBigrams(TIntIntMap neighbours) {
+  private Iterable<TermStatistics.TermFrequency> mostFrequentBigrams(TLongIntMap neighbours) {
     if (neighbours == null || neighbours.isEmpty()) {
       return new LinkedList<>();
     }
@@ -112,7 +118,7 @@ class StatisticsBuilder {
     wordFrequencyMap.forEachKey(
         k -> {
           writeBatch.put(
-              Ints.toByteArray(k),
+              Longs.toByteArray(k),
               IndexUnits.TermStatistics
                   .newBuilder()
                   .setTermId(k)
@@ -133,15 +139,15 @@ class StatisticsBuilder {
 
   private static class IdFrequencyPair {
 
-    int termId;
+    long termId;
     int frequency;
 
-    IdFrequencyPair(int termId, int frequency) {
+    IdFrequencyPair(long termId, int frequency) {
       this.termId = termId;
       this.frequency = frequency;
     }
 
-    int termId() {
+    long termId() {
       return termId;
     }
 
