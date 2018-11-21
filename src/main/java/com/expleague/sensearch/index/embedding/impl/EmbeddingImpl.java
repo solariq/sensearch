@@ -1,50 +1,73 @@
 package com.expleague.sensearch.index.embedding.impl;
 
 import com.expleague.commons.math.vectors.Vec;
+import com.expleague.commons.math.vectors.VecTools;
 import com.expleague.commons.math.vectors.impl.vectors.ArrayVec;
-import com.expleague.sensearch.Config;
 import com.expleague.sensearch.index.embedding.Embedding;
 
+import com.google.common.primitives.Longs;
 import gnu.trove.list.TLongList;
+import org.iq80.leveldb.DB;
+import org.iq80.leveldb.DBException;
+import org.iq80.leveldb.Options;
+import org.iq80.leveldb.impl.Iq80DBFactory;
+
+import static com.expleague.sensearch.donkey.plain.ByteTools.*;
+import static com.expleague.sensearch.donkey.plain.EmbeddingBuilder.hashFuncs;
+
+import java.io.IOException;
+import java.nio.file.Path;
 import java.util.*;
+import java.util.function.BiFunction;
 import java.util.stream.LongStream;
-import java.util.stream.Stream;
 
 public class EmbeddingImpl implements Embedding {
 
   private static final int VEC_SIZE = 50;
+  private static final long CACHE_SIZE = 16 * (1 << 20);
+  private static final double EPSILON = 10e-9;
+  private static final Options DB_OPTIONS = new Options().cacheSize(CACHE_SIZE);
 
-  private final Storage storage;
+  private List<Long>[][] tables;
+  private BiFunction<Vec, Vec, Double> nearestMeasure = VecTools::distanceAV;
 
-  public EmbeddingImpl(Config config) {
-    //upload database
-    storage = new Storage();
+  private DB vecDb;
+
+  public EmbeddingImpl(Path embeddingPath) throws IOException {
+    vecDb = Iq80DBFactory.factory.open(embeddingPath.toFile(), DB_OPTIONS);
+    tables = null;
+  }
+
+  private Vec getVec(long id) {
+    try {
+      return bytesToVec(vecDb.get(Longs.toByteArray(id)));
+    } catch (DBException e) {
+      return null;
+    }
   }
 
   @Override
   public Vec getVec(long ... ids) {
     if (ids.length == 0) {
-      // TODO: determine behaviour
+      return null;
     }
 
     if (ids.length == 1) {
-      return storage.get(ids[0]);
+      return getVec(ids[0]);
     }
 
-    ArrayVec vectors = new ArrayVec(new double[VEC_SIZE]);
-    int vectorsFound = 0;
-    for (int i = 0; i < ids.length; ++i) {
-      Vec vec = storage.get(ids[i]);
+    ArrayVec mean = new ArrayVec(new double[VEC_SIZE]);
+    int number = 0;
+    for (long id : ids) {
+      Vec vec = getVec(id);
       if (vec != null) {
-        vectors.add((ArrayVec) vec);
-        ++vectorsFound;
+        mean.add((ArrayVec) vec);
+        number++;
       }
     }
 
-    vectors.scale(1. / vectorsFound);
-
-    return vectors;
-
+    mean.scale(1. / number);
+    return mean;
   }
 
   @Override
@@ -52,8 +75,42 @@ public class EmbeddingImpl implements Embedding {
     return getVec(ids.toArray());
   }
 
+  private Comparator<Long> getComparator(Vec mainVec) {
+    return (id1, id2) -> {
+      double val1 = nearestMeasure.apply(mainVec, getVec(id1));
+      double val2 = nearestMeasure.apply(mainVec, getVec(id2));
+      if (Math.abs(val1 - val2) < EPSILON) {
+        return 0;
+      }
+      return val1 < val2 ? -1 : 1;
+    };
+  }
+
   @Override
   public LongStream getNearest(Vec mainVec, int numberOfNeighbors) {
-    return storage.getNearest(mainVec.toArray(), numberOfNeighbors);
+    List<Long> lshNeighbors = new ArrayList<>();
+    for (int i = 0; i < tables.length; i++) {
+      int bucketIndex = hashFuncs[i].applyAsInt(mainVec);
+      lshNeighbors.addAll(tables[i][bucketIndex]);
+    }
+
+    Comparator<Long> comparator = getComparator(mainVec);
+
+    if (lshNeighbors.size() <= numberOfNeighbors) {
+      lshNeighbors.sort(comparator);
+      return lshNeighbors.stream().mapToLong(Long::longValue);
+    }
+
+    TreeSet<Long> nearestNeighbors = new TreeSet<>(comparator);
+    for (long id : lshNeighbors) {
+      if (nearestNeighbors.size() < numberOfNeighbors) {
+        nearestNeighbors.add(id);
+      } else if (comparator.compare(nearestNeighbors.last(), id) > 0) {
+        nearestNeighbors.pollLast();
+        nearestNeighbors.add(id);
+      }
+    }
+
+    return nearestNeighbors.stream().mapToLong(Long::longValue);
   }
 }

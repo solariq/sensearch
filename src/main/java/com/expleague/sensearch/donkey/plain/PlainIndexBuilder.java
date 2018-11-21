@@ -8,16 +8,9 @@ import com.expleague.sensearch.core.Tokenizer;
 import com.expleague.sensearch.donkey.IndexBuilder;
 import com.expleague.sensearch.donkey.crawler.Crawler;
 import com.expleague.sensearch.protobuf.index.IndexUnits;
-import gnu.trove.list.TIntList;
-import gnu.trove.list.linked.TIntLinkedList;
-import gnu.trove.map.TIntIntMap;
-import gnu.trove.map.TIntObjectMap;
 import gnu.trove.map.TLongIntMap;
 import gnu.trove.map.TLongObjectMap;
-import gnu.trove.map.TObjectIntMap;
 import gnu.trove.map.TObjectLongMap;
-import gnu.trove.map.hash.TIntIntHashMap;
-import gnu.trove.map.hash.TIntObjectHashMap;
 import gnu.trove.map.hash.TLongIntHashMap;
 import gnu.trove.map.hash.TLongObjectHashMap;
 import gnu.trove.map.hash.TObjectLongHashMap;
@@ -62,7 +55,8 @@ public class PlainIndexBuilder implements IndexBuilder {
     final PlainPageBuilder plainPageBuilder = new PlainPageBuilder(indexRoot.resolve(PLAIN_ROOT));
     final StatisticsBuilder statisticsBuilder = new StatisticsBuilder(
         indexRoot.resolve(TERM_STATISTICS_ROOT));
-    final EmbeddingBuilder embeddingBuilder = new EmbeddingBuilder();
+    final EmbeddingBuilder embeddingBuilder = new EmbeddingBuilder(
+        indexRoot.resolve(EMBEDDING_ROOT));
 
     final long[] pagesAndTokensCounts = new long[]{0, 0};
 
@@ -79,7 +73,7 @@ public class PlainIndexBuilder implements IndexBuilder {
                 pageId,
                 toVector(
                     toWordIds(
-                        Tokenizer.tokenize(doc.getTitle().toLowerCase()),
+                        Tokenizer.tokenize(doc.title().toLowerCase()),
                         idMappings
                     ),
                     gloveVectors
@@ -87,7 +81,7 @@ public class PlainIndexBuilder implements IndexBuilder {
             );
 
             long[] tokens = toWordIds(
-                Tokenizer.tokenize((doc.getTitle() + " " + doc.getTitle()).toLowerCase()),
+                Tokenizer.tokenize((doc.title() + " " + doc.content()).toLowerCase()),
                 idMappings
             );
 
@@ -104,7 +98,7 @@ public class PlainIndexBuilder implements IndexBuilder {
           }
       );
       embeddingBuilder.addAll(gloveVectors);
-      embeddingBuilder.build(indexRoot.resolve(EMBEDDING_ROOT));
+      embeddingBuilder.build();
 
       plainPageBuilder.build();
       statisticsBuilder.build();
