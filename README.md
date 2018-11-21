@@ -1,5 +1,7 @@
 ## Лёгкий поиск
 
+[![Build Status](https://travis-ci.org/pvktk/sensearch.svg?branch=master)](https://travis-ci.org/pvktk/sensearch)
+
 У нас есть [GDrive][1] где можно найти архивы со статьями из Википедии,
  а так же **можно** добавлять свои файлы и библиотеки.
  
