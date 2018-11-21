@@ -9,19 +9,20 @@ import com.google.inject.Guice;
 import com.google.inject.Injector;
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import javax.xml.stream.XMLStreamException;
+import org.apache.commons.io.FileUtils;
 
 public class RebaseMetrics {
 
   public static void main(String[] args)
-      throws IOException, XMLStreamException, URISyntaxException {
+      throws IOException, XMLStreamException {
     Injector injector = Guice.createInjector(new AppModule());
     Builder builder = injector.getInstance(Builder.class);
     Config config = builder.build();
 
+    FileUtils.deleteDirectory(Paths.get("./resources/Metrics").toFile());
     try (BufferedReader reader = Files.newBufferedReader(Paths.get("./resources/Queries.txt"))) {
       String line;
       ObjectMapper objectMapper = new ObjectMapper();
