@@ -566,13 +566,13 @@ public final class IndexUnits {
       com.google.protobuf.MessageOrBuilder {
 
     /**
-     * <code>optional int32 page_id = 1;</code>
+     * <code>optional int64 page_id = 1;</code>
      */
     boolean hasPageId();
     /**
-     * <code>optional int32 page_id = 1;</code>
+     * <code>optional int64 page_id = 1;</code>
      */
-    int getPageId();
+    long getPageId();
 
     /**
      * <code>optional string title = 2;</code>
@@ -656,7 +656,7 @@ public final class IndexUnits {
             }
             case 8: {
               bitField0_ |= 0x00000001;
-              pageId_ = input.readInt32();
+              pageId_ = input.readInt64();
               break;
             }
             case 18: {
@@ -712,17 +712,17 @@ public final class IndexUnits {
 
     private int bitField0_;
     public static final int PAGE_ID_FIELD_NUMBER = 1;
-    private int pageId_;
+    private long pageId_;
     /**
-     * <code>optional int32 page_id = 1;</code>
+     * <code>optional int64 page_id = 1;</code>
      */
     public boolean hasPageId() {
       return ((bitField0_ & 0x00000001) == 0x00000001);
     }
     /**
-     * <code>optional int32 page_id = 1;</code>
+     * <code>optional int64 page_id = 1;</code>
      */
-    public int getPageId() {
+    public long getPageId() {
       return pageId_;
     }
 
@@ -811,7 +811,7 @@ public final class IndexUnits {
     }
 
     private void initFields() {
-      pageId_ = 0;
+      pageId_ = 0L;
       title_ = "";
       content_ = "";
     }
@@ -829,7 +829,7 @@ public final class IndexUnits {
                         throws java.io.IOException {
       getSerializedSize();
       if (((bitField0_ & 0x00000001) == 0x00000001)) {
-        output.writeInt32(1, pageId_);
+        output.writeInt64(1, pageId_);
       }
       if (((bitField0_ & 0x00000002) == 0x00000002)) {
         output.writeBytes(2, getTitleBytes());
@@ -848,7 +848,7 @@ public final class IndexUnits {
       size = 0;
       if (((bitField0_ & 0x00000001) == 0x00000001)) {
         size += com.google.protobuf.CodedOutputStream
-          .computeInt32Size(1, pageId_);
+          .computeInt64Size(1, pageId_);
       }
       if (((bitField0_ & 0x00000002) == 0x00000002)) {
         size += com.google.protobuf.CodedOutputStream
@@ -975,7 +975,7 @@ public final class IndexUnits {
 
       public Builder clear() {
         super.clear();
-        pageId_ = 0;
+        pageId_ = 0L;
         bitField0_ = (bitField0_ & ~0x00000001);
         title_ = "";
         bitField0_ = (bitField0_ & ~0x00000002);
@@ -1077,34 +1077,34 @@ public final class IndexUnits {
       }
       private int bitField0_;
 
-      private int pageId_ ;
+      private long pageId_ ;
       /**
-       * <code>optional int32 page_id = 1;</code>
+       * <code>optional int64 page_id = 1;</code>
        */
       public boolean hasPageId() {
         return ((bitField0_ & 0x00000001) == 0x00000001);
       }
       /**
-       * <code>optional int32 page_id = 1;</code>
+       * <code>optional int64 page_id = 1;</code>
        */
-      public int getPageId() {
+      public long getPageId() {
         return pageId_;
       }
       /**
-       * <code>optional int32 page_id = 1;</code>
+       * <code>optional int64 page_id = 1;</code>
        */
-      public Builder setPageId(int value) {
+      public Builder setPageId(long value) {
         bitField0_ |= 0x00000001;
         pageId_ = value;
         onChanged();
         return this;
       }
       /**
-       * <code>optional int32 page_id = 1;</code>
+       * <code>optional int64 page_id = 1;</code>
        */
       public Builder clearPageId() {
         bitField0_ = (bitField0_ & ~0x00000001);
-        pageId_ = 0;
+        pageId_ = 0L;
         onChanged();
         return this;
       }
@@ -1277,13 +1277,13 @@ public final class IndexUnits {
       com.google.protobuf.MessageOrBuilder {
 
     /**
-     * <code>optional int32 term_id = 1;</code>
+     * <code>optional int64 term_id = 1;</code>
      */
     boolean hasTermId();
     /**
-     * <code>optional int32 term_id = 1;</code>
+     * <code>optional int64 term_id = 1;</code>
      */
-    int getTermId();
+    long getTermId();
 
     /**
      * <code>optional int32 docuement_frequency = 2;</code>
@@ -1381,7 +1381,7 @@ public final class IndexUnits {
             }
             case 8: {
               bitField0_ |= 0x00000001;
-              termId_ = input.readInt32();
+              termId_ = input.readInt64();
               break;
             }
             case 16: {
@@ -1449,13 +1449,13 @@ public final class IndexUnits {
         com.google.protobuf.MessageOrBuilder {
 
       /**
-       * <code>optional int32 term_id = 1;</code>
+       * <code>optional int64 term_id = 1;</code>
        */
       boolean hasTermId();
       /**
-       * <code>optional int32 term_id = 1;</code>
+       * <code>optional int64 term_id = 1;</code>
        */
-      int getTermId();
+      long getTermId();
 
       /**
        * <code>optional int32 term_frequency = 2;</code>
@@ -1520,7 +1520,7 @@ public final class IndexUnits {
               }
               case 8: {
                 bitField0_ |= 0x00000001;
-                termId_ = input.readInt32();
+                termId_ = input.readInt64();
                 break;
               }
               case 16: {
@@ -1569,17 +1569,17 @@ public final class IndexUnits {
 
       private int bitField0_;
       public static final int TERM_ID_FIELD_NUMBER = 1;
-      private int termId_;
+      private long termId_;
       /**
-       * <code>optional int32 term_id = 1;</code>
+       * <code>optional int64 term_id = 1;</code>
        */
       public boolean hasTermId() {
         return ((bitField0_ & 0x00000001) == 0x00000001);
       }
       /**
-       * <code>optional int32 term_id = 1;</code>
+       * <code>optional int64 term_id = 1;</code>
        */
-      public int getTermId() {
+      public long getTermId() {
         return termId_;
       }
 
@@ -1599,7 +1599,7 @@ public final class IndexUnits {
       }
 
       private void initFields() {
-        termId_ = 0;
+        termId_ = 0L;
         termFrequency_ = 0;
       }
       private byte memoizedIsInitialized = -1;
@@ -1616,7 +1616,7 @@ public final class IndexUnits {
                           throws java.io.IOException {
         getSerializedSize();
         if (((bitField0_ & 0x00000001) == 0x00000001)) {
-          output.writeInt32(1, termId_);
+          output.writeInt64(1, termId_);
         }
         if (((bitField0_ & 0x00000002) == 0x00000002)) {
           output.writeInt32(2, termFrequency_);
@@ -1632,7 +1632,7 @@ public final class IndexUnits {
         size = 0;
         if (((bitField0_ & 0x00000001) == 0x00000001)) {
           size += com.google.protobuf.CodedOutputStream
-            .computeInt32Size(1, termId_);
+            .computeInt64Size(1, termId_);
         }
         if (((bitField0_ & 0x00000002) == 0x00000002)) {
           size += com.google.protobuf.CodedOutputStream
@@ -1755,7 +1755,7 @@ public final class IndexUnits {
 
         public Builder clear() {
           super.clear();
-          termId_ = 0;
+          termId_ = 0L;
           bitField0_ = (bitField0_ & ~0x00000001);
           termFrequency_ = 0;
           bitField0_ = (bitField0_ & ~0x00000002);
@@ -1844,34 +1844,34 @@ public final class IndexUnits {
         }
         private int bitField0_;
 
-        private int termId_ ;
+        private long termId_ ;
         /**
-         * <code>optional int32 term_id = 1;</code>
+         * <code>optional int64 term_id = 1;</code>
          */
         public boolean hasTermId() {
           return ((bitField0_ & 0x00000001) == 0x00000001);
         }
         /**
-         * <code>optional int32 term_id = 1;</code>
+         * <code>optional int64 term_id = 1;</code>
          */
-        public int getTermId() {
+        public long getTermId() {
           return termId_;
         }
         /**
-         * <code>optional int32 term_id = 1;</code>
+         * <code>optional int64 term_id = 1;</code>
          */
-        public Builder setTermId(int value) {
+        public Builder setTermId(long value) {
           bitField0_ |= 0x00000001;
           termId_ = value;
           onChanged();
           return this;
         }
         /**
-         * <code>optional int32 term_id = 1;</code>
+         * <code>optional int64 term_id = 1;</code>
          */
         public Builder clearTermId() {
           bitField0_ = (bitField0_ & ~0x00000001);
-          termId_ = 0;
+          termId_ = 0L;
           onChanged();
           return this;
         }
@@ -1921,17 +1921,17 @@ public final class IndexUnits {
 
     private int bitField0_;
     public static final int TERM_ID_FIELD_NUMBER = 1;
-    private int termId_;
+    private long termId_;
     /**
-     * <code>optional int32 term_id = 1;</code>
+     * <code>optional int64 term_id = 1;</code>
      */
     public boolean hasTermId() {
       return ((bitField0_ & 0x00000001) == 0x00000001);
     }
     /**
-     * <code>optional int32 term_id = 1;</code>
+     * <code>optional int64 term_id = 1;</code>
      */
-    public int getTermId() {
+    public long getTermId() {
       return termId_;
     }
 
@@ -2001,7 +2001,7 @@ public final class IndexUnits {
     }
 
     private void initFields() {
-      termId_ = 0;
+      termId_ = 0L;
       docuementFrequency_ = 0;
       termFrequency_ = 0L;
       bigramFrequency_ = java.util.Collections.emptyList();
@@ -2020,7 +2020,7 @@ public final class IndexUnits {
                         throws java.io.IOException {
       getSerializedSize();
       if (((bitField0_ & 0x00000001) == 0x00000001)) {
-        output.writeInt32(1, termId_);
+        output.writeInt64(1, termId_);
       }
       if (((bitField0_ & 0x00000002) == 0x00000002)) {
         output.writeInt32(2, docuementFrequency_);
@@ -2042,7 +2042,7 @@ public final class IndexUnits {
       size = 0;
       if (((bitField0_ & 0x00000001) == 0x00000001)) {
         size += com.google.protobuf.CodedOutputStream
-          .computeInt32Size(1, termId_);
+          .computeInt64Size(1, termId_);
       }
       if (((bitField0_ & 0x00000002) == 0x00000002)) {
         size += com.google.protobuf.CodedOutputStream
@@ -2174,7 +2174,7 @@ public final class IndexUnits {
 
       public Builder clear() {
         super.clear();
-        termId_ = 0;
+        termId_ = 0L;
         bitField0_ = (bitField0_ & ~0x00000001);
         docuementFrequency_ = 0;
         bitField0_ = (bitField0_ & ~0x00000002);
@@ -2313,34 +2313,34 @@ public final class IndexUnits {
       }
       private int bitField0_;
 
-      private int termId_ ;
+      private long termId_ ;
       /**
-       * <code>optional int32 term_id = 1;</code>
+       * <code>optional int64 term_id = 1;</code>
        */
       public boolean hasTermId() {
         return ((bitField0_ & 0x00000001) == 0x00000001);
       }
       /**
-       * <code>optional int32 term_id = 1;</code>
+       * <code>optional int64 term_id = 1;</code>
        */
-      public int getTermId() {
+      public long getTermId() {
         return termId_;
       }
       /**
-       * <code>optional int32 term_id = 1;</code>
+       * <code>optional int64 term_id = 1;</code>
        */
-      public Builder setTermId(int value) {
+      public Builder setTermId(long value) {
         bitField0_ |= 0x00000001;
         termId_ = value;
         onChanged();
         return this;
       }
       /**
-       * <code>optional int32 term_id = 1;</code>
+       * <code>optional int64 term_id = 1;</code>
        */
       public Builder clearTermId() {
         bitField0_ = (bitField0_ & ~0x00000001);
-        termId_ = 0;
+        termId_ = 0L;
         onChanged();
         return this;
       }
@@ -2692,12 +2692,12 @@ public final class IndexUnits {
       "\n\020indexunits.proto\022\005index\"Z\n\017IndexStatis" +
       "tics\022\023\n\013pages_count\030\001 \001(\005\022\031\n\021average_pag" +
       "e_size\030\002 \001(\001\022\027\n\017vocabulary_size\030\003 \001(\005\"7\n" +
-      "\004Page\022\017\n\007page_id\030\001 \001(\005\022\r\n\005title\030\002 \001(\t\022\017\n" +
+      "\004Page\022\017\n\007page_id\030\001 \001(\003\022\r\n\005title\030\002 \001(\t\022\017\n" +
       "\007content\030\003 \001(\t\"\317\001\n\016TermStatistics\022\017\n\007ter" +
-      "m_id\030\001 \001(\005\022\033\n\023docuement_frequency\030\002 \001(\005\022" +
+      "m_id\030\001 \001(\003\022\033\n\023docuement_frequency\030\002 \001(\005\022" +
       "\026\n\016term_frequency\030\003 \001(\003\022=\n\020bigram_freque" +
       "ncy\030\004 \003(\0132#.index.TermStatistics.TermFre" +
-      "quency\0328\n\rTermFrequency\022\017\n\007term_id\030\001 \001(\005" +
+      "quency\0328\n\rTermFrequency\022\017\n\007term_id\030\001 \001(\003" +
       "\022\026\n\016term_frequency\030\002 \001(\005B4\n&com.expleagu",
       "e.sensearch.protobuf.indexB\nIndexUnits"
     };

@@ -2,9 +2,8 @@ package com.expleague.sensearch.donkey.plain;
 
 import com.expleague.sensearch.donkey.crawler.document.CrawlerDocument;
 import com.expleague.sensearch.protobuf.index.IndexUnits;
-import com.google.common.primitives.Ints;
+import com.google.common.primitives.Longs;
 import java.io.IOException;
-import java.nio.ByteBuffer;
 import java.nio.file.Path;
 import org.fusesource.leveldbjni.JniDBFactory;
 import org.iq80.leveldb.CompressionType;
@@ -13,7 +12,7 @@ import org.iq80.leveldb.Options;
 import org.iq80.leveldb.WriteBatch;
 import org.iq80.leveldb.WriteOptions;
 
-class PlainPageBuilder {
+public class PlainPageBuilder {
 
   private static final long DEFAULT_CACHE_SIZE = 16 * (1 << 20); // 16 MB
 
@@ -31,7 +30,7 @@ class PlainPageBuilder {
 
   private final DB plainDataBase;
 
-  private int flushedPagesCount = 0;
+  private int negFlushedPagesCount = 0;
 
   private WriteBatch writeBatch = null;
   private int pagesInBatch = 0;
@@ -40,7 +39,7 @@ class PlainPageBuilder {
     plainDataBase = JniDBFactory.factory.open(plainPagePath.toFile(), DEFAULT_DB_OPTIONS);
   }
 
-  int add(CrawlerDocument newPage) {
+  long add(CrawlerDocument newPage) {
     if (writeBatch == null) {
       writeBatch = plainDataBase.createWriteBatch();
     }
@@ -51,10 +50,10 @@ class PlainPageBuilder {
       writeBatch = plainDataBase.createWriteBatch();
     }
 
-    byte[] pageIdBytes = Ints.toByteArray(flushedPagesCount);
+    byte[] pageIdBytes = Longs.toByteArray(negFlushedPagesCount);
     byte[] pageBytes = IndexUnits.Page
         .newBuilder()
-        .setPageId(flushedPagesCount)
+        .setPageId(negFlushedPagesCount)
         .setContent(newPage.getContent().toString())
         .setTitle(newPage.getTitle())
         .build()
@@ -63,7 +62,7 @@ class PlainPageBuilder {
     writeBatch.put(pageIdBytes, pageBytes);
     ++pagesInBatch;
 
-    return flushedPagesCount++;
+    return negFlushedPagesCount--;
   }
 
   void build() throws IOException {
