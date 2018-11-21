@@ -10,5 +10,13 @@ public interface CrawlerDocument {
 
   List<String> categories();
 
+  List<Section> sections();
+
   Long iD();
+
+  interface Section {
+    CharSequence text();
+    CharSequence title();
+  }
+
 }

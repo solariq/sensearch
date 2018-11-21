@@ -3,7 +3,9 @@ package com.expleague.sensearch.donkey.crawler.document;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLEventReader;
 import javax.xml.stream.XMLInputFactory;
@@ -21,7 +23,7 @@ public class XMLParser {
     try {
       XMLEventReader reader = xmlInputFactory.
           createXMLEventReader(new FileInputStream(file.getAbsolutePath()));
-      StringBuilder text = null;
+      StringBuilder text = new StringBuilder();
       while (reader.hasNext()) {
         XMLEvent xmlEvent = reader.nextEvent();
         if (xmlEvent.isStartElement()) {
@@ -49,31 +51,46 @@ public class XMLParser {
                   .getValue().split("@")));
             }
 
-                        /*Attribute a;
-                        a = startElement.getAttributeByName(new QName("revision"));
-                        if (a != null) {
-                            page.revision = a.getValue();
-                        }
-
-                        a = startElement.getAttributeByName(new QName("type"));
-                        if (a != null) {
-                            page.type = a.getValue();
-                        }
-
-                        a = startElement.getAttributeByName(new QName("ns-id"));
-                        if (a != null) {
-                            page.nsId = a.getValue();
-                        }*/
-
-            while (reader.hasNext() && (xmlEvent = reader.nextEvent()).isCharacters()) {
-              text.append(xmlEvent.asCharacters().getData());
+            // Parse newline after <page>
+            if (!reader.hasNext() || !(xmlEvent = reader.nextEvent()).isCharacters()) {
+              throw new IllegalStateException("Newline expected, found " + xmlEvent.toString());
             }
+            List<CrawlerDocument.Section> sections = new ArrayList<>();
+
+            while (reader.hasNext() && (xmlEvent = reader.nextEvent()).isStartElement()) {
+              StartElement sectionElement = xmlEvent.asStartElement();
+              String sectionTitle = sectionElement
+                  .getAttributeByName(new QName("title"))
+                  .getValue();
+              StringBuilder sectionText = new StringBuilder();
+
+              while (reader.hasNext() && (xmlEvent = reader.nextEvent()).isCharacters()) {
+                String s = xmlEvent.asCharacters().getData();
+                sectionText.append(s);
+                // TODO (tehnar): do not duplicate data in section and in text
+                if (text.length() > 0) {
+                  text.append("\n\n");
+                }
+                text.append(s);
+              }
+              sections.add(new WikiPage.WikiSection(sectionText.toString(), sectionTitle));
+
+              if (!reader.hasNext() || !xmlEvent.isEndElement()) {
+                throw new IllegalStateException("Expected end of <section>, found " + xmlEvent.toString());
+              }
+              // Parse newline after </section>
+              if (!reader.hasNext() || !(xmlEvent = reader.nextEvent()).isCharacters()) {
+                throw new IllegalStateException("Newline expected, found " + xmlEvent.toString());
+              }
+            }
+
+            page.setSections(sections);
           }
         }
         if (xmlEvent.isEndElement()) {
           EndElement endElement = xmlEvent.asEndElement();
           if (endElement.getName().getLocalPart().equals("page")) {
-            page.setPage(text);
+            page.setPage(text.toString());
           }
         }
       }
@@ -87,7 +104,7 @@ public class XMLParser {
 
     /*
     private void writeXML(WikiPage page) {
-        String fileName = "/home/artem/JetBrains/WikiDocs/Mini_Wiki/" + page.iD() + ".xml";
+        String fileName = "/home/artem/JetBrains/WikiDocs/Mini_Wiki/" + page.getID() + ".xml";
         String startElement = "page";
 
         XMLOutputFactory xmlOutputFactory = XMLOutputFactory.newInstance();

@@ -1,6 +1,5 @@
 package com.expleague.sensearch.donkey.crawler.document;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class WikiPage implements CrawlerDocument {
@@ -8,7 +7,8 @@ public class WikiPage implements CrawlerDocument {
   private long id;
   private String title;
   private CharSequence page;
-  private List<String> categories = new ArrayList<>();
+  private List<String> categories;
+  private List<Section> sections;
 
     /*
     String revision;
@@ -32,6 +32,10 @@ public class WikiPage implements CrawlerDocument {
     this.categories = categories;
   }
 
+  public void setSections(List<Section> sections) {
+    this.sections = sections;
+  }
+
   @Override
   public String title() {
     return this.title;
@@ -40,6 +44,11 @@ public class WikiPage implements CrawlerDocument {
   @Override
   public List<String> categories() {
     return this.categories;
+  }
+
+  @Override
+  public List<Section> sections() {
+    return sections;
   }
 
   @Override
@@ -55,5 +64,26 @@ public class WikiPage implements CrawlerDocument {
   @Override
   public String toString() {
     return this.page.toString();
+  }
+
+  public static class WikiSection implements Section {
+
+    private CharSequence text;
+    private CharSequence title;
+
+    public WikiSection(CharSequence text, CharSequence title) {
+      this.text = text;
+      this.title = title;
+    }
+
+    @Override
+    public CharSequence text() {
+      return text;
+    }
+
+    @Override
+    public CharSequence title() {
+      return title;
+    }
   }
 }
