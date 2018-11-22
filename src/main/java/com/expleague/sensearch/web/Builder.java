@@ -35,17 +35,12 @@ public class Builder {
   }
 
   public Config build() throws IOException, XMLStreamException {
-    return build(new RequestCrawler());
-  }
-
-  public Config build(WebCrawler webCrawler) throws IOException, XMLStreamException {
     crawler = new CrawlerXML(config);
-    index = new PlainIndex();
+    index = new PlainIndex(config);
     bigramsBasedSuggestor = new BigramsBasedSuggestor(config);
     lemmer = new Lemmer(config.getMyStem());
     searcher = new SenSeArchImpl(this);
-    webCrawler.setAllTitles(((PlainIndex) index).allTitles());
-    metric = new Metric(webCrawler, config.getPathToMetrics());
+    metric = new Metric(new RequestCrawler(index), config.getPathToMetrics());
     return config;
   }
 

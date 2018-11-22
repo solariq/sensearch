@@ -3,18 +3,20 @@ package com.expleague.sensearch.index.plain;
 import com.expleague.sensearch.Config;
 import com.expleague.sensearch.Page;
 import com.expleague.sensearch.donkey.plain.PlainIndexBuilder;
+import com.expleague.sensearch.index.Embedding;
+import com.expleague.sensearch.index.Filter;
 import com.expleague.sensearch.index.Index;
 import com.expleague.sensearch.index.IndexedPage;
-import com.expleague.sensearch.index.embedding.Embedding;
-import com.expleague.sensearch.index.embedding.Filter;
-import com.expleague.sensearch.index.embedding.impl.EmbeddingImpl;
-import com.expleague.sensearch.index.embedding.impl.FilterImpl;
 import com.expleague.sensearch.protobuf.index.IndexUnits;
 import com.expleague.sensearch.protobuf.index.IndexUnits.TermStatistics;
 import com.expleague.sensearch.query.Query;
 import com.expleague.sensearch.query.term.Term;
+import com.google.common.hash.BloomFilter;
+import com.google.common.hash.Funnels;
 import com.google.common.primitives.Longs;
+import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
+import com.sun.xml.internal.messaging.saaj.util.ByteInputStream;
 import gnu.trove.list.TLongList;
 import gnu.trove.list.linked.TLongLinkedList;
 import gnu.trove.map.TLongObjectMap;
@@ -66,6 +68,9 @@ public class PlainIndex implements Index {
   private final double averagePageSize;
   private final int indexSize;
   private final int vocabularySize;
+
+  private final BloomFilter<byte[]> titlesBloomFilter;
+
   private final Embedding embedding;
   private final Filter filter;
 
@@ -87,12 +92,18 @@ public class PlainIndex implements Index {
         DEFAULT_DB_OPTIONS
     );
 
-    IndexUnits.IndexStatistics indexStatistics = IndexUnits.IndexStatistics.parseFrom(
-        Files.newInputStream(indexRoot.resolve(PlainIndexBuilder.INDEX_STATISTICS))
+    IndexUnits.IndexMeta indexMeta = IndexUnits.IndexMeta.parseFrom(
+        Files.newInputStream(indexRoot.resolve(PlainIndexBuilder.INDEX_META))
     );
-    averagePageSize = indexStatistics.getAveragePageSize();
-    indexSize = indexStatistics.getPagesCount();
-    vocabularySize = indexStatistics.getVocabularySize();
+    averagePageSize = indexMeta.getAveragePageSize();
+    indexSize = indexMeta.getPagesCount();
+    vocabularySize = indexMeta.getVocabularySize();
+
+    ByteString byteStringFilter = indexMeta.getTitlesBloomFilter();
+    titlesBloomFilter = BloomFilter.readFrom(
+        new ByteInputStream(byteStringFilter.toByteArray(), byteStringFilter.size()),
+        Funnels.byteArrayFunnel()
+    );
 
     wordToIdMap = new TObjectLongHashMap<>();
     try (BufferedReader mappingsReader =
@@ -125,7 +136,12 @@ public class PlainIndex implements Index {
     return id > 0;
   }
 
-  private long getWordId(Term term) {
+  @Override
+  public boolean hasTitle(CharSequence title) {
+    return false;
+  }
+
+  private long toWordId(Term term) {
     String normalizedWord = term.getRaw().toString().toLowerCase();
     if (!wordToIdMap.containsKey(normalizedWord)) {
       LOG.fine(String.format("No mapping was found for word %s", normalizedWord));
@@ -139,7 +155,7 @@ public class PlainIndex implements Index {
     TLongList ids = new TLongLinkedList();
     for (Term term : query.getTerms()) {
       try {
-        ids.add(getWordId(term));
+        ids.add(toWordId(term));
       } catch (NoSuchElementException e) {
         // ignore
       }
@@ -159,7 +175,7 @@ public class PlainIndex implements Index {
             SYNONYMS_COUNT,
             PlainIndex::isWordId
         )
-        .mapToObj(this::word)
+        .mapToObj(this::idToWord)
         .toArray(Term[]::new);
   }
 
@@ -174,8 +190,7 @@ public class PlainIndex implements Index {
     }
   }
 
-  //todo implement
-  private String word(long id) {
+  private String idToWord(long id) {
     return idToWordMap.get(id);
   }
 
@@ -211,7 +226,7 @@ public class PlainIndex implements Index {
   @Override
   public int documentFrequency(Term term) {
     try {
-      long termId = getWordId(term);
+      long termId = toWordId(term);
       return termStatistics(termId).getDocuementFrequency();
     } catch (DBException | NoSuchElementException e) {
       return 0;
@@ -224,7 +239,7 @@ public class PlainIndex implements Index {
   @Override
   public long termFrequency(Term term) {
     try {
-      long termId = getWordId(term);
+      long termId = toWordId(term);
       return termStatistics(termId).getTermFrequency();
     } catch (DBException | NoSuchElementException e) {
       return 0;

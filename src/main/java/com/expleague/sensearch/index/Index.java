@@ -11,6 +11,8 @@ public interface Index {
 
   Term[] synonyms(Term term);
 
+  boolean hasTitle(CharSequence title);
+
   int indexSize();
 
   int vocabularySize();

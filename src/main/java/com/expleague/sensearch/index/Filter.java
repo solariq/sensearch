@@ -1,4 +1,4 @@
-package com.expleague.sensearch.index.embedding;
+package com.expleague.sensearch.index;
 
 import com.expleague.commons.math.vectors.Vec;
 

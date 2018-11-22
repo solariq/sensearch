@@ -8,6 +8,9 @@ import com.expleague.sensearch.core.Tokenizer;
 import com.expleague.sensearch.donkey.IndexBuilder;
 import com.expleague.sensearch.donkey.crawler.Crawler;
 import com.expleague.sensearch.protobuf.index.IndexUnits;
+import com.google.common.hash.BloomFilter;
+import com.google.common.hash.Funnels;
+import com.google.protobuf.ByteString;
 import gnu.trove.map.TLongIntMap;
 import gnu.trove.map.TLongObjectMap;
 import gnu.trove.map.TObjectLongMap;
@@ -15,6 +18,7 @@ import gnu.trove.map.hash.TLongIntHashMap;
 import gnu.trove.map.hash.TLongObjectHashMap;
 import gnu.trove.map.hash.TObjectLongHashMap;
 import java.io.BufferedWriter;
+import java.io.ByteArrayOutputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -36,7 +40,10 @@ public class PlainIndexBuilder implements IndexBuilder {
   public static final String EMBEDDING_ROOT = "embedding";
 
   public static final String WORD_ID_MAPPINGS = "word2id.map.gz";
-  public static final String INDEX_STATISTICS = "index.stat";
+  public static final String INDEX_META = "index.meta";
+
+  private static final long DEFAULT_EXPECTED_COLLECTION_SIZE = (long) 1e7;
+  private static final double DEFAULT_FALSE_POSITIVE_RATE = 1e-5;
 
   private static final int VEC_SIZE = 50;
 
@@ -52,7 +59,8 @@ public class PlainIndexBuilder implements IndexBuilder {
     readGloveVectors(Paths.get(config.getEmbeddingVectors()), idMappings, gloveVectors);
 
     final Path indexRoot = config.getTemporaryIndex();
-    final PlainPageBuilder plainPageBuilder = new PlainPageBuilder(indexRoot.resolve(PLAIN_ROOT));
+    final PlainPageBuilder plainPageBuilder = new PlainPageBuilder(
+        indexRoot.resolve(PLAIN_ROOT));
     final StatisticsBuilder statisticsBuilder = new StatisticsBuilder(
         indexRoot.resolve(TERM_STATISTICS_ROOT));
     final EmbeddingBuilder embeddingBuilder = new EmbeddingBuilder(
@@ -63,19 +71,26 @@ public class PlainIndexBuilder implements IndexBuilder {
     final TLongIntMap termFrequencyMap = new TLongIntHashMap();
     final TLongObjectMap<TLongIntMap> bigramFrequencyMap = new TLongObjectHashMap<>();
 
+    final BloomFilter<byte[]> titlesFilter = BloomFilter.create(Funnels.byteArrayFunnel(),
+        DEFAULT_EXPECTED_COLLECTION_SIZE,
+        DEFAULT_FALSE_POSITIVE_RATE
+    );
     // saving page-wise data
     try {
       crawler.makeStream().forEach(
           doc -> {
             long pageId = plainPageBuilder.add(doc);
 
+            long[] titleIds = toWordIds(
+                Tokenizer.tokenize(doc.title().toLowerCase()),
+                idMappings
+            );
+            titlesFilter.put(ByteTools.toBytes(titleIds));
+
             embeddingBuilder.add(
                 pageId,
                 toVector(
-                    toWordIds(
-                        Tokenizer.tokenize(doc.title().toLowerCase()),
-                        idMappings
-                    ),
+                    titleIds,
                     gloveVectors
                 )
             );
@@ -103,14 +118,18 @@ public class PlainIndexBuilder implements IndexBuilder {
       plainPageBuilder.build();
       statisticsBuilder.build();
 
+      ByteArrayOutputStream bos = new ByteArrayOutputStream();
+      titlesFilter.writeTo(bos);
+
       // saving index-wise data
-      IndexUnits.IndexStatistics
+      IndexUnits.IndexMeta
           .newBuilder()
           .setAveragePageSize((double) pagesAndTokensCounts[1] / pagesAndTokensCounts[0])
           .setVocabularySize(idMappings.size())
           .setPagesCount((int) pagesAndTokensCounts[0])
+          .setTitlesBloomFilter(ByteString.copyFrom(bos.toByteArray()))
           .build()
-          .writeTo(Files.newOutputStream(indexRoot.resolve(INDEX_STATISTICS)));
+          .writeTo(Files.newOutputStream(indexRoot.resolve(INDEX_META)));
 
       flushWordToIdMap(indexRoot.resolve(WORD_ID_MAPPINGS), idMappings);
     } catch (Exception e) {
@@ -141,10 +160,6 @@ public class PlainIndexBuilder implements IndexBuilder {
     ) {
       mapWriter.write(idMappingsSb.toString().trim());
     }
-  }
-
-  private long toLongPageId(int pageId) {
-    return -pageId;
   }
 
   /**

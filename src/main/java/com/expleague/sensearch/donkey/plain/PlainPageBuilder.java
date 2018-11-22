@@ -54,8 +54,8 @@ public class PlainPageBuilder {
     byte[] pageBytes = IndexUnits.Page
         .newBuilder()
         .setPageId(negFlushedPagesCount)
-        .setContent(newPage.getContent().toString())
-        .setTitle(newPage.getTitle())
+        .setContent(newPage.content().toString())
+        .setTitle(newPage.title())
         .build()
         .toByteArray();
 

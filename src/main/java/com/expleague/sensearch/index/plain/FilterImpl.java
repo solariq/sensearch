@@ -1,9 +1,9 @@
-package com.expleague.sensearch.index.embedding.impl;
+package com.expleague.sensearch.index.plain;
 
 import com.expleague.commons.math.vectors.Vec;
-import com.expleague.sensearch.index.embedding.Embedding;
-import com.expleague.sensearch.index.embedding.Filter;
 
+import com.expleague.sensearch.index.Embedding;
+import com.expleague.sensearch.index.Filter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.LongPredicate;

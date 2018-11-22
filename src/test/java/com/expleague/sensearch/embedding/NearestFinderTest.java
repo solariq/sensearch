@@ -13,9 +13,7 @@ import java.util.List;
 import java.util.Map;
 <<<<<<< HEAD
 
-import com.expleague.sensearch.Config;
-import com.expleague.sensearch.index.embedding.impl.EmbeddingImpl;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.expleague.sensearch.index.plain.EmbeddingImpl;
 =======
 >>>>>>> 56248c58f72e23a35bd8ee431f3c804b0402a999
 import org.junit.Assert;

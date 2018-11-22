@@ -5,11 +5,12 @@ package index;
 option java_package = "com.expleague.sensearch.protobuf.index";
 option java_outer_classname = "IndexUnits";
 
-message IndexStatistics {
+message IndexMeta {
   optional int32 pages_count = 1;
   optional double average_page_size = 2;
 
   optional int32 vocabulary_size = 3;
+  optional bytes titles_bloom_filter = 4;
 }
 
 message Page {

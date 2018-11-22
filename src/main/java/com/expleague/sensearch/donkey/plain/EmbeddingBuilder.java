@@ -5,10 +5,9 @@ import com.google.common.primitives.Longs;
 import gnu.trove.list.TLongList;
 import gnu.trove.list.array.TLongArrayList;
 import gnu.trove.map.TLongObjectMap;
+import org.fusesource.leveldbjni.JniDBFactory;
 import org.iq80.leveldb.*;
 import org.iq80.leveldb.impl.Iq80DBFactory;
-
-import static com.expleague.sensearch.donkey.plain.ByteTools.*;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -41,7 +40,7 @@ public class EmbeddingBuilder {
   private int batchSize = 0;
 
   EmbeddingBuilder(Path embeddingPath) throws IOException {
-      vecDb = Iq80DBFactory.factory.open(embeddingPath.toFile(), DB_OPTIONS);
+      vecDb = JniDBFactory.factory.open(embeddingPath.toFile(), DB_OPTIONS);
   }
 
   void add(long id, Vec vec) {
@@ -57,7 +56,7 @@ public class EmbeddingBuilder {
       batchSize = 0;
       batch = vecDb.createWriteBatch();
     }
-    batch.put(Longs.toByteArray(id), vecToBytes(vec));
+    batch.put(Longs.toByteArray(id), ByteTools.toBytes(vec));
   }
 
   void addAll(TLongObjectMap<Vec> vecs) {

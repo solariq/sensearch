@@ -1,10 +1,11 @@
-package com.expleague.sensearch.index.embedding.impl;
+package com.expleague.sensearch.index.plain;
 
 import com.expleague.commons.math.vectors.Vec;
 import com.expleague.commons.math.vectors.VecTools;
 import com.expleague.commons.math.vectors.impl.vectors.ArrayVec;
-import com.expleague.sensearch.index.embedding.Embedding;
 
+import com.expleague.sensearch.donkey.plain.ByteTools;
+import com.expleague.sensearch.index.Embedding;
 import com.google.common.primitives.Longs;
 import gnu.trove.list.TLongList;
 import org.iq80.leveldb.DB;
@@ -12,7 +13,6 @@ import org.iq80.leveldb.DBException;
 import org.iq80.leveldb.Options;
 import org.iq80.leveldb.impl.Iq80DBFactory;
 
-import static com.expleague.sensearch.donkey.plain.ByteTools.*;
 import static com.expleague.sensearch.donkey.plain.EmbeddingBuilder.hashFuncs;
 
 import java.io.IOException;
@@ -40,7 +40,7 @@ public class EmbeddingImpl implements Embedding {
 
   private Vec getVec(long id) {
     try {
-      return bytesToVec(vecDb.get(Longs.toByteArray(id)));
+      return ByteTools.toVec(vecDb.get(Longs.toByteArray(id)));
     } catch (DBException e) {
       return null;
     }

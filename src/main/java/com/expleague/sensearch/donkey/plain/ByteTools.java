@@ -1,22 +1,33 @@
 package com.expleague.sensearch.donkey.plain;
 
 import com.expleague.commons.math.vectors.Vec;
+import com.google.common.primitives.Bytes;
+import com.google.common.primitives.Longs;
 
-public class ByteTools {
+public final class ByteTools {
 
-    public static byte[] longToBytes(long x) {
-        return null;
+  private ByteTools() {
+  }
+
+  public static byte[] toBytes(Vec vec) {
+    return null;
+  }
+
+  public static Vec toVec(byte[] bytes) {
+    return null;
+  }
+
+  public static byte[] toBytes(long[] lArr) {
+    // TODO: need check for array size to be within int bounds
+    byte[][] byteArrays = new byte[lArr.length][];
+    for (int i = 0; i < lArr.length; ++i) {
+      byteArrays[i] = Longs.toByteArray(lArr[i]);
     }
+    return Bytes.concat(byteArrays);
+  }
 
-    public static long bytesToLong(byte[] bytes) {
-        return 0;
-    }
-
-    public static byte[] vecToBytes(Vec vec) {
-        return null;
-    }
-
-    public static Vec bytesToVec(byte[] bytes) {
-        return null;
-    }
+  public static long[] toLongArray(byte[] bytes) {
+    //TODO: implement
+    return new long[]{0};
+  }
 }
