@@ -8,8 +8,8 @@ public final class IndexUnits {
   public static void registerAllExtensions(
       com.google.protobuf.ExtensionRegistry registry) {
   }
-  public interface IndexStatisticsOrBuilder extends
-      // @@protoc_insertion_point(interface_extends:index.IndexStatistics)
+  public interface IndexMetaOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:index.IndexMeta)
       com.google.protobuf.MessageOrBuilder {
 
     /**
@@ -38,27 +38,36 @@ public final class IndexUnits {
      * <code>optional int32 vocabulary_size = 3;</code>
      */
     int getVocabularySize();
+
+    /**
+     * <code>optional bytes titles_bloom_filter = 4;</code>
+     */
+    boolean hasTitlesBloomFilter();
+    /**
+     * <code>optional bytes titles_bloom_filter = 4;</code>
+     */
+    com.google.protobuf.ByteString getTitlesBloomFilter();
   }
   /**
-   * Protobuf type {@code index.IndexStatistics}
+   * Protobuf type {@code index.IndexMeta}
    */
-  public static final class IndexStatistics extends
+  public static final class IndexMeta extends
       com.google.protobuf.GeneratedMessage implements
-      // @@protoc_insertion_point(message_implements:index.IndexStatistics)
-      IndexStatisticsOrBuilder {
-    // Use IndexStatistics.newBuilder() to construct.
-    private IndexStatistics(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
+      // @@protoc_insertion_point(message_implements:index.IndexMeta)
+      IndexMetaOrBuilder {
+    // Use IndexMeta.newBuilder() to construct.
+    private IndexMeta(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
       super(builder);
       this.unknownFields = builder.getUnknownFields();
     }
-    private IndexStatistics(boolean noInit) { this.unknownFields = com.google.protobuf.UnknownFieldSet.getDefaultInstance(); }
+    private IndexMeta(boolean noInit) { this.unknownFields = com.google.protobuf.UnknownFieldSet.getDefaultInstance(); }
 
-    private static final IndexStatistics defaultInstance;
-    public static IndexStatistics getDefaultInstance() {
+    private static final IndexMeta defaultInstance;
+    public static IndexMeta getDefaultInstance() {
       return defaultInstance;
     }
 
-    public IndexStatistics getDefaultInstanceForType() {
+    public IndexMeta getDefaultInstanceForType() {
       return defaultInstance;
     }
 
@@ -68,7 +77,7 @@ public final class IndexUnits {
         getUnknownFields() {
       return this.unknownFields;
     }
-    private IndexStatistics(
+    private IndexMeta(
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
@@ -106,6 +115,11 @@ public final class IndexUnits {
               vocabularySize_ = input.readInt32();
               break;
             }
+            case 34: {
+              bitField0_ |= 0x00000008;
+              titlesBloomFilter_ = input.readBytes();
+              break;
+            }
           }
         }
       } catch (com.google.protobuf.InvalidProtocolBufferException e) {
@@ -120,28 +134,28 @@ public final class IndexUnits {
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
-      return com.expleague.sensearch.protobuf.index.IndexUnits.internal_static_index_IndexStatistics_descriptor;
+      return com.expleague.sensearch.protobuf.index.IndexUnits.internal_static_index_IndexMeta_descriptor;
     }
 
     protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return com.expleague.sensearch.protobuf.index.IndexUnits.internal_static_index_IndexStatistics_fieldAccessorTable
+      return com.expleague.sensearch.protobuf.index.IndexUnits.internal_static_index_IndexMeta_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
-              com.expleague.sensearch.protobuf.index.IndexUnits.IndexStatistics.class, com.expleague.sensearch.protobuf.index.IndexUnits.IndexStatistics.Builder.class);
+              com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta.class, com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta.Builder.class);
     }
 
-    public static com.google.protobuf.Parser<IndexStatistics> PARSER =
-        new com.google.protobuf.AbstractParser<IndexStatistics>() {
-      public IndexStatistics parsePartialFrom(
+    public static com.google.protobuf.Parser<IndexMeta> PARSER =
+        new com.google.protobuf.AbstractParser<IndexMeta>() {
+      public IndexMeta parsePartialFrom(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new IndexStatistics(input, extensionRegistry);
+        return new IndexMeta(input, extensionRegistry);
       }
     };
 
     @java.lang.Override
-    public com.google.protobuf.Parser<IndexStatistics> getParserForType() {
+    public com.google.protobuf.Parser<IndexMeta> getParserForType() {
       return PARSER;
     }
 
@@ -191,10 +205,26 @@ public final class IndexUnits {
       return vocabularySize_;
     }
 
+    public static final int TITLES_BLOOM_FILTER_FIELD_NUMBER = 4;
+    private com.google.protobuf.ByteString titlesBloomFilter_;
+    /**
+     * <code>optional bytes titles_bloom_filter = 4;</code>
+     */
+    public boolean hasTitlesBloomFilter() {
+      return ((bitField0_ & 0x00000008) == 0x00000008);
+    }
+    /**
+     * <code>optional bytes titles_bloom_filter = 4;</code>
+     */
+    public com.google.protobuf.ByteString getTitlesBloomFilter() {
+      return titlesBloomFilter_;
+    }
+
     private void initFields() {
       pagesCount_ = 0;
       averagePageSize_ = 0D;
       vocabularySize_ = 0;
+      titlesBloomFilter_ = com.google.protobuf.ByteString.EMPTY;
     }
     private byte memoizedIsInitialized = -1;
     public final boolean isInitialized() {
@@ -218,6 +248,9 @@ public final class IndexUnits {
       if (((bitField0_ & 0x00000004) == 0x00000004)) {
         output.writeInt32(3, vocabularySize_);
       }
+      if (((bitField0_ & 0x00000008) == 0x00000008)) {
+        output.writeBytes(4, titlesBloomFilter_);
+      }
       getUnknownFields().writeTo(output);
     }
 
@@ -239,6 +272,10 @@ public final class IndexUnits {
         size += com.google.protobuf.CodedOutputStream
           .computeInt32Size(3, vocabularySize_);
       }
+      if (((bitField0_ & 0x00000008) == 0x00000008)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBytesSize(4, titlesBloomFilter_);
+      }
       size += getUnknownFields().getSerializedSize();
       memoizedSerializedSize = size;
       return size;
@@ -251,53 +288,53 @@ public final class IndexUnits {
       return super.writeReplace();
     }
 
-    public static com.expleague.sensearch.protobuf.index.IndexUnits.IndexStatistics parseFrom(
+    public static com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta parseFrom(
         com.google.protobuf.ByteString data)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
-    public static com.expleague.sensearch.protobuf.index.IndexUnits.IndexStatistics parseFrom(
+    public static com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta parseFrom(
         com.google.protobuf.ByteString data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
-    public static com.expleague.sensearch.protobuf.index.IndexUnits.IndexStatistics parseFrom(byte[] data)
+    public static com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta parseFrom(byte[] data)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
-    public static com.expleague.sensearch.protobuf.index.IndexUnits.IndexStatistics parseFrom(
+    public static com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta parseFrom(
         byte[] data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
-    public static com.expleague.sensearch.protobuf.index.IndexUnits.IndexStatistics parseFrom(java.io.InputStream input)
+    public static com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta parseFrom(java.io.InputStream input)
         throws java.io.IOException {
       return PARSER.parseFrom(input);
     }
-    public static com.expleague.sensearch.protobuf.index.IndexUnits.IndexStatistics parseFrom(
+    public static com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta parseFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
       return PARSER.parseFrom(input, extensionRegistry);
     }
-    public static com.expleague.sensearch.protobuf.index.IndexUnits.IndexStatistics parseDelimitedFrom(java.io.InputStream input)
+    public static com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
       return PARSER.parseDelimitedFrom(input);
     }
-    public static com.expleague.sensearch.protobuf.index.IndexUnits.IndexStatistics parseDelimitedFrom(
+    public static com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
       return PARSER.parseDelimitedFrom(input, extensionRegistry);
     }
-    public static com.expleague.sensearch.protobuf.index.IndexUnits.IndexStatistics parseFrom(
+    public static com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta parseFrom(
         com.google.protobuf.CodedInputStream input)
         throws java.io.IOException {
       return PARSER.parseFrom(input);
     }
-    public static com.expleague.sensearch.protobuf.index.IndexUnits.IndexStatistics parseFrom(
+    public static com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta parseFrom(
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
@@ -306,7 +343,7 @@ public final class IndexUnits {
 
     public static Builder newBuilder() { return Builder.create(); }
     public Builder newBuilderForType() { return newBuilder(); }
-    public static Builder newBuilder(com.expleague.sensearch.protobuf.index.IndexUnits.IndexStatistics prototype) {
+    public static Builder newBuilder(com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta prototype) {
       return newBuilder().mergeFrom(prototype);
     }
     public Builder toBuilder() { return newBuilder(this); }
@@ -318,25 +355,25 @@ public final class IndexUnits {
       return builder;
     }
     /**
-     * Protobuf type {@code index.IndexStatistics}
+     * Protobuf type {@code index.IndexMeta}
      */
     public static final class Builder extends
         com.google.protobuf.GeneratedMessage.Builder<Builder> implements
-        // @@protoc_insertion_point(builder_implements:index.IndexStatistics)
-        com.expleague.sensearch.protobuf.index.IndexUnits.IndexStatisticsOrBuilder {
+        // @@protoc_insertion_point(builder_implements:index.IndexMeta)
+        com.expleague.sensearch.protobuf.index.IndexUnits.IndexMetaOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
-        return com.expleague.sensearch.protobuf.index.IndexUnits.internal_static_index_IndexStatistics_descriptor;
+        return com.expleague.sensearch.protobuf.index.IndexUnits.internal_static_index_IndexMeta_descriptor;
       }
 
       protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return com.expleague.sensearch.protobuf.index.IndexUnits.internal_static_index_IndexStatistics_fieldAccessorTable
+        return com.expleague.sensearch.protobuf.index.IndexUnits.internal_static_index_IndexMeta_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
-                com.expleague.sensearch.protobuf.index.IndexUnits.IndexStatistics.class, com.expleague.sensearch.protobuf.index.IndexUnits.IndexStatistics.Builder.class);
+                com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta.class, com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta.Builder.class);
       }
 
-      // Construct using com.expleague.sensearch.protobuf.index.IndexUnits.IndexStatistics.newBuilder()
+      // Construct using com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta.newBuilder()
       private Builder() {
         maybeForceBuilderInitialization();
       }
@@ -362,6 +399,8 @@ public final class IndexUnits {
         bitField0_ = (bitField0_ & ~0x00000002);
         vocabularySize_ = 0;
         bitField0_ = (bitField0_ & ~0x00000004);
+        titlesBloomFilter_ = com.google.protobuf.ByteString.EMPTY;
+        bitField0_ = (bitField0_ & ~0x00000008);
         return this;
       }
 
@@ -371,23 +410,23 @@ public final class IndexUnits {
 
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return com.expleague.sensearch.protobuf.index.IndexUnits.internal_static_index_IndexStatistics_descriptor;
+        return com.expleague.sensearch.protobuf.index.IndexUnits.internal_static_index_IndexMeta_descriptor;
       }
 
-      public com.expleague.sensearch.protobuf.index.IndexUnits.IndexStatistics getDefaultInstanceForType() {
-        return com.expleague.sensearch.protobuf.index.IndexUnits.IndexStatistics.getDefaultInstance();
+      public com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta getDefaultInstanceForType() {
+        return com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta.getDefaultInstance();
       }
 
-      public com.expleague.sensearch.protobuf.index.IndexUnits.IndexStatistics build() {
-        com.expleague.sensearch.protobuf.index.IndexUnits.IndexStatistics result = buildPartial();
+      public com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta build() {
+        com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta result = buildPartial();
         if (!result.isInitialized()) {
           throw newUninitializedMessageException(result);
         }
         return result;
       }
 
-      public com.expleague.sensearch.protobuf.index.IndexUnits.IndexStatistics buildPartial() {
-        com.expleague.sensearch.protobuf.index.IndexUnits.IndexStatistics result = new com.expleague.sensearch.protobuf.index.IndexUnits.IndexStatistics(this);
+      public com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta buildPartial() {
+        com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta result = new com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta(this);
         int from_bitField0_ = bitField0_;
         int to_bitField0_ = 0;
         if (((from_bitField0_ & 0x00000001) == 0x00000001)) {
@@ -402,22 +441,26 @@ public final class IndexUnits {
           to_bitField0_ |= 0x00000004;
         }
         result.vocabularySize_ = vocabularySize_;
+        if (((from_bitField0_ & 0x00000008) == 0x00000008)) {
+          to_bitField0_ |= 0x00000008;
+        }
+        result.titlesBloomFilter_ = titlesBloomFilter_;
         result.bitField0_ = to_bitField0_;
         onBuilt();
         return result;
       }
 
       public Builder mergeFrom(com.google.protobuf.Message other) {
-        if (other instanceof com.expleague.sensearch.protobuf.index.IndexUnits.IndexStatistics) {
-          return mergeFrom((com.expleague.sensearch.protobuf.index.IndexUnits.IndexStatistics)other);
+        if (other instanceof com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta) {
+          return mergeFrom((com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta)other);
         } else {
           super.mergeFrom(other);
           return this;
         }
       }
 
-      public Builder mergeFrom(com.expleague.sensearch.protobuf.index.IndexUnits.IndexStatistics other) {
-        if (other == com.expleague.sensearch.protobuf.index.IndexUnits.IndexStatistics.getDefaultInstance()) return this;
+      public Builder mergeFrom(com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta other) {
+        if (other == com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta.getDefaultInstance()) return this;
         if (other.hasPagesCount()) {
           setPagesCount(other.getPagesCount());
         }
@@ -426,6 +469,9 @@ public final class IndexUnits {
         }
         if (other.hasVocabularySize()) {
           setVocabularySize(other.getVocabularySize());
+        }
+        if (other.hasTitlesBloomFilter()) {
+          setTitlesBloomFilter(other.getTitlesBloomFilter());
         }
         this.mergeUnknownFields(other.getUnknownFields());
         return this;
@@ -439,11 +485,11 @@ public final class IndexUnits {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        com.expleague.sensearch.protobuf.index.IndexUnits.IndexStatistics parsedMessage = null;
+        com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta parsedMessage = null;
         try {
           parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (com.expleague.sensearch.protobuf.index.IndexUnits.IndexStatistics) e.getUnfinishedMessage();
+          parsedMessage = (com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta) e.getUnfinishedMessage();
           throw e;
         } finally {
           if (parsedMessage != null) {
@@ -550,15 +596,50 @@ public final class IndexUnits {
         return this;
       }
 
-      // @@protoc_insertion_point(builder_scope:index.IndexStatistics)
+      private com.google.protobuf.ByteString titlesBloomFilter_ = com.google.protobuf.ByteString.EMPTY;
+      /**
+       * <code>optional bytes titles_bloom_filter = 4;</code>
+       */
+      public boolean hasTitlesBloomFilter() {
+        return ((bitField0_ & 0x00000008) == 0x00000008);
+      }
+      /**
+       * <code>optional bytes titles_bloom_filter = 4;</code>
+       */
+      public com.google.protobuf.ByteString getTitlesBloomFilter() {
+        return titlesBloomFilter_;
+      }
+      /**
+       * <code>optional bytes titles_bloom_filter = 4;</code>
+       */
+      public Builder setTitlesBloomFilter(com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000008;
+        titlesBloomFilter_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional bytes titles_bloom_filter = 4;</code>
+       */
+      public Builder clearTitlesBloomFilter() {
+        bitField0_ = (bitField0_ & ~0x00000008);
+        titlesBloomFilter_ = getDefaultInstance().getTitlesBloomFilter();
+        onChanged();
+        return this;
+      }
+
+      // @@protoc_insertion_point(builder_scope:index.IndexMeta)
     }
 
     static {
-      defaultInstance = new IndexStatistics(true);
+      defaultInstance = new IndexMeta(true);
       defaultInstance.initFields();
     }
 
-    // @@protoc_insertion_point(class_scope:index.IndexStatistics)
+    // @@protoc_insertion_point(class_scope:index.IndexMeta)
   }
 
   public interface PageOrBuilder extends
@@ -2661,10 +2742,10 @@ public final class IndexUnits {
   }
 
   private static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_index_IndexStatistics_descriptor;
+    internal_static_index_IndexMeta_descriptor;
   private static
     com.google.protobuf.GeneratedMessage.FieldAccessorTable
-      internal_static_index_IndexStatistics_fieldAccessorTable;
+      internal_static_index_IndexMeta_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
     internal_static_index_Page_descriptor;
   private static
@@ -2689,17 +2770,18 @@ public final class IndexUnits {
       descriptor;
   static {
     java.lang.String[] descriptorData = {
-      "\n\020indexunits.proto\022\005index\"Z\n\017IndexStatis" +
-      "tics\022\023\n\013pages_count\030\001 \001(\005\022\031\n\021average_pag" +
-      "e_size\030\002 \001(\001\022\027\n\017vocabulary_size\030\003 \001(\005\"7\n" +
-      "\004Page\022\017\n\007page_id\030\001 \001(\003\022\r\n\005title\030\002 \001(\t\022\017\n" +
-      "\007content\030\003 \001(\t\"\317\001\n\016TermStatistics\022\017\n\007ter" +
-      "m_id\030\001 \001(\003\022\033\n\023docuement_frequency\030\002 \001(\005\022" +
-      "\026\n\016term_frequency\030\003 \001(\003\022=\n\020bigram_freque" +
-      "ncy\030\004 \003(\0132#.index.TermStatistics.TermFre" +
-      "quency\0328\n\rTermFrequency\022\017\n\007term_id\030\001 \001(\003" +
-      "\022\026\n\016term_frequency\030\002 \001(\005B4\n&com.expleagu",
-      "e.sensearch.protobuf.indexB\nIndexUnits"
+      "\n\020indexunits.proto\022\005index\"q\n\tIndexMeta\022\023" +
+      "\n\013pages_count\030\001 \001(\005\022\031\n\021average_page_size" +
+      "\030\002 \001(\001\022\027\n\017vocabulary_size\030\003 \001(\005\022\033\n\023title" +
+      "s_bloom_filter\030\004 \001(\014\"7\n\004Page\022\017\n\007page_id\030" +
+      "\001 \001(\003\022\r\n\005title\030\002 \001(\t\022\017\n\007content\030\003 \001(\t\"\317\001" +
+      "\n\016TermStatistics\022\017\n\007term_id\030\001 \001(\003\022\033\n\023doc" +
+      "uement_frequency\030\002 \001(\005\022\026\n\016term_frequency" +
+      "\030\003 \001(\003\022=\n\020bigram_frequency\030\004 \003(\0132#.index" +
+      ".TermStatistics.TermFrequency\0328\n\rTermFre" +
+      "quency\022\017\n\007term_id\030\001 \001(\003\022\026\n\016term_frequenc",
+      "y\030\002 \001(\005B4\n&com.expleague.sensearch.proto" +
+      "buf.indexB\nIndexUnits"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
         new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
@@ -2713,12 +2795,12 @@ public final class IndexUnits {
       .internalBuildGeneratedFileFrom(descriptorData,
         new com.google.protobuf.Descriptors.FileDescriptor[] {
         }, assigner);
-    internal_static_index_IndexStatistics_descriptor =
+    internal_static_index_IndexMeta_descriptor =
       getDescriptor().getMessageTypes().get(0);
-    internal_static_index_IndexStatistics_fieldAccessorTable = new
+    internal_static_index_IndexMeta_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessage.FieldAccessorTable(
-        internal_static_index_IndexStatistics_descriptor,
-        new java.lang.String[] { "PagesCount", "AveragePageSize", "VocabularySize", });
+        internal_static_index_IndexMeta_descriptor,
+        new java.lang.String[] { "PagesCount", "AveragePageSize", "VocabularySize", "TitlesBloomFilter", });
     internal_static_index_Page_descriptor =
       getDescriptor().getMessageTypes().get(1);
     internal_static_index_Page_fieldAccessorTable = new
