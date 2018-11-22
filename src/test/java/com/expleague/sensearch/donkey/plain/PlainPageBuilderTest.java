@@ -1,8 +1,8 @@
 package com.expleague.sensearch.donkey.plain;
 
-/**
- * Created by sandulmv on 22.11.18.
- */
-public class PlainPageBuilderTest {
 
+public class PlainPageBuilderTest {
+  public static void main(String... args) {
+
+  }
 }

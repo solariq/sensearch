@@ -23,7 +23,17 @@ public class RelevanceTest {
     }
 
     @Override
-    public int indexSize() {
+    public Term[] synonyms(Term term) {
+      return new Term[0];
+    }
+
+    @Override
+    public boolean hasTitle(CharSequence title) {
+      return false;
+    }
+
+    @Override
+    public int size() {
       return 0;
     }
 
@@ -33,17 +43,17 @@ public class RelevanceTest {
     }
 
     @Override
-    public double averageWordsPerPage() {
+    public double averagePageSize() {
       return 0;
     }
 
     @Override
-    public int pagesWithTerm(Term term) {
+    public int documentFrequency(Term term) {
       return 0;
     }
 
     @Override
-    public long termCollectionFrequency(Term term) {
+    public long termFrequency(Term term) {
       return 0;
     }
   };

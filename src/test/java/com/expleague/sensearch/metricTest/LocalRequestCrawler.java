@@ -16,7 +16,6 @@ public class LocalRequestCrawler implements WebCrawler {
 
   private final String MAP_FILE = "PAGE.json";
   String query;
-  private Set<String> allTitles;
   private Path pathToMetric;
 
   @Override
@@ -31,13 +30,6 @@ public class LocalRequestCrawler implements WebCrawler {
       e.printStackTrace();
     }
     return null;
-  }
-
-  @Override
-  public void setAllTitles(Stream<CharSequence> allTitles) {
-    this.allTitles = allTitles
-        .map(String.class::cast)
-        .collect(Collectors.toSet());
   }
 
   @Override

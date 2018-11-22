@@ -26,7 +26,7 @@ public class MetricTest {
   public void initSearch() throws IOException, XMLStreamException {
     Injector injector = Guice.createInjector(new AppModule());
     builder = injector.getInstance(Builder.class);
-    config = builder.build(webCrawler);
+    config = builder.build();
     searcher = builder.getSearcher();
   }
 
