@@ -2,6 +2,7 @@ package com.expleague.sensearch.donkey.plain;
 
 import com.expleague.sensearch.protobuf.index.IndexUnits;
 import com.expleague.sensearch.protobuf.index.IndexUnits.TermStatistics;
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.primitives.Longs;
 import gnu.trove.map.TLongIntMap;
 import gnu.trove.map.TLongLongMap;
@@ -73,7 +74,8 @@ public class StatisticsBuilder {
     );
   }
 
-  private Iterable<TermStatistics.TermFrequency> mostFrequentBigrams(TLongIntMap neighbours) {
+  @VisibleForTesting
+  Iterable<TermStatistics.TermFrequency> mostFrequentBigrams(TLongIntMap neighbours) {
     if (neighbours == null || neighbours.isEmpty()) {
       return new LinkedList<>();
     }

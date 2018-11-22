@@ -8,6 +8,7 @@ import com.expleague.sensearch.core.Tokenizer;
 import com.expleague.sensearch.donkey.IndexBuilder;
 import com.expleague.sensearch.donkey.crawler.Crawler;
 import com.expleague.sensearch.protobuf.index.IndexUnits;
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.hash.BloomFilter;
 import com.google.common.hash.Funnels;
 import com.google.protobuf.ByteString;
@@ -137,7 +138,8 @@ public class PlainIndexBuilder implements IndexBuilder {
     }
   }
 
-  private void flushWordToIdMap(Path pathToMap, TObjectLongMap<String> idMappings)
+  @VisibleForTesting
+  void flushWordToIdMap(Path pathToMap, TObjectLongMap<String> idMappings)
       throws IOException {
     StringBuilder idMappingsSb = new StringBuilder();
     idMappings.forEachEntry(
@@ -170,7 +172,8 @@ public class PlainIndexBuilder implements IndexBuilder {
    * @param mappings all known word to int mappings
    * @return array of word ids in the same order as given words
    */
-  private long[] toWordIds(String[] words, TObjectLongMap<String> mappings) {
+  @VisibleForTesting
+  long[] toWordIds(String[] words, TObjectLongMap<String> mappings) {
     long[] wordIds = new long[words.length];
     for (int i = 0; i < words.length; ++i) {
       if (!mappings.containsKey(words[i])) {
@@ -185,7 +188,8 @@ public class PlainIndexBuilder implements IndexBuilder {
     return wordIds;
   }
 
-  private void enrichFrequencies(long[] tokens, TLongIntMap termFrequencyMap,
+  @VisibleForTesting
+  void enrichFrequencies(long[] tokens, TLongIntMap termFrequencyMap,
       TLongObjectMap<TLongIntMap> bigramFrequencyMap) {
     if (tokens.length < 1) {
       return;
@@ -199,7 +203,8 @@ public class PlainIndexBuilder implements IndexBuilder {
     }
   }
 
-  private Vec toVector(long[] tokens, TLongObjectMap<Vec> vectors) {
+  @VisibleForTesting
+  Vec toVector(long[] tokens, TLongObjectMap<Vec> vectors) {
     ArrayVec mean = new ArrayVec(new double[VEC_SIZE]);
     for (long i : tokens) {
       mean.add((ArrayVec) vectors.get(i));
@@ -208,7 +213,8 @@ public class PlainIndexBuilder implements IndexBuilder {
     return mean;
   }
 
-  private void readGloveVectors(Path glovePath, TObjectLongMap<String> idMappings,
+  @VisibleForTesting
+  void readGloveVectors(Path glovePath, TObjectLongMap<String> idMappings,
       TLongObjectMap<Vec> vectors) {
     try (Reader input =
         new InputStreamReader(

@@ -12,7 +12,7 @@ import org.iq80.leveldb.Options;
 import org.iq80.leveldb.WriteBatch;
 import org.iq80.leveldb.WriteOptions;
 
-public class PlainPageBuilder {
+class PlainPageBuilder {
 
   private static final long DEFAULT_CACHE_SIZE = 16 * (1 << 20); // 16 MB
 
