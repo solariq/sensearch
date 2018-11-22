@@ -8,10 +8,12 @@ import java.util.HashSet;
 import java.util.Set;
 import javax.xml.stream.XMLStreamException;
 import org.apache.commons.io.FileUtils;
+import org.junit.After;
 import org.junit.Assert;
 import org.junit.Test;
 
 public class UnitCrawlerTest {
+
   private Crawler crawler;
   private Path pathToTmpDoc = Paths.get("TMPDOCS");
 
@@ -24,8 +26,6 @@ public class UnitCrawlerTest {
     crawler = new CrawlerXML(config);
 
     Assert.assertEquals(crawler.makeStream().count(), 20);
-
-    FileUtils.deleteDirectory(Paths.get("./src/test/java/com/expleague/sensearch/donkey/crawler/resources/TMPDOCS").toFile());
   }
 
   @Test
@@ -54,12 +54,18 @@ public class UnitCrawlerTest {
       }
     });
     Assert.assertEquals(titles, rightTitles);
-
-    FileUtils.deleteDirectory(Paths.get("./src/test/java/com/expleague/sensearch/donkey/crawler/resources/TMPDOCS").toFile());
   }
 
 
-    private class Config implements ConfigJson {
+  @After
+  public void clear() throws IOException {
+    FileUtils.deleteDirectory(
+        Paths.get("./src/test/java/com/expleague/sensearch/donkey/crawler/resources/TMPDOCS")
+            .toFile());
+  }
+
+  private class Config implements ConfigJson {
+
     Path zip;
     Path doc;
 
