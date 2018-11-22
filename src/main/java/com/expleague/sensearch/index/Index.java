@@ -13,7 +13,7 @@ public interface Index {
 
   boolean hasTitle(CharSequence title);
 
-  int indexSize();
+  int size();
 
   int vocabularySize();
   double averagePageSize();

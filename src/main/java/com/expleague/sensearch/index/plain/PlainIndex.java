@@ -2,6 +2,8 @@ package com.expleague.sensearch.index.plain;
 
 import com.expleague.sensearch.Config;
 import com.expleague.sensearch.Page;
+import com.expleague.sensearch.core.Tokenizer;
+import com.expleague.sensearch.donkey.plain.ByteTools;
 import com.expleague.sensearch.donkey.plain.PlainIndexBuilder;
 import com.expleague.sensearch.index.Embedding;
 import com.expleague.sensearch.index.Filter;
@@ -28,6 +30,8 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.logging.Logger;
 import java.util.stream.Stream;
@@ -138,30 +142,44 @@ public class PlainIndex implements Index {
 
   @Override
   public boolean hasTitle(CharSequence title) {
-    return false;
+    return titlesBloomFilter.mightContain(
+        ByteTools.toBytes(
+            toIds(Tokenizer.tokenize(title))
+        )
+    );
   }
 
-  private long toWordId(Term term) {
-    String normalizedWord = term.getRaw().toString().toLowerCase();
-    if (!wordToIdMap.containsKey(normalizedWord)) {
-      LOG.fine(String.format("No mapping was found for word %s", normalizedWord));
+  private long toId(String word) {
+    word = word.toLowerCase();
+    if (!wordToIdMap.containsKey(word)) {
+      LOG.fine(String.format("No mapping was found for word %s", word));
       throw new NoSuchElementException("No mapping for word %s");
     }
 
-    return wordToIdMap.get(normalizedWord);
+    return wordToIdMap.get(word);
   }
 
-  private long[] queryToIds(Query query) {
+  private long toId(Term term) {
+    return toId(term.getRaw().toString());
+  }
+
+  private long[] toIds(String... words) {
     TLongList ids = new TLongLinkedList();
-    for (Term term : query.getTerms()) {
+    for (String word : words) {
       try {
-        ids.add(toWordId(term));
+        ids.add(toId(word));
       } catch (NoSuchElementException e) {
         // ignore
       }
     }
 
     return ids.toArray();
+  }
+
+  private long[] toIds(Query query) {
+    List<String> rawWords = new LinkedList<>();
+    query.getTerms().forEach(t -> rawWords.add(t.getRaw().toString().toLowerCase()));
+    return toIds(rawWords.toArray(new String[rawWords.size()]));
   }
 
   /**
@@ -179,7 +197,7 @@ public class PlainIndex implements Index {
         .toArray(Term[]::new);
   }
 
-  private IndexedPage page(long id) {
+  private IndexedPage idToPage(long id) {
     try {
       return new PlainPage(
           IndexUnits.Page.parseFrom(plainBase.get(Longs.toByteArray(id)))
@@ -194,27 +212,23 @@ public class PlainIndex implements Index {
     return idToWordMap.get(id);
   }
 
-  public Stream<CharSequence> allTitles() {
-    return null;
-  }
-
   @Override
   public Stream<Page> fetchDocuments(Query query) {
-    long[] queryIds = queryToIds(query);
+    long[] queryIds = toIds(query);
 
     if (queryIds.length == 0) {
-      // TODO: process case
+      return Stream.empty();
     }
 
     return filter.filtrate(
         embedding.getVec(queryIds),
         DOC_NUMBER,
         PlainIndex::isPageId
-    ).mapToObj(this::page);
+    ).mapToObj(this::idToPage);
   }
 
   @Override
-  public int indexSize() {
+  public int size() {
     return indexSize;
   }
 
@@ -226,7 +240,7 @@ public class PlainIndex implements Index {
   @Override
   public int documentFrequency(Term term) {
     try {
-      long termId = toWordId(term);
+      long termId = toId(term);
       return termStatistics(termId).getDocuementFrequency();
     } catch (DBException | NoSuchElementException e) {
       return 0;
@@ -239,7 +253,7 @@ public class PlainIndex implements Index {
   @Override
   public long termFrequency(Term term) {
     try {
-      long termId = toWordId(term);
+      long termId = toId(term);
       return termStatistics(termId).getTermFrequency();
     } catch (DBException | NoSuchElementException e) {
       return 0;
