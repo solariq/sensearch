@@ -3,7 +3,7 @@ package com.expleague.sensearch;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-public class Config {
+public class Config implements ConfigJson{
 
   private String temporaryDocuments;
 
@@ -28,6 +28,7 @@ public class Config {
   private int pageSize = 10;
 
 
+  @Override
   public Path getTemporaryDocuments() {
     return Paths.get(temporaryDocuments);
   }
@@ -36,6 +37,7 @@ public class Config {
     this.temporaryDocuments = temporaryDocuments;
   }
 
+  @Override
   public String getTemporaryBigrams() {
     return temporaryBigrams;
   }
@@ -44,6 +46,7 @@ public class Config {
     this.temporaryBigrams = temporaryBigrams;
   }
 
+  @Override
   public Path getBigramsFileName() {
     return getPathToZIP().toAbsolutePath().getParent().resolve(getTemporaryBigrams())
         .resolve(bigramsFileName);
@@ -53,6 +56,7 @@ public class Config {
     this.bigramsFileName = bigramsFileName;
   }
 
+  @Override
   public Path getTemporaryIndex() {
     return getPathToZIP().toAbsolutePath().getParent().resolve(temporaryIndex);
   }
@@ -61,6 +65,7 @@ public class Config {
     this.temporaryIndex = temporaryIndex;
   }
 
+  @Override
   public String getWebRoot() {
     return webRoot;
   }
@@ -69,6 +74,7 @@ public class Config {
     this.webRoot = webRoot;
   }
 
+  @Override
   public Path getMyStem() {
     return Paths.get(myStem);
   }
@@ -77,6 +83,7 @@ public class Config {
     this.myStem = myStem;
   }
 
+  @Override
   public Path getPathToZIP() {
     return Paths.get(pathToZIP);
   }
@@ -85,6 +92,7 @@ public class Config {
     this.pathToZIP = pathToZIP;
   }
 
+  @Override
   public String getStatisticsFileName() {
     return statisticsFileName;
   }
@@ -93,7 +101,7 @@ public class Config {
     this.statisticsFileName = statisticsFileName;
   }
 
-
+  @Override
   public String getEmbeddingVectors() {
     return embeddingVectors;
   }
@@ -102,6 +110,7 @@ public class Config {
     this.embeddingVectors = embeddingVectors;
   }
 
+  @Override
   public Path getPathToMetrics() {
     return Paths.get(pathToMetrics);
   }

@@ -1,6 +1,6 @@
 package com.expleague.sensearch.donkey.crawler;
 
-import com.expleague.sensearch.Config;
+import com.expleague.sensearch.ConfigJson;
 import com.expleague.sensearch.donkey.crawler.document.CrawlerDocument;
 import com.expleague.sensearch.donkey.crawler.document.XMLParser;
 import java.io.File;
@@ -20,10 +20,10 @@ import java.util.zip.ZipInputStream;
 
 public class CrawlerXML implements Crawler {
 
-  private final Config config;
+  private final ConfigJson config;
   private Path path;
 
-  public CrawlerXML(Config config) {
+  public CrawlerXML(ConfigJson config) {
     this.path = config.getPathToZIP();
     this.config = config;
   }

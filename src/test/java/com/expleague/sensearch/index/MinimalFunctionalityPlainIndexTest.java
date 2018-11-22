@@ -189,7 +189,7 @@ public class MinimalFunctionalityPlainIndexTest {
     }
 
     @Override
-    public Long iD() {
+    public long iD() {
       throw new UnsupportedOperationException();
     }
   }

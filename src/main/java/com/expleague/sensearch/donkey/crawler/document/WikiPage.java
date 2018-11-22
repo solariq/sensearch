@@ -57,7 +57,7 @@ public class WikiPage implements CrawlerDocument {
   }
 
   @Override
-  public Long iD() {
+  public long iD() {
     return this.id;
   }
 

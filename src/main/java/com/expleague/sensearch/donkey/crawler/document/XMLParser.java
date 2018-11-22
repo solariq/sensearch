@@ -49,6 +49,8 @@ public class XMLParser {
             if (categoriesAttr != null) {
               page.setCategories(Arrays.asList(categoriesAttr
                   .getValue().split("@")));
+            } else {
+              page.setCategories(new ArrayList<>());
             }
 
             // Parse <page> tags
@@ -62,10 +64,13 @@ public class XMLParser {
               if (xmlEvent.isStartElement()) {
                 StartElement sectionElement = xmlEvent.asStartElement();
                 if (sectionElement.getName().getLocalPart().equals("section")) {
-                  sectionTitle = sectionElement
-                      .getAttributeByName(new QName("title"))
-                      .getValue();
+                  sectionTitle = "";
                   sectionText = new StringBuilder();
+                  Attribute sectionTitleAttr = sectionElement
+                      .getAttributeByName(new QName("title"));
+                  if (sectionTitleAttr != null) {
+                    sectionTitle = sectionTitleAttr.getValue();
+                  }
 
                   while (reader.hasNext() && (xmlEvent = reader.nextEvent()).isCharacters()) {
                     String s = xmlEvent.asCharacters().getData();
