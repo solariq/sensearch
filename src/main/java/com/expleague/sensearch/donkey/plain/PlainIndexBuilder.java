@@ -82,7 +82,7 @@ public class PlainIndexBuilder implements IndexBuilder {
           doc -> {
             long pageId = plainPageBuilder.add(doc);
 
-            long[] titleIds = toWordIds(
+            long[] titleIds = toIds(
                 Tokenizer.tokenize(doc.title().toLowerCase()),
                 idMappings
             );
@@ -96,7 +96,7 @@ public class PlainIndexBuilder implements IndexBuilder {
                 )
             );
 
-            long[] tokens = toWordIds(
+            long[] tokens = toIds(
                 Tokenizer.tokenize((doc.title() + " " + doc.content()).toLowerCase()),
                 idMappings
             );
@@ -132,14 +132,14 @@ public class PlainIndexBuilder implements IndexBuilder {
           .build()
           .writeTo(Files.newOutputStream(indexRoot.resolve(INDEX_META)));
 
-      flushWordToIdMap(indexRoot.resolve(WORD_ID_MAPPINGS), idMappings);
+      flushIdMappings(indexRoot.resolve(WORD_ID_MAPPINGS), idMappings);
     } catch (Exception e) {
       throw new IOException(e);
     }
   }
 
   @VisibleForTesting
-  void flushWordToIdMap(Path pathToMap, TObjectLongMap<String> idMappings)
+  void flushIdMappings(Path pathToMap, TObjectLongMap<String> idMappings)
       throws IOException {
     StringBuilder idMappingsSb = new StringBuilder();
     idMappings.forEachEntry(
@@ -173,14 +173,14 @@ public class PlainIndexBuilder implements IndexBuilder {
    * @return array of word ids in the same order as given words
    */
   @VisibleForTesting
-  long[] toWordIds(String[] words, TObjectLongMap<String> mappings) {
+  long[] toIds(String[] words, TObjectLongMap<String> mappings) {
     long[] wordIds = new long[words.length];
     for (int i = 0; i < words.length; ++i) {
       if (!mappings.containsKey(words[i])) {
         LOG.warning(String.format("For the word '%s' was not found any vector representation!",
             words[i])
         );
-        mappings.put(words[i], mappings.size());
+        mappings.put(words[i], mappings.size() + 1);
       }
       wordIds[i] = mappings.get(words[i]);
     }

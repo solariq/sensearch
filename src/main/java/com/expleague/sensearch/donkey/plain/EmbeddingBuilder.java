@@ -13,7 +13,7 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.util.function.ToIntFunction;
 
-class EmbeddingBuilder {
+public class EmbeddingBuilder {
   private static final int MAX_BATCH_SIZE = 100;
 
   private static final int TABLES_NUMBER = 10;
