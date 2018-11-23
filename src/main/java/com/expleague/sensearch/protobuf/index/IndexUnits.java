@@ -47,6 +47,30 @@ public final class IndexUnits {
      * <code>optional bytes titles_bloom_filter = 4;</code>
      */
     com.google.protobuf.ByteString getTitlesBloomFilter();
+
+    /**
+     * <code>repeated .index.IndexMeta.IdMapping id_mappings = 5;</code>
+     */
+    java.util.List<com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta.IdMapping> 
+        getIdMappingsList();
+    /**
+     * <code>repeated .index.IndexMeta.IdMapping id_mappings = 5;</code>
+     */
+    com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta.IdMapping getIdMappings(int index);
+    /**
+     * <code>repeated .index.IndexMeta.IdMapping id_mappings = 5;</code>
+     */
+    int getIdMappingsCount();
+    /**
+     * <code>repeated .index.IndexMeta.IdMapping id_mappings = 5;</code>
+     */
+    java.util.List<? extends com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta.IdMappingOrBuilder> 
+        getIdMappingsOrBuilderList();
+    /**
+     * <code>repeated .index.IndexMeta.IdMapping id_mappings = 5;</code>
+     */
+    com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta.IdMappingOrBuilder getIdMappingsOrBuilder(
+        int index);
   }
   /**
    * Protobuf type {@code index.IndexMeta}
@@ -120,6 +144,14 @@ public final class IndexUnits {
               titlesBloomFilter_ = input.readBytes();
               break;
             }
+            case 42: {
+              if (!((mutable_bitField0_ & 0x00000010) == 0x00000010)) {
+                idMappings_ = new java.util.ArrayList<com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta.IdMapping>();
+                mutable_bitField0_ |= 0x00000010;
+              }
+              idMappings_.add(input.readMessage(com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta.IdMapping.PARSER, extensionRegistry));
+              break;
+            }
           }
         }
       } catch (com.google.protobuf.InvalidProtocolBufferException e) {
@@ -128,6 +160,9 @@ public final class IndexUnits {
         throw new com.google.protobuf.InvalidProtocolBufferException(
             e.getMessage()).setUnfinishedMessage(this);
       } finally {
+        if (((mutable_bitField0_ & 0x00000010) == 0x00000010)) {
+          idMappings_ = java.util.Collections.unmodifiableList(idMappings_);
+        }
         this.unknownFields = unknownFields.build();
         makeExtensionsImmutable();
       }
@@ -157,6 +192,560 @@ public final class IndexUnits {
     @java.lang.Override
     public com.google.protobuf.Parser<IndexMeta> getParserForType() {
       return PARSER;
+    }
+
+    public interface IdMappingOrBuilder extends
+        // @@protoc_insertion_point(interface_extends:index.IndexMeta.IdMapping)
+        com.google.protobuf.MessageOrBuilder {
+
+      /**
+       * <code>optional string word = 1;</code>
+       */
+      boolean hasWord();
+      /**
+       * <code>optional string word = 1;</code>
+       */
+      java.lang.String getWord();
+      /**
+       * <code>optional string word = 1;</code>
+       */
+      com.google.protobuf.ByteString
+          getWordBytes();
+
+      /**
+       * <code>optional int64 id = 2;</code>
+       */
+      boolean hasId();
+      /**
+       * <code>optional int64 id = 2;</code>
+       */
+      long getId();
+    }
+    /**
+     * Protobuf type {@code index.IndexMeta.IdMapping}
+     */
+    public static final class IdMapping extends
+        com.google.protobuf.GeneratedMessage implements
+        // @@protoc_insertion_point(message_implements:index.IndexMeta.IdMapping)
+        IdMappingOrBuilder {
+      // Use IdMapping.newBuilder() to construct.
+      private IdMapping(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
+        super(builder);
+        this.unknownFields = builder.getUnknownFields();
+      }
+      private IdMapping(boolean noInit) { this.unknownFields = com.google.protobuf.UnknownFieldSet.getDefaultInstance(); }
+
+      private static final IdMapping defaultInstance;
+      public static IdMapping getDefaultInstance() {
+        return defaultInstance;
+      }
+
+      public IdMapping getDefaultInstanceForType() {
+        return defaultInstance;
+      }
+
+      private final com.google.protobuf.UnknownFieldSet unknownFields;
+      @java.lang.Override
+      public final com.google.protobuf.UnknownFieldSet
+          getUnknownFields() {
+        return this.unknownFields;
+      }
+      private IdMapping(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        initFields();
+        int mutable_bitField0_ = 0;
+        com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+            com.google.protobuf.UnknownFieldSet.newBuilder();
+        try {
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              default: {
+                if (!parseUnknownField(input, unknownFields,
+                                       extensionRegistry, tag)) {
+                  done = true;
+                }
+                break;
+              }
+              case 10: {
+                com.google.protobuf.ByteString bs = input.readBytes();
+                bitField0_ |= 0x00000001;
+                word_ = bs;
+                break;
+              }
+              case 16: {
+                bitField0_ |= 0x00000002;
+                id_ = input.readInt64();
+                break;
+              }
+            }
+          }
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(this);
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(
+              e.getMessage()).setUnfinishedMessage(this);
+        } finally {
+          this.unknownFields = unknownFields.build();
+          makeExtensionsImmutable();
+        }
+      }
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return com.expleague.sensearch.protobuf.index.IndexUnits.internal_static_index_IndexMeta_IdMapping_descriptor;
+      }
+
+      protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return com.expleague.sensearch.protobuf.index.IndexUnits.internal_static_index_IndexMeta_IdMapping_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta.IdMapping.class, com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta.IdMapping.Builder.class);
+      }
+
+      public static com.google.protobuf.Parser<IdMapping> PARSER =
+          new com.google.protobuf.AbstractParser<IdMapping>() {
+        public IdMapping parsePartialFrom(
+            com.google.protobuf.CodedInputStream input,
+            com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+            throws com.google.protobuf.InvalidProtocolBufferException {
+          return new IdMapping(input, extensionRegistry);
+        }
+      };
+
+      @java.lang.Override
+      public com.google.protobuf.Parser<IdMapping> getParserForType() {
+        return PARSER;
+      }
+
+      private int bitField0_;
+      public static final int WORD_FIELD_NUMBER = 1;
+      private java.lang.Object word_;
+      /**
+       * <code>optional string word = 1;</code>
+       */
+      public boolean hasWord() {
+        return ((bitField0_ & 0x00000001) == 0x00000001);
+      }
+      /**
+       * <code>optional string word = 1;</code>
+       */
+      public java.lang.String getWord() {
+        java.lang.Object ref = word_;
+        if (ref instanceof java.lang.String) {
+          return (java.lang.String) ref;
+        } else {
+          com.google.protobuf.ByteString bs = 
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          if (bs.isValidUtf8()) {
+            word_ = s;
+          }
+          return s;
+        }
+      }
+      /**
+       * <code>optional string word = 1;</code>
+       */
+      public com.google.protobuf.ByteString
+          getWordBytes() {
+        java.lang.Object ref = word_;
+        if (ref instanceof java.lang.String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          word_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+
+      public static final int ID_FIELD_NUMBER = 2;
+      private long id_;
+      /**
+       * <code>optional int64 id = 2;</code>
+       */
+      public boolean hasId() {
+        return ((bitField0_ & 0x00000002) == 0x00000002);
+      }
+      /**
+       * <code>optional int64 id = 2;</code>
+       */
+      public long getId() {
+        return id_;
+      }
+
+      private void initFields() {
+        word_ = "";
+        id_ = 0L;
+      }
+      private byte memoizedIsInitialized = -1;
+      public final boolean isInitialized() {
+        byte isInitialized = memoizedIsInitialized;
+        if (isInitialized == 1) return true;
+        if (isInitialized == 0) return false;
+
+        memoizedIsInitialized = 1;
+        return true;
+      }
+
+      public void writeTo(com.google.protobuf.CodedOutputStream output)
+                          throws java.io.IOException {
+        getSerializedSize();
+        if (((bitField0_ & 0x00000001) == 0x00000001)) {
+          output.writeBytes(1, getWordBytes());
+        }
+        if (((bitField0_ & 0x00000002) == 0x00000002)) {
+          output.writeInt64(2, id_);
+        }
+        getUnknownFields().writeTo(output);
+      }
+
+      private int memoizedSerializedSize = -1;
+      public int getSerializedSize() {
+        int size = memoizedSerializedSize;
+        if (size != -1) return size;
+
+        size = 0;
+        if (((bitField0_ & 0x00000001) == 0x00000001)) {
+          size += com.google.protobuf.CodedOutputStream
+            .computeBytesSize(1, getWordBytes());
+        }
+        if (((bitField0_ & 0x00000002) == 0x00000002)) {
+          size += com.google.protobuf.CodedOutputStream
+            .computeInt64Size(2, id_);
+        }
+        size += getUnknownFields().getSerializedSize();
+        memoizedSerializedSize = size;
+        return size;
+      }
+
+      private static final long serialVersionUID = 0L;
+      @java.lang.Override
+      protected java.lang.Object writeReplace()
+          throws java.io.ObjectStreamException {
+        return super.writeReplace();
+      }
+
+      public static com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta.IdMapping parseFrom(
+          com.google.protobuf.ByteString data)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return PARSER.parseFrom(data);
+      }
+      public static com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta.IdMapping parseFrom(
+          com.google.protobuf.ByteString data,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return PARSER.parseFrom(data, extensionRegistry);
+      }
+      public static com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta.IdMapping parseFrom(byte[] data)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return PARSER.parseFrom(data);
+      }
+      public static com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta.IdMapping parseFrom(
+          byte[] data,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return PARSER.parseFrom(data, extensionRegistry);
+      }
+      public static com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta.IdMapping parseFrom(java.io.InputStream input)
+          throws java.io.IOException {
+        return PARSER.parseFrom(input);
+      }
+      public static com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta.IdMapping parseFrom(
+          java.io.InputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        return PARSER.parseFrom(input, extensionRegistry);
+      }
+      public static com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta.IdMapping parseDelimitedFrom(java.io.InputStream input)
+          throws java.io.IOException {
+        return PARSER.parseDelimitedFrom(input);
+      }
+      public static com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta.IdMapping parseDelimitedFrom(
+          java.io.InputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        return PARSER.parseDelimitedFrom(input, extensionRegistry);
+      }
+      public static com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta.IdMapping parseFrom(
+          com.google.protobuf.CodedInputStream input)
+          throws java.io.IOException {
+        return PARSER.parseFrom(input);
+      }
+      public static com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta.IdMapping parseFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        return PARSER.parseFrom(input, extensionRegistry);
+      }
+
+      public static Builder newBuilder() { return Builder.create(); }
+      public Builder newBuilderForType() { return newBuilder(); }
+      public static Builder newBuilder(com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta.IdMapping prototype) {
+        return newBuilder().mergeFrom(prototype);
+      }
+      public Builder toBuilder() { return newBuilder(this); }
+
+      @java.lang.Override
+      protected Builder newBuilderForType(
+          com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+        Builder builder = new Builder(parent);
+        return builder;
+      }
+      /**
+       * Protobuf type {@code index.IndexMeta.IdMapping}
+       */
+      public static final class Builder extends
+          com.google.protobuf.GeneratedMessage.Builder<Builder> implements
+          // @@protoc_insertion_point(builder_implements:index.IndexMeta.IdMapping)
+          com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta.IdMappingOrBuilder {
+        public static final com.google.protobuf.Descriptors.Descriptor
+            getDescriptor() {
+          return com.expleague.sensearch.protobuf.index.IndexUnits.internal_static_index_IndexMeta_IdMapping_descriptor;
+        }
+
+        protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+            internalGetFieldAccessorTable() {
+          return com.expleague.sensearch.protobuf.index.IndexUnits.internal_static_index_IndexMeta_IdMapping_fieldAccessorTable
+              .ensureFieldAccessorsInitialized(
+                  com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta.IdMapping.class, com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta.IdMapping.Builder.class);
+        }
+
+        // Construct using com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta.IdMapping.newBuilder()
+        private Builder() {
+          maybeForceBuilderInitialization();
+        }
+
+        private Builder(
+            com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+          super(parent);
+          maybeForceBuilderInitialization();
+        }
+        private void maybeForceBuilderInitialization() {
+          if (com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders) {
+          }
+        }
+        private static Builder create() {
+          return new Builder();
+        }
+
+        public Builder clear() {
+          super.clear();
+          word_ = "";
+          bitField0_ = (bitField0_ & ~0x00000001);
+          id_ = 0L;
+          bitField0_ = (bitField0_ & ~0x00000002);
+          return this;
+        }
+
+        public Builder clone() {
+          return create().mergeFrom(buildPartial());
+        }
+
+        public com.google.protobuf.Descriptors.Descriptor
+            getDescriptorForType() {
+          return com.expleague.sensearch.protobuf.index.IndexUnits.internal_static_index_IndexMeta_IdMapping_descriptor;
+        }
+
+        public com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta.IdMapping getDefaultInstanceForType() {
+          return com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta.IdMapping.getDefaultInstance();
+        }
+
+        public com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta.IdMapping build() {
+          com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta.IdMapping result = buildPartial();
+          if (!result.isInitialized()) {
+            throw newUninitializedMessageException(result);
+          }
+          return result;
+        }
+
+        public com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta.IdMapping buildPartial() {
+          com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta.IdMapping result = new com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta.IdMapping(this);
+          int from_bitField0_ = bitField0_;
+          int to_bitField0_ = 0;
+          if (((from_bitField0_ & 0x00000001) == 0x00000001)) {
+            to_bitField0_ |= 0x00000001;
+          }
+          result.word_ = word_;
+          if (((from_bitField0_ & 0x00000002) == 0x00000002)) {
+            to_bitField0_ |= 0x00000002;
+          }
+          result.id_ = id_;
+          result.bitField0_ = to_bitField0_;
+          onBuilt();
+          return result;
+        }
+
+        public Builder mergeFrom(com.google.protobuf.Message other) {
+          if (other instanceof com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta.IdMapping) {
+            return mergeFrom((com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta.IdMapping)other);
+          } else {
+            super.mergeFrom(other);
+            return this;
+          }
+        }
+
+        public Builder mergeFrom(com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta.IdMapping other) {
+          if (other == com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta.IdMapping.getDefaultInstance()) return this;
+          if (other.hasWord()) {
+            bitField0_ |= 0x00000001;
+            word_ = other.word_;
+            onChanged();
+          }
+          if (other.hasId()) {
+            setId(other.getId());
+          }
+          this.mergeUnknownFields(other.getUnknownFields());
+          return this;
+        }
+
+        public final boolean isInitialized() {
+          return true;
+        }
+
+        public Builder mergeFrom(
+            com.google.protobuf.CodedInputStream input,
+            com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+            throws java.io.IOException {
+          com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta.IdMapping parsedMessage = null;
+          try {
+            parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+            parsedMessage = (com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta.IdMapping) e.getUnfinishedMessage();
+            throw e;
+          } finally {
+            if (parsedMessage != null) {
+              mergeFrom(parsedMessage);
+            }
+          }
+          return this;
+        }
+        private int bitField0_;
+
+        private java.lang.Object word_ = "";
+        /**
+         * <code>optional string word = 1;</code>
+         */
+        public boolean hasWord() {
+          return ((bitField0_ & 0x00000001) == 0x00000001);
+        }
+        /**
+         * <code>optional string word = 1;</code>
+         */
+        public java.lang.String getWord() {
+          java.lang.Object ref = word_;
+          if (!(ref instanceof java.lang.String)) {
+            com.google.protobuf.ByteString bs =
+                (com.google.protobuf.ByteString) ref;
+            java.lang.String s = bs.toStringUtf8();
+            if (bs.isValidUtf8()) {
+              word_ = s;
+            }
+            return s;
+          } else {
+            return (java.lang.String) ref;
+          }
+        }
+        /**
+         * <code>optional string word = 1;</code>
+         */
+        public com.google.protobuf.ByteString
+            getWordBytes() {
+          java.lang.Object ref = word_;
+          if (ref instanceof String) {
+            com.google.protobuf.ByteString b = 
+                com.google.protobuf.ByteString.copyFromUtf8(
+                    (java.lang.String) ref);
+            word_ = b;
+            return b;
+          } else {
+            return (com.google.protobuf.ByteString) ref;
+          }
+        }
+        /**
+         * <code>optional string word = 1;</code>
+         */
+        public Builder setWord(
+            java.lang.String value) {
+          if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000001;
+          word_ = value;
+          onChanged();
+          return this;
+        }
+        /**
+         * <code>optional string word = 1;</code>
+         */
+        public Builder clearWord() {
+          bitField0_ = (bitField0_ & ~0x00000001);
+          word_ = getDefaultInstance().getWord();
+          onChanged();
+          return this;
+        }
+        /**
+         * <code>optional string word = 1;</code>
+         */
+        public Builder setWordBytes(
+            com.google.protobuf.ByteString value) {
+          if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000001;
+          word_ = value;
+          onChanged();
+          return this;
+        }
+
+        private long id_ ;
+        /**
+         * <code>optional int64 id = 2;</code>
+         */
+        public boolean hasId() {
+          return ((bitField0_ & 0x00000002) == 0x00000002);
+        }
+        /**
+         * <code>optional int64 id = 2;</code>
+         */
+        public long getId() {
+          return id_;
+        }
+        /**
+         * <code>optional int64 id = 2;</code>
+         */
+        public Builder setId(long value) {
+          bitField0_ |= 0x00000002;
+          id_ = value;
+          onChanged();
+          return this;
+        }
+        /**
+         * <code>optional int64 id = 2;</code>
+         */
+        public Builder clearId() {
+          bitField0_ = (bitField0_ & ~0x00000002);
+          id_ = 0L;
+          onChanged();
+          return this;
+        }
+
+        // @@protoc_insertion_point(builder_scope:index.IndexMeta.IdMapping)
+      }
+
+      static {
+        defaultInstance = new IdMapping(true);
+        defaultInstance.initFields();
+      }
+
+      // @@protoc_insertion_point(class_scope:index.IndexMeta.IdMapping)
     }
 
     private int bitField0_;
@@ -220,11 +809,47 @@ public final class IndexUnits {
       return titlesBloomFilter_;
     }
 
+    public static final int ID_MAPPINGS_FIELD_NUMBER = 5;
+    private java.util.List<com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta.IdMapping> idMappings_;
+    /**
+     * <code>repeated .index.IndexMeta.IdMapping id_mappings = 5;</code>
+     */
+    public java.util.List<com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta.IdMapping> getIdMappingsList() {
+      return idMappings_;
+    }
+    /**
+     * <code>repeated .index.IndexMeta.IdMapping id_mappings = 5;</code>
+     */
+    public java.util.List<? extends com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta.IdMappingOrBuilder> 
+        getIdMappingsOrBuilderList() {
+      return idMappings_;
+    }
+    /**
+     * <code>repeated .index.IndexMeta.IdMapping id_mappings = 5;</code>
+     */
+    public int getIdMappingsCount() {
+      return idMappings_.size();
+    }
+    /**
+     * <code>repeated .index.IndexMeta.IdMapping id_mappings = 5;</code>
+     */
+    public com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta.IdMapping getIdMappings(int index) {
+      return idMappings_.get(index);
+    }
+    /**
+     * <code>repeated .index.IndexMeta.IdMapping id_mappings = 5;</code>
+     */
+    public com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta.IdMappingOrBuilder getIdMappingsOrBuilder(
+        int index) {
+      return idMappings_.get(index);
+    }
+
     private void initFields() {
       pagesCount_ = 0;
       averagePageSize_ = 0D;
       vocabularySize_ = 0;
       titlesBloomFilter_ = com.google.protobuf.ByteString.EMPTY;
+      idMappings_ = java.util.Collections.emptyList();
     }
     private byte memoizedIsInitialized = -1;
     public final boolean isInitialized() {
@@ -251,6 +876,9 @@ public final class IndexUnits {
       if (((bitField0_ & 0x00000008) == 0x00000008)) {
         output.writeBytes(4, titlesBloomFilter_);
       }
+      for (int i = 0; i < idMappings_.size(); i++) {
+        output.writeMessage(5, idMappings_.get(i));
+      }
       getUnknownFields().writeTo(output);
     }
 
@@ -275,6 +903,10 @@ public final class IndexUnits {
       if (((bitField0_ & 0x00000008) == 0x00000008)) {
         size += com.google.protobuf.CodedOutputStream
           .computeBytesSize(4, titlesBloomFilter_);
+      }
+      for (int i = 0; i < idMappings_.size(); i++) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(5, idMappings_.get(i));
       }
       size += getUnknownFields().getSerializedSize();
       memoizedSerializedSize = size;
@@ -385,6 +1017,7 @@ public final class IndexUnits {
       }
       private void maybeForceBuilderInitialization() {
         if (com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders) {
+          getIdMappingsFieldBuilder();
         }
       }
       private static Builder create() {
@@ -401,6 +1034,12 @@ public final class IndexUnits {
         bitField0_ = (bitField0_ & ~0x00000004);
         titlesBloomFilter_ = com.google.protobuf.ByteString.EMPTY;
         bitField0_ = (bitField0_ & ~0x00000008);
+        if (idMappingsBuilder_ == null) {
+          idMappings_ = java.util.Collections.emptyList();
+          bitField0_ = (bitField0_ & ~0x00000010);
+        } else {
+          idMappingsBuilder_.clear();
+        }
         return this;
       }
 
@@ -445,6 +1084,15 @@ public final class IndexUnits {
           to_bitField0_ |= 0x00000008;
         }
         result.titlesBloomFilter_ = titlesBloomFilter_;
+        if (idMappingsBuilder_ == null) {
+          if (((bitField0_ & 0x00000010) == 0x00000010)) {
+            idMappings_ = java.util.Collections.unmodifiableList(idMappings_);
+            bitField0_ = (bitField0_ & ~0x00000010);
+          }
+          result.idMappings_ = idMappings_;
+        } else {
+          result.idMappings_ = idMappingsBuilder_.build();
+        }
         result.bitField0_ = to_bitField0_;
         onBuilt();
         return result;
@@ -472,6 +1120,32 @@ public final class IndexUnits {
         }
         if (other.hasTitlesBloomFilter()) {
           setTitlesBloomFilter(other.getTitlesBloomFilter());
+        }
+        if (idMappingsBuilder_ == null) {
+          if (!other.idMappings_.isEmpty()) {
+            if (idMappings_.isEmpty()) {
+              idMappings_ = other.idMappings_;
+              bitField0_ = (bitField0_ & ~0x00000010);
+            } else {
+              ensureIdMappingsIsMutable();
+              idMappings_.addAll(other.idMappings_);
+            }
+            onChanged();
+          }
+        } else {
+          if (!other.idMappings_.isEmpty()) {
+            if (idMappingsBuilder_.isEmpty()) {
+              idMappingsBuilder_.dispose();
+              idMappingsBuilder_ = null;
+              idMappings_ = other.idMappings_;
+              bitField0_ = (bitField0_ & ~0x00000010);
+              idMappingsBuilder_ = 
+                com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders ?
+                   getIdMappingsFieldBuilder() : null;
+            } else {
+              idMappingsBuilder_.addAllMessages(other.idMappings_);
+            }
+          }
         }
         this.mergeUnknownFields(other.getUnknownFields());
         return this;
@@ -629,6 +1303,246 @@ public final class IndexUnits {
         titlesBloomFilter_ = getDefaultInstance().getTitlesBloomFilter();
         onChanged();
         return this;
+      }
+
+      private java.util.List<com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta.IdMapping> idMappings_ =
+        java.util.Collections.emptyList();
+      private void ensureIdMappingsIsMutable() {
+        if (!((bitField0_ & 0x00000010) == 0x00000010)) {
+          idMappings_ = new java.util.ArrayList<com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta.IdMapping>(idMappings_);
+          bitField0_ |= 0x00000010;
+         }
+      }
+
+      private com.google.protobuf.RepeatedFieldBuilder<
+          com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta.IdMapping, com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta.IdMapping.Builder, com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta.IdMappingOrBuilder> idMappingsBuilder_;
+
+      /**
+       * <code>repeated .index.IndexMeta.IdMapping id_mappings = 5;</code>
+       */
+      public java.util.List<com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta.IdMapping> getIdMappingsList() {
+        if (idMappingsBuilder_ == null) {
+          return java.util.Collections.unmodifiableList(idMappings_);
+        } else {
+          return idMappingsBuilder_.getMessageList();
+        }
+      }
+      /**
+       * <code>repeated .index.IndexMeta.IdMapping id_mappings = 5;</code>
+       */
+      public int getIdMappingsCount() {
+        if (idMappingsBuilder_ == null) {
+          return idMappings_.size();
+        } else {
+          return idMappingsBuilder_.getCount();
+        }
+      }
+      /**
+       * <code>repeated .index.IndexMeta.IdMapping id_mappings = 5;</code>
+       */
+      public com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta.IdMapping getIdMappings(int index) {
+        if (idMappingsBuilder_ == null) {
+          return idMappings_.get(index);
+        } else {
+          return idMappingsBuilder_.getMessage(index);
+        }
+      }
+      /**
+       * <code>repeated .index.IndexMeta.IdMapping id_mappings = 5;</code>
+       */
+      public Builder setIdMappings(
+          int index, com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta.IdMapping value) {
+        if (idMappingsBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureIdMappingsIsMutable();
+          idMappings_.set(index, value);
+          onChanged();
+        } else {
+          idMappingsBuilder_.setMessage(index, value);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .index.IndexMeta.IdMapping id_mappings = 5;</code>
+       */
+      public Builder setIdMappings(
+          int index, com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta.IdMapping.Builder builderForValue) {
+        if (idMappingsBuilder_ == null) {
+          ensureIdMappingsIsMutable();
+          idMappings_.set(index, builderForValue.build());
+          onChanged();
+        } else {
+          idMappingsBuilder_.setMessage(index, builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .index.IndexMeta.IdMapping id_mappings = 5;</code>
+       */
+      public Builder addIdMappings(com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta.IdMapping value) {
+        if (idMappingsBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureIdMappingsIsMutable();
+          idMappings_.add(value);
+          onChanged();
+        } else {
+          idMappingsBuilder_.addMessage(value);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .index.IndexMeta.IdMapping id_mappings = 5;</code>
+       */
+      public Builder addIdMappings(
+          int index, com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta.IdMapping value) {
+        if (idMappingsBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureIdMappingsIsMutable();
+          idMappings_.add(index, value);
+          onChanged();
+        } else {
+          idMappingsBuilder_.addMessage(index, value);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .index.IndexMeta.IdMapping id_mappings = 5;</code>
+       */
+      public Builder addIdMappings(
+          com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta.IdMapping.Builder builderForValue) {
+        if (idMappingsBuilder_ == null) {
+          ensureIdMappingsIsMutable();
+          idMappings_.add(builderForValue.build());
+          onChanged();
+        } else {
+          idMappingsBuilder_.addMessage(builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .index.IndexMeta.IdMapping id_mappings = 5;</code>
+       */
+      public Builder addIdMappings(
+          int index, com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta.IdMapping.Builder builderForValue) {
+        if (idMappingsBuilder_ == null) {
+          ensureIdMappingsIsMutable();
+          idMappings_.add(index, builderForValue.build());
+          onChanged();
+        } else {
+          idMappingsBuilder_.addMessage(index, builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .index.IndexMeta.IdMapping id_mappings = 5;</code>
+       */
+      public Builder addAllIdMappings(
+          java.lang.Iterable<? extends com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta.IdMapping> values) {
+        if (idMappingsBuilder_ == null) {
+          ensureIdMappingsIsMutable();
+          com.google.protobuf.AbstractMessageLite.Builder.addAll(
+              values, idMappings_);
+          onChanged();
+        } else {
+          idMappingsBuilder_.addAllMessages(values);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .index.IndexMeta.IdMapping id_mappings = 5;</code>
+       */
+      public Builder clearIdMappings() {
+        if (idMappingsBuilder_ == null) {
+          idMappings_ = java.util.Collections.emptyList();
+          bitField0_ = (bitField0_ & ~0x00000010);
+          onChanged();
+        } else {
+          idMappingsBuilder_.clear();
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .index.IndexMeta.IdMapping id_mappings = 5;</code>
+       */
+      public Builder removeIdMappings(int index) {
+        if (idMappingsBuilder_ == null) {
+          ensureIdMappingsIsMutable();
+          idMappings_.remove(index);
+          onChanged();
+        } else {
+          idMappingsBuilder_.remove(index);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .index.IndexMeta.IdMapping id_mappings = 5;</code>
+       */
+      public com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta.IdMapping.Builder getIdMappingsBuilder(
+          int index) {
+        return getIdMappingsFieldBuilder().getBuilder(index);
+      }
+      /**
+       * <code>repeated .index.IndexMeta.IdMapping id_mappings = 5;</code>
+       */
+      public com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta.IdMappingOrBuilder getIdMappingsOrBuilder(
+          int index) {
+        if (idMappingsBuilder_ == null) {
+          return idMappings_.get(index);  } else {
+          return idMappingsBuilder_.getMessageOrBuilder(index);
+        }
+      }
+      /**
+       * <code>repeated .index.IndexMeta.IdMapping id_mappings = 5;</code>
+       */
+      public java.util.List<? extends com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta.IdMappingOrBuilder> 
+           getIdMappingsOrBuilderList() {
+        if (idMappingsBuilder_ != null) {
+          return idMappingsBuilder_.getMessageOrBuilderList();
+        } else {
+          return java.util.Collections.unmodifiableList(idMappings_);
+        }
+      }
+      /**
+       * <code>repeated .index.IndexMeta.IdMapping id_mappings = 5;</code>
+       */
+      public com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta.IdMapping.Builder addIdMappingsBuilder() {
+        return getIdMappingsFieldBuilder().addBuilder(
+            com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta.IdMapping.getDefaultInstance());
+      }
+      /**
+       * <code>repeated .index.IndexMeta.IdMapping id_mappings = 5;</code>
+       */
+      public com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta.IdMapping.Builder addIdMappingsBuilder(
+          int index) {
+        return getIdMappingsFieldBuilder().addBuilder(
+            index, com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta.IdMapping.getDefaultInstance());
+      }
+      /**
+       * <code>repeated .index.IndexMeta.IdMapping id_mappings = 5;</code>
+       */
+      public java.util.List<com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta.IdMapping.Builder> 
+           getIdMappingsBuilderList() {
+        return getIdMappingsFieldBuilder().getBuilderList();
+      }
+      private com.google.protobuf.RepeatedFieldBuilder<
+          com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta.IdMapping, com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta.IdMapping.Builder, com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta.IdMappingOrBuilder> 
+          getIdMappingsFieldBuilder() {
+        if (idMappingsBuilder_ == null) {
+          idMappingsBuilder_ = new com.google.protobuf.RepeatedFieldBuilder<
+              com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta.IdMapping, com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta.IdMapping.Builder, com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta.IdMappingOrBuilder>(
+                  idMappings_,
+                  ((bitField0_ & 0x00000010) == 0x00000010),
+                  getParentForChildren(),
+                  isClean());
+          idMappings_ = null;
+        }
+        return idMappingsBuilder_;
       }
 
       // @@protoc_insertion_point(builder_scope:index.IndexMeta)
@@ -2747,6 +3661,11 @@ public final class IndexUnits {
     com.google.protobuf.GeneratedMessage.FieldAccessorTable
       internal_static_index_IndexMeta_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_index_IndexMeta_IdMapping_descriptor;
+  private static
+    com.google.protobuf.GeneratedMessage.FieldAccessorTable
+      internal_static_index_IndexMeta_IdMapping_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
     internal_static_index_Page_descriptor;
   private static
     com.google.protobuf.GeneratedMessage.FieldAccessorTable
@@ -2770,18 +3689,20 @@ public final class IndexUnits {
       descriptor;
   static {
     java.lang.String[] descriptorData = {
-      "\n\020indexunits.proto\022\005index\"q\n\tIndexMeta\022\023" +
-      "\n\013pages_count\030\001 \001(\005\022\031\n\021average_page_size" +
-      "\030\002 \001(\001\022\027\n\017vocabulary_size\030\003 \001(\005\022\033\n\023title" +
-      "s_bloom_filter\030\004 \001(\014\"7\n\004Page\022\017\n\007page_id\030" +
-      "\001 \001(\003\022\r\n\005title\030\002 \001(\t\022\017\n\007content\030\003 \001(\t\"\317\001" +
-      "\n\016TermStatistics\022\017\n\007term_id\030\001 \001(\003\022\033\n\023doc" +
-      "uement_frequency\030\002 \001(\005\022\026\n\016term_frequency" +
-      "\030\003 \001(\003\022=\n\020bigram_frequency\030\004 \003(\0132#.index" +
-      ".TermStatistics.TermFrequency\0328\n\rTermFre" +
-      "quency\022\017\n\007term_id\030\001 \001(\003\022\026\n\016term_frequenc",
-      "y\030\002 \001(\005B4\n&com.expleague.sensearch.proto" +
-      "buf.indexB\nIndexUnits"
+      "\n\020indexunits.proto\022\005index\"\311\001\n\tIndexMeta\022" +
+      "\023\n\013pages_count\030\001 \001(\005\022\031\n\021average_page_siz" +
+      "e\030\002 \001(\001\022\027\n\017vocabulary_size\030\003 \001(\005\022\033\n\023titl" +
+      "es_bloom_filter\030\004 \001(\014\022/\n\013id_mappings\030\005 \003" +
+      "(\0132\032.index.IndexMeta.IdMapping\032%\n\tIdMapp" +
+      "ing\022\014\n\004word\030\001 \001(\t\022\n\n\002id\030\002 \001(\003\"7\n\004Page\022\017\n" +
+      "\007page_id\030\001 \001(\003\022\r\n\005title\030\002 \001(\t\022\017\n\007content" +
+      "\030\003 \001(\t\"\317\001\n\016TermStatistics\022\017\n\007term_id\030\001 \001" +
+      "(\003\022\033\n\023docuement_frequency\030\002 \001(\005\022\026\n\016term_" +
+      "frequency\030\003 \001(\003\022=\n\020bigram_frequency\030\004 \003(",
+      "\0132#.index.TermStatistics.TermFrequency\0328" +
+      "\n\rTermFrequency\022\017\n\007term_id\030\001 \001(\003\022\026\n\016term" +
+      "_frequency\030\002 \001(\005B4\n&com.expleague.sensea" +
+      "rch.protobuf.indexB\nIndexUnits"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
         new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
@@ -2800,7 +3721,13 @@ public final class IndexUnits {
     internal_static_index_IndexMeta_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessage.FieldAccessorTable(
         internal_static_index_IndexMeta_descriptor,
-        new java.lang.String[] { "PagesCount", "AveragePageSize", "VocabularySize", "TitlesBloomFilter", });
+        new java.lang.String[] { "PagesCount", "AveragePageSize", "VocabularySize", "TitlesBloomFilter", "IdMappings", });
+    internal_static_index_IndexMeta_IdMapping_descriptor =
+      internal_static_index_IndexMeta_descriptor.getNestedTypes().get(0);
+    internal_static_index_IndexMeta_IdMapping_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessage.FieldAccessorTable(
+        internal_static_index_IndexMeta_IdMapping_descriptor,
+        new java.lang.String[] { "Word", "Id", });
     internal_static_index_Page_descriptor =
       getDescriptor().getMessageTypes().get(1);
     internal_static_index_Page_fieldAccessorTable = new

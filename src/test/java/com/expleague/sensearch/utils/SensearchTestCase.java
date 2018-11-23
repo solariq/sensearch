@@ -1,5 +1,6 @@
 package com.expleague.sensearch.utils;
 
+import com.expleague.sensearch.Config;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -82,4 +83,7 @@ public class SensearchTestCase {
     return testDataRoot;
   }
 
+  protected static Config config() {
+    return null;
+  }
 }

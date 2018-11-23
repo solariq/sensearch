@@ -3,6 +3,7 @@ package com.expleague.sensearch.donkey.plain;
 import com.expleague.sensearch.protobuf.index.IndexUnits;
 import com.expleague.sensearch.protobuf.index.IndexUnits.TermStatistics;
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.collect.MinMaxPriorityQueue;
 import com.google.common.primitives.Longs;
 import gnu.trove.map.TLongIntMap;
 import gnu.trove.map.TLongLongMap;
@@ -15,8 +16,6 @@ import java.nio.file.Path;
 import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.NavigableSet;
-import java.util.TreeSet;
 import org.fusesource.leveldbjni.JniDBFactory;
 import org.iq80.leveldb.CompressionType;
 import org.iq80.leveldb.DB;
@@ -50,6 +49,39 @@ public class StatisticsBuilder {
     statisticsDb = JniDBFactory.factory.open(statisticsRoot.toFile(), DEFAULT_DB_OPTIONS);
   }
 
+  @VisibleForTesting
+  static Iterable<TermStatistics.TermFrequency> mostFrequentBigrams(TLongIntMap neighbours,
+      int keep) {
+    if (neighbours == null || neighbours.isEmpty()) {
+      return new LinkedList<>();
+    }
+
+    MinMaxPriorityQueue<IdFrequencyPair> neighboursHeap = MinMaxPriorityQueue
+        .orderedBy(Comparator.comparingInt(IdFrequencyPair::frequency).reversed())
+        .maximumSize(keep)
+        .expectedSize(keep)
+        .create();
+
+    neighbours.forEachEntry(
+        (neighId, freq) -> {
+          neighboursHeap.add(new IdFrequencyPair(neighId, freq));
+          return true;
+        }
+    );
+
+    List<TermStatistics.TermFrequency> termFrequencies = new LinkedList<>();
+    neighboursHeap.forEach(
+        p -> termFrequencies.add(TermStatistics.TermFrequency
+            .newBuilder()
+            .setTermFrequency(p.frequency())
+            .setTermId(p.termId())
+            .build()
+        )
+    );
+
+    return termFrequencies;
+  }
+
   void enrich(TLongIntMap pageWiseTf, TLongObjectMap<TLongIntMap> pageWiseBigramTf) {
     pageWiseTf.forEachEntry(
         (tok, freq) -> {
@@ -74,39 +106,6 @@ public class StatisticsBuilder {
     );
   }
 
-  @VisibleForTesting
-  Iterable<TermStatistics.TermFrequency> mostFrequentBigrams(TLongIntMap neighbours) {
-    if (neighbours == null || neighbours.isEmpty()) {
-      return new LinkedList<>();
-    }
-
-    NavigableSet<IdFrequencyPair> sortedNeighbours = new TreeSet<>(
-        Comparator.comparingInt(IdFrequencyPair::frequency).reversed()
-    );
-
-    neighbours.forEachEntry(
-        (neighId, freq) -> {
-          if (sortedNeighbours.size() > MOST_FREQUENT_BIGRAMS_COUNT) {
-            sortedNeighbours.pollLast();
-          }
-          sortedNeighbours.add(new IdFrequencyPair(neighId, freq));
-          return true;
-        }
-    );
-
-    List<TermStatistics.TermFrequency> termFrequencies = new LinkedList<>();
-    sortedNeighbours.forEach(
-        p -> termFrequencies.add(TermStatistics.TermFrequency
-            .newBuilder()
-            .setTermFrequency(p.frequency())
-            .setTermId(p.termId())
-            .build()
-        )
-    );
-
-    return termFrequencies;
-  }
-
   void build() throws IOException {
     WriteBatch writeBatch = statisticsDb.createWriteBatch();
     wordFrequencyMap.forEachKey(
@@ -118,7 +117,10 @@ public class StatisticsBuilder {
                   .setTermId(k)
                   .setTermFrequency(wordFrequencyMap.get(k))
                   .setDocuementFrequency(documentFrequencyMap.get(k))
-                  .addAllBigramFrequency(mostFrequentBigrams(largeBigramsMap.get(k)))
+                  .addAllBigramFrequency(mostFrequentBigrams(
+                      largeBigramsMap.get(k),
+                      MOST_FREQUENT_BIGRAMS_COUNT)
+                  )
                   .build()
                   .toByteArray()
           );

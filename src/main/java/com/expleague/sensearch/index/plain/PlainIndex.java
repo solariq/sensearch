@@ -10,6 +10,7 @@ import com.expleague.sensearch.index.Filter;
 import com.expleague.sensearch.index.Index;
 import com.expleague.sensearch.index.IndexedPage;
 import com.expleague.sensearch.protobuf.index.IndexUnits;
+import com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta.IdMapping;
 import com.expleague.sensearch.protobuf.index.IndexUnits.TermStatistics;
 import com.expleague.sensearch.query.Query;
 import com.expleague.sensearch.query.term.Term;
@@ -110,17 +111,8 @@ public class PlainIndex implements Index {
     );
 
     wordToIdMap = new TObjectLongHashMap<>();
-    try (BufferedReader mappingsReader =
-        new BufferedReader(
-            new InputStreamReader(
-                new GZIPInputStream(
-                    Files.newInputStream(indexRoot.resolve(PlainIndexBuilder.WORD_ID_MAPPINGS))
-                )
-            )
-        )
-    ) {
-      String[] tokens = mappingsReader.readLine().split("\t");
-      wordToIdMap.put(tokens[0], Long.parseLong(tokens[1]));
+    for (IdMapping idMapping : indexMeta.getIdMappingsList()) {
+      wordToIdMap.put(idMapping.getWord(), idMapping.getId());
     }
 
     idToWordMap = new TLongObjectHashMap<>();
