@@ -1,42 +1,35 @@
 package com.expleague.sensearch.donkey.plain;
 
-import com.expleague.sensearch.utils.SensearchTestCase;
-import com.fasterxml.jackson.annotation.JsonTypeInfo.As;
+import com.expleague.commons.math.vectors.Vec;
+import com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta.IdMapping;
+import com.google.common.collect.Lists;
 import gnu.trove.map.TLongIntMap;
 import gnu.trove.map.TLongObjectMap;
 import gnu.trove.map.TObjectLongMap;
 import gnu.trove.map.hash.TLongIntHashMap;
 import gnu.trove.map.hash.TLongObjectHashMap;
 import gnu.trove.map.hash.TObjectLongHashMap;
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.zip.GZIPInputStream;
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 
-public class PlainIndexBuilderMethodsTest extends SensearchTestCase {
-
-
-  private static final PlainIndexBuilder PLAIN_INDEX_BUILDER = new PlainIndexBuilder();
+public class PlainIndexBuilderMethodsTest {
 
   @Test
   public void enrichFrequenciesTest() {
-    long[] idSequence = new long[] {
+    long[] idSequence = new long[]{
         1, 2, 3, 1, 2, 1, 3, 2, 3, 3, 2, 3, 1
     };
     TLongIntMap frequenciesMap = new TLongIntHashMap();
     TLongObjectMap<TLongIntMap> bigramsMap = new TLongObjectHashMap<>();
 
-    PLAIN_INDEX_BUILDER.enrichFrequencies(idSequence, frequenciesMap, bigramsMap);
+    PlainIndexBuilder.enrichFrequencies(idSequence, frequenciesMap, bigramsMap);
     // test frequencies
     Assert.assertFalse(frequenciesMap.isEmpty());
-    Assert.assertEquals(frequenciesMap.size(), 3);
-    Assert.assertEquals(frequenciesMap.get(1), 4);
-    Assert.assertEquals(frequenciesMap.get(2), 4);
-    Assert.assertEquals(frequenciesMap.get(3), 5);
+    Assert.assertEquals(3, frequenciesMap.size());
+    Assert.assertEquals(4, frequenciesMap.get(1));
+    Assert.assertEquals(4, frequenciesMap.get(2));
+    Assert.assertEquals(5, frequenciesMap.get(3));
 
     // test bigrams
     Assert.assertFalse(bigramsMap.isEmpty());
@@ -45,8 +38,8 @@ public class PlainIndexBuilderMethodsTest extends SensearchTestCase {
     TLongIntMap bigramsFor1 = bigramsMap.get(1);
     Assert.assertFalse(bigramsFor1.isEmpty());
     Assert.assertFalse(bigramsFor1.containsKey(1));
-    Assert.assertEquals(bigramsFor1.get(2), 2);
-    Assert.assertEquals(bigramsFor1.get(3), 1);
+    Assert.assertEquals(2, bigramsFor1.get(2));
+    Assert.assertEquals(1, bigramsFor1.get(3));
   }
 
   @Test
@@ -59,87 +52,73 @@ public class PlainIndexBuilderMethodsTest extends SensearchTestCase {
     long[] convertResult;
 
     // Simple test
-    convertResult = PLAIN_INDEX_BUILDER.toIds(
+    convertResult = PlainIndexBuilder.toIds(
         new String[]{"word1", "word3"}, knownIdMappings
     );
-    Assert.assertArrayEquals(convertResult, new long[]{1, 3});
+    Assert.assertArrayEquals(new long[]{1, 3}, convertResult);
 
     // Empty input test
-    convertResult = PLAIN_INDEX_BUILDER.toIds(
+    convertResult = PlainIndexBuilder.toIds(
         new String[0], knownIdMappings
     );
     Assert.assertEquals(convertResult.length, 0);
 
     // New words test
-    convertResult = PLAIN_INDEX_BUILDER.toIds(
+    convertResult = PlainIndexBuilder.toIds(
         new String[]{"word4"}, knownIdMappings
     );
     Assert.assertTrue(knownIdMappings.containsKey("word1"));
     Assert.assertTrue(knownIdMappings.containsKey("word2"));
     Assert.assertTrue(knownIdMappings.containsKey("word3"));
     Assert.assertTrue(knownIdMappings.containsKey("word4"));
-    Assert.assertArrayEquals(convertResult, new long[]{4});
-    Assert.assertEquals(knownIdMappings.get("word4"), 4);
+    Assert.assertArrayEquals(new long[]{4}, convertResult);
+    Assert.assertEquals(4, knownIdMappings.get("word4"));
 
     // Empty mappings test
     knownIdMappings.clear();
-    convertResult = PLAIN_INDEX_BUILDER.toIds(
+    convertResult = PlainIndexBuilder.toIds(
         new String[]{"word1", "word2", "word3"}, knownIdMappings
     );
     Assert.assertTrue(knownIdMappings.containsKey("word1"));
     Assert.assertTrue(knownIdMappings.containsKey("word2"));
     Assert.assertTrue(knownIdMappings.containsKey("word3"));
     Assert.assertFalse(knownIdMappings.containsKey("word4"));
-    Assert.assertEquals(knownIdMappings.get("word1"), 1);
-    Assert.assertEquals(knownIdMappings.get("word2"), 2);
-    Assert.assertEquals(knownIdMappings.get("word3"), 3);
+    Assert.assertEquals(1, knownIdMappings.get("word1"));
+    Assert.assertEquals(2, knownIdMappings.get("word2"));
+    Assert.assertEquals(3, knownIdMappings.get("word3"));
     Assert.assertArrayEquals(convertResult, new long[]{1, 2, 3});
   }
 
   @Test
-  public void flushIdMappingsTest() throws IOException {
-    Path testOutputRoot = testOutputRoot().resolve("IdMappingFlushTest");
-    Files.createDirectories(testOutputRoot);
-    Path testOutputFile = testOutputRoot.resolve("mappings.gz");
+  public void idMappingsToProtobufTest() {
     TObjectLongMap<String> knowIdMappings = new TObjectLongHashMap<>();
-    knowIdMappings.put("word1", 1);
-    knowIdMappings.put("word2", 2);
-    knowIdMappings.put("word3", 3);
+    for (int i = 0; i < 10; ++i) {
+      knowIdMappings.put("word" + i, i);
 
-    PLAIN_INDEX_BUILDER.flushIdMappings(testOutputFile, knowIdMappings);
-    Assert.assertTrue(Files.exists(testOutputFile));
+      Iterable<IdMapping> protobufMapings = PlainIndexBuilder.toProtobufIterable(knowIdMappings);
 
-    BufferedReader bufferedReader = new BufferedReader(
-        new InputStreamReader(
-            new GZIPInputStream(Files.newInputStream(testOutputFile))
-        )
-    );
+      protobufMapings.forEach(
+          m -> {
+            Assert.assertTrue(knowIdMappings.containsKey(m.getWord()));
+            Assert.assertEquals(knowIdMappings.get(m.getWord()), m.getId());
+          }
+      );
 
-    TObjectLongMap<String> serializedMappings = new TObjectLongHashMap<>();
-    bufferedReader.lines().forEach(
-        l -> {
-          String[] tokens = l.split("\t");
-          serializedMappings.put(tokens[0], Long.parseLong(tokens[1]));
-        }
-    );
-
-    Assert.assertEquals(serializedMappings.size(), knowIdMappings.size());
-    knowIdMappings.forEachEntry(
-        (k, v) -> {
-          Assert.assertTrue(serializedMappings.containsKey(k));
-          Assert.assertEquals(serializedMappings.get(k), v);
-          return true;
-        }
-    );
+      Assert.assertEquals(knowIdMappings.size(), Lists.newArrayList(protobufMapings).size());
+    }
   }
 
   @Test
+  @Ignore
   public void readGloveVectorsTest() {
-
+    // TODO: make test for reading glove vectors
   }
 
   @Test
+  @Ignore
   public void toVectorTest() {
+    // TODO: test to vector conversion
+    TLongObjectMap<Vec> knownVectors = new TLongObjectHashMap<>();
 
   }
 }

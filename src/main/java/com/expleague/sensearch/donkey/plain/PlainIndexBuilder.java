@@ -8,6 +8,7 @@ import com.expleague.sensearch.core.Tokenizer;
 import com.expleague.sensearch.donkey.IndexBuilder;
 import com.expleague.sensearch.donkey.crawler.Crawler;
 import com.expleague.sensearch.protobuf.index.IndexUnits;
+import com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta.IdMapping;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.hash.BloomFilter;
 import com.google.common.hash.Funnels;
@@ -18,21 +19,20 @@ import gnu.trove.map.TObjectLongMap;
 import gnu.trove.map.hash.TLongIntHashMap;
 import gnu.trove.map.hash.TLongObjectHashMap;
 import gnu.trove.map.hash.TObjectLongHashMap;
-import java.io.BufferedWriter;
 import java.io.ByteArrayOutputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
 import java.io.Reader;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.logging.Logger;
 import java.util.zip.GZIPInputStream;
-import java.util.zip.GZIPOutputStream;
 
 public class PlainIndexBuilder implements IndexBuilder {
 
@@ -40,7 +40,6 @@ public class PlainIndexBuilder implements IndexBuilder {
   public static final String PLAIN_ROOT = "plain";
   public static final String EMBEDDING_ROOT = "embedding";
 
-  public static final String WORD_ID_MAPPINGS = "word2id.map.gz";
   public static final String INDEX_META = "index.meta";
 
   private static final long DEFAULT_EXPECTED_COLLECTION_SIZE = (long) 1e7;
@@ -51,6 +50,104 @@ public class PlainIndexBuilder implements IndexBuilder {
   private static final Logger LOG = Logger.getLogger(PlainIndexBuilder.class.getName());
 
   public PlainIndexBuilder() {
+  }
+
+  @VisibleForTesting
+  static Iterable<IdMapping> toProtobufIterable(TObjectLongMap<String> mappings) {
+    List<IdMapping> protobufMappings = new LinkedList<>();
+    mappings.forEachEntry(
+        (w, id) -> {
+          protobufMappings.add(
+              IdMapping.newBuilder()
+                  .setId(id)
+                  .setWord(w)
+                  .build()
+          );
+          return true;
+        }
+    );
+
+    return protobufMappings;
+  }
+
+  /**
+   * Converts an array of words to an array of integer ids. Also if a word was not found in
+   * mappings the method adds a new entry to mapping for such word
+   *
+   * @param words array of words to be converted to ids
+   * @param mappings all known word to int mappings
+   * @return array of word ids in the same order as given words
+   */
+  @VisibleForTesting
+  static long[] toIds(String[] words, TObjectLongMap<String> mappings) {
+    long[] wordIds = new long[words.length];
+    for (int i = 0; i < words.length; ++i) {
+      if (!mappings.containsKey(words[i])) {
+        LOG.warning(String.format("For the word '%s' was not found any vector representation!",
+            words[i])
+        );
+        mappings.put(words[i], mappings.size() + 1);
+      }
+      wordIds[i] = mappings.get(words[i]);
+    }
+
+    return wordIds;
+  }
+
+  @VisibleForTesting
+  static void enrichFrequencies(long[] tokens, TLongIntMap termFrequencyMap,
+      TLongObjectMap<TLongIntMap> bigramFrequencyMap) {
+    if (tokens.length < 1) {
+      return;
+    }
+    termFrequencyMap.put(tokens[0], 1);
+    for (int i = 1; i < tokens.length; ++i) {
+      termFrequencyMap.adjustOrPutValue(tokens[i], 1, 1);
+
+      bigramFrequencyMap.putIfAbsent(tokens[i - 1], new TLongIntHashMap());
+      bigramFrequencyMap.get(tokens[i - 1]).adjustOrPutValue(tokens[i], 1, 1);
+    }
+  }
+
+  @VisibleForTesting
+  static Vec toVector(long[] tokens, TLongObjectMap<Vec> vectors) {
+    ArrayVec mean = new ArrayVec(new double[VEC_SIZE]);
+    for (long i : tokens) {
+      mean.add((ArrayVec) vectors.get(i));
+    }
+    mean.scale(1.0 / tokens.length);
+    return mean;
+  }
+
+  @VisibleForTesting
+  static void readGloveVectors(Path glovePath, TObjectLongMap<String> idMappings,
+      TLongObjectMap<Vec> vectors) {
+    try (Reader input =
+        new InputStreamReader(
+            new GZIPInputStream(
+                new FileInputStream(glovePath.toFile())),
+            StandardCharsets.UTF_8
+        )
+    ) {
+      CharSeqTools.lines(input)
+          .parallel()
+          .forEach(line -> {
+                CharSequence[] parts = CharSeqTools.split(line, ' ');
+                final String word = parts[0].toString();
+                double[] doubles = Arrays.stream(parts, 1, parts.length)
+                    .mapToDouble(CharSeqTools::parseDouble)
+                    .toArray();
+                synchronized (idMappings) {
+                  idMappings.put(word, idMappings.size() + 1);
+                }
+                synchronized (vectors) {
+                  vectors.put(idMappings.get(word), new ArrayVec(doubles));
+                }
+              }
+          );
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
   }
 
   @Override
@@ -129,118 +226,11 @@ public class PlainIndexBuilder implements IndexBuilder {
           .setVocabularySize(idMappings.size())
           .setPagesCount((int) pagesAndTokensCounts[0])
           .setTitlesBloomFilter(ByteString.copyFrom(bos.toByteArray()))
+          .addAllIdMappings(toProtobufIterable(idMappings))
           .build()
           .writeTo(Files.newOutputStream(indexRoot.resolve(INDEX_META)));
-
-      flushIdMappings(indexRoot.resolve(WORD_ID_MAPPINGS), idMappings);
     } catch (Exception e) {
       throw new IOException(e);
-    }
-  }
-
-  @VisibleForTesting
-  void flushIdMappings(Path pathToMap, TObjectLongMap<String> idMappings)
-      throws IOException {
-    StringBuilder idMappingsSb = new StringBuilder();
-    idMappings.forEachEntry(
-        (s, id) -> {
-          idMappingsSb
-              .append(s)
-              .append("\t")
-              .append(id)
-              .append("\n");
-          return true;
-        }
-    );
-
-    try (
-        BufferedWriter mapWriter = new BufferedWriter(
-            new OutputStreamWriter(
-                new GZIPOutputStream(Files.newOutputStream(pathToMap))
-            )
-        )
-    ) {
-      mapWriter.write(idMappingsSb.toString().trim());
-    }
-  }
-
-  /**
-   * Converts an array of words to an array of integer ids. Also if a word was not found in
-   * mappings the method adds a new entry to mapping for such word
-   *
-   * @param words array of words to be converted to ids
-   * @param mappings all known word to int mappings
-   * @return array of word ids in the same order as given words
-   */
-  @VisibleForTesting
-  long[] toIds(String[] words, TObjectLongMap<String> mappings) {
-    long[] wordIds = new long[words.length];
-    for (int i = 0; i < words.length; ++i) {
-      if (!mappings.containsKey(words[i])) {
-        LOG.warning(String.format("For the word '%s' was not found any vector representation!",
-            words[i])
-        );
-        mappings.put(words[i], mappings.size() + 1);
-      }
-      wordIds[i] = mappings.get(words[i]);
-    }
-
-    return wordIds;
-  }
-
-  @VisibleForTesting
-  void enrichFrequencies(long[] tokens, TLongIntMap termFrequencyMap,
-      TLongObjectMap<TLongIntMap> bigramFrequencyMap) {
-    if (tokens.length < 1) {
-      return;
-    }
-    termFrequencyMap.put(tokens[0], 1);
-    for (int i = 1; i < tokens.length; ++i) {
-      termFrequencyMap.adjustOrPutValue(tokens[i], 1, 1);
-
-      bigramFrequencyMap.putIfAbsent(tokens[i - 1], new TLongIntHashMap());
-      bigramFrequencyMap.get(tokens[i - 1]).adjustOrPutValue(tokens[i], 1, 1);
-    }
-  }
-
-  @VisibleForTesting
-  Vec toVector(long[] tokens, TLongObjectMap<Vec> vectors) {
-    ArrayVec mean = new ArrayVec(new double[VEC_SIZE]);
-    for (long i : tokens) {
-      mean.add((ArrayVec) vectors.get(i));
-    }
-    mean.scale(1.0 / tokens.length);
-    return mean;
-  }
-
-  @VisibleForTesting
-  void readGloveVectors(Path glovePath, TObjectLongMap<String> idMappings,
-      TLongObjectMap<Vec> vectors) {
-    try (Reader input =
-        new InputStreamReader(
-            new GZIPInputStream(
-                new FileInputStream(glovePath.toFile())),
-            StandardCharsets.UTF_8
-        )
-    ) {
-      CharSeqTools.lines(input)
-          .parallel()
-          .forEach(line -> {
-                CharSequence[] parts = CharSeqTools.split(line, ' ');
-                final String word = parts[0].toString();
-                double[] doubles = Arrays.stream(parts, 1, parts.length)
-                    .mapToDouble(CharSeqTools::parseDouble)
-                    .toArray();
-                synchronized (idMappings) {
-                  idMappings.put(word, idMappings.size() + 1);
-                }
-                synchronized (vectors) {
-                  vectors.put(idMappings.get(word), new ArrayVec(doubles));
-                }
-              }
-          );
-    } catch (IOException e) {
-      throw new RuntimeException(e);
     }
   }
 }
