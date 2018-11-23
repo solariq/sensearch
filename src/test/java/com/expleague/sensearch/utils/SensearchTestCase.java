@@ -28,7 +28,7 @@ public class SensearchTestCase {
     }
 
     Path projectRoot = Paths.get(workingDir);
-    testDataRoot = projectRoot.resolve("src").resolve("test").resolve("java").resolve("DATA");
+    testDataRoot = projectRoot.resolve("src").resolve("test").resolve("DATA");
     if (Files.notExists(testDataRoot) || !Files.isDirectory(testDataRoot)) {
       throw new RuntimeException(String.format(
           "Test data root was not found by path: %s",
@@ -43,7 +43,7 @@ public class SensearchTestCase {
       );
     }
 
-    testOutputRoot = projectRoot.resolve("src").resolve("test").resolve("java").resolve("UNIVERSE");
+    testOutputRoot = projectRoot.resolve("src").resolve("test").resolve("UNIVERSE");
     if (Files.notExists(testOutputRoot)) {
       LOG.info(String.format(
           "Will create test output directory by path: %s",
