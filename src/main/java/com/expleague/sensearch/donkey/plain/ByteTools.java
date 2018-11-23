@@ -1,8 +1,12 @@
 package com.expleague.sensearch.donkey.plain;
 
 import com.expleague.commons.math.vectors.Vec;
-import com.google.common.primitives.Bytes;
-import com.google.common.primitives.Longs;
+import com.expleague.commons.math.vectors.impl.vectors.ArrayVec;
+
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
+import java.nio.DoubleBuffer;
+import java.nio.LongBuffer;
 
 public final class ByteTools {
 
@@ -10,24 +14,31 @@ public final class ByteTools {
   }
 
   public static byte[] toBytes(Vec vec) {
-    return null;
+    double[] coords = vec.toArray();
+    ByteBuffer byteBuf = ByteBuffer.allocate(Double.BYTES * coords.length);
+    DoubleBuffer doubleBuf = byteBuf.asDoubleBuffer();
+    doubleBuf.put(coords);
+    return byteBuf.array();
   }
 
   public static Vec toVec(byte[] bytes) {
-    return null;
+    DoubleBuffer doubleBuf = ByteBuffer.wrap(bytes).order(ByteOrder.nativeOrder()).asDoubleBuffer();
+    double[] doubles = new double[doubleBuf.remaining()];
+    doubleBuf.get(doubles);
+    return new ArrayVec(doubles);
   }
 
-  public static byte[] toBytes(long[] lArr) {
-    // TODO: need check for array size to be within int bounds
-    byte[][] byteArrays = new byte[lArr.length][];
-    for (int i = 0; i < lArr.length; ++i) {
-      byteArrays[i] = Longs.toByteArray(lArr[i]);
-    }
-    return Bytes.concat(byteArrays);
+  public static byte[] toBytes(long[] longs) {
+    ByteBuffer byteBuf = ByteBuffer.allocate(Long.BYTES * longs.length);
+    LongBuffer longBuf = byteBuf.asLongBuffer();
+    longBuf.put(longs);
+    return byteBuf.array();
   }
 
   public static long[] toLongArray(byte[] bytes) {
-    //TODO: implement
-    return new long[]{0};
+    LongBuffer longBuf = ByteBuffer.wrap(bytes).order(ByteOrder.nativeOrder()).asLongBuffer();
+    long[] longs = new long[longBuf.remaining()];
+    longBuf.get(longs);
+    return longs;
   }
 }

@@ -4,43 +4,98 @@ import com.expleague.commons.math.vectors.Vec;
 import com.expleague.commons.math.vectors.VecTools;
 import com.expleague.commons.math.vectors.impl.vectors.ArrayVec;
 
+import com.expleague.commons.seq.CharSeqTools;
 import com.expleague.sensearch.donkey.plain.ByteTools;
+import com.expleague.sensearch.donkey.plain.EmbeddingBuilder;
+import com.expleague.sensearch.donkey.plain.PlainIndexBuilder;
 import com.expleague.sensearch.index.Embedding;
+import com.google.common.primitives.Ints;
 import com.google.common.primitives.Longs;
 import gnu.trove.list.TLongList;
+import org.fusesource.leveldbjni.JniDBFactory;
 import org.iq80.leveldb.DB;
 import org.iq80.leveldb.DBException;
 import org.iq80.leveldb.Options;
-import org.iq80.leveldb.impl.Iq80DBFactory;
 
-import static com.expleague.sensearch.donkey.plain.EmbeddingBuilder.hashFuncs;
-
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.Reader;
 import java.nio.file.Path;
 import java.util.*;
 import java.util.function.BiFunction;
+import java.util.function.ToIntFunction;
 import java.util.stream.LongStream;
 
 public class EmbeddingImpl implements Embedding {
 
-  private static final int VEC_SIZE = 50;
   private static final long CACHE_SIZE = 16 * (1 << 20);
   private static final double EPSILON = 10e-9;
   private static final Options DB_OPTIONS = new Options().cacheSize(CACHE_SIZE);
 
-  private List<Long>[][] tables;
   private BiFunction<Vec, Vec, Double> nearestMeasure = VecTools::distanceAV;
 
-  private DB vecDb;
+  private DB vecDB, tablesDB;
+  private ToIntFunction<Vec>[] hashFuncs;
 
   public EmbeddingImpl(Path embeddingPath) throws IOException {
-    vecDb = Iq80DBFactory.factory.open(embeddingPath.toFile(), DB_OPTIONS);
-    tables = null;
+    vecDB = JniDBFactory.factory.open(
+            embeddingPath.resolve(EmbeddingBuilder.VECS_ROOT).toFile(),
+            DB_OPTIONS
+    );
+
+    tablesDB = JniDBFactory.factory.open(
+            embeddingPath.resolve(EmbeddingBuilder.LSH_ROOT).toFile(),
+            DB_OPTIONS
+    );
+
+    List<Vec> randVecsList = new ArrayList<>();
+    try (Reader input =
+        new InputStreamReader(
+            new FileInputStream(
+                embeddingPath.resolve(EmbeddingBuilder.RAND_VECS).toFile()
+            )
+        )
+    ) {
+      CharSeqTools.lines(input)
+          .forEach(line -> {
+              CharSequence[] parts = CharSeqTools.split(line, ' ');
+                  randVecsList.add(
+                      new ArrayVec(
+                          Arrays.stream(parts).mapToDouble(CharSeqTools::parseDouble).toArray()
+                      )
+                  );
+                }
+              );
+    }
+    Vec[] randVecs = (Vec[]) randVecsList.toArray();
+
+    hashFuncs = new ToIntFunction[EmbeddingBuilder.TABLES_NUMBER];
+    for (int i = 0; i < hashFuncs.length; i++) {
+
+      final int hashNum = i;
+      hashFuncs[i] = (vec) -> {
+
+        boolean[] mask = new boolean[EmbeddingBuilder.TUPLE_SIZE];
+        for (int j = 0; j < mask.length; j++) {
+          mask[j] = VecTools.multiply(vec, randVecs[EmbeddingBuilder.TUPLE_SIZE * hashNum + j]) >= 0;
+        }
+
+        int hash = (1 << EmbeddingBuilder.TUPLE_SIZE) * hashNum;
+        for (int j = 0; j < mask.length; j++) {
+          if (mask[j]) {
+            hash += 1 << j;
+          }
+        }
+
+        return hash;
+      };
+    }
   }
 
   private Vec getVec(long id) {
     try {
-      return ByteTools.toVec(vecDb.get(Longs.toByteArray(id)));
+      return ByteTools.toVec(vecDB.get(Longs.toByteArray(id)));
     } catch (DBException e) {
       return null;
     }
@@ -56,7 +111,7 @@ public class EmbeddingImpl implements Embedding {
       return getVec(ids[0]);
     }
 
-    ArrayVec mean = new ArrayVec(new double[VEC_SIZE]);
+    ArrayVec mean = new ArrayVec(new double[PlainIndexBuilder.VEC_SIZE]);
     int number = 0;
     for (long id : ids) {
       Vec vec = getVec(id);
@@ -88,10 +143,14 @@ public class EmbeddingImpl implements Embedding {
 
   @Override
   public LongStream getNearest(Vec mainVec, int numberOfNeighbors) {
+    //TODO : replace on TLongList
     List<Long> lshNeighbors = new ArrayList<>();
-    for (int i = 0; i < tables.length; i++) {
-      int bucketIndex = hashFuncs[i].applyAsInt(mainVec);
-      lshNeighbors.addAll(tables[i][bucketIndex]);
+    for (ToIntFunction<Vec> hashFunc : hashFuncs) {
+      int bucketIndex = hashFunc.applyAsInt(mainVec);
+      long[] ids = ByteTools.toLongArray(tablesDB.get(Ints.toByteArray(bucketIndex)));
+      for (long id : ids) {
+        lshNeighbors.add(id);
+      }
     }
 
     Comparator<Long> comparator = getComparator(mainVec);

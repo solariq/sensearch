@@ -22,6 +22,7 @@ public class FilterImpl implements Filter {
 
   @Override
   // TODO: move filtrate method to Index and delete FilterImpl?
+  // NO, GOD, PLS NO!!
   public LongStream filtrate(Vec mainVec, int number, LongPredicate predicate) {
     int embNumber = number * START_MULTIPLIER;
     List<Long> result = new ArrayList<>();

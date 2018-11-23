@@ -46,7 +46,7 @@ public class PlainIndexBuilder implements IndexBuilder {
   private static final long DEFAULT_EXPECTED_COLLECTION_SIZE = (long) 1e7;
   private static final double DEFAULT_FALSE_POSITIVE_RATE = 1e-5;
 
-  private static final int VEC_SIZE = 50;
+  public static final int VEC_SIZE = 50;
 
   private static final Logger LOG = Logger.getLogger(PlainIndexBuilder.class.getName());
 
