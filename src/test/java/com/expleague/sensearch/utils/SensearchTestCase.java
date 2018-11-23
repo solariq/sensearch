@@ -5,6 +5,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.logging.Logger;
+import org.apache.commons.io.FileUtils;
+import org.junit.AfterClass;
 import org.junit.BeforeClass;
 
 public class SensearchTestCase {
@@ -51,16 +53,25 @@ public class SensearchTestCase {
           )
       );
       try {
-        Files.createDirectories(testDataRoot);
+        Files.createDirectories(testOutputRoot);
       } catch (IOException e) {
         throw new RuntimeException(
             String.format(
                 "Failed to create test output directory by path: %s",
-                testDataRoot.toAbsolutePath().toString()),
+                testOutputRoot.toAbsolutePath().toString()),
             e
         );
       }
     }
+  }
+
+  @AfterClass
+  public static void cleanup() throws IOException {
+    LOG.fine("Cleaning up...");
+    LOG.fine(String.format("Will delete tes output directory %s",
+        testOutputRoot.toAbsolutePath().toString())
+    );
+    FileUtils.deleteDirectory(testOutputRoot.toFile());
   }
 
   protected static Path testOutputRoot() {
