@@ -6,7 +6,6 @@ import com.google.common.collect.Lists;
 import gnu.trove.map.TLongIntMap;
 import gnu.trove.map.hash.TLongIntHashMap;
 import java.io.IOException;
-import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import org.junit.Assert;
@@ -42,7 +41,7 @@ public class StatisticsBuilderMethodsTest extends SensearchTestCase {
     neighboursFreq.put(2, 8);
     neighboursFreq.put(3, 8);
     neighboursFreq.put(4, 8);
-    neighboursFreq.put(4, 8);
+    neighboursFreq.put(5, 8);
 
     ArrayList<TermFrequency> freqNeigh = Lists.newArrayList(
         StatisticsBuilder.mostFrequentBigrams(neighboursFreq, 3)

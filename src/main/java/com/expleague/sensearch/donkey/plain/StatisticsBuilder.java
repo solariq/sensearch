@@ -1,7 +1,7 @@
 package com.expleague.sensearch.donkey.plain;
 
-import com.expleague.sensearch.protobuf.index.IndexUnits;
 import com.expleague.sensearch.protobuf.index.IndexUnits.TermStatistics;
+import com.expleague.sensearch.protobuf.index.IndexUnits.TermStatistics.TermFrequency;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.MinMaxPriorityQueue;
 import com.google.common.primitives.Longs;
@@ -69,10 +69,10 @@ public class StatisticsBuilder {
         }
     );
 
-    List<TermStatistics.TermFrequency> termFrequencies = new LinkedList<>();
+    final TermFrequency.Builder tfBuilder = TermFrequency.newBuilder();
+    final List<TermStatistics.TermFrequency> termFrequencies = new LinkedList<>();
     neighboursHeap.forEach(
-        p -> termFrequencies.add(TermStatistics.TermFrequency
-            .newBuilder()
+        p -> termFrequencies.add(tfBuilder
             .setTermFrequency(p.frequency())
             .setTermId(p.termId())
             .build()
@@ -108,12 +108,12 @@ public class StatisticsBuilder {
 
   void build() throws IOException {
     WriteBatch writeBatch = statisticsDb.createWriteBatch();
+    final TermStatistics.Builder tsBuilder = TermStatistics.newBuilder();
     wordFrequencyMap.forEachKey(
         k -> {
           writeBatch.put(
               Longs.toByteArray(k),
-              IndexUnits.TermStatistics
-                  .newBuilder()
+              tsBuilder
                   .setTermId(k)
                   .setTermFrequency(wordFrequencyMap.get(k))
                   .setDocuementFrequency(documentFrequencyMap.get(k))
@@ -124,6 +124,8 @@ public class StatisticsBuilder {
                   .build()
                   .toByteArray()
           );
+
+          tsBuilder.clear();
           return true;
         }
     );
@@ -131,7 +133,6 @@ public class StatisticsBuilder {
     statisticsDb.write(writeBatch, DEFAULT_WRITE_OPTIONS);
     statisticsDb.close();
   }
-
 
   private static class IdFrequencyPair {
 

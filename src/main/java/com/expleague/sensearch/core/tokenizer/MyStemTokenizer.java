@@ -12,8 +12,6 @@ public class MyStemTokenizer implements Tokenizer {
   private static final Pattern splitPattern = Pattern
       .compile("(?<=[.!?]|[.!?]['\"])(?=\\p{javaWhitespace}*\\p{javaUpperCase})");
 
-
-
   private MyStem myStem;
 
   public MyStemTokenizer(Path myStemPath) {

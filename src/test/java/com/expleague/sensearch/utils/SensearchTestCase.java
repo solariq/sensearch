@@ -10,7 +10,7 @@ import org.apache.commons.io.FileUtils;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 
-public class SensearchTestCase {
+public abstract class SensearchTestCase {
 
   private static final Logger LOG = Logger.getLogger(SensearchTestCase.class.getName());
 
@@ -67,7 +67,7 @@ public class SensearchTestCase {
   }
 
   @AfterClass
-  public static void cleanup() throws IOException {
+  public static void cleanupUniverse() throws IOException {
     LOG.fine("Cleaning up...");
     LOG.fine(String.format("Will delete tes output directory %s",
         testOutputRoot.toAbsolutePath().toString())

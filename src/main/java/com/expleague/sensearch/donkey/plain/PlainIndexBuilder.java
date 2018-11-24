@@ -54,11 +54,12 @@ public class PlainIndexBuilder implements IndexBuilder {
 
   @VisibleForTesting
   static Iterable<IdMapping> toProtobufIterable(TObjectLongMap<String> mappings) {
-    List<IdMapping> protobufMappings = new LinkedList<>();
+    final List<IdMapping> protobufMappings = new LinkedList<>();
+    final IdMapping.Builder idMappingsBuilder = IdMapping.newBuilder();
     mappings.forEachEntry(
         (w, id) -> {
           protobufMappings.add(
-              IdMapping.newBuilder()
+              idMappingsBuilder
                   .setId(id)
                   .setWord(w)
                   .build()
