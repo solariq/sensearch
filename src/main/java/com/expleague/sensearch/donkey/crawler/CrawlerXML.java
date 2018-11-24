@@ -17,6 +17,7 @@ import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
+import org.apache.commons.io.FileUtils;
 
 public class CrawlerXML implements Crawler {
 
@@ -64,6 +65,13 @@ public class CrawlerXML implements Crawler {
 
     @Override
     public boolean hasNext() {
+      if (this.zipEntry == null) {
+        try {
+          FileUtils.deleteDirectory(pathTmp.toFile());
+        } catch (IOException e) {
+          e.printStackTrace();
+        }
+      }
       return this.zipEntry != null;
     }
 
