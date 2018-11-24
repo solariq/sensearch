@@ -31,6 +31,7 @@
         <configuration>
           <excludes>
             <exclude>*InteractionTest.java</exclude>
+            <exclude>MinimalFunctionalityTest.java</exclude>
             <exclude>MetricTest.java</exclude>
           </excludes>
         </configuration>
