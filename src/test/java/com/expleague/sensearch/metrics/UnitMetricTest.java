@@ -39,10 +39,6 @@ public class UnitMetricTest {
     return DCG;
   }
 
-  private boolean checkEq(double DCG, double rightDCG) {
-    return ((DCG - rightDCG) < 1e-10 && (DCG - rightDCG) > -1e-10);
-  }
-
   @Before
   public void init() {
     crawler = new Crawler();
@@ -79,7 +75,7 @@ public class UnitMetricTest {
         + ((1.0 / 9) / (log2(9)))
         + ((1.0 / 10) / (log2(10)));
 
-    Assert.assertTrue(checkEq(DCG, rightDCG));
+    Assert.assertEquals(DCG, rightDCG, 1e-10);
 
   }
 
@@ -102,7 +98,7 @@ public class UnitMetricTest {
 
     double rightDCG = 0;
 
-    Assert.assertTrue(checkEq(DCG, rightDCG));
+    Assert.assertEquals(DCG, rightDCG, 1e-10);
 
   }
 
@@ -134,7 +130,7 @@ public class UnitMetricTest {
         + ((1.0 / 9) / (log2(9)))
         + ((1.0 / 5) / (log2(10)));
 
-    Assert.assertTrue(checkEq(DCG, rightDCG));
+    Assert.assertEquals(DCG, rightDCG, 1e-10);
 
   }
 
@@ -166,7 +162,7 @@ public class UnitMetricTest {
         + 0.0
         + ((1.0 / 5) / (log2(10)));
 
-    Assert.assertTrue(checkEq(DCG, rightDCG));
+    Assert.assertEquals(DCG, rightDCG, 1e-10);
 
   }
 
