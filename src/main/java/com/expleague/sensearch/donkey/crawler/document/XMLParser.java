@@ -23,14 +23,12 @@ public class XMLParser {
     try {
       XMLEventReader reader = xmlInputFactory.
           createXMLEventReader(new FileInputStream(file.getAbsolutePath()));
-      StringBuilder text;
       while (reader.hasNext()) {
         XMLEvent xmlEvent = reader.nextEvent();
         if (xmlEvent.isStartElement()) {
           StartElement startElement = xmlEvent.asStartElement();
           if (startElement.getName().getLocalPart().equals("page")) {
             page = new WikiPage();
-            text = new StringBuilder();
 
             Attribute idAttr = startElement
                 .getAttributeByName(new QName("id"));
@@ -75,8 +73,6 @@ public class XMLParser {
                   while (reader.hasNext() && (xmlEvent = reader.nextEvent()).isCharacters()) {
                     String s = xmlEvent.asCharacters().getData();
                     sectionText.append(s);
-                    // TODO (tehnar): do not duplicate data in section and in text
-                    text.append(s);
                   }
                 }
               }
@@ -84,12 +80,8 @@ public class XMLParser {
                 EndElement endElement = xmlEvent.asEndElement();
                 if (endElement.getName().getLocalPart().equals("section")) {
                   sections.add(new WikiPage.WikiSection(sectionText.toString(), sectionTitle));
-                  if (text.length() > 0) {
-                    text.append("\n\n\n");
-                  }
                 }
                 if (endElement.getName().getLocalPart().equals("page")) {
-                  page.setPage(text.toString());
                   page.setSections(sections);
                   break;
                 }

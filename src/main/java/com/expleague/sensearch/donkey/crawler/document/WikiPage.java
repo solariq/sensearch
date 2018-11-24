@@ -6,7 +6,6 @@ public class WikiPage implements CrawlerDocument {
 
   private long id;
   private String title;
-  private CharSequence page;
   private List<String> categories;
   private List<Section> sections;
 
@@ -18,10 +17,6 @@ public class WikiPage implements CrawlerDocument {
 
   public void setId(long id) {
     this.id = id;
-  }
-
-  public void setPage(CharSequence page) {
-    this.page = page;
   }
 
   public void setTitle(String title) {
@@ -53,17 +48,19 @@ public class WikiPage implements CrawlerDocument {
 
   @Override
   public CharSequence content() {
-    return this.page;
+    StringBuilder page = new StringBuilder();
+    for (Section section : sections) {
+      page.append(section.text());
+      if (page.length() > 0) {
+        page.append("\n\n\n");
+      }
+    }
+    return page;
   }
 
   @Override
   public long iD() {
     return this.id;
-  }
-
-  @Override
-  public String toString() {
-    return this.page.toString();
   }
 
   public static class WikiSection implements Section {
