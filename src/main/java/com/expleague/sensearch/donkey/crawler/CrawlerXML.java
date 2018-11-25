@@ -1,6 +1,6 @@
 package com.expleague.sensearch.donkey.crawler;
 
-import com.expleague.sensearch.Config;
+import com.expleague.sensearch.ConfigJson;
 import com.expleague.sensearch.donkey.crawler.document.CrawlerDocument;
 import com.expleague.sensearch.donkey.crawler.document.WikiPage;
 import com.expleague.sensearch.donkey.crawler.document.XMLParser;
@@ -18,13 +18,14 @@ import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
+import org.apache.commons.io.FileUtils;
 
 public class CrawlerXML implements Crawler {
 
-  private final Config config;
+  private final ConfigJson config;
   private Path path;
 
-  public CrawlerXML(Config config) {
+  public CrawlerXML(ConfigJson config) {
     this.path = config.getPathToZIP();
     this.config = config;
   }
@@ -65,6 +66,13 @@ public class CrawlerXML implements Crawler {
 
     @Override
     public boolean hasNext() {
+      if (this.zipEntry == null) {
+        try {
+          FileUtils.deleteDirectory(pathTmp.toFile());
+        } catch (IOException e) {
+          e.printStackTrace();
+        }
+      }
       return this.zipEntry != null;
     }
 

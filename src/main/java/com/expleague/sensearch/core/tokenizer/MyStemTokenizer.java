@@ -19,7 +19,7 @@ public class MyStemTokenizer implements Tokenizer {
   }
 
   @Override
-  public List<CharSequence> sentenceToWords(CharSequence sentence) {
+  public List<CharSequence> toWords(CharSequence sentence) {
     return myStem
         .parse(sentence)
         .stream()
@@ -28,7 +28,7 @@ public class MyStemTokenizer implements Tokenizer {
   }
 
   @Override
-  public List<CharSequence> textToSentences(CharSequence text) {
+  public List<CharSequence> toSentences(CharSequence text) {
     return Arrays.asList(splitPattern.split(text));
   }
 

@@ -12,7 +12,7 @@ public interface CrawlerDocument {
 
   List<Section> sections();
 
-  Long iD();
+  long iD();
 
   interface Section {
     CharSequence text();
