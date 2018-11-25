@@ -67,12 +67,12 @@ public abstract class SensearchTestCase {
   }
 
   @AfterClass
-  public static void cleanupUniverse() throws IOException {
+  public static void cleanupUniverse() {
     LOG.fine("Cleaning up...");
     LOG.fine(String.format("Will delete tes output directory %s",
         testOutputRoot.toAbsolutePath().toString())
     );
-    FileUtils.deleteDirectory(testOutputRoot.toFile());
+    clearOutputRoot();
   }
 
   protected static Path testOutputRoot() {
@@ -81,6 +81,17 @@ public abstract class SensearchTestCase {
 
   protected static Path testDataRoot() {
     return testDataRoot;
+  }
+
+  protected static void clearOutputRoot() {
+    try {
+      FileUtils.cleanDirectory(testOutputRoot.toFile());
+    } catch (IOException e) {
+      throw new RuntimeException(
+          String.format("Failed to clea test output directory %s",
+              testOutputRoot.toAbsolutePath().toString()),
+          e);
+    }
   }
 
   protected static Config config() {

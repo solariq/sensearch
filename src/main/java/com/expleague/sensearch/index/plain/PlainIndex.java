@@ -26,9 +26,7 @@ import gnu.trove.map.TLongObjectMap;
 import gnu.trove.map.TObjectLongMap;
 import gnu.trove.map.hash.TLongObjectHashMap;
 import gnu.trove.map.hash.TObjectLongHashMap;
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.LinkedList;
@@ -36,7 +34,6 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.logging.Logger;
 import java.util.stream.Stream;
-import java.util.zip.GZIPInputStream;
 import org.fusesource.leveldbjni.JniDBFactory;
 import org.iq80.leveldb.CompressionType;
 import org.iq80.leveldb.DB;
@@ -98,7 +95,7 @@ public class PlainIndex implements Index {
     );
 
     IndexUnits.IndexMeta indexMeta = IndexUnits.IndexMeta.parseFrom(
-        Files.newInputStream(indexRoot.resolve(PlainIndexBuilder.INDEX_META))
+        Files.newInputStream(indexRoot.resolve(PlainIndexBuilder.INDEX_META_FILE))
     );
     averagePageSize = indexMeta.getAveragePageSize();
     indexSize = indexMeta.getPagesCount();

@@ -111,7 +111,7 @@ public class EmbeddingImpl implements Embedding {
       return getVec(ids[0]);
     }
 
-    ArrayVec mean = new ArrayVec(new double[PlainIndexBuilder.VEC_SIZE]);
+    ArrayVec mean = new ArrayVec(new double[PlainIndexBuilder.DEFAULT_VEC_SIZE]);
     int number = 0;
     for (long id : ids) {
       Vec vec = getVec(id);

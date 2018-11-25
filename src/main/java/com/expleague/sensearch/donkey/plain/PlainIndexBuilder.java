@@ -33,19 +33,41 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.logging.Logger;
 import java.util.zip.GZIPInputStream;
+import org.fusesource.leveldbjni.JniDBFactory;
+import org.iq80.leveldb.CompressionType;
+import org.iq80.leveldb.DB;
+import org.iq80.leveldb.Options;
 
 public class PlainIndexBuilder implements IndexBuilder {
+
+  public static final int STATISTICS_BLOCK_SIZE = 1 << 10;
+  public static final int PLAIN_PAGE_BLOCK_SIZE = 1 << 20;
 
   public static final String TERM_STATISTICS_ROOT = "stats";
   public static final String PLAIN_ROOT = "plain";
   public static final String EMBEDDING_ROOT = "embedding";
 
-  public static final String INDEX_META = "index.meta";
+  public static final String INDEX_META_FILE = "index.meta";
+  public static final int DEFAULT_VEC_SIZE = 50;
 
+  // DB configurations
+  private static final long DEFAULT_CACHE_SIZE = 1 << 10; // 1 KB
+  private static final Options STATS_DB_OPTIONS = new Options()
+      .cacheSize(DEFAULT_CACHE_SIZE)
+      .blockSize(STATISTICS_BLOCK_SIZE) // 1 MB
+      .createIfMissing(true)
+      .errorIfExists(true)
+      .compressionType(CompressionType.SNAPPY);
+  private static final Options PLAIN_DB_OPTIONS = new Options()
+      .cacheSize(DEFAULT_CACHE_SIZE)
+      .blockRestartInterval(PLAIN_PAGE_BLOCK_SIZE)
+      .createIfMissing(true)
+      .errorIfExists(true)
+      .compressionType(CompressionType.SNAPPY);
+
+  // Bloom filter for titles options
   private static final long DEFAULT_EXPECTED_COLLECTION_SIZE = (long) 1e7;
   private static final double DEFAULT_FALSE_POSITIVE_RATE = 1e-5;
-
-  public static final int VEC_SIZE = 50;
 
   private static final Logger LOG = Logger.getLogger(PlainIndexBuilder.class.getName());
 
@@ -112,7 +134,7 @@ public class PlainIndexBuilder implements IndexBuilder {
 
   @VisibleForTesting
   static Vec toVector(long[] tokens, TLongObjectMap<Vec> vectors) {
-    ArrayVec mean = new ArrayVec(new double[VEC_SIZE]);
+    ArrayVec mean = new ArrayVec(new double[DEFAULT_VEC_SIZE]);
     for (long i : tokens) {
       mean.add((ArrayVec) vectors.get(i));
     }
@@ -158,10 +180,22 @@ public class PlainIndexBuilder implements IndexBuilder {
     readGloveVectors(Paths.get(config.getEmbeddingVectors()), idMappings, gloveVectors);
 
     final Path indexRoot = config.getTemporaryIndex();
-    final PlainPageBuilder plainPageBuilder = new PlainPageBuilder(
-        indexRoot.resolve(PLAIN_ROOT));
-    final StatisticsBuilder statisticsBuilder = new StatisticsBuilder(
-        indexRoot.resolve(TERM_STATISTICS_ROOT));
+    // ensure all roots
+    Files.createDirectories(indexRoot.resolve(PLAIN_ROOT));
+    final DB plainDb = JniDBFactory.factory.open(
+        indexRoot.resolve(PLAIN_ROOT).toFile(),
+        PLAIN_DB_OPTIONS
+    );
+    final PlainPageBuilder plainPageBuilder = new PlainPageBuilder(plainDb);
+
+    Files.createDirectories(indexRoot.resolve(TERM_STATISTICS_ROOT));
+    final DB statisticsDb = JniDBFactory.factory.open(
+        indexRoot.resolve(TERM_STATISTICS_ROOT).toFile(),
+        STATS_DB_OPTIONS
+    );
+    final StatisticsBuilder statisticsBuilder = new StatisticsBuilder(statisticsDb);
+
+    Files.createDirectories(indexRoot.resolve(EMBEDDING_ROOT));
     final EmbeddingBuilder embeddingBuilder = new EmbeddingBuilder(
         indexRoot.resolve(EMBEDDING_ROOT));
 
@@ -229,7 +263,8 @@ public class PlainIndexBuilder implements IndexBuilder {
           .setTitlesBloomFilter(ByteString.copyFrom(bos.toByteArray()))
           .addAllIdMappings(toProtobufIterable(idMappings))
           .build()
-          .writeTo(Files.newOutputStream(indexRoot.resolve(INDEX_META)));
+          .writeTo(Files.newOutputStream(indexRoot.resolve(INDEX_META_FILE)));
+
     } catch (Exception e) {
       throw new IOException(e);
     }

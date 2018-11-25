@@ -8,9 +8,6 @@ import com.google.common.primitives.Longs;
 import gnu.trove.list.TLongList;
 import gnu.trove.list.array.TLongArrayList;
 import gnu.trove.map.TLongObjectMap;
-import org.fusesource.leveldbjni.JniDBFactory;
-import org.iq80.leveldb.*;
-
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
@@ -18,26 +15,30 @@ import java.io.Writer;
 import java.nio.file.Path;
 import java.util.Random;
 import java.util.function.ToIntFunction;
+import org.fusesource.leveldbjni.JniDBFactory;
+import org.iq80.leveldb.CompressionType;
+import org.iq80.leveldb.DB;
+import org.iq80.leveldb.Options;
+import org.iq80.leveldb.WriteBatch;
+import org.iq80.leveldb.WriteOptions;
 
 public class EmbeddingBuilder {
 
   public static final String VECS_ROOT = "vecs";
   public static final String LSH_ROOT = "lsh";
   public static final String RAND_VECS = "rand";
-
-  private static final int MAX_BATCH_SIZE = 100;
-
   public static final int TABLES_NUMBER = 10;
   public static final int TUPLE_SIZE = 12;
+  private static final int MAX_BATCH_SIZE = 100;
 
   private static final Options DB_OPTIONS = new Options()
-          .createIfMissing(true)
-          .errorIfExists(true)
-          .compressionType(CompressionType.SNAPPY);
+      .createIfMissing(true)
+      .errorIfExists(true)
+      .compressionType(CompressionType.SNAPPY);
 
   private static final WriteOptions WRITE_OPTIONS = new WriteOptions()
-          .sync(true);
-          //.snapshot(false);
+      .sync(true);
+  //.snapshot(false);
 
   private DB vecDB;
   private WriteBatch batch = null;
@@ -65,7 +66,7 @@ public class EmbeddingBuilder {
 
         Vec[] randVecs = new Vec[TUPLE_SIZE];
         for (int j = 0; j < randVecs.length; j++) {
-          double[] randCoords = new double[PlainIndexBuilder.VEC_SIZE];
+          double[] randCoords = new double[PlainIndexBuilder.DEFAULT_VEC_SIZE];
           for (int k = 0; k < randCoords.length; k++) {
             randCoords[k] = random.nextDouble();
             output.write(randCoords[k] + " ");

@@ -25,14 +25,6 @@ import org.iq80.leveldb.WriteOptions;
 
 public class StatisticsBuilder {
 
-  private static final long DEFAULT_CACHE_SIZE = 16 * (1 << 20); // 16 MB
-
-  private static final Options DEFAULT_DB_OPTIONS = new Options()
-      .cacheSize(DEFAULT_CACHE_SIZE)
-      .createIfMissing(true)
-      .errorIfExists(true)
-      .compressionType(CompressionType.SNAPPY);
-
   private static final WriteOptions DEFAULT_WRITE_OPTIONS = new WriteOptions()
       .sync(true)
       .snapshot(false);
@@ -45,8 +37,8 @@ public class StatisticsBuilder {
 
   private final DB statisticsDb;
 
-  StatisticsBuilder(Path statisticsRoot) throws IOException {
-    statisticsDb = JniDBFactory.factory.open(statisticsRoot.toFile(), DEFAULT_DB_OPTIONS);
+  StatisticsBuilder(DB statisticsDb) {
+    this.statisticsDb = statisticsDb;
   }
 
   @VisibleForTesting
