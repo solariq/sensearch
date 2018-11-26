@@ -64,7 +64,6 @@ public class UnitDocumentTest {
         .toFile());
     Assert.assertEquals(page.categories().size(), 0);
 
-
     Assert.assertEquals(page.iD(), 3457253);
     Assert.assertEquals(page.title(), "Нагуманов, Андрей Рафаилович");
     Assert.assertEquals(page.sections().size(), 3);

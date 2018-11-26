@@ -37,7 +37,8 @@ public class MetricTest {
       String line;
       while ((line = reader.readLine()) != null) {
         webCrawler.query = line;
-        BufferedReader readOld = Files.newBufferedReader(pathToMetric.resolve(line).resolve("METRIC"));
+        BufferedReader readOld = Files
+            .newBufferedReader(pathToMetric.resolve(line).resolve("METRIC"));
         System.err.println(readOld.readLine());
         builder.getSearcher().search(line, 0);
       }

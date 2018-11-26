@@ -9,6 +9,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 public class MyStemTokenizer implements Tokenizer {
+
   private static final Pattern splitPattern = Pattern
       .compile("(?<=[.!?]|[.!?]['\"])(?=\\p{javaWhitespace}*\\p{javaUpperCase})");
 

@@ -15,8 +15,9 @@ public class SpellChecker {
     StringBuilder result = new StringBuilder();
     int lastInd = 0;
 
-    for (RuleMatch rule: rules) {
-      String suggestion = rule.getSuggestedReplacements().isEmpty() ? "" : rule.getSuggestedReplacements().get(0);
+    for (RuleMatch rule : rules) {
+      String suggestion =
+          rule.getSuggestedReplacements().isEmpty() ? "" : rule.getSuggestedReplacements().get(0);
       result.append(uncorrected.subSequence(lastInd, rule.getFromPos()));
       result.append(suggestion);
       lastInd = rule.getToPos();

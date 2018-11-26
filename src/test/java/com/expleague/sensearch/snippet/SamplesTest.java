@@ -60,7 +60,7 @@ public class SamplesTest {
   @Before
   public void prepare() {
     File folder = new File("./src/test/java/com/expleague/sensearch/snippet/samples");
-    Arrays.stream(folder.listFiles()).sorted().forEach(fileEntry ->  {
+    Arrays.stream(folder.listFiles()).sorted().forEach(fileEntry -> {
       if (fileEntry.isDirectory()) {
         try {
           CharSequence content = String

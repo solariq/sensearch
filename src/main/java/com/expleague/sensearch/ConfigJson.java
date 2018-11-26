@@ -3,6 +3,7 @@ package com.expleague.sensearch;
 import java.nio.file.Path;
 
 public interface ConfigJson {
+
   public Path getTemporaryDocuments();
 
   public String getTemporaryBigrams();

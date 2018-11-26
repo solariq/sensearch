@@ -20,6 +20,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 public class UnitMetricTest {
+
   private Metric metric;
   private WebCrawler crawler;
 
@@ -30,7 +31,8 @@ public class UnitMetricTest {
   private double readDCG() {
     double DCG = -1;
     try (BufferedReader reader = Files.newBufferedReader(
-        Paths.get("./src/test/java/com/expleague/sensearch/metrics/TMP").resolve("test").resolve("METRIC")
+        Paths.get("./src/test/java/com/expleague/sensearch/metrics/TMP").resolve("test")
+            .resolve("METRIC")
     )) {
       DCG = Double.valueOf(reader.readLine());
     } catch (IOException e) {
@@ -168,7 +170,8 @@ public class UnitMetricTest {
 
   @After
   public void clear() throws IOException {
-    FileUtils.deleteDirectory(Paths.get("./src/test/java/com/expleague/sensearch/metrics/TMP").toFile());
+    FileUtils
+        .deleteDirectory(Paths.get("./src/test/java/com/expleague/sensearch/metrics/TMP").toFile());
   }
 
   private class Crawler implements WebCrawler {

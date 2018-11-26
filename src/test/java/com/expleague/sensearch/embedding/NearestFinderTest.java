@@ -37,7 +37,9 @@ public class NearestFinderTest {
     byte[] jsonData = Files.readAllBytes(Paths.get("./config.json"));
     Config config = new ObjectMapper().readValue(jsonData, Config.class);
     embedding = new EmbeddingImpl(config);
-    Vec v = VecTools.append(VecTools.subtract(embedding.getVec("король"), embedding.getVec("мужчина")), embedding.getVec("женщина"));
+    Vec v = VecTools
+        .append(VecTools.subtract(embedding.getVec("король"), embedding.getVec("мужчина")),
+            embedding.getVec("женщина"));
     for (String nearestWord : embedding.getNearestWords(v, 50)) {
       System.out.println(nearestWord);
     }

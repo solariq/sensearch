@@ -25,7 +25,7 @@ public class SnippetsCreator {
 
   private static final long PASSAGES_IN_SNIPPET = 4;
   private static final long NUMBER_OF_KEYWORDS = 6;
-  private static final double ALPHA = .4 ;
+  private static final double ALPHA = .4;
 
   private static final Pattern splitPattern = Pattern
       .compile("(?<=[.!?]|[.!?]['\"])(?=\\p{javaWhitespace}*\\p{javaUpperCase})");

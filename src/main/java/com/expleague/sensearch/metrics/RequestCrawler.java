@@ -35,7 +35,8 @@ public class RequestCrawler implements WebCrawler {
   private void setCookies(URLConnection urlConnection) throws IOException {
     List<String> cookies = getCookies();
     if (cookies != null) {
-      String resultCookie = cookies.stream().map(cookie -> cookie.split(";", 2)[0]).collect(Collectors.joining("; "));
+      String resultCookie = cookies.stream().map(cookie -> cookie.split(";", 2)[0])
+          .collect(Collectors.joining("; "));
       urlConnection.setRequestProperty("Cookie", resultCookie);
     }
   }
