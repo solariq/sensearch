@@ -3,6 +3,7 @@ package com.expleague.sensearch.donkey.plain;
 import com.expleague.commons.math.vectors.Vec;
 import com.expleague.commons.math.vectors.VecTools;
 import com.expleague.commons.math.vectors.impl.vectors.ArrayVec;
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.primitives.Ints;
 import com.google.common.primitives.Longs;
 import gnu.trove.list.TLongList;
@@ -48,9 +49,13 @@ public class EmbeddingBuilder {
   private DB tablesDB;
   private ToIntFunction<Vec>[] hashFuncs;
 
-  EmbeddingBuilder(Path embeddingPath) throws IOException {
+  public EmbeddingBuilder(Path embeddingPath) throws IOException {
     vecDB = JniDBFactory.factory.open(embeddingPath.resolve(VECS_ROOT).toFile(), DB_OPTIONS);
     tablesDB = JniDBFactory.factory.open(embeddingPath.resolve(LSH_ROOT).toFile(), DB_OPTIONS);
+
+    for (int i = 0; i < tables.length; i++) {
+      tables[i] = new TLongArrayList();
+    }
 
     hashFuncs = new ToIntFunction[TABLES_NUMBER];
 
@@ -69,7 +74,7 @@ public class EmbeddingBuilder {
           double[] randCoords = new double[PlainIndexBuilder.DEFAULT_VEC_SIZE];
           for (int k = 0; k < randCoords.length; k++) {
             randCoords[k] = random.nextDouble();
-            output.write(randCoords[k] + " ");
+            output.write(randCoords[k] + (k < randCoords.length - 1 ? " " : ""));
           }
           randVecs[j] = new ArrayVec(randCoords);
           output.write("\n");
@@ -114,13 +119,14 @@ public class EmbeddingBuilder {
     }
   }
 
-  void add(long id, Vec vec) {
+  public void add(long id, Vec vec) {
     addToTables(id, vec);
     check(vecDB);
     batch.put(Longs.toByteArray(id), ByteTools.toBytes(vec));
+    batchSize++;
   }
 
-  void addAll(TLongObjectMap<Vec> vecs) {
+  public void addAll(TLongObjectMap<Vec> vecs) {
     vecs.forEachEntry((id, vec) -> {
       add(id, vec);
       return true;
@@ -130,9 +136,10 @@ public class EmbeddingBuilder {
   private void addToTablesDB(int bucket, long[] ids) {
     check(tablesDB);
     batch.put(Ints.toByteArray(bucket), ByteTools.toBytes(ids));
+    batchSize++;
   }
 
-  void build() throws IOException {
+  public void build() throws IOException {
     if (batchSize > 0) {
       vecDB.write(batch, WRITE_OPTIONS);
       batchSize = 0;

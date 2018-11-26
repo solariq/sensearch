@@ -14,7 +14,6 @@ import com.google.common.primitives.Longs;
 import gnu.trove.list.TLongList;
 import org.fusesource.leveldbjni.JniDBFactory;
 import org.iq80.leveldb.DB;
-import org.iq80.leveldb.DBException;
 import org.iq80.leveldb.Options;
 
 import java.io.FileInputStream;
@@ -30,7 +29,7 @@ import java.util.stream.LongStream;
 public class EmbeddingImpl implements Embedding {
 
   private static final long CACHE_SIZE = 16 * (1 << 20);
-  private static final double EPSILON = 10e-9;
+  private static final double EPSILON = 1e-9;
   private static final Options DB_OPTIONS = new Options().cacheSize(CACHE_SIZE);
 
   private BiFunction<Vec, Vec, Double> nearestMeasure = VecTools::distanceAV;
@@ -49,7 +48,7 @@ public class EmbeddingImpl implements Embedding {
             DB_OPTIONS
     );
 
-    List<Vec> randVecsList = new ArrayList<>();
+    List<Vec> randVecs = new ArrayList<>();
     try (Reader input =
         new InputStreamReader(
             new FileInputStream(
@@ -60,7 +59,7 @@ public class EmbeddingImpl implements Embedding {
       CharSeqTools.lines(input)
           .forEach(line -> {
               CharSequence[] parts = CharSeqTools.split(line, ' ');
-                  randVecsList.add(
+                  randVecs.add(
                       new ArrayVec(
                           Arrays.stream(parts).mapToDouble(CharSeqTools::parseDouble).toArray()
                       )
@@ -68,7 +67,6 @@ public class EmbeddingImpl implements Embedding {
                 }
               );
     }
-    Vec[] randVecs = (Vec[]) randVecsList.toArray();
 
     hashFuncs = new ToIntFunction[EmbeddingBuilder.TABLES_NUMBER];
     for (int i = 0; i < hashFuncs.length; i++) {
@@ -78,7 +76,7 @@ public class EmbeddingImpl implements Embedding {
 
         boolean[] mask = new boolean[EmbeddingBuilder.TUPLE_SIZE];
         for (int j = 0; j < mask.length; j++) {
-          mask[j] = VecTools.multiply(vec, randVecs[EmbeddingBuilder.TUPLE_SIZE * hashNum + j]) >= 0;
+          mask[j] = VecTools.multiply(vec, randVecs.get(EmbeddingBuilder.TUPLE_SIZE * hashNum + j)) >= 0;
         }
 
         int hash = (1 << EmbeddingBuilder.TUPLE_SIZE) * hashNum;
@@ -94,11 +92,11 @@ public class EmbeddingImpl implements Embedding {
   }
 
   private Vec getVec(long id) {
-    try {
-      return ByteTools.toVec(vecDB.get(Longs.toByteArray(id)));
-    } catch (DBException e) {
-      return null;
+    byte[] bytes = vecDB.get(Longs.toByteArray(id));
+    if (bytes != null) {
+      return ByteTools.toVec(bytes);
     }
+    return null;
   }
 
   @Override
@@ -121,7 +119,11 @@ public class EmbeddingImpl implements Embedding {
       }
     }
 
-    mean.scale(1. / number);
+    if (number == 0) {
+      return null;
+    }
+
+    mean.scale(1. / (double) number);
     return mean;
   }
 
@@ -143,8 +145,9 @@ public class EmbeddingImpl implements Embedding {
 
   @Override
   public LongStream getNearest(Vec mainVec, int numberOfNeighbors) {
-    //TODO : replace on TLongList
-    List<Long> lshNeighbors = new ArrayList<>();
+    Comparator<Long> comparator = getComparator(mainVec);
+
+    Set<Long> lshNeighbors = new TreeSet<>(comparator);
     for (ToIntFunction<Vec> hashFunc : hashFuncs) {
       int bucketIndex = hashFunc.applyAsInt(mainVec);
       long[] ids = ByteTools.toLongArray(tablesDB.get(Ints.toByteArray(bucketIndex)));
@@ -153,10 +156,7 @@ public class EmbeddingImpl implements Embedding {
       }
     }
 
-    Comparator<Long> comparator = getComparator(mainVec);
-
     if (lshNeighbors.size() <= numberOfNeighbors) {
-      lshNeighbors.sort(comparator);
       return lshNeighbors.stream().mapToLong(Long::longValue);
     }
 

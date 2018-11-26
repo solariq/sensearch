@@ -22,7 +22,7 @@ public final class ByteTools {
   }
 
   public static Vec toVec(byte[] bytes) {
-    DoubleBuffer doubleBuf = ByteBuffer.wrap(bytes).order(ByteOrder.nativeOrder()).asDoubleBuffer();
+    DoubleBuffer doubleBuf = ByteBuffer.wrap(bytes).asDoubleBuffer();
     double[] doubles = new double[doubleBuf.remaining()];
     doubleBuf.get(doubles);
     return new ArrayVec(doubles);
@@ -36,7 +36,7 @@ public final class ByteTools {
   }
 
   public static long[] toLongArray(byte[] bytes) {
-    LongBuffer longBuf = ByteBuffer.wrap(bytes).order(ByteOrder.nativeOrder()).asLongBuffer();
+    LongBuffer longBuf = ByteBuffer.wrap(bytes).asLongBuffer();
     long[] longs = new long[longBuf.remaining()];
     longBuf.get(longs);
     return longs;
