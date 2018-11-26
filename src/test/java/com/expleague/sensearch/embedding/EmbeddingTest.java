@@ -72,6 +72,11 @@ public class EmbeddingTest {
         embedding = new EmbeddingImpl(embeddingTestPath);
     }
 
+    @AfterClass
+    public static void close() throws IOException {
+        FileUtils.deleteDirectory(embeddingTestPath.toFile());
+    }
+
     @Test
     public void getVecTest() throws Exception {
         int idsNumber = 10;
@@ -86,7 +91,6 @@ public class EmbeddingTest {
             ids.add(MAX_ID + random.nextInt(MAX_ID));
         }
         Assert.assertNull(embedding.getVec(ids));
-        FileUtils.deleteDirectory(embeddingTestPath.toFile());
     }
 
     @Test
@@ -100,6 +104,5 @@ public class EmbeddingTest {
                     ).anyMatch(curNeighbors::contains)
             );
         }
-        FileUtils.deleteDirectory(embeddingTestPath.toFile());
     }
 }
