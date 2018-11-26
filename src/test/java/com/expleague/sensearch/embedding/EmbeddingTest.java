@@ -78,7 +78,7 @@ public class EmbeddingTest {
     }
 
     @Test
-    public void getVecTest() throws Exception {
+    public void getVecTest() {
         int idsNumber = 10;
         TLongList ids = new TLongArrayList();
         for (int i = 0; i < idsNumber; i++) {
@@ -94,7 +94,7 @@ public class EmbeddingTest {
     }
 
     @Test
-    public void getNearestTest() throws Exception {
+    public void getNearestTest() {
         for (int i = 0; i < MAIN_VEC_NUMBER; i++) {
             TLongSet curNeighbors = neighbors[i];
             Assert.assertTrue(
