@@ -30,8 +30,9 @@
         <version>3.0.0-M1</version>
         <configuration>
           <excludes>
+            <exclude>FilterTest.java</exclude>
             <exclude>*InteractionTest.java</exclude>
-            <exclude>MinimalFunctionalityPlainIndexText.java</exclude>
+            <exclude>MinimalFunctionalityPlainIndexTest.java</exclude>
             <exclude>NearestFinderTest.java</exclude>
             <exclude>MetricTest.java</exclude>
           </excludes>
