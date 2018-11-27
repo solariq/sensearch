@@ -12,6 +12,7 @@ import com.expleague.sensearch.index.IndexedPage;
 import com.expleague.sensearch.protobuf.index.IndexUnits;
 import com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta.IdMapping;
 import com.expleague.sensearch.protobuf.index.IndexUnits.TermStatistics;
+import com.expleague.sensearch.protobuf.index.IndexUnits.TermStatistics.TermFrequency;
 import com.expleague.sensearch.query.Query;
 import com.expleague.sensearch.query.term.Term;
 import com.google.common.hash.BloomFilter;
@@ -29,6 +30,8 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -127,6 +130,29 @@ public class PlainIndex implements Index {
 
   private static boolean isWordId(long id) {
     return id > 0;
+  }
+
+  @Override
+  public List<String> mostFrequentNeighbours(String rawWord) {
+    rawWord = rawWord.toLowerCase().trim();
+    long wordId = 0;
+    try {
+      wordId = toId(rawWord);
+      List<String> neighbours = new ArrayList<>();
+      for (TermFrequency tf : termStatistics(wordId)
+          .getBigramFrequencyList()) {
+        neighbours.add(idToWord(tf.getTermId()));
+      }
+      return neighbours;
+    } catch (NoSuchElementException e) {
+      return Collections.emptyList();
+    } catch (InvalidProtocolBufferException e) {
+      LOG.warning(String.format(
+          "Encountered invalid protobuf in statistics base for word with id %d", wordId
+          )
+      );
+      return Collections.emptyList();
+    }
   }
 
   @Override

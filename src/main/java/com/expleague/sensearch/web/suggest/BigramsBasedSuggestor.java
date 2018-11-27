@@ -1,9 +1,14 @@
 package com.expleague.sensearch.web.suggest;
 
 import com.expleague.sensearch.Config;
+import com.expleague.sensearch.core.Tokenizer;
+import com.expleague.sensearch.index.Index;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.TreeMap;
@@ -12,44 +17,39 @@ import java.util.stream.Collectors;
 
 public class BigramsBasedSuggestor implements Suggestor {
 
-  private final Config config;
-  private TreeMap<String, Integer> map;
+  private final Index index;
 
-  public BigramsBasedSuggestor(Config config) throws IOException {
-    this.config = config;
-
-    ObjectMapper mapper = new ObjectMapper();
-    map = mapper.readValue(this.config.getBigramsFileName().toFile(), TreeMap.class);
+  public BigramsBasedSuggestor(Index index) throws IOException {
+    this.index = index;
   }
 
   public List<String> getSuggestions(String searchString) {
-    TreeSet<Entry<String, Integer>> resSet = new TreeSet<>(
-        new Comparator<Entry<String, Integer>>() {
+    // TODO: dummy implementation via most frequent neighbours
+    // TODO: is it needed to make 'smarter' data structure for such approach?
 
-          @Override
-          public int compare(Entry<String, Integer> o1, Entry<String, Integer> o2) {
-            // TODO Auto-generated method stub
-            return o1.getValue() - o2.getValue();
-          }
-        });
+    String[] tokens = searchString.toLowerCase().split("[^а-яёa-z0-9]");
+    if (tokens.length == 0) {
+      return Collections.emptyList();
+    }
 
-    String[] words = searchString.split("[^a-zA-Zа-яА-ЯЁё]+");
-
-    String lastWord = words.length > 0 ? words[words.length - 1].trim() : "";
-    String lastBigram = words.length > 1 ?
-        words[words.length - 2] + " " + words[words.length - 1]
-        : null;
-
-    for (Entry<String, Integer> ent : map.entrySet()) {
-      if ((!lastWord.equals("") && ent.getKey().startsWith(lastWord))
-          || (lastBigram != null && ent.getKey().startsWith(lastBigram))) {
-        resSet.add(ent);
+    // avoid empty tokens
+    String lastToken = "";
+    for (int i = tokens.length - 1; i >= 0; --i) {
+      if (!tokens[i].trim().isEmpty()) {
+        lastToken = tokens[i].trim();
+        break;
       }
     }
 
-    return resSet.stream()
-        .map(Entry::getKey)
-        .limit(10)
-        .collect(Collectors.toList());
+    if (lastToken.isEmpty()) {
+      return Collections.emptyList();
+    }
+
+    List<String> suggestions = new ArrayList<>();
+    for (String neighbour : index.mostFrequentNeighbours(lastToken)) {
+      suggestions.add(searchString + " " + neighbour);
+    }
+
+    return suggestions;
   }
 }

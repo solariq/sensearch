@@ -6,53 +6,63 @@ import java.nio.file.Path;
 
 public class TestConfig extends Config {
 
+  private Path miniWikiPath;
+  private Path indexRoot;
+  private Path gloveVectorsPath;
+
+  public TestConfig(Path miniWikiPath, Path indexRoot, Path gloveVectorsPath) {
+    this.miniWikiPath = miniWikiPath;
+    this.indexRoot = indexRoot;
+    this.gloveVectorsPath = gloveVectorsPath;
+  }
+
   @Override
   public Path getTemporaryDocuments() {
-    return super.getTemporaryDocuments();
+    throw new UnsupportedOperationException();
   }
 
   @Override
   public String getTemporaryBigrams() {
-    return super.getTemporaryBigrams();
+    throw new UnsupportedOperationException();
   }
 
   @Override
   public Path getBigramsFileName() {
-    return super.getBigramsFileName();
+    throw new UnsupportedOperationException();
   }
 
   @Override
   public Path getTemporaryIndex() {
-    return super.getTemporaryIndex();
+    return indexRoot;
   }
 
   @Override
   public String getWebRoot() {
-    return super.getWebRoot();
+    throw new UnsupportedOperationException();
   }
 
   @Override
   public Path getMyStem() {
-    return super.getMyStem();
+    throw new UnsupportedOperationException();
   }
 
   @Override
   public Path getPathToZIP() {
-    return super.getPathToZIP();
+    return miniWikiPath;
   }
 
   @Override
   public String getStatisticsFileName() {
-    return super.getStatisticsFileName();
+    throw new UnsupportedOperationException();
   }
 
   @Override
   public String getEmbeddingVectors() {
-    return super.getEmbeddingVectors();
+    return gloveVectorsPath.toString();
   }
 
   @Override
   public Path getPathToMetrics() {
-    return super.getPathToMetrics();
+    throw new UnsupportedOperationException();
   }
 }
