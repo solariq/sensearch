@@ -1,5 +1,7 @@
 package com.expleague.sensearch.snippet;
 
+import com.expleague.commons.text.lemmer.MyStem;
+import com.expleague.sensearch.LogBasedMyStem;
 import com.expleague.sensearch.Page;
 import com.expleague.sensearch.core.Lemmer;
 import com.expleague.sensearch.index.Index;
@@ -11,7 +13,9 @@ import java.nio.file.Paths;
 import java.util.stream.Stream;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.TestName;
 
 public class RelevanceTest {
 
@@ -47,11 +51,20 @@ public class RelevanceTest {
       return 0;
     }
   };
-  private Lemmer lemmer = new Lemmer(Paths.get("./resources/mystem"));
+
+  private Lemmer lemmer;
   private Page d1, d2, d3;
+
+  @Rule
+  public TestName testName = new TestName();
 
   @Before
   public void prepare() {
+    MyStem myStem = new LogBasedMyStem(
+//          Paths.get("./resources/mystem"),
+        Paths.get("myStemTestLogs", this.getClass().getName() + "_" + testName.getMethodName()));
+    lemmer = new Lemmer(myStem);
+
     d1 = new Page() {
       @Override
       public URI reference() {
