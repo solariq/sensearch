@@ -124,5 +124,17 @@
       <version>1.11.3</version>
     </dependency>
 
+    <dependency>
+      <groupId>org.languagetool</groupId>
+      <artifactId>languagetool-core</artifactId>
+      <version>4.3</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.languagetool</groupId>
+      <artifactId>language-ru</artifactId>
+      <version>4.3</version>
+    </dependency>
+
   </dependencies>
 </project>
