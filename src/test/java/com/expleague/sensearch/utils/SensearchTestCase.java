@@ -7,6 +7,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.logging.Logger;
 import org.apache.commons.io.FileUtils;
+import org.iq80.leveldb.CompressionType;
+import org.iq80.leveldb.Options;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 
@@ -94,7 +96,23 @@ public abstract class SensearchTestCase {
     }
   }
 
-  protected static Config config() {
+  protected static Options dbOpenOptions() {
+    return new Options()
+        .cacheSize(1 << 10)
+        .createIfMissing(false)
+        .errorIfExists(false)
+        .compressionType(CompressionType.NONE);
+  }
+
+  protected static Options dbCreateOptions() {
+    return new Options()
+        .cacheSize(1 << 10)
+        .createIfMissing(true)
+        .errorIfExists(true)
+        .compressionType(CompressionType.NONE);
+  }
+
+  protected Config config() {
     return null;
   }
 }

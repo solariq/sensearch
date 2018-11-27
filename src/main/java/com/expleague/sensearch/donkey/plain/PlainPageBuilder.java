@@ -59,8 +59,6 @@ class PlainPageBuilder {
   void build() throws IOException {
     if (pagesInBatch > 0) {
       plainDb.write(writeBatch, DEFAULT_WRITE_OPTIONS);
-      pagesInBatch = 0;
-      writeBatch = plainDb.createWriteBatch();
     }
 
     plainDb.close();

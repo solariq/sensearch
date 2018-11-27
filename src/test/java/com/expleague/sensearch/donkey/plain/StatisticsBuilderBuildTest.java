@@ -12,9 +12,8 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import org.fusesource.leveldbjni.JniDBFactory;
-import org.iq80.leveldb.CompressionType;
+import org.fusesource.leveldbjni.internal.NativeDB.DBException;
 import org.iq80.leveldb.DB;
-import org.iq80.leveldb.Options;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -26,17 +25,6 @@ public class StatisticsBuilderBuildTest extends SensearchTestCase {
       {2, 3, 1, 3, 2, 1, 4, 1, 2, 3, 1},
       {3, 2, 3, 4, 2, 4, 3, 2, 3, 4, 2}
   };
-  private static Options DB_OPEN_OPTIONS = new Options()
-      .cacheSize(1 << 10)
-      .createIfMissing(false)
-      .errorIfExists(false)
-      .compressionType(CompressionType.SNAPPY);
-
-  private static Options DB_CREATE_OPTIONS = new Options()
-      .cacheSize(1 << 10)
-      .createIfMissing(true)
-      .errorIfExists(true)
-      .compressionType(CompressionType.SNAPPY);
 
   @Test
   public void enrichFrequenciesTest() {
@@ -65,12 +53,13 @@ public class StatisticsBuilderBuildTest extends SensearchTestCase {
   @Test
   public void simpleBuildTest() throws IOException {
     clearOutputRoot();
-    enrichFrequenciesTest();
 
     Path statisticsOutputRoot = testOutputRoot().resolve(DB_ROOT_NAME);
     Files.createDirectories(statisticsOutputRoot);
-    DB statisticsDb = JniDBFactory.factory.open(statisticsOutputRoot.toFile(),
-        DB_CREATE_OPTIONS);
+    DB statisticsDb = JniDBFactory.factory.open(
+        statisticsOutputRoot.toFile(),
+        dbOpenOptions()
+    );
 
     TLongIntMap tFreqMap = new TLongIntHashMap();
     TLongObjectMap<TLongIntMap> bFreqMap = new TLongObjectHashMap<>();
@@ -85,27 +74,39 @@ public class StatisticsBuilderBuildTest extends SensearchTestCase {
     statisticsBuilder.build();
   }
 
+  @Test(expected = DBException.class)
+  public void twiceBuildTest() throws IOException {
+    DB plainDb = JniDBFactory.factory.open(
+        Files.createTempDirectory(testOutputRoot(), "tmp").toFile(),
+        dbCreateOptions()
+    );
+
+    PlainPageBuilder plainPageBuilder = new PlainPageBuilder(plainDb);
+    plainPageBuilder.build();
+    plainPageBuilder.build();
+  }
+
   @Test
   public void StatsDbContentTest() throws IOException {
     clearOutputRoot();
     simpleBuildTest();
-    DB statsDb = JniDBFactory.factory.open(testOutputRoot().resolve(DB_ROOT_NAME).toFile(),
-        DB_OPEN_OPTIONS
-    );
+    try (
+        DB statsDb = JniDBFactory.factory.open(testOutputRoot().resolve(DB_ROOT_NAME).toFile(),
+            dbOpenOptions()
+        )) {
 
-    TLongIntMap tFreqMap = new TLongIntHashMap();
-    TLongObjectMap<TLongIntMap> bFreqMap = new TLongObjectHashMap<>();
-    for (long[] wordSeq : WORD_ID_SEQ) {
-      PlainIndexBuilder.enrichFrequencies(wordSeq, tFreqMap, bFreqMap);
+      TLongIntMap tFreqMap = new TLongIntHashMap();
+      TLongObjectMap<TLongIntMap> bFreqMap = new TLongObjectHashMap<>();
+      for (long[] wordSeq : WORD_ID_SEQ) {
+        PlainIndexBuilder.enrichFrequencies(wordSeq, tFreqMap, bFreqMap);
+      }
+
+      TermStatistics statsFor1 = TermStatistics.parseFrom(statsDb.get(Longs.toByteArray(1)));
+      Assert.assertEquals(tFreqMap.get(1), statsFor1.getTermFrequency());
+      Assert.assertEquals(2, statsFor1.getDocuementFrequency());
+      for (TermFrequency tf : statsFor1.getBigramFrequencyList()) {
+        Assert.assertEquals(bFreqMap.get(1).get(tf.getTermId()), tf.getTermFrequency());
+      }
     }
-
-    TermStatistics statsFor1 = TermStatistics.parseFrom(statsDb.get(Longs.toByteArray(1)));
-    Assert.assertEquals(tFreqMap.get(1), statsFor1.getTermFrequency());
-    Assert.assertEquals(2, statsFor1.getDocuementFrequency());
-    for (TermFrequency tf : statsFor1.getBigramFrequencyList()) {
-      Assert.assertEquals(bFreqMap.get(1).get(tf.getTermId()), tf.getTermFrequency());
-    }
-
-    statsDb.close();
   }
 }

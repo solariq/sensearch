@@ -1,10 +1,11 @@
-package com.expleague.sensearch.embedding;
+package com.expleague.sensearch.donkey.plain;
 
 import com.expleague.commons.math.vectors.Vec;
 import com.expleague.commons.math.vectors.impl.vectors.ArrayVec;
 import com.expleague.sensearch.donkey.plain.EmbeddingBuilder;
 import com.expleague.sensearch.index.Embedding;
 import com.expleague.sensearch.index.plain.EmbeddingImpl;
+import com.expleague.sensearch.utils.SensearchTestCase;
 import gnu.trove.list.TLongList;
 import gnu.trove.list.array.TLongArrayList;
 import gnu.trove.map.TLongObjectMap;
@@ -20,7 +21,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Random;
 
-public class EmbeddingTest {
+public class EmbeddingBuilderTest extends SensearchTestCase {
 
     private static final String EMBEDDING_TEST_ROOT = "embeddingTest";
     private static final int MAIN_VEC_NUMBER = 10;
@@ -33,13 +34,13 @@ public class EmbeddingTest {
     private static Random random = new Random();
     private static TLongObjectMap<Vec> idVecMap;
     private static TLongSet[] neighbors;
-    private static Path embeddingTestPath = Paths.get(EMBEDDING_TEST_ROOT);
+    private static Path embeddingTestPath;
     private static Embedding embedding;
 
     //TODO: Remove builder or not?
     @BeforeClass
     public static void init() throws IOException {
-        Files.createDirectories(embeddingTestPath);
+        embeddingTestPath = Files.createDirectories(testOutputRoot().resolve(EMBEDDING_TEST_ROOT));
 
         EmbeddingBuilder builder = new EmbeddingBuilder(embeddingTestPath);
         idVecMap = new TLongObjectHashMap<>();
@@ -70,11 +71,6 @@ public class EmbeddingTest {
         builder.addAll(idVecMap);
         builder.build();
         embedding = new EmbeddingImpl(embeddingTestPath);
-    }
-
-    @AfterClass
-    public static void close() throws IOException {
-        FileUtils.deleteDirectory(embeddingTestPath.toFile());
     }
 
     @Test
