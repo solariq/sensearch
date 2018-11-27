@@ -12,8 +12,8 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import org.fusesource.leveldbjni.JniDBFactory;
-import org.fusesource.leveldbjni.internal.NativeDB.DBException;
 import org.iq80.leveldb.DB;
+import org.iq80.leveldb.DBException;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -58,7 +58,7 @@ public class StatisticsBuilderBuildTest extends SensearchTestCase {
     Files.createDirectories(statisticsOutputRoot);
     DB statisticsDb = JniDBFactory.factory.open(
         statisticsOutputRoot.toFile(),
-        dbOpenOptions()
+        dbCreateOptions()
     );
 
     TLongIntMap tFreqMap = new TLongIntHashMap();
@@ -76,14 +76,18 @@ public class StatisticsBuilderBuildTest extends SensearchTestCase {
 
   @Test(expected = DBException.class)
   public void twiceBuildTest() throws IOException {
-    DB plainDb = JniDBFactory.factory.open(
+    DB statsDb = JniDBFactory.factory.open(
         Files.createTempDirectory(testOutputRoot(), "tmp").toFile(),
         dbCreateOptions()
     );
 
-    PlainPageBuilder plainPageBuilder = new PlainPageBuilder(plainDb);
-    plainPageBuilder.build();
-    plainPageBuilder.build();
+    StatisticsBuilder statisticsBuilder = new StatisticsBuilder(statsDb);
+    statisticsBuilder.build();
+
+    TLongIntMap freqMap = new TLongIntHashMap();
+    freqMap.put(1, 1);
+    statisticsBuilder.enrich(freqMap, new TLongObjectHashMap<>());
+    statisticsBuilder.build();
   }
 
   @Test

@@ -3,22 +3,18 @@ package com.expleague.sensearch.donkey.plain;
 import com.expleague.sensearch.donkey.crawler.document.CrawlerDocument;
 import com.expleague.sensearch.protobuf.index.IndexUnits.Page;
 import com.expleague.sensearch.utils.SensearchTestCase;
-import com.google.common.primitives.Longs;
 import com.google.protobuf.InvalidProtocolBufferException;
 import gnu.trove.list.TLongList;
 import gnu.trove.list.array.TLongArrayList;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import org.fusesource.leveldbjni.JniDBFactory;
-import org.fusesource.leveldbjni.internal.NativeDB.DBException;
 import org.iq80.leveldb.DB;
+import org.iq80.leveldb.DBException;
 import org.iq80.leveldb.DBIterator;
-import org.iq80.leveldb.ReadOptions;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -65,6 +61,8 @@ public class PlainPageBuilderTest extends SensearchTestCase {
 
     PlainPageBuilder plainPageBuilder = new PlainPageBuilder(plainDb);
     plainPageBuilder.build();
+
+    plainPageBuilder.add(new CrawlerDocumentMock("testTitle", "testContent"));
     plainPageBuilder.build();
   }
 
