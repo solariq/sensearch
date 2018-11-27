@@ -31,7 +31,8 @@
         <configuration>
           <excludes>
             <exclude>*InteractionTest.java</exclude>
-            <exclude>MinimalFunctionalityTest.java</exclude>
+            <exclude>MinimalFunctionalityPlainIndexText.java</exclude>
+            <exclude>NearestFinderTest.java</exclude>
             <exclude>MetricTest.java</exclude>
           </excludes>
         </configuration>
@@ -88,7 +89,7 @@
     <dependency>
       <groupId>com.expleague</groupId>
       <artifactId>commons</artifactId>
-      <version>1.4.2</version>
+      <version>1.4.5</version>
     </dependency>
 
     <!-- https://mvnrepository.com/artifact/com.fasterxml.jackson.core/jackson-core -->
