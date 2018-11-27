@@ -1,7 +1,7 @@
 package com.expleague.sensearch.miner.impl;
 
 import com.expleague.sensearch.Page;
-import com.expleague.sensearch.index.IndexStatistics;
+import com.expleague.sensearch.index.Index;
 import com.expleague.sensearch.miner.Features;
 import com.expleague.sensearch.miner.FeaturesMiner;
 import com.expleague.sensearch.query.Query;
@@ -17,9 +17,6 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-/**
- * Created by sandulmv on 02.11.18.
- */
 public class RawTextFeaturesMiner implements FeaturesMiner {
 
   private static final Pattern SIMPLE_SPLITTER = Pattern.compile("[^а-яёa-z0-9]+");
@@ -30,10 +27,10 @@ public class RawTextFeaturesMiner implements FeaturesMiner {
   private static final double K = 1.2;
   private static final double B = 0.75;
 
-  private final IndexStatistics indexStatistics;
+  private final Index index;
 
-  public RawTextFeaturesMiner(IndexStatistics indexStatistics) {
-    this.indexStatistics = indexStatistics;
+  public RawTextFeaturesMiner(Index index) {
+    this.index = index;
   }
 
   @Override
@@ -70,9 +67,9 @@ public class RawTextFeaturesMiner implements FeaturesMiner {
     double[] idf = new double[rawTerms.length];
     double[] rawCounts = new double[rawTerms.length];
 
-    int indexSize = indexStatistics.indexSize();
+    int indexSize = index.size();
     for (int i = 0; i < rawTerms.length; ++i) {
-      int pagesWithTerm = indexStatistics.pagesWithTerm(terms.get(i));
+      int pagesWithTerm = index.documentFrequency(terms.get(i));
       idf[i] = pagesWithTerm == 0 ? 0 :
           Math.log((indexSize - pagesWithTerm + 0.5) / (pagesWithTerm + 0.5));
       idf[i] = idf[i] < 0 ? 0 : idf[i];
@@ -88,7 +85,7 @@ public class RawTextFeaturesMiner implements FeaturesMiner {
 
     double totalScore = 0;
     int pageSize = contentTokens.length;
-    double averagePageSize = indexStatistics.averageWordsPerPage();
+    double averagePageSize = index.averagePageSize();
     for (int i = 0; i < idf.length; ++i) {
       if (idf[i] > 0) {
         double tf = rawCounts[i] / pageSize;

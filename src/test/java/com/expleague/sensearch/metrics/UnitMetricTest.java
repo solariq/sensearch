@@ -193,10 +193,6 @@ public class UnitMetricTest {
     }
 
     @Override
-    public void setAllTitles(Set<String> allTitles) {
-    }
-
-    @Override
     public void setPath(Path pathToMetric) {
     }
   }

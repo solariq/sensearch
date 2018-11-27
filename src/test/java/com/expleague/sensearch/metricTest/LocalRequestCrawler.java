@@ -9,12 +9,13 @@ import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class LocalRequestCrawler implements WebCrawler {
 
   private final String MAP_FILE = "PAGE.json";
   String query;
-  private Set<String> allTitles;
   private Path pathToMetric;
 
   @Override
@@ -29,11 +30,6 @@ public class LocalRequestCrawler implements WebCrawler {
       e.printStackTrace();
     }
     return null;
-  }
-
-  @Override
-  public void setAllTitles(Set<String> allTitles) {
-    this.allTitles = allTitles;
   }
 
   @Override

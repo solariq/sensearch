@@ -12,7 +12,7 @@ public class BaseQuery implements Query {
 
   private List<Term> terms;
 
-  public BaseQuery(CharSequence queryString, Index index, Lemmer lemmer) {
+  public BaseQuery(CharSequence queryString, Lemmer lemmer) {
     //todo replace for "smart" tokenizer when it zavezut
     String regex = " ";
     Pattern pattern = Pattern.compile(regex);

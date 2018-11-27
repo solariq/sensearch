@@ -3,6 +3,7 @@ package com.expleague.sensearch.metrics;
 import com.expleague.commons.util.Pair;
 import com.expleague.sensearch.SenSeArch.ResultItem;
 import com.expleague.sensearch.core.impl.ResultItemImpl;
+import com.expleague.sensearch.index.Index;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -12,7 +13,6 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -22,8 +22,13 @@ public class RequestCrawler implements WebCrawler {
 
   private final String googleRequest = "https://www.google.ru/search?q=site:ru.wikipedia.org%20";
   private UserAgents userAgents = new UserAgents();
-  private Set<String> allTitles;
   private Path pathToMetric;
+
+  private final Index index;
+
+  public RequestCrawler(Index index) {
+    this.index = index;
+  }
 
   private List<String> getCookies() throws IOException {
     URL urlG = new URL("https://www.google.com/");
@@ -33,6 +38,7 @@ public class RequestCrawler implements WebCrawler {
   }
 
   private void setCookies(URLConnection urlConnection) throws IOException {
+
     List<String> cookies = getCookies();
     if (cookies != null) {
       String resultCookie = cookies.stream().map(cookie -> cookie.split(";", 2)[0])
@@ -45,7 +51,7 @@ public class RequestCrawler implements WebCrawler {
     String ans = title;
     if (ans.endsWith(" — Википедия")) {
       ans = ans.replace(" — Википедия", "");
-      if (allTitles.contains(ans)) {
+      if (index.hasTitle(ans)) {
         return ans;
       }
     }
@@ -92,11 +98,6 @@ public class RequestCrawler implements WebCrawler {
       }
     }
     return results;
-  }
-
-  @Override
-  public void setAllTitles(Set<String> allTitles) {
-    this.allTitles = allTitles;
   }
 
   @Override

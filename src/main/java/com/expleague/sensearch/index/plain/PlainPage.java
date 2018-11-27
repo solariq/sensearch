@@ -1,22 +1,29 @@
 package com.expleague.sensearch.index.plain;
 
+
 import com.expleague.sensearch.index.IndexedPage;
-import java.io.BufferedReader;
-import java.io.IOException;
+import com.expleague.sensearch.protobuf.index.IndexUnits;
 import java.net.URI;
-import java.nio.file.Files;
-import java.nio.file.Path;
 
 public class PlainPage implements IndexedPage {
 
   private final long id;
-  private final Path contentPath;
-  private final Path titlePath;
+  private final String text;
+  private final String title;
 
-  PlainPage(Path pathToIndexEntry) {
-    this.id = Long.parseLong(pathToIndexEntry.getFileName().toString());
-    this.contentPath = pathToIndexEntry.resolve(PlainIndexBuilder.CONTENT_FILE);
-    this.titlePath = pathToIndexEntry.resolve(PlainIndexBuilder.META_FILE);
+  /**
+   * Empty Page constructor
+   */
+  PlainPage() {
+    id = 0;
+    text = "";
+    title = "";
+  }
+
+  PlainPage(IndexUnits.Page page) {
+    text = page.getContent();
+    title = page.getTitle();
+    id = page.getPageId();
   }
 
   @Override
@@ -32,30 +39,12 @@ public class PlainPage implements IndexedPage {
 
   @Override
   public CharSequence text() {
-    StringBuilder contentBuilder = new StringBuilder();
-    try (BufferedReader bufferedReader = Files.newBufferedReader(contentPath)) {
-      bufferedReader.lines().forEach(contentBuilder::append);
-    } catch (IOException e) {
-      throw new RuntimeException(
-          String.format("Can not get content for the document with id %d", this.id()), e
-      );
-    }
-
-    return contentBuilder;
+    return text;
   }
 
   @Override
   public CharSequence title() {
-    StringBuilder titleBuilder = new StringBuilder();
-    try (BufferedReader bufferedReader = Files.newBufferedReader(titlePath)) {
-      bufferedReader.lines().forEach(titleBuilder::append);
-    } catch (IOException e) {
-      throw new RuntimeException(
-          String.format("Can not get title for the document with id %d", this.id()), e
-      );
-    }
-
-    return titleBuilder;
+    return title;
   }
 
   @Override
