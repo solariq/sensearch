@@ -19,13 +19,13 @@ import com.google.common.hash.Funnels;
 import com.google.common.primitives.Longs;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
-import com.sun.xml.internal.messaging.saaj.util.ByteInputStream;
 import gnu.trove.list.TLongList;
 import gnu.trove.list.linked.TLongLinkedList;
 import gnu.trove.map.TLongObjectMap;
 import gnu.trove.map.TObjectLongMap;
 import gnu.trove.map.hash.TLongObjectHashMap;
 import gnu.trove.map.hash.TObjectLongHashMap;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -103,7 +103,7 @@ public class PlainIndex implements Index {
 
     ByteString byteStringFilter = indexMeta.getTitlesBloomFilter();
     titlesBloomFilter = BloomFilter.readFrom(
-        new ByteInputStream(byteStringFilter.toByteArray(), byteStringFilter.size()),
+        new ByteArrayInputStream(byteStringFilter.toByteArray(), 0, byteStringFilter.size()),
         Funnels.byteArrayFunnel()
     );
 
