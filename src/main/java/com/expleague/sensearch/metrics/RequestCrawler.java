@@ -13,6 +13,7 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
@@ -37,11 +38,13 @@ public class RequestCrawler implements WebCrawler {
   }
 
   private void setCookies(URLConnection urlConnection) throws IOException {
-//    List<String> cookies = getCookies();
-//    if (cookies != null) {
-//      String resultCookie = cookies.stream().map(cookie -> cookie.split(";", 2)[0]).collect(Collectors.joining("; "));
-      urlConnection.setRequestProperty("Cookie", "CGIC=IlV0ZXh0L2h0bWwsYXBwbGljYXRpb24veGh0bWwreG1sLGFwcGxpY2F0aW9uL3htbDtxPTAuOSxpbWFnZS93ZWJwLGltYWdlL2FwbmcsKi8qO3E9MC44; SID=kwaUY0kEqptz9WqPlab4nKKtGX18uLV0aR0ufs0o26UibWQAU2RhyWjLHKNMFo7gVzRopA.; HSID=AXsi5ijI32tE6k_Vh; SSID=A4hbAX4sT7y35ap8m; APISID=d26GGAI_W37s3KQH/AR7OVpPKlDBwgUroD; SAPISID=vg_3cm0PN1vNcUyC/AOptCxN_Pim17voio; OGPC=19009353-1:; GOOGLE_ABUSE_EXEMPTION=ID=46c7579afed41c63:TM=1542817514:C=r:IP=195.144.231.198-:S=APGng0u81ezICXj4MZFoUZzeNxsUTZlqCQ; NID=146=PGdy2A-3XgUTzzeLIa4YMaNYYGCxiaSAuy3gEEFZ-g4tC-YkBlfNn-eMPgKIZ3xXMmxPVZIqpEBTqaUhRCZkJJm6WtYYj8Jp2HiMxWcs8cZeLgpXlyhDQnGnqHgcIC9YtFb_umdD-j814nIgi2tN4FVy__qIXCXX0_JhJFtqqDDfDA0Njs2r5cSel-B_1tYoPfadVa2yDRV91EuF-jJSOpyf1NWCbBeIIEcrY43odqXK8OmTDPdctjI; 1P_JAR=2018-11-21-17; DV=02U1xCMR5kJTQCeZhV-tOAGGNwN2cxbWSxWyBWS9OAEAADBIhHf0405rqAAAACwaSbD5clGrSgAAAIfP0zVEMDWdGQAAAAx`");
-//    }
+
+    List<String> cookies = getCookies();
+    if (cookies != null) {
+      String resultCookie = cookies.stream().map(cookie -> cookie.split(";", 2)[0])
+          .collect(Collectors.joining("; "));
+      urlConnection.setRequestProperty("Cookie", resultCookie);
+    }
   }
 
   private String normalizeTitle(String title) {

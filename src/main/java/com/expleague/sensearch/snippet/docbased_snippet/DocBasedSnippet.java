@@ -21,7 +21,7 @@ public class DocBasedSnippet implements Snippet {
     this.title = title;
 
     double bestPassage = passages
-        .stream() 
+        .stream()
         .mapToDouble(Passage::getRating)
         .max()
         .getAsDouble();

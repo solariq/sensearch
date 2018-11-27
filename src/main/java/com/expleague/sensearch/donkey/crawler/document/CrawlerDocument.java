@@ -15,7 +15,9 @@ public interface CrawlerDocument {
   long iD();
 
   interface Section {
+
     CharSequence text();
+
     CharSequence title();
   }
 

@@ -3,7 +3,7 @@ package com.expleague.sensearch;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-public class Config implements ConfigJson{
+public class Config implements ConfigJson {
 
   private String temporaryDocuments;
 

@@ -1,5 +1,7 @@
 package com.expleague.sensearch.snippet;
 
+import com.expleague.commons.text.lemmer.MyStem;
+import com.expleague.sensearch.LogBasedMyStem;
 import com.expleague.sensearch.Page;
 import com.expleague.sensearch.core.Lemmer;
 import com.expleague.sensearch.index.Index;
@@ -16,7 +18,9 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Stream;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.TestName;
 
 public class SamplesTest {
 
@@ -62,15 +66,23 @@ public class SamplesTest {
       return 0;
     }
   };
-  private Lemmer lemmer = new Lemmer(Paths.get("./resources/mystem"));
+  private Lemmer lemmer;
 
   private List<Page> pages = new ArrayList<>();
   private List<Query> queries = new ArrayList<>();
 
+  @Rule
+  public TestName testName = new TestName();
+
   @Before
   public void prepare() {
+    MyStem myStem = new LogBasedMyStem(
+//          Paths.get("./resources/mystem"),
+        Paths.get("myStemTestLogs", this.getClass().getName() + "_" + testName.getMethodName()));
+    lemmer = new Lemmer(myStem);
+
     File folder = new File("./src/test/java/com/expleague/sensearch/snippet/samples");
-    Arrays.stream(folder.listFiles()).sorted().forEach(fileEntry ->  {
+    Arrays.stream(folder.listFiles()).sorted().forEach(fileEntry -> {
       if (fileEntry.isDirectory()) {
         try {
           CharSequence content = String
