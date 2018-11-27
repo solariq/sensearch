@@ -1,66 +1,22 @@
 package com.expleague.sensearch.snippet;
 
 import com.expleague.commons.text.lemmer.MyStem;
-import com.expleague.sensearch.LogBasedMyStem;
+import com.expleague.sensearch.utils.LogBasedMyStem;
 import com.expleague.sensearch.Page;
 import com.expleague.sensearch.core.Lemmer;
-import com.expleague.sensearch.index.Index;
 import com.expleague.sensearch.query.BaseQuery;
-import com.expleague.sensearch.query.Query;
-import com.expleague.sensearch.query.term.Term;
+import com.expleague.sensearch.utils.SensearchTestCase;
 import java.net.URI;
 import java.nio.file.Paths;
-import java.util.stream.Stream;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TestName;
 
-public class RelevanceTest {
+public class RelevanceTest extends SensearchTestCase {
 
   private SnippetsCreator sc = new SnippetsCreator();
-  private Index index = new Index() {
-    @Override
-    public Stream<Page> fetchDocuments(Query query) {
-      return null;
-    }
-
-    @Override
-    public Term[] synonyms(Term term) {
-      return new Term[0];
-    }
-
-    @Override
-    public boolean hasTitle(CharSequence title) {
-      return false;
-    }
-
-    @Override
-    public int size() {
-      return 0;
-    }
-
-    @Override
-    public int vocabularySize() {
-      return 0;
-    }
-
-    @Override
-    public double averagePageSize() {
-      return 0;
-    }
-
-    @Override
-    public int documentFrequency(Term term) {
-      return 0;
-    }
-
-    @Override
-    public long termFrequency(Term term) {
-      return 0;
-    }
-  };
 
   private Lemmer lemmer;
   private Page d1, d2, d3;
@@ -70,9 +26,7 @@ public class RelevanceTest {
 
   @Before
   public void prepare() {
-    MyStem myStem = new LogBasedMyStem(
-//          Paths.get("./resources/mystem"),
-        Paths.get("myStemTestLogs", this.getClass().getName() + "_" + testName.getMethodName()));
+    MyStem myStem = myStemForTest(RelevanceTest.class.getName(), testName.getMethodName());
     lemmer = new Lemmer(myStem);
 
     d1 = new Page() {
@@ -162,10 +116,10 @@ public class RelevanceTest {
 
   @Test
   public void test() {
-    Snippet s1 = sc.getSnippet(d1, new BaseQuery("волшебник", index, lemmer), lemmer);
+    Snippet s1 = sc.getSnippet(d1, new BaseQuery("волшебник", lemmer), lemmer);
     Snippet s2 = sc
-        .getSnippet(d2, new BaseQuery("Несущая смерть Хлоя и Джесси", index, lemmer), lemmer);
-    Snippet s3 = sc.getSnippet(d3, new BaseQuery("змея образ жизни", index, lemmer), lemmer);
+        .getSnippet(d2, new BaseQuery("Несущая смерть Хлоя и Джесси", lemmer), lemmer);
+    Snippet s3 = sc.getSnippet(d3, new BaseQuery("змея образ жизни", lemmer), lemmer);
     Assert.assertTrue(s1
         .getContent()
         .toString()

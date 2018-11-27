@@ -37,7 +37,7 @@ public class Builder {
   public Config build() throws IOException, XMLStreamException {
     crawler = new CrawlerXML(config);
     index = new PlainIndex(config);
-    bigramsBasedSuggestor = new BigramsBasedSuggestor(config);
+    bigramsBasedSuggestor = new BigramsBasedSuggestor(index);
     lemmer = new Lemmer(config.getMyStem());
     searcher = new SenSeArchImpl(this);
     metric = new Metric(new RequestCrawler(index), config.getPathToMetrics());

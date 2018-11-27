@@ -20,7 +20,7 @@ public class UnitCrawlerTest {
   @Test
   public void goodZIPTest() throws IOException, XMLStreamException {
     Config config = new Config(
-        Paths.get("./src/test/java/com/expleague/sensearch/donkey/crawler/resources/Mini_Wiki.zip"),
+        Paths.get("./src/test/java/com/expleague/sensearch/donkey/crawler/resources/MiniWiki.zip"),
         pathToTmpDoc
     );
     crawler = new CrawlerXML(config);

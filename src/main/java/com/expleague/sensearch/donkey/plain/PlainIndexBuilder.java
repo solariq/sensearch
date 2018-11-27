@@ -66,7 +66,7 @@ public class PlainIndexBuilder implements IndexBuilder {
       .compressionType(CompressionType.SNAPPY);
 
   // Bloom filter for titles options
-  private static final long DEFAULT_EXPECTED_COLLECTION_SIZE = (long) 1e7;
+  private static final long DEFAULT_EXPECTED_COLLECTION_SIZE = (long) 1e6;
   private static final double DEFAULT_FALSE_POSITIVE_RATE = 1e-5;
 
   private static final Logger LOG = Logger.getLogger(PlainIndexBuilder.class.getName());
@@ -135,10 +135,17 @@ public class PlainIndexBuilder implements IndexBuilder {
   @VisibleForTesting
   static Vec toVector(long[] tokens, TLongObjectMap<Vec> vectors) {
     ArrayVec mean = new ArrayVec(new double[DEFAULT_VEC_SIZE]);
+    int vectorsFound = 0;
     for (long i : tokens) {
-      mean.add((ArrayVec) vectors.get(i));
+      if (vectors.containsKey(i)) {
+        mean.add((ArrayVec) vectors.get(i));
+        ++vectorsFound;
+      }
     }
-    mean.scale(1.0 / tokens.length);
+    if (vectorsFound != tokens.length) {
+      LOG.warning("");
+    }
+    mean.scale(1.0 / vectorsFound);
     return mean;
   }
 

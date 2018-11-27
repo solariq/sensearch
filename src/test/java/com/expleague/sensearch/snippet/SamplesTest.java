@@ -1,13 +1,14 @@
 package com.expleague.sensearch.snippet;
 
 import com.expleague.commons.text.lemmer.MyStem;
-import com.expleague.sensearch.LogBasedMyStem;
+import com.expleague.sensearch.utils.LogBasedMyStem;
 import com.expleague.sensearch.Page;
 import com.expleague.sensearch.core.Lemmer;
 import com.expleague.sensearch.index.Index;
 import com.expleague.sensearch.query.BaseQuery;
 import com.expleague.sensearch.query.Query;
 import com.expleague.sensearch.query.term.Term;
+import com.expleague.sensearch.utils.SensearchTestCase;
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
@@ -22,50 +23,10 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TestName;
 
-public class SamplesTest {
+public class SamplesTest extends SensearchTestCase {
 
   private SnippetsCreator sc = new SnippetsCreator();
-  private Index index = new Index() {
-    @Override
-    public Stream<Page> fetchDocuments(Query query) {
-      return null;
-    }
 
-    @Override
-    public Term[] synonyms(Term term) {
-      return new Term[0];
-    }
-
-    @Override
-    public boolean hasTitle(CharSequence title) {
-      return false;
-    }
-
-    @Override
-    public int size() {
-      return 0;
-    }
-
-    @Override
-    public int vocabularySize() {
-      return 0;
-    }
-
-    @Override
-    public double averagePageSize() {
-      return 0;
-    }
-
-    @Override
-    public int documentFrequency(Term term) {
-      return 0;
-    }
-
-    @Override
-    public long termFrequency(Term term) {
-      return 0;
-    }
-  };
   private Lemmer lemmer;
 
   private List<Page> pages = new ArrayList<>();
@@ -76,11 +37,8 @@ public class SamplesTest {
 
   @Before
   public void prepare() {
-    MyStem myStem = new LogBasedMyStem(
-//          Paths.get("./resources/mystem"),
-        Paths.get("myStemTestLogs", this.getClass().getName() + "_" + testName.getMethodName()));
+    MyStem myStem = myStemForTest(SamplesTest.class.getName(), testName.getMethodName());
     lemmer = new Lemmer(myStem);
-
     File folder = new File("./src/test/java/com/expleague/sensearch/snippet/samples");
     Arrays.stream(folder.listFiles()).sorted().forEach(fileEntry -> {
       if (fileEntry.isDirectory()) {
@@ -105,7 +63,7 @@ public class SamplesTest {
               return content;
             }
           });
-          queries.add(new BaseQuery(query, index, lemmer));
+          queries.add(new BaseQuery(query, lemmer));
         } catch (IOException e) {
           e.printStackTrace();
         }

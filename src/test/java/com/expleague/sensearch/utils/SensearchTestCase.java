@@ -1,5 +1,6 @@
 package com.expleague.sensearch.utils;
 
+import com.expleague.commons.text.lemmer.MyStem;
 import com.expleague.sensearch.Config;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -14,10 +15,18 @@ import org.junit.BeforeClass;
 
 public abstract class SensearchTestCase {
 
+  private static final String INDEX_DATA_ROOT = "ForIndex";
+  private static final String MINI_WIKI_ZIP = "MiniWiki.zip";
+  private static final String VECTORS_FILE = "Vectors.txt.gz";
+  private static final String MY_STEM_LOGS_ROOT = "MyStemTestLogs";
+
   private static final Logger LOG = Logger.getLogger(SensearchTestCase.class.getName());
 
   private static Path testDataRoot;
   private static Path testOutputRoot;
+  private static Path myStemLogsRoot;
+  private static Config config;
+
 
   @BeforeClass
   public static void initWorkingPaths() {
@@ -66,6 +75,16 @@ public abstract class SensearchTestCase {
         );
       }
     }
+
+    // TODO: check whether path actually exists
+    myStemLogsRoot = testDataRoot.resolve(MY_STEM_LOGS_ROOT);
+
+    Path indexDataRoot = testDataRoot.resolve(INDEX_DATA_ROOT);
+    config = new TestConfig(
+        indexDataRoot.resolve(MINI_WIKI_ZIP),
+        indexDataRoot.resolve(VECTORS_FILE)
+    );
+
   }
 
   @AfterClass
@@ -83,6 +102,17 @@ public abstract class SensearchTestCase {
 
   protected static Path testDataRoot() {
     return testDataRoot;
+  }
+
+  protected static Path myStemLogsPath() {
+    return myStemLogsRoot;
+  }
+
+  protected static MyStem myStemForTest(String testClassName, String testName) {
+    Path pathToSpecificStem = myStemLogsRoot.resolve(
+        String.format("%s_%s", testClassName, testName)
+    );
+    return new LogBasedMyStem(pathToSpecificStem);
   }
 
   protected static void clearOutputRoot() {
@@ -113,6 +143,6 @@ public abstract class SensearchTestCase {
   }
 
   protected Config config() {
-    return null;
+    return config;
   }
 }

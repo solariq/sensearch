@@ -1,4 +1,4 @@
-package com.expleague.sensearch;
+package com.expleague.sensearch.utils;
 
 import com.expleague.commons.text.lemmer.MyStem;
 import com.expleague.commons.text.lemmer.MyStemImpl;

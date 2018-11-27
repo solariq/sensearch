@@ -9,16 +9,22 @@ public class TestConfig extends Config {
   private Path miniWikiPath;
   private Path indexRoot;
   private Path gloveVectorsPath;
+  private Path tempDocumentsPath;
 
-  public TestConfig(Path miniWikiPath, Path indexRoot, Path gloveVectorsPath) {
+
+  // TODO: copy constructor!
+  TestConfig(Path miniWikiPath, Path gloveVectorsPath) {
     this.miniWikiPath = miniWikiPath;
-    this.indexRoot = indexRoot;
     this.gloveVectorsPath = gloveVectorsPath;
   }
 
   @Override
   public Path getTemporaryDocuments() {
-    throw new UnsupportedOperationException();
+    if (tempDocumentsPath == null) {
+      throw new UnsupportedOperationException("Path to temporary documents is not set!");
+    }
+
+    return tempDocumentsPath;
   }
 
   @Override
@@ -33,6 +39,10 @@ public class TestConfig extends Config {
 
   @Override
   public Path getTemporaryIndex() {
+    if (indexRoot == null) {
+      throw new UnsupportedOperationException("Path to index root is not set!");
+    }
+
     return indexRoot;
   }
 
@@ -64,5 +74,13 @@ public class TestConfig extends Config {
   @Override
   public Path getPathToMetrics() {
     throw new UnsupportedOperationException();
+  }
+
+  public void setIndexRoot(Path indexRoot) {
+    this.indexRoot = indexRoot;
+  }
+
+  public void setTempDocumentsPath(Path tempDocumentsPath) {
+    this.tempDocumentsPath = tempDocumentsPath;
   }
 }

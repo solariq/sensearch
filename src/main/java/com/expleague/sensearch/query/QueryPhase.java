@@ -14,6 +14,6 @@ public class QueryPhase implements SearchPhase {
   public void accept(Whiteboard whiteboard) {
     final String input = whiteboard.input();
     whiteboard.putQuery(
-        new BaseQuery(input, whiteboard.builder().getIndex(), whiteboard.builder().getLemmer()));
+        new BaseQuery(input, whiteboard.builder().getLemmer()));
   }
 }
