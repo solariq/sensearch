@@ -70,6 +70,7 @@ public class XMLParser {
 
         return new WikiSection(
             text, Arrays.asList(xmlSection.title.split("\\|@\\|")), links);
+
       }).collect(Collectors.toList());
 
       page.setSections(sections);
