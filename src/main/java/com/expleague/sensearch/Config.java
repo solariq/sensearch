@@ -27,6 +27,23 @@ public class Config implements ConfigJson {
 
   private int pageSize = 10;
 
+  private boolean buildIndexFlag;
+
+  public int getPageSize() {
+    return pageSize;
+  }
+
+  public void setPageSize(int pageSize) {
+    this.pageSize = pageSize;
+  }
+
+  public boolean getBuildIndexFlag() {
+    return buildIndexFlag;
+  }
+
+  private void setBuildIndexFlag(boolean buildIndexFlag) {
+    this.buildIndexFlag = buildIndexFlag;
+  }
 
   @Override
   public Path getTemporaryDocuments() {

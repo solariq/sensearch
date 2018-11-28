@@ -6,11 +6,11 @@ import com.expleague.sensearch.core.Lemmer;
 import com.expleague.sensearch.core.SenSeArchImpl;
 import com.expleague.sensearch.donkey.crawler.Crawler;
 import com.expleague.sensearch.donkey.crawler.CrawlerXML;
+import com.expleague.sensearch.donkey.plain.PlainIndexBuilder;
 import com.expleague.sensearch.index.Index;
 import com.expleague.sensearch.index.plain.PlainIndex;
 import com.expleague.sensearch.metrics.Metric;
 import com.expleague.sensearch.metrics.RequestCrawler;
-import com.expleague.sensearch.metrics.WebCrawler;
 import com.expleague.sensearch.web.suggest.BigramsBasedSuggestor;
 import com.expleague.sensearch.web.suggest.Suggestor;
 import com.google.inject.Singleton;
@@ -36,6 +36,9 @@ public class Builder {
 
   public Config build() throws IOException, XMLStreamException {
     crawler = new CrawlerXML(config);
+    if (config.getBuildIndexFlag()) {
+      new PlainIndexBuilder().buildIndex(crawler, config);
+    }
     index = new PlainIndex(config);
     bigramsBasedSuggestor = new BigramsBasedSuggestor(index);
     lemmer = new Lemmer(config.getMyStem());

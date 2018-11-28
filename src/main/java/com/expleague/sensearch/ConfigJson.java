@@ -23,4 +23,8 @@ public interface ConfigJson {
   public String getEmbeddingVectors();
 
   public Path getPathToMetrics();
+
+  default boolean getBuildIndexFlag() {
+    return false;
+  }
 }
