@@ -25,7 +25,26 @@ public class UnitCrawlerTest {
     );
     crawler = new CrawlerXML(config);
 
-    Assert.assertEquals(crawler.makeStream().count(), 20);
+    Assert.assertEquals(crawler.makeStream().count(), 10);
+
+    Set<String> titles = new HashSet<>();
+    Set<String> rightTitles = new HashSet<>();
+    rightTitles.add("Мужун Бао");
+    rightTitles.add("Самохина, Дарья Сергеевна");
+    rightTitles.add("Мужун Вэй");
+    rightTitles.add("Бонифаций дель Васто");
+    rightTitles.add("Ги V (виконт Лиможа)");
+    rightTitles.add("Тэмусин (Когурё)»");
+    rightTitles.add("Тэсо (Тонбуё)");
+    rightTitles.add("Ши Чжи");
+    rightTitles.add("Нифай");
+    rightTitles.add("Итен");
+    crawler.makeStream().forEach(doc -> {
+      if (doc != null) {
+        titles.add(doc.title());
+      }
+    });
+    Assert.assertEquals(titles, rightTitles);
   }
 
   @Test
@@ -37,17 +56,17 @@ public class UnitCrawlerTest {
     );
     crawler = new CrawlerXML(config);
 
-    Assert.assertEquals(crawler.makeStream().count(), 8);
+    Assert.assertEquals(crawler.makeStream().count(), 10);
 
     Set<String> titles = new HashSet<>();
     Set<String> rightTitles = new HashSet<>();
-    rightTitles.add("Пантусов, Николай Николаевич");
-    rightTitles.add("Нагуманов, Андрей Рафаилович");
-    rightTitles.add("Орисаба");
-    rightTitles.add("Масатепек");
-    rightTitles.add("Тельчак-Пуэбло");
-    rightTitles.add("Сантьяго-Куаутлальпан");
-    rightTitles.add("Нытва");
+    rightTitles.add("Мужун Бао");
+    rightTitles.add("Самохина, Дарья Сергеевна");
+    rightTitles.add("Бонифаций дель Васто");
+    rightTitles.add("Тэмусин (Когурё)»");
+    rightTitles.add("Тэсо (Тонбуё)");
+    rightTitles.add("Ши Чжи");
+    rightTitles.add("Итен");
     crawler.makeStream().forEach(doc -> {
       if (doc != null) {
         titles.add(doc.title());
