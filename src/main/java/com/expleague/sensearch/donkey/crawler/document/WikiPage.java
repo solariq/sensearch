@@ -66,11 +66,13 @@ public class WikiPage implements CrawlerDocument {
   public static class WikiSection implements Section {
 
     private CharSequence text;
-    private CharSequence title;
+    private List<CharSequence> title;
+    private List<Link> links;
 
-    public WikiSection(CharSequence text, CharSequence title) {
+    public WikiSection(CharSequence text, List<CharSequence> title, List<Link> links) {
       this.text = text;
       this.title = title;
+      this.links = links;
     }
 
     @Override
@@ -79,8 +81,49 @@ public class WikiPage implements CrawlerDocument {
     }
 
     @Override
-    public CharSequence title() {
+    public List<CharSequence> title() {
       return title;
+    }
+
+    @Override
+    public List<Link> links() {
+      return links;
+    }
+  }
+
+  public static class WikiLink implements Link {
+
+    private CharSequence text;
+    private CharSequence targetTitle;
+    private long targetId;
+    private int textOffset;
+
+    public WikiLink(CharSequence text, CharSequence targetTitle, long targetId, int textOffset) {
+      this.text = text;
+      this.targetTitle = targetTitle;
+      this.targetId = targetId;
+      this.textOffset = textOffset;
+    }
+
+
+    @Override
+    public CharSequence text() {
+      return text;
+    }
+
+    @Override
+    public CharSequence targetTitle() {
+      return targetTitle;
+    }
+
+    @Override
+    public long targetId() {
+      return targetId;
+    }
+
+    @Override
+    public int textOffset() {
+      return textOffset;
     }
   }
 }

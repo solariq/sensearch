@@ -1,102 +1,85 @@
 package com.expleague.sensearch.donkey.crawler.document;
 
+import com.expleague.sensearch.donkey.crawler.document.CrawlerDocument.Link;
+import com.expleague.sensearch.donkey.crawler.document.CrawlerDocument.Section;
+import com.expleague.sensearch.donkey.crawler.document.WikiPage.WikiLink;
+import com.expleague.sensearch.donkey.crawler.document.WikiPage.WikiSection;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import javax.xml.namespace.QName;
-import javax.xml.stream.XMLEventReader;
-import javax.xml.stream.XMLInputFactory;
-import javax.xml.stream.XMLStreamException;
-import javax.xml.stream.events.Attribute;
-import javax.xml.stream.events.EndElement;
-import javax.xml.stream.events.StartElement;
-import javax.xml.stream.events.XMLEvent;
+import java.util.stream.Collectors;
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Unmarshaller;
+import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlElementRef;
+import javax.xml.bind.annotation.XmlElementWrapper;
+import javax.xml.bind.annotation.XmlMixed;
+import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlValue;
 
 public class XMLParser {
 
   public WikiPage parseXML(File file) {
-    XMLInputFactory xmlInputFactory = XMLInputFactory.newInstance();
     WikiPage page = new WikiPage();
     try {
-      XMLEventReader reader = xmlInputFactory.
-          createXMLEventReader(new FileInputStream(file.getAbsolutePath()));
-      while (reader.hasNext()) {
-        XMLEvent xmlEvent = reader.nextEvent();
-        if (xmlEvent.isStartElement()) {
-          StartElement startElement = xmlEvent.asStartElement();
-          if (startElement.getName().getLocalPart().equals("page")) {
-            page = new WikiPage();
+      JAXBContext context = JAXBContext.newInstance(XmlPageRootElement.class);
+      Unmarshaller um = context.createUnmarshaller();
+      XmlPageRootElement element = (XmlPageRootElement) um.unmarshal(file);
+      XmlPage xmlPage = element.page;
 
-            Attribute idAttr = startElement
-                .getAttributeByName(new QName("id"));
-            if (idAttr != null) {
-              page.setId(Integer.parseInt(idAttr.getValue()));
-            }
+      page.setTitle(xmlPage.title);
+      if (xmlPage.categories == null) {
+        page.setCategories(new ArrayList<>());
+      } else {
+        page.setCategories(Arrays.asList(xmlPage.categories.split("@")));
+      }
+      page.setId(xmlPage.id);
 
-            Attribute titleAttr = startElement
-                .getAttributeByName(new QName("title"));
-            if (titleAttr != null) {
-              page.setTitle(titleAttr.getValue());
-            }
+      List<Section> sections = xmlPage.sections.stream().map(xmlSection -> {
+        List<Link> links = new ArrayList<>();
+        StringBuilder text = new StringBuilder();
 
-            Attribute categoriesAttr = startElement
-                .getAttributeByName(new QName("categories"));
-            if (categoriesAttr != null) {
-              page.setCategories(Arrays.asList(categoriesAttr
-                  .getValue().split("@")));
-            } else {
-              page.setCategories(new ArrayList<>());
-            }
+        if (xmlSection.content != null) {
+          for (Serializable serializable : xmlSection.content) {
+            if (serializable instanceof String) {
+              text.append(((String) serializable).trim());
+            } else if (serializable instanceof XmlSectionLink) {
+              XmlSectionLink link = (XmlSectionLink) serializable;
 
-            // Parse <page> tags
-
-            List<CrawlerDocument.Section> sections = new ArrayList<>();
-            String sectionTitle = "";
-            StringBuilder sectionText = new StringBuilder();
-
-            while (reader.hasNext()) {
-              xmlEvent = reader.nextEvent();
-              if (xmlEvent.isStartElement()) {
-                StartElement sectionElement = xmlEvent.asStartElement();
-                if (sectionElement.getName().getLocalPart().equals("section")) {
-                  sectionTitle = "";
-                  sectionText = new StringBuilder();
-                  Attribute sectionTitleAttr = sectionElement
-                      .getAttributeByName(new QName("title"));
-                  if (sectionTitleAttr != null) {
-                    sectionTitle = sectionTitleAttr.getValue();
-                  }
-
-                  while (reader.hasNext() && (xmlEvent = reader.nextEvent()).isCharacters()) {
-                    String s = xmlEvent.asCharacters().getData();
-                    sectionText.append(s);
-                  }
-                }
+              if (link.targetId == 0) {
+                link.targetId = -1;
               }
-              if (xmlEvent.isEndElement()) {
-                EndElement endElement = xmlEvent.asEndElement();
-                if (endElement.getName().getLocalPart().equals("section")) {
-                  sections.add(new WikiPage.WikiSection(sectionText.toString(), sectionTitle));
-                }
-                if (endElement.getName().getLocalPart().equals("page")) {
-                  page.setSections(sections);
-                  break;
-                }
+              if (link.targetTitle == null) {
+                link.targetTitle = "";
               }
+
+              if (text.length() > 0 && text.charAt(text.length() - 1) != ' ') {
+                text.append(" ");
+              }
+              links
+                  .add(new WikiLink(link.text, link.targetTitle, link.targetId, text.length()));
+              text.append(link.text.trim());
+              text.append(" ");
             }
           }
         }
-      }
-      //writeXML(page);
-      return page;
-    } catch (FileNotFoundException | XMLStreamException e) {
-      e.printStackTrace();
+
+        return new WikiSection(
+            text, Arrays.asList(xmlSection.title.split("\\|@\\|")), links);
+      }).collect(Collectors.toList());
+
+      page.setSections(sections);
+    } catch (JAXBException e) {
+      throw new IllegalArgumentException(e);
     }
-    return null;
+
+    return page;
   }
+
 
     /*
     private void writeXML(WikiPage page) {
@@ -137,4 +120,50 @@ public class XMLParser {
             e.printStackTrace();
         }
     }//*/
+
+  @XmlRootElement(name = "pages")
+  private static class XmlPageRootElement {
+    @XmlElement(name = "page")
+    XmlPage page;
+  }
+
+  @XmlRootElement(name = "page")
+  private static class XmlPage {
+    @XmlAttribute(name = "id")
+    long id;
+
+    @XmlAttribute(name = "title")
+    String title;
+
+    @XmlAttribute(name = "categories")
+    String categories;
+
+    @XmlElementWrapper(name = "sections")
+    @XmlElement(name = "section")
+    List<XmlSection> sections;
+  }
+
+  @XmlRootElement(name = "section")
+  private static class XmlSection {
+    @XmlAttribute(name = "title")
+    String title;
+
+    @XmlElementRef(name = "link", type = XmlSectionLink.class)
+    @XmlMixed
+    List<Serializable> content;
+  }
+
+  @XmlRootElement(name = "link")
+  private static class XmlSectionLink implements Serializable {
+    @XmlValue
+    String text;
+
+    @XmlAttribute(name = "target")
+    String targetTitle;
+
+    @XmlAttribute(name = "targetId")
+    long targetId;
+  }
+
+
 }
