@@ -67,8 +67,8 @@ public class UnitDocumentTest {
     Assert.assertEquals(page.sections().get(2).text().toString(), "");
 
     Assert.assertEquals(page.sections().get(0).title(), Collections.singletonList("Мужун Вэй"));
-    //Assert.assertEquals(page.sections().get(0).text().toString(),
-        //"");
+    Assert.assertEquals(page.sections().get(0).text().toString(),
+        "Мужун Вэй (, 350—385), взрослое имя Цзинмао (景茂) —<link target=\"сяньби\" targetId=\"5896482\">сяньби</link>йский вождь, последний император государства<link target=\"ранняя янь\" targetId=\"6675814\">Ранняя Янь</link>. От императора<link target=\"южная янь\" targetId=\"133904\">Южной Янь</link><link target=\"мужун дэ\" targetId=\"7395037\">Мужун Дэ</link>, который был его дядей, впоследствии получил посмертное имя Ю-ди (幽帝).");
 
   }
 
