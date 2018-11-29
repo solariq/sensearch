@@ -51,7 +51,6 @@ public class PlainIndex implements Index {
   private static final Options DEFAULT_DB_OPTIONS = new Options()
       .cacheSize(DEFAULT_CACHE_SIZE)
       .createIfMissing(false)
-      .errorIfExists(true)
       .compressionType(CompressionType.SNAPPY);
 
   private static final ReadOptions DEFAULT_READ_OPTIONS = new ReadOptions()
@@ -59,7 +58,7 @@ public class PlainIndex implements Index {
 
   private static final Logger LOG = Logger.getLogger(PlainIndex.class.getName());
 
-  private static final int DOC_NUMBER = 50;
+  private static final int DOC_NUMBER = 1000;
   private static final int SYNONYMS_COUNT = 50;
 
   private final Path indexRoot;
