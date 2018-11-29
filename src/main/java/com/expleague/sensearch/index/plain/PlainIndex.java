@@ -48,13 +48,13 @@ public class PlainIndex implements Index {
 
   private static final long DEFAULT_CACHE_SIZE = 128 * (1 << 20); // 128 MB
 
-  private static final Options DEFAULT_DB_OPTIONS = new Options()
-      .cacheSize(DEFAULT_CACHE_SIZE)
-      .createIfMissing(false)
-      .compressionType(CompressionType.SNAPPY);
+  private static final Options DEFAULT_DB_OPTIONS =
+      new Options()
+          .cacheSize(DEFAULT_CACHE_SIZE)
+          .createIfMissing(false)
+          .compressionType(CompressionType.SNAPPY);
 
-  private static final ReadOptions DEFAULT_READ_OPTIONS = new ReadOptions()
-      .fillCache(true);
+  private static final ReadOptions DEFAULT_READ_OPTIONS = new ReadOptions().fillCache(true);
 
   private static final Logger LOG = Logger.getLogger(PlainIndex.class.getName());
 
@@ -86,28 +86,26 @@ public class PlainIndex implements Index {
     embedding = new EmbeddingImpl(indexRoot.resolve(PlainIndexBuilder.EMBEDDING_ROOT));
     filter = new FilterImpl(embedding);
 
-    termStatisticsBase = JniDBFactory.factory.open(
-        indexRoot.resolve(PlainIndexBuilder.TERM_STATISTICS_ROOT).toFile(),
-        DEFAULT_DB_OPTIONS
-    );
+    termStatisticsBase =
+        JniDBFactory.factory.open(
+            indexRoot.resolve(PlainIndexBuilder.TERM_STATISTICS_ROOT).toFile(), DEFAULT_DB_OPTIONS);
 
-    plainBase = JniDBFactory.factory.open(
-        indexRoot.resolve(PlainIndexBuilder.PLAIN_ROOT).toFile(),
-        DEFAULT_DB_OPTIONS
-    );
+    plainBase =
+        JniDBFactory.factory.open(
+            indexRoot.resolve(PlainIndexBuilder.PLAIN_ROOT).toFile(), DEFAULT_DB_OPTIONS);
 
-    IndexUnits.IndexMeta indexMeta = IndexUnits.IndexMeta.parseFrom(
-        Files.newInputStream(indexRoot.resolve(PlainIndexBuilder.INDEX_META_FILE))
-    );
+    IndexUnits.IndexMeta indexMeta =
+        IndexUnits.IndexMeta.parseFrom(
+            Files.newInputStream(indexRoot.resolve(PlainIndexBuilder.INDEX_META_FILE)));
     averagePageSize = indexMeta.getAveragePageSize();
     indexSize = indexMeta.getPagesCount();
     vocabularySize = indexMeta.getVocabularySize();
 
     ByteString byteStringFilter = indexMeta.getTitlesBloomFilter();
-    titlesBloomFilter = BloomFilter.readFrom(
-        new ByteArrayInputStream(byteStringFilter.toByteArray(), 0, byteStringFilter.size()),
-        Funnels.byteArrayFunnel()
-    );
+    titlesBloomFilter =
+        BloomFilter.readFrom(
+            new ByteArrayInputStream(byteStringFilter.toByteArray(), 0, byteStringFilter.size()),
+            Funnels.byteArrayFunnel());
 
     wordToIdMap = new TObjectLongHashMap<>();
     for (IdMapping idMapping : indexMeta.getIdMappingsList()) {
@@ -119,8 +117,7 @@ public class PlainIndex implements Index {
         (word, id) -> {
           idToWordMap.put(id, word);
           return true;
-        }
-    );
+        });
   }
 
   private static boolean isPageId(long id) {
@@ -138,29 +135,23 @@ public class PlainIndex implements Index {
     try {
       wordId = toId(rawWord);
       List<String> neighbours = new ArrayList<>();
-      for (TermFrequency tf : termStatistics(wordId)
-          .getBigramFrequencyList()) {
+      for (TermFrequency tf : termStatistics(wordId).getBigramFrequencyList()) {
         neighbours.add(idToWord(tf.getTermId()));
       }
       return neighbours;
     } catch (NoSuchElementException e) {
       return Collections.emptyList();
     } catch (InvalidProtocolBufferException e) {
-      LOG.warning(String.format(
-          "Encountered invalid protobuf in statistics base for word with id %d", wordId
-          )
-      );
+      LOG.warning(
+          String.format(
+              "Encountered invalid protobuf in statistics base for word with id %d", wordId));
       return Collections.emptyList();
     }
   }
 
   @Override
   public boolean hasTitle(CharSequence title) {
-    return titlesBloomFilter.mightContain(
-        ByteTools.toBytes(
-            toIds(Tokenizer.tokenize(title))
-        )
-    );
+    return titlesBloomFilter.mightContain(ByteTools.toBytes(toIds(Tokenizer.tokenize(title))));
   }
 
   private long toId(String word) {
@@ -205,17 +196,14 @@ public class PlainIndex implements Index {
         .filtrate(
             embedding.getVec(wordToIdMap.get(term.getRaw().toString().toLowerCase())),
             SYNONYMS_COUNT,
-            PlainIndex::isWordId
-        )
+            PlainIndex::isWordId)
         .mapToObj(this::idToWord)
         .toArray(Term[]::new);
   }
 
   private IndexedPage idToPage(long id) {
     try {
-      return new PlainPage(
-          IndexUnits.Page.parseFrom(plainBase.get(Longs.toByteArray(id)))
-      );
+      return new PlainPage(IndexUnits.Page.parseFrom(plainBase.get(Longs.toByteArray(id))));
     } catch (InvalidProtocolBufferException e) {
       LOG.severe("Encountered invalid protobuf in Plain Base!");
       return new PlainPage();
@@ -234,11 +222,9 @@ public class PlainIndex implements Index {
       return Stream.empty();
     }
 
-    return filter.filtrate(
-        embedding.getVec(queryIds),
-        FILTERED_DOC_NUMBER,
-        PlainIndex::isPageId
-    ).mapToObj(this::idToPage);
+    return filter
+        .filtrate(embedding.getVec(queryIds), FILTERED_DOC_NUMBER, PlainIndex::isPageId)
+        .mapToObj(this::idToPage);
   }
 
   @Override
@@ -279,9 +265,9 @@ public class PlainIndex implements Index {
 
   private TermStatistics termStatistics(long termId) throws InvalidProtocolBufferException {
     if (lastTermStatistics == null || lastTermStatistics.getTermId() != termId) {
-      lastTermStatistics = TermStatistics.parseFrom(
-          termStatisticsBase.get(Longs.toByteArray(termId), DEFAULT_READ_OPTIONS)
-      );
+      lastTermStatistics =
+          TermStatistics.parseFrom(
+              termStatisticsBase.get(Longs.toByteArray(termId), DEFAULT_READ_OPTIONS));
     }
     return lastTermStatistics;
   }

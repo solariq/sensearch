@@ -4,10 +4,7 @@ import com.expleague.sensearch.donkey.crawler.document.CrawlerDocument;
 import com.expleague.sensearch.protobuf.index.IndexUnits;
 import com.google.common.primitives.Longs;
 import java.io.IOException;
-import org.fusesource.leveldbjni.JniDBFactory;
-import org.iq80.leveldb.CompressionType;
 import org.iq80.leveldb.DB;
-import org.iq80.leveldb.Options;
 import org.iq80.leveldb.WriteBatch;
 import org.iq80.leveldb.WriteOptions;
 
@@ -15,9 +12,8 @@ class PlainPageBuilder {
 
   private static final int MAX_PAGES_IN_BATCH = 100;
 
-  private static final WriteOptions DEFAULT_WRITE_OPTIONS = new WriteOptions()
-      .sync(true)
-      .snapshot(false);
+  private static final WriteOptions DEFAULT_WRITE_OPTIONS =
+      new WriteOptions().sync(true).snapshot(false);
 
   private final DB plainDb;
 
@@ -42,13 +38,13 @@ class PlainPageBuilder {
     }
 
     byte[] pageIdBytes = Longs.toByteArray(negFlushedPagesCount);
-    byte[] pageBytes = IndexUnits.Page
-        .newBuilder()
-        .setPageId(negFlushedPagesCount)
-        .setContent(newPage.content().toString())
-        .setTitle(newPage.title())
-        .build()
-        .toByteArray();
+    byte[] pageBytes =
+        IndexUnits.Page.newBuilder()
+            .setPageId(negFlushedPagesCount)
+            .setContent(newPage.content().toString())
+            .setTitle(newPage.title())
+            .build()
+            .toByteArray();
 
     writeBatch.put(pageIdBytes, pageBytes);
     ++pagesInBatch;

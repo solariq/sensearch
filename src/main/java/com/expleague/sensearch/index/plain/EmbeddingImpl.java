@@ -3,7 +3,6 @@ package com.expleague.sensearch.index.plain;
 import com.expleague.commons.math.vectors.Vec;
 import com.expleague.commons.math.vectors.VecTools;
 import com.expleague.commons.math.vectors.impl.vectors.ArrayVec;
-
 import com.expleague.commons.seq.CharSeqTools;
 import com.expleague.sensearch.donkey.plain.ByteTools;
 import com.expleague.sensearch.donkey.plain.EmbeddingBuilder;
@@ -12,19 +11,23 @@ import com.expleague.sensearch.index.Embedding;
 import com.google.common.primitives.Ints;
 import com.google.common.primitives.Longs;
 import gnu.trove.list.TLongList;
-import org.fusesource.leveldbjni.JniDBFactory;
-import org.iq80.leveldb.DB;
-import org.iq80.leveldb.Options;
-
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.nio.file.Path;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.function.BiFunction;
 import java.util.function.ToIntFunction;
 import java.util.stream.LongStream;
+import org.fusesource.leveldbjni.JniDBFactory;
+import org.iq80.leveldb.DB;
+import org.iq80.leveldb.Options;
 
 public class EmbeddingImpl implements Embedding {
 
@@ -38,56 +41,50 @@ public class EmbeddingImpl implements Embedding {
   private ToIntFunction<Vec>[] hashFuncs;
 
   public EmbeddingImpl(Path embeddingPath) throws IOException {
-    vecDB = JniDBFactory.factory.open(
-            embeddingPath.resolve(EmbeddingBuilder.VECS_ROOT).toFile(),
-            DB_OPTIONS
-    );
+    vecDB =
+        JniDBFactory.factory.open(
+            embeddingPath.resolve(EmbeddingBuilder.VECS_ROOT).toFile(), DB_OPTIONS);
 
-    tablesDB = JniDBFactory.factory.open(
-            embeddingPath.resolve(EmbeddingBuilder.LSH_ROOT).toFile(),
-            DB_OPTIONS
-    );
+    tablesDB =
+        JniDBFactory.factory.open(
+            embeddingPath.resolve(EmbeddingBuilder.LSH_ROOT).toFile(), DB_OPTIONS);
 
     List<Vec> randVecs = new ArrayList<>();
     try (Reader input =
         new InputStreamReader(
-            new FileInputStream(
-                embeddingPath.resolve(EmbeddingBuilder.RAND_VECS).toFile()
-            )
-        )
-    ) {
+            new FileInputStream(embeddingPath.resolve(EmbeddingBuilder.RAND_VECS).toFile()))) {
       CharSeqTools.lines(input)
-          .forEach(line -> {
-              CharSequence[] parts = CharSeqTools.split(line, ' ');
-                  randVecs.add(
-                      new ArrayVec(
-                          Arrays.stream(parts).mapToDouble(CharSeqTools::parseDouble).toArray()
-                      )
-                  );
-                }
-              );
+          .forEach(
+              line -> {
+                CharSequence[] parts = CharSeqTools.split(line, ' ');
+                randVecs.add(
+                    new ArrayVec(
+                        Arrays.stream(parts).mapToDouble(CharSeqTools::parseDouble).toArray()));
+              });
     }
 
     hashFuncs = new ToIntFunction[EmbeddingBuilder.TABLES_NUMBER];
     for (int i = 0; i < hashFuncs.length; i++) {
 
       final int hashNum = i;
-      hashFuncs[i] = (vec) -> {
+      hashFuncs[i] =
+          (vec) -> {
+            boolean[] mask = new boolean[EmbeddingBuilder.TUPLE_SIZE];
+            for (int j = 0; j < mask.length; j++) {
+              mask[j] =
+                  VecTools.multiply(vec, randVecs.get(EmbeddingBuilder.TUPLE_SIZE * hashNum + j))
+                      >= 0;
+            }
 
-        boolean[] mask = new boolean[EmbeddingBuilder.TUPLE_SIZE];
-        for (int j = 0; j < mask.length; j++) {
-          mask[j] = VecTools.multiply(vec, randVecs.get(EmbeddingBuilder.TUPLE_SIZE * hashNum + j)) >= 0;
-        }
+            int hash = (1 << EmbeddingBuilder.TUPLE_SIZE) * hashNum;
+            for (int j = 0; j < mask.length; j++) {
+              if (mask[j]) {
+                hash += 1 << j;
+              }
+            }
 
-        int hash = (1 << EmbeddingBuilder.TUPLE_SIZE) * hashNum;
-        for (int j = 0; j < mask.length; j++) {
-          if (mask[j]) {
-            hash += 1 << j;
-          }
-        }
-
-        return hash;
-      };
+            return hash;
+          };
     }
   }
 
@@ -100,7 +97,7 @@ public class EmbeddingImpl implements Embedding {
   }
 
   @Override
-  public Vec getVec(long ... ids) {
+  public Vec getVec(long... ids) {
     if (ids.length == 0) {
       return null;
     }
@@ -150,6 +147,7 @@ public class EmbeddingImpl implements Embedding {
     Set<Long> lshNeighbors = new TreeSet<>(comparator);
     for (ToIntFunction<Vec> hashFunc : hashFuncs) {
       int bucketIndex = hashFunc.applyAsInt(mainVec);
+
       long[] ids = ByteTools.toLongArray(tablesDB.get(Ints.toByteArray(bucketIndex)));
       for (long id : ids) {
         lshNeighbors.add(id);

@@ -11,7 +11,7 @@ import java.util.stream.Collectors;
 
 public class DocBasedSnippet implements Snippet {
 
-  private static final long MAX_LENGTH = 300; //🚜🚜🚜
+  private static final long MAX_LENGTH = 300; // 🚜🚜🚜
 
   private CharSequence title;
   private CharSequence content;
@@ -20,17 +20,14 @@ public class DocBasedSnippet implements Snippet {
   public DocBasedSnippet(CharSequence title, List<Passage> passages, Query query) {
     this.title = title;
 
-    double bestPassage = passages
-        .stream()
-        .mapToDouble(Passage::getRating)
-        .max()
-        .getAsDouble();
+    double bestPassage = passages.stream().mapToDouble(Passage::getRating).max().getAsDouble();
 
-    List<Passage> bestPassages = passages
-        .stream()
-        .filter(passage -> passage.getRating() * 2 > bestPassage)
-        .sorted(Comparator.comparingLong(Passage::getId))
-        .collect(Collectors.toList());
+    List<Passage> bestPassages =
+        passages
+            .stream()
+            .filter(passage -> passage.getRating() * 2 > bestPassage)
+            .sorted(Comparator.comparingLong(Passage::getId))
+            .collect(Collectors.toList());
 
     StringBuilder sb = new StringBuilder();
     for (int i = 0; i < bestPassages.size(); ++i) {
@@ -44,13 +41,13 @@ public class DocBasedSnippet implements Snippet {
     }
     this.content = sb;
 
-    this.selection = query
-        .getTerms()
-        .stream()
-        .flatMap(x -> Passages.containsSelection(content, x.getRaw())
-            .stream())
-        .sorted(Comparator.comparingInt(Segment::getLeft))
-        .collect(Collectors.toList());
+    this.selection =
+        query
+            .getTerms()
+            .stream()
+            .flatMap(x -> Passages.containsSelection(content, x.getRaw()).stream())
+            .sorted(Comparator.comparingInt(Segment::getLeft))
+            .collect(Collectors.toList());
   }
 
   @Override

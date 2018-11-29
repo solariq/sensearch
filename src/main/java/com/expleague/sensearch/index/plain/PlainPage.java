@@ -1,6 +1,5 @@
 package com.expleague.sensearch.index.plain;
 
-
 import com.expleague.sensearch.index.IndexedPage;
 import com.expleague.sensearch.protobuf.index.IndexUnits;
 import java.net.URI;
@@ -33,8 +32,7 @@ public class PlainPage implements IndexedPage {
 
   @Override
   public URI reference() {
-    return URI.create("http://ru.wikipedia.org/wiki/"
-        + title().toString().replace(" ", "_"));
+    return URI.create("http://ru.wikipedia.org/wiki/" + title().toString().replace(" ", "_"));
   }
 
   @Override
@@ -49,8 +47,7 @@ public class PlainPage implements IndexedPage {
 
   @Override
   public boolean equals(Object other) {
-    return (other instanceof PlainPage) &&
-        (this == other || ((PlainPage) other).id == this.id);
+    return (other instanceof PlainPage) && (this == other || ((PlainPage) other).id == this.id);
   }
 
   @Override

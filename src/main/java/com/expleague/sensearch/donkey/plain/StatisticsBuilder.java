@@ -12,22 +12,17 @@ import gnu.trove.map.hash.TLongIntHashMap;
 import gnu.trove.map.hash.TLongLongHashMap;
 import gnu.trove.map.hash.TLongObjectHashMap;
 import java.io.IOException;
-import java.nio.file.Path;
 import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
-import org.fusesource.leveldbjni.JniDBFactory;
-import org.iq80.leveldb.CompressionType;
 import org.iq80.leveldb.DB;
-import org.iq80.leveldb.Options;
 import org.iq80.leveldb.WriteBatch;
 import org.iq80.leveldb.WriteOptions;
 
 public class StatisticsBuilder {
 
-  private static final WriteOptions DEFAULT_WRITE_OPTIONS = new WriteOptions()
-      .sync(true)
-      .snapshot(false);
+  private static final WriteOptions DEFAULT_WRITE_OPTIONS =
+      new WriteOptions().sync(true).snapshot(false);
 
   private static final int MOST_FREQUENT_BIGRAMS_COUNT = 10;
 
@@ -42,34 +37,31 @@ public class StatisticsBuilder {
   }
 
   @VisibleForTesting
-  static Iterable<TermStatistics.TermFrequency> mostFrequentBigrams(TLongIntMap neighbours,
-      int keep) {
+  static Iterable<TermStatistics.TermFrequency> mostFrequentBigrams(
+      TLongIntMap neighbours, int keep) {
     if (neighbours == null || neighbours.isEmpty()) {
       return new LinkedList<>();
     }
 
-    MinMaxPriorityQueue<IdFrequencyPair> neighboursHeap = MinMaxPriorityQueue
-        .orderedBy(Comparator.comparingInt(IdFrequencyPair::frequency).reversed())
-        .maximumSize(keep)
-        .expectedSize(keep)
-        .create();
+    MinMaxPriorityQueue<IdFrequencyPair> neighboursHeap =
+        MinMaxPriorityQueue.orderedBy(
+            Comparator.comparingInt(IdFrequencyPair::frequency).reversed())
+            .maximumSize(keep)
+            .expectedSize(keep)
+            .create();
 
     neighbours.forEachEntry(
         (neighId, freq) -> {
           neighboursHeap.add(new IdFrequencyPair(neighId, freq));
           return true;
-        }
-    );
+        });
 
     final TermFrequency.Builder tfBuilder = TermFrequency.newBuilder();
     final List<TermStatistics.TermFrequency> termFrequencies = new LinkedList<>();
     neighboursHeap.forEach(
-        p -> termFrequencies.add(tfBuilder
-            .setTermFrequency(p.frequency())
-            .setTermId(p.termId())
-            .build()
-        )
-    );
+        p ->
+            termFrequencies.add(
+                tfBuilder.setTermFrequency(p.frequency()).setTermId(p.termId()).build()));
 
     return termFrequencies;
   }
@@ -80,8 +72,7 @@ public class StatisticsBuilder {
           wordFrequencyMap.adjustOrPutValue(tok, freq, freq);
           documentFrequencyMap.adjustOrPutValue(tok, 1, 1);
           return true;
-        }
-    );
+        });
 
     pageWiseBigramTf.forEachEntry(
         (tId, neigh) -> {
@@ -91,11 +82,9 @@ public class StatisticsBuilder {
               (nId, freq) -> {
                 existingNeighStats.adjustOrPutValue(nId, freq, freq);
                 return true;
-              }
-          );
+              });
           return true;
-        }
-    );
+        });
   }
 
   void build() throws IOException {
@@ -109,18 +98,14 @@ public class StatisticsBuilder {
                   .setTermId(k)
                   .setTermFrequency(wordFrequencyMap.get(k))
                   .setDocuementFrequency(documentFrequencyMap.get(k))
-                  .addAllBigramFrequency(mostFrequentBigrams(
-                      largeBigramsMap.get(k),
-                      MOST_FREQUENT_BIGRAMS_COUNT)
-                  )
+                  .addAllBigramFrequency(
+                      mostFrequentBigrams(largeBigramsMap.get(k), MOST_FREQUENT_BIGRAMS_COUNT))
                   .build()
-                  .toByteArray()
-          );
+                  .toByteArray());
 
           tsBuilder.clear();
           return true;
-        }
-    );
+        });
 
     statisticsDb.write(writeBatch, DEFAULT_WRITE_OPTIONS);
     statisticsDb.close();

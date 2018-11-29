@@ -42,9 +42,12 @@ public class Metric {
     double DCG = 0.0;
     int ind = 0;
     for (String title : ourTitles) {
-      ResultItem googleResult = googleResults.stream()
-          .filter(item -> item.title().equals(title)).findFirst()
-          .orElse(null);
+      ResultItem googleResult =
+          googleResults
+              .stream()
+              .filter(item -> item.title().equals(title))
+              .findFirst()
+              .orElse(null);
       ind++;
       if (googleResult == null) {
         continue;
@@ -55,9 +58,9 @@ public class Metric {
     }
 
     System.err.println("Query: " + query + " DCG: " + DCG);
-    try (BufferedWriter DCGWriter = new BufferedWriter(
-        new OutputStreamWriter(
-            Files.newOutputStream(tmpPath.resolve(METRIC_FILE))))) {
+    try (BufferedWriter DCGWriter =
+        new BufferedWriter(
+            new OutputStreamWriter(Files.newOutputStream(tmpPath.resolve(METRIC_FILE))))) {
       DCGWriter.write(String.valueOf(DCG));
     } catch (IOException e) {
       e.printStackTrace();

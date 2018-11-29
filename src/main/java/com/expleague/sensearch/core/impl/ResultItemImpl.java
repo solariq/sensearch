@@ -24,7 +24,6 @@ public class ResultItemImpl implements ResultItem {
     this.score = score;
   }
 
-
   @Override
   public URI reference() {
     return reference;

@@ -29,8 +29,8 @@ public class MinerPhase implements SearchPhase {
   public void accept(Whiteboard whiteboard) {
     final Query query = whiteboard.query();
     whiteboard.putTextFeatures(
-        index.fetchDocuments(query)
-            .map(p -> Pair.of(p, featuresExtractor.extractFeatures(query, p)))
-    );
+        index
+            .fetchDocuments(query)
+            .map(p -> Pair.of(p, featuresExtractor.extractFeatures(query, p))));
   }
 }

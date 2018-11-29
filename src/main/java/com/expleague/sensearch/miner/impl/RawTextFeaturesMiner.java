@@ -35,22 +35,23 @@ public class RawTextFeaturesMiner implements FeaturesMiner {
 
   @Override
   public Features extractFeatures(Query query, Page page) {
-    String[] contentTokens = SIMPLE_SPLITTER
-        .split((page.title() + " " + page.text()).toLowerCase());
-    String[] rawTerms = query.getTerms()
-        .stream()
-        .map(Term::getRaw)
-        .map(CharSequence::toString)
-        .map(String::toLowerCase)
-        .toArray(String[]::new);
+    String[] contentTokens =
+        SIMPLE_SPLITTER.split((page.title() + " " + page.text()).toLowerCase());
+    String[] rawTerms =
+        query
+            .getTerms()
+            .stream()
+            .map(Term::getRaw)
+            .map(CharSequence::toString)
+            .map(String::toLowerCase)
+            .toArray(String[]::new);
 
     return new TextFeaturesImpl(
-        0,//bm25Rank(query.getTerms(), contentTokens),
+        0, // bm25Rank(query.getTerms(), contentTokens),
         fuzzyRank(rawTerms, contentTokens),
         lmRank(rawTerms, contentTokens),
         dlhRank(rawTerms, contentTokens),
-        dllhRank(rawTerms, contentTokens)
-    );
+        dllhRank(rawTerms, contentTokens));
   }
 
   private String[] getRawTerms(List<Term> terms) {
@@ -70,8 +71,10 @@ public class RawTextFeaturesMiner implements FeaturesMiner {
     int indexSize = index.size();
     for (int i = 0; i < rawTerms.length; ++i) {
       int pagesWithTerm = index.documentFrequency(terms.get(i));
-      idf[i] = pagesWithTerm == 0 ? 0 :
-          Math.log((indexSize - pagesWithTerm + 0.5) / (pagesWithTerm + 0.5));
+      idf[i] =
+          pagesWithTerm == 0
+              ? 0
+              : Math.log((indexSize - pagesWithTerm + 0.5) / (pagesWithTerm + 0.5));
       idf[i] = idf[i] < 0 ? 0 : idf[i];
     }
 

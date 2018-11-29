@@ -33,9 +33,9 @@ public class CrawlerXML implements Crawler {
   @Override
   public Stream<CrawlerDocument> makeStream() throws IOException {
     return StreamSupport.stream(
-        Spliterators
-            .spliteratorUnknownSize(new DocumentIterator(path, config.getTemporaryDocuments()),
-                Spliterator.ORDERED | Spliterator.SORTED),
+        Spliterators.spliteratorUnknownSize(
+            new DocumentIterator(path, config.getTemporaryDocuments()),
+            Spliterator.ORDERED | Spliterator.SORTED),
         false);
   }
 
@@ -134,31 +134,38 @@ public class CrawlerXML implements Crawler {
         File file = new File(fileName);
         WikiPage page = parser.parseXML(file);
         boolean[] isOk = new boolean[1];
-        page.categories().forEach(category -> {
-          isOk[0] |= category.equals("Актёры России");
-          isOk[0] |= category.equals("Футболисты России");
-          isOk[0] |= category.equals("Писатели России по алфавиту");
-          isOk[0] |= category.equals("Поэты России");
-          isOk[0] |= category.equals("Актрисы России");
-          isOk[0] |= category.equals("Мастера спорта России международного класса");
-          isOk[0] |= category.contains("Правители");
+        page.categories()
+            .forEach(
+                category -> {
+                  isOk[0] |= category.equals("Актёры России");
+                  isOk[0] |= category.equals("Футболисты России");
+                  isOk[0] |= category.equals("Писатели России по алфавиту");
+                  isOk[0] |= category.equals("Поэты России");
+                  isOk[0] |= category.equals("Актрисы России");
+                  isOk[0] |= category.equals("Мастера спорта России международного класса");
+                  isOk[0] |= category.contains("Правители");
 
+                  //          isOk[0] |= category.contains("Росс") &&
+                  // !category.contains("Википедия:") && !category.contains("ПРО:");
+                  isOk[0] |=
+                      category.contains("Город")
+                          && !category.contains("Википедия:")
+                          && !category.contains("ПРО:");
+                  //          isOk[0] |= category.contains("Фильм") &&
+                  // !category.contains("Википедия:") && !category.contains("ПРО:");
+                  //          isOk[0] |= category.contains("фильм") &&
+                  // !category.contains("Википедия:") && !category.contains("ПРО:");
+                });
 
-//          isOk[0] |= category.contains("Росс") && !category.contains("Википедия:") && !category.contains("ПРО:");
-          isOk[0] |= category.contains("Город") && !category.contains("Википедия:") && !category.contains("ПРО:");
-//          isOk[0] |= category.contains("Фильм") && !category.contains("Википедия:") && !category.contains("ПРО:");
-//          isOk[0] |= category.contains("фильм") && !category.contains("Википедия:") && !category.contains("ПРО:");
-        });
-
-//        if (!isOk[0]) {
-//          Files.delete(Paths.get(fileName));
-//        }
+        //        if (!isOk[0]) {
+        //          Files.delete(Paths.get(fileName));
+        //        }
         if (cnt % 100000 == 0) {
           System.out.println(cnt);
         }
-//        if (cnt == num) {
-//          break;
-//        }
+        //        if (cnt == num) {
+        //          break;
+        //        }
       }
 
     } catch (IOException e) {
@@ -166,4 +173,3 @@ public class CrawlerXML implements Crawler {
     }
   }
 }
-

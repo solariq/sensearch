@@ -39,39 +39,45 @@ public class XMLParser {
       }
       page.setId(xmlPage.id);
 
-      List<Section> sections = xmlPage.sections.stream().map(xmlSection -> {
-        List<Link> links = new ArrayList<>();
-        StringBuilder text = new StringBuilder();
+      List<Section> sections =
+          xmlPage
+              .sections
+              .stream()
+              .map(
+                  xmlSection -> {
+                    List<Link> links = new ArrayList<>();
+                    StringBuilder text = new StringBuilder();
 
-        if (xmlSection.content != null) {
-          for (Serializable serializable : xmlSection.content) {
-            if (serializable instanceof String) {
-              text.append(((String) serializable).trim());
-            } else if (serializable instanceof XmlSectionLink) {
-              XmlSectionLink link = (XmlSectionLink) serializable;
+                    if (xmlSection.content != null) {
+                      for (Serializable serializable : xmlSection.content) {
+                        if (serializable instanceof String) {
+                          text.append(((String) serializable).trim());
+                        } else if (serializable instanceof XmlSectionLink) {
+                          XmlSectionLink link = (XmlSectionLink) serializable;
 
-              if (link.targetId == 0) {
-                link.targetId = -1;
-              }
-              if (link.targetTitle == null) {
-                link.targetTitle = "";
-              }
+                          if (link.targetId == 0) {
+                            link.targetId = -1;
+                          }
+                          if (link.targetTitle == null) {
+                            link.targetTitle = "";
+                          }
 
-              if (text.length() > 0 && text.charAt(text.length() - 1) != ' ') {
-                text.append(" ");
-              }
-              links
-                  .add(new WikiLink(link.text, link.targetTitle, link.targetId, text.length()));
-              text.append(link.text.trim());
-              text.append(" ");
-            }
-          }
-        }
+                          if (text.length() > 0 && text.charAt(text.length() - 1) != ' ') {
+                            text.append(" ");
+                          }
+                          links.add(
+                              new WikiLink(
+                                  link.text, link.targetTitle, link.targetId, text.length()));
+                          text.append(link.text.trim());
+                          text.append(" ");
+                        }
+                      }
+                    }
 
-        return new WikiSection(
-            text, Arrays.asList(xmlSection.title.split("\\|@\\|")), links);
-
-      }).collect(Collectors.toList());
+                    return new WikiSection(
+                        text, Arrays.asList(xmlSection.title.split("\\|@\\|")), links);
+                  })
+              .collect(Collectors.toList());
 
       page.setSections(sections);
     } catch (JAXBException e) {
@@ -81,46 +87,45 @@ public class XMLParser {
     return page;
   }
 
+  /*
+  private void writeXML(WikiPage page) {
+      String fileName = "/home/artem/JetBrains/WikiDocs/Mini_Wiki/" + page.getID() + ".xml";
+      String startElement = "page";
 
-    /*
-    private void writeXML(WikiPage page) {
-        String fileName = "/home/artem/JetBrains/WikiDocs/Mini_Wiki/" + page.getID() + ".xml";
-        String startElement = "page";
+      XMLOutputFactory xmlOutputFactory = XMLOutputFactory.newInstance();
+      try {
+          XMLStreamWriter xmlStreamWriter = xmlOutputFactory.
+                  createXMLStreamWriter(new FileOutputStream(fileName), "UTF-8");
+          xmlStreamWriter.writeStartDocument("UTF-8", "1.0");
+          xmlStreamWriter.writeCharacters("\n");
 
-        XMLOutputFactory xmlOutputFactory = XMLOutputFactory.newInstance();
-        try {
-            XMLStreamWriter xmlStreamWriter = xmlOutputFactory.
-                    createXMLStreamWriter(new FileOutputStream(fileName), "UTF-8");
-            xmlStreamWriter.writeStartDocument("UTF-8", "1.0");
-            xmlStreamWriter.writeCharacters("\n");
+          xmlStreamWriter.writeStartElement("Pages");
+          xmlStreamWriter.writeCharacters("\n");
 
-            xmlStreamWriter.writeStartElement("Pages");
-            xmlStreamWriter.writeCharacters("\n");
+          xmlStreamWriter.writeStartElement(startElement);
+          xmlStreamWriter.writeAttribute("id", Long.toString(page.iD()));
+          xmlStreamWriter.writeAttribute("title", page.title());
+          xmlStreamWriter.writeAttribute("revision", page.revision);
+          xmlStreamWriter.writeAttribute("type", page.type);
+          xmlStreamWriter.writeAttribute("ns-id", page.nsId);
+          xmlStreamWriter.writeAttribute("ns-name", "");
+          xmlStreamWriter.writeCharacters("\n");
+          xmlStreamWriter.writeCharacters(page.content().toString());
+          xmlStreamWriter.writeCharacters("\n");
+          xmlStreamWriter.writeEndElement();
 
-            xmlStreamWriter.writeStartElement(startElement);
-            xmlStreamWriter.writeAttribute("id", Long.toString(page.iD()));
-            xmlStreamWriter.writeAttribute("title", page.title());
-            xmlStreamWriter.writeAttribute("revision", page.revision);
-            xmlStreamWriter.writeAttribute("type", page.type);
-            xmlStreamWriter.writeAttribute("ns-id", page.nsId);
-            xmlStreamWriter.writeAttribute("ns-name", "");
-            xmlStreamWriter.writeCharacters("\n");
-            xmlStreamWriter.writeCharacters(page.content().toString());
-            xmlStreamWriter.writeCharacters("\n");
-            xmlStreamWriter.writeEndElement();
+          xmlStreamWriter.writeCharacters("\n");
+          xmlStreamWriter.writeEndElement();
+          xmlStreamWriter.writeEndDocument();
 
-            xmlStreamWriter.writeCharacters("\n");
-            xmlStreamWriter.writeEndElement();
-            xmlStreamWriter.writeEndDocument();
-
-            xmlStreamWriter.flush();
-            xmlStreamWriter.close();
+          xmlStreamWriter.flush();
+          xmlStreamWriter.close();
 
 
-        } catch (FileNotFoundException | XMLStreamException e) {
-            e.printStackTrace();
-        }
-    }//*/
+      } catch (FileNotFoundException | XMLStreamException e) {
+          e.printStackTrace();
+      }
+  }//*/
 
   @XmlRootElement(name = "pages")
   private static class XmlPageRootElement {
@@ -156,6 +161,7 @@ public class XMLParser {
 
   @XmlRootElement(name = "link")
   private static class XmlSectionLink implements Serializable {
+
     @XmlValue
     String text;
 
@@ -165,6 +171,4 @@ public class XMLParser {
     @XmlAttribute(name = "targetId")
     long targetId;
   }
-
-
 }

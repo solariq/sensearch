@@ -21,7 +21,6 @@ import org.glassfish.jersey.servlet.ServletContainer;
 
 public class SearchServer {
 
-
   public static void main(String[] args) throws Exception {
     Injector injector = Guice.createInjector(new AppModule());
     Builder builder = injector.getInstance(Builder.class);
@@ -31,13 +30,13 @@ public class SearchServer {
     context.setContextPath("/api");
 
     // Set up cors to be able to make request from frontend
-    FilterHolder cors = context
-        .addFilter(CrossOriginFilter.class, "/*", EnumSet.of(DispatcherType.REQUEST));
+    FilterHolder cors =
+        context.addFilter(CrossOriginFilter.class, "/*", EnumSet.of(DispatcherType.REQUEST));
     cors.setInitParameter(CrossOriginFilter.ALLOWED_ORIGINS_PARAM, "*");
     cors.setInitParameter(CrossOriginFilter.ACCESS_CONTROL_ALLOW_ORIGIN_HEADER, "*");
     cors.setInitParameter(CrossOriginFilter.ALLOWED_METHODS_PARAM, "GET,POST,HEAD");
-    cors.setInitParameter(CrossOriginFilter.ALLOWED_HEADERS_PARAM,
-        "X-Requested-With,Content-Type,Accept,Origin");
+    cors.setInitParameter(
+        CrossOriginFilter.ALLOWED_HEADERS_PARAM, "X-Requested-With,Content-Type,Accept,Origin");
 
     ResourceConfig resourceConfig = new ResourceConfig();
     resourceConfig.packages("com.expleague.sensearch.web");

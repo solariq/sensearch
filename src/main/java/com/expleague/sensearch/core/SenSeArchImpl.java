@@ -28,16 +28,23 @@ public class SenSeArchImpl implements SenSeArch {
 
   @Override
   public ResultPage search(String query, int pageNo) {
-    final Set<SearchPhase> phases = Stream.of(SearchPhase.FACTORIES).map(f -> {
-      f.setConfig(builder);
-      return f.get();
-    }).collect(Collectors.toSet());
+    final Set<SearchPhase> phases =
+        Stream.of(SearchPhase.FACTORIES)
+            .map(
+                f -> {
+                  f.setConfig(builder);
+                  return f.get();
+                })
+            .collect(Collectors.toSet());
 
     final Whiteboard wb = new WhiteboardImpl(query, pageNo, builder);
-    final ThreadPoolExecutor executor = new ThreadPoolExecutor(
-        Runtime.getRuntime().availableProcessors() - 1,
-        Runtime.getRuntime().availableProcessors() - 1, 1, TimeUnit.SECONDS,
-        new LinkedBlockingQueue<>());
+    final ThreadPoolExecutor executor =
+        new ThreadPoolExecutor(
+            Runtime.getRuntime().availableProcessors() - 1,
+            Runtime.getRuntime().availableProcessors() - 1,
+            1,
+            TimeUnit.SECONDS,
+            new LinkedBlockingQueue<>());
 
     boolean[] hasError = new boolean[1];
 
@@ -49,20 +56,21 @@ public class SenSeArchImpl implements SenSeArch {
           phases.add(phase);
           continue;
         }
-        executor.execute(() -> {
-          try {
-            phase.accept(wb);
-            synchronized (wb) {
-              wb.notify();
-            }
-          } catch (Exception e) {
-            synchronized (wb) {
-              e.printStackTrace();
-              hasError[0] = true;
-              wb.notify();
-            }
-          }
-        });
+        executor.execute(
+            () -> {
+              try {
+                phase.accept(wb);
+                synchronized (wb) {
+                  wb.notify();
+                }
+              } catch (Exception e) {
+                synchronized (wb) {
+                  e.printStackTrace();
+                  hasError[0] = true;
+                  wb.notify();
+                }
+              }
+            });
       }
       synchronized (wb) {
         try {
@@ -81,14 +89,14 @@ public class SenSeArchImpl implements SenSeArch {
     final ResultItem[] results = new ResultItem[snippets.length];
     final ResultItem[] googleResults = wb.googleResults();
     for (int i = 0; i < snippets.length; i++) {
-      results[i] = new ResultItemImpl(
-          pages[i].reference(),
-          pages[i].title(),
-          Arrays.asList(Pair.create(snippets[i].getContent(), snippets[i].getSelection())),
-          0);
+      results[i] =
+          new ResultItemImpl(
+              pages[i].reference(),
+              pages[i].title(),
+              Arrays.asList(Pair.create(snippets[i].getContent(), snippets[i].getSelection())),
+              0);
     }
 
     return new ResultPageImpl(0, snippets.length, results, googleResults);
   }
-
 }

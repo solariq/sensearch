@@ -1,8 +1,8 @@
 package com.expleague.sensearch.index;
 
-import com.expleague.sensearch.query.term.Term;
 import com.expleague.sensearch.Page;
 import com.expleague.sensearch.query.Query;
+import com.expleague.sensearch.query.term.Term;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -19,8 +19,10 @@ public interface Index {
   int size();
 
   int vocabularySize();
+
   double averagePageSize();
 
   int documentFrequency(Term term);
+
   long termFrequency(Term term);
 }

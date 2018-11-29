@@ -9,13 +9,12 @@ import java.util.Objects;
 
 public class SnippetPhase implements SearchPhase {
 
-  final private SnippetsCreator snippetsCreator = new SnippetsCreator();
+  private final SnippetsCreator snippetsCreator = new SnippetsCreator();
 
   @Override
   public boolean test(Whiteboard whiteboard) {
     return whiteboard.results() != null && whiteboard.query() != null;
   }
-
 
   @Override
   public void accept(Whiteboard whiteboard) {

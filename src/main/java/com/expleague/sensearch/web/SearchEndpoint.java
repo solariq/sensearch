@@ -45,10 +45,10 @@ public class SearchEndpoint {
     return mapper.writeValueAsString(search.search(query, pageNumber));
   }
 
-//  @GET
-//  @Produces(MediaType.TEXT_HTML)
-//  public String index() throws IOException {
-//    return String.join("\n", Files.readAllLines(Paths.get(Config.getMainPageHTML())));
-//  }
+  //  @GET
+  //  @Produces(MediaType.TEXT_HTML)
+  //  public String index() throws IOException {
+  //    return String.join("\n", Files.readAllLines(Paths.get(Config.getMainPageHTML())));
+  //  }
 
 }

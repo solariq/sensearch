@@ -14,40 +14,38 @@ import java.util.function.Supplier;
 public interface SearchPhase extends Predicate<Whiteboard>, Consumer<Whiteboard> {
 
   @SuppressWarnings("unchecked")
-  Factory<? extends SearchPhase>[] FACTORIES = new Factory[]{
-      QueryPhase::new,
-      SnippetPhase::new,
+  Factory<? extends SearchPhase>[] FACTORIES =
+      new Factory[]{
+          QueryPhase::new,
+          SnippetPhase::new,
+          new Factory<RankingPhase>() {
+            Builder builder;
 
-      new Factory<RankingPhase>() {
-        Builder builder;
+            @Override
+            public void setConfig(Builder builder) {
+              this.builder = builder;
+            }
 
-        @Override
-        public void setConfig(Builder builder) {
-          this.builder = builder;
-        }
+            @Override
+            public RankingPhase get() {
+              return new RankingPhase(new Bm25Ranker(), builder.pageSize());
+            }
+          },
+          new Factory<MinerPhase>() {
+            Builder config;
 
-        @Override
-        public RankingPhase get() {
-          return new RankingPhase(new Bm25Ranker(), builder.pageSize());
-        }
-      },
+            @Override
+            public void setConfig(Builder builder) {
+              this.config = builder;
+            }
 
-      new Factory<MinerPhase>() {
-        Builder config;
-
-        @Override
-        public void setConfig(Builder builder) {
-          this.config = builder;
-        }
-
-        @Override
-        public MinerPhase get() {
-          return new MinerPhase(config.getIndex());
-        }
-      },
-
-      MetricPhase::new
-  };
+            @Override
+            public MinerPhase get() {
+              return new MinerPhase(config.getIndex());
+            }
+          },
+          MetricPhase::new
+      };
 
   interface Factory<T> extends Supplier<T> {
 

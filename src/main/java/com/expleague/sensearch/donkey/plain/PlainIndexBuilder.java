@@ -48,22 +48,24 @@ public class PlainIndexBuilder implements IndexBuilder {
   public static final String EMBEDDING_ROOT = "embedding";
 
   public static final String INDEX_META_FILE = "index.meta";
-  public static final int DEFAULT_VEC_SIZE = 50;
+  public static final int DEFAULT_VEC_SIZE = 130;
 
   // DB configurations
   private static final long DEFAULT_CACHE_SIZE = 1 << 10; // 1 KB
-  private static final Options STATS_DB_OPTIONS = new Options()
-      .cacheSize(DEFAULT_CACHE_SIZE)
-      .blockSize(STATISTICS_BLOCK_SIZE) // 1 MB
-      .createIfMissing(true)
-      .errorIfExists(true)
-      .compressionType(CompressionType.SNAPPY);
-  private static final Options PLAIN_DB_OPTIONS = new Options()
-      .cacheSize(DEFAULT_CACHE_SIZE)
-      .blockRestartInterval(PLAIN_PAGE_BLOCK_SIZE)
-      .createIfMissing(true)
-      .errorIfExists(true)
-      .compressionType(CompressionType.SNAPPY);
+  private static final Options STATS_DB_OPTIONS =
+      new Options()
+          .cacheSize(DEFAULT_CACHE_SIZE)
+          .blockSize(STATISTICS_BLOCK_SIZE) // 1 MB
+          .createIfMissing(true)
+          .errorIfExists(true)
+          .compressionType(CompressionType.SNAPPY);
+  private static final Options PLAIN_DB_OPTIONS =
+      new Options()
+          .cacheSize(DEFAULT_CACHE_SIZE)
+          .blockRestartInterval(PLAIN_PAGE_BLOCK_SIZE)
+          .createIfMissing(true)
+          .errorIfExists(true)
+          .compressionType(CompressionType.SNAPPY);
 
   // Bloom filter for titles options
   private static final long DEFAULT_EXPECTED_COLLECTION_SIZE = (long) 1e6;
@@ -80,22 +82,16 @@ public class PlainIndexBuilder implements IndexBuilder {
     final IdMapping.Builder idMappingsBuilder = IdMapping.newBuilder();
     mappings.forEachEntry(
         (w, id) -> {
-          protobufMappings.add(
-              idMappingsBuilder
-                  .setId(id)
-                  .setWord(w)
-                  .build()
-          );
+          protobufMappings.add(idMappingsBuilder.setId(id).setWord(w).build());
           return true;
-        }
-    );
+        });
 
     return protobufMappings;
   }
 
   /**
-   * Converts an array of words to an array of integer ids. Also if a word was not found in
-   * mappings the method adds a new entry to mapping for such word
+   * Converts an array of words to an array of integer ids. Also if a word was not found in mappings
+   * the method adds a new entry to mapping for such word
    *
    * @param words array of words to be converted to ids
    * @param mappings all known word to int mappings
@@ -106,9 +102,8 @@ public class PlainIndexBuilder implements IndexBuilder {
     long[] wordIds = new long[words.length];
     for (int i = 0; i < words.length; ++i) {
       if (!mappings.containsKey(words[i])) {
-        LOG.warning(String.format("For the word '%s' was not found any vector representation!",
-            words[i])
-        );
+        LOG.warning(
+            String.format("For the word '%s' was not found any vector representation!", words[i]));
         mappings.put(words[i], mappings.size() + 1);
       }
       wordIds[i] = mappings.get(words[i]);
@@ -118,8 +113,8 @@ public class PlainIndexBuilder implements IndexBuilder {
   }
 
   @VisibleForTesting
-  static void enrichFrequencies(long[] tokens, TLongIntMap termFrequencyMap,
-      TLongObjectMap<TLongIntMap> bigramFrequencyMap) {
+  static void enrichFrequencies(
+      long[] tokens, TLongIntMap termFrequencyMap, TLongObjectMap<TLongIntMap> bigramFrequencyMap) {
     if (tokens.length < 1) {
       return;
     }
@@ -150,31 +145,28 @@ public class PlainIndexBuilder implements IndexBuilder {
   }
 
   @VisibleForTesting
-  static void readGloveVectors(Path glovePath, TObjectLongMap<String> idMappings,
-      TLongObjectMap<Vec> vectors) {
+  static void readGloveVectors(
+      Path glovePath, TObjectLongMap<String> idMappings, TLongObjectMap<Vec> vectors) {
     try (Reader input =
         new InputStreamReader(
-            new GZIPInputStream(
-                new FileInputStream(glovePath.toFile())),
-            StandardCharsets.UTF_8
-        )
-    ) {
+            new GZIPInputStream(new FileInputStream(glovePath.toFile())), StandardCharsets.UTF_8)) {
       CharSeqTools.lines(input)
           .parallel()
-          .forEach(line -> {
+          .forEach(
+              line -> {
                 CharSequence[] parts = CharSeqTools.split(line, ' ');
                 final String word = parts[0].toString();
-                double[] doubles = Arrays.stream(parts, 1, parts.length)
-                    .mapToDouble(CharSeqTools::parseDouble)
-                    .toArray();
+                double[] doubles =
+                    Arrays.stream(parts, 1, parts.length)
+                        .mapToDouble(CharSeqTools::parseDouble)
+                        .toArray();
                 synchronized (idMappings) {
                   idMappings.put(word, idMappings.size() + 1);
                 }
                 synchronized (vectors) {
                   vectors.put(idMappings.get(word), new ArrayVec(doubles));
                 }
-              }
-          );
+              });
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
@@ -189,69 +181,56 @@ public class PlainIndexBuilder implements IndexBuilder {
     final Path indexRoot = config.getTemporaryIndex();
     // ensure all roots
     Files.createDirectories(indexRoot.resolve(PLAIN_ROOT));
-    final DB plainDb = JniDBFactory.factory.open(
-        indexRoot.resolve(PLAIN_ROOT).toFile(),
-        PLAIN_DB_OPTIONS
-    );
+    final DB plainDb =
+        JniDBFactory.factory.open(indexRoot.resolve(PLAIN_ROOT).toFile(), PLAIN_DB_OPTIONS);
     final PlainPageBuilder plainPageBuilder = new PlainPageBuilder(plainDb);
 
     Files.createDirectories(indexRoot.resolve(TERM_STATISTICS_ROOT));
-    final DB statisticsDb = JniDBFactory.factory.open(
-        indexRoot.resolve(TERM_STATISTICS_ROOT).toFile(),
-        STATS_DB_OPTIONS
-    );
+    final DB statisticsDb =
+        JniDBFactory.factory.open(
+            indexRoot.resolve(TERM_STATISTICS_ROOT).toFile(), STATS_DB_OPTIONS);
     final StatisticsBuilder statisticsBuilder = new StatisticsBuilder(statisticsDb);
 
     Files.createDirectories(indexRoot.resolve(EMBEDDING_ROOT));
-    final EmbeddingBuilder embeddingBuilder = new EmbeddingBuilder(
-        indexRoot.resolve(EMBEDDING_ROOT));
+    final EmbeddingBuilder embeddingBuilder =
+        new EmbeddingBuilder(indexRoot.resolve(EMBEDDING_ROOT));
 
     final long[] pagesAndTokensCounts = new long[]{0, 0};
 
     final TLongIntMap termFrequencyMap = new TLongIntHashMap();
     final TLongObjectMap<TLongIntMap> bigramFrequencyMap = new TLongObjectHashMap<>();
 
-    final BloomFilter<byte[]> titlesFilter = BloomFilter.create(Funnels.byteArrayFunnel(),
-        DEFAULT_EXPECTED_COLLECTION_SIZE,
-        DEFAULT_FALSE_POSITIVE_RATE
-    );
+    final BloomFilter<byte[]> titlesFilter =
+        BloomFilter.create(
+            Funnels.byteArrayFunnel(),
+            DEFAULT_EXPECTED_COLLECTION_SIZE,
+            DEFAULT_FALSE_POSITIVE_RATE);
     // saving page-wise data
     try {
-      crawler.makeStream().forEach(
-          doc -> {
-            long pageId = plainPageBuilder.add(doc);
+      crawler
+          .makeStream()
+          .forEach(
+              doc -> {
+                long pageId = plainPageBuilder.add(doc);
 
-            long[] titleIds = toIds(
-                Tokenizer.tokenize(doc.title().toLowerCase()),
-                idMappings
-            );
-            titlesFilter.put(ByteTools.toBytes(titleIds));
+                long[] titleIds = toIds(Tokenizer.tokenize(doc.title().toLowerCase()), idMappings);
+                titlesFilter.put(ByteTools.toBytes(titleIds));
 
-            embeddingBuilder.add(
-                pageId,
-                toVector(
-                    titleIds,
-                    gloveVectors
-                )
-            );
+                embeddingBuilder.add(pageId, toVector(titleIds, gloveVectors));
 
-            long[] tokens = toIds(
-                Tokenizer.tokenize((doc.title() + " " + doc.content()).toLowerCase()),
-                idMappings
-            );
+                long[] tokens =
+                    toIds(
+                        Tokenizer.tokenize((doc.title() + " " + doc.content()).toLowerCase()),
+                        idMappings);
 
-            termFrequencyMap.clear();
-            bigramFrequencyMap.clear();
-            enrichFrequencies(tokens, termFrequencyMap, bigramFrequencyMap);
-            statisticsBuilder.enrich(
-                termFrequencyMap,
-                bigramFrequencyMap
-            );
+                termFrequencyMap.clear();
+                bigramFrequencyMap.clear();
+                enrichFrequencies(tokens, termFrequencyMap, bigramFrequencyMap);
+                statisticsBuilder.enrich(termFrequencyMap, bigramFrequencyMap);
 
-            ++pagesAndTokensCounts[0];
-            pagesAndTokensCounts[1] += tokens.length;
-          }
-      );
+                ++pagesAndTokensCounts[0];
+                pagesAndTokensCounts[1] += tokens.length;
+              });
       embeddingBuilder.addAll(gloveVectors);
       embeddingBuilder.build();
 
@@ -262,8 +241,7 @@ public class PlainIndexBuilder implements IndexBuilder {
       titlesFilter.writeTo(bos);
 
       // saving index-wise data
-      IndexUnits.IndexMeta
-          .newBuilder()
+      IndexUnits.IndexMeta.newBuilder()
           .setAveragePageSize((double) pagesAndTokensCounts[1] / pagesAndTokensCounts[0])
           .setVocabularySize(idMappings.size())
           .setPagesCount((int) pagesAndTokensCounts[0])

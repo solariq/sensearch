@@ -11,8 +11,8 @@ import java.util.stream.Collectors;
 
 public class MyStemTokenizer implements Tokenizer {
 
-  private static final Pattern splitPattern = Pattern
-      .compile("(?<=[.!?]|[.!?]['\"])(?=\\p{javaWhitespace}*\\p{javaUpperCase})");
+  private static final Pattern splitPattern =
+      Pattern.compile("(?<=[.!?]|[.!?]['\"])(?=\\p{javaWhitespace}*\\p{javaUpperCase})");
 
   private MyStem myStem;
 
@@ -22,16 +22,11 @@ public class MyStemTokenizer implements Tokenizer {
 
   @Override
   public List<CharSequence> toWords(CharSequence sentence) {
-    return myStem
-        .parse(sentence)
-        .stream()
-        .map(WordInfo::token)
-        .collect(Collectors.toList());
+    return myStem.parse(sentence).stream().map(WordInfo::token).collect(Collectors.toList());
   }
 
   @Override
   public List<CharSequence> toSentences(CharSequence text) {
     return Arrays.asList(splitPattern.split(text));
   }
-
 }

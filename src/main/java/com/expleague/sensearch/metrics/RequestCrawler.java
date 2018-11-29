@@ -41,8 +41,8 @@ public class RequestCrawler implements WebCrawler {
 
     List<String> cookies = getCookies();
     if (cookies != null) {
-      String resultCookie = cookies.stream().map(cookie -> cookie.split(";", 2)[0])
-          .collect(Collectors.joining("; "));
+      String resultCookie =
+          cookies.stream().map(cookie -> cookie.split(";", 2)[0]).collect(Collectors.joining("; "));
       urlConnection.setRequestProperty("Cookie", resultCookie);
     }
   }
@@ -67,8 +67,7 @@ public class RequestCrawler implements WebCrawler {
     while (results.size() < size && page < 5) {
       page++;
       try {
-        String request = googleRequest + query.replace(" ", "%20")
-            + "&start=" + article[0];
+        String request = googleRequest + query.replace(" ", "%20") + "&start=" + article[0];
         URL url = new URL(request);
         URLConnection connection = url.openConnection();
         setCookies(connection);
@@ -77,22 +76,27 @@ public class RequestCrawler implements WebCrawler {
         Document document = Jsoup.parse(connection.getInputStream(), "UTF-8", url.toString());
 
         Elements googleSnippets = document.select("div.g");
-        googleSnippets.forEach(element -> {
-          String title = normalizeTitle(element.select("h3.LC20lb").text());
-          article[0]++;
-          if (title == null) {
-            return;
-          }
+        googleSnippets.forEach(
+            element -> {
+              String title = normalizeTitle(element.select("h3.LC20lb").text());
+              article[0]++;
+              if (title == null) {
+                return;
+              }
 
-          String snippet = element.select("span.st").text();
-          String snippetUrl = element.select("a[href]").attr("href");
-          try {
-            results.add(new ResultItemImpl(new URI(snippetUrl), title,
-                Arrays.asList(new Pair<>(snippet, new ArrayList<>())), 0));
-          } catch (URISyntaxException e) {
-            e.printStackTrace();
-          }
-        });
+              String snippet = element.select("span.st").text();
+              String snippetUrl = element.select("a[href]").attr("href");
+              try {
+                results.add(
+                    new ResultItemImpl(
+                        new URI(snippetUrl),
+                        title,
+                        Arrays.asList(new Pair<>(snippet, new ArrayList<>())),
+                        0));
+              } catch (URISyntaxException e) {
+                e.printStackTrace();
+              }
+            });
       } catch (IOException e) {
         e.printStackTrace();
       }
