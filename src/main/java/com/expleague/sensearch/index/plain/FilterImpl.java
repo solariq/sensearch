@@ -31,7 +31,7 @@ public class FilterImpl implements Filter {
       if (result.size() >= number) {
         return result.subList(0, number).stream().mapToLong(Long::longValue);
       }
-      embNumber += number;
+      embNumber *= 2;
     }
     throw new IllegalArgumentException("number is too large");
   }
