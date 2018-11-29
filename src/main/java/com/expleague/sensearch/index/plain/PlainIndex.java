@@ -35,14 +35,16 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.NoSuchElementException;
-import java.util.logging.Logger;
 import java.util.stream.Stream;
+import org.apache.log4j.Logger;
 import org.fusesource.leveldbjni.JniDBFactory;
 import org.iq80.leveldb.CompressionType;
 import org.iq80.leveldb.DB;
 import org.iq80.leveldb.DBException;
 import org.iq80.leveldb.Options;
 import org.iq80.leveldb.ReadOptions;
+
+;
 
 public class PlainIndex implements Index {
 
@@ -142,7 +144,7 @@ public class PlainIndex implements Index {
     } catch (NoSuchElementException e) {
       return Collections.emptyList();
     } catch (InvalidProtocolBufferException e) {
-      LOG.warning(
+      LOG.warn(
           String.format(
               "Encountered invalid protobuf in statistics base for word with id %d", wordId));
       return Collections.emptyList();
@@ -157,7 +159,7 @@ public class PlainIndex implements Index {
   private long toId(String word) {
     word = word.toLowerCase();
     if (!wordToIdMap.containsKey(word)) {
-      LOG.fine(String.format("No mapping was found for word %s", word));
+      LOG.debug(String.format("No mapping was found for word %s", word));
       throw new NoSuchElementException("No mapping for word %s");
     }
 
@@ -205,7 +207,7 @@ public class PlainIndex implements Index {
     try {
       return new PlainPage(IndexUnits.Page.parseFrom(plainBase.get(Longs.toByteArray(id))));
     } catch (InvalidProtocolBufferException e) {
-      LOG.severe("Encountered invalid protobuf in Plain Base!");
+      LOG.fatal("Encountered invalid protobuf in Plain Base!");
       return new PlainPage();
     }
   }
@@ -245,7 +247,7 @@ public class PlainIndex implements Index {
     } catch (DBException | NoSuchElementException e) {
       return 0;
     } catch (InvalidProtocolBufferException e) {
-      LOG.severe("Encountered invalid protobuf in Term Statistics Base!");
+      LOG.fatal("Encountered invalid protobuf in Term Statistics Base!");
       return 0;
     }
   }
@@ -258,7 +260,7 @@ public class PlainIndex implements Index {
     } catch (DBException | NoSuchElementException e) {
       return 0;
     } catch (InvalidProtocolBufferException e) {
-      LOG.severe("Encountered invalid protobuf in Term Statistics Base!");
+      LOG.fatal("Encountered invalid protobuf in Term Statistics Base!");
       return 0;
     }
   }

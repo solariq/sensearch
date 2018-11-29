@@ -31,12 +31,14 @@ import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.logging.Logger;
 import java.util.zip.GZIPInputStream;
+import org.apache.log4j.Logger;
 import org.fusesource.leveldbjni.JniDBFactory;
 import org.iq80.leveldb.CompressionType;
 import org.iq80.leveldb.DB;
 import org.iq80.leveldb.Options;
+
+;
 
 public class PlainIndexBuilder implements IndexBuilder {
 
@@ -102,7 +104,7 @@ public class PlainIndexBuilder implements IndexBuilder {
     long[] wordIds = new long[words.length];
     for (int i = 0; i < words.length; ++i) {
       if (!mappings.containsKey(words[i])) {
-        LOG.warning(
+        LOG.warn(
             String.format("For the word '%s' was not found any vector representation!", words[i]));
         mappings.put(words[i], mappings.size() + 1);
       }
@@ -138,7 +140,7 @@ public class PlainIndexBuilder implements IndexBuilder {
       }
     }
     if (vectorsFound != tokens.length) {
-      LOG.warning("");
+      LOG.warn("");
     }
     mean.scale(1.0 / vectorsFound);
     return mean;

@@ -2,8 +2,13 @@ package com.expleague.sensearch.query;
 
 import com.expleague.sensearch.core.SearchPhase;
 import com.expleague.sensearch.core.Whiteboard;
+import org.apache.log4j.Logger;
+
+;
 
 public class QueryPhase implements SearchPhase {
+
+  private static final Logger LOG = Logger.getLogger(QueryPhase.class.getName());
 
   @Override
   public boolean test(Whiteboard whiteboard) {
@@ -12,7 +17,13 @@ public class QueryPhase implements SearchPhase {
 
   @Override
   public void accept(Whiteboard whiteboard) {
+    LOG.debug("Query phase started");
+    long startTime = System.nanoTime();
+
     final String input = whiteboard.input();
     whiteboard.putQuery(new BaseQuery(input, whiteboard.builder().getLemmer()));
+
+    LOG.debug(String
+        .format("Query phase finished in %.3f seconds", (System.nanoTime() - startTime) / 1e9));
   }
 }

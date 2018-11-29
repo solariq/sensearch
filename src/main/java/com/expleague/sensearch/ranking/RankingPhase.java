@@ -5,11 +5,16 @@ import com.expleague.sensearch.core.SearchPhase;
 import com.expleague.sensearch.core.Whiteboard;
 import java.util.Comparator;
 import org.apache.commons.lang3.tuple.Pair;
+import org.apache.log4j.Logger;
+
+;
 
 /**
  * Point-wise ranker
  */
 public class RankingPhase implements SearchPhase {
+
+  private static final Logger LOG = Logger.getLogger(RankingPhase.class.getName());
 
   private final int pageSize;
   private PointWiseRanker ranker;
@@ -26,6 +31,9 @@ public class RankingPhase implements SearchPhase {
 
   @Override
   public void accept(Whiteboard whiteboard) {
+    LOG.debug("Ranking phase started");
+    long startTime = System.nanoTime();
+
     final int pageNo = whiteboard.pageNo();
     whiteboard.putResults(
         whiteboard
@@ -36,5 +44,8 @@ public class RankingPhase implements SearchPhase {
             .skip(pageNo * pageSize)
             .limit(pageSize)
             .toArray(Page[]::new));
+
+    LOG.debug(String
+        .format("Ranking phase finished in %.3f seconds", (System.nanoTime() - startTime) / 1e9));
   }
 }
