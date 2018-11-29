@@ -58,7 +58,7 @@ public class PlainIndex implements Index {
 
   private static final Logger LOG = Logger.getLogger(PlainIndex.class.getName());
 
-  private static final int DOC_NUMBER = 1000;
+  private static final int FILTERED_DOC_NUMBER = 50;
   private static final int SYNONYMS_COUNT = 50;
 
   private final Path indexRoot;
@@ -236,7 +236,7 @@ public class PlainIndex implements Index {
 
     return filter.filtrate(
         embedding.getVec(queryIds),
-        DOC_NUMBER,
+        FILTERED_DOC_NUMBER,
         PlainIndex::isPageId
     ).mapToObj(this::idToPage);
   }
