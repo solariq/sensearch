@@ -26,7 +26,7 @@ public class EmbeddingBuilderTest extends SensearchTestCase {
   private static final int NEIGHBORS_NUMBER = 5;
   private static final int MAX_ID = MAIN_VEC_NUMBER * (NEIGHBORS_NUMBER + 1);
   private static final int DIFFERENT_COORDS_NUMBER = 10;
-  private static final int VEC_SIZE = 50;
+  private static final int VEC_SIZE = 130;
   private static final double EPS = 1e-2;
 
   private static Random random = new Random();
@@ -51,6 +51,7 @@ public class EmbeddingBuilderTest extends SensearchTestCase {
       }
       Vec mainVec = new ArrayVec(randCoords);
       idVecMap.put((long) mainId, mainVec);
+      builder.add((long) mainId, mainVec);
 
       neighbors[mainId] = new TLongHashSet();
       for (int nIndex = 0; nIndex < NEIGHBORS_NUMBER; nIndex++) {
@@ -60,13 +61,10 @@ public class EmbeddingBuilderTest extends SensearchTestCase {
           int pos = random.nextInt(VEC_SIZE);
           neighborVec.set(pos, neighborVec.get(pos) + (random.nextBoolean() ? EPS : -EPS));
         }
-
-        idVecMap.put(neighborId, neighborVec);
+        builder.add(neighborId, neighborVec);
         neighbors[mainId].add(neighborId);
       }
     }
-
-    builder.addAll(idVecMap);
     builder.build();
     embedding = new EmbeddingImpl(embeddingTestPath);
   }
@@ -92,7 +90,8 @@ public class EmbeddingBuilderTest extends SensearchTestCase {
     for (int i = 0; i < MAIN_VEC_NUMBER; i++) {
       TLongSet curNeighbors = neighbors[i];
       Assert.assertTrue(
-          embedding.getNearest(idVecMap.get(i), NEIGHBORS_NUMBER).anyMatch(curNeighbors::contains));
+          embedding.getNearest(idVecMap.get(i), MAX_ID).anyMatch(curNeighbors::contains)
+      );
     }
   }
 }

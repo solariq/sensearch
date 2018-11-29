@@ -25,6 +25,8 @@ import java.util.TreeSet;
 import java.util.function.BiFunction;
 import java.util.function.ToIntFunction;
 import java.util.stream.LongStream;
+
+import gnu.trove.list.array.TLongArrayList;
 import org.fusesource.leveldbjni.JniDBFactory;
 import org.iq80.leveldb.DB;
 import org.iq80.leveldb.Options;
@@ -142,19 +144,25 @@ public class EmbeddingImpl implements Embedding {
 
   @Override
   public LongStream getNearest(Vec mainVec, int numberOfNeighbors) {
-    Comparator<Long> comparator = getComparator(mainVec);
+    //Comparator<Long> comparator = getComparator(mainVec);
+    //Set<Long> lshNeighbors = new TreeSet<>(comparator);
 
-    Set<Long> lshNeighbors = new TreeSet<>(comparator);
+    TLongList lshNeighbors = new TLongArrayList();
     for (ToIntFunction<Vec> hashFunc : hashFuncs) {
       int bucketIndex = hashFunc.applyAsInt(mainVec);
-
       long[] ids = ByteTools.toLongArray(tablesDB.get(Ints.toByteArray(bucketIndex)));
+
       for (long id : ids) {
         lshNeighbors.add(id);
+        if (lshNeighbors.size() == numberOfNeighbors) {
+          return Arrays.stream(lshNeighbors.toArray());
+        }
       }
     }
+    return Arrays.stream(lshNeighbors.toArray());
 
-    if (lshNeighbors.size() <= numberOfNeighbors) {
+    //Sort makes finder slower
+    /*if (lshNeighbors.size() <= numberOfNeighbors) {
       return lshNeighbors.stream().mapToLong(Long::longValue);
     }
 
@@ -168,6 +176,6 @@ public class EmbeddingImpl implements Embedding {
       }
     }
 
-    return nearestNeighbors.stream().mapToLong(Long::longValue);
+    return nearestNeighbors.stream().mapToLong(Long::longValue);*/
   }
 }
