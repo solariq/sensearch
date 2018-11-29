@@ -1,7 +1,7 @@
 import {Component, OnInit, ViewChild} from '@angular/core';
 import {Observable} from "rxjs";
 import {SearchService} from "../../services/search.service";
-import {debounceTime, switchMap} from "rxjs/operators";
+import {debounceTime, fo, skip, switchMap, take} from "rxjs/operators";
 import {FormControl} from "@angular/forms";
 import {SearchResultPageModel} from "../../models/search-result-item.model";
 import {MatAutocompleteTrigger} from "@angular/material";
@@ -37,7 +37,10 @@ export class SearchPageComponent implements OnInit {
       switchMap(query => this.searchService.getSuggestions$(query))
     );
 
-    this.route.queryParams.subscribe(params => {
+    this.route.queryParams.pipe(
+      skip(1),
+      take(1),
+    ).subscribe(params => {
       if (params['search']) {
         this.autocompleteControl.setValue(params['search']);
         this.search();

@@ -1,7 +1,6 @@
 package com.expleague.sensearch.index.plain;
 
 import com.expleague.commons.math.vectors.Vec;
-
 import com.expleague.sensearch.index.Embedding;
 import com.expleague.sensearch.index.Filter;
 import java.util.ArrayList;
@@ -28,11 +27,11 @@ public class FilterImpl implements Filter {
     List<Long> result = new ArrayList<>();
     while (embNumber < MAX_NUMBER) {
       result.clear();
-      embedding.getNearest(mainVec, number).filter(predicate).forEach(result::add);
+      embedding.getNearest(mainVec, embNumber).filter(predicate).forEach(result::add);
       if (result.size() >= number) {
         return result.subList(0, number).stream().mapToLong(Long::longValue);
       }
-      embNumber += number;
+      embNumber *= 2;
     }
     throw new IllegalArgumentException("number is too large");
   }

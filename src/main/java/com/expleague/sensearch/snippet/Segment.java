@@ -16,7 +16,6 @@ public class Segment {
 
   public void setLeft(int left) {
     this.left = left;
-
   }
 
   public int getRight() {
@@ -27,4 +26,3 @@ public class Segment {
     this.right = right;
   }
 }
-

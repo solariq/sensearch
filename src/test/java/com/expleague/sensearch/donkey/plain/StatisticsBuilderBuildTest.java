@@ -20,11 +20,12 @@ import org.junit.Test;
 public class StatisticsBuilderBuildTest extends SensearchTestCase {
 
   private static final String DB_ROOT_NAME = "StatsDB";
-  private static final long[][] WORD_ID_SEQ = new long[][]{
-      {1, 2, 3, 2, 3, 1, 3, 2, 3, 1, 1},
-      {2, 3, 1, 3, 2, 1, 4, 1, 2, 3, 1},
-      {3, 2, 3, 4, 2, 4, 3, 2, 3, 4, 2}
-  };
+  private static final long[][] WORD_ID_SEQ =
+      new long[][] {
+        {1, 2, 3, 2, 3, 1, 3, 2, 3, 1, 1},
+        {2, 3, 1, 3, 2, 1, 4, 1, 2, 3, 1},
+        {3, 2, 3, 4, 2, 4, 3, 2, 3, 4, 2}
+      };
 
   @Test
   public void enrichFrequenciesTest() {
@@ -56,10 +57,7 @@ public class StatisticsBuilderBuildTest extends SensearchTestCase {
 
     Path statisticsOutputRoot = testOutputRoot().resolve(DB_ROOT_NAME);
     Files.createDirectories(statisticsOutputRoot);
-    DB statisticsDb = JniDBFactory.factory.open(
-        statisticsOutputRoot.toFile(),
-        dbCreateOptions()
-    );
+    DB statisticsDb = JniDBFactory.factory.open(statisticsOutputRoot.toFile(), dbCreateOptions());
 
     TLongIntMap tFreqMap = new TLongIntHashMap();
     TLongObjectMap<TLongIntMap> bFreqMap = new TLongObjectHashMap<>();
@@ -76,10 +74,9 @@ public class StatisticsBuilderBuildTest extends SensearchTestCase {
 
   @Test(expected = DBException.class)
   public void twiceBuildTest() throws IOException {
-    DB statsDb = JniDBFactory.factory.open(
-        Files.createTempDirectory(testOutputRoot(), "tmp").toFile(),
-        dbCreateOptions()
-    );
+    DB statsDb =
+        JniDBFactory.factory.open(
+            Files.createTempDirectory(testOutputRoot(), "tmp").toFile(), dbCreateOptions());
 
     StatisticsBuilder statisticsBuilder = new StatisticsBuilder(statsDb);
     statisticsBuilder.build();
@@ -94,10 +91,9 @@ public class StatisticsBuilderBuildTest extends SensearchTestCase {
   public void StatsDbContentTest() throws IOException {
     clearOutputRoot();
     simpleBuildTest();
-    try (
-        DB statsDb = JniDBFactory.factory.open(testOutputRoot().resolve(DB_ROOT_NAME).toFile(),
-            dbOpenOptions()
-        )) {
+    try (DB statsDb =
+        JniDBFactory.factory.open(
+            testOutputRoot().resolve(DB_ROOT_NAME).toFile(), dbOpenOptions())) {
 
       TLongIntMap tFreqMap = new TLongIntHashMap();
       TLongObjectMap<TLongIntMap> bFreqMap = new TLongObjectHashMap<>();

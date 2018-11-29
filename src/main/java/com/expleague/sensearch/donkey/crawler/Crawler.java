@@ -8,5 +8,4 @@ import javax.xml.stream.XMLStreamException;
 public interface Crawler {
 
   Stream<CrawlerDocument> makeStream() throws IOException, XMLStreamException;
-
 }

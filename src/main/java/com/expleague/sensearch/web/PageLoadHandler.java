@@ -26,8 +26,8 @@ public class PageLoadHandler extends AbstractHandler {
   private final Config config;
   private ObjectMapper mapper = new ObjectMapper();
 
-  public PageLoadHandler(SenSeArch searcher, BigramsBasedSuggestor bigramsBasedSuggestor,
-      Config config) {
+  public PageLoadHandler(
+      SenSeArch searcher, BigramsBasedSuggestor bigramsBasedSuggestor, Config config) {
     suggestor = bigramsBasedSuggestor;
     this.config = config;
     this.search = searcher;
@@ -41,7 +41,8 @@ public class PageLoadHandler extends AbstractHandler {
     for (Segment segment : segments) {
       strb.append(plain.subSequence(left, segment.getLeft()));
       strb.append("<strong>")
-          .append(plain.subSequence(segment.getLeft(), segment.getRight())).append("</strong>");
+          .append(plain.subSequence(segment.getLeft(), segment.getRight()))
+          .append("</strong>");
       left = segment.getRight();
     }
 
@@ -51,10 +52,8 @@ public class PageLoadHandler extends AbstractHandler {
   }
 
   @Override
-  public void handle(String target,
-      Request baseRequest,
-      HttpServletRequest request,
-      HttpServletResponse response)
+  public void handle(
+      String target, Request baseRequest, HttpServletRequest request, HttpServletResponse response)
       throws IOException, ServletException {
 
     String requestText = request.getReader().readLine();
@@ -66,8 +65,7 @@ public class PageLoadHandler extends AbstractHandler {
     final PrintWriter writer = response.getWriter();
     if (requestText == null || requestText.isEmpty()) {
 
-      try (BufferedReader in = new BufferedReader(
-          new FileReader(new File(config.getWebRoot())))) {
+      try (BufferedReader in = new BufferedReader(new FileReader(new File(config.getWebRoot())))) {
         writer.println(in.lines().collect(Collectors.joining("\n")));
       }
 
@@ -82,7 +80,10 @@ public class PageLoadHandler extends AbstractHandler {
         final SenSeArch.ResultItem[] results = serp.results();
         for (int i = 0; i < results.length; i++) {
           writer.println("<br><strong>" + (i + 1) + ". " + results[i].title() + "</strong><br>");
-          results[i].passages().stream().map(pair -> generateBoldedText(pair.first, pair.second))
+          results[i]
+              .passages()
+              .stream()
+              .map(pair -> generateBoldedText(pair.first, pair.second))
               .forEach(writer::println);
         }
         writer.println("</body></html>");
@@ -91,5 +92,4 @@ public class PageLoadHandler extends AbstractHandler {
       writer.println(mapper.writeValueAsString(suggestor.getSuggestions(requestText)));
     }
   }
-
 }

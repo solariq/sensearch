@@ -35,8 +35,6 @@ public class UserAgents {
   }
 
   public void setAnyAgent(URLConnection connection) {
-    connection.setRequestProperty("User-Agent",
-        anyUserAgent());
+    connection.setRequestProperty("User-Agent", anyUserAgent());
   }
-
 }

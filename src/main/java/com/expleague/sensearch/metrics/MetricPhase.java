@@ -5,7 +5,7 @@ import com.expleague.sensearch.core.Whiteboard;
 
 public class MetricPhase implements SearchPhase {
 
-  //TODO implement as Phase and delete in SenSeArchImpl and "(ResultItem[])"
+  // TODO implement as Phase and delete in SenSeArchImpl and "(ResultItem[])"
   @Override
   public void accept(Whiteboard whiteboard) {
     Metric metric = whiteboard.builder().metric();

@@ -28,13 +28,13 @@ public class RankingPhase implements SearchPhase {
   public void accept(Whiteboard whiteboard) {
     final int pageNo = whiteboard.pageNo();
     whiteboard.putResults(
-        whiteboard.textFeatures()
+        whiteboard
+            .textFeatures()
             .map(p -> Pair.of(p.getLeft(), p.getRight().fuzzy()))
             .sorted(Comparator.<Pair<Page, Double>>comparingDouble(Pair::getRight).reversed())
             .map(Pair::getLeft)
             .skip(pageNo * pageSize)
             .limit(pageSize)
-            .toArray(Page[]::new)
-    );
+            .toArray(Page[]::new));
   }
 }

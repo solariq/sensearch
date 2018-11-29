@@ -9,11 +9,11 @@ public class WikiPage implements CrawlerDocument {
   private List<String> categories;
   private List<Section> sections;
 
-    /*
-    String revision;
-    String type;
-    String nsId;
-    //*/
+  /*
+  String revision;
+  String type;
+  String nsId;
+  //*/
 
   public void setId(long id) {
     this.id = id;
@@ -104,7 +104,6 @@ public class WikiPage implements CrawlerDocument {
       this.targetId = targetId;
       this.textOffset = textOffset;
     }
-
 
     @Override
     public CharSequence text() {

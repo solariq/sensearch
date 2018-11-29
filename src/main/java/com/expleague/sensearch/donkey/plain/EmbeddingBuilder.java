@@ -3,7 +3,6 @@ package com.expleague.sensearch.donkey.plain;
 import com.expleague.commons.math.vectors.Vec;
 import com.expleague.commons.math.vectors.VecTools;
 import com.expleague.commons.math.vectors.impl.vectors.ArrayVec;
-import com.google.common.annotations.VisibleForTesting;
 import com.google.common.primitives.Ints;
 import com.google.common.primitives.Longs;
 import gnu.trove.list.TLongList;
@@ -32,14 +31,14 @@ public class EmbeddingBuilder {
   public static final int TUPLE_SIZE = 12;
   private static final int MAX_BATCH_SIZE = 100;
 
-  private static final Options DB_OPTIONS = new Options()
-      .createIfMissing(true)
-      .errorIfExists(true)
-      .compressionType(CompressionType.SNAPPY);
+  private static final Options DB_OPTIONS =
+      new Options()
+          .createIfMissing(true)
+          .errorIfExists(true)
+          .compressionType(CompressionType.SNAPPY);
 
-  private static final WriteOptions WRITE_OPTIONS = new WriteOptions()
-      .sync(true);
-  //.snapshot(false);
+  private static final WriteOptions WRITE_OPTIONS = new WriteOptions().sync(true);
+  // .snapshot(false);
 
   private DB vecDB;
   private WriteBatch batch = null;
@@ -60,12 +59,7 @@ public class EmbeddingBuilder {
     hashFuncs = new ToIntFunction[TABLES_NUMBER];
 
     try (Writer output =
-        new OutputStreamWriter(
-            new FileOutputStream(
-                embeddingPath.resolve(RAND_VECS).toFile()
-            )
-        )
-    ) {
+        new OutputStreamWriter(new FileOutputStream(embeddingPath.resolve(RAND_VECS).toFile()))) {
       Random random = new Random();
       for (int i = 0; i < hashFuncs.length; i++) {
 
@@ -81,22 +75,22 @@ public class EmbeddingBuilder {
         }
 
         final int hashNum = i;
-        hashFuncs[i] = (vec) -> {
+        hashFuncs[i] =
+            (vec) -> {
+              boolean[] mask = new boolean[TUPLE_SIZE];
+              for (int j = 0; j < mask.length; j++) {
+                mask[j] = VecTools.multiply(vec, randVecs[j]) >= 0;
+              }
 
-          boolean[] mask = new boolean[TUPLE_SIZE];
-          for (int j = 0; j < mask.length; j++) {
-            mask[j] = VecTools.multiply(vec, randVecs[j]) >= 0;
-          }
+              int hash = (1 << TUPLE_SIZE) * hashNum;
+              for (int j = 0; j < mask.length; j++) {
+                if (mask[j]) {
+                  hash += 1 << j;
+                }
+              }
 
-          int hash = (1 << TUPLE_SIZE) * hashNum;
-          for (int j = 0; j < mask.length; j++) {
-            if (mask[j]) {
-              hash += 1 << j;
-            }
-          }
-
-          return hash;
-        };
+              return hash;
+            };
       }
     }
   }
@@ -127,10 +121,11 @@ public class EmbeddingBuilder {
   }
 
   public void addAll(TLongObjectMap<Vec> vecs) {
-    vecs.forEachEntry((id, vec) -> {
-      add(id, vec);
-      return true;
-    });
+    vecs.forEachEntry(
+        (id, vec) -> {
+          add(id, vec);
+          return true;
+        });
   }
 
   private void addToTablesDB(int bucket, long[] ids) {

@@ -1,19 +1,10 @@
 package com.expleague.sensearch.web.suggest;
 
-import com.expleague.sensearch.Config;
-import com.expleague.sensearch.core.Tokenizer;
 import com.expleague.sensearch.index.Index;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.Map.Entry;
-import java.util.TreeMap;
-import java.util.TreeSet;
-import java.util.stream.Collectors;
 
 public class BigramsBasedSuggestor implements Suggestor {
 

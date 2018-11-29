@@ -1,25 +1,25 @@
-//package com.expleague.sensearch.web.suggest;
+// package com.expleague.sensearch.web.suggest;
 //
-//import com.expleague.sensearch.Config;
-//import com.expleague.sensearch.utils.IndexBasedTestCase;
-//import com.fasterxml.jackson.core.JsonGenerationException;
-//import com.fasterxml.jackson.databind.JsonMappingException;
-//import com.fasterxml.jackson.databind.ObjectMapper;
-//import java.io.File;
-//import java.io.IOException;
-//import java.nio.file.Files;
-//import java.nio.file.Path;
-//import java.nio.file.Paths;
-//import java.util.Arrays;
-//import java.util.Map;
-//import java.util.TreeMap;
-//import org.junit.After;
-//import org.junit.Assert;
-//import org.junit.Before;
-//import org.junit.Test;
+// import com.expleague.sensearch.Config;
+// import com.expleague.sensearch.utils.IndexBasedTestCase;
+// import com.fasterxml.jackson.core.JsonGenerationException;
+// import com.fasterxml.jackson.databind.JsonMappingException;
+// import com.fasterxml.jackson.databind.ObjectMapper;
+// import java.io.File;
+// import java.io.IOException;
+// import java.nio.file.Files;
+// import java.nio.file.Path;
+// import java.nio.file.Paths;
+// import java.util.Arrays;
+// import java.util.Map;
+// import java.util.TreeMap;
+// import org.junit.After;
+// import org.junit.Assert;
+// import org.junit.Before;
+// import org.junit.Test;
 //
 //// TODO: rework bigrams test when IndexBasedTestCase will be ready
-//public class BigramsBasedSuggestorTest extends IndexBasedTestCase {
+// public class BigramsBasedSuggestorTest extends IndexBasedTestCase {
 //
 //  final String suggMapfilename = "suggTmpMap";
 //  ObjectMapper mapper = new ObjectMapper();
@@ -92,4 +92,4 @@
 //    Assert.assertEquals(Arrays.asList("ёлка палка"),
 //        suggestor.getSuggestions("ёлка па"));
 //  }
-//}
+// }

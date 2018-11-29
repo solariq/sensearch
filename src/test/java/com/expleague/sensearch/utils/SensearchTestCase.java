@@ -27,7 +27,6 @@ public abstract class SensearchTestCase {
   private static Path myStemLogsRoot;
   private static Config config;
 
-
   @BeforeClass
   public static void initWorkingPaths() {
     //
@@ -36,34 +35,28 @@ public abstract class SensearchTestCase {
       throw new RuntimeException(
           String.format(
               "Working directory expected to be project root. Received path %s instead",
-              workingDir
-          )
-      );
+              workingDir));
     }
 
     Path projectRoot = Paths.get(workingDir);
     testDataRoot = projectRoot.resolve("src").resolve("test").resolve("DATA");
     if (Files.notExists(testDataRoot) || !Files.isDirectory(testDataRoot)) {
-      throw new RuntimeException(String.format(
-          "Test data root was not found by path: %s",
-          testDataRoot.toAbsolutePath().toString()
-      )
-      );
+      throw new RuntimeException(
+          String.format(
+              "Test data root was not found by path: %s",
+              testDataRoot.toAbsolutePath().toString()));
     } else {
-      LOG.fine(String.format(
-          "Test data root was found by path: %s",
-          testDataRoot.toAbsolutePath().toString()
-          )
-      );
+      LOG.fine(
+          String.format(
+              "Test data root was found by path: %s", testDataRoot.toAbsolutePath().toString()));
     }
 
     testOutputRoot = projectRoot.resolve("src").resolve("test").resolve("UNIVERSE");
     if (Files.notExists(testOutputRoot)) {
-      LOG.info(String.format(
-          "Will create test output directory by path: %s",
-          testOutputRoot.toAbsolutePath().toString()
-          )
-      );
+      LOG.info(
+          String.format(
+              "Will create test output directory by path: %s",
+              testOutputRoot.toAbsolutePath().toString()));
       try {
         Files.createDirectories(testOutputRoot);
       } catch (IOException e) {
@@ -71,8 +64,7 @@ public abstract class SensearchTestCase {
             String.format(
                 "Failed to create test output directory by path: %s",
                 testOutputRoot.toAbsolutePath().toString()),
-            e
-        );
+            e);
       }
     }
 
@@ -80,19 +72,16 @@ public abstract class SensearchTestCase {
     myStemLogsRoot = testDataRoot.resolve(MY_STEM_LOGS_ROOT);
 
     Path indexDataRoot = testDataRoot.resolve(INDEX_DATA_ROOT);
-    config = new TestConfig(
-        indexDataRoot.resolve(MINI_WIKI_ZIP),
-        indexDataRoot.resolve(VECTORS_FILE)
-    );
-
+    config =
+        new TestConfig(indexDataRoot.resolve(MINI_WIKI_ZIP), indexDataRoot.resolve(VECTORS_FILE));
   }
 
   @AfterClass
   public static void cleanupUniverse() {
     LOG.fine("Cleaning up...");
-    LOG.fine(String.format("Will delete tes output directory %s",
-        testOutputRoot.toAbsolutePath().toString())
-    );
+    LOG.fine(
+        String.format(
+            "Will delete tes output directory %s", testOutputRoot.toAbsolutePath().toString()));
     clearOutputRoot();
   }
 
@@ -109,9 +98,8 @@ public abstract class SensearchTestCase {
   }
 
   protected static MyStem myStemForTest(String testClassName, String testName) {
-    Path pathToSpecificStem = myStemLogsRoot.resolve(
-        String.format("%s_%s", testClassName, testName)
-    );
+    Path pathToSpecificStem =
+        myStemLogsRoot.resolve(String.format("%s_%s", testClassName, testName));
     return new LogBasedMyStem(pathToSpecificStem);
   }
 
@@ -120,7 +108,8 @@ public abstract class SensearchTestCase {
       FileUtils.cleanDirectory(testOutputRoot.toFile());
     } catch (IOException e) {
       throw new RuntimeException(
-          String.format("Failed to clea test output directory %s",
+          String.format(
+              "Failed to clea test output directory %s",
               testOutputRoot.toAbsolutePath().toString()),
           e);
     }

@@ -9,12 +9,12 @@ public class Passages {
 
   public static boolean contains(Lemmer lemmer, CharSequence s, CharSequence t) {
     /*return lemmer.myStem
-        .parse(s)
-        .stream()
-        .anyMatch(x -> {
-          Term term = new BaseTerm(x);
-          return term.getNormalized() == t;
-        });*/
+    .parse(s)
+    .stream()
+    .anyMatch(x -> {
+      Term term = new BaseTerm(x);
+      return term.getNormalized() == t;
+    });*/
     return !containsSelection(s, t).isEmpty();
   }
 
@@ -66,8 +66,8 @@ public class Passages {
       }
       if (j < bound) {
         ok = true;
-        if ((i == 0 || !Character.isAlphabetic(s.charAt(i - 1))) && (i + m == n || !Character
-            .isAlphabetic(s.charAt(i + m)))) {
+        if ((i == 0 || !Character.isAlphabetic(s.charAt(i - 1)))
+            && (i + m == n || !Character.isAlphabetic(s.charAt(i + m)))) {
           selection.add(new Segment(i, i + m));
         }
         bound = m - suffixShift[0];

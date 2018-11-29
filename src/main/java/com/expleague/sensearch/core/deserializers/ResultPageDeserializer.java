@@ -24,8 +24,9 @@ public class ResultPageDeserializer extends StdDeserializer<ResultPage> {
   }
 
   @Override
-  public ResultPage deserialize(JsonParser jsonParser,
-      DeserializationContext deserializationContext) throws IOException, JsonProcessingException {
+  public ResultPage deserialize(
+      JsonParser jsonParser, DeserializationContext deserializationContext)
+      throws IOException, JsonProcessingException {
     ObjectCodec codec = jsonParser.getCodec();
     JsonNode node = codec.readTree(jsonParser);
     ResultItemDeserializer resultItemDeserializer = new ResultItemDeserializer();
@@ -40,8 +41,7 @@ public class ResultPageDeserializer extends StdDeserializer<ResultPage> {
       googleResults.add(codec.treeToValue(result, ResultItem.class));
     }
 
-    return new ResultPageImpl(0, 0,
-        results.toArray(new ResultItem[0]),
-        googleResults.toArray(new ResultItem[0]));
+    return new ResultPageImpl(
+        0, 0, results.toArray(new ResultItem[0]), googleResults.toArray(new ResultItem[0]));
   }
 }

@@ -65,7 +65,10 @@ public class Config implements ConfigJson {
 
   @Override
   public Path getBigramsFileName() {
-    return getPathToZIP().toAbsolutePath().getParent().resolve(getTemporaryBigrams())
+    return getPathToZIP()
+        .toAbsolutePath()
+        .getParent()
+        .resolve(getTemporaryBigrams())
         .resolve(bigramsFileName);
   }
 

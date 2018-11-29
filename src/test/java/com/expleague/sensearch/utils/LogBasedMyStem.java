@@ -17,26 +17,26 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Class that uses logs provided by {@link RecordingMyStem} to mock MyStem behaviour.
- * Throws an error if given a parse request which can not be found in logs
+ * Class that uses logs provided by {@link RecordingMyStem} to mock MyStem behaviour. Throws an
+ * error if given a parse request which can not be found in logs
  */
 public class LogBasedMyStem implements MyStem {
 
   private Map<CharSequence, List<WordInfo>> requests = new HashMap<>();
 
   public LogBasedMyStem(Path logPath) {
-    try (
-        InputStream fromMyStem = Files.newInputStream(Paths.get(logPath + "_from"));
-        InputStream toMyStem = Files.newInputStream(Paths.get(logPath + "_to"))
-    ) {
-      MyStemImpl myStem = new MyStemImpl(fromMyStem, new OutputStream() {
-        @Override
-        public void write(int i) {
+    try (InputStream fromMyStem = Files.newInputStream(Paths.get(logPath + "_from"));
+        InputStream toMyStem = Files.newInputStream(Paths.get(logPath + "_to"))) {
+      MyStemImpl myStem =
+          new MyStemImpl(
+              fromMyStem,
+              new OutputStream() {
+                @Override
+                public void write(int i) {}
+              });
 
-        }
-      });
-
-      BufferedReader toMyStemReader = new BufferedReader(new InputStreamReader(toMyStem, StandardCharsets.UTF_8));
+      BufferedReader toMyStemReader =
+          new BufferedReader(new InputStreamReader(toMyStem, StandardCharsets.UTF_8));
       StringBuilder line = new StringBuilder();
       while (true) {
         String newLine = toMyStemReader.readLine();
@@ -61,6 +61,7 @@ public class LogBasedMyStem implements MyStem {
       return requests.get(charSequence);
     }
 
-    throw new IllegalArgumentException("Request to mystem '" + charSequence + "' can not be found in logs");
+    throw new IllegalArgumentException(
+        "Request to mystem '" + charSequence + "' can not be found in logs");
   }
 }

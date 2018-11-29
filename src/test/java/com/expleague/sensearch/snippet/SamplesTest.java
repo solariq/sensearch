@@ -1,13 +1,10 @@
 package com.expleague.sensearch.snippet;
 
 import com.expleague.commons.text.lemmer.MyStem;
-import com.expleague.sensearch.utils.LogBasedMyStem;
 import com.expleague.sensearch.Page;
 import com.expleague.sensearch.core.Lemmer;
-import com.expleague.sensearch.index.Index;
 import com.expleague.sensearch.query.BaseQuery;
 import com.expleague.sensearch.query.Query;
-import com.expleague.sensearch.query.term.Term;
 import com.expleague.sensearch.utils.SensearchTestCase;
 import java.io.File;
 import java.io.IOException;
@@ -17,7 +14,6 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Stream;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -32,46 +28,49 @@ public class SamplesTest extends SensearchTestCase {
   private List<Page> pages = new ArrayList<>();
   private List<Query> queries = new ArrayList<>();
 
-  @Rule
-  public TestName testName = new TestName();
+  @Rule public TestName testName = new TestName();
 
   @Before
   public void prepare() {
     MyStem myStem = myStemForTest(SamplesTest.class.getName(), testName.getMethodName());
     lemmer = new Lemmer(myStem);
     File folder = new File("./src/test/java/com/expleague/sensearch/snippet/samples");
-    Arrays.stream(folder.listFiles()).sorted().forEach(fileEntry -> {
-      if (fileEntry.isDirectory()) {
-        try {
-          CharSequence content = String
-              .join("", Files.readAllLines(Paths.get(fileEntry.getPath() + "/content")));
-          CharSequence query = String
-              .join("", Files.readAllLines(Paths.get(fileEntry.getPath() + "/query")));
-          pages.add(new Page() {
-            @Override
-            public URI reference() {
-              return null;
-            }
+    Arrays.stream(folder.listFiles())
+        .sorted()
+        .forEach(
+            fileEntry -> {
+              if (fileEntry.isDirectory()) {
+                try {
+                  CharSequence content =
+                      String.join(
+                          "", Files.readAllLines(Paths.get(fileEntry.getPath() + "/content")));
+                  CharSequence query =
+                      String.join(
+                          "", Files.readAllLines(Paths.get(fileEntry.getPath() + "/query")));
+                  pages.add(
+                      new Page() {
+                        @Override
+                        public URI reference() {
+                          return null;
+                        }
 
-            @Override
-            public CharSequence title() {
-              return null;
-            }
+                        @Override
+                        public CharSequence title() {
+                          return null;
+                        }
 
-            @Override
-            public CharSequence text() {
-              return content;
-            }
-          });
-          queries.add(new BaseQuery(query, lemmer));
-        } catch (IOException e) {
-          e.printStackTrace();
-        }
-      }
-    });
-
+                        @Override
+                        public CharSequence text() {
+                          return content;
+                        }
+                      });
+                  queries.add(new BaseQuery(query, lemmer));
+                } catch (IOException e) {
+                  e.printStackTrace();
+                }
+              }
+            });
   }
-
 
   @Test
   public void test() {

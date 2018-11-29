@@ -12,7 +12,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 import org.apache.commons.io.FileUtils;
 import org.junit.After;
 import org.junit.Assert;
@@ -30,10 +29,11 @@ public class UnitMetricTest {
 
   private double readDCG() {
     double DCG = -1;
-    try (BufferedReader reader = Files.newBufferedReader(
-        Paths.get("./src/test/java/com/expleague/sensearch/metrics/TMP").resolve("test")
-            .resolve("METRIC")
-    )) {
+    try (BufferedReader reader =
+        Files.newBufferedReader(
+            Paths.get("./src/test/java/com/expleague/sensearch/metrics/TMP")
+                .resolve("test")
+                .resolve("METRIC"))) {
       DCG = Double.valueOf(reader.readLine());
     } catch (IOException e) {
       e.printStackTrace();
@@ -44,10 +44,8 @@ public class UnitMetricTest {
   @Before
   public void init() {
     crawler = new Crawler();
-    metric = new Metric(crawler,
-        Paths.get("./src/test/java/com/expleague/sensearch/metrics/TMP"));
+    metric = new Metric(crawler, Paths.get("./src/test/java/com/expleague/sensearch/metrics/TMP"));
   }
-
 
   @Test
   public void equalsTest() {
@@ -66,19 +64,19 @@ public class UnitMetricTest {
     metric.calculate("test", res.toArray(new Page[0]));
     double DCG = readDCG();
 
-    double rightDCG = ((1.0 / 1) / (log2(1)))
-        + ((1.0 / 2) / (log2(2)))
-        + ((1.0 / 3) / (log2(3)))
-        + ((1.0 / 4) / (log2(4)))
-        + ((1.0 / 5) / (log2(5)))
-        + ((1.0 / 6) / (log2(6)))
-        + ((1.0 / 7) / (log2(7)))
-        + ((1.0 / 8) / (log2(8)))
-        + ((1.0 / 9) / (log2(9)))
-        + ((1.0 / 10) / (log2(10)));
+    double rightDCG =
+        ((1.0 / 1) / (log2(1)))
+            + ((1.0 / 2) / (log2(2)))
+            + ((1.0 / 3) / (log2(3)))
+            + ((1.0 / 4) / (log2(4)))
+            + ((1.0 / 5) / (log2(5)))
+            + ((1.0 / 6) / (log2(6)))
+            + ((1.0 / 7) / (log2(7)))
+            + ((1.0 / 8) / (log2(8)))
+            + ((1.0 / 9) / (log2(9)))
+            + ((1.0 / 10) / (log2(10)));
 
     Assert.assertEquals(DCG, rightDCG, 1e-10);
-
   }
 
   @Test
@@ -101,7 +99,6 @@ public class UnitMetricTest {
     double rightDCG = 0;
 
     Assert.assertEquals(DCG, rightDCG, 1e-10);
-
   }
 
   @Test
@@ -121,19 +118,19 @@ public class UnitMetricTest {
     metric.calculate("test", res.toArray(new Page[0]));
     double DCG = readDCG();
 
-    double rightDCG = ((1.0 / 1) / (log2(1)))
-        + ((1.0 / 7) / (log2(2)))
-        + ((1.0 / 10) / (log2(3)))
-        + ((1.0 / 2) / (log2(4)))
-        + ((1.0 / 6) / (log2(5)))
-        + ((1.0 / 4) / (log2(6)))
-        + ((1.0 / 8) / (log2(7)))
-        + ((1.0 / 3) / (log2(8)))
-        + ((1.0 / 9) / (log2(9)))
-        + ((1.0 / 5) / (log2(10)));
+    double rightDCG =
+        ((1.0 / 1) / (log2(1)))
+            + ((1.0 / 7) / (log2(2)))
+            + ((1.0 / 10) / (log2(3)))
+            + ((1.0 / 2) / (log2(4)))
+            + ((1.0 / 6) / (log2(5)))
+            + ((1.0 / 4) / (log2(6)))
+            + ((1.0 / 8) / (log2(7)))
+            + ((1.0 / 3) / (log2(8)))
+            + ((1.0 / 9) / (log2(9)))
+            + ((1.0 / 5) / (log2(10)));
 
     Assert.assertEquals(DCG, rightDCG, 1e-10);
-
   }
 
   @Test
@@ -153,25 +150,25 @@ public class UnitMetricTest {
     metric.calculate("test", res.toArray(new Page[0]));
     double DCG = readDCG();
 
-    double rightDCG = 0.0
-        + ((1.0 / 7) / (log2(2)))
-        + ((1.0 / 10) / (log2(3)))
-        + ((1.0 / 2) / (log2(4)))
-        + ((1.0 / 6) / (log2(5)))
-        + 0.0
-        + ((1.0 / 8) / (log2(7)))
-        + ((1.0 / 3) / (log2(8)))
-        + 0.0
-        + ((1.0 / 5) / (log2(10)));
+    double rightDCG =
+        0.0
+            + ((1.0 / 7) / (log2(2)))
+            + ((1.0 / 10) / (log2(3)))
+            + ((1.0 / 2) / (log2(4)))
+            + ((1.0 / 6) / (log2(5)))
+            + 0.0
+            + ((1.0 / 8) / (log2(7)))
+            + ((1.0 / 3) / (log2(8)))
+            + 0.0
+            + ((1.0 / 5) / (log2(10)));
 
     Assert.assertEquals(DCG, rightDCG, 1e-10);
-
   }
 
   @After
   public void clear() throws IOException {
-    FileUtils
-        .deleteDirectory(Paths.get("./src/test/java/com/expleague/sensearch/metrics/TMP").toFile());
+    FileUtils.deleteDirectory(
+        Paths.get("./src/test/java/com/expleague/sensearch/metrics/TMP").toFile());
   }
 
   private class Crawler implements WebCrawler {
@@ -193,8 +190,7 @@ public class UnitMetricTest {
     }
 
     @Override
-    public void setPath(Path pathToMetric) {
-    }
+    public void setPath(Path pathToMetric) {}
   }
 
   private class ResultItemTest implements ResultItem {

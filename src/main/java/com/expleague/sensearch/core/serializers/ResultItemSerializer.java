@@ -21,9 +21,8 @@ public class ResultItemSerializer extends StdSerializer<ResultItem> {
 
   @Override
   public void serialize(
-      ResultItem resultItem,
-      JsonGenerator jsonGenerator,
-      SerializerProvider serializerProvider) throws IOException {
+      ResultItem resultItem, JsonGenerator jsonGenerator, SerializerProvider serializerProvider)
+      throws IOException {
     jsonGenerator.writeStartObject();
 
     jsonGenerator.writeStringField("reference", resultItem.reference().toString());

@@ -26,23 +26,30 @@ public class ResultItemDeserializer extends StdDeserializer<ResultItem> {
   }
 
   @Override
-  public ResultItem deserialize(JsonParser jsonParser,
-      DeserializationContext deserializationContext) throws IOException, JsonProcessingException {
+  public ResultItem deserialize(
+      JsonParser jsonParser, DeserializationContext deserializationContext)
+      throws IOException, JsonProcessingException {
     JsonNode node = jsonParser.getCodec().readTree(jsonParser);
     try {
       URI reference = new URI(node.get("reference").asText());
       String title = node.get("title").asText();
       List<Pair<CharSequence, List<Segment>>> passages = new ArrayList<>();
-      node.get("passages").elements().forEachRemaining(n -> {
-        String text = n.get("text").asText();
-        List<Segment> highlights = new ArrayList<>();
-        n.get("highlights").elements().forEachRemaining(s -> {
-          List<Integer> oneSegment = new ArrayList<>();
-          s.elements().forEachRemaining(os -> oneSegment.add(os.intValue()));
-          highlights.add(new Segment(oneSegment.get(0), oneSegment.get(1)));
-        });
-        passages.add(new Pair<>(text, highlights));
-      });
+      node.get("passages")
+          .elements()
+          .forEachRemaining(
+              n -> {
+                String text = n.get("text").asText();
+                List<Segment> highlights = new ArrayList<>();
+                n.get("highlights")
+                    .elements()
+                    .forEachRemaining(
+                        s -> {
+                          List<Integer> oneSegment = new ArrayList<>();
+                          s.elements().forEachRemaining(os -> oneSegment.add(os.intValue()));
+                          highlights.add(new Segment(oneSegment.get(0), oneSegment.get(1)));
+                        });
+                passages.add(new Pair<>(text, highlights));
+              });
 
       return new ResultItemImpl(reference, title, passages, 0);
     } catch (URISyntaxException e) {

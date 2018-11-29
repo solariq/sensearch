@@ -14,6 +14,7 @@ public class CompleteIndexBuildTest extends SensearchTestCase {
   private static String TEMP_DOC_PATH = "tempDoc";
 
   private Config config;
+
   @Before
   public void initConfigPaths() {
     this.config = config();

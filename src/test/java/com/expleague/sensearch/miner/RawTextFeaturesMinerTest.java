@@ -1,28 +1,28 @@
-//package com.expleague.sensearch.miner;
+// package com.expleague.sensearch.miner;
 //
-//import com.expleague.commons.text.lemmer.LemmaInfo;
-//import com.expleague.sensearch.Page;
-//import com.expleague.sensearch.index.Index;
-//import com.expleague.sensearch.index.IndexedPage;
-//import com.expleague.sensearch.miner.impl.RawTextFeaturesMiner;
-//import com.expleague.sensearch.query.Query;
-//import com.expleague.sensearch.query.term.Term;
-//import gnu.trove.map.TObjectIntMap;
-//import gnu.trove.map.hash.TObjectIntHashMap;
-//import java.net.URI;
-//import java.util.ArrayList;
-//import java.util.HashMap;
-//import java.util.List;
-//import java.util.Map;
-//import java.util.regex.Pattern;
-//import java.util.stream.Stream;
-//import org.junit.BeforeClass;
-//import org.junit.Test;
+// import com.expleague.commons.text.lemmer.LemmaInfo;
+// import com.expleague.sensearch.Page;
+// import com.expleague.sensearch.index.Index;
+// import com.expleague.sensearch.index.IndexedPage;
+// import com.expleague.sensearch.miner.impl.RawTextFeaturesMiner;
+// import com.expleague.sensearch.query.Query;
+// import com.expleague.sensearch.query.term.Term;
+// import gnu.trove.map.TObjectIntMap;
+// import gnu.trove.map.hash.TObjectIntHashMap;
+// import java.net.URI;
+// import java.util.ArrayList;
+// import java.util.HashMap;
+// import java.util.List;
+// import java.util.Map;
+// import java.util.regex.Pattern;
+// import java.util.stream.Stream;
+// import org.junit.BeforeClass;
+// import org.junit.Test;
 //
-///**
+/// **
 // * Created by sandulmv on 02.11.18.
 // */
-//public class RawTextFeaturesMinerTest {
+// public class RawTextFeaturesMinerTest {
 //
 //  private static final Pattern SIMPLE_SPLITTER = Pattern.compile("[^а-яё0-9]+");
 //  private static final Map<String, String> DOCUMENTS_AND_TITLES = new HashMap<>();
@@ -216,4 +216,4 @@
 //      return termsRawCounts.get(term.getRaw());
 //    }
 //  }
-//}
+// }

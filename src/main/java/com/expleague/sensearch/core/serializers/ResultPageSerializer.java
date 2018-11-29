@@ -17,8 +17,9 @@ public class ResultPageSerializer extends StdSerializer<ResultPage> {
   }
 
   @Override
-  public void serialize(ResultPage resultPage, JsonGenerator jsonGenerator,
-      SerializerProvider serializerProvider) throws IOException {
+  public void serialize(
+      ResultPage resultPage, JsonGenerator jsonGenerator, SerializerProvider serializerProvider)
+      throws IOException {
     jsonGenerator.writeStartObject();
 
     jsonGenerator.writeObjectField("results", resultPage.results());
