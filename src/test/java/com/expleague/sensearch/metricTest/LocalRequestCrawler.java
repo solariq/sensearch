@@ -8,9 +8,6 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class LocalRequestCrawler implements WebCrawler {
 
@@ -22,9 +19,9 @@ public class LocalRequestCrawler implements WebCrawler {
   public List<ResultItem> getGoogleResults(Integer size, String query) {
     ObjectMapper objectMapper = new ObjectMapper();
     try {
-      ResultPage page = objectMapper
-          .readValue(pathToMetric.resolve(query).resolve(MAP_FILE).toFile(),
-              ResultPage.class);
+      ResultPage page =
+          objectMapper.readValue(
+              pathToMetric.resolve(query).resolve(MAP_FILE).toFile(), ResultPage.class);
       return Arrays.asList(page.googleResults());
     } catch (IOException e) {
       e.printStackTrace();

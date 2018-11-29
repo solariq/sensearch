@@ -1,27 +1,27 @@
-//package com.expleague.sensearch.embedding;
+// package com.expleague.sensearch.embedding;
 //
-//import com.expleague.commons.text.lemmer.LemmaInfo;
-//import com.expleague.sensearch.Config;
-//import com.expleague.sensearch.Page;
-//import com.expleague.sensearch.donkey.crawler.CrawlerXML;
-//import com.expleague.sensearch.donkey.plain.PlainIndexBuilder;
-//import com.expleague.sensearch.index.Index;
-//import com.expleague.sensearch.query.Query;
-//import com.expleague.sensearch.query.term.Term;
-//import com.fasterxml.jackson.databind.ObjectMapper;
-//import java.nio.file.Files;
-//import java.nio.file.Paths;
-//import java.util.Arrays;
-//import java.util.HashMap;
-//import java.util.LinkedList;
-//import java.util.List;
-//import java.util.Map;
-//import java.util.stream.Stream;
-//import org.junit.Assert;
-//import org.junit.Before;
-//import org.junit.Test;
+// import com.expleague.commons.text.lemmer.LemmaInfo;
+// import com.expleague.sensearch.Config;
+// import com.expleague.sensearch.Page;
+// import com.expleague.sensearch.donkey.crawler.CrawlerXML;
+// import com.expleague.sensearch.donkey.plain.PlainIndexBuilder;
+// import com.expleague.sensearch.index.Index;
+// import com.expleague.sensearch.query.Query;
+// import com.expleague.sensearch.query.term.Term;
+// import com.fasterxml.jackson.databind.ObjectMapper;
+// import java.nio.file.Files;
+// import java.nio.file.Paths;
+// import java.util.Arrays;
+// import java.util.HashMap;
+// import java.util.LinkedList;
+// import java.util.List;
+// import java.util.Map;
+// import java.util.stream.Stream;
+// import org.junit.Assert;
+// import org.junit.Before;
+// import org.junit.Test;
 //
-//public class FilterTest {
+// public class FilterTest {
 //
 //  private static final Map<String, String[]> tests;
 //
@@ -90,4 +90,4 @@
 //      return null;
 //    }
 //  }
-//}
+// }

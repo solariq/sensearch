@@ -1,6 +1,5 @@
 package com.expleague.sensearch.utils;
 
-
 import com.expleague.sensearch.Config;
 import java.nio.file.Path;
 
@@ -10,7 +9,6 @@ public class TestConfig extends Config {
   private Path indexRoot;
   private Path gloveVectorsPath;
   private Path tempDocumentsPath;
-
 
   // TODO: copy constructor!
   TestConfig(Path miniWikiPath, Path gloveVectorsPath) {

@@ -19,10 +19,11 @@ public class UnitCrawlerTest {
 
   @Test
   public void goodZIPTest() throws IOException, XMLStreamException {
-    Config config = new Config(
-        Paths.get("./src/test/java/com/expleague/sensearch/donkey/crawler/resources/Mini_Wiki.zip"),
-        pathToTmpDoc
-    );
+    Config config =
+        new Config(
+            Paths.get(
+                "./src/test/java/com/expleague/sensearch/donkey/crawler/resources/Mini_Wiki.zip"),
+            pathToTmpDoc);
     crawler = new CrawlerXML(config);
 
     Assert.assertEquals(crawler.makeStream().count(), 10);
@@ -39,21 +40,24 @@ public class UnitCrawlerTest {
     rightTitles.add("Ши Чжи");
     rightTitles.add("Нифай");
     rightTitles.add("Итен");
-    crawler.makeStream().forEach(doc -> {
-      if (doc != null) {
-        titles.add(doc.title());
-      }
-    });
+    crawler
+        .makeStream()
+        .forEach(
+            doc -> {
+              if (doc != null) {
+                titles.add(doc.title());
+              }
+            });
     Assert.assertEquals(titles, rightTitles);
   }
 
   @Test
   public void badZIPTest() throws IOException, XMLStreamException {
-    Config config = new Config(
-        Paths.get(
-            "./src/test/java/com/expleague/sensearch/donkey/crawler/resources/Mini_Wiki_broken.zip"),
-        pathToTmpDoc
-    );
+    Config config =
+        new Config(
+            Paths.get(
+                "./src/test/java/com/expleague/sensearch/donkey/crawler/resources/Mini_Wiki_broken.zip"),
+            pathToTmpDoc);
     crawler = new CrawlerXML(config);
 
     Assert.assertEquals(crawler.makeStream().count(), 10);
@@ -67,14 +71,16 @@ public class UnitCrawlerTest {
     rightTitles.add("Тэсо (Тонбуё)");
     rightTitles.add("Ши Чжи");
     rightTitles.add("Итен");
-    crawler.makeStream().forEach(doc -> {
-      if (doc != null) {
-        titles.add(doc.title());
-      }
-    });
+    crawler
+        .makeStream()
+        .forEach(
+            doc -> {
+              if (doc != null) {
+                titles.add(doc.title());
+              }
+            });
     Assert.assertEquals(titles, rightTitles);
   }
-
 
   @After
   public void clear() throws IOException {

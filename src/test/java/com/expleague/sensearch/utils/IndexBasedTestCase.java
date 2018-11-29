@@ -11,9 +11,8 @@ public abstract class IndexBasedTestCase extends SensearchTestCase {
   private static Index miniIndex;
 
   @BeforeClass
-  public static void initIndex() {
+  public static void initIndex() {}
 
-  }
   protected Config config() {
     return null;
   }

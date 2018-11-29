@@ -17,9 +17,7 @@ public class PlainIndexBuilderMethodsTest {
 
   @Test
   public void enrichFrequenciesTest() {
-    long[] idSequence = new long[]{
-        1, 2, 3, 1, 2, 1, 3, 2, 3, 3, 2, 3, 1
-    };
+    long[] idSequence = new long[] {1, 2, 3, 1, 2, 1, 3, 2, 3, 3, 2, 3, 1};
     TLongIntMap frequenciesMap = new TLongIntHashMap();
     TLongObjectMap<TLongIntMap> bigramsMap = new TLongObjectHashMap<>();
 
@@ -52,33 +50,26 @@ public class PlainIndexBuilderMethodsTest {
     long[] convertResult;
 
     // Simple test
-    convertResult = PlainIndexBuilder.toIds(
-        new String[]{"word1", "word3"}, knownIdMappings
-    );
-    Assert.assertArrayEquals(new long[]{1, 3}, convertResult);
+    convertResult = PlainIndexBuilder.toIds(new String[] {"word1", "word3"}, knownIdMappings);
+    Assert.assertArrayEquals(new long[] {1, 3}, convertResult);
 
     // Empty input test
-    convertResult = PlainIndexBuilder.toIds(
-        new String[0], knownIdMappings
-    );
+    convertResult = PlainIndexBuilder.toIds(new String[0], knownIdMappings);
     Assert.assertEquals(convertResult.length, 0);
 
     // New words test
-    convertResult = PlainIndexBuilder.toIds(
-        new String[]{"word4"}, knownIdMappings
-    );
+    convertResult = PlainIndexBuilder.toIds(new String[] {"word4"}, knownIdMappings);
     Assert.assertTrue(knownIdMappings.containsKey("word1"));
     Assert.assertTrue(knownIdMappings.containsKey("word2"));
     Assert.assertTrue(knownIdMappings.containsKey("word3"));
     Assert.assertTrue(knownIdMappings.containsKey("word4"));
-    Assert.assertArrayEquals(new long[]{4}, convertResult);
+    Assert.assertArrayEquals(new long[] {4}, convertResult);
     Assert.assertEquals(4, knownIdMappings.get("word4"));
 
     // Empty mappings test
     knownIdMappings.clear();
-    convertResult = PlainIndexBuilder.toIds(
-        new String[]{"word1", "word2", "word3"}, knownIdMappings
-    );
+    convertResult =
+        PlainIndexBuilder.toIds(new String[] {"word1", "word2", "word3"}, knownIdMappings);
     Assert.assertTrue(knownIdMappings.containsKey("word1"));
     Assert.assertTrue(knownIdMappings.containsKey("word2"));
     Assert.assertTrue(knownIdMappings.containsKey("word3"));
@@ -86,7 +77,7 @@ public class PlainIndexBuilderMethodsTest {
     Assert.assertEquals(1, knownIdMappings.get("word1"));
     Assert.assertEquals(2, knownIdMappings.get("word2"));
     Assert.assertEquals(3, knownIdMappings.get("word3"));
-    Assert.assertArrayEquals(convertResult, new long[]{1, 2, 3});
+    Assert.assertArrayEquals(convertResult, new long[] {1, 2, 3});
   }
 
   @Test
@@ -101,8 +92,7 @@ public class PlainIndexBuilderMethodsTest {
           m -> {
             Assert.assertTrue(knowIdMappings.containsKey(m.getWord()));
             Assert.assertEquals(knowIdMappings.get(m.getWord()), m.getId());
-          }
-      );
+          });
 
       Assert.assertEquals(knowIdMappings.size(), Lists.newArrayList(protobufMapings).size());
     }
@@ -119,6 +109,5 @@ public class PlainIndexBuilderMethodsTest {
   public void toVectorTest() {
     // TODO: test to vector conversion
     TLongObjectMap<Vec> knownVectors = new TLongObjectHashMap<>();
-
   }
 }

@@ -15,8 +15,8 @@ import org.apache.commons.io.input.TeeInputStream;
 import org.apache.commons.io.output.TeeOutputStream;
 
 /**
- * Wrapper class for MyStem which logs all the interactions with it so these interactions can
- * be reproduced later by {@link LogBasedMyStem}
+ * Wrapper class for MyStem which logs all the interactions with it so these interactions can be
+ * reproduced later by {@link LogBasedMyStem}
  */
 public class RecordingMyStem implements MyStem {
 
@@ -29,8 +29,10 @@ public class RecordingMyStem implements MyStem {
       OutputStream toMyStem = mystem.getOutputStream();
       InputStream fromMyStem = mystem.getInputStream();
 
-      OutputStream fromMyStemLog = Files.newOutputStream(Paths.get(logPath + "_from"), StandardOpenOption.CREATE);
-      OutputStream toMyStemLog = Files.newOutputStream(Paths.get(logPath + "_to"), StandardOpenOption.CREATE);
+      OutputStream fromMyStemLog =
+          Files.newOutputStream(Paths.get(logPath + "_from"), StandardOpenOption.CREATE);
+      OutputStream toMyStemLog =
+          Files.newOutputStream(Paths.get(logPath + "_to"), StandardOpenOption.CREATE);
 
       InputStream fromMyStemWrapper = new TeeInputStream(fromMyStem, fromMyStemLog);
       OutputStream toMyStemWrapper = new TeeOutputStream(toMyStem, toMyStemLog);

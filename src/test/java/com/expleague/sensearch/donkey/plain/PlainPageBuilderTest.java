@@ -35,10 +35,7 @@ public class PlainPageBuilderTest extends SensearchTestCase {
   public void testBuildPlainDb() throws IOException {
     clearOutputRoot();
     Path plainDbPath = testOutputRoot().resolve(PLAIN_DB_ROOT);
-    DB plainDb = JniDBFactory.factory.open(
-        plainDbPath.toFile(),
-        dbCreateOptions()
-    );
+    DB plainDb = JniDBFactory.factory.open(plainDbPath.toFile(), dbCreateOptions());
 
     TLongList pageIds = new TLongArrayList();
     PlainPageBuilder plainPageBuilder = new PlainPageBuilder(plainDb);
@@ -54,10 +51,9 @@ public class PlainPageBuilderTest extends SensearchTestCase {
 
   @Test(expected = DBException.class)
   public void buildPlainDbTwice() throws IOException {
-    DB plainDb = JniDBFactory.factory.open(
-        Files.createTempDirectory(testOutputRoot(), "tmp").toFile(),
-        dbCreateOptions()
-    );
+    DB plainDb =
+        JniDBFactory.factory.open(
+            Files.createTempDirectory(testOutputRoot(), "tmp").toFile(), dbCreateOptions());
 
     PlainPageBuilder plainPageBuilder = new PlainPageBuilder(plainDb);
     plainPageBuilder.build();
@@ -69,10 +65,9 @@ public class PlainPageBuilderTest extends SensearchTestCase {
   @Test
   public void testReadPlainDb() throws IOException {
     testBuildPlainDb();
-    try (DB plainDb = JniDBFactory.factory.open(
-        testOutputRoot().resolve(PLAIN_DB_ROOT).toFile(),
-        dbOpenOptions()
-    )) {
+    try (DB plainDb =
+        JniDBFactory.factory.open(
+            testOutputRoot().resolve(PLAIN_DB_ROOT).toFile(), dbOpenOptions())) {
 
       List<Page> dbContent = new LinkedList<>();
       DBIterator dbIterator = plainDb.iterator();
@@ -84,8 +79,7 @@ public class PlainPageBuilderTest extends SensearchTestCase {
             } catch (InvalidProtocolBufferException e) {
               Assert.fail("Data base contain invalid protobuf!");
             }
-          }
-      );
+          });
 
       Assert.assertEquals(crawlerPages.size(), dbContent.size());
       for (CrawlerDocument cd : crawlerPages) {
@@ -97,9 +91,9 @@ public class PlainPageBuilderTest extends SensearchTestCase {
 
         if (!hasPageInDb) {
           Assert.fail(
-              String.format("Document with title '%s' and content '%s' was not found in base!",
-                  cd.title(), cd.content())
-          );
+              String.format(
+                  "Document with title '%s' and content '%s' was not found in base!",
+                  cd.title(), cd.content()));
         }
       }
     }

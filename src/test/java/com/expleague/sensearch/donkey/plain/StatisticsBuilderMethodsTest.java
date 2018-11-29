@@ -26,7 +26,7 @@ public class StatisticsBuilderMethodsTest extends SensearchTestCase {
 
     Iterable<TermFrequency> mostFreq = StatisticsBuilder.mostFrequentBigrams(neighboursFreq, 3);
     List<TermFrequency> mFreqMap = Lists.newArrayList(mostFreq);
-    Assert.assertEquals(3, mFreqMap.size() );
+    Assert.assertEquals(3, mFreqMap.size());
     Assert.assertEquals(4, mFreqMap.get(0).getTermId());
     Assert.assertEquals(7, mFreqMap.get(0).getTermFrequency());
 
@@ -43,16 +43,14 @@ public class StatisticsBuilderMethodsTest extends SensearchTestCase {
     neighboursFreq.put(4, 8);
     neighboursFreq.put(5, 8);
 
-    ArrayList<TermFrequency> freqNeigh = Lists.newArrayList(
-        StatisticsBuilder.mostFrequentBigrams(neighboursFreq, 3)
-    );
+    ArrayList<TermFrequency> freqNeigh =
+        Lists.newArrayList(StatisticsBuilder.mostFrequentBigrams(neighboursFreq, 3));
 
     Assert.assertEquals(3, freqNeigh.size());
     freqNeigh.forEach(
         tf -> {
           Assert.assertTrue(neighboursFreq.containsKey(tf.getTermId()));
           Assert.assertEquals(neighboursFreq.get(tf.getTermId()), tf.getTermFrequency());
-        }
-    );
+        });
   }
 }
