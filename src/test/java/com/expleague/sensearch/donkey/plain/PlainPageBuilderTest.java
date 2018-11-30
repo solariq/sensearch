@@ -7,6 +7,7 @@ import com.google.protobuf.InvalidProtocolBufferException;
 import gnu.trove.list.TLongList;
 import gnu.trove.list.array.TLongArrayList;
 import java.io.IOException;
+import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.LinkedList;
@@ -132,6 +133,11 @@ public class PlainPageBuilderTest extends SensearchTestCase {
     @Override
     public long iD() {
       return 0;
+    }
+
+    @Override
+    public URI uri() {
+      return null;
     }
   }
 }

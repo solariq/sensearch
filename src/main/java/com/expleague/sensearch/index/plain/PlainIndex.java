@@ -12,6 +12,7 @@ import com.expleague.sensearch.index.Index;
 import com.expleague.sensearch.index.IndexedPage;
 import com.expleague.sensearch.protobuf.index.IndexUnits;
 import com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta.IdMapping;
+import com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta.UriPageMapping;
 import com.expleague.sensearch.protobuf.index.IndexUnits.TermStatistics;
 import com.expleague.sensearch.protobuf.index.IndexUnits.TermStatistics.TermFrequency;
 import com.expleague.sensearch.query.Query;
@@ -29,12 +30,14 @@ import gnu.trove.map.hash.TLongObjectHashMap;
 import gnu.trove.map.hash.TObjectLongHashMap;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Objects;
 import java.util.stream.Stream;
 import org.apache.log4j.Logger;
 import org.fusesource.leveldbjni.JniDBFactory;
@@ -43,6 +46,7 @@ import org.iq80.leveldb.DB;
 import org.iq80.leveldb.DBException;
 import org.iq80.leveldb.Options;
 import org.iq80.leveldb.ReadOptions;
+import org.jetbrains.annotations.Nullable;
 
 public class PlainIndex implements Index {
 
@@ -65,6 +69,7 @@ public class PlainIndex implements Index {
 
   private final TObjectLongMap<String> wordToIdMap;
   private final TLongObjectMap<String> idToWordMap;
+  private final TObjectLongMap<URI> uriToPageIdMap = new TObjectLongHashMap<>();
 
   private final DB termStatisticsBase;
   private final DB plainBase;
@@ -121,6 +126,10 @@ public class PlainIndex implements Index {
           idToWordMap.put(id, word);
           return true;
         });
+
+    for (UriPageMapping mapping : indexMeta.getUriPageMappingsList()) {
+      uriToPageIdMap.put(URI.create(mapping.getUri()), mapping.getPageId());
+    }
   }
 
   private static boolean isPageId(long id) {
@@ -196,17 +205,26 @@ public class PlainIndex implements Index {
         .toArray(Term[]::new);
   }
 
+  @Nullable
   private IndexedPage idToPage(long id) {
     try {
       return new PlainPage(IndexUnits.Page.parseFrom(plainBase.get(Longs.toByteArray(id))));
     } catch (InvalidProtocolBufferException e) {
       LOG.fatal("Encountered invalid protobuf in Plain Base!");
-      return new PlainPage();
+      return null;
     }
   }
 
   private String idToWord(long id) {
     return idToWordMap.get(id);
+  }
+
+  @Nullable
+  @Override
+  public Page page(URI uri) {
+    // TODO: maybe add some sophisticated logic here and in builder like URI normalization
+    long pageId = uriToPageIdMap.get(uri);
+    return pageId == uriToPageIdMap.getNoEntryValue() ? null : idToPage(pageId);
   }
 
   @Override
@@ -219,7 +237,8 @@ public class PlainIndex implements Index {
 
     return filter
         .filtrate(embedding.getVec(queryIds), FILTERED_DOC_NUMBER, PlainIndex::isPageId)
-        .mapToObj(this::idToPage);
+        .mapToObj(id -> (Page) idToPage(id))
+        .filter(Objects::nonNull);
   }
 
   @Override

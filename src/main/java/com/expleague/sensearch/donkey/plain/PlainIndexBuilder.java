@@ -10,6 +10,7 @@ import com.expleague.sensearch.donkey.IndexBuilder;
 import com.expleague.sensearch.donkey.crawler.Crawler;
 import com.expleague.sensearch.protobuf.index.IndexUnits;
 import com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta.IdMapping;
+import com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta.UriPageMapping;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.hash.BloomFilter;
 import com.google.common.hash.Funnels;
@@ -77,6 +78,21 @@ public class PlainIndexBuilder implements IndexBuilder {
   private static final Logger LOG = Logger.getLogger(PlainIndexBuilder.class.getName());
 
   public PlainIndexBuilder() {
+  }
+
+
+  // Yes, this is a dirty copy-paste
+  @VisibleForTesting
+  static Iterable<UriPageMapping> toProtobufIterableUri(TObjectLongMap<String> mappings) {
+    final List<UriPageMapping> protobufMappings = new LinkedList<>();
+    final UriPageMapping.Builder uriMappingsBuilder = UriPageMapping.newBuilder();
+    mappings.forEachEntry(
+        (w, id) -> {
+          protobufMappings.add(uriMappingsBuilder.setPageId(id).setUri(w).build());
+          return true;
+        });
+
+    return protobufMappings;
   }
 
   @VisibleForTesting
@@ -176,6 +192,7 @@ public class PlainIndexBuilder implements IndexBuilder {
     final Tokenizer tokenizer = new TokenizerImpl();
     final TLongObjectMap<Vec> gloveVectors = new TLongObjectHashMap<>();
     final TObjectLongMap<String> idMappings = new TObjectLongHashMap<>();
+    final TObjectLongMap<String> uriPageIdMapping = new TObjectLongHashMap<>();
     readGloveVectors(Paths.get(config.getEmbeddingVectors()), idMappings, gloveVectors);
 
     final Path indexRoot = config.getTemporaryIndex();
@@ -230,6 +247,8 @@ public class PlainIndexBuilder implements IndexBuilder {
 
                 ++pagesAndTokensCounts[0];
                 pagesAndTokensCounts[1] += tokens.length;
+
+                uriPageIdMapping.put(doc.uri().toString(), pageId);
               });
       embeddingBuilder.addAll(gloveVectors);
       embeddingBuilder.build();
@@ -247,6 +266,7 @@ public class PlainIndexBuilder implements IndexBuilder {
           .setPagesCount((int) pagesAndTokensCounts[0])
           .setTitlesBloomFilter(ByteString.copyFrom(bos.toByteArray()))
           .addAllIdMappings(toProtobufIterable(idMappings))
+          .addAllUriPageMappings(toProtobufIterableUri(uriPageIdMapping))
           .build()
           .writeTo(Files.newOutputStream(indexRoot.resolve(INDEX_META_FILE)));
 
@@ -254,4 +274,5 @@ public class PlainIndexBuilder implements IndexBuilder {
       throw new IOException(e);
     }
   }
+
 }

@@ -12,6 +12,11 @@ message IndexMeta {
     optional int64 id = 2;
   }
 
+  message UriPageMapping {
+    optional string uri = 1;
+    optional int64 page_id = 2;
+  }
+
   optional int32 pages_count = 1;
   optional double average_page_size = 2;
 
@@ -19,12 +24,14 @@ message IndexMeta {
   optional bytes titles_bloom_filter = 4;
 
   repeated IdMapping id_mappings = 5;
+  repeated UriPageMapping uri_page_mappings = 6;
 }
 
 message Page {
   optional int64 page_id = 1;
-  optional string title = 2;
-  optional string content = 3;
+  optional string uri = 2;
+  optional string title = 3;
+  optional string content = 4;
 }
 
 message TermStatistics {

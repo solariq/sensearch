@@ -6,12 +6,11 @@ import com.expleague.sensearch.core.impl.ResultItemImpl;
 import com.expleague.sensearch.index.Index;
 import java.io.IOException;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLConnection;
+import java.net.URLDecoder;
 import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -76,25 +75,23 @@ public class RequestCrawler implements WebCrawler {
         Elements googleSnippets = document.select("div.g");
         googleSnippets.forEach(
             element -> {
-              try {
-                String title = normalizeTitle(element.select("h3.LC20lb").text());
-                article[0]++;
-                if (title == null)
-                  return;
-                String snippet = element.select("span.st").text();
-                String snippetUrl = element.select("a[href]").attr("href");
-                final URI uri = new URI(snippetUrl);
-                if (index.page(uri) == null)
-                  return;
-                results.add(
-                    new ResultItemImpl(
-                        uri,
-                        title,
-                        Collections.singletonList(new Pair<>(snippet, new ArrayList<>())),
-                        0));
-              } catch (URISyntaxException e) {
-                e.printStackTrace();
+              String title = normalizeTitle(element.select("h3.LC20lb").text());
+              article[0]++;
+              if (title == null) {
+                return;
               }
+              String snippet = element.select("span.st").text();
+              String snippetUrl = element.select("a[href]").attr("href");
+              final URI uri = URI.create(URLDecoder.decode(snippetUrl));
+              if (index.page(uri) == null) {
+                return;
+              }
+              results.add(
+                  new ResultItemImpl(
+                      uri,
+                      title,
+                      Collections.singletonList(new Pair<>(snippet, new ArrayList<>())),
+                      0));
             });
       } catch (IOException e) {
         e.printStackTrace();
