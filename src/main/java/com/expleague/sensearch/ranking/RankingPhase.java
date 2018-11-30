@@ -38,7 +38,9 @@ public class RankingPhase implements SearchPhase {
     whiteboard.putResults(
         whiteboard
             .textFeatures()
-            .map(p -> Pair.of(p.getLeft(), p.getRight().fuzzy()))
+            .entrySet()
+            .stream()
+            .map(p -> Pair.of(p.getKey(), p.getValue().fuzzy()))
             .sorted(Comparator.<Pair<Page, Double>>comparingDouble(Pair::getRight).reversed())
             .map(Pair::getLeft)
             .skip(pageNo * pageSize)
