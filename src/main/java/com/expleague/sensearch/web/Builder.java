@@ -12,6 +12,7 @@ import com.expleague.sensearch.index.plain.PlainIndex;
 import com.expleague.sensearch.metrics.Metric;
 import com.expleague.sensearch.metrics.RequestCrawler;
 import com.expleague.sensearch.web.suggest.BigramsBasedSuggestor;
+import com.expleague.sensearch.web.suggest.ProbabilisticSuggestor;
 import com.expleague.sensearch.web.suggest.Suggestor;
 import com.google.inject.Singleton;
 import java.io.IOException;
@@ -24,7 +25,7 @@ public class Builder {
   private Index index;
   private SenSeArch searcher;
   private Crawler crawler;
-  private BigramsBasedSuggestor bigramsBasedSuggestor;
+  private Suggestor suggestor;
   private Config config;
   private Lemmer lemmer;
   private Metric metric;
@@ -40,8 +41,9 @@ public class Builder {
       new PlainIndexBuilder().buildIndex(crawler, config);
     }
     index = new PlainIndex(config);
-    bigramsBasedSuggestor = new BigramsBasedSuggestor(index);
     lemmer = new Lemmer(config.getMyStem());
+    //suggestor = new BigramsBasedSuggestor(index);
+    suggestor = new ProbabilisticSuggestor(crawler, lemmer);
     searcher = new SenSeArchImpl(this);
     metric = new Metric(new RequestCrawler(index), config.getPathToMetrics());
     return config;
@@ -60,7 +62,7 @@ public class Builder {
   }
 
   Suggestor getSuggestor() {
-    return bigramsBasedSuggestor;
+    return suggestor;
   }
 
   public int pageSize() {

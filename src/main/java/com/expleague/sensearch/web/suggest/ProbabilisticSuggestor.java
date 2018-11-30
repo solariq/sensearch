@@ -1,5 +1,6 @@
 package com.expleague.sensearch.web.suggest;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -7,7 +8,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import javax.xml.stream.XMLStreamException;
+
 import com.expleague.sensearch.core.Lemmer;
+import com.expleague.sensearch.donkey.crawler.Crawler;
 import com.expleague.sensearch.index.Index;
 import com.expleague.sensearch.query.BaseQuery;
 import com.expleague.sensearch.query.Query;
@@ -18,7 +22,10 @@ public class ProbabilisticSuggestor implements Suggestor {
 	private final String splitRegex = "[^а-яёa-z0-9]";
 	private final int maxNgramsOrder = 3;
 
-	private Index index;
+	private int ndocs;
+	
+	//private Index index;
+	private Crawler crawler;
 	private Lemmer lemmer;
 
 	private Map<List<String>, Integer> multigramFreq;
@@ -43,28 +50,57 @@ public class ProbabilisticSuggestor implements Suggestor {
 		phraseProb = new HashMap<>();
 
 		avgOrderFreq = new double[maxNgramsOrder];
+		
+		ndocs = 0;
 	}
 
-	private void makeComputations(List<String> titles) {
+	private void makeComputations() throws IOException, XMLStreamException {
+		
+		List<String> titles = crawler
+				.makeStream()
+				.peek(t -> ndocs++)
+				.map(p -> p.title().toString())
+				.limit(100)
+				.collect(Collectors.toList());
+		System.out.println("getSuggestions: titles recieved");
+		
+		
 		computeUnigrams(titles);
 		computeMultigrams(titles);
 		computeAvgOrderFreq();
 		computeFreqNorm();
 	}
 
-	public ProbabilisticSuggestor(Index idx, Lemmer lemmer) {
-		index = idx;
+	public ProbabilisticSuggestor(Crawler crawl, Lemmer lemmer) {
+		crawler = crawl;
 		this.lemmer = lemmer;
+		
+		init();
+		
+		try {
+			makeComputations();
+		} catch (Exception e) {
+			System.out.println("suggestor: exception while computing occured. " + e.getMessage());
+		}
 	}
 
 	@Override
 	public List<String> getSuggestions(String searchString) {
-		return getSuggestions(new BaseQuery(searchString, lemmer));
+		System.out.println("suggest requested: " + searchString);
+		List<String> res = null;
+		try {
+			res = getSuggestions(new BaseQuery(searchString, lemmer));
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		System.out.println("returning suggest");
+		return res;
 	}
 
 	private void computeUnigrams(List<String> texts) {
 		for (String t : texts) {
-			Arrays.stream(t.split(splitRegex))
+			Arrays.stream(t.toLowerCase().split(splitRegex))
 			.filter(s -> !s.isEmpty())
 			.peek(s -> {
 				addToMap(unigramFreq, s, 1);
@@ -77,7 +113,7 @@ public class ProbabilisticSuggestor implements Suggestor {
 	}
 
 	private List<List<String>> getNgrams(String sentence, int order) {
-		List<String> unigrams = Arrays.stream(sentence.split(splitRegex))
+		List<String> unigrams = Arrays.stream(sentence.toLowerCase().split(splitRegex))
 				.filter(s -> !s.isEmpty())
 				.collect(Collectors.toList());
 
@@ -139,21 +175,14 @@ public class ProbabilisticSuggestor implements Suggestor {
 	}
 
 	public List<String> getSuggestions(Query query) {
-		init();
-		List<String> titles = index
-				.fetchDocuments(query)
-				.map(p -> p.title().toString())
-				.limit(100)
-				.collect(Collectors.toList());
-
-		makeComputations(titles);
 
 		List<Term> terms = query.getTerms();
 		String qt = terms.get(terms.size() - 1).getRaw().toString();
 		
-
+		phraseProb.clear();
+		
 		multigramFreq.keySet().stream()
-		.forEach(p -> phraseProb.put(p, getPpqt(p, qt, titles.size())));
+		.forEach(p -> phraseProb.put(p, getPpqt(p, qt, ndocs)));
 		
 		String qc = terms.subList(0, terms.size() - 1)
 				.stream()
@@ -161,7 +190,7 @@ public class ProbabilisticSuggestor implements Suggestor {
 				.collect(Collectors.joining(" "));
 		
 		return phraseProb.entrySet().stream()
-				.sorted((e1, e2) -> Double.compare(e1.getValue(), e2.getValue()))
+				.sorted((e1, e2) -> -Double.compare(e1.getValue(), e2.getValue()))
 				.limit(10)
 				.map(e -> qc + " " + e.getKey()
 					.stream()
