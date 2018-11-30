@@ -7,12 +7,6 @@ public class Config implements ConfigJson {
 
   private String temporaryDocuments;
 
-  private String temporaryBigrams;
-
-  private String bigramsFileName;
-
-  private String statisticsFileName;
-
   private String temporaryIndex;
 
   private String webRoot;
@@ -55,30 +49,8 @@ public class Config implements ConfigJson {
   }
 
   @Override
-  public String getTemporaryBigrams() {
-    return temporaryBigrams;
-  }
-
-  private void setTemporaryBigrams(String temporaryBigrams) {
-    this.temporaryBigrams = temporaryBigrams;
-  }
-
-  @Override
-  public Path getBigramsFileName() {
-    return getPathToZIP()
-        .toAbsolutePath()
-        .getParent()
-        .resolve(getTemporaryBigrams())
-        .resolve(bigramsFileName);
-  }
-
-  private void setBigramsFileName(String bigramsFileName) {
-    this.bigramsFileName = bigramsFileName;
-  }
-
-  @Override
   public Path getTemporaryIndex() {
-    return getPathToZIP().toAbsolutePath().getParent().resolve(temporaryIndex);
+    return Paths.get(".").resolve(temporaryIndex);
   }
 
   private void setTemporaryIndex(String temporaryIndex) {
@@ -110,15 +82,6 @@ public class Config implements ConfigJson {
 
   private void setPathToZIP(String pathToZIP) {
     this.pathToZIP = pathToZIP;
-  }
-
-  @Override
-  public String getStatisticsFileName() {
-    return statisticsFileName;
-  }
-
-  private void setStatisticsFileName(String statisticsFileName) {
-    this.statisticsFileName = statisticsFileName;
   }
 
   @Override

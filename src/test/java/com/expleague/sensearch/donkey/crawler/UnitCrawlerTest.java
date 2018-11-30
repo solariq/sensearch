@@ -105,16 +105,6 @@ public class UnitCrawlerTest {
     }
 
     @Override
-    public String getTemporaryBigrams() {
-      return null;
-    }
-
-    @Override
-    public Path getBigramsFileName() {
-      return null;
-    }
-
-    @Override
     public Path getTemporaryIndex() {
       return null;
     }
@@ -132,11 +122,6 @@ public class UnitCrawlerTest {
     @Override
     public Path getPathToZIP() {
       return zip;
-    }
-
-    @Override
-    public String getStatisticsFileName() {
-      return null;
     }
 
     @Override

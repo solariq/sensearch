@@ -6,10 +6,6 @@ public interface ConfigJson {
 
   public Path getTemporaryDocuments();
 
-  public String getTemporaryBigrams();
-
-  public Path getBigramsFileName();
-
   public Path getTemporaryIndex();
 
   public String getWebRoot();
@@ -17,8 +13,6 @@ public interface ConfigJson {
   public Path getMyStem();
 
   public Path getPathToZIP();
-
-  public String getStatisticsFileName();
 
   public String getEmbeddingVectors();
 

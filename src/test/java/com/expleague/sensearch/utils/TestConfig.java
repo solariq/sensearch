@@ -26,16 +26,6 @@ public class TestConfig extends Config {
   }
 
   @Override
-  public String getTemporaryBigrams() {
-    throw new UnsupportedOperationException();
-  }
-
-  @Override
-  public Path getBigramsFileName() {
-    throw new UnsupportedOperationException();
-  }
-
-  @Override
   public Path getTemporaryIndex() {
     if (indexRoot == null) {
       throw new UnsupportedOperationException("Path to index root is not set!");
@@ -57,11 +47,6 @@ public class TestConfig extends Config {
   @Override
   public Path getPathToZIP() {
     return miniWikiPath;
-  }
-
-  @Override
-  public String getStatisticsFileName() {
-    throw new UnsupportedOperationException();
   }
 
   @Override
