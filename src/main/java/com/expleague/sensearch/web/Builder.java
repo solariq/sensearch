@@ -4,8 +4,6 @@ import com.expleague.sensearch.Config;
 import com.expleague.sensearch.SenSeArch;
 import com.expleague.sensearch.core.Lemmer;
 import com.expleague.sensearch.core.SenSeArchImpl;
-import com.expleague.sensearch.core.Tokenizer;
-import com.expleague.sensearch.core.impl.MyStemTokenizer;
 import com.expleague.sensearch.donkey.crawler.Crawler;
 import com.expleague.sensearch.donkey.crawler.CrawlerXML;
 import com.expleague.sensearch.donkey.plain.PlainIndexBuilder;

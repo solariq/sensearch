@@ -5,12 +5,11 @@ import com.expleague.commons.math.vectors.impl.vectors.ArrayVec;
 import com.expleague.commons.seq.CharSeqTools;
 import com.expleague.sensearch.Config;
 import com.expleague.sensearch.core.Tokenizer;
-import com.expleague.sensearch.core.impl.MyStemTokenizer;
+import com.expleague.sensearch.core.impl.TokenizerImpl;
 import com.expleague.sensearch.donkey.IndexBuilder;
 import com.expleague.sensearch.donkey.crawler.Crawler;
 import com.expleague.sensearch.protobuf.index.IndexUnits;
 import com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta.IdMapping;
-import com.expleague.sensearch.web.Builder;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.hash.BloomFilter;
 import com.google.common.hash.Funnels;
@@ -174,7 +173,7 @@ public class PlainIndexBuilder implements IndexBuilder {
 
   @Override
   public void buildIndex(Crawler crawler, Config config) throws IOException {
-    final Tokenizer tokenizer = new MyStemTokenizer(config.getMyStem());
+    final Tokenizer tokenizer = new TokenizerImpl();
     final TLongObjectMap<Vec> gloveVectors = new TLongObjectHashMap<>();
     final TObjectLongMap<String> idMappings = new TObjectLongHashMap<>();
     readGloveVectors(Paths.get(config.getEmbeddingVectors()), idMappings, gloveVectors);
@@ -214,12 +213,15 @@ public class PlainIndexBuilder implements IndexBuilder {
               doc -> {
                 long pageId = plainPageBuilder.add(doc);
 
-                long[] titleIds = toIds(tokenizer.parse(doc.title().toLowerCase()), idMappings);
+                long[] titleIds = toIds(tokenizer.parseTextToWords(doc.title().toLowerCase()),
+                    idMappings);
                 titlesFilter.put(ByteTools.toBytes(titleIds));
 
                 embeddingBuilder.add(pageId, toVector(titleIds, gloveVectors));
 
-                long[] tokens = toIds(tokenizer.parse((doc.title() + " " + doc.content()).toLowerCase()), idMappings);
+                long[] tokens = toIds(
+                    tokenizer.parseTextToWords((doc.title() + " " + doc.content()).toLowerCase()),
+                    idMappings);
 
                 termFrequencyMap.clear();
                 bigramFrequencyMap.clear();

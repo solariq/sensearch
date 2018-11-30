@@ -3,7 +3,7 @@ package com.expleague.sensearch.index.plain;
 import com.expleague.sensearch.Config;
 import com.expleague.sensearch.Page;
 import com.expleague.sensearch.core.Tokenizer;
-import com.expleague.sensearch.core.impl.MyStemTokenizer;
+import com.expleague.sensearch.core.impl.TokenizerImpl;
 import com.expleague.sensearch.donkey.plain.ByteTools;
 import com.expleague.sensearch.donkey.plain.PlainIndexBuilder;
 import com.expleague.sensearch.index.Embedding;
@@ -33,7 +33,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.stream.Stream;
@@ -96,7 +95,7 @@ public class PlainIndex implements Index {
         JniDBFactory.factory.open(
             indexRoot.resolve(PlainIndexBuilder.PLAIN_ROOT).toFile(), DEFAULT_DB_OPTIONS);
 
-    tokenizer = new MyStemTokenizer(config.getMyStem());
+    tokenizer = new TokenizerImpl();
 
     IndexUnits.IndexMeta indexMeta =
         IndexUnits.IndexMeta.parseFrom(
@@ -155,7 +154,8 @@ public class PlainIndex implements Index {
 
   @Override
   public boolean hasTitle(CharSequence title) {
-    return titlesBloomFilter.mightContain(ByteTools.toBytes(toIds(tokenizer.parse(title))));
+    return titlesBloomFilter
+        .mightContain(ByteTools.toBytes(toIds(tokenizer.parseTextToWords(title))));
   }
 
   private long toId(String word) {

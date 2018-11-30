@@ -9,7 +9,7 @@ public class Passages {
 
   public static boolean contains(Lemmer lemmer, CharSequence s, CharSequence t) {
     /*return lemmer.myStem
-    .parse(s)
+    .parseTextToWords(s)
     .stream()
     .anyMatch(x -> {
       Term term = new BaseTerm(x);

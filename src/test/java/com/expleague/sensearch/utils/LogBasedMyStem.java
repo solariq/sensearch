@@ -18,7 +18,7 @@ import java.util.Map;
 
 /**
  * Class that uses logs provided by {@link RecordingMyStem} to mock MyStem behaviour. Throws an
- * error if given a parse request which can not be found in logs
+ * error if given a parseTextToWords request which can not be found in logs
  */
 public class LogBasedMyStem implements MyStem {
 
