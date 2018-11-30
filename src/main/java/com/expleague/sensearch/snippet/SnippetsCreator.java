@@ -5,7 +5,7 @@ import com.expleague.commons.text.lemmer.PartOfSpeech;
 import com.expleague.sensearch.Page;
 import com.expleague.sensearch.core.Lemmer;
 import com.expleague.sensearch.query.Query;
-import com.expleague.sensearch.query.term.BaseTerm;
+import com.expleague.sensearch.index.plain.IndexTerm;
 import com.expleague.sensearch.snippet.docbased_snippet.DocBasedSnippet;
 import com.expleague.sensearch.snippet.docbased_snippet.KeyWord;
 import com.expleague.sensearch.snippet.passage.Passage;
@@ -22,7 +22,6 @@ import java.util.stream.Collectors;
  * Created by Maxim on 06.10.2018. Email: alvinmax@mail.ru
  */
 public class SnippetsCreator {
-
   private static final long PASSAGES_IN_SNIPPET = 4;
   private static final long NUMBER_OF_KEYWORDS = 6;
   private static final double ALPHA = .4;
@@ -58,14 +57,14 @@ public class SnippetsCreator {
                     passage
                         .getWords()
                         .stream()
-                        .map(wordInfo -> new KeyWord(new BaseTerm(wordInfo), 0)))
+                        .map(wordInfo -> new KeyWord(wordInfo, 0)))
             .collect(Collectors.toCollection(HashSet::new));
 
     Predicate<Passage> queryRelevant =
-        y -> query.getTerms().stream().anyMatch(x -> contains(y, x.getNormalized()));
+        y -> query.terms().stream().anyMatch(x -> contains(y, (CharSequence) x.lemma().lemma().text()));
 
     Predicate<Passage> notQueryRelevant =
-        y -> query.getTerms().stream().noneMatch(x -> contains(y, x.getNormalized()));
+        y -> query.terms().stream().noneMatch(x -> contains(y, (CharSequence) x.lemma().lemma().text()));
 
     List<Passage> passagesWithQueryWords =
         passages.stream().filter(queryRelevant).collect(Collectors.toList());
@@ -78,7 +77,7 @@ public class SnippetsCreator {
             .stream()
             .filter(
                 x -> {
-                  LemmaInfo lemmaInfo = x.getWord().getLemma();
+                  LemmaInfo lemmaInfo = x.getWord().lemma();
                   if (lemmaInfo == null) {
                     return false;
                   }
@@ -90,13 +89,13 @@ public class SnippetsCreator {
                   long r =
                       passagesWithQueryWords
                           .stream()
-                          .filter(y -> contains(y, x.getWord().getNormalized()))
+                          .filter(y -> contains(y, x.getWord().lemma().lemma()))
                           .count();
                   long R = passagesWithQueryWords.size();
                   long s =
                       passagesWithoutQueryWords
                           .stream()
-                          .filter(y -> contains(y, x.getWord().getNormalized()))
+                          .filter(y -> contains(y, x.getWord().lemma().lemma()))
                           .count();
                   long S = passagesWithoutQueryWords.size();
                   double w = Math.log((r + 0.5) * (S - s + 0.5) / ((R - r + 0.5) * (s + 0.5)));
@@ -114,7 +113,7 @@ public class SnippetsCreator {
                   double rank =
                       keyWords
                           .stream()
-                          .filter(x -> contains(y, x.getWord().getNormalized()))
+                          .filter(x -> contains(y, x.getWord().lemma().lemma()))
                           .mapToDouble(KeyWord::getRank)
                           .sum();
                   y.setRating(rank);

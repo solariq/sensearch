@@ -21,7 +21,7 @@ public class QueryPhase implements SearchPhase {
     long startTime = System.nanoTime();
 
     final String input = whiteboard.input();
-    whiteboard.putQuery(new BaseQuery(input, whiteboard.builder().getLemmer()));
+    whiteboard.putQuery(BaseQuery.create(input, whiteboard.builder().getIndex()));
 
     LOG.debug(String
         .format("Query phase finished in %.3f seconds", (System.nanoTime() - startTime) / 1e9));

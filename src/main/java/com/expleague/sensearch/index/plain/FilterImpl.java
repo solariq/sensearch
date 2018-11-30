@@ -6,9 +6,7 @@ import com.expleague.sensearch.index.Filter;
 import gnu.trove.list.TLongList;
 import gnu.trove.list.array.TLongArrayList;
 
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 import java.util.function.LongPredicate;
 import java.util.stream.LongStream;
 
@@ -31,7 +29,7 @@ public class FilterImpl implements Filter {
     TLongList result = new TLongArrayList();
     while (embNumber < MAX_NUMBER) {
       result.clear();
-      embedding.getNearest(mainVec, embNumber).filter(predicate).forEach(result::add);
+      embedding.nearest(mainVec, embNumber, predicate).forEach(result::add);
       if (result.size() >= number) {
         return Arrays.stream(result.subList(0, number).toArray());
       }

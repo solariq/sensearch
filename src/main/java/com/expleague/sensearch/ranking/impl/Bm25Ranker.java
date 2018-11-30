@@ -10,6 +10,6 @@ public class Bm25Ranker implements PointWiseRanker {
 
   @Override
   public double rank(Features textFeatures) {
-    return textFeatures.bm25();
+    return textFeatures.features().get(0);
   }
 }

@@ -39,8 +39,8 @@
 //    byte[] jsonData = Files.readAllBytes(Paths.get("./config.json"));
 //    Config config = new ObjectMapper().readValue(jsonData, Config.class);
 //    embedding = new EmbeddingImpl(config);
-//    Vec v = VecTools.append(VecTools.subtract(embedding.getVec("король"),
-// embedding.getVec("мужчина")), embedding.getVec("женщина"));
+//    Vec v = VecTools.append(VecTools.subtract(embedding.vec("король"),
+// embedding.vec("мужчина")), embedding.vec("женщина"));
 //    for (String nearestWord : embedding.getNearestWords(v, 50)) {
 //      System.out.println(nearestWord);
 //    }
@@ -51,7 +51,7 @@
 //  private void nearestFinderTest() {
 //    for (Map.Entry<String, String[]> entry : tests.entrySet()) {
 //      List<String> nearest = embedding
-//          .getNearestWords(embedding.getVec(entry.getKey()), numberOfNeighbors);
+//          .getNearestWords(embedding.vec(entry.getKey()), numberOfNeighbors);
 //      for (String neighbor : entry.getValue()) {
 //        Assert.assertTrue(nearest.contains(neighbor));
 //      }

@@ -97,7 +97,7 @@
 //    }
 //
 //    @Override
-//    public LemmaInfo getLemma() {
+//    public LemmaInfo lemma() {
 //      throw new UnsupportedOperationException();
 //    }
 //  }
