@@ -3,6 +3,7 @@ package com.expleague.sensearch.index.plain;
 import com.expleague.sensearch.Config;
 import com.expleague.sensearch.Page;
 import com.expleague.sensearch.core.Tokenizer;
+import com.expleague.sensearch.core.impl.MyStemTokenizer;
 import com.expleague.sensearch.donkey.plain.ByteTools;
 import com.expleague.sensearch.donkey.plain.PlainIndexBuilder;
 import com.expleague.sensearch.index.Embedding;
@@ -44,8 +45,6 @@ import org.iq80.leveldb.DBException;
 import org.iq80.leveldb.Options;
 import org.iq80.leveldb.ReadOptions;
 
-;
-
 public class PlainIndex implements Index {
 
   private static final long DEFAULT_CACHE_SIZE = 128 * (1 << 20); // 128 MB
@@ -79,8 +78,9 @@ public class PlainIndex implements Index {
 
   private final Embedding embedding;
   private final Filter filter;
+  private final Tokenizer tokenizer;
 
-  private TermStatistics lastTermStatistics = null;
+  private TermStatistics lastTermStatistics;
 
   public PlainIndex(Config config) throws IOException {
     indexRoot = config.getTemporaryIndex();
@@ -95,6 +95,8 @@ public class PlainIndex implements Index {
     plainBase =
         JniDBFactory.factory.open(
             indexRoot.resolve(PlainIndexBuilder.PLAIN_ROOT).toFile(), DEFAULT_DB_OPTIONS);
+
+    tokenizer = new MyStemTokenizer(config.getMyStem());
 
     IndexUnits.IndexMeta indexMeta =
         IndexUnits.IndexMeta.parseFrom(
@@ -153,14 +155,14 @@ public class PlainIndex implements Index {
 
   @Override
   public boolean hasTitle(CharSequence title) {
-    return titlesBloomFilter.mightContain(ByteTools.toBytes(toIds(Tokenizer.tokenize(title))));
+    return titlesBloomFilter.mightContain(ByteTools.toBytes(toIds(tokenizer.parse(title))));
   }
 
   private long toId(String word) {
     word = word.toLowerCase();
     if (!wordToIdMap.containsKey(word)) {
-      LOG.debug(String.format("No mapping was found for word %s", word));
-      throw new NoSuchElementException("No mapping for word %s");
+      LOG.debug(String.format("No mapping was found for word [%s]", word));
+      throw new NoSuchElementException(String.format("No mapping was found for word [%s]", word));
     }
 
     return wordToIdMap.get(word);
@@ -170,23 +172,14 @@ public class PlainIndex implements Index {
     return toId(term.getRaw().toString());
   }
 
-  private long[] toIds(String... words) {
+  private long[] toIds(Stream<CharSequence> words) {
     TLongList ids = new TLongLinkedList();
-    for (String word : words) {
-      try {
-        ids.add(toId(word));
-      } catch (NoSuchElementException e) {
-        // ignore
-      }
-    }
-
+    words.map(Object::toString).mapToLong(this::toId).forEach(ids::add);
     return ids.toArray();
   }
 
   private long[] toIds(Query query) {
-    List<String> rawWords = new LinkedList<>();
-    query.getTerms().forEach(t -> rawWords.add(t.getRaw().toString().toLowerCase()));
-    return toIds(rawWords.toArray(new String[rawWords.size()]));
+    return toIds(query.getTerms().stream().map(t -> t.getRaw().toString().toLowerCase()));
   }
 
   /**
@@ -272,6 +265,11 @@ public class PlainIndex implements Index {
               termStatisticsBase.get(Longs.toByteArray(termId), DEFAULT_READ_OPTIONS));
     }
     return lastTermStatistics;
+  }
+
+  @Override
+  public Tokenizer tokenizer() {
+    return tokenizer;
   }
 
   @Override

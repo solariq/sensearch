@@ -6,13 +6,13 @@
 
   "statisticsFileName" : "StatisticsData",
 
-  "temporaryIndex": "IndexTmp",
+  "temporaryIndex": "/Users/solar/data/search/IndexTmp",
 
   "webRoot": "webapp/dist/webapp",
 
   "embeddingVectors": "./resources/vectors.txt.gz",
 
-  "myStem": "./resources/mystem",
+  "myStem": "/Users/solar/bin/mystem",
 
   "pathToZIP": "../WikiDocs/Mini_Wiki_categories.zip",
 

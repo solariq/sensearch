@@ -1,17 +1,13 @@
 package com.expleague.sensearch.core;
 
+import com.expleague.sensearch.core.impl.MyStemTokenizer;
+
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
-public class Tokenizer {
-  private static final Pattern REGEXP_SPLITTER = Pattern.compile("[^А-ЯЁа-яёA-Za-z0-9]");
+public interface Tokenizer {
+  Stream<CharSequence> toWords(CharSequence sentence);
+  Stream<CharSequence> toSentences(CharSequence text);
 
-  private Tokenizer() {
-  }
-
-  public static String[] tokenize(CharSequence charSequence) {
-    return Stream.of(REGEXP_SPLITTER.split(charSequence))
-        .filter(s -> !s.isEmpty())
-        .toArray(String[]::new);
-  }
+  Stream<CharSequence> parse(CharSequence text);
 }

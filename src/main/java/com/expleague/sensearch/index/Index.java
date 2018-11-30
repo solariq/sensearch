@@ -1,6 +1,7 @@
 package com.expleague.sensearch.index;
 
 import com.expleague.sensearch.Page;
+import com.expleague.sensearch.core.Tokenizer;
 import com.expleague.sensearch.query.Query;
 import com.expleague.sensearch.query.term.Term;
 import java.util.List;
@@ -25,4 +26,6 @@ public interface Index {
   int documentFrequency(Term term);
 
   long termFrequency(Term term);
+
+  Tokenizer tokenizer();
 }

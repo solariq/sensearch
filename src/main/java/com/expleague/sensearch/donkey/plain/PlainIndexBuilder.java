@@ -5,10 +5,12 @@ import com.expleague.commons.math.vectors.impl.vectors.ArrayVec;
 import com.expleague.commons.seq.CharSeqTools;
 import com.expleague.sensearch.Config;
 import com.expleague.sensearch.core.Tokenizer;
+import com.expleague.sensearch.core.impl.MyStemTokenizer;
 import com.expleague.sensearch.donkey.IndexBuilder;
 import com.expleague.sensearch.donkey.crawler.Crawler;
 import com.expleague.sensearch.protobuf.index.IndexUnits;
 import com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta.IdMapping;
+import com.expleague.sensearch.web.Builder;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.hash.BloomFilter;
 import com.google.common.hash.Funnels;
@@ -31,6 +33,7 @@ import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.stream.Stream;
 import java.util.zip.GZIPInputStream;
 import org.apache.log4j.Logger;
 import org.fusesource.leveldbjni.JniDBFactory;
@@ -41,7 +44,6 @@ import org.iq80.leveldb.Options;
 ;
 
 public class PlainIndexBuilder implements IndexBuilder {
-
   public static final int STATISTICS_BLOCK_SIZE = 1 << 10;
   public static final int PLAIN_PAGE_BLOCK_SIZE = 1 << 20;
 
@@ -100,18 +102,14 @@ public class PlainIndexBuilder implements IndexBuilder {
    * @return array of word ids in the same order as given words
    */
   @VisibleForTesting
-  static long[] toIds(String[] words, TObjectLongMap<String> mappings) {
-    long[] wordIds = new long[words.length];
-    for (int i = 0; i < words.length; ++i) {
-      if (!mappings.containsKey(words[i])) {
-        LOG.warn(
-            String.format("For the word '%s' was not found any vector representation!", words[i]));
-        mappings.put(words[i], mappings.size() + 1);
+  static long[] toIds(Stream<CharSequence> words, TObjectLongMap<String> mappings) {
+    return words.map(Object::toString).mapToLong(word -> {
+      if (!mappings.containsKey(word)) {
+        LOG.warn(String.format("For the word '%s' was not found any vector representation!", word));
+        mappings.put(word, mappings.size() + 1);
       }
-      wordIds[i] = mappings.get(words[i]);
-    }
-
-    return wordIds;
+      return mappings.get(word);
+    }).toArray();
   }
 
   @VisibleForTesting
@@ -176,6 +174,7 @@ public class PlainIndexBuilder implements IndexBuilder {
 
   @Override
   public void buildIndex(Crawler crawler, Config config) throws IOException {
+    final Tokenizer tokenizer = new MyStemTokenizer(config.getMyStem());
     final TLongObjectMap<Vec> gloveVectors = new TLongObjectHashMap<>();
     final TObjectLongMap<String> idMappings = new TObjectLongHashMap<>();
     readGloveVectors(Paths.get(config.getEmbeddingVectors()), idMappings, gloveVectors);
@@ -215,15 +214,12 @@ public class PlainIndexBuilder implements IndexBuilder {
               doc -> {
                 long pageId = plainPageBuilder.add(doc);
 
-                long[] titleIds = toIds(Tokenizer.tokenize(doc.title().toLowerCase()), idMappings);
+                long[] titleIds = toIds(tokenizer.parse(doc.title().toLowerCase()), idMappings);
                 titlesFilter.put(ByteTools.toBytes(titleIds));
 
                 embeddingBuilder.add(pageId, toVector(titleIds, gloveVectors));
 
-                long[] tokens =
-                    toIds(
-                        Tokenizer.tokenize((doc.title() + " " + doc.content()).toLowerCase()),
-                        idMappings);
+                long[] tokens = toIds(tokenizer.parse((doc.title() + " " + doc.content()).toLowerCase()), idMappings);
 
                 termFrequencyMap.clear();
                 bigramFrequencyMap.clear();

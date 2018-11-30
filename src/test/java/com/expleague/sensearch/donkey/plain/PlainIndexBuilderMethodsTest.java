@@ -13,8 +13,9 @@ import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
 
-public class PlainIndexBuilderMethodsTest {
+import java.util.stream.Stream;
 
+public class PlainIndexBuilderMethodsTest {
   @Test
   public void enrichFrequenciesTest() {
     long[] idSequence = new long[] {1, 2, 3, 1, 2, 1, 3, 2, 3, 3, 2, 3, 1};
@@ -50,15 +51,15 @@ public class PlainIndexBuilderMethodsTest {
     long[] convertResult;
 
     // Simple test
-    convertResult = PlainIndexBuilder.toIds(new String[] {"word1", "word3"}, knownIdMappings);
+    convertResult = PlainIndexBuilder.toIds(Stream.of("word1", "word3"), knownIdMappings);
     Assert.assertArrayEquals(new long[] {1, 3}, convertResult);
 
     // Empty input test
-    convertResult = PlainIndexBuilder.toIds(new String[0], knownIdMappings);
+    convertResult = PlainIndexBuilder.toIds(Stream.empty(), knownIdMappings);
     Assert.assertEquals(convertResult.length, 0);
 
     // New words test
-    convertResult = PlainIndexBuilder.toIds(new String[] {"word4"}, knownIdMappings);
+    convertResult = PlainIndexBuilder.toIds(Stream.of("word4"), knownIdMappings);
     Assert.assertTrue(knownIdMappings.containsKey("word1"));
     Assert.assertTrue(knownIdMappings.containsKey("word2"));
     Assert.assertTrue(knownIdMappings.containsKey("word3"));
@@ -68,8 +69,7 @@ public class PlainIndexBuilderMethodsTest {
 
     // Empty mappings test
     knownIdMappings.clear();
-    convertResult =
-        PlainIndexBuilder.toIds(new String[] {"word1", "word2", "word3"}, knownIdMappings);
+    convertResult = PlainIndexBuilder.toIds(Stream.of("word1", "word2", "word3"), knownIdMappings);
     Assert.assertTrue(knownIdMappings.containsKey("word1"));
     Assert.assertTrue(knownIdMappings.containsKey("word2"));
     Assert.assertTrue(knownIdMappings.containsKey("word3"));

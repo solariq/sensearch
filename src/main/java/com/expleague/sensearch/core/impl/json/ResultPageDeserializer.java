@@ -1,4 +1,4 @@
-package com.expleague.sensearch.core.deserializers;
+package com.expleague.sensearch.core.impl.json;
 
 import com.expleague.sensearch.SenSeArch.ResultItem;
 import com.expleague.sensearch.SenSeArch.ResultPage;

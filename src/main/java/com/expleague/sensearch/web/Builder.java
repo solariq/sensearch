@@ -4,6 +4,8 @@ import com.expleague.sensearch.Config;
 import com.expleague.sensearch.SenSeArch;
 import com.expleague.sensearch.core.Lemmer;
 import com.expleague.sensearch.core.SenSeArchImpl;
+import com.expleague.sensearch.core.Tokenizer;
+import com.expleague.sensearch.core.impl.MyStemTokenizer;
 import com.expleague.sensearch.donkey.crawler.Crawler;
 import com.expleague.sensearch.donkey.crawler.CrawlerXML;
 import com.expleague.sensearch.donkey.plain.PlainIndexBuilder;
@@ -15,6 +17,7 @@ import com.expleague.sensearch.web.suggest.BigramsBasedSuggestor;
 import com.expleague.sensearch.web.suggest.Suggestor;
 import com.google.inject.Singleton;
 import java.io.IOException;
+import java.nio.file.Path;
 import javax.inject.Inject;
 import javax.xml.stream.XMLStreamException;
 
@@ -41,7 +44,8 @@ public class Builder {
     }
     index = new PlainIndex(config);
     bigramsBasedSuggestor = new BigramsBasedSuggestor(index);
-    lemmer = new Lemmer(config.getMyStem());
+    final Path myStem = config.getMyStem();
+    lemmer = new Lemmer(myStem);
     searcher = new SenSeArchImpl(this);
     metric = new Metric(new RequestCrawler(index), config.getPathToMetrics());
     return config;
