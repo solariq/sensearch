@@ -9,7 +9,6 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import org.apache.log4j.Logger;
 
-;
 
 /**
  * Created by sandulmv on 02.11.18.

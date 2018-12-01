@@ -4,7 +4,6 @@ import com.expleague.sensearch.core.SearchPhase;
 import com.expleague.sensearch.core.Whiteboard;
 import org.apache.log4j.Logger;
 
-;
 
 public class QueryPhase implements SearchPhase {
 
