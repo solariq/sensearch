@@ -1,5 +1,6 @@
 package com.expleague.sensearch.donkey.crawler.document;
 
+import java.net.URI;
 import java.util.List;
 
 public class WikiPage implements CrawlerDocument {
@@ -8,6 +9,12 @@ public class WikiPage implements CrawlerDocument {
   private String title;
   private List<String> categories;
   private List<Section> sections;
+
+  public void setUri(URI uri) {
+    this.uri = uri;
+  }
+
+  private URI uri;
 
   /*
   String revision;
@@ -61,6 +68,11 @@ public class WikiPage implements CrawlerDocument {
   @Override
   public long iD() {
     return this.id;
+  }
+
+  @Override
+  public URI uri() {
+    return uri;
   }
 
   public static class WikiSection implements Section {

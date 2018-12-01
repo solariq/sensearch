@@ -16,6 +16,7 @@ import com.expleague.sensearch.web.suggest.ProbabilisticSuggestor;
 import com.expleague.sensearch.web.suggest.Suggestor;
 import com.google.inject.Singleton;
 import java.io.IOException;
+import java.nio.file.Path;
 import javax.inject.Inject;
 import javax.xml.stream.XMLStreamException;
 
@@ -41,9 +42,15 @@ public class Builder {
       new PlainIndexBuilder().buildIndex(crawler, config);
     }
     index = new PlainIndex(config);
-    lemmer = new Lemmer(config.getMyStem());
-    //suggestor = new BigramsBasedSuggestor(index);
-    suggestor = new ProbabilisticSuggestor(crawler, lemmer);
+    
+    final Path myStem = config.getMyStem();
+    
+	lemmer = new Lemmer(myStem);
+    suggestor = new BigramsBasedSuggestor(index);
+    //suggestor = new ProbabilisticSuggestor(crawler, lemmer);
+
+    suggestor = new BigramsBasedSuggestor(index);
+
     searcher = new SenSeArchImpl(this);
     metric = new Metric(new RequestCrawler(index), config.getPathToMetrics());
     return config;

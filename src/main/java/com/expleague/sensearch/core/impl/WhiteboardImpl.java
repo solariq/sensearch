@@ -7,8 +7,7 @@ import com.expleague.sensearch.miner.Features;
 import com.expleague.sensearch.query.Query;
 import com.expleague.sensearch.snippet.Snippet;
 import com.expleague.sensearch.web.Builder;
-import java.util.stream.Stream;
-import org.apache.commons.lang3.tuple.Pair;
+import java.util.Map;
 import org.jetbrains.annotations.Nullable;
 
 public class WhiteboardImpl implements Whiteboard {
@@ -19,7 +18,7 @@ public class WhiteboardImpl implements Whiteboard {
   private Page[] results;
   private Snippet[] snippets;
   private Query query;
-  private Stream<Pair<Page, Features>> textFeatures;
+  private Map<Page, Features> textFeatures;
   private ResultItem[] googleResults;
 
   public WhiteboardImpl(String input, int page, Builder builder) {
@@ -34,12 +33,12 @@ public class WhiteboardImpl implements Whiteboard {
   }
 
   @Override
-  public synchronized Stream<Pair<Page, Features>> textFeatures() {
+  public synchronized Map<Page, Features> textFeatures() {
     return textFeatures;
   }
 
   @Override
-  public synchronized void putTextFeatures(Stream<Pair<Page, Features>> textFeatures) {
+  public synchronized void putTextFeatures(Map<Page, Features> textFeatures) {
     this.textFeatures = textFeatures;
   }
 

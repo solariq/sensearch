@@ -1,17 +1,31 @@
 package com.expleague.sensearch.core;
 
-import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
-public class Tokenizer {
-  private static final Pattern REGEXP_SPLITTER = Pattern.compile("[^А-ЯЁа-яёA-Za-z0-9]");
+public interface Tokenizer {
 
-  private Tokenizer() {
-  }
+  /**
+   * Splits given sentence to words, removing all punctuation and special characters
+   *
+   * @param sentence A sentence to be split
+   * @return Words of this sentence
+   */
+  Stream<CharSequence> toWords(CharSequence sentence);
 
-  public static String[] tokenize(CharSequence charSequence) {
-    return Stream.of(REGEXP_SPLITTER.split(charSequence))
-        .filter(s -> !s.isEmpty())
-        .toArray(String[]::new);
+  /**
+   * Splits text to sentences
+   * @param text Text to be splitted
+   * @return Sentences of the text
+   */
+  Stream<CharSequence> toSentences(CharSequence text);
+
+  /**
+   * Splits text into words, removing all punctuation and special characters
+   *
+   * @param text Text to be split
+   * @return Words of this text
+   */
+  default Stream<CharSequence> parseTextToWords(CharSequence text) {
+    return toSentences(text).filter(s -> s.length() > 0).flatMap(this::toWords);
   }
 }

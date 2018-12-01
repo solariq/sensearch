@@ -1,5 +1,6 @@
 package com.expleague.sensearch.donkey.crawler.document;
 
+import java.net.URI;
 import java.util.List;
 import javax.validation.constraints.NotNull;
 
@@ -14,6 +15,8 @@ public interface CrawlerDocument {
   List<Section> sections();
 
   long iD();
+
+  URI uri();
 
   interface Section {
 

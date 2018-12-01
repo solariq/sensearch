@@ -6,12 +6,12 @@ import com.expleague.sensearch.core.impl.ResultItemImpl;
 import com.expleague.sensearch.index.Index;
 import java.io.IOException;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLConnection;
+import java.net.URLDecoder;
 import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.jsoup.Jsoup;
@@ -50,10 +50,7 @@ public class RequestCrawler implements WebCrawler {
   private String normalizeTitle(String title) {
     String ans = title;
     if (ans.endsWith(" — Википедия")) {
-      ans = ans.replace(" — Википедия", "");
-      if (index.hasTitle(ans)) {
-        return ans;
-      }
+      return ans.replace(" — Википедия", "");
     }
     return null;
   }
@@ -83,19 +80,18 @@ public class RequestCrawler implements WebCrawler {
               if (title == null) {
                 return;
               }
-
               String snippet = element.select("span.st").text();
               String snippetUrl = element.select("a[href]").attr("href");
-              try {
-                results.add(
-                    new ResultItemImpl(
-                        new URI(snippetUrl),
-                        title,
-                        Arrays.asList(new Pair<>(snippet, new ArrayList<>())),
-                        0));
-              } catch (URISyntaxException e) {
-                e.printStackTrace();
+              final URI uri = URI.create(URLDecoder.decode(snippetUrl));
+              if (index.page(uri) == null) {
+                return;
               }
+              results.add(
+                  new ResultItemImpl(
+                      uri,
+                      title,
+                      Collections.singletonList(new Pair<>(snippet, new ArrayList<>())),
+                      0));
             });
       } catch (IOException e) {
         e.printStackTrace();

@@ -1,4 +1,4 @@
-package com.expleague.sensearch.core.serializers;
+package com.expleague.sensearch.core.impl.json;
 
 import com.expleague.sensearch.SenSeArch.ResultPage;
 import com.fasterxml.jackson.core.JsonGenerator;

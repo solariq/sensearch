@@ -6,6 +6,7 @@ import com.expleague.sensearch.donkey.crawler.document.WikiPage.WikiLink;
 import com.expleague.sensearch.donkey.crawler.document.WikiPage.WikiSection;
 import java.io.File;
 import java.io.Serializable;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -32,6 +33,11 @@ public class XMLParser {
       XmlPage xmlPage = element.page;
 
       page.setTitle(xmlPage.title);
+      // TODO (tehnar): proper escaping
+      page.setUri(
+          URI.create(
+              "https://ru.wikipedia.org/wiki/"
+                  + xmlPage.title.replace(" ", "_").replace("%", "%25")));
       if (xmlPage.categories == null) {
         page.setCategories(new ArrayList<>());
       } else {

@@ -3,8 +3,10 @@ package com.expleague.sensearch.index.plain;
 import com.expleague.commons.math.vectors.Vec;
 import com.expleague.sensearch.index.Embedding;
 import com.expleague.sensearch.index.Filter;
-import java.util.ArrayList;
-import java.util.List;
+import gnu.trove.list.TLongList;
+import gnu.trove.list.array.TLongArrayList;
+
+import java.util.Arrays;
 import java.util.function.LongPredicate;
 import java.util.stream.LongStream;
 
@@ -24,12 +26,12 @@ public class FilterImpl implements Filter {
   // NO, GOD, PLS NO!!
   public LongStream filtrate(Vec mainVec, int number, LongPredicate predicate) {
     int embNumber = number * START_MULTIPLIER;
-    List<Long> result = new ArrayList<>();
+    TLongList result = new TLongArrayList();
     while (embNumber < MAX_NUMBER) {
       result.clear();
-      embedding.getNearest(mainVec, embNumber).filter(predicate).forEach(result::add);
+      embedding.nearest(mainVec, embNumber, predicate).forEach(result::add);
       if (result.size() >= number) {
-        return result.subList(0, number).stream().mapToLong(Long::longValue);
+        return Arrays.stream(result.subList(0, number).toArray());
       }
       embNumber *= 2;
     }

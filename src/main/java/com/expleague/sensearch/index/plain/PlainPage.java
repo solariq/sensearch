@@ -9,19 +9,12 @@ public class PlainPage implements IndexedPage {
   private final long id;
   private final String text;
   private final String title;
-
-  /**
-   * Empty Page constructor
-   */
-  PlainPage() {
-    id = 0;
-    text = "";
-    title = "";
-  }
+  private final URI uri;
 
   PlainPage(IndexUnits.Page page) {
     text = page.getContent();
     title = page.getTitle();
+    uri = URI.create(page.getUri());
     id = page.getPageId();
   }
 
@@ -32,7 +25,7 @@ public class PlainPage implements IndexedPage {
 
   @Override
   public URI reference() {
-    return URI.create("http://ru.wikipedia.org/wiki/" + title().toString().replace(" ", "_"));
+    return uri;
   }
 
   @Override

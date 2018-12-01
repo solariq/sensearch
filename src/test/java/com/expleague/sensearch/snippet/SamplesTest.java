@@ -64,7 +64,7 @@ public class SamplesTest extends SensearchTestCase {
                           return content;
                         }
                       });
-                  queries.add(new BaseQuery(query, lemmer));
+//                  queries.add(new BaseQuery(query, lemmer));
                 } catch (IOException e) {
                   e.printStackTrace();
                 }

@@ -43,6 +43,7 @@ class PlainPageBuilder {
             .setPageId(negFlushedPagesCount)
             .setContent(newPage.content().toString())
             .setTitle(newPage.title())
+            .setUri(newPage.uri().toString())
             .build()
             .toByteArray();
 

@@ -1,17 +1,10 @@
 {
   "temporaryDocuments": "PagesTmp",
-
-  "temporaryBigrams": "BigramsMapTmp",
-  "bigramsFileName": "BigramsData",
-
-  "statisticsFileName" : "StatisticsData",
-
-  "temporaryIndex": "IndexTmp",
+  "temporaryIndex": "../WikiDocs/IndexTmp",
 
   "webRoot": "webapp/dist/webapp",
 
   "embeddingVectors": "./resources/vectors.txt.gz",
-
   "myStem": "./resources/mystem",
 
   "pathToZIP": "../WikiDocs/Mini_Wiki_categories.zip",

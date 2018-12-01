@@ -1,10 +1,10 @@
 package com.expleague.sensearch;
 
 import com.expleague.commons.util.Pair;
-import com.expleague.sensearch.core.deserializers.ResultItemDeserializer;
-import com.expleague.sensearch.core.deserializers.ResultPageDeserializer;
-import com.expleague.sensearch.core.serializers.ResultItemSerializer;
-import com.expleague.sensearch.core.serializers.ResultPageSerializer;
+import com.expleague.sensearch.core.impl.json.ResultItemDeserializer;
+import com.expleague.sensearch.core.impl.json.ResultPageDeserializer;
+import com.expleague.sensearch.core.impl.json.ResultItemSerializer;
+import com.expleague.sensearch.core.impl.json.ResultPageSerializer;
 import com.expleague.sensearch.snippet.Segment;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;

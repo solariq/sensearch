@@ -1,9 +1,19 @@
 package com.expleague.sensearch.index.plain;
 
+import com.expleague.commons.math.vectors.Vec;
+import com.expleague.commons.math.vectors.VecTools;
+import com.expleague.commons.math.vectors.impl.vectors.ArrayVec;
+import com.expleague.commons.seq.CharSeq;
+import com.expleague.commons.seq.CharSeqTools;
+import com.expleague.commons.text.lemmer.LemmaInfo;
+import com.expleague.commons.text.lemmer.MyStem;
+import com.expleague.commons.text.lemmer.MyStemImpl;
+import com.expleague.commons.text.lemmer.WordInfo;
 import com.expleague.sensearch.Config;
 import com.expleague.sensearch.Page;
+import com.expleague.sensearch.core.Term;
 import com.expleague.sensearch.core.Tokenizer;
-import com.expleague.sensearch.donkey.plain.ByteTools;
+import com.expleague.sensearch.core.impl.TokenizerImpl;
 import com.expleague.sensearch.donkey.plain.PlainIndexBuilder;
 import com.expleague.sensearch.index.Embedding;
 import com.expleague.sensearch.index.Filter;
@@ -11,41 +21,42 @@ import com.expleague.sensearch.index.Index;
 import com.expleague.sensearch.index.IndexedPage;
 import com.expleague.sensearch.protobuf.index.IndexUnits;
 import com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta.IdMapping;
+import com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta.UriPageMapping;
 import com.expleague.sensearch.protobuf.index.IndexUnits.TermStatistics;
 import com.expleague.sensearch.protobuf.index.IndexUnits.TermStatistics.TermFrequency;
 import com.expleague.sensearch.query.Query;
-import com.expleague.sensearch.query.term.Term;
 import com.google.common.hash.BloomFilter;
 import com.google.common.hash.Funnels;
 import com.google.common.primitives.Longs;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
-import gnu.trove.list.TLongList;
-import gnu.trove.list.linked.TLongLinkedList;
 import gnu.trove.map.TLongObjectMap;
 import gnu.trove.map.TObjectLongMap;
 import gnu.trove.map.hash.TLongObjectHashMap;
 import gnu.trove.map.hash.TObjectLongHashMap;
+import org.apache.log4j.Logger;
+import org.fusesource.leveldbjni.JniDBFactory;
+import org.iq80.leveldb.*;
+import org.jetbrains.annotations.Nullable;
+
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.NoSuchElementException;
-import java.util.logging.Logger;
+import java.util.*;
+import java.util.Objects;
 import java.util.stream.Stream;
+import org.apache.log4j.Logger;
 import org.fusesource.leveldbjni.JniDBFactory;
 import org.iq80.leveldb.CompressionType;
 import org.iq80.leveldb.DB;
 import org.iq80.leveldb.DBException;
 import org.iq80.leveldb.Options;
 import org.iq80.leveldb.ReadOptions;
+import org.jetbrains.annotations.Nullable;
 
 public class PlainIndex implements Index {
-
   private static final long DEFAULT_CACHE_SIZE = 128 * (1 << 20); // 128 MB
 
   private static final Options DEFAULT_DB_OPTIONS =
@@ -63,8 +74,9 @@ public class PlainIndex implements Index {
 
   private final Path indexRoot;
 
-  private final TObjectLongMap<String> wordToIdMap;
-  private final TLongObjectMap<String> idToWordMap;
+  private final Map<CharSeq, Term> wordToTerms = new HashMap<>();
+  private final TLongObjectMap<Term> idToTerm = new TLongObjectHashMap<>();
+  private final TObjectLongMap<URI> uriToPageIdMap = new TObjectLongHashMap<>();
 
   private final DB termStatisticsBase;
   private final DB plainBase;
@@ -77,8 +89,10 @@ public class PlainIndex implements Index {
 
   private final Embedding embedding;
   private final Filter filter;
+  private final MyStem stemmer;
+  private final Tokenizer tokenizer;
 
-  private TermStatistics lastTermStatistics = null;
+  private TermStatistics lastTermStatistics;
 
   public PlainIndex(Config config) throws IOException {
     indexRoot = config.getTemporaryIndex();
@@ -94,6 +108,10 @@ public class PlainIndex implements Index {
         JniDBFactory.factory.open(
             indexRoot.resolve(PlainIndexBuilder.PLAIN_ROOT).toFile(), DEFAULT_DB_OPTIONS);
 
+    tokenizer = new TokenizerImpl();
+
+    stemmer = new MyStemImpl(config.getMyStem());
+
     IndexUnits.IndexMeta indexMeta =
         IndexUnits.IndexMeta.parseFrom(
             Files.newInputStream(indexRoot.resolve(PlainIndexBuilder.INDEX_META_FILE)));
@@ -107,17 +125,43 @@ public class PlainIndex implements Index {
             new ByteArrayInputStream(byteStringFilter.toByteArray(), 0, byteStringFilter.size()),
             Funnels.byteArrayFunnel());
 
-    wordToIdMap = new TObjectLongHashMap<>();
+    final TObjectLongMap<CharSeq> ids = new TObjectLongHashMap<>();
+    indexMeta.getIdMappingsList().forEach(m -> ids.put(CharSeq.create(m.getWord()), m.getId()));
     for (IdMapping idMapping : indexMeta.getIdMappingsList()) {
-      wordToIdMap.put(idMapping.getWord(), idMapping.getId());
-    }
+      //noinspection SuspiciousMethodCalls
+      if (wordToTerms.containsKey(idMapping.getWord()))
+        continue;
 
-    idToWordMap = new TLongObjectHashMap<>();
-    wordToIdMap.forEachEntry(
-        (word, id) -> {
-          idToWordMap.put(id, word);
-          return true;
-        });
+      final String word = idMapping.getWord();
+      final List<WordInfo> parse = stemmer.parse(word);
+      final LemmaInfo lemma = parse.size() > 0 ? parse.get(0).lemma() : null;
+//      if (lemma == null)
+//        System.out.println();
+      final IndexTerm lemmaTerm;
+      //noinspection EqualsBetweenInconvertibleTypes
+      if (lemma == null || lemma.lemma().equals(word)) {
+        lemmaTerm = null;
+      }
+      else if (wordToTerms.containsKey(lemma.lemma())) {
+        lemmaTerm = (IndexTerm) wordToTerms.get(lemma.lemma());
+      }
+      else {
+        long lemmaId = ids.get(lemma.lemma());
+        if (lemmaId == ids.getNoEntryValue()) {
+          lemmaId = ids.size();
+          ids.put(lemma.lemma(), lemmaId);
+        }
+        CharSeq compactLemma = CharSeq.intern(lemma.lemma());
+        lemmaTerm = new IndexTerm(this, compactLemma, lemmaId, null);
+      }
+      final CharSeq compactText = CharSeq.intern(word);
+      wordToTerms.put(compactText, new IndexTerm(this, compactText, idMapping.getId(), lemmaTerm));
+    }
+    wordToTerms.values().forEach(t -> idToTerm.put(((IndexTerm) t).id(), t));
+
+    for (UriPageMapping mapping : indexMeta.getUriPageMappingsList()) {
+      uriToPageIdMap.put(URI.create(mapping.getUri()), mapping.getPageId());
+    }
   }
 
   private static boolean isPageId(long id) {
@@ -129,102 +173,66 @@ public class PlainIndex implements Index {
   }
 
   @Override
-  public List<String> mostFrequentNeighbours(String rawWord) {
-    rawWord = rawWord.toLowerCase().trim();
-    long wordId = 0;
+  public Stream<Term> mostFrequentNeighbours(Term term) {
     try {
-      wordId = toId(rawWord);
-      List<String> neighbours = new ArrayList<>();
-      for (TermFrequency tf : termStatistics(wordId).getBigramFrequencyList()) {
-        neighbours.add(idToWord(tf.getTermId()));
-      }
-      return neighbours;
-    } catch (NoSuchElementException e) {
-      return Collections.emptyList();
+      return termStatistics(((IndexTerm)term).id()).getBigramFrequencyList().stream().mapToLong(TermFrequency::getTermId).mapToObj(idToTerm::get);
     } catch (InvalidProtocolBufferException e) {
-      LOG.warning(
+      LOG.warn(
           String.format(
-              "Encountered invalid protobuf in statistics base for word with id %d", wordId));
-      return Collections.emptyList();
+              "Encountered invalid protobuf in statistics base for word with id %d", term.text().toString()));
+      return Stream.empty();
     }
-  }
-
-  @Override
-  public boolean hasTitle(CharSequence title) {
-    return titlesBloomFilter.mightContain(ByteTools.toBytes(toIds(Tokenizer.tokenize(title))));
-  }
-
-  private long toId(String word) {
-    word = word.toLowerCase();
-    if (!wordToIdMap.containsKey(word)) {
-      LOG.fine(String.format("No mapping was found for word %s", word));
-      throw new NoSuchElementException("No mapping for word %s");
-    }
-
-    return wordToIdMap.get(word);
-  }
-
-  private long toId(Term term) {
-    return toId(term.getRaw().toString());
-  }
-
-  private long[] toIds(String... words) {
-    TLongList ids = new TLongLinkedList();
-    for (String word : words) {
-      try {
-        ids.add(toId(word));
-      } catch (NoSuchElementException e) {
-        // ignore
-      }
-    }
-
-    return ids.toArray();
-  }
-
-  private long[] toIds(Query query) {
-    List<String> rawWords = new LinkedList<>();
-    query.getTerms().forEach(t -> rawWords.add(t.getRaw().toString().toLowerCase()));
-    return toIds(rawWords.toArray(new String[rawWords.size()]));
   }
 
   /**
    * TODO: What kind of terms is returned?
    */
-  @Override
-  public Term[] synonyms(Term term) {
+  Stream<Term> synonyms(Term term) {
     return filter
         .filtrate(
-            embedding.getVec(wordToIdMap.get(term.getRaw().toString().toLowerCase())),
+            embedding.vec(((IndexTerm) term).id()),
             SYNONYMS_COUNT,
             PlainIndex::isWordId)
-        .mapToObj(this::idToWord)
-        .toArray(Term[]::new);
+        .mapToObj(idToTerm::get);
   }
 
+  @Nullable
   private IndexedPage idToPage(long id) {
     try {
       return new PlainPage(IndexUnits.Page.parseFrom(plainBase.get(Longs.toByteArray(id))));
     } catch (InvalidProtocolBufferException e) {
-      LOG.severe("Encountered invalid protobuf in Plain Base!");
-      return new PlainPage();
+      LOG.fatal("Encountered invalid protobuf in Plain Base!");
+      return null;
     }
   }
 
-  private String idToWord(long id) {
-    return idToWordMap.get(id);
+  @Nullable
+  @Override
+  public Page page(URI uri) {
+    // TODO: maybe add some sophisticated logic here and in builder like URI normalization
+    long pageId = uriToPageIdMap.get(uri);
+    return pageId == uriToPageIdMap.getNoEntryValue() ? null : idToPage(pageId);
   }
 
   @Override
   public Stream<Page> fetchDocuments(Query query) {
-    long[] queryIds = toIds(query);
+    final Vec queryVec = new ArrayVec(embedding.dim());
+    query.terms().stream()
+        .mapToLong(t -> ((IndexTerm) t).id())
+        .mapToObj(embedding::vec)
+        .forEach(v -> VecTools.append(queryVec, v));
+    return filter.filtrate(queryVec, FILTERED_DOC_NUMBER, PlainIndex::isPageId).mapToObj(this::idToPage);
+  }
 
-    if (queryIds.length == 0) {
-      return Stream.empty();
-    }
+  @Override
+  public Term term(CharSequence seq) {
+    final CharSequence normalized = CharSeqTools.toLowerCase(CharSeqTools.trim(seq));
+    return wordToTerms.get(CharSeq.create(normalized));
+  }
 
-    return filter
-        .filtrate(embedding.getVec(queryIds), FILTERED_DOC_NUMBER, PlainIndex::isPageId)
-        .mapToObj(this::idToPage);
+  @Override
+  public Stream<Term> parse(CharSequence sequence) {
+    return tokenizer.parseTextToWords(sequence).map(this::term).filter(Objects::nonNull);
   }
 
   @Override
@@ -237,28 +245,24 @@ public class PlainIndex implements Index {
     return averagePageSize;
   }
 
-  @Override
-  public int documentFrequency(Term term) {
+  int documentFrequency(Term term) {
     try {
-      long termId = toId(term);
-      return termStatistics(termId).getDocuementFrequency();
+      return termStatistics(((IndexTerm) term).id()).getDocuementFrequency();
     } catch (DBException | NoSuchElementException e) {
       return 0;
     } catch (InvalidProtocolBufferException e) {
-      LOG.severe("Encountered invalid protobuf in Term Statistics Base!");
+      LOG.fatal("Encountered invalid protobuf in Term Statistics Base!");
       return 0;
     }
   }
 
-  @Override
-  public long termFrequency(Term term) {
+  int termFrequency(Term term) {
     try {
-      long termId = toId(term);
-      return termStatistics(termId).getTermFrequency();
+      return (int)termStatistics(((IndexTerm) term).id()).getTermFrequency();
     } catch (DBException | NoSuchElementException e) {
       return 0;
     } catch (InvalidProtocolBufferException e) {
-      LOG.severe("Encountered invalid protobuf in Term Statistics Base!");
+      LOG.fatal("Encountered invalid protobuf in Term Statistics Base!");
       return 0;
     }
   }

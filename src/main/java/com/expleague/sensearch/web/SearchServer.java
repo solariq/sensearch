@@ -4,9 +4,12 @@ import com.expleague.sensearch.AppModule;
 import com.expleague.sensearch.Config;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
+import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.EnumSet;
+import java.util.Properties;
 import javax.servlet.DispatcherType;
+import org.apache.log4j.PropertyConfigurator;
 import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.handler.HandlerCollection;
@@ -22,6 +25,10 @@ import org.glassfish.jersey.servlet.ServletContainer;
 public class SearchServer {
 
   public static void main(String[] args) throws Exception {
+    Properties logProperties = new Properties();
+    logProperties.load(Files.newInputStream(Paths.get("log4j.properties")));
+    PropertyConfigurator.configure(logProperties);
+
     Injector injector = Guice.createInjector(new AppModule());
     Builder builder = injector.getInstance(Builder.class);
     Config config = builder.build();

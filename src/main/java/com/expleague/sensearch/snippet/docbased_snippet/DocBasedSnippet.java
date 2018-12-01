@@ -43,9 +43,9 @@ public class DocBasedSnippet implements Snippet {
 
     this.selection =
         query
-            .getTerms()
+            .terms()
             .stream()
-            .flatMap(x -> Passages.containsSelection(content, x.getRaw()).stream())
+            .flatMap(x -> Passages.containsSelection(content, x.text()).stream())
             .sorted(Comparator.comparingInt(Segment::getLeft))
             .collect(Collectors.toList());
   }

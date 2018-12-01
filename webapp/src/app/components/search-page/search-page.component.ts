@@ -1,7 +1,7 @@
 import {Component, OnInit, ViewChild} from '@angular/core';
 import {Observable} from "rxjs";
 import {SearchService} from "../../services/search.service";
-import {debounceTime, fo, skip, switchMap, take} from "rxjs/operators";
+import {debounceTime, skip, switchMap, take} from "rxjs/operators";
 import {FormControl} from "@angular/forms";
 import {SearchResultPageModel} from "../../models/search-result-item.model";
 import {MatAutocompleteTrigger} from "@angular/material";

@@ -1,10 +1,12 @@
 package com.expleague.sensearch.web.suggest;
 
+import com.expleague.sensearch.core.Term;
 import com.expleague.sensearch.index.Index;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class BigramsBasedSuggestor implements Suggestor {
 
@@ -36,11 +38,9 @@ public class BigramsBasedSuggestor implements Suggestor {
       return Collections.emptyList();
     }
 
-    List<String> suggestions = new ArrayList<>();
-    for (String neighbour : index.mostFrequentNeighbours(lastToken)) {
-      suggestions.add(searchString + " " + neighbour);
-    }
-
-    return suggestions;
+    return index
+        .mostFrequentNeighbours(index.term(lastToken))
+        .map(t-> searchString + " " + t.text())
+        .collect(Collectors.toList());
   }
 }

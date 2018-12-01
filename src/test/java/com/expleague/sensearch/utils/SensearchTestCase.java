@@ -6,8 +6,8 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.logging.Logger;
 import org.apache.commons.io.FileUtils;
+import org.apache.log4j.Logger;
 import org.iq80.leveldb.CompressionType;
 import org.iq80.leveldb.Options;
 import org.junit.AfterClass;
@@ -46,7 +46,7 @@ public abstract class SensearchTestCase {
               "Test data root was not found by path: %s",
               testDataRoot.toAbsolutePath().toString()));
     } else {
-      LOG.fine(
+      LOG.debug(
           String.format(
               "Test data root was found by path: %s", testDataRoot.toAbsolutePath().toString()));
     }
@@ -78,8 +78,8 @@ public abstract class SensearchTestCase {
 
   @AfterClass
   public static void cleanupUniverse() {
-    LOG.fine("Cleaning up...");
-    LOG.fine(
+    LOG.debug("Cleaning up...");
+    LOG.debug(
         String.format(
             "Will delete tes output directory %s", testOutputRoot.toAbsolutePath().toString()));
     clearOutputRoot();
