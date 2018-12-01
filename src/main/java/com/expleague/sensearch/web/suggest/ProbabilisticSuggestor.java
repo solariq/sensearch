@@ -16,7 +16,6 @@ import com.expleague.sensearch.index.Index;
 
 public class ProbabilisticSuggestor implements Suggestor {
 
-	private final String splitRegex = "[^а-яёa-z0-9]";
 	private final int maxNgramsOrder = 3;
 
 	private int ndocs;
@@ -95,7 +94,8 @@ public class ProbabilisticSuggestor implements Suggestor {
 
 	private void computeUnigrams(List<String> texts) {
 		for (String t : texts) {
-			Arrays.stream(t.toLowerCase().split(splitRegex))
+			index.parse(t)
+			.map(trm -> trm.text().toString())
 			.filter(s -> !s.isEmpty())
 			.peek(s -> {
 				addToMap(unigramFreq, s, 1);
@@ -108,7 +108,7 @@ public class ProbabilisticSuggestor implements Suggestor {
 	}
 
 	private List<List<String>> getNgrams(String sentence, int order) {
-		List<String> unigrams = Arrays.stream(sentence.toLowerCase().split(splitRegex))
+		List<String> unigrams = index.parse(sentence).map(t -> t.text().toString())
 				.filter(s -> !s.isEmpty())
 				.collect(Collectors.toList());
 
