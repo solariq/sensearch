@@ -10,12 +10,9 @@ import java.util.stream.Collectors;
 
 import javax.xml.stream.XMLStreamException;
 
-import com.expleague.sensearch.core.Lemmer;
+import com.expleague.sensearch.core.Term;
 import com.expleague.sensearch.donkey.crawler.Crawler;
 import com.expleague.sensearch.index.Index;
-import com.expleague.sensearch.query.BaseQuery;
-import com.expleague.sensearch.query.Query;
-import com.expleague.sensearch.query.term.Term;
 
 public class ProbabilisticSuggestor implements Suggestor {
 
@@ -24,9 +21,8 @@ public class ProbabilisticSuggestor implements Suggestor {
 
 	private int ndocs;
 	
-	//private Index index;
+	private Index index;
 	private Crawler crawler;
-	private Lemmer lemmer;
 
 	private Map<List<String>, Integer> multigramFreq;
 	private Map<List<String>, Double> phraseProb;
@@ -70,9 +66,9 @@ public class ProbabilisticSuggestor implements Suggestor {
 		computeFreqNorm();
 	}
 
-	public ProbabilisticSuggestor(Crawler crawl, Lemmer lemmer) {
+	public ProbabilisticSuggestor(Crawler crawl, Index index) {
 		crawler = crawl;
-		this.lemmer = lemmer;
+		this.index = index;
 		
 		init();
 		
@@ -88,7 +84,7 @@ public class ProbabilisticSuggestor implements Suggestor {
 		System.out.println("suggest requested: " + searchString);
 		List<String> res = null;
 		try {
-			res = getSuggestions(new BaseQuery(searchString, lemmer));
+			res = getSuggestions(index.parse(searchString).collect(Collectors.toList()));
 			
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -173,10 +169,9 @@ public class ProbabilisticSuggestor implements Suggestor {
 		return res;
 	}
 
-	public List<String> getSuggestions(Query query) {
+	public List<String> getSuggestions(List<Term> terms) {
 
-		List<Term> terms = query.getTerms();
-		String qt = terms.get(terms.size() - 1).getRaw().toString();
+		String qt = terms.get(terms.size() - 1).text().toString();
 		
 		phraseProb.clear();
 		
@@ -185,7 +180,7 @@ public class ProbabilisticSuggestor implements Suggestor {
 		
 		String qc = terms.subList(0, terms.size() - 1)
 				.stream()
-				.map(t -> t.getRaw())
+				.map(t -> t.text())
 				.collect(Collectors.joining(" "));
 		
 		return phraseProb.entrySet().stream()

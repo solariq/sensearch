@@ -47,7 +47,7 @@ public class Builder {
     
 	lemmer = new Lemmer(myStem);
     suggestor = new BigramsBasedSuggestor(index);
-    //suggestor = new ProbabilisticSuggestor(crawler, lemmer);
+    //suggestor = new ProbabilisticSuggestor(crawler, index);
 
     suggestor = new BigramsBasedSuggestor(index);
 
