@@ -78,10 +78,12 @@ public class CrawlerXML implements Crawler {
 
     @Override
     public CrawlerDocument next() {
+      String name = "";
       try {
         while (zipEntry.isDirectory()) {
           zipEntry = zipInputStream.getNextEntry();
         }
+        name = zipEntry.getName();
         Path filePath = pathTmp.resolve(Paths.get(zipEntry.getName()).getFileName());
 
         Files.copy(zipInputStream, filePath, StandardCopyOption.REPLACE_EXISTING);
@@ -94,6 +96,8 @@ public class CrawlerXML implements Crawler {
         }
 
         return result;
+      } catch (IllegalArgumentException e) {
+        System.err.println("File " + name + " is broken");
       } catch (IOException e) {
         e.printStackTrace();
       } finally {
