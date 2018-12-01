@@ -60,9 +60,8 @@ public class ProbabilisticSuggestor implements Suggestor {
 				.makeStream()
 				.peek(t -> ndocs++)
 				.map(p -> p.title().toString())
-				.limit(100)
 				.collect(Collectors.toList());
-		System.out.println("getSuggestions: titles recieved");
+		System.out.println("getSuggestions: titles recieved " + ndocs);
 		
 		
 		computeUnigrams(titles);
