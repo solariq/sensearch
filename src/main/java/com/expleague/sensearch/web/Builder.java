@@ -38,13 +38,15 @@ public class Builder {
 
   public Config build() throws IOException, XMLStreamException {
     crawler = new CrawlerXML(config);
+    final Path myStem = config.getMyStem();
+    lemmer = new Lemmer(myStem);
     if (config.getBuildIndexFlag()) {
-      new PlainIndexBuilder().buildIndex(crawler, config);
+      new PlainIndexBuilder().buildIndex(crawler, config, lemmer);
     }
     index = new PlainIndex(config);
-    
+
     final Path myStem = config.getMyStem();
-    
+
 	lemmer = new Lemmer(myStem);
     suggestor = new BigramsBasedSuggestor(index);
     //suggestor = new ProbabilisticSuggestor(crawler, index);

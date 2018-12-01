@@ -9,6 +9,7 @@ import java.nio.file.Paths;
 import java.util.EnumSet;
 import java.util.Properties;
 import javax.servlet.DispatcherType;
+import org.apache.log4j.Logger;
 import org.apache.log4j.PropertyConfigurator;
 import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.Server;
@@ -23,6 +24,8 @@ import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.servlet.ServletContainer;
 
 public class SearchServer {
+
+  private static final Logger LOG = Logger.getLogger(SearchServer.class.getName());
 
   public static void main(String[] args) throws Exception {
     Properties logProperties = new Properties();
@@ -65,6 +68,9 @@ public class SearchServer {
     context.addServlet(jerseyServlet, "/*");
 
     server.start();
+
+    LOG.info("Server started!");
+
     server.join();
   }
 }

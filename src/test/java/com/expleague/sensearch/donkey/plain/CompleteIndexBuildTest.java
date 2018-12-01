@@ -2,7 +2,6 @@ package com.expleague.sensearch.donkey.plain;
 
 import com.expleague.sensearch.Config;
 import com.expleague.sensearch.donkey.IndexBuilder;
-import com.expleague.sensearch.donkey.crawler.CrawlerXML;
 import com.expleague.sensearch.utils.SensearchTestCase;
 import com.expleague.sensearch.utils.TestConfig;
 import org.junit.Before;
@@ -25,6 +24,6 @@ public class CompleteIndexBuildTest extends SensearchTestCase {
   @Test
   public void completeBuildTest() throws Exception {
     IndexBuilder indexBuilder = new PlainIndexBuilder();
-    indexBuilder.buildIndex(new CrawlerXML(config), config);
+//    indexBuilder.buildIndex(new CrawlerXML(config), config, lemmer);
   }
 }

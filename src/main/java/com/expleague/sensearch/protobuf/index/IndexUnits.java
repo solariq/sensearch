@@ -5,11 +5,9 @@ package com.expleague.sensearch.protobuf.index;
 
 public final class IndexUnits {
   private IndexUnits() {}
-
   public static void registerAllExtensions(
       com.google.protobuf.ExtensionRegistry registry) {
   }
-
   public interface IndexMetaOrBuilder extends
       // @@protoc_insertion_point(interface_extends:index.IndexMeta)
       com.google.protobuf.MessageOrBuilder {
@@ -18,7 +16,6 @@ public final class IndexUnits {
      * <code>optional int32 pages_count = 1;</code>
      */
     boolean hasPagesCount();
-
     /**
      * <code>optional int32 pages_count = 1;</code>
      */
@@ -28,7 +25,6 @@ public final class IndexUnits {
      * <code>optional double average_page_size = 2;</code>
      */
     boolean hasAveragePageSize();
-
     /**
      * <code>optional double average_page_size = 2;</code>
      */
@@ -38,44 +34,29 @@ public final class IndexUnits {
      * <code>optional int32 vocabulary_size = 3;</code>
      */
     boolean hasVocabularySize();
-
     /**
      * <code>optional int32 vocabulary_size = 3;</code>
      */
     int getVocabularySize();
 
     /**
-     * <code>optional bytes titles_bloom_filter = 4;</code>
-     */
-    boolean hasTitlesBloomFilter();
-
-    /**
-     * <code>optional bytes titles_bloom_filter = 4;</code>
-     */
-    com.google.protobuf.ByteString getTitlesBloomFilter();
-
-    /**
      * <code>repeated .index.IndexMeta.IdMapping id_mappings = 5;</code>
      */
     java.util.List<com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta.IdMapping>
     getIdMappingsList();
-
     /**
      * <code>repeated .index.IndexMeta.IdMapping id_mappings = 5;</code>
      */
     com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta.IdMapping getIdMappings(int index);
-
     /**
      * <code>repeated .index.IndexMeta.IdMapping id_mappings = 5;</code>
      */
     int getIdMappingsCount();
-
     /**
      * <code>repeated .index.IndexMeta.IdMapping id_mappings = 5;</code>
      */
     java.util.List<? extends com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta.IdMappingOrBuilder>
     getIdMappingsOrBuilderList();
-
     /**
      * <code>repeated .index.IndexMeta.IdMapping id_mappings = 5;</code>
      */
@@ -83,30 +64,55 @@ public final class IndexUnits {
         int index);
 
     /**
-     * <code>repeated .index.IndexMeta.UriPageMapping uri_page_mappings = 6;</code>
+     * <code>repeated .index.IndexMeta.LemmaIdMapping lemma_id_mappings = 6;</code>
      */
-    java.util.List<com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta.UriPageMapping>
-    getUriPageMappingsList();
+    java.util.List<com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta.LemmaIdMapping>
+    getLemmaIdMappingsList();
 
     /**
-     * <code>repeated .index.IndexMeta.UriPageMapping uri_page_mappings = 6;</code>
+     * <code>repeated .index.IndexMeta.LemmaIdMapping lemma_id_mappings = 6;</code>
      */
-    com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta.UriPageMapping getUriPageMappings(
+    com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta.LemmaIdMapping getLemmaIdMappings(
         int index);
 
     /**
-     * <code>repeated .index.IndexMeta.UriPageMapping uri_page_mappings = 6;</code>
+     * <code>repeated .index.IndexMeta.LemmaIdMapping lemma_id_mappings = 6;</code>
      */
-    int getUriPageMappingsCount();
+    int getLemmaIdMappingsCount();
 
     /**
-     * <code>repeated .index.IndexMeta.UriPageMapping uri_page_mappings = 6;</code>
+     * <code>repeated .index.IndexMeta.LemmaIdMapping lemma_id_mappings = 6;</code>
+     */
+    java.util.List<? extends com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta.LemmaIdMappingOrBuilder>
+    getLemmaIdMappingsOrBuilderList();
+
+    /**
+     * <code>repeated .index.IndexMeta.LemmaIdMapping lemma_id_mappings = 6;</code>
+     */
+    com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta.LemmaIdMappingOrBuilder getLemmaIdMappingsOrBuilder(
+        int index);
+
+    /**
+     * <code>repeated .index.IndexMeta.UriPageMapping uri_page_mappings = 7;</code>
+     */
+    java.util.List<com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta.UriPageMapping>
+    getUriPageMappingsList();
+    /**
+     * <code>repeated .index.IndexMeta.UriPageMapping uri_page_mappings = 7;</code>
+     */
+    com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta.UriPageMapping getUriPageMappings(
+        int index);
+    /**
+     * <code>repeated .index.IndexMeta.UriPageMapping uri_page_mappings = 7;</code>
+     */
+    int getUriPageMappingsCount();
+    /**
+     * <code>repeated .index.IndexMeta.UriPageMapping uri_page_mappings = 7;</code>
      */
     java.util.List<? extends com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta.UriPageMappingOrBuilder>
     getUriPageMappingsOrBuilderList();
-
     /**
-     * <code>repeated .index.IndexMeta.UriPageMapping uri_page_mappings = 6;</code>
+     * <code>repeated .index.IndexMeta.UriPageMapping uri_page_mappings = 7;</code>
      */
     com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta.UriPageMappingOrBuilder getUriPageMappingsOrBuilder(
         int index);
@@ -181,15 +187,10 @@ public final class IndexUnits {
               vocabularySize_ = input.readInt32();
               break;
             }
-            case 34: {
-              bitField0_ |= 0x00000008;
-              titlesBloomFilter_ = input.readBytes();
-              break;
-            }
             case 42: {
-              if (!((mutable_bitField0_ & 0x00000010) == 0x00000010)) {
+              if (!((mutable_bitField0_ & 0x00000008) == 0x00000008)) {
                 idMappings_ = new java.util.ArrayList<com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta.IdMapping>();
-                mutable_bitField0_ |= 0x00000010;
+                mutable_bitField0_ |= 0x00000008;
               }
               idMappings_.add(input.readMessage(
                   com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta.IdMapping.PARSER,
@@ -197,6 +198,16 @@ public final class IndexUnits {
               break;
             }
             case 50: {
+              if (!((mutable_bitField0_ & 0x00000010) == 0x00000010)) {
+                lemmaIdMappings_ = new java.util.ArrayList<com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta.LemmaIdMapping>();
+                mutable_bitField0_ |= 0x00000010;
+              }
+              lemmaIdMappings_.add(input.readMessage(
+                  com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta.LemmaIdMapping.PARSER,
+                  extensionRegistry));
+              break;
+            }
+            case 58: {
               if (!((mutable_bitField0_ & 0x00000020) == 0x00000020)) {
                 uriPageMappings_ = new java.util.ArrayList<com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta.UriPageMapping>();
                 mutable_bitField0_ |= 0x00000020;
@@ -214,8 +225,11 @@ public final class IndexUnits {
         throw new com.google.protobuf.InvalidProtocolBufferException(
             e.getMessage()).setUnfinishedMessage(this);
       } finally {
-        if (((mutable_bitField0_ & 0x00000010) == 0x00000010)) {
+        if (((mutable_bitField0_ & 0x00000008) == 0x00000008)) {
           idMappings_ = java.util.Collections.unmodifiableList(idMappings_);
+        }
+        if (((mutable_bitField0_ & 0x00000010) == 0x00000010)) {
+          lemmaIdMappings_ = java.util.Collections.unmodifiableList(lemmaIdMappings_);
         }
         if (((mutable_bitField0_ & 0x00000020) == 0x00000020)) {
           uriPageMappings_ = java.util.Collections.unmodifiableList(uriPageMappings_);
@@ -224,7 +238,6 @@ public final class IndexUnits {
         makeExtensionsImmutable();
       }
     }
-
     public static final com.google.protobuf.Descriptors.Descriptor
     getDescriptor() {
       return com.expleague.sensearch.protobuf.index.IndexUnits.internal_static_index_IndexMeta_descriptor;
@@ -261,7 +274,6 @@ public final class IndexUnits {
        * <code>optional string word = 1;</code>
        */
       boolean hasWord();
-
       /**
        * <code>optional string word = 1;</code>
        */
@@ -359,7 +371,6 @@ public final class IndexUnits {
           makeExtensionsImmutable();
         }
       }
-
       public static final com.google.protobuf.Descriptors.Descriptor
       getDescriptor() {
         return com.expleague.sensearch.protobuf.index.IndexUnits.internal_static_index_IndexMeta_IdMapping_descriptor;
@@ -391,14 +402,12 @@ public final class IndexUnits {
       private int bitField0_;
       public static final int WORD_FIELD_NUMBER = 1;
       private java.lang.Object word_;
-
       /**
        * <code>optional string word = 1;</code>
        */
       public boolean hasWord() {
         return ((bitField0_ & 0x00000001) == 0x00000001);
       }
-
       /**
        * <code>optional string word = 1;</code>
        */
@@ -407,7 +416,7 @@ public final class IndexUnits {
         if (ref instanceof java.lang.String) {
           return (java.lang.String) ref;
         } else {
-          com.google.protobuf.ByteString bs =
+          com.google.protobuf.ByteString bs = 
               (com.google.protobuf.ByteString) ref;
           java.lang.String s = bs.toStringUtf8();
           if (bs.isValidUtf8()) {
@@ -416,7 +425,6 @@ public final class IndexUnits {
           return s;
         }
       }
-
       /**
        * <code>optional string word = 1;</code>
        */
@@ -424,7 +432,7 @@ public final class IndexUnits {
       getWordBytes() {
         java.lang.Object ref = word_;
         if (ref instanceof java.lang.String) {
-          com.google.protobuf.ByteString b =
+          com.google.protobuf.ByteString b = 
               com.google.protobuf.ByteString.copyFromUtf8(
                   (java.lang.String) ref);
           word_ = b;
@@ -436,14 +444,12 @@ public final class IndexUnits {
 
       public static final int ID_FIELD_NUMBER = 2;
       private long id_;
-
       /**
        * <code>optional int64 id = 2;</code>
        */
       public boolean hasId() {
         return ((bitField0_ & 0x00000002) == 0x00000002);
       }
-
       /**
        * <code>optional int64 id = 2;</code>
        */
@@ -548,7 +554,6 @@ public final class IndexUnits {
           throws java.io.IOException {
         return PARSER.parseDelimitedFrom(input);
       }
-
       public static com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta.IdMapping parseDelimitedFrom(
           java.io.InputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
@@ -597,7 +602,6 @@ public final class IndexUnits {
           com.google.protobuf.GeneratedMessage.Builder<Builder> implements
           // @@protoc_insertion_point(builder_implements:index.IndexMeta.IdMapping)
           com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta.IdMappingOrBuilder {
-
         public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
           return com.expleague.sensearch.protobuf.index.IndexUnits.internal_static_index_IndexMeta_IdMapping_descriptor;
@@ -731,14 +735,12 @@ public final class IndexUnits {
         private int bitField0_;
 
         private java.lang.Object word_ = "";
-
         /**
          * <code>optional string word = 1;</code>
          */
         public boolean hasWord() {
           return ((bitField0_ & 0x00000001) == 0x00000001);
         }
-
         /**
          * <code>optional string word = 1;</code>
          */
@@ -756,7 +758,6 @@ public final class IndexUnits {
             return (java.lang.String) ref;
           }
         }
-
         /**
          * <code>optional string word = 1;</code>
          */
@@ -764,7 +765,7 @@ public final class IndexUnits {
         getWordBytes() {
           java.lang.Object ref = word_;
           if (ref instanceof String) {
-            com.google.protobuf.ByteString b =
+            com.google.protobuf.ByteString b = 
                 com.google.protobuf.ByteString.copyFromUtf8(
                     (java.lang.String) ref);
             word_ = b;
@@ -773,7 +774,6 @@ public final class IndexUnits {
             return (com.google.protobuf.ByteString) ref;
           }
         }
-
         /**
          * <code>optional string word = 1;</code>
          */
@@ -787,7 +787,6 @@ public final class IndexUnits {
           onChanged();
           return this;
         }
-
         /**
          * <code>optional string word = 1;</code>
          */
@@ -797,7 +796,6 @@ public final class IndexUnits {
           onChanged();
           return this;
         }
-
         /**
          * <code>optional string word = 1;</code>
          */
@@ -813,21 +811,18 @@ public final class IndexUnits {
         }
 
         private long id_;
-
         /**
          * <code>optional int64 id = 2;</code>
          */
         public boolean hasId() {
           return ((bitField0_ & 0x00000002) == 0x00000002);
         }
-
         /**
          * <code>optional int64 id = 2;</code>
          */
         public long getId() {
           return id_;
         }
-
         /**
          * <code>optional int64 id = 2;</code>
          */
@@ -837,7 +832,6 @@ public final class IndexUnits {
           onChanged();
           return this;
         }
-
         /**
          * <code>optional int64 id = 2;</code>
          */
@@ -859,62 +853,56 @@ public final class IndexUnits {
       // @@protoc_insertion_point(class_scope:index.IndexMeta.IdMapping)
     }
 
-    public interface UriPageMappingOrBuilder extends
-        // @@protoc_insertion_point(interface_extends:index.IndexMeta.UriPageMapping)
+    public interface LemmaIdMappingOrBuilder extends
+        // @@protoc_insertion_point(interface_extends:index.IndexMeta.LemmaIdMapping)
         com.google.protobuf.MessageOrBuilder {
 
       /**
-       * <code>optional string uri = 1;</code>
+       * <code>optional int64 word_id = 1;</code>
        */
-      boolean hasUri();
+      boolean hasWordId();
 
       /**
-       * <code>optional string uri = 1;</code>
+       * <code>optional int64 word_id = 1;</code>
        */
-      java.lang.String getUri();
+      long getWordId();
 
       /**
-       * <code>optional string uri = 1;</code>
+       * <code>optional int64 lemma_id = 2;</code>
        */
-      com.google.protobuf.ByteString
-      getUriBytes();
+      boolean hasLemmaId();
 
       /**
-       * <code>optional int64 page_id = 2;</code>
+       * <code>optional int64 lemma_id = 2;</code>
        */
-      boolean hasPageId();
-
-      /**
-       * <code>optional int64 page_id = 2;</code>
-       */
-      long getPageId();
+      long getLemmaId();
     }
 
     /**
-     * Protobuf type {@code index.IndexMeta.UriPageMapping}
+     * Protobuf type {@code index.IndexMeta.LemmaIdMapping}
      */
-    public static final class UriPageMapping extends
+    public static final class LemmaIdMapping extends
         com.google.protobuf.GeneratedMessage implements
-        // @@protoc_insertion_point(message_implements:index.IndexMeta.UriPageMapping)
-        UriPageMappingOrBuilder {
+        // @@protoc_insertion_point(message_implements:index.IndexMeta.LemmaIdMapping)
+        LemmaIdMappingOrBuilder {
 
-      // Use UriPageMapping.newBuilder() to construct.
-      private UriPageMapping(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
+      // Use LemmaIdMapping.newBuilder() to construct.
+      private LemmaIdMapping(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
         super(builder);
         this.unknownFields = builder.getUnknownFields();
       }
 
-      private UriPageMapping(boolean noInit) {
+      private LemmaIdMapping(boolean noInit) {
         this.unknownFields = com.google.protobuf.UnknownFieldSet.getDefaultInstance();
       }
 
-      private static final UriPageMapping defaultInstance;
+      private static final LemmaIdMapping defaultInstance;
 
-      public static UriPageMapping getDefaultInstance() {
+      public static LemmaIdMapping getDefaultInstance() {
         return defaultInstance;
       }
 
-      public UriPageMapping getDefaultInstanceForType() {
+      public LemmaIdMapping getDefaultInstanceForType() {
         return defaultInstance;
       }
 
@@ -926,6 +914,549 @@ public final class IndexUnits {
         return this.unknownFields;
       }
 
+      private LemmaIdMapping(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        initFields();
+        int mutable_bitField0_ = 0;
+        com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+            com.google.protobuf.UnknownFieldSet.newBuilder();
+        try {
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              default: {
+                if (!parseUnknownField(input, unknownFields,
+                    extensionRegistry, tag)) {
+                  done = true;
+                }
+                break;
+              }
+              case 8: {
+                bitField0_ |= 0x00000001;
+                wordId_ = input.readInt64();
+                break;
+              }
+              case 16: {
+                bitField0_ |= 0x00000002;
+                lemmaId_ = input.readInt64();
+                break;
+              }
+            }
+          }
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(this);
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(
+              e.getMessage()).setUnfinishedMessage(this);
+        } finally {
+          this.unknownFields = unknownFields.build();
+          makeExtensionsImmutable();
+        }
+      }
+
+      public static final com.google.protobuf.Descriptors.Descriptor
+      getDescriptor() {
+        return com.expleague.sensearch.protobuf.index.IndexUnits.internal_static_index_IndexMeta_LemmaIdMapping_descriptor;
+      }
+
+      protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+      internalGetFieldAccessorTable() {
+        return com.expleague.sensearch.protobuf.index.IndexUnits.internal_static_index_IndexMeta_LemmaIdMapping_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta.LemmaIdMapping.class,
+                com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta.LemmaIdMapping.Builder.class);
+      }
+
+      public static com.google.protobuf.Parser<LemmaIdMapping> PARSER =
+          new com.google.protobuf.AbstractParser<LemmaIdMapping>() {
+            public LemmaIdMapping parsePartialFrom(
+                com.google.protobuf.CodedInputStream input,
+                com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+                throws com.google.protobuf.InvalidProtocolBufferException {
+              return new LemmaIdMapping(input, extensionRegistry);
+            }
+          };
+
+      @java.lang.Override
+      public com.google.protobuf.Parser<LemmaIdMapping> getParserForType() {
+        return PARSER;
+      }
+
+      private int bitField0_;
+      public static final int WORD_ID_FIELD_NUMBER = 1;
+      private long wordId_;
+
+      /**
+       * <code>optional int64 word_id = 1;</code>
+       */
+      public boolean hasWordId() {
+        return ((bitField0_ & 0x00000001) == 0x00000001);
+      }
+
+      /**
+       * <code>optional int64 word_id = 1;</code>
+       */
+      public long getWordId() {
+        return wordId_;
+      }
+
+      public static final int LEMMA_ID_FIELD_NUMBER = 2;
+      private long lemmaId_;
+
+      /**
+       * <code>optional int64 lemma_id = 2;</code>
+       */
+      public boolean hasLemmaId() {
+        return ((bitField0_ & 0x00000002) == 0x00000002);
+      }
+
+      /**
+       * <code>optional int64 lemma_id = 2;</code>
+       */
+      public long getLemmaId() {
+        return lemmaId_;
+      }
+
+      private void initFields() {
+        wordId_ = 0L;
+        lemmaId_ = 0L;
+      }
+
+      private byte memoizedIsInitialized = -1;
+
+      public final boolean isInitialized() {
+        byte isInitialized = memoizedIsInitialized;
+        if (isInitialized == 1) {
+          return true;
+        }
+        if (isInitialized == 0) {
+          return false;
+        }
+
+        memoizedIsInitialized = 1;
+        return true;
+      }
+
+      public void writeTo(com.google.protobuf.CodedOutputStream output)
+          throws java.io.IOException {
+        getSerializedSize();
+        if (((bitField0_ & 0x00000001) == 0x00000001)) {
+          output.writeInt64(1, wordId_);
+        }
+        if (((bitField0_ & 0x00000002) == 0x00000002)) {
+          output.writeInt64(2, lemmaId_);
+        }
+        getUnknownFields().writeTo(output);
+      }
+
+      private int memoizedSerializedSize = -1;
+
+      public int getSerializedSize() {
+        int size = memoizedSerializedSize;
+        if (size != -1) {
+          return size;
+        }
+
+        size = 0;
+        if (((bitField0_ & 0x00000001) == 0x00000001)) {
+          size += com.google.protobuf.CodedOutputStream
+              .computeInt64Size(1, wordId_);
+        }
+        if (((bitField0_ & 0x00000002) == 0x00000002)) {
+          size += com.google.protobuf.CodedOutputStream
+              .computeInt64Size(2, lemmaId_);
+        }
+        size += getUnknownFields().getSerializedSize();
+        memoizedSerializedSize = size;
+        return size;
+      }
+
+      private static final long serialVersionUID = 0L;
+
+      @java.lang.Override
+      protected java.lang.Object writeReplace()
+          throws java.io.ObjectStreamException {
+        return super.writeReplace();
+      }
+
+      public static com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta.LemmaIdMapping parseFrom(
+          com.google.protobuf.ByteString data)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return PARSER.parseFrom(data);
+      }
+
+      public static com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta.LemmaIdMapping parseFrom(
+          com.google.protobuf.ByteString data,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return PARSER.parseFrom(data, extensionRegistry);
+      }
+
+      public static com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta.LemmaIdMapping parseFrom(
+          byte[] data)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return PARSER.parseFrom(data);
+      }
+
+      public static com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta.LemmaIdMapping parseFrom(
+          byte[] data,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return PARSER.parseFrom(data, extensionRegistry);
+      }
+
+      public static com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta.LemmaIdMapping parseFrom(
+          java.io.InputStream input)
+          throws java.io.IOException {
+        return PARSER.parseFrom(input);
+      }
+
+      public static com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta.LemmaIdMapping parseFrom(
+          java.io.InputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        return PARSER.parseFrom(input, extensionRegistry);
+      }
+
+      public static com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta.LemmaIdMapping parseDelimitedFrom(
+          java.io.InputStream input)
+          throws java.io.IOException {
+        return PARSER.parseDelimitedFrom(input);
+      }
+
+      public static com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta.LemmaIdMapping parseDelimitedFrom(
+          java.io.InputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        return PARSER.parseDelimitedFrom(input, extensionRegistry);
+      }
+
+      public static com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta.LemmaIdMapping parseFrom(
+          com.google.protobuf.CodedInputStream input)
+          throws java.io.IOException {
+        return PARSER.parseFrom(input);
+      }
+
+      public static com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta.LemmaIdMapping parseFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        return PARSER.parseFrom(input, extensionRegistry);
+      }
+
+      public static Builder newBuilder() {
+        return Builder.create();
+      }
+
+      public Builder newBuilderForType() {
+        return newBuilder();
+      }
+
+      public static Builder newBuilder(
+          com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta.LemmaIdMapping prototype) {
+        return newBuilder().mergeFrom(prototype);
+      }
+
+      public Builder toBuilder() {
+        return newBuilder(this);
+      }
+
+      @java.lang.Override
+      protected Builder newBuilderForType(
+          com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+        Builder builder = new Builder(parent);
+        return builder;
+      }
+
+      /**
+       * Protobuf type {@code index.IndexMeta.LemmaIdMapping}
+       */
+      public static final class Builder extends
+          com.google.protobuf.GeneratedMessage.Builder<Builder> implements
+          // @@protoc_insertion_point(builder_implements:index.IndexMeta.LemmaIdMapping)
+          com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta.LemmaIdMappingOrBuilder {
+
+        public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+          return com.expleague.sensearch.protobuf.index.IndexUnits.internal_static_index_IndexMeta_LemmaIdMapping_descriptor;
+        }
+
+        protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+          return com.expleague.sensearch.protobuf.index.IndexUnits.internal_static_index_IndexMeta_LemmaIdMapping_fieldAccessorTable
+              .ensureFieldAccessorsInitialized(
+                  com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta.LemmaIdMapping.class,
+                  com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta.LemmaIdMapping.Builder.class);
+        }
+
+        // Construct using com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta.LemmaIdMapping.newBuilder()
+        private Builder() {
+          maybeForceBuilderInitialization();
+        }
+
+        private Builder(
+            com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+          super(parent);
+          maybeForceBuilderInitialization();
+        }
+
+        private void maybeForceBuilderInitialization() {
+          if (com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders) {
+          }
+        }
+
+        private static Builder create() {
+          return new Builder();
+        }
+
+        public Builder clear() {
+          super.clear();
+          wordId_ = 0L;
+          bitField0_ = (bitField0_ & ~0x00000001);
+          lemmaId_ = 0L;
+          bitField0_ = (bitField0_ & ~0x00000002);
+          return this;
+        }
+
+        public Builder clone() {
+          return create().mergeFrom(buildPartial());
+        }
+
+        public com.google.protobuf.Descriptors.Descriptor
+        getDescriptorForType() {
+          return com.expleague.sensearch.protobuf.index.IndexUnits.internal_static_index_IndexMeta_LemmaIdMapping_descriptor;
+        }
+
+        public com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta.LemmaIdMapping getDefaultInstanceForType() {
+          return com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta.LemmaIdMapping
+              .getDefaultInstance();
+        }
+
+        public com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta.LemmaIdMapping build() {
+          com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta.LemmaIdMapping result = buildPartial();
+          if (!result.isInitialized()) {
+            throw newUninitializedMessageException(result);
+          }
+          return result;
+        }
+
+        public com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta.LemmaIdMapping buildPartial() {
+          com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta.LemmaIdMapping result = new com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta.LemmaIdMapping(
+              this);
+          int from_bitField0_ = bitField0_;
+          int to_bitField0_ = 0;
+          if (((from_bitField0_ & 0x00000001) == 0x00000001)) {
+            to_bitField0_ |= 0x00000001;
+          }
+          result.wordId_ = wordId_;
+          if (((from_bitField0_ & 0x00000002) == 0x00000002)) {
+            to_bitField0_ |= 0x00000002;
+          }
+          result.lemmaId_ = lemmaId_;
+          result.bitField0_ = to_bitField0_;
+          onBuilt();
+          return result;
+        }
+
+        public Builder mergeFrom(com.google.protobuf.Message other) {
+          if (other instanceof com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta.LemmaIdMapping) {
+            return mergeFrom(
+                (com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta.LemmaIdMapping) other);
+          } else {
+            super.mergeFrom(other);
+            return this;
+          }
+        }
+
+        public Builder mergeFrom(
+            com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta.LemmaIdMapping other) {
+          if (other == com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta.LemmaIdMapping
+              .getDefaultInstance()) {
+            return this;
+          }
+          if (other.hasWordId()) {
+            setWordId(other.getWordId());
+          }
+          if (other.hasLemmaId()) {
+            setLemmaId(other.getLemmaId());
+          }
+          this.mergeUnknownFields(other.getUnknownFields());
+          return this;
+        }
+
+        public final boolean isInitialized() {
+          return true;
+        }
+
+        public Builder mergeFrom(
+            com.google.protobuf.CodedInputStream input,
+            com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+            throws java.io.IOException {
+          com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta.LemmaIdMapping parsedMessage = null;
+          try {
+            parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+            parsedMessage = (com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta.LemmaIdMapping) e
+                .getUnfinishedMessage();
+            throw e;
+          } finally {
+            if (parsedMessage != null) {
+              mergeFrom(parsedMessage);
+            }
+          }
+          return this;
+        }
+
+        private int bitField0_;
+
+        private long wordId_;
+
+        /**
+         * <code>optional int64 word_id = 1;</code>
+         */
+        public boolean hasWordId() {
+          return ((bitField0_ & 0x00000001) == 0x00000001);
+        }
+
+        /**
+         * <code>optional int64 word_id = 1;</code>
+         */
+        public long getWordId() {
+          return wordId_;
+        }
+
+        /**
+         * <code>optional int64 word_id = 1;</code>
+         */
+        public Builder setWordId(long value) {
+          bitField0_ |= 0x00000001;
+          wordId_ = value;
+          onChanged();
+          return this;
+        }
+
+        /**
+         * <code>optional int64 word_id = 1;</code>
+         */
+        public Builder clearWordId() {
+          bitField0_ = (bitField0_ & ~0x00000001);
+          wordId_ = 0L;
+          onChanged();
+          return this;
+        }
+
+        private long lemmaId_;
+
+        /**
+         * <code>optional int64 lemma_id = 2;</code>
+         */
+        public boolean hasLemmaId() {
+          return ((bitField0_ & 0x00000002) == 0x00000002);
+        }
+
+        /**
+         * <code>optional int64 lemma_id = 2;</code>
+         */
+        public long getLemmaId() {
+          return lemmaId_;
+        }
+
+        /**
+         * <code>optional int64 lemma_id = 2;</code>
+         */
+        public Builder setLemmaId(long value) {
+          bitField0_ |= 0x00000002;
+          lemmaId_ = value;
+          onChanged();
+          return this;
+        }
+
+        /**
+         * <code>optional int64 lemma_id = 2;</code>
+         */
+        public Builder clearLemmaId() {
+          bitField0_ = (bitField0_ & ~0x00000002);
+          lemmaId_ = 0L;
+          onChanged();
+          return this;
+        }
+
+        // @@protoc_insertion_point(builder_scope:index.IndexMeta.LemmaIdMapping)
+      }
+
+      static {
+        defaultInstance = new LemmaIdMapping(true);
+        defaultInstance.initFields();
+      }
+
+      // @@protoc_insertion_point(class_scope:index.IndexMeta.LemmaIdMapping)
+    }
+
+    public interface UriPageMappingOrBuilder extends
+        // @@protoc_insertion_point(interface_extends:index.IndexMeta.UriPageMapping)
+        com.google.protobuf.MessageOrBuilder {
+
+      /**
+       * <code>optional string uri = 1;</code>
+       */
+      boolean hasUri();
+      /**
+       * <code>optional string uri = 1;</code>
+       */
+      java.lang.String getUri();
+      /**
+       * <code>optional string uri = 1;</code>
+       */
+      com.google.protobuf.ByteString
+      getUriBytes();
+
+      /**
+       * <code>optional int64 page_id = 2;</code>
+       */
+      boolean hasPageId();
+      /**
+       * <code>optional int64 page_id = 2;</code>
+       */
+      long getPageId();
+    }
+    /**
+     * Protobuf type {@code index.IndexMeta.UriPageMapping}
+     */
+    public static final class UriPageMapping extends
+        com.google.protobuf.GeneratedMessage implements
+        // @@protoc_insertion_point(message_implements:index.IndexMeta.UriPageMapping)
+        UriPageMappingOrBuilder {
+      // Use UriPageMapping.newBuilder() to construct.
+      private UriPageMapping(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
+        super(builder);
+        this.unknownFields = builder.getUnknownFields();
+      }
+
+      private UriPageMapping(boolean noInit) {
+        this.unknownFields = com.google.protobuf.UnknownFieldSet.getDefaultInstance();
+      }
+
+      private static final UriPageMapping defaultInstance;
+      public static UriPageMapping getDefaultInstance() {
+        return defaultInstance;
+      }
+
+      public UriPageMapping getDefaultInstanceForType() {
+        return defaultInstance;
+      }
+
+      private final com.google.protobuf.UnknownFieldSet unknownFields;
+      @java.lang.Override
+      public final com.google.protobuf.UnknownFieldSet
+      getUnknownFields() {
+        return this.unknownFields;
+      }
       private UriPageMapping(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
@@ -972,7 +1503,6 @@ public final class IndexUnits {
           makeExtensionsImmutable();
         }
       }
-
       public static final com.google.protobuf.Descriptors.Descriptor
       getDescriptor() {
         return com.expleague.sensearch.protobuf.index.IndexUnits.internal_static_index_IndexMeta_UriPageMapping_descriptor;
@@ -1004,14 +1534,12 @@ public final class IndexUnits {
       private int bitField0_;
       public static final int URI_FIELD_NUMBER = 1;
       private java.lang.Object uri_;
-
       /**
        * <code>optional string uri = 1;</code>
        */
       public boolean hasUri() {
         return ((bitField0_ & 0x00000001) == 0x00000001);
       }
-
       /**
        * <code>optional string uri = 1;</code>
        */
@@ -1020,7 +1548,7 @@ public final class IndexUnits {
         if (ref instanceof java.lang.String) {
           return (java.lang.String) ref;
         } else {
-          com.google.protobuf.ByteString bs =
+          com.google.protobuf.ByteString bs = 
               (com.google.protobuf.ByteString) ref;
           java.lang.String s = bs.toStringUtf8();
           if (bs.isValidUtf8()) {
@@ -1029,7 +1557,6 @@ public final class IndexUnits {
           return s;
         }
       }
-
       /**
        * <code>optional string uri = 1;</code>
        */
@@ -1037,7 +1564,7 @@ public final class IndexUnits {
       getUriBytes() {
         java.lang.Object ref = uri_;
         if (ref instanceof java.lang.String) {
-          com.google.protobuf.ByteString b =
+          com.google.protobuf.ByteString b = 
               com.google.protobuf.ByteString.copyFromUtf8(
                   (java.lang.String) ref);
           uri_ = b;
@@ -1049,14 +1576,12 @@ public final class IndexUnits {
 
       public static final int PAGE_ID_FIELD_NUMBER = 2;
       private long pageId_;
-
       /**
        * <code>optional int64 page_id = 2;</code>
        */
       public boolean hasPageId() {
         return ((bitField0_ & 0x00000002) == 0x00000002);
       }
-
       /**
        * <code>optional int64 page_id = 2;</code>
        */
@@ -1068,9 +1593,7 @@ public final class IndexUnits {
         uri_ = "";
         pageId_ = 0L;
       }
-
       private byte memoizedIsInitialized = -1;
-
       public final boolean isInitialized() {
         byte isInitialized = memoizedIsInitialized;
         if (isInitialized == 1) {
@@ -1097,7 +1620,6 @@ public final class IndexUnits {
       }
 
       private int memoizedSerializedSize = -1;
-
       public int getSerializedSize() {
         int size = memoizedSerializedSize;
         if (size != -1) {
@@ -1119,7 +1641,6 @@ public final class IndexUnits {
       }
 
       private static final long serialVersionUID = 0L;
-
       @java.lang.Override
       protected java.lang.Object writeReplace()
           throws java.io.ObjectStreamException {
@@ -1131,7 +1652,6 @@ public final class IndexUnits {
           throws com.google.protobuf.InvalidProtocolBufferException {
         return PARSER.parseFrom(data);
       }
-
       public static com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta.UriPageMapping parseFrom(
           com.google.protobuf.ByteString data,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
@@ -1144,7 +1664,6 @@ public final class IndexUnits {
           throws com.google.protobuf.InvalidProtocolBufferException {
         return PARSER.parseFrom(data);
       }
-
       public static com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta.UriPageMapping parseFrom(
           byte[] data,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
@@ -1157,7 +1676,6 @@ public final class IndexUnits {
           throws java.io.IOException {
         return PARSER.parseFrom(input);
       }
-
       public static com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta.UriPageMapping parseFrom(
           java.io.InputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
@@ -1170,20 +1688,17 @@ public final class IndexUnits {
           throws java.io.IOException {
         return PARSER.parseDelimitedFrom(input);
       }
-
       public static com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta.UriPageMapping parseDelimitedFrom(
           java.io.InputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
         return PARSER.parseDelimitedFrom(input, extensionRegistry);
       }
-
       public static com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta.UriPageMapping parseFrom(
           com.google.protobuf.CodedInputStream input)
           throws java.io.IOException {
         return PARSER.parseFrom(input);
       }
-
       public static com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta.UriPageMapping parseFrom(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
@@ -1214,7 +1729,6 @@ public final class IndexUnits {
         Builder builder = new Builder(parent);
         return builder;
       }
-
       /**
        * Protobuf type {@code index.IndexMeta.UriPageMapping}
        */
@@ -1222,7 +1736,6 @@ public final class IndexUnits {
           com.google.protobuf.GeneratedMessage.Builder<Builder> implements
           // @@protoc_insertion_point(builder_implements:index.IndexMeta.UriPageMapping)
           com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta.UriPageMappingOrBuilder {
-
         public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
           return com.expleague.sensearch.protobuf.index.IndexUnits.internal_static_index_IndexMeta_UriPageMapping_descriptor;
@@ -1246,12 +1759,10 @@ public final class IndexUnits {
           super(parent);
           maybeForceBuilderInitialization();
         }
-
         private void maybeForceBuilderInitialization() {
           if (com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders) {
           }
         }
-
         private static Builder create() {
           return new Builder();
         }
@@ -1355,18 +1866,15 @@ public final class IndexUnits {
           }
           return this;
         }
-
         private int bitField0_;
 
         private java.lang.Object uri_ = "";
-
         /**
          * <code>optional string uri = 1;</code>
          */
         public boolean hasUri() {
           return ((bitField0_ & 0x00000001) == 0x00000001);
         }
-
         /**
          * <code>optional string uri = 1;</code>
          */
@@ -1384,7 +1892,6 @@ public final class IndexUnits {
             return (java.lang.String) ref;
           }
         }
-
         /**
          * <code>optional string uri = 1;</code>
          */
@@ -1392,7 +1899,7 @@ public final class IndexUnits {
         getUriBytes() {
           java.lang.Object ref = uri_;
           if (ref instanceof String) {
-            com.google.protobuf.ByteString b =
+            com.google.protobuf.ByteString b = 
                 com.google.protobuf.ByteString.copyFromUtf8(
                     (java.lang.String) ref);
             uri_ = b;
@@ -1401,7 +1908,6 @@ public final class IndexUnits {
             return (com.google.protobuf.ByteString) ref;
           }
         }
-
         /**
          * <code>optional string uri = 1;</code>
          */
@@ -1415,7 +1921,6 @@ public final class IndexUnits {
           onChanged();
           return this;
         }
-
         /**
          * <code>optional string uri = 1;</code>
          */
@@ -1425,7 +1930,6 @@ public final class IndexUnits {
           onChanged();
           return this;
         }
-
         /**
          * <code>optional string uri = 1;</code>
          */
@@ -1441,21 +1945,18 @@ public final class IndexUnits {
         }
 
         private long pageId_;
-
         /**
          * <code>optional int64 page_id = 2;</code>
          */
         public boolean hasPageId() {
           return ((bitField0_ & 0x00000002) == 0x00000002);
         }
-
         /**
          * <code>optional int64 page_id = 2;</code>
          */
         public long getPageId() {
           return pageId_;
         }
-
         /**
          * <code>optional int64 page_id = 2;</code>
          */
@@ -1465,7 +1966,6 @@ public final class IndexUnits {
           onChanged();
           return this;
         }
-
         /**
          * <code>optional int64 page_id = 2;</code>
          */
@@ -1490,14 +1990,12 @@ public final class IndexUnits {
     private int bitField0_;
     public static final int PAGES_COUNT_FIELD_NUMBER = 1;
     private int pagesCount_;
-
     /**
      * <code>optional int32 pages_count = 1;</code>
      */
     public boolean hasPagesCount() {
       return ((bitField0_ & 0x00000001) == 0x00000001);
     }
-
     /**
      * <code>optional int32 pages_count = 1;</code>
      */
@@ -1507,14 +2005,12 @@ public final class IndexUnits {
 
     public static final int AVERAGE_PAGE_SIZE_FIELD_NUMBER = 2;
     private double averagePageSize_;
-
     /**
      * <code>optional double average_page_size = 2;</code>
      */
     public boolean hasAveragePageSize() {
       return ((bitField0_ & 0x00000002) == 0x00000002);
     }
-
     /**
      * <code>optional double average_page_size = 2;</code>
      */
@@ -1524,14 +2020,12 @@ public final class IndexUnits {
 
     public static final int VOCABULARY_SIZE_FIELD_NUMBER = 3;
     private int vocabularySize_;
-
     /**
      * <code>optional int32 vocabulary_size = 3;</code>
      */
     public boolean hasVocabularySize() {
       return ((bitField0_ & 0x00000004) == 0x00000004);
     }
-
     /**
      * <code>optional int32 vocabulary_size = 3;</code>
      */
@@ -1539,26 +2033,8 @@ public final class IndexUnits {
       return vocabularySize_;
     }
 
-    public static final int TITLES_BLOOM_FILTER_FIELD_NUMBER = 4;
-    private com.google.protobuf.ByteString titlesBloomFilter_;
-
-    /**
-     * <code>optional bytes titles_bloom_filter = 4;</code>
-     */
-    public boolean hasTitlesBloomFilter() {
-      return ((bitField0_ & 0x00000008) == 0x00000008);
-    }
-
-    /**
-     * <code>optional bytes titles_bloom_filter = 4;</code>
-     */
-    public com.google.protobuf.ByteString getTitlesBloomFilter() {
-      return titlesBloomFilter_;
-    }
-
     public static final int ID_MAPPINGS_FIELD_NUMBER = 5;
     private java.util.List<com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta.IdMapping> idMappings_;
-
     /**
      * <code>repeated .index.IndexMeta.IdMapping id_mappings = 5;</code>
      */
@@ -1572,14 +2048,12 @@ public final class IndexUnits {
     getIdMappingsOrBuilderList() {
       return idMappings_;
     }
-
     /**
      * <code>repeated .index.IndexMeta.IdMapping id_mappings = 5;</code>
      */
     public int getIdMappingsCount() {
       return idMappings_.size();
     }
-
     /**
      * <code>repeated .index.IndexMeta.IdMapping id_mappings = 5;</code>
      */
@@ -1595,41 +2069,77 @@ public final class IndexUnits {
       return idMappings_.get(index);
     }
 
-    public static final int URI_PAGE_MAPPINGS_FIELD_NUMBER = 6;
-    private java.util.List<com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta.UriPageMapping> uriPageMappings_;
+    public static final int LEMMA_ID_MAPPINGS_FIELD_NUMBER = 6;
+    private java.util.List<com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta.LemmaIdMapping> lemmaIdMappings_;
 
     /**
-     * <code>repeated .index.IndexMeta.UriPageMapping uri_page_mappings = 6;</code>
+     * <code>repeated .index.IndexMeta.LemmaIdMapping lemma_id_mappings = 6;</code>
+     */
+    public java.util.List<com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta.LemmaIdMapping> getLemmaIdMappingsList() {
+      return lemmaIdMappings_;
+    }
+
+    /**
+     * <code>repeated .index.IndexMeta.LemmaIdMapping lemma_id_mappings = 6;</code>
+     */
+    public java.util.List<? extends com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta.LemmaIdMappingOrBuilder>
+    getLemmaIdMappingsOrBuilderList() {
+      return lemmaIdMappings_;
+    }
+
+    /**
+     * <code>repeated .index.IndexMeta.LemmaIdMapping lemma_id_mappings = 6;</code>
+     */
+    public int getLemmaIdMappingsCount() {
+      return lemmaIdMappings_.size();
+    }
+
+    /**
+     * <code>repeated .index.IndexMeta.LemmaIdMapping lemma_id_mappings = 6;</code>
+     */
+    public com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta.LemmaIdMapping getLemmaIdMappings(
+        int index) {
+      return lemmaIdMappings_.get(index);
+    }
+
+    /**
+     * <code>repeated .index.IndexMeta.LemmaIdMapping lemma_id_mappings = 6;</code>
+     */
+    public com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta.LemmaIdMappingOrBuilder getLemmaIdMappingsOrBuilder(
+        int index) {
+      return lemmaIdMappings_.get(index);
+    }
+
+    public static final int URI_PAGE_MAPPINGS_FIELD_NUMBER = 7;
+    private java.util.List<com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta.UriPageMapping> uriPageMappings_;
+    /**
+     * <code>repeated .index.IndexMeta.UriPageMapping uri_page_mappings = 7;</code>
      */
     public java.util.List<com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta.UriPageMapping> getUriPageMappingsList() {
       return uriPageMappings_;
     }
-
     /**
-     * <code>repeated .index.IndexMeta.UriPageMapping uri_page_mappings = 6;</code>
+     * <code>repeated .index.IndexMeta.UriPageMapping uri_page_mappings = 7;</code>
      */
     public java.util.List<? extends com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta.UriPageMappingOrBuilder>
     getUriPageMappingsOrBuilderList() {
       return uriPageMappings_;
     }
-
     /**
-     * <code>repeated .index.IndexMeta.UriPageMapping uri_page_mappings = 6;</code>
+     * <code>repeated .index.IndexMeta.UriPageMapping uri_page_mappings = 7;</code>
      */
     public int getUriPageMappingsCount() {
       return uriPageMappings_.size();
     }
-
     /**
-     * <code>repeated .index.IndexMeta.UriPageMapping uri_page_mappings = 6;</code>
+     * <code>repeated .index.IndexMeta.UriPageMapping uri_page_mappings = 7;</code>
      */
     public com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta.UriPageMapping getUriPageMappings(
         int index) {
       return uriPageMappings_.get(index);
     }
-
     /**
-     * <code>repeated .index.IndexMeta.UriPageMapping uri_page_mappings = 6;</code>
+     * <code>repeated .index.IndexMeta.UriPageMapping uri_page_mappings = 7;</code>
      */
     public com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta.UriPageMappingOrBuilder getUriPageMappingsOrBuilder(
         int index) {
@@ -1640,8 +2150,8 @@ public final class IndexUnits {
       pagesCount_ = 0;
       averagePageSize_ = 0D;
       vocabularySize_ = 0;
-      titlesBloomFilter_ = com.google.protobuf.ByteString.EMPTY;
       idMappings_ = java.util.Collections.emptyList();
+      lemmaIdMappings_ = java.util.Collections.emptyList();
       uriPageMappings_ = java.util.Collections.emptyList();
     }
     private byte memoizedIsInitialized = -1;
@@ -1670,14 +2180,14 @@ public final class IndexUnits {
       if (((bitField0_ & 0x00000004) == 0x00000004)) {
         output.writeInt32(3, vocabularySize_);
       }
-      if (((bitField0_ & 0x00000008) == 0x00000008)) {
-        output.writeBytes(4, titlesBloomFilter_);
-      }
       for (int i = 0; i < idMappings_.size(); i++) {
         output.writeMessage(5, idMappings_.get(i));
       }
+      for (int i = 0; i < lemmaIdMappings_.size(); i++) {
+        output.writeMessage(6, lemmaIdMappings_.get(i));
+      }
       for (int i = 0; i < uriPageMappings_.size(); i++) {
-        output.writeMessage(6, uriPageMappings_.get(i));
+        output.writeMessage(7, uriPageMappings_.get(i));
       }
       getUnknownFields().writeTo(output);
     }
@@ -1702,17 +2212,17 @@ public final class IndexUnits {
         size += com.google.protobuf.CodedOutputStream
             .computeInt32Size(3, vocabularySize_);
       }
-      if (((bitField0_ & 0x00000008) == 0x00000008)) {
-        size += com.google.protobuf.CodedOutputStream
-            .computeBytesSize(4, titlesBloomFilter_);
-      }
       for (int i = 0; i < idMappings_.size(); i++) {
         size += com.google.protobuf.CodedOutputStream
             .computeMessageSize(5, idMappings_.get(i));
       }
+      for (int i = 0; i < lemmaIdMappings_.size(); i++) {
+        size += com.google.protobuf.CodedOutputStream
+            .computeMessageSize(6, lemmaIdMappings_.get(i));
+      }
       for (int i = 0; i < uriPageMappings_.size(); i++) {
         size += com.google.protobuf.CodedOutputStream
-            .computeMessageSize(6, uriPageMappings_.get(i));
+            .computeMessageSize(7, uriPageMappings_.get(i));
       }
       size += getUnknownFields().getSerializedSize();
       memoizedSerializedSize = size;
@@ -1806,7 +2316,6 @@ public final class IndexUnits {
       Builder builder = new Builder(parent);
       return builder;
     }
-
     /**
      * Protobuf type {@code index.IndexMeta}
      */
@@ -1814,7 +2323,6 @@ public final class IndexUnits {
         com.google.protobuf.GeneratedMessage.Builder<Builder> implements
         // @@protoc_insertion_point(builder_implements:index.IndexMeta)
         com.expleague.sensearch.protobuf.index.IndexUnits.IndexMetaOrBuilder {
-
       public static final com.google.protobuf.Descriptors.Descriptor
       getDescriptor() {
         return com.expleague.sensearch.protobuf.index.IndexUnits.internal_static_index_IndexMeta_descriptor;
@@ -1841,6 +2349,7 @@ public final class IndexUnits {
       private void maybeForceBuilderInitialization() {
         if (com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders) {
           getIdMappingsFieldBuilder();
+          getLemmaIdMappingsFieldBuilder();
           getUriPageMappingsFieldBuilder();
         }
       }
@@ -1856,13 +2365,17 @@ public final class IndexUnits {
         bitField0_ = (bitField0_ & ~0x00000002);
         vocabularySize_ = 0;
         bitField0_ = (bitField0_ & ~0x00000004);
-        titlesBloomFilter_ = com.google.protobuf.ByteString.EMPTY;
-        bitField0_ = (bitField0_ & ~0x00000008);
         if (idMappingsBuilder_ == null) {
           idMappings_ = java.util.Collections.emptyList();
-          bitField0_ = (bitField0_ & ~0x00000010);
+          bitField0_ = (bitField0_ & ~0x00000008);
         } else {
           idMappingsBuilder_.clear();
+        }
+        if (lemmaIdMappingsBuilder_ == null) {
+          lemmaIdMappings_ = java.util.Collections.emptyList();
+          bitField0_ = (bitField0_ & ~0x00000010);
+        } else {
+          lemmaIdMappingsBuilder_.clear();
         }
         if (uriPageMappingsBuilder_ == null) {
           uriPageMappings_ = java.util.Collections.emptyList();
@@ -1911,18 +2424,23 @@ public final class IndexUnits {
           to_bitField0_ |= 0x00000004;
         }
         result.vocabularySize_ = vocabularySize_;
-        if (((from_bitField0_ & 0x00000008) == 0x00000008)) {
-          to_bitField0_ |= 0x00000008;
-        }
-        result.titlesBloomFilter_ = titlesBloomFilter_;
         if (idMappingsBuilder_ == null) {
-          if (((bitField0_ & 0x00000010) == 0x00000010)) {
+          if (((bitField0_ & 0x00000008) == 0x00000008)) {
             idMappings_ = java.util.Collections.unmodifiableList(idMappings_);
-            bitField0_ = (bitField0_ & ~0x00000010);
+            bitField0_ = (bitField0_ & ~0x00000008);
           }
           result.idMappings_ = idMappings_;
         } else {
           result.idMappings_ = idMappingsBuilder_.build();
+        }
+        if (lemmaIdMappingsBuilder_ == null) {
+          if (((bitField0_ & 0x00000010) == 0x00000010)) {
+            lemmaIdMappings_ = java.util.Collections.unmodifiableList(lemmaIdMappings_);
+            bitField0_ = (bitField0_ & ~0x00000010);
+          }
+          result.lemmaIdMappings_ = lemmaIdMappings_;
+        } else {
+          result.lemmaIdMappings_ = lemmaIdMappingsBuilder_.build();
         }
         if (uriPageMappingsBuilder_ == null) {
           if (((bitField0_ & 0x00000020) == 0x00000020)) {
@@ -1961,14 +2479,11 @@ public final class IndexUnits {
         if (other.hasVocabularySize()) {
           setVocabularySize(other.getVocabularySize());
         }
-        if (other.hasTitlesBloomFilter()) {
-          setTitlesBloomFilter(other.getTitlesBloomFilter());
-        }
         if (idMappingsBuilder_ == null) {
           if (!other.idMappings_.isEmpty()) {
             if (idMappings_.isEmpty()) {
               idMappings_ = other.idMappings_;
-              bitField0_ = (bitField0_ & ~0x00000010);
+              bitField0_ = (bitField0_ & ~0x00000008);
             } else {
               ensureIdMappingsIsMutable();
               idMappings_.addAll(other.idMappings_);
@@ -1981,12 +2496,38 @@ public final class IndexUnits {
               idMappingsBuilder_.dispose();
               idMappingsBuilder_ = null;
               idMappings_ = other.idMappings_;
-              bitField0_ = (bitField0_ & ~0x00000010);
+              bitField0_ = (bitField0_ & ~0x00000008);
               idMappingsBuilder_ =
                   com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders ?
                       getIdMappingsFieldBuilder() : null;
             } else {
               idMappingsBuilder_.addAllMessages(other.idMappings_);
+            }
+          }
+        }
+        if (lemmaIdMappingsBuilder_ == null) {
+          if (!other.lemmaIdMappings_.isEmpty()) {
+            if (lemmaIdMappings_.isEmpty()) {
+              lemmaIdMappings_ = other.lemmaIdMappings_;
+              bitField0_ = (bitField0_ & ~0x00000010);
+            } else {
+              ensureLemmaIdMappingsIsMutable();
+              lemmaIdMappings_.addAll(other.lemmaIdMappings_);
+            }
+            onChanged();
+          }
+        } else {
+          if (!other.lemmaIdMappings_.isEmpty()) {
+            if (lemmaIdMappingsBuilder_.isEmpty()) {
+              lemmaIdMappingsBuilder_.dispose();
+              lemmaIdMappingsBuilder_ = null;
+              lemmaIdMappings_ = other.lemmaIdMappings_;
+              bitField0_ = (bitField0_ & ~0x00000010);
+              lemmaIdMappingsBuilder_ =
+                  com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders ?
+                      getLemmaIdMappingsFieldBuilder() : null;
+            } else {
+              lemmaIdMappingsBuilder_.addAllMessages(other.lemmaIdMappings_);
             }
           }
         }
@@ -2045,21 +2586,18 @@ public final class IndexUnits {
       private int bitField0_;
 
       private int pagesCount_;
-
       /**
        * <code>optional int32 pages_count = 1;</code>
        */
       public boolean hasPagesCount() {
         return ((bitField0_ & 0x00000001) == 0x00000001);
       }
-
       /**
        * <code>optional int32 pages_count = 1;</code>
        */
       public int getPagesCount() {
         return pagesCount_;
       }
-
       /**
        * <code>optional int32 pages_count = 1;</code>
        */
@@ -2069,7 +2607,6 @@ public final class IndexUnits {
         onChanged();
         return this;
       }
-
       /**
        * <code>optional int32 pages_count = 1;</code>
        */
@@ -2081,21 +2618,18 @@ public final class IndexUnits {
       }
 
       private double averagePageSize_;
-
       /**
        * <code>optional double average_page_size = 2;</code>
        */
       public boolean hasAveragePageSize() {
         return ((bitField0_ & 0x00000002) == 0x00000002);
       }
-
       /**
        * <code>optional double average_page_size = 2;</code>
        */
       public double getAveragePageSize() {
         return averagePageSize_;
       }
-
       /**
        * <code>optional double average_page_size = 2;</code>
        */
@@ -2105,7 +2639,6 @@ public final class IndexUnits {
         onChanged();
         return this;
       }
-
       /**
        * <code>optional double average_page_size = 2;</code>
        */
@@ -2117,21 +2650,18 @@ public final class IndexUnits {
       }
 
       private int vocabularySize_;
-
       /**
        * <code>optional int32 vocabulary_size = 3;</code>
        */
       public boolean hasVocabularySize() {
         return ((bitField0_ & 0x00000004) == 0x00000004);
       }
-
       /**
        * <code>optional int32 vocabulary_size = 3;</code>
        */
       public int getVocabularySize() {
         return vocabularySize_;
       }
-
       /**
        * <code>optional int32 vocabulary_size = 3;</code>
        */
@@ -2141,7 +2671,6 @@ public final class IndexUnits {
         onChanged();
         return this;
       }
-
       /**
        * <code>optional int32 vocabulary_size = 3;</code>
        */
@@ -2152,52 +2681,13 @@ public final class IndexUnits {
         return this;
       }
 
-      private com.google.protobuf.ByteString titlesBloomFilter_ = com.google.protobuf.ByteString.EMPTY;
-
-      /**
-       * <code>optional bytes titles_bloom_filter = 4;</code>
-       */
-      public boolean hasTitlesBloomFilter() {
-        return ((bitField0_ & 0x00000008) == 0x00000008);
-      }
-
-      /**
-       * <code>optional bytes titles_bloom_filter = 4;</code>
-       */
-      public com.google.protobuf.ByteString getTitlesBloomFilter() {
-        return titlesBloomFilter_;
-      }
-
-      /**
-       * <code>optional bytes titles_bloom_filter = 4;</code>
-       */
-      public Builder setTitlesBloomFilter(com.google.protobuf.ByteString value) {
-        if (value == null) {
-          throw new NullPointerException();
-        }
-        bitField0_ |= 0x00000008;
-        titlesBloomFilter_ = value;
-        onChanged();
-        return this;
-      }
-
-      /**
-       * <code>optional bytes titles_bloom_filter = 4;</code>
-       */
-      public Builder clearTitlesBloomFilter() {
-        bitField0_ = (bitField0_ & ~0x00000008);
-        titlesBloomFilter_ = getDefaultInstance().getTitlesBloomFilter();
-        onChanged();
-        return this;
-      }
-
       private java.util.List<com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta.IdMapping> idMappings_ =
           java.util.Collections.emptyList();
       private void ensureIdMappingsIsMutable() {
-        if (!((bitField0_ & 0x00000010) == 0x00000010)) {
+        if (!((bitField0_ & 0x00000008) == 0x00000008)) {
           idMappings_ = new java.util.ArrayList<com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta.IdMapping>(
               idMappings_);
-          bitField0_ |= 0x00000010;
+          bitField0_ |= 0x00000008;
         }
       }
 
@@ -2214,7 +2704,6 @@ public final class IndexUnits {
           return idMappingsBuilder_.getMessageList();
         }
       }
-
       /**
        * <code>repeated .index.IndexMeta.IdMapping id_mappings = 5;</code>
        */
@@ -2225,7 +2714,6 @@ public final class IndexUnits {
           return idMappingsBuilder_.getCount();
         }
       }
-
       /**
        * <code>repeated .index.IndexMeta.IdMapping id_mappings = 5;</code>
        */
@@ -2237,7 +2725,6 @@ public final class IndexUnits {
           return idMappingsBuilder_.getMessage(index);
         }
       }
-
       /**
        * <code>repeated .index.IndexMeta.IdMapping id_mappings = 5;</code>
        */
@@ -2270,7 +2757,6 @@ public final class IndexUnits {
         }
         return this;
       }
-
       /**
        * <code>repeated .index.IndexMeta.IdMapping id_mappings = 5;</code>
        */
@@ -2288,7 +2774,6 @@ public final class IndexUnits {
         }
         return this;
       }
-
       /**
        * <code>repeated .index.IndexMeta.IdMapping id_mappings = 5;</code>
        */
@@ -2306,7 +2791,6 @@ public final class IndexUnits {
         }
         return this;
       }
-
       /**
        * <code>repeated .index.IndexMeta.IdMapping id_mappings = 5;</code>
        */
@@ -2351,21 +2835,19 @@ public final class IndexUnits {
         }
         return this;
       }
-
       /**
        * <code>repeated .index.IndexMeta.IdMapping id_mappings = 5;</code>
        */
       public Builder clearIdMappings() {
         if (idMappingsBuilder_ == null) {
           idMappings_ = java.util.Collections.emptyList();
-          bitField0_ = (bitField0_ & ~0x00000010);
+          bitField0_ = (bitField0_ & ~0x00000008);
           onChanged();
         } else {
           idMappingsBuilder_.clear();
         }
         return this;
       }
-
       /**
        * <code>repeated .index.IndexMeta.IdMapping id_mappings = 5;</code>
        */
@@ -2379,7 +2861,6 @@ public final class IndexUnits {
         }
         return this;
       }
-
       /**
        * <code>repeated .index.IndexMeta.IdMapping id_mappings = 5;</code>
        */
@@ -2387,7 +2868,6 @@ public final class IndexUnits {
           int index) {
         return getIdMappingsFieldBuilder().getBuilder(index);
       }
-
       /**
        * <code>repeated .index.IndexMeta.IdMapping id_mappings = 5;</code>
        */
@@ -2399,7 +2879,6 @@ public final class IndexUnits {
           return idMappingsBuilder_.getMessageOrBuilder(index);
         }
       }
-
       /**
        * <code>repeated .index.IndexMeta.IdMapping id_mappings = 5;</code>
        */
@@ -2428,7 +2907,6 @@ public final class IndexUnits {
             index, com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta.IdMapping
                 .getDefaultInstance());
       }
-
       /**
        * <code>repeated .index.IndexMeta.IdMapping id_mappings = 5;</code>
        */
@@ -2443,7 +2921,7 @@ public final class IndexUnits {
           idMappingsBuilder_ = new com.google.protobuf.RepeatedFieldBuilder<
               com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta.IdMapping, com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta.IdMapping.Builder, com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta.IdMappingOrBuilder>(
                   idMappings_,
-                  ((bitField0_ & 0x00000010) == 0x00000010),
+              ((bitField0_ & 0x00000008) == 0x00000008),
                   getParentForChildren(),
                   isClean());
           idMappings_ = null;
@@ -2451,9 +2929,277 @@ public final class IndexUnits {
         return idMappingsBuilder_;
       }
 
-      private java.util.List<com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta.UriPageMapping> uriPageMappings_ =
+      private java.util.List<com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta.LemmaIdMapping> lemmaIdMappings_ =
           java.util.Collections.emptyList();
 
+      private void ensureLemmaIdMappingsIsMutable() {
+        if (!((bitField0_ & 0x00000010) == 0x00000010)) {
+          lemmaIdMappings_ = new java.util.ArrayList<com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta.LemmaIdMapping>(
+              lemmaIdMappings_);
+          bitField0_ |= 0x00000010;
+        }
+      }
+
+      private com.google.protobuf.RepeatedFieldBuilder<
+          com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta.LemmaIdMapping, com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta.LemmaIdMapping.Builder, com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta.LemmaIdMappingOrBuilder> lemmaIdMappingsBuilder_;
+
+      /**
+       * <code>repeated .index.IndexMeta.LemmaIdMapping lemma_id_mappings = 6;</code>
+       */
+      public java.util.List<com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta.LemmaIdMapping> getLemmaIdMappingsList() {
+        if (lemmaIdMappingsBuilder_ == null) {
+          return java.util.Collections.unmodifiableList(lemmaIdMappings_);
+        } else {
+          return lemmaIdMappingsBuilder_.getMessageList();
+        }
+      }
+
+      /**
+       * <code>repeated .index.IndexMeta.LemmaIdMapping lemma_id_mappings = 6;</code>
+       */
+      public int getLemmaIdMappingsCount() {
+        if (lemmaIdMappingsBuilder_ == null) {
+          return lemmaIdMappings_.size();
+        } else {
+          return lemmaIdMappingsBuilder_.getCount();
+        }
+      }
+
+      /**
+       * <code>repeated .index.IndexMeta.LemmaIdMapping lemma_id_mappings = 6;</code>
+       */
+      public com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta.LemmaIdMapping getLemmaIdMappings(
+          int index) {
+        if (lemmaIdMappingsBuilder_ == null) {
+          return lemmaIdMappings_.get(index);
+        } else {
+          return lemmaIdMappingsBuilder_.getMessage(index);
+        }
+      }
+
+      /**
+       * <code>repeated .index.IndexMeta.LemmaIdMapping lemma_id_mappings = 6;</code>
+       */
+      public Builder setLemmaIdMappings(
+          int index,
+          com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta.LemmaIdMapping value) {
+        if (lemmaIdMappingsBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureLemmaIdMappingsIsMutable();
+          lemmaIdMappings_.set(index, value);
+          onChanged();
+        } else {
+          lemmaIdMappingsBuilder_.setMessage(index, value);
+        }
+        return this;
+      }
+
+      /**
+       * <code>repeated .index.IndexMeta.LemmaIdMapping lemma_id_mappings = 6;</code>
+       */
+      public Builder setLemmaIdMappings(
+          int index,
+          com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta.LemmaIdMapping.Builder builderForValue) {
+        if (lemmaIdMappingsBuilder_ == null) {
+          ensureLemmaIdMappingsIsMutable();
+          lemmaIdMappings_.set(index, builderForValue.build());
+          onChanged();
+        } else {
+          lemmaIdMappingsBuilder_.setMessage(index, builderForValue.build());
+        }
+        return this;
+      }
+
+      /**
+       * <code>repeated .index.IndexMeta.LemmaIdMapping lemma_id_mappings = 6;</code>
+       */
+      public Builder addLemmaIdMappings(
+          com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta.LemmaIdMapping value) {
+        if (lemmaIdMappingsBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureLemmaIdMappingsIsMutable();
+          lemmaIdMappings_.add(value);
+          onChanged();
+        } else {
+          lemmaIdMappingsBuilder_.addMessage(value);
+        }
+        return this;
+      }
+
+      /**
+       * <code>repeated .index.IndexMeta.LemmaIdMapping lemma_id_mappings = 6;</code>
+       */
+      public Builder addLemmaIdMappings(
+          int index,
+          com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta.LemmaIdMapping value) {
+        if (lemmaIdMappingsBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureLemmaIdMappingsIsMutable();
+          lemmaIdMappings_.add(index, value);
+          onChanged();
+        } else {
+          lemmaIdMappingsBuilder_.addMessage(index, value);
+        }
+        return this;
+      }
+
+      /**
+       * <code>repeated .index.IndexMeta.LemmaIdMapping lemma_id_mappings = 6;</code>
+       */
+      public Builder addLemmaIdMappings(
+          com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta.LemmaIdMapping.Builder builderForValue) {
+        if (lemmaIdMappingsBuilder_ == null) {
+          ensureLemmaIdMappingsIsMutable();
+          lemmaIdMappings_.add(builderForValue.build());
+          onChanged();
+        } else {
+          lemmaIdMappingsBuilder_.addMessage(builderForValue.build());
+        }
+        return this;
+      }
+
+      /**
+       * <code>repeated .index.IndexMeta.LemmaIdMapping lemma_id_mappings = 6;</code>
+       */
+      public Builder addLemmaIdMappings(
+          int index,
+          com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta.LemmaIdMapping.Builder builderForValue) {
+        if (lemmaIdMappingsBuilder_ == null) {
+          ensureLemmaIdMappingsIsMutable();
+          lemmaIdMappings_.add(index, builderForValue.build());
+          onChanged();
+        } else {
+          lemmaIdMappingsBuilder_.addMessage(index, builderForValue.build());
+        }
+        return this;
+      }
+
+      /**
+       * <code>repeated .index.IndexMeta.LemmaIdMapping lemma_id_mappings = 6;</code>
+       */
+      public Builder addAllLemmaIdMappings(
+          java.lang.Iterable<? extends com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta.LemmaIdMapping> values) {
+        if (lemmaIdMappingsBuilder_ == null) {
+          ensureLemmaIdMappingsIsMutable();
+          com.google.protobuf.AbstractMessageLite.Builder.addAll(
+              values, lemmaIdMappings_);
+          onChanged();
+        } else {
+          lemmaIdMappingsBuilder_.addAllMessages(values);
+        }
+        return this;
+      }
+
+      /**
+       * <code>repeated .index.IndexMeta.LemmaIdMapping lemma_id_mappings = 6;</code>
+       */
+      public Builder clearLemmaIdMappings() {
+        if (lemmaIdMappingsBuilder_ == null) {
+          lemmaIdMappings_ = java.util.Collections.emptyList();
+          bitField0_ = (bitField0_ & ~0x00000010);
+          onChanged();
+        } else {
+          lemmaIdMappingsBuilder_.clear();
+        }
+        return this;
+      }
+
+      /**
+       * <code>repeated .index.IndexMeta.LemmaIdMapping lemma_id_mappings = 6;</code>
+       */
+      public Builder removeLemmaIdMappings(int index) {
+        if (lemmaIdMappingsBuilder_ == null) {
+          ensureLemmaIdMappingsIsMutable();
+          lemmaIdMappings_.remove(index);
+          onChanged();
+        } else {
+          lemmaIdMappingsBuilder_.remove(index);
+        }
+        return this;
+      }
+
+      /**
+       * <code>repeated .index.IndexMeta.LemmaIdMapping lemma_id_mappings = 6;</code>
+       */
+      public com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta.LemmaIdMapping.Builder getLemmaIdMappingsBuilder(
+          int index) {
+        return getLemmaIdMappingsFieldBuilder().getBuilder(index);
+      }
+
+      /**
+       * <code>repeated .index.IndexMeta.LemmaIdMapping lemma_id_mappings = 6;</code>
+       */
+      public com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta.LemmaIdMappingOrBuilder getLemmaIdMappingsOrBuilder(
+          int index) {
+        if (lemmaIdMappingsBuilder_ == null) {
+          return lemmaIdMappings_.get(index);
+        } else {
+          return lemmaIdMappingsBuilder_.getMessageOrBuilder(index);
+        }
+      }
+
+      /**
+       * <code>repeated .index.IndexMeta.LemmaIdMapping lemma_id_mappings = 6;</code>
+       */
+      public java.util.List<? extends com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta.LemmaIdMappingOrBuilder>
+      getLemmaIdMappingsOrBuilderList() {
+        if (lemmaIdMappingsBuilder_ != null) {
+          return lemmaIdMappingsBuilder_.getMessageOrBuilderList();
+        } else {
+          return java.util.Collections.unmodifiableList(lemmaIdMappings_);
+        }
+      }
+
+      /**
+       * <code>repeated .index.IndexMeta.LemmaIdMapping lemma_id_mappings = 6;</code>
+       */
+      public com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta.LemmaIdMapping.Builder addLemmaIdMappingsBuilder() {
+        return getLemmaIdMappingsFieldBuilder().addBuilder(
+            com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta.LemmaIdMapping
+                .getDefaultInstance());
+      }
+
+      /**
+       * <code>repeated .index.IndexMeta.LemmaIdMapping lemma_id_mappings = 6;</code>
+       */
+      public com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta.LemmaIdMapping.Builder addLemmaIdMappingsBuilder(
+          int index) {
+        return getLemmaIdMappingsFieldBuilder().addBuilder(
+            index, com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta.LemmaIdMapping
+                .getDefaultInstance());
+      }
+
+      /**
+       * <code>repeated .index.IndexMeta.LemmaIdMapping lemma_id_mappings = 6;</code>
+       */
+      public java.util.List<com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta.LemmaIdMapping.Builder>
+      getLemmaIdMappingsBuilderList() {
+        return getLemmaIdMappingsFieldBuilder().getBuilderList();
+      }
+
+      private com.google.protobuf.RepeatedFieldBuilder<
+          com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta.LemmaIdMapping, com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta.LemmaIdMapping.Builder, com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta.LemmaIdMappingOrBuilder>
+      getLemmaIdMappingsFieldBuilder() {
+        if (lemmaIdMappingsBuilder_ == null) {
+          lemmaIdMappingsBuilder_ = new com.google.protobuf.RepeatedFieldBuilder<
+              com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta.LemmaIdMapping, com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta.LemmaIdMapping.Builder, com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta.LemmaIdMappingOrBuilder>(
+              lemmaIdMappings_,
+              ((bitField0_ & 0x00000010) == 0x00000010),
+              getParentForChildren(),
+              isClean());
+          lemmaIdMappings_ = null;
+        }
+        return lemmaIdMappingsBuilder_;
+      }
+
+      private java.util.List<com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta.UriPageMapping> uriPageMappings_ =
+          java.util.Collections.emptyList();
       private void ensureUriPageMappingsIsMutable() {
         if (!((bitField0_ & 0x00000020) == 0x00000020)) {
           uriPageMappings_ = new java.util.ArrayList<com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta.UriPageMapping>(
@@ -2466,7 +3212,7 @@ public final class IndexUnits {
           com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta.UriPageMapping, com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta.UriPageMapping.Builder, com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta.UriPageMappingOrBuilder> uriPageMappingsBuilder_;
 
       /**
-       * <code>repeated .index.IndexMeta.UriPageMapping uri_page_mappings = 6;</code>
+       * <code>repeated .index.IndexMeta.UriPageMapping uri_page_mappings = 7;</code>
        */
       public java.util.List<com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta.UriPageMapping> getUriPageMappingsList() {
         if (uriPageMappingsBuilder_ == null) {
@@ -2475,9 +3221,8 @@ public final class IndexUnits {
           return uriPageMappingsBuilder_.getMessageList();
         }
       }
-
       /**
-       * <code>repeated .index.IndexMeta.UriPageMapping uri_page_mappings = 6;</code>
+       * <code>repeated .index.IndexMeta.UriPageMapping uri_page_mappings = 7;</code>
        */
       public int getUriPageMappingsCount() {
         if (uriPageMappingsBuilder_ == null) {
@@ -2486,9 +3231,8 @@ public final class IndexUnits {
           return uriPageMappingsBuilder_.getCount();
         }
       }
-
       /**
-       * <code>repeated .index.IndexMeta.UriPageMapping uri_page_mappings = 6;</code>
+       * <code>repeated .index.IndexMeta.UriPageMapping uri_page_mappings = 7;</code>
        */
       public com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta.UriPageMapping getUriPageMappings(
           int index) {
@@ -2498,9 +3242,8 @@ public final class IndexUnits {
           return uriPageMappingsBuilder_.getMessage(index);
         }
       }
-
       /**
-       * <code>repeated .index.IndexMeta.UriPageMapping uri_page_mappings = 6;</code>
+       * <code>repeated .index.IndexMeta.UriPageMapping uri_page_mappings = 7;</code>
        */
       public Builder setUriPageMappings(
           int index,
@@ -2517,9 +3260,8 @@ public final class IndexUnits {
         }
         return this;
       }
-
       /**
-       * <code>repeated .index.IndexMeta.UriPageMapping uri_page_mappings = 6;</code>
+       * <code>repeated .index.IndexMeta.UriPageMapping uri_page_mappings = 7;</code>
        */
       public Builder setUriPageMappings(
           int index,
@@ -2533,9 +3275,8 @@ public final class IndexUnits {
         }
         return this;
       }
-
       /**
-       * <code>repeated .index.IndexMeta.UriPageMapping uri_page_mappings = 6;</code>
+       * <code>repeated .index.IndexMeta.UriPageMapping uri_page_mappings = 7;</code>
        */
       public Builder addUriPageMappings(
           com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta.UriPageMapping value) {
@@ -2551,9 +3292,8 @@ public final class IndexUnits {
         }
         return this;
       }
-
       /**
-       * <code>repeated .index.IndexMeta.UriPageMapping uri_page_mappings = 6;</code>
+       * <code>repeated .index.IndexMeta.UriPageMapping uri_page_mappings = 7;</code>
        */
       public Builder addUriPageMappings(
           int index,
@@ -2570,9 +3310,8 @@ public final class IndexUnits {
         }
         return this;
       }
-
       /**
-       * <code>repeated .index.IndexMeta.UriPageMapping uri_page_mappings = 6;</code>
+       * <code>repeated .index.IndexMeta.UriPageMapping uri_page_mappings = 7;</code>
        */
       public Builder addUriPageMappings(
           com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta.UriPageMapping.Builder builderForValue) {
@@ -2585,9 +3324,8 @@ public final class IndexUnits {
         }
         return this;
       }
-
       /**
-       * <code>repeated .index.IndexMeta.UriPageMapping uri_page_mappings = 6;</code>
+       * <code>repeated .index.IndexMeta.UriPageMapping uri_page_mappings = 7;</code>
        */
       public Builder addUriPageMappings(
           int index,
@@ -2601,9 +3339,8 @@ public final class IndexUnits {
         }
         return this;
       }
-
       /**
-       * <code>repeated .index.IndexMeta.UriPageMapping uri_page_mappings = 6;</code>
+       * <code>repeated .index.IndexMeta.UriPageMapping uri_page_mappings = 7;</code>
        */
       public Builder addAllUriPageMappings(
           java.lang.Iterable<? extends com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta.UriPageMapping> values) {
@@ -2617,9 +3354,8 @@ public final class IndexUnits {
         }
         return this;
       }
-
       /**
-       * <code>repeated .index.IndexMeta.UriPageMapping uri_page_mappings = 6;</code>
+       * <code>repeated .index.IndexMeta.UriPageMapping uri_page_mappings = 7;</code>
        */
       public Builder clearUriPageMappings() {
         if (uriPageMappingsBuilder_ == null) {
@@ -2631,9 +3367,8 @@ public final class IndexUnits {
         }
         return this;
       }
-
       /**
-       * <code>repeated .index.IndexMeta.UriPageMapping uri_page_mappings = 6;</code>
+       * <code>repeated .index.IndexMeta.UriPageMapping uri_page_mappings = 7;</code>
        */
       public Builder removeUriPageMappings(int index) {
         if (uriPageMappingsBuilder_ == null) {
@@ -2645,17 +3380,15 @@ public final class IndexUnits {
         }
         return this;
       }
-
       /**
-       * <code>repeated .index.IndexMeta.UriPageMapping uri_page_mappings = 6;</code>
+       * <code>repeated .index.IndexMeta.UriPageMapping uri_page_mappings = 7;</code>
        */
       public com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta.UriPageMapping.Builder getUriPageMappingsBuilder(
           int index) {
         return getUriPageMappingsFieldBuilder().getBuilder(index);
       }
-
       /**
-       * <code>repeated .index.IndexMeta.UriPageMapping uri_page_mappings = 6;</code>
+       * <code>repeated .index.IndexMeta.UriPageMapping uri_page_mappings = 7;</code>
        */
       public com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta.UriPageMappingOrBuilder getUriPageMappingsOrBuilder(
           int index) {
@@ -2665,9 +3398,8 @@ public final class IndexUnits {
           return uriPageMappingsBuilder_.getMessageOrBuilder(index);
         }
       }
-
       /**
-       * <code>repeated .index.IndexMeta.UriPageMapping uri_page_mappings = 6;</code>
+       * <code>repeated .index.IndexMeta.UriPageMapping uri_page_mappings = 7;</code>
        */
       public java.util.List<? extends com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta.UriPageMappingOrBuilder>
       getUriPageMappingsOrBuilderList() {
@@ -2677,18 +3409,16 @@ public final class IndexUnits {
           return java.util.Collections.unmodifiableList(uriPageMappings_);
         }
       }
-
       /**
-       * <code>repeated .index.IndexMeta.UriPageMapping uri_page_mappings = 6;</code>
+       * <code>repeated .index.IndexMeta.UriPageMapping uri_page_mappings = 7;</code>
        */
       public com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta.UriPageMapping.Builder addUriPageMappingsBuilder() {
         return getUriPageMappingsFieldBuilder().addBuilder(
             com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta.UriPageMapping
                 .getDefaultInstance());
       }
-
       /**
-       * <code>repeated .index.IndexMeta.UriPageMapping uri_page_mappings = 6;</code>
+       * <code>repeated .index.IndexMeta.UriPageMapping uri_page_mappings = 7;</code>
        */
       public com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta.UriPageMapping.Builder addUriPageMappingsBuilder(
           int index) {
@@ -2696,15 +3426,13 @@ public final class IndexUnits {
             index, com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta.UriPageMapping
                 .getDefaultInstance());
       }
-
       /**
-       * <code>repeated .index.IndexMeta.UriPageMapping uri_page_mappings = 6;</code>
+       * <code>repeated .index.IndexMeta.UriPageMapping uri_page_mappings = 7;</code>
        */
       public java.util.List<com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta.UriPageMapping.Builder>
       getUriPageMappingsBuilderList() {
         return getUriPageMappingsFieldBuilder().getBuilderList();
       }
-
       private com.google.protobuf.RepeatedFieldBuilder<
           com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta.UriPageMapping, com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta.UriPageMapping.Builder, com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta.UriPageMappingOrBuilder>
       getUriPageMappingsFieldBuilder() {
@@ -2748,12 +3476,10 @@ public final class IndexUnits {
      * <code>optional string uri = 2;</code>
      */
     boolean hasUri();
-
     /**
      * <code>optional string uri = 2;</code>
      */
     java.lang.String getUri();
-
     /**
      * <code>optional string uri = 2;</code>
      */
@@ -2764,12 +3490,10 @@ public final class IndexUnits {
      * <code>optional string title = 3;</code>
      */
     boolean hasTitle();
-
     /**
      * <code>optional string title = 3;</code>
      */
     java.lang.String getTitle();
-
     /**
      * <code>optional string title = 3;</code>
      */
@@ -2784,14 +3508,12 @@ public final class IndexUnits {
      * <code>optional string content = 4;</code>
      */
     java.lang.String getContent();
-
     /**
      * <code>optional string content = 4;</code>
      */
     com.google.protobuf.ByteString
     getContentBytes();
   }
-
   /**
    * Protobuf type {@code index.Page}
    */
@@ -2882,7 +3604,6 @@ public final class IndexUnits {
         makeExtensionsImmutable();
       }
     }
-
     public static final com.google.protobuf.Descriptors.Descriptor
     getDescriptor() {
       return com.expleague.sensearch.protobuf.index.IndexUnits.internal_static_index_Page_descriptor;
@@ -2914,14 +3635,12 @@ public final class IndexUnits {
     private int bitField0_;
     public static final int PAGE_ID_FIELD_NUMBER = 1;
     private long pageId_;
-
     /**
      * <code>optional int64 page_id = 1;</code>
      */
     public boolean hasPageId() {
       return ((bitField0_ & 0x00000001) == 0x00000001);
     }
-
     /**
      * <code>optional int64 page_id = 1;</code>
      */
@@ -2931,14 +3650,12 @@ public final class IndexUnits {
 
     public static final int URI_FIELD_NUMBER = 2;
     private java.lang.Object uri_;
-
     /**
      * <code>optional string uri = 2;</code>
      */
     public boolean hasUri() {
       return ((bitField0_ & 0x00000002) == 0x00000002);
     }
-
     /**
      * <code>optional string uri = 2;</code>
      */
@@ -2947,7 +3664,7 @@ public final class IndexUnits {
       if (ref instanceof java.lang.String) {
         return (java.lang.String) ref;
       } else {
-        com.google.protobuf.ByteString bs =
+        com.google.protobuf.ByteString bs = 
             (com.google.protobuf.ByteString) ref;
         java.lang.String s = bs.toStringUtf8();
         if (bs.isValidUtf8()) {
@@ -2956,7 +3673,6 @@ public final class IndexUnits {
         return s;
       }
     }
-
     /**
      * <code>optional string uri = 2;</code>
      */
@@ -2964,7 +3680,7 @@ public final class IndexUnits {
     getUriBytes() {
       java.lang.Object ref = uri_;
       if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b =
+        com.google.protobuf.ByteString b = 
             com.google.protobuf.ByteString.copyFromUtf8(
                 (java.lang.String) ref);
         uri_ = b;
@@ -2976,14 +3692,12 @@ public final class IndexUnits {
 
     public static final int TITLE_FIELD_NUMBER = 3;
     private java.lang.Object title_;
-
     /**
      * <code>optional string title = 3;</code>
      */
     public boolean hasTitle() {
       return ((bitField0_ & 0x00000004) == 0x00000004);
     }
-
     /**
      * <code>optional string title = 3;</code>
      */
@@ -2992,7 +3706,7 @@ public final class IndexUnits {
       if (ref instanceof java.lang.String) {
         return (java.lang.String) ref;
       } else {
-        com.google.protobuf.ByteString bs =
+        com.google.protobuf.ByteString bs = 
             (com.google.protobuf.ByteString) ref;
         java.lang.String s = bs.toStringUtf8();
         if (bs.isValidUtf8()) {
@@ -3001,7 +3715,6 @@ public final class IndexUnits {
         return s;
       }
     }
-
     /**
      * <code>optional string title = 3;</code>
      */
@@ -3009,7 +3722,7 @@ public final class IndexUnits {
     getTitleBytes() {
       java.lang.Object ref = title_;
       if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b =
+        com.google.protobuf.ByteString b = 
             com.google.protobuf.ByteString.copyFromUtf8(
                 (java.lang.String) ref);
         title_ = b;
@@ -3021,14 +3734,12 @@ public final class IndexUnits {
 
     public static final int CONTENT_FIELD_NUMBER = 4;
     private java.lang.Object content_;
-
     /**
      * <code>optional string content = 4;</code>
      */
     public boolean hasContent() {
       return ((bitField0_ & 0x00000008) == 0x00000008);
     }
-
     /**
      * <code>optional string content = 4;</code>
      */
@@ -3037,7 +3748,7 @@ public final class IndexUnits {
       if (ref instanceof java.lang.String) {
         return (java.lang.String) ref;
       } else {
-        com.google.protobuf.ByteString bs =
+        com.google.protobuf.ByteString bs = 
             (com.google.protobuf.ByteString) ref;
         java.lang.String s = bs.toStringUtf8();
         if (bs.isValidUtf8()) {
@@ -3046,7 +3757,6 @@ public final class IndexUnits {
         return s;
       }
     }
-
     /**
      * <code>optional string content = 4;</code>
      */
@@ -3054,7 +3764,7 @@ public final class IndexUnits {
     getContentBytes() {
       java.lang.Object ref = content_;
       if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b =
+        com.google.protobuf.ByteString b = 
             com.google.protobuf.ByteString.copyFromUtf8(
                 (java.lang.String) ref);
         content_ = b;
@@ -3214,7 +3924,6 @@ public final class IndexUnits {
       Builder builder = new Builder(parent);
       return builder;
     }
-
     /**
      * Protobuf type {@code index.Page}
      */
@@ -3222,7 +3931,6 @@ public final class IndexUnits {
         com.google.protobuf.GeneratedMessage.Builder<Builder> implements
         // @@protoc_insertion_point(builder_implements:index.Page)
         com.expleague.sensearch.protobuf.index.IndexUnits.PageOrBuilder {
-
       public static final com.google.protobuf.Descriptors.Descriptor
       getDescriptor() {
         return com.expleague.sensearch.protobuf.index.IndexUnits.internal_static_index_Page_descriptor;
@@ -3374,21 +4082,18 @@ public final class IndexUnits {
       private int bitField0_;
 
       private long pageId_;
-
       /**
        * <code>optional int64 page_id = 1;</code>
        */
       public boolean hasPageId() {
         return ((bitField0_ & 0x00000001) == 0x00000001);
       }
-
       /**
        * <code>optional int64 page_id = 1;</code>
        */
       public long getPageId() {
         return pageId_;
       }
-
       /**
        * <code>optional int64 page_id = 1;</code>
        */
@@ -3398,7 +4103,6 @@ public final class IndexUnits {
         onChanged();
         return this;
       }
-
       /**
        * <code>optional int64 page_id = 1;</code>
        */
@@ -3410,14 +4114,12 @@ public final class IndexUnits {
       }
 
       private java.lang.Object uri_ = "";
-
       /**
        * <code>optional string uri = 2;</code>
        */
       public boolean hasUri() {
         return ((bitField0_ & 0x00000002) == 0x00000002);
       }
-
       /**
        * <code>optional string uri = 2;</code>
        */
@@ -3435,7 +4137,6 @@ public final class IndexUnits {
           return (java.lang.String) ref;
         }
       }
-
       /**
        * <code>optional string uri = 2;</code>
        */
@@ -3443,7 +4144,7 @@ public final class IndexUnits {
       getUriBytes() {
         java.lang.Object ref = uri_;
         if (ref instanceof String) {
-          com.google.protobuf.ByteString b =
+          com.google.protobuf.ByteString b = 
               com.google.protobuf.ByteString.copyFromUtf8(
                   (java.lang.String) ref);
           uri_ = b;
@@ -3452,7 +4153,6 @@ public final class IndexUnits {
           return (com.google.protobuf.ByteString) ref;
         }
       }
-
       /**
        * <code>optional string uri = 2;</code>
        */
@@ -3466,7 +4166,6 @@ public final class IndexUnits {
         onChanged();
         return this;
       }
-
       /**
        * <code>optional string uri = 2;</code>
        */
@@ -3476,7 +4175,6 @@ public final class IndexUnits {
         onChanged();
         return this;
       }
-
       /**
        * <code>optional string uri = 2;</code>
        */
@@ -3492,14 +4190,12 @@ public final class IndexUnits {
       }
 
       private java.lang.Object title_ = "";
-
       /**
        * <code>optional string title = 3;</code>
        */
       public boolean hasTitle() {
         return ((bitField0_ & 0x00000004) == 0x00000004);
       }
-
       /**
        * <code>optional string title = 3;</code>
        */
@@ -3517,7 +4213,6 @@ public final class IndexUnits {
           return (java.lang.String) ref;
         }
       }
-
       /**
        * <code>optional string title = 3;</code>
        */
@@ -3525,7 +4220,7 @@ public final class IndexUnits {
       getTitleBytes() {
         java.lang.Object ref = title_;
         if (ref instanceof String) {
-          com.google.protobuf.ByteString b =
+          com.google.protobuf.ByteString b = 
               com.google.protobuf.ByteString.copyFromUtf8(
                   (java.lang.String) ref);
           title_ = b;
@@ -3534,7 +4229,6 @@ public final class IndexUnits {
           return (com.google.protobuf.ByteString) ref;
         }
       }
-
       /**
        * <code>optional string title = 3;</code>
        */
@@ -3557,7 +4251,6 @@ public final class IndexUnits {
         onChanged();
         return this;
       }
-
       /**
        * <code>optional string title = 3;</code>
        */
@@ -3573,14 +4266,12 @@ public final class IndexUnits {
       }
 
       private java.lang.Object content_ = "";
-
       /**
        * <code>optional string content = 4;</code>
        */
       public boolean hasContent() {
         return ((bitField0_ & 0x00000008) == 0x00000008);
       }
-
       /**
        * <code>optional string content = 4;</code>
        */
@@ -3598,7 +4289,6 @@ public final class IndexUnits {
           return (java.lang.String) ref;
         }
       }
-
       /**
        * <code>optional string content = 4;</code>
        */
@@ -3606,7 +4296,7 @@ public final class IndexUnits {
       getContentBytes() {
         java.lang.Object ref = content_;
         if (ref instanceof String) {
-          com.google.protobuf.ByteString b =
+          com.google.protobuf.ByteString b = 
               com.google.protobuf.ByteString.copyFromUtf8(
                   (java.lang.String) ref);
           content_ = b;
@@ -3637,7 +4327,6 @@ public final class IndexUnits {
         onChanged();
         return this;
       }
-
       /**
        * <code>optional string content = 4;</code>
        */
@@ -3671,7 +4360,6 @@ public final class IndexUnits {
      * <code>optional int64 term_id = 1;</code>
      */
     boolean hasTermId();
-
     /**
      * <code>optional int64 term_id = 1;</code>
      */
@@ -3705,7 +4393,6 @@ public final class IndexUnits {
      */
     com.expleague.sensearch.protobuf.index.IndexUnits.TermStatistics.TermFrequency getBigramFrequency(
         int index);
-
     /**
      * <code>repeated .index.TermStatistics.TermFrequency bigram_frequency = 4;</code>
      */
@@ -3715,14 +4402,12 @@ public final class IndexUnits {
      */
     java.util.List<? extends com.expleague.sensearch.protobuf.index.IndexUnits.TermStatistics.TermFrequencyOrBuilder>
     getBigramFrequencyOrBuilderList();
-
     /**
      * <code>repeated .index.TermStatistics.TermFrequency bigram_frequency = 4;</code>
      */
     com.expleague.sensearch.protobuf.index.IndexUnits.TermStatistics.TermFrequencyOrBuilder getBigramFrequencyOrBuilder(
         int index);
   }
-
   /**
    * Protobuf type {@code index.TermStatistics}
    */
@@ -3818,7 +4503,6 @@ public final class IndexUnits {
         makeExtensionsImmutable();
       }
     }
-
     public static final com.google.protobuf.Descriptors.Descriptor
     getDescriptor() {
       return com.expleague.sensearch.protobuf.index.IndexUnits.internal_static_index_TermStatistics_descriptor;
@@ -3864,13 +4548,11 @@ public final class IndexUnits {
        * <code>optional int32 term_frequency = 2;</code>
        */
       boolean hasTermFrequency();
-
       /**
        * <code>optional int32 term_frequency = 2;</code>
        */
       int getTermFrequency();
     }
-
     /**
      * Protobuf type {@code index.TermStatistics.TermFrequency}
      */
@@ -3948,7 +4630,6 @@ public final class IndexUnits {
           makeExtensionsImmutable();
         }
       }
-
       public static final com.google.protobuf.Descriptors.Descriptor
       getDescriptor() {
         return com.expleague.sensearch.protobuf.index.IndexUnits.internal_static_index_TermStatistics_TermFrequency_descriptor;
@@ -3980,14 +4661,12 @@ public final class IndexUnits {
       private int bitField0_;
       public static final int TERM_ID_FIELD_NUMBER = 1;
       private long termId_;
-
       /**
        * <code>optional int64 term_id = 1;</code>
        */
       public boolean hasTermId() {
         return ((bitField0_ & 0x00000001) == 0x00000001);
       }
-
       /**
        * <code>optional int64 term_id = 1;</code>
        */
@@ -3997,14 +4676,12 @@ public final class IndexUnits {
 
       public static final int TERM_FREQUENCY_FIELD_NUMBER = 2;
       private int termFrequency_;
-
       /**
        * <code>optional int32 term_frequency = 2;</code>
        */
       public boolean hasTermFrequency() {
         return ((bitField0_ & 0x00000002) == 0x00000002);
       }
-
       /**
        * <code>optional int32 term_frequency = 2;</code>
        */
@@ -4069,7 +4746,6 @@ public final class IndexUnits {
           throws com.google.protobuf.InvalidProtocolBufferException {
         return PARSER.parseFrom(data);
       }
-
       public static com.expleague.sensearch.protobuf.index.IndexUnits.TermStatistics.TermFrequency parseFrom(
           com.google.protobuf.ByteString data,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
@@ -4082,7 +4758,6 @@ public final class IndexUnits {
           throws com.google.protobuf.InvalidProtocolBufferException {
         return PARSER.parseFrom(data);
       }
-
       public static com.expleague.sensearch.protobuf.index.IndexUnits.TermStatistics.TermFrequency parseFrom(
           byte[] data,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
@@ -4095,7 +4770,6 @@ public final class IndexUnits {
           throws java.io.IOException {
         return PARSER.parseFrom(input);
       }
-
       public static com.expleague.sensearch.protobuf.index.IndexUnits.TermStatistics.TermFrequency parseFrom(
           java.io.InputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
@@ -4108,20 +4782,17 @@ public final class IndexUnits {
           throws java.io.IOException {
         return PARSER.parseDelimitedFrom(input);
       }
-
       public static com.expleague.sensearch.protobuf.index.IndexUnits.TermStatistics.TermFrequency parseDelimitedFrom(
           java.io.InputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
         return PARSER.parseDelimitedFrom(input, extensionRegistry);
       }
-
       public static com.expleague.sensearch.protobuf.index.IndexUnits.TermStatistics.TermFrequency parseFrom(
           com.google.protobuf.CodedInputStream input)
           throws java.io.IOException {
         return PARSER.parseFrom(input);
       }
-
       public static com.expleague.sensearch.protobuf.index.IndexUnits.TermStatistics.TermFrequency parseFrom(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
@@ -4159,7 +4830,6 @@ public final class IndexUnits {
           com.google.protobuf.GeneratedMessage.Builder<Builder> implements
           // @@protoc_insertion_point(builder_implements:index.TermStatistics.TermFrequency)
           com.expleague.sensearch.protobuf.index.IndexUnits.TermStatistics.TermFrequencyOrBuilder {
-
         public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
           return com.expleague.sensearch.protobuf.index.IndexUnits.internal_static_index_TermStatistics_TermFrequency_descriptor;
@@ -4292,21 +4962,18 @@ public final class IndexUnits {
         private int bitField0_;
 
         private long termId_;
-
         /**
          * <code>optional int64 term_id = 1;</code>
          */
         public boolean hasTermId() {
           return ((bitField0_ & 0x00000001) == 0x00000001);
         }
-
         /**
          * <code>optional int64 term_id = 1;</code>
          */
         public long getTermId() {
           return termId_;
         }
-
         /**
          * <code>optional int64 term_id = 1;</code>
          */
@@ -4327,21 +4994,18 @@ public final class IndexUnits {
         }
 
         private int termFrequency_;
-
         /**
          * <code>optional int32 term_frequency = 2;</code>
          */
         public boolean hasTermFrequency() {
           return ((bitField0_ & 0x00000002) == 0x00000002);
         }
-
         /**
          * <code>optional int32 term_frequency = 2;</code>
          */
         public int getTermFrequency() {
           return termFrequency_;
         }
-
         /**
          * <code>optional int32 term_frequency = 2;</code>
          */
@@ -4351,7 +5015,6 @@ public final class IndexUnits {
           onChanged();
           return this;
         }
-
         /**
          * <code>optional int32 term_frequency = 2;</code>
          */
@@ -4376,14 +5039,12 @@ public final class IndexUnits {
     private int bitField0_;
     public static final int TERM_ID_FIELD_NUMBER = 1;
     private long termId_;
-
     /**
      * <code>optional int64 term_id = 1;</code>
      */
     public boolean hasTermId() {
       return ((bitField0_ & 0x00000001) == 0x00000001);
     }
-
     /**
      * <code>optional int64 term_id = 1;</code>
      */
@@ -4393,14 +5054,12 @@ public final class IndexUnits {
 
     public static final int DOCUEMENT_FREQUENCY_FIELD_NUMBER = 2;
     private int docuementFrequency_;
-
     /**
      * <code>optional int32 docuement_frequency = 2;</code>
      */
     public boolean hasDocuementFrequency() {
       return ((bitField0_ & 0x00000002) == 0x00000002);
     }
-
     /**
      * <code>optional int32 docuement_frequency = 2;</code>
      */
@@ -4425,14 +5084,12 @@ public final class IndexUnits {
 
     public static final int BIGRAM_FREQUENCY_FIELD_NUMBER = 4;
     private java.util.List<com.expleague.sensearch.protobuf.index.IndexUnits.TermStatistics.TermFrequency> bigramFrequency_;
-
     /**
      * <code>repeated .index.TermStatistics.TermFrequency bigram_frequency = 4;</code>
      */
     public java.util.List<com.expleague.sensearch.protobuf.index.IndexUnits.TermStatistics.TermFrequency> getBigramFrequencyList() {
       return bigramFrequency_;
     }
-
     /**
      * <code>repeated .index.TermStatistics.TermFrequency bigram_frequency = 4;</code>
      */
@@ -4446,7 +5103,6 @@ public final class IndexUnits {
     public int getBigramFrequencyCount() {
       return bigramFrequency_.size();
     }
-
     /**
      * <code>repeated .index.TermStatistics.TermFrequency bigram_frequency = 4;</code>
      */
@@ -4454,7 +5110,6 @@ public final class IndexUnits {
         int index) {
       return bigramFrequency_.get(index);
     }
-
     /**
      * <code>repeated .index.TermStatistics.TermFrequency bigram_frequency = 4;</code>
      */
@@ -4572,7 +5227,6 @@ public final class IndexUnits {
         throws java.io.IOException {
       return PARSER.parseDelimitedFrom(input);
     }
-
     public static com.expleague.sensearch.protobuf.index.IndexUnits.TermStatistics parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
@@ -4614,7 +5268,6 @@ public final class IndexUnits {
       Builder builder = new Builder(parent);
       return builder;
     }
-
     /**
      * Protobuf type {@code index.TermStatistics}
      */
@@ -4622,7 +5275,6 @@ public final class IndexUnits {
         com.google.protobuf.GeneratedMessage.Builder<Builder> implements
         // @@protoc_insertion_point(builder_implements:index.TermStatistics)
         com.expleague.sensearch.protobuf.index.IndexUnits.TermStatisticsOrBuilder {
-
       public static final com.google.protobuf.Descriptors.Descriptor
       getDescriptor() {
         return com.expleague.sensearch.protobuf.index.IndexUnits.internal_static_index_TermStatistics_descriptor;
@@ -4805,21 +5457,18 @@ public final class IndexUnits {
       private int bitField0_;
 
       private long termId_;
-
       /**
        * <code>optional int64 term_id = 1;</code>
        */
       public boolean hasTermId() {
         return ((bitField0_ & 0x00000001) == 0x00000001);
       }
-
       /**
        * <code>optional int64 term_id = 1;</code>
        */
       public long getTermId() {
         return termId_;
       }
-
       /**
        * <code>optional int64 term_id = 1;</code>
        */
@@ -4829,7 +5478,6 @@ public final class IndexUnits {
         onChanged();
         return this;
       }
-
       /**
        * <code>optional int64 term_id = 1;</code>
        */
@@ -4841,14 +5489,12 @@ public final class IndexUnits {
       }
 
       private int docuementFrequency_;
-
       /**
        * <code>optional int32 docuement_frequency = 2;</code>
        */
       public boolean hasDocuementFrequency() {
         return ((bitField0_ & 0x00000002) == 0x00000002);
       }
-
       /**
        * <code>optional int32 docuement_frequency = 2;</code>
        */
@@ -4864,7 +5510,6 @@ public final class IndexUnits {
         onChanged();
         return this;
       }
-
       /**
        * <code>optional int32 docuement_frequency = 2;</code>
        */
@@ -4876,14 +5521,12 @@ public final class IndexUnits {
       }
 
       private long termFrequency_;
-
       /**
        * <code>optional int64 term_frequency = 3;</code>
        */
       public boolean hasTermFrequency() {
         return ((bitField0_ & 0x00000004) == 0x00000004);
       }
-
       /**
        * <code>optional int64 term_frequency = 3;</code>
        */
@@ -4899,7 +5542,6 @@ public final class IndexUnits {
         onChanged();
         return this;
       }
-
       /**
        * <code>optional int64 term_frequency = 3;</code>
        */
@@ -4933,7 +5575,6 @@ public final class IndexUnits {
           return bigramFrequencyBuilder_.getMessageList();
         }
       }
-
       /**
        * <code>repeated .index.TermStatistics.TermFrequency bigram_frequency = 4;</code>
        */
@@ -4944,7 +5585,6 @@ public final class IndexUnits {
           return bigramFrequencyBuilder_.getCount();
         }
       }
-
       /**
        * <code>repeated .index.TermStatistics.TermFrequency bigram_frequency = 4;</code>
        */
@@ -4956,7 +5596,6 @@ public final class IndexUnits {
           return bigramFrequencyBuilder_.getMessage(index);
         }
       }
-
       /**
        * <code>repeated .index.TermStatistics.TermFrequency bigram_frequency = 4;</code>
        */
@@ -4975,7 +5614,6 @@ public final class IndexUnits {
         }
         return this;
       }
-
       /**
        * <code>repeated .index.TermStatistics.TermFrequency bigram_frequency = 4;</code>
        */
@@ -4991,7 +5629,6 @@ public final class IndexUnits {
         }
         return this;
       }
-
       /**
        * <code>repeated .index.TermStatistics.TermFrequency bigram_frequency = 4;</code>
        */
@@ -5009,7 +5646,6 @@ public final class IndexUnits {
         }
         return this;
       }
-
       /**
        * <code>repeated .index.TermStatistics.TermFrequency bigram_frequency = 4;</code>
        */
@@ -5028,7 +5664,6 @@ public final class IndexUnits {
         }
         return this;
       }
-
       /**
        * <code>repeated .index.TermStatistics.TermFrequency bigram_frequency = 4;</code>
        */
@@ -5043,7 +5678,6 @@ public final class IndexUnits {
         }
         return this;
       }
-
       /**
        * <code>repeated .index.TermStatistics.TermFrequency bigram_frequency = 4;</code>
        */
@@ -5059,7 +5693,6 @@ public final class IndexUnits {
         }
         return this;
       }
-
       /**
        * <code>repeated .index.TermStatistics.TermFrequency bigram_frequency = 4;</code>
        */
@@ -5075,7 +5708,6 @@ public final class IndexUnits {
         }
         return this;
       }
-
       /**
        * <code>repeated .index.TermStatistics.TermFrequency bigram_frequency = 4;</code>
        */
@@ -5102,7 +5734,6 @@ public final class IndexUnits {
         }
         return this;
       }
-
       /**
        * <code>repeated .index.TermStatistics.TermFrequency bigram_frequency = 4;</code>
        */
@@ -5193,6 +5824,11 @@ public final class IndexUnits {
   com.google.protobuf.GeneratedMessage.FieldAccessorTable
       internal_static_index_IndexMeta_IdMapping_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
+      internal_static_index_IndexMeta_LemmaIdMapping_descriptor;
+  private static
+  com.google.protobuf.GeneratedMessage.FieldAccessorTable
+      internal_static_index_IndexMeta_LemmaIdMapping_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
       internal_static_index_IndexMeta_UriPageMapping_descriptor;
   private static
   com.google.protobuf.GeneratedMessage.FieldAccessorTable
@@ -5217,29 +5853,31 @@ public final class IndexUnits {
   getDescriptor() {
     return descriptor;
   }
-
   private static com.google.protobuf.Descriptors.FileDescriptor
       descriptor;
   static {
     java.lang.String[] descriptorData = {
-        "\n\020indexunits.proto\022\005index\"\265\002\n\tIndexMeta\022" +
+        "\n\020indexunits.proto\022\005index\"\211\003\n\tIndexMeta\022" +
             "\023\n\013pages_count\030\001 \001(\005\022\031\n\021average_page_siz" +
-            "e\030\002 \001(\001\022\027\n\017vocabulary_size\030\003 \001(\005\022\033\n\023titl" +
-            "es_bloom_filter\030\004 \001(\014\022/\n\013id_mappings\030\005 \003" +
-            "(\0132\032.index.IndexMeta.IdMapping\022:\n\021uri_pa" +
-            "ge_mappings\030\006 \003(\0132\037.index.IndexMeta.UriP" +
-            "ageMapping\032%\n\tIdMapping\022\014\n\004word\030\001 \001(\t\022\n\n" +
-            "\002id\030\002 \001(\003\032.\n\016UriPageMapping\022\013\n\003uri\030\001 \001(\t" +
-            "\022\017\n\007page_id\030\002 \001(\003\"D\n\004Page\022\017\n\007page_id\030\001 \001"
+            "e\030\002 \001(\001\022\027\n\017vocabulary_size\030\003 \001(\005\022/\n\013id_m" +
+            "appings\030\005 \003(\0132\032.index.IndexMeta.IdMappin" +
+            "g\022:\n\021lemma_id_mappings\030\006 \003(\0132\037.index.Ind" +
+            "exMeta.LemmaIdMapping\022:\n\021uri_page_mappin" +
+            "gs\030\007 \003(\0132\037.index.IndexMeta.UriPageMappin" +
+            "g\032%\n\tIdMapping\022\014\n\004word\030\001 \001(\t\022\n\n\002id\030\002 \001(\003"
             +
-            "(\003\022\013\n\003uri\030\002 \001(\t\022\r\n\005title\030\003 \001(\t\022\017\n\007conten",
-        "t\030\004 \001(\t\"\317\001\n\016TermStatistics\022\017\n\007term_id\030\001 " +
-            "\001(\003\022\033\n\023docuement_frequency\030\002 \001(\005\022\026\n\016term" +
-            "_frequency\030\003 \001(\003\022=\n\020bigram_frequency\030\004 \003" +
-            "(\0132#.index.TermStatistics.TermFrequency\032" +
-            "8\n\rTermFrequency\022\017\n\007term_id\030\001 \001(\003\022\026\n\016ter" +
-            "m_frequency\030\002 \001(\005B4\n&com.expleague.sense" +
-            "arch.protobuf.indexB\nIndexUnits"
+            "\0323\n\016LemmaIdMapping\022\017\n\007word_id\030\001 \001(\003\022\020\n\010l" +
+            "emma_id\030\002 \001(\003\032.\n\016UriPageMapping\022\013\n\003uri\030\001",
+        " \001(\t\022\017\n\007page_id\030\002 \001(\003\"D\n\004Page\022\017\n\007page_id" +
+            "\030\001 \001(\003\022\013\n\003uri\030\002 \001(\t\022\r\n\005title\030\003 \001(\t\022\017\n\007co"
+            +
+            "ntent\030\004 \001(\t\"\317\001\n\016TermStatistics\022\017\n\007term_i" +
+            "d\030\001 \001(\003\022\033\n\023docuement_frequency\030\002 \001(\005\022\026\n\016" +
+            "term_frequency\030\003 \001(\003\022=\n\020bigram_frequency" +
+            "\030\004 \003(\0132#.index.TermStatistics.TermFreque" +
+            "ncy\0328\n\rTermFrequency\022\017\n\007term_id\030\001 \001(\003\022\026\n" +
+            "\016term_frequency\030\002 \001(\005B4\n&com.expleague.s" +
+            "ensearch.protobuf.indexB\nIndexUnits"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
         new com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner() {
@@ -5258,16 +5896,22 @@ public final class IndexUnits {
     internal_static_index_IndexMeta_fieldAccessorTable = new
         com.google.protobuf.GeneratedMessage.FieldAccessorTable(
         internal_static_index_IndexMeta_descriptor,
-        new java.lang.String[]{"PagesCount", "AveragePageSize", "VocabularySize",
-            "TitlesBloomFilter", "IdMappings", "UriPageMappings",});
+        new java.lang.String[]{"PagesCount", "AveragePageSize", "VocabularySize", "IdMappings",
+            "LemmaIdMappings", "UriPageMappings",});
     internal_static_index_IndexMeta_IdMapping_descriptor =
         internal_static_index_IndexMeta_descriptor.getNestedTypes().get(0);
     internal_static_index_IndexMeta_IdMapping_fieldAccessorTable = new
         com.google.protobuf.GeneratedMessage.FieldAccessorTable(
         internal_static_index_IndexMeta_IdMapping_descriptor,
         new java.lang.String[]{"Word", "Id",});
-    internal_static_index_IndexMeta_UriPageMapping_descriptor =
+    internal_static_index_IndexMeta_LemmaIdMapping_descriptor =
         internal_static_index_IndexMeta_descriptor.getNestedTypes().get(1);
+    internal_static_index_IndexMeta_LemmaIdMapping_fieldAccessorTable = new
+        com.google.protobuf.GeneratedMessage.FieldAccessorTable(
+        internal_static_index_IndexMeta_LemmaIdMapping_descriptor,
+        new java.lang.String[]{"WordId", "LemmaId",});
+    internal_static_index_IndexMeta_UriPageMapping_descriptor =
+        internal_static_index_IndexMeta_descriptor.getNestedTypes().get(2);
     internal_static_index_IndexMeta_UriPageMapping_fieldAccessorTable = new
         com.google.protobuf.GeneratedMessage.FieldAccessorTable(
         internal_static_index_IndexMeta_UriPageMapping_descriptor,

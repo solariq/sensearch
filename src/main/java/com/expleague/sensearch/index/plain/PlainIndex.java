@@ -5,10 +5,8 @@ import com.expleague.commons.math.vectors.VecTools;
 import com.expleague.commons.math.vectors.impl.vectors.ArrayVec;
 import com.expleague.commons.seq.CharSeq;
 import com.expleague.commons.seq.CharSeqTools;
-import com.expleague.commons.text.lemmer.LemmaInfo;
 import com.expleague.commons.text.lemmer.MyStem;
 import com.expleague.commons.text.lemmer.MyStemImpl;
-import com.expleague.commons.text.lemmer.WordInfo;
 import com.expleague.sensearch.Config;
 import com.expleague.sensearch.Page;
 import com.expleague.sensearch.core.Term;
@@ -25,26 +23,21 @@ import com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta.UriPageMappin
 import com.expleague.sensearch.protobuf.index.IndexUnits.TermStatistics;
 import com.expleague.sensearch.protobuf.index.IndexUnits.TermStatistics.TermFrequency;
 import com.expleague.sensearch.query.Query;
-import com.google.common.hash.BloomFilter;
-import com.google.common.hash.Funnels;
 import com.google.common.primitives.Longs;
-import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
+import gnu.trove.map.TLongLongMap;
 import gnu.trove.map.TLongObjectMap;
 import gnu.trove.map.TObjectLongMap;
+import gnu.trove.map.hash.TLongLongHashMap;
 import gnu.trove.map.hash.TLongObjectHashMap;
 import gnu.trove.map.hash.TObjectLongHashMap;
-import org.apache.log4j.Logger;
-import org.fusesource.leveldbjni.JniDBFactory;
-import org.iq80.leveldb.*;
-import org.jetbrains.annotations.Nullable;
-
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.stream.Stream;
 import org.apache.log4j.Logger;
@@ -85,8 +78,6 @@ public class PlainIndex implements Index {
   private final int indexSize;
   private final int vocabularySize;
 
-  private final BloomFilter<byte[]> titlesBloomFilter;
-
   private final Embedding embedding;
   private final Filter filter;
   private final MyStem stemmer;
@@ -95,6 +86,9 @@ public class PlainIndex implements Index {
   private TermStatistics lastTermStatistics;
 
   public PlainIndex(Config config) throws IOException {
+    LOG.info("Loading PlainIndex...");
+    long startTime = System.nanoTime();
+
     indexRoot = config.getTemporaryIndex();
 
     embedding = new EmbeddingImpl(indexRoot.resolve(PlainIndexBuilder.EMBEDDING_ROOT));
@@ -119,49 +113,52 @@ public class PlainIndex implements Index {
     indexSize = indexMeta.getPagesCount();
     vocabularySize = indexMeta.getVocabularySize();
 
-    ByteString byteStringFilter = indexMeta.getTitlesBloomFilter();
-    titlesBloomFilter =
-        BloomFilter.readFrom(
-            new ByteArrayInputStream(byteStringFilter.toByteArray(), 0, byteStringFilter.size()),
-            Funnels.byteArrayFunnel());
-
     final TObjectLongMap<CharSeq> ids = new TObjectLongHashMap<>();
     indexMeta.getIdMappingsList().forEach(m -> ids.put(CharSeq.create(m.getWord()), m.getId()));
+
+    final TLongLongMap wordToLemma = new TLongLongHashMap();
+    indexMeta.getLemmaIdMappingsList().forEach(m -> wordToLemma.put(m.getWordId(), m.getLemmaId()));
+
+    TLongObjectMap<String> idToWord = new TLongObjectHashMap<>();
+    indexMeta.getIdMappingsList().forEach(m -> idToWord.put(m.getId(), m.getWord()));
+
     for (IdMapping idMapping : indexMeta.getIdMappingsList()) {
       //noinspection SuspiciousMethodCalls
       if (wordToTerms.containsKey(idMapping.getWord()))
         continue;
 
-      final String word = idMapping.getWord();
-      final List<WordInfo> parse = stemmer.parse(word);
-      final LemmaInfo lemma = parse.size() > 0 ? parse.get(0).lemma() : null;
-//      if (lemma == null)
-//        System.out.println();
+//      final List<WordInfo> parse = stemmer.parse(word);
+//      final LemmaInfo lemma = parse.size() > 0 ? parse.get(0).lemma() : null;
       final IndexTerm lemmaTerm;
-      //noinspection EqualsBetweenInconvertibleTypes
-      if (lemma == null || lemma.lemma().equals(word)) {
+
+      final String word = idMapping.getWord();
+      final long lemmaId = wordToLemma.get(idMapping.getId());
+      if (lemmaId == -1) {
         lemmaTerm = null;
-      }
-      else if (wordToTerms.containsKey(lemma.lemma())) {
-        lemmaTerm = (IndexTerm) wordToTerms.get(lemma.lemma());
-      }
-      else {
-        long lemmaId = ids.get(lemma.lemma());
-        if (lemmaId == ids.getNoEntryValue()) {
-          lemmaId = ids.size();
-          ids.put(lemma.lemma(), lemmaId);
+      } else {
+        if (idToTerm.containsKey(lemmaId)) {
+          lemmaTerm = (IndexTerm) idToTerm.get(lemmaId);
+        } else {
+          CharSeq lemmaText = CharSeq.intern(idToWord.get(lemmaId));
+          lemmaTerm = new IndexTerm(this, lemmaText, lemmaId, null);
+          idToTerm.put(lemmaId, lemmaTerm);
+          wordToTerms.put(lemmaText, lemmaTerm);
         }
-        CharSeq compactLemma = CharSeq.intern(lemma.lemma());
-        lemmaTerm = new IndexTerm(this, compactLemma, lemmaId, null);
       }
+
       final CharSeq compactText = CharSeq.intern(word);
-      wordToTerms.put(compactText, new IndexTerm(this, compactText, idMapping.getId(), lemmaTerm));
+
+      IndexTerm term = new IndexTerm(this, compactText, idMapping.getId(), lemmaTerm);
+      idToTerm.put(idMapping.getId(), term);
+      wordToTerms.put(compactText, term);
     }
-    wordToTerms.values().forEach(t -> idToTerm.put(((IndexTerm) t).id(), t));
 
     for (UriPageMapping mapping : indexMeta.getUriPageMappingsList()) {
       uriToPageIdMap.put(URI.create(mapping.getUri()), mapping.getPageId());
     }
+
+    LOG.info(
+        String.format("PlainIndex loaded in %.3f seconds", (System.nanoTime() - startTime) / 1e9));
   }
 
   private static boolean isPageId(long id) {
@@ -179,7 +176,8 @@ public class PlainIndex implements Index {
     } catch (InvalidProtocolBufferException e) {
       LOG.warn(
           String.format(
-              "Encountered invalid protobuf in statistics base for word with id %d", term.text().toString()));
+              "Encountered invalid protobuf in statistics base for word with id [%d] and text [%s]",
+              ((IndexTerm) term).id(), term.text()));
       return Stream.empty();
     }
   }
@@ -227,7 +225,7 @@ public class PlainIndex implements Index {
   @Override
   public Term term(CharSequence seq) {
     final CharSequence normalized = CharSeqTools.toLowerCase(CharSeqTools.trim(seq));
-    return wordToTerms.get(CharSeq.create(normalized));
+    return wordToTerms.get(CharSeq.intern(normalized));
   }
 
   @Override

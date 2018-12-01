@@ -12,6 +12,11 @@ message IndexMeta {
     optional int64 id = 2;
   }
 
+  message LemmaIdMapping {
+    optional int64 word_id = 1;
+    optional int64 lemma_id = 2;
+  }
+
   message UriPageMapping {
     optional string uri = 1;
     optional int64 page_id = 2;
@@ -21,10 +26,10 @@ message IndexMeta {
   optional double average_page_size = 2;
 
   optional int32 vocabulary_size = 3;
-  optional bytes titles_bloom_filter = 4;
 
   repeated IdMapping id_mappings = 5;
-  repeated UriPageMapping uri_page_mappings = 6;
+  repeated LemmaIdMapping lemma_id_mappings = 6;
+  repeated UriPageMapping uri_page_mappings = 7;
 }
 
 message Page {

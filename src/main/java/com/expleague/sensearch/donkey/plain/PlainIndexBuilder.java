@@ -3,22 +3,26 @@ package com.expleague.sensearch.donkey.plain;
 import com.expleague.commons.math.vectors.Vec;
 import com.expleague.commons.math.vectors.impl.vectors.ArrayVec;
 import com.expleague.commons.seq.CharSeqTools;
+import com.expleague.commons.text.lemmer.LemmaInfo;
+import com.expleague.commons.text.lemmer.MyStem;
+import com.expleague.commons.text.lemmer.WordInfo;
 import com.expleague.sensearch.Config;
+import com.expleague.sensearch.core.Lemmer;
 import com.expleague.sensearch.core.Tokenizer;
 import com.expleague.sensearch.core.impl.TokenizerImpl;
 import com.expleague.sensearch.donkey.IndexBuilder;
 import com.expleague.sensearch.donkey.crawler.Crawler;
 import com.expleague.sensearch.protobuf.index.IndexUnits;
 import com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta.IdMapping;
+import com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta.LemmaIdMapping;
 import com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta.UriPageMapping;
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.hash.BloomFilter;
-import com.google.common.hash.Funnels;
-import com.google.protobuf.ByteString;
 import gnu.trove.map.TLongIntMap;
+import gnu.trove.map.TLongLongMap;
 import gnu.trove.map.TLongObjectMap;
 import gnu.trove.map.TObjectLongMap;
 import gnu.trove.map.hash.TLongIntHashMap;
+import gnu.trove.map.hash.TLongLongHashMap;
 import gnu.trove.map.hash.TLongObjectHashMap;
 import gnu.trove.map.hash.TObjectLongHashMap;
 import java.io.ByteArrayOutputStream;
@@ -81,6 +85,7 @@ public class PlainIndexBuilder implements IndexBuilder {
   }
 
 
+  // TODO refactor this
   // Yes, this is a dirty copy-paste
   @VisibleForTesting
   static Iterable<UriPageMapping> toProtobufIterableUri(TObjectLongMap<String> mappings) {
@@ -89,6 +94,21 @@ public class PlainIndexBuilder implements IndexBuilder {
     mappings.forEachEntry(
         (w, id) -> {
           protobufMappings.add(uriMappingsBuilder.setPageId(id).setUri(w).build());
+          return true;
+        });
+
+    return protobufMappings;
+  }
+
+  // TODO refactor this
+  // Another copy-paste
+  @VisibleForTesting
+  static Iterable<LemmaIdMapping> toProtobufIterableLemmaId(TLongLongMap mappings) {
+    final List<LemmaIdMapping> protobufMappings = new LinkedList<>();
+    final LemmaIdMapping.Builder idMappingsBuilder = LemmaIdMapping.newBuilder();
+    mappings.forEachEntry(
+        (w, lemma) -> {
+          protobufMappings.add(idMappingsBuilder.setWordId(w).setLemmaId(lemma).build());
           return true;
         });
 
@@ -188,13 +208,19 @@ public class PlainIndexBuilder implements IndexBuilder {
   }
 
   @Override
-  public void buildIndex(Crawler crawler, Config config) throws IOException {
+  public void buildIndex(Crawler crawler, Config config, Lemmer lemmer) throws IOException {
     final Tokenizer tokenizer = new TokenizerImpl();
     final TLongObjectMap<Vec> gloveVectors = new TLongObjectHashMap<>();
     final TObjectLongMap<String> idMappings = new TObjectLongHashMap<>();
     final TObjectLongMap<String> uriPageIdMapping = new TObjectLongHashMap<>();
+
+    LOG.info("Reading vectors...");
     readGloveVectors(Paths.get(config.getEmbeddingVectors()), idMappings, gloveVectors);
 
+    LOG.info("Parsing lemmas...");
+    TLongLongMap lemmaMappings = enrichWordsWithLemmas(idMappings, lemmer);
+
+    LOG.info("Creating database files...");
     final Path indexRoot = config.getTemporaryIndex();
     // ensure all roots
     Files.createDirectories(indexRoot.resolve(PLAIN_ROOT));
@@ -217,12 +243,8 @@ public class PlainIndexBuilder implements IndexBuilder {
     final TLongIntMap termFrequencyMap = new TLongIntHashMap();
     final TLongObjectMap<TLongIntMap> bigramFrequencyMap = new TLongObjectHashMap<>();
 
-    final BloomFilter<byte[]> titlesFilter =
-        BloomFilter.create(
-            Funnels.byteArrayFunnel(),
-            DEFAULT_EXPECTED_COLLECTION_SIZE,
-            DEFAULT_FALSE_POSITIVE_RATE);
     // saving page-wise data
+    LOG.info("Storing page-wise data...");
     try {
       crawler
           .makeStream()
@@ -232,7 +254,6 @@ public class PlainIndexBuilder implements IndexBuilder {
 
                 long[] titleIds = toIds(tokenizer.parseTextToWords(doc.title().toLowerCase()),
                     idMappings);
-                titlesFilter.put(ByteTools.toBytes(titleIds));
 
                 embeddingBuilder.add(pageId, toVector(titleIds, gloveVectors));
 
@@ -250,6 +271,8 @@ public class PlainIndexBuilder implements IndexBuilder {
 
                 uriPageIdMapping.put(doc.uri().toString(), pageId);
               });
+
+      LOG.info("Building embedding...");
       embeddingBuilder.addAll(gloveVectors);
       embeddingBuilder.build();
 
@@ -257,15 +280,15 @@ public class PlainIndexBuilder implements IndexBuilder {
       statisticsBuilder.build();
 
       ByteArrayOutputStream bos = new ByteArrayOutputStream();
-      titlesFilter.writeTo(bos);
 
+      LOG.info("Storing index meta...");
       // saving index-wise data
       IndexUnits.IndexMeta.newBuilder()
           .setAveragePageSize((double) pagesAndTokensCounts[1] / pagesAndTokensCounts[0])
           .setVocabularySize(idMappings.size())
           .setPagesCount((int) pagesAndTokensCounts[0])
-          .setTitlesBloomFilter(ByteString.copyFrom(bos.toByteArray()))
           .addAllIdMappings(toProtobufIterable(idMappings))
+          .addAllLemmaIdMappings(toProtobufIterableLemmaId(lemmaMappings))
           .addAllUriPageMappings(toProtobufIterableUri(uriPageIdMapping))
           .build()
           .writeTo(Files.newOutputStream(indexRoot.resolve(INDEX_META_FILE)));
@@ -273,6 +296,40 @@ public class PlainIndexBuilder implements IndexBuilder {
     } catch (Exception e) {
       throw new IOException(e);
     }
+    LOG.info("Index built!");
+  }
+
+  private TLongLongMap enrichWordsWithLemmas(TObjectLongMap<String> idMapping, Lemmer lemmer) {
+    MyStem stem = lemmer.myStem;
+    TLongLongMap mapping = new TLongLongHashMap();
+    TObjectLongMap<String> newIds = new TObjectLongHashMap<>();
+
+    idMapping.forEachKey(word -> {
+      final List<WordInfo> parse = stem.parse(word);
+      final LemmaInfo lemma = parse.size() > 0 ? parse.get(0).lemma() : null;
+      ;
+
+      //noinspection EqualsBetweenInconvertibleTypes
+      if (lemma == null || lemma.lemma().equals(word)) {
+        mapping.put(idMapping.get(word), -1);
+        return true;
+      }
+
+      if (!idMapping.containsKey(lemma.lemma()) && !newIds.containsKey(lemma.lemma().toString())) {
+        newIds.put(lemma.lemma().toString(), idMapping.size() + newIds.size());
+      }
+
+      long lemmaId = idMapping.get(lemma);
+      mapping.put(idMapping.get(word), lemmaId);
+      if (!mapping.containsKey(lemmaId)) {
+        mapping.put(lemmaId, -1);
+      }
+
+      return true;
+    });
+
+    idMapping.putAll(newIds);
+    return mapping;
   }
 
 }
