@@ -75,8 +75,8 @@ public class UnitDocumentTest {
 
     Assert.assertEquals(page.sections().get(0).title(), Collections.singletonList("Мужун Вэй"));
     Assert.assertEquals(
-        page.sections().get(0).text().toString(),
-        "Мужун Вэй (, 350—385), взрослое имя Цзинмао (景茂) —<link target=\"сяньби\" targetId=\"5896482\">сяньби</link>йский вождь, последний император государства<link target=\"ранняя янь\" targetId=\"6675814\">Ранняя Янь</link>. От императора<link target=\"южная янь\" targetId=\"133904\">Южной Янь</link><link target=\"мужун дэ\" targetId=\"7395037\">Мужун Дэ</link>, который был его дядей, впоследствии получил посмертное имя Ю-ди (幽帝).");
+        "Мужун Вэй (, 350—385), взрослое имя Цзинмао (景茂) — сяньби йский вождь, последний император государства Ранняя Янь . От императора Южной Янь Мужун Дэ , который был его дядей, впоследствии получил посмертное имя Ю-ди (幽帝).",
+        page.sections().get(0).text().toString());
   }
 
   @Test
@@ -126,7 +126,7 @@ public class UnitDocumentTest {
     test.add("Императоры Поздней Чжао");
     test.add("Правители Азии IV века");
     Assert.assertEquals(page.iD(), 6673315);
-    Assert.assertNull(page.title());
+    Assert.assertEquals("", page.title());
     Assert.assertEquals(page.sections().size(), 3);
     Assert.assertEquals(page.categories(), test);
     Assert.assertEquals(page.sections().get(0).title(), Collections.singletonList("Ши Чжи"));

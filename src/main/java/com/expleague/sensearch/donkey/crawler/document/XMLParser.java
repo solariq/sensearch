@@ -32,12 +32,12 @@ public class XMLParser {
       XmlPageRootElement element = (XmlPageRootElement) um.unmarshal(file);
       XmlPage xmlPage = element.page;
 
-      page.setTitle(xmlPage.title);
+      page.setTitle(xmlPage.title == null ? "" : xmlPage.title);
       // TODO (tehnar): proper escaping
       page.setUri(
           URI.create(
               "https://ru.wikipedia.org/wiki/"
-                  + xmlPage.title.replace(" ", "_").replace("%", "%25")));
+                  + page.title().replace(" ", "_").replace("%", "%25")));
       if (xmlPage.categories == null) {
         page.setCategories(new ArrayList<>());
       } else {
@@ -80,8 +80,9 @@ public class XMLParser {
                       }
                     }
 
+                    String sectionTitle = xmlSection.title == null ? "" : xmlSection.title;
                     return new WikiSection(
-                        text, Arrays.asList(xmlSection.title.split("\\|@\\|")), links);
+                        text, Arrays.asList(sectionTitle.split("\\|@\\|")), links);
                   })
               .collect(Collectors.toList());
 
