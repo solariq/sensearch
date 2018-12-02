@@ -28,8 +28,8 @@ public class EmbeddingBuilder {
   public static final String LSH_ROOT = "lsh";
   public static final String RAND_VECS = "rand";
   public static final int TABLES_NUMBER = 10;
-  public static final int TUPLE_SIZE = 12;
-  private static final int MAX_BATCH_SIZE = 100;
+  public static final int TUPLE_SIZE = 20;
+  private static final int MAX_BATCH_SIZE = 1_000_000;
 
   private static final Options DB_OPTIONS =
       new Options()
@@ -44,7 +44,7 @@ public class EmbeddingBuilder {
   private WriteBatch batch = null;
   private int batchSize = 0;
 
-  private TLongList[] tables = new TLongArrayList[(1 << TUPLE_SIZE) * TABLES_NUMBER];
+  private TLongList[] tables = new TLongArrayList[(TABLES_NUMBER << TUPLE_SIZE)];
   private DB tablesDB;
   private ToIntFunction<Vec>[] hashFuncs;
 
@@ -82,7 +82,7 @@ public class EmbeddingBuilder {
                 mask[j] = VecTools.multiply(vec, randVecs[j]) >= 0;
               }
 
-              int hash = (1 << TUPLE_SIZE) * hashNum;
+              int hash = (hashNum << TUPLE_SIZE);
               for (int j = 0; j < mask.length; j++) {
                 if (mask[j]) {
                   hash += 1 << j;
@@ -141,7 +141,6 @@ public class EmbeddingBuilder {
       batch = null;
     }
     vecDB.close();
-
     for (int i = 0; i < tables.length; i++) {
       addToTablesDB(i, tables[i].toArray());
     }
