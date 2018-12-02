@@ -32,7 +32,7 @@ public class MinerPhase implements SearchPhase {
 
   @Override
   public void accept(Whiteboard whiteboard) {
-    LOG.debug("Miner phase started");
+    LOG.info("Miner phase started");
     long startTime = System.nanoTime();
 
     final Query query = whiteboard.query();
@@ -43,7 +43,7 @@ public class MinerPhase implements SearchPhase {
                 Collectors.toMap(
                     Function.identity(), page -> featuresExtractor.extractFeatures(query, page))));
 
-    LOG.debug(
+    LOG.info(
         String.format(
             "Miner phase finished in %.3f seconds", (System.nanoTime() - startTime) / 1e9));
   }

@@ -50,6 +50,8 @@ import org.iq80.leveldb.ReadOptions;
 import org.jetbrains.annotations.Nullable;
 
 public class PlainIndex implements Index {
+  public static final int VERSION = 1;
+
   private static final long DEFAULT_CACHE_SIZE = 128 * (1 << 20); // 128 MB
 
   private static final Options DEFAULT_DB_OPTIONS =
@@ -109,6 +111,10 @@ public class PlainIndex implements Index {
     IndexUnits.IndexMeta indexMeta =
         IndexUnits.IndexMeta.parseFrom(
             Files.newInputStream(indexRoot.resolve(PlainIndexBuilder.INDEX_META_FILE)));
+
+    if (indexMeta.getVersion() != VERSION) {
+      throw new IllegalArgumentException(String.format("Built index has version %d while code version is %d", indexMeta.getVersion(), VERSION));
+    }
     averagePageSize = indexMeta.getAveragePageSize();
     indexSize = indexMeta.getPagesCount();
     vocabularySize = indexMeta.getVocabularySize();

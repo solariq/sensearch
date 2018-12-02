@@ -22,10 +22,11 @@ message IndexMeta {
     optional int64 page_id = 2;
   }
 
-  optional int32 pages_count = 1;
-  optional double average_page_size = 2;
+  optional int32 version = 1;
+  optional int32 pages_count = 2;
+  optional double average_page_size = 3;
 
-  optional int32 vocabulary_size = 3;
+  optional int32 vocabulary_size = 4;
 
   repeated IdMapping id_mappings = 5;
   repeated LemmaIdMapping lemma_id_mappings = 6;

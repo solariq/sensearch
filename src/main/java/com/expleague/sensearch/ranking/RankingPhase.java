@@ -31,7 +31,7 @@ public class RankingPhase implements SearchPhase {
 
   @Override
   public void accept(Whiteboard whiteboard) {
-    LOG.debug("Ranking phase started");
+    LOG.info("Ranking phase started");
     long startTime = System.nanoTime();
 
     final int pageNo = whiteboard.pageNo();
@@ -47,7 +47,7 @@ public class RankingPhase implements SearchPhase {
             .limit(pageSize)
             .toArray(Page[]::new));
 
-    LOG.debug(String
+    LOG.info(String
         .format("Ranking phase finished in %.3f seconds", (System.nanoTime() - startTime) / 1e9));
   }
 }

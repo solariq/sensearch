@@ -16,13 +16,13 @@ public class QueryPhase implements SearchPhase {
 
   @Override
   public void accept(Whiteboard whiteboard) {
-    LOG.debug("Query phase started");
+    LOG.info("Query phase started");
     long startTime = System.nanoTime();
 
     final String input = whiteboard.input();
     whiteboard.putQuery(BaseQuery.create(input, whiteboard.builder().getIndex()));
 
-    LOG.debug(String
+    LOG.info(String
         .format("Query phase finished in %.3f seconds", (System.nanoTime() - startTime) / 1e9));
   }
 }

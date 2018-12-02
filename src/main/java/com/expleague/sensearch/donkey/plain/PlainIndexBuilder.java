@@ -12,6 +12,7 @@ import com.expleague.sensearch.core.Tokenizer;
 import com.expleague.sensearch.core.impl.TokenizerImpl;
 import com.expleague.sensearch.donkey.IndexBuilder;
 import com.expleague.sensearch.donkey.crawler.Crawler;
+import com.expleague.sensearch.index.plain.PlainIndex;
 import com.expleague.sensearch.protobuf.index.IndexUnits;
 import com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta.IdMapping;
 import com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta.LemmaIdMapping;
@@ -175,7 +176,8 @@ public class PlainIndexBuilder implements IndexBuilder {
     if (vectorsFound != tokens.length) {
       LOG.warn("");
     }
-    mean.scale(1.0 / vectorsFound);
+
+    mean.scale(vectorsFound == 0 ? 1 : 1.0 / vectorsFound);
     return mean;
   }
 
@@ -190,7 +192,7 @@ public class PlainIndexBuilder implements IndexBuilder {
           .forEach(
               line -> {
                 CharSequence[] parts = CharSeqTools.split(line, ' ');
-                final String word = parts[0].toString();
+                final String word = parts[0].toString().toLowerCase();
                 double[] doubles =
                     Arrays.stream(parts, 1, parts.length)
                         .mapToDouble(CharSeqTools::parseDouble)
@@ -284,6 +286,7 @@ public class PlainIndexBuilder implements IndexBuilder {
       LOG.info("Storing index meta...");
       // saving index-wise data
       IndexUnits.IndexMeta.newBuilder()
+          .setVersion(PlainIndex.VERSION)
           .setAveragePageSize((double) pagesAndTokensCounts[1] / pagesAndTokensCounts[0])
           .setVocabularySize(idMappings.size())
           .setPagesCount((int) pagesAndTokensCounts[0])
