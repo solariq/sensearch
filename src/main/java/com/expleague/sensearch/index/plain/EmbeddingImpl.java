@@ -161,23 +161,4 @@ public class EmbeddingImpl implements Embedding {
   public int dim() {
     return PlainIndexBuilder.DEFAULT_VEC_SIZE;
   }
-/*
-  public static void main(String[] args) {
-    *//*TIntList list = new TIntArrayList();
-    nearestIndexes(list, 26, 0, 2);
-    for (int i = 0; i < list.size(); i++) {
-      System.out.println(list.get(i));
-    }*//*
-    int prev = -1;
-    for (int i = 1; i <= 40; i++) {
-      int cur = (10 << i);
-      if (cur < prev) {
-        System.out.println(i);
-        System.out.println(cur);
-        break;
-      }
-      System.out.println(cur);
-      prev = cur;
-    }
-  }*/
 }
