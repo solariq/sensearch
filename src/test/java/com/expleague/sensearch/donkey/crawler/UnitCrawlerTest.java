@@ -1,29 +1,28 @@
 package com.expleague.sensearch.donkey.crawler;
 
-import com.expleague.sensearch.ConfigJson;
+import com.expleague.sensearch.utils.SensearchTestCase;
+import com.expleague.sensearch.utils.TestConfig;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.HashSet;
 import java.util.Set;
 import javax.xml.stream.XMLStreamException;
-import org.apache.commons.io.FileUtils;
-import org.junit.After;
 import org.junit.Assert;
 import org.junit.Test;
 
-public class UnitCrawlerTest {
+public class UnitCrawlerTest extends SensearchTestCase {
+
+
+  private static final Path RESOURCES_ROOT = testDataRoot().resolve("CrawlerTestsData");
 
   private Crawler crawler;
-  private Path pathToTmpDoc = Paths.get("TMPDOCS");
 
   @Test
   public void goodZIPTest() throws IOException, XMLStreamException {
-    Config config =
-        new Config(
-            Paths.get(
-                "./src/test/java/com/expleague/sensearch/donkey/crawler/resources/Mini_Wiki.zip"),
-            pathToTmpDoc);
+    TestConfig config = sensearchConfig()
+        .setPathToZIP(RESOURCES_ROOT.resolve("Mini_Wiki.zip"))
+        .setTemporaryDocuments(Files.createTempDirectory(testOutputRoot(), "tmpDocs"));
     crawler = new CrawlerXML(config);
 
     Assert.assertEquals(crawler.makeStream().count(), 10);
@@ -53,11 +52,9 @@ public class UnitCrawlerTest {
 
   @Test
   public void badZIPTest() throws IOException, XMLStreamException {
-    Config config =
-        new Config(
-            Paths.get(
-                "./src/test/java/com/expleague/sensearch/donkey/crawler/resources/Mini_Wiki_broken.zip"),
-            pathToTmpDoc);
+    TestConfig config = sensearchConfig()
+        .setPathToZIP(RESOURCES_ROOT.resolve("Mini_Wiki_broken.zip"))
+        .setTemporaryDocuments(Files.createTempDirectory(testOutputRoot(), "tmpDocs"));
     crawler = new CrawlerXML(config);
 
     Assert.assertEquals(crawler.makeStream().count(), 10);
@@ -80,58 +77,5 @@ public class UnitCrawlerTest {
               }
             });
     Assert.assertEquals(titles, rightTitles);
-  }
-
-  @After
-  public void clear() throws IOException {
-    FileUtils.deleteDirectory(
-        Paths.get("./src/test/java/com/expleague/sensearch/donkey/crawler/resources/TMPDOCS")
-            .toFile());
-  }
-
-  private class Config implements ConfigJson {
-
-    Path zip;
-    Path doc;
-
-    public Config(Path pathToZip, Path tmpDocs) {
-      this.zip = pathToZip;
-      this.doc = tmpDocs;
-    }
-
-    @Override
-    public Path getTemporaryDocuments() {
-      return doc;
-    }
-
-    @Override
-    public Path getTemporaryIndex() {
-      return null;
-    }
-
-    @Override
-    public String getWebRoot() {
-      return null;
-    }
-
-    @Override
-    public Path getMyStem() {
-      return null;
-    }
-
-    @Override
-    public Path getPathToZIP() {
-      return zip;
-    }
-
-    @Override
-    public String getEmbeddingVectors() {
-      return null;
-    }
-
-    @Override
-    public Path getPathToMetrics() {
-      return null;
-    }
   }
 }

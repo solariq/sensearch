@@ -26,7 +26,6 @@ import gnu.trove.map.hash.TLongIntHashMap;
 import gnu.trove.map.hash.TLongLongHashMap;
 import gnu.trove.map.hash.TLongObjectHashMap;
 import gnu.trove.map.hash.TObjectLongHashMap;
-import java.io.ByteArrayOutputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -45,8 +44,6 @@ import org.fusesource.leveldbjni.JniDBFactory;
 import org.iq80.leveldb.CompressionType;
 import org.iq80.leveldb.DB;
 import org.iq80.leveldb.Options;
-
-;
 
 public class PlainIndexBuilder implements IndexBuilder {
   public static final int STATISTICS_BLOCK_SIZE = 1 << 10;
@@ -75,10 +72,6 @@ public class PlainIndexBuilder implements IndexBuilder {
           .createIfMissing(true)
           .errorIfExists(true)
           .compressionType(CompressionType.SNAPPY);
-
-  // Bloom filter for titles options
-  private static final long DEFAULT_EXPECTED_COLLECTION_SIZE = (long) 1e6;
-  private static final double DEFAULT_FALSE_POSITIVE_RATE = 1e-5;
 
   private static final Logger LOG = Logger.getLogger(PlainIndexBuilder.class.getName());
 
@@ -280,8 +273,6 @@ public class PlainIndexBuilder implements IndexBuilder {
 
       plainPageBuilder.build();
       statisticsBuilder.build();
-
-      ByteArrayOutputStream bos = new ByteArrayOutputStream();
 
       LOG.info("Storing index meta...");
       // saving index-wise data

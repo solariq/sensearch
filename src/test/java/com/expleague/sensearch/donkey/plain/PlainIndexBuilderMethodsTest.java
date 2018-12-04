@@ -2,6 +2,7 @@ package com.expleague.sensearch.donkey.plain;
 
 import com.expleague.commons.math.vectors.Vec;
 import com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta.IdMapping;
+import com.expleague.sensearch.utils.SensearchTestCase;
 import com.google.common.collect.Lists;
 import gnu.trove.map.TLongIntMap;
 import gnu.trove.map.TLongObjectMap;
@@ -15,7 +16,7 @@ import org.junit.Test;
 
 import java.util.stream.Stream;
 
-public class PlainIndexBuilderMethodsTest {
+public class PlainIndexBuilderMethodsTest extends SensearchTestCase {
   @Test
   public void enrichFrequenciesTest() {
     long[] idSequence = new long[] {1, 2, 3, 1, 2, 1, 3, 2, 3, 3, 2, 3, 1};

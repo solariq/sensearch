@@ -221,10 +221,25 @@
       <artifactId>language-ru</artifactId>
       <version>4.3</version>
     </dependency>
+
     <dependency>
       <groupId>log4j</groupId>
       <artifactId>log4j</artifactId>
       <version>1.2.17</version>
+    </dependency>
+
+    <!-- https://mvnrepository.com/artifact/org.cfg4j/cfg4j-core -->
+    <dependency>
+      <groupId>org.cfg4j</groupId>
+      <artifactId>cfg4j-core</artifactId>
+      <version>4.4.1</version>
+    </dependency>
+
+    <!-- https://mvnrepository.com/artifact/org.cfg4j/cfg4j-git -->
+    <dependency>
+      <groupId>org.cfg4j</groupId>
+      <artifactId>cfg4j-git</artifactId>
+      <version>4.4.1</version>
     </dependency>
 
   </dependencies>

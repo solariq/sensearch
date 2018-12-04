@@ -17,8 +17,8 @@ public class CompleteIndexBuildTest extends SensearchTestCase {
   @Before
   public void initConfigPaths() {
     this.config = config();
-    ((TestConfig) config).setIndexRoot(testOutputRoot().resolve(INDEX_ROOT_NAME));
-    ((TestConfig) config).setTempDocumentsPath(testOutputRoot().resolve(TEMP_DOC_PATH));
+    ((TestConfig) config).setTemporaryIndex(testOutputRoot().resolve(INDEX_ROOT_NAME));
+    ((TestConfig) config).setTemporaryDocuments(testOutputRoot().resolve(TEMP_DOC_PATH));
   }
 
   @Test

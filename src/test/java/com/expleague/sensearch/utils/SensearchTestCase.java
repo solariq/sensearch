@@ -15,22 +15,29 @@ import org.junit.BeforeClass;
 
 public abstract class SensearchTestCase {
 
-  private static final String INDEX_DATA_ROOT = "ForIndex";
-  private static final String MINI_WIKI_ZIP = "MiniWiki.zip";
-  private static final String VECTORS_FILE = "Vectors.txt.gz";
-  private static final String MY_STEM_LOGS_ROOT = "MyStemTestLogs";
+  protected static final String INDEX_DATA_ROOT = "ForIndex";
+
+  protected static final String MINI_WIKI_ZIP = "MiniWiki.zip";
+  protected static final String VECTORS_FILE = "Vectors.txt.gz";
+
+  protected static final String MY_STEM_LOGS_ROOT = "MyStemTestLogs";
 
   private static final Logger LOG = Logger.getLogger(SensearchTestCase.class.getName());
 
   private static Path testDataRoot;
   private static Path testOutputRoot;
   private static Path myStemLogsRoot;
-  private static Config config;
+  private static Path miniWikiRoot;
+  private static Path gloveVectorsFile;
+  private static TestConfig config;
 
   @BeforeClass
   public static void initWorkingPaths() {
     //
+    LOG.info("Initializing test environment...");
+
     String workingDir = System.getProperty("user.dir");
+
     if (!workingDir.endsWith("sensearch")) {
       throw new RuntimeException(
           String.format(
@@ -68,12 +75,29 @@ public abstract class SensearchTestCase {
       }
     }
 
-    // TODO: check whether path actually exists
     myStemLogsRoot = testDataRoot.resolve(MY_STEM_LOGS_ROOT);
+    if (Files.notExists(myStemLogsRoot)) {
+      LOG.warn(String.format("My stem logs folder was not found by the path [%s]",
+          myStemLogsRoot.toAbsolutePath().toString())
+      );
+
+    }
 
     Path indexDataRoot = testDataRoot.resolve(INDEX_DATA_ROOT);
-    config =
-        new TestConfig(indexDataRoot.resolve(MINI_WIKI_ZIP), indexDataRoot.resolve(VECTORS_FILE));
+    if (Files.exists(indexDataRoot)) {
+      gloveVectorsFile = indexDataRoot.resolve(VECTORS_FILE);
+      miniWikiRoot = indexDataRoot.resolve(MINI_WIKI_ZIP);
+    } else {
+      LOG.warn(String.format("Data required for index was not found by the path [%s]",
+          indexDataRoot.toAbsolutePath().toString())
+      );
+    }
+
+    config = new TestConfig()
+        .setEmbeddingVectors(gloveVectorsFile)
+        .setPathToZIP(miniWikiRoot);
+
+    LOG.info("Done initializing test environment");
   }
 
   @AfterClass
@@ -93,6 +117,14 @@ public abstract class SensearchTestCase {
     return testDataRoot;
   }
 
+  protected static Path miniWikiRoot() {
+    return miniWikiRoot;
+  }
+
+  protected static Path gloveVectorsFile() {
+    return gloveVectorsFile;
+  }
+
   protected static Path myStemLogsPath() {
     return myStemLogsRoot;
   }
@@ -107,9 +139,9 @@ public abstract class SensearchTestCase {
     try {
       FileUtils.cleanDirectory(testOutputRoot.toFile());
     } catch (IOException e) {
-      throw new RuntimeException(
+      LOG.fatal(
           String.format(
-              "Failed to clea test output directory %s",
+              "Failed to clear test output directory %s",
               testOutputRoot.toAbsolutePath().toString()),
           e);
     }
@@ -131,7 +163,11 @@ public abstract class SensearchTestCase {
         .compressionType(CompressionType.NONE);
   }
 
+  protected static TestConfig sensearchConfig() {
+    return new TestConfig(config);
+  }
+
   protected Config config() {
-    return config;
+    return new TestConfig(config);
   }
 }

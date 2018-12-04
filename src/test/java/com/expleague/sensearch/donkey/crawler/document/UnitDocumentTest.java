@@ -1,6 +1,8 @@
 package com.expleague.sensearch.donkey.crawler.document;
 
 import com.expleague.sensearch.donkey.crawler.document.CrawlerDocument.Link;
+import com.expleague.sensearch.utils.SensearchTestCase;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -9,7 +11,9 @@ import java.util.List;
 import org.junit.Assert;
 import org.junit.Test;
 
-public class UnitDocumentTest {
+public class UnitDocumentTest extends SensearchTestCase {
+
+  private static final Path RESOURCES_ROOT = testDataRoot().resolve("CrawlerTestsData");
 
   private XMLParser parser = new XMLParser();
   private CrawlerDocument page;
@@ -17,9 +21,7 @@ public class UnitDocumentTest {
   @Test
   public void smallXMLTest() {
     page =
-        parser.parseXML(
-            Paths.get("./src/test/java/com/expleague/sensearch/donkey/crawler/resources/smallXML")
-                .toFile());
+        parser.parseXML(RESOURCES_ROOT.resolve("smallXML").toFile());
     Assert.assertEquals(page.iD(), 6673504);
     Assert.assertEquals(page.title(), "Тэмусин (Когурё)»");
     Assert.assertEquals(
@@ -35,19 +37,13 @@ public class UnitDocumentTest {
 
   @Test(expected = IllegalArgumentException.class)
   public void brokenXMLTest() {
-    page =
-        parser.parseXML(
-            Paths.get("./src/test/java/com/expleague/sensearch/donkey/crawler/resources/BrokenXML")
-                .toFile());
+    page = parser.parseXML(RESOURCES_ROOT.resolve("BrokenXML").toFile());
   }
 
   @Test
   public void xMLWithEmptyLinksTest() {
     page =
-        parser.parseXML(
-            Paths.get(
-                    "./src/test/java/com/expleague/sensearch/donkey/crawler/resources/XMLwithEmptyLink")
-                .toFile());
+        parser.parseXML(RESOURCES_ROOT.resolve("XMLwithEmptyLink").toFile());
     Assert.assertEquals(page.iD(), 3666303);
     Assert.assertEquals(page.sections().get(0).links().size(), 0);
     Assert.assertEquals(page.sections().get(1).links().size(), 1);
@@ -61,11 +57,7 @@ public class UnitDocumentTest {
 
   @Test
   public void xMLwithEmptySectionsTest() {
-    page =
-        parser.parseXML(
-            Paths.get(
-                    "./src/test/java/com/expleague/sensearch/donkey/crawler/resources/XMLwithEmptySections")
-                .toFile());
+    page = parser.parseXML(RESOURCES_ROOT.resolve("XMLwithEmptySections").toFile());
     Assert.assertEquals(page.iD(), 6676369);
     Assert.assertEquals(page.title(), "Мужун Вэй");
     Assert.assertEquals(page.sections().size(), 6);
@@ -81,11 +73,7 @@ public class UnitDocumentTest {
 
   @Test
   public void xMLwithoutCategoriesTest() {
-    page =
-        parser.parseXML(
-            Paths.get(
-                    "./src/test/java/com/expleague/sensearch/donkey/crawler/resources/XMLwithoutCategories")
-                .toFile());
+    page = parser.parseXML(RESOURCES_ROOT.resolve("XMLwithoutCategories").toFile());
     Assert.assertEquals(page.categories().size(), 0);
 
     Assert.assertEquals(page.iD(), 6673602);
@@ -102,11 +90,7 @@ public class UnitDocumentTest {
 
   @Test
   public void xMLwithoutIDTest() {
-    page =
-        parser.parseXML(
-            Paths.get(
-                    "./src/test/java/com/expleague/sensearch/donkey/crawler/resources/XMLwithoutID")
-                .toFile());
+    page = parser.parseXML(RESOURCES_ROOT.resolve("XMLwithoutID").toFile());
     Assert.assertEquals(page.iD(), 0);
 
     Assert.assertEquals(page.title(), "Тэсо (Тонбуё)");
@@ -117,11 +101,7 @@ public class UnitDocumentTest {
 
   @Test
   public void xMLwithoutTitleTest() {
-    page =
-        parser.parseXML(
-            Paths.get(
-                    "./src/test/java/com/expleague/sensearch/donkey/crawler/resources/XMLwithoutTitle")
-                .toFile());
+    page = parser.parseXML(RESOURCES_ROOT.resolve("XMLwithoutTitle").toFile());
     List<CharSequence> test = new ArrayList<>();
     test.add("Императоры Поздней Чжао");
     test.add("Правители Азии IV века");
@@ -134,11 +114,7 @@ public class UnitDocumentTest {
 
   @Test
   public void xmlWithSubcategoriesTest() {
-    page =
-        parser.parseXML(
-            Paths.get(
-                    "./src/test/java/com/expleague/sensearch/donkey/crawler/resources/XMLWithSubsections")
-                .toFile());
+    page = parser.parseXML(RESOURCES_ROOT.resolve("XMLWithSubsections").toFile());
 
     Assert.assertEquals(5, page.sections().size());
     Assert.assertEquals(Arrays.asList("Ссылки"), page.sections().get(0).title());
@@ -151,11 +127,7 @@ public class UnitDocumentTest {
 
   @Test
   public void xmlWithLinksTest() {
-    page =
-        parser.parseXML(
-            Paths.get(
-                    "./src/test/java/com/expleague/sensearch/donkey/crawler/resources/XMLWithLinks")
-                .toFile());
+    page = parser.parseXML(RESOURCES_ROOT.resolve("XMLWithLinks").toFile());
     Assert.assertEquals(3, page.sections().size());
     Assert.assertEquals(2, page.sections().get(0).links().size());
 
@@ -174,11 +146,7 @@ public class UnitDocumentTest {
 
   @Test
   public void xMLWithoutLinks() {
-    page =
-        parser.parseXML(
-            Paths.get(
-                    "./src/test/java/com/expleague/sensearch/donkey/crawler/resources/XMLWithoutLinks")
-                .toFile());
+    page = parser.parseXML(RESOURCES_ROOT.resolve("XMLWithoutLinks").toFile());
     Assert.assertEquals(page.iD(), 6675547);
     Assert.assertEquals(page.title(), "Бонифаций дель Васто");
     Assert.assertEquals(page.sections().size(), 3);
