@@ -94,46 +94,6 @@ public class XMLParser {
     return page;
   }
 
-  /*
-  private void writeXML(WikiPage page) {
-      String fileName = "/home/artem/JetBrains/WikiDocs/Mini_Wiki/" + page.getID() + ".xml";
-      String startElement = "page";
-
-      XMLOutputFactory xmlOutputFactory = XMLOutputFactory.newInstance();
-      try {
-          XMLStreamWriter xmlStreamWriter = xmlOutputFactory.
-                  createXMLStreamWriter(new FileOutputStream(fileName), "UTF-8");
-          xmlStreamWriter.writeStartDocument("UTF-8", "1.0");
-          xmlStreamWriter.writeCharacters("\n");
-
-          xmlStreamWriter.writeStartElement("Pages");
-          xmlStreamWriter.writeCharacters("\n");
-
-          xmlStreamWriter.writeStartElement(startElement);
-          xmlStreamWriter.writeAttribute("id", Long.toString(page.iD()));
-          xmlStreamWriter.writeAttribute("title", page.title());
-          xmlStreamWriter.writeAttribute("revision", page.revision);
-          xmlStreamWriter.writeAttribute("type", page.type);
-          xmlStreamWriter.writeAttribute("ns-id", page.nsId);
-          xmlStreamWriter.writeAttribute("ns-name", "");
-          xmlStreamWriter.writeCharacters("\n");
-          xmlStreamWriter.writeCharacters(page.content().toString());
-          xmlStreamWriter.writeCharacters("\n");
-          xmlStreamWriter.writeEndElement();
-
-          xmlStreamWriter.writeCharacters("\n");
-          xmlStreamWriter.writeEndElement();
-          xmlStreamWriter.writeEndDocument();
-
-          xmlStreamWriter.flush();
-          xmlStreamWriter.close();
-
-
-      } catch (FileNotFoundException | XMLStreamException e) {
-          e.printStackTrace();
-      }
-  }//*/
-
   @XmlRootElement(name = "pages")
   private static class XmlPageRootElement {
     @XmlElement(name = "page")
@@ -178,4 +138,44 @@ public class XMLParser {
     @XmlAttribute(name = "targetId")
     long targetId;
   }
+
+  /*
+  private void writeXML(WikiPage page) {
+      String fileName = "/home/artem/JetBrains/WikiDocs/Mini_Wiki/" + page.getID() + ".xml";
+      String startElement = "page";
+
+      XMLOutputFactory xmlOutputFactory = XMLOutputFactory.newInstance();
+      try {
+          XMLStreamWriter xmlStreamWriter = xmlOutputFactory.
+                  createXMLStreamWriter(new FileOutputStream(fileName), "UTF-8");
+          xmlStreamWriter.writeStartDocument("UTF-8", "1.0");
+          xmlStreamWriter.writeCharacters("\n");
+
+          xmlStreamWriter.writeStartElement("Pages");
+          xmlStreamWriter.writeCharacters("\n");
+
+          xmlStreamWriter.writeStartElement(startElement);
+          xmlStreamWriter.writeAttribute("id", Long.toString(page.iD()));
+          xmlStreamWriter.writeAttribute("title", page.title());
+          xmlStreamWriter.writeAttribute("revision", page.revision);
+          xmlStreamWriter.writeAttribute("type", page.type);
+          xmlStreamWriter.writeAttribute("ns-id", page.nsId);
+          xmlStreamWriter.writeAttribute("ns-name", "");
+          xmlStreamWriter.writeCharacters("\n");
+          xmlStreamWriter.writeCharacters(page.content().toString());
+          xmlStreamWriter.writeCharacters("\n");
+          xmlStreamWriter.writeEndElement();
+
+          xmlStreamWriter.writeCharacters("\n");
+          xmlStreamWriter.writeEndElement();
+          xmlStreamWriter.writeEndDocument();
+
+          xmlStreamWriter.flush();
+          xmlStreamWriter.close();
+
+
+      } catch (FileNotFoundException | XMLStreamException e) {
+          e.printStackTrace();
+      }
+  }//*/
 }

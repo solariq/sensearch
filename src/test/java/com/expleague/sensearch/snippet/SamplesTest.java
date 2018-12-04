@@ -3,7 +3,6 @@ package com.expleague.sensearch.snippet;
 import com.expleague.commons.text.lemmer.MyStem;
 import com.expleague.sensearch.Page;
 import com.expleague.sensearch.core.Lemmer;
-import com.expleague.sensearch.query.BaseQuery;
 import com.expleague.sensearch.query.Query;
 import com.expleague.sensearch.utils.SensearchTestCase;
 import java.io.File;
@@ -62,6 +61,21 @@ public class SamplesTest extends SensearchTestCase {
                         @Override
                         public CharSequence text() {
                           return content;
+                        }
+
+                        @Override
+                        public List<CharSequence> categories() {
+                          return null;
+                        }
+
+                        @Override
+                        public List<Section> sections() {
+                          return null;
+                        }
+
+                        @Override
+                        public List<Page> inputLinks() {
+                          return null;
                         }
                       });
 //                  queries.add(new BaseQuery(query, lemmer));

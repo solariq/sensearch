@@ -244,5 +244,20 @@ public class UnitMetricTest {
     public CharSequence text() {
       return null;
     }
+
+    @Override
+    public List<CharSequence> categories() {
+      return null;
+    }
+
+    @Override
+    public List<Section> sections() {
+      return null;
+    }
+
+    @Override
+    public List<Page> inputLinks() {
+      return null;
+    }
   }
 }

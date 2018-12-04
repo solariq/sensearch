@@ -3,13 +3,11 @@ package com.expleague.sensearch.snippet;
 import com.expleague.commons.text.lemmer.MyStem;
 import com.expleague.sensearch.Page;
 import com.expleague.sensearch.core.Lemmer;
-import com.expleague.sensearch.query.BaseQuery;
 import com.expleague.sensearch.utils.SensearchTestCase;
 import java.net.URI;
-import org.junit.Assert;
+import java.util.List;
 import org.junit.Before;
 import org.junit.Rule;
-import org.junit.Test;
 import org.junit.rules.TestName;
 
 public class RelevanceTest extends SensearchTestCase {
@@ -54,6 +52,21 @@ public class RelevanceTest extends SensearchTestCase {
                 + "Слон и муха - лучшие друзья. "
                 + "Пьёт чай и тихонько улыбается. Потому что необыкновенно красиво. ";
           }
+
+          @Override
+          public List<CharSequence> categories() {
+            return null;
+          }
+
+          @Override
+          public List<Section> sections() {
+            return null;
+          }
+
+          @Override
+          public List<Page> inputLinks() {
+            return null;
+          }
         };
     d2 =
         new Page() {
@@ -83,6 +96,21 @@ public class RelevanceTest extends SensearchTestCase {
                 + "\n"
                 + "Картина вышла в прокат 3 февраля 2006 года. Фильм провалился в прокате, заработав при бюджете 3,5 миллиона всего 206,871 долларов.";
           }
+
+          @Override
+          public List<CharSequence> categories() {
+            return null;
+          }
+
+          @Override
+          public List<Section> sections() {
+            return null;
+          }
+
+          @Override
+          public List<Page> inputLinks() {
+            return null;
+          }
         };
 
     d3 =
@@ -108,6 +136,21 @@ public class RelevanceTest extends SensearchTestCase {
                 + "Это яйцекладущая змея. Самка откладывает до 7 яиц.\n"
                 + "\n"
                 + "Обитает в южной Бразилии, Боливии, Парагвае, северной Аргентине.\n";
+          }
+
+          @Override
+          public List<CharSequence> categories() {
+            return null;
+          }
+
+          @Override
+          public List<Section> sections() {
+            return null;
+          }
+
+          @Override
+          public List<Page> inputLinks() {
+            return null;
           }
         };
   }

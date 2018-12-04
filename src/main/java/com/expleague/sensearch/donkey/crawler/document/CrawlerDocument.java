@@ -6,16 +6,40 @@ import javax.validation.constraints.NotNull;
 
 public interface CrawlerDocument {
 
+  /**
+   * @return Page text
+   */
+  @NotNull
   CharSequence content();
 
+  /**
+   * @return Page title or "" if page have no title
+   */
+  @NotNull
   String title();
 
+  /**
+   * @return List of categories this page or empty list if page have no categories
+   */
+  @NotNull
   List<String> categories();
 
+  /**
+   * @return List of {@link Section} this page
+   */
+  @NotNull
   List<Section> sections();
 
+  /**
+   * @return Page ID or 0 if page have no ID
+   */
+  @NotNull
   long iD();
 
+  /**
+   * @return Page URI constructed by Page.title
+   */
+  @NotNull
   URI uri();
 
   interface Section {
@@ -34,7 +58,7 @@ public interface CrawlerDocument {
     @NotNull
     List<CharSequence> title();
 
-    /** @return Links that are contained in this section */
+    /** @return {@link Link}s that are contained in this section */
     @NotNull
     List<Link> links();
   }
