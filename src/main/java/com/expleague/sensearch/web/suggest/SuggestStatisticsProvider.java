@@ -78,7 +78,7 @@ public class SuggestStatisticsProvider {
 	}
 	
 	private void saveTargets() throws JsonGenerationException, JsonMappingException, IOException {
-		Files.createDirectories(unigramsStorage);
+		Files.createDirectories(unigramsStorage.getParent());
 		mapper.writeValue(unigramsStorage.toFile(), unigramCoeff);
 		mapper.writeValue(multigramsStorage.toFile(), multigramFreqNorm);
 	}
