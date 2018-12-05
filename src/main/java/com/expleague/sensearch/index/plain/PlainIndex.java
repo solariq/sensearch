@@ -50,7 +50,8 @@ import org.iq80.leveldb.ReadOptions;
 import org.jetbrains.annotations.Nullable;
 
 public class PlainIndex implements Index {
-  public static final int VERSION = 1;
+
+  public static final int VERSION = 2;
 
   private static final long DEFAULT_CACHE_SIZE = 128 * (1 << 20); // 128 MB
 
