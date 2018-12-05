@@ -13,6 +13,7 @@ import java.util.stream.Collectors;
 import javax.xml.stream.XMLStreamException;
 
 import com.expleague.sensearch.Config;
+import com.expleague.sensearch.core.Term;
 import com.expleague.sensearch.donkey.crawler.Crawler;
 import com.expleague.sensearch.index.Index;
 import com.fasterxml.jackson.core.JsonGenerationException;
@@ -32,15 +33,15 @@ public class SuggestStatisticsProvider {
 	private Crawler crawler;
 	private ObjectMapper mapper = new ObjectMapper();
 
-	private Map<List<String>, Integer> multigramFreq = new HashMap<>();
-	private Map<String, Integer> unigramFreq = new HashMap<>();
-	private Map<String, Integer> unigramDF = new HashMap<>();
-	private Map<String, Double> sumFreqNorm = new HashMap<>();
+	private Map<List<Term>, Integer> multigramFreq = new HashMap<>();
+	private Map<Term, Integer> unigramFreq = new HashMap<>();
+	private Map<Term, Integer> unigramDF = new HashMap<>();
+	private Map<Term, Double> sumFreqNorm = new HashMap<>();
 	 
 	private double[] avgOrderFreq = new double[maxNgramsOrder];
 	
-	private Map<String, Double> unigramCoeff = new HashMap<>();
-	private Map<List<String>, Double> multigramFreqNorm = new HashMap<>();
+	private Map<Term, Double> unigramCoeff = new HashMap<>();
+	private Map<List<Term>, Double> multigramFreqNorm = new HashMap<>();
 	
 	private <K> void addToMap(Map<K, Integer> m, K key, int inc) {
 		Integer oldVal = m.get(key);
@@ -77,19 +78,22 @@ public class SuggestStatisticsProvider {
 	}
 	
 	private void saveTargets() throws JsonGenerationException, JsonMappingException, IOException {
+		Files.createDirectories(unigramsStorage);
 		mapper.writeValue(unigramsStorage.toFile(), unigramCoeff);
 		mapper.writeValue(multigramsStorage.toFile(), multigramFreqNorm);
 	}
 	
 	public SuggestStatisticsProvider(Crawler crawler, Index index, Config config) throws JsonParseException, JsonMappingException, IOException {
 		
-		unigramsStorage = config.getTemporaryIndex().resolve("/Suggest/unigram_coeff");
-		multigramsStorage = config.getTemporaryIndex().resolve("/Suggest/multigram_coeff");
-
+		unigramsStorage = config.getTemporaryIndex().resolve("Suggest/unigram_coeff");
+		multigramsStorage = config.getTemporaryIndex().resolve("Suggest/multigram_coeff");
+		
+		System.out.println("try to load suggest...");
 		if (tryLoad()) {
 			System.out.println("Suggest information loaded");
 			return;
 		}
+		System.out.println("Failed to load suggest. Trying to compute...");
 		
 		this.crawler = crawler;
 		this.index = index;
@@ -107,8 +111,6 @@ public class SuggestStatisticsProvider {
 	private void computeUnigrams(List<String> texts) {
 		for (String t : texts) {
 			index.parse(t)
-			.map(trm -> trm.text().toString())
-			.filter(s -> !s.isEmpty())
 			.peek(s -> {
 				addToMap(unigramFreq, s, 1);
 				addToMap(multigramFreq, Arrays.asList(s), 1);
@@ -119,12 +121,11 @@ public class SuggestStatisticsProvider {
 		}
 	}
 
-	private List<List<String>> getNgrams(String sentence, int order) {
-		List<String> unigrams = index.parse(sentence).map(t -> t.text().toString())
-				.filter(s -> !s.isEmpty())
+	private List<List<Term>> getNgrams(String sentence, int order) {
+		List<Term> unigrams = index.parse(sentence)
 				.collect(Collectors.toList());
 
-		List<List<String>> result = new ArrayList<>();
+		List<List<Term>> result = new ArrayList<>();
 
 		for (int i = 0; i < unigrams.size() - order + 1; i++) {
 			result.add(unigrams.subList(i, i + order));
@@ -157,14 +158,14 @@ public class SuggestStatisticsProvider {
 		}
 	}
 
-	private double freqNorm(List<String> phrase) {
+	private double freqNorm(List<Term> phrase) {
 		return multigramFreq.get(phrase) / Math.log(avgOrderFreq[phrase.size() - 1]);
 	}
 
 	private void computeFreqNorm() {
-		for (List<String> l : multigramFreq.keySet()) {
+		for (List<Term> l : multigramFreq.keySet()) {
 			double fNorm = freqNorm(l);
-			for (String s : l) {
+			for (Term s : l) {
 				sumFreqNorm.put(s, sumFreqNorm.get(s) + fNorm);
 			}
 		}
@@ -179,11 +180,11 @@ public class SuggestStatisticsProvider {
 				unigramFreq.get(ung) * Math.log(ndocs / unigramDF.get(ung)) / sumFreqNorm.get(ung)));
 	}
 	
-	public Map<List<String>, Double> getMultigramFreqNorm() {
+	public Map<List<Term>, Double> getMultigramFreqNorm() {
 		return multigramFreqNorm;
 	}
 	
-	public Map<String, Double> getUnigramCoeff() {
+	public Map<Term, Double> getUnigramCoeff() {
 		return unigramCoeff;
 	}
 }

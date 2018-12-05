@@ -15,9 +15,9 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 
 public class ProbabilisticSuggestor implements Suggestor {
 
-	private Map<String, Double> unigramCoeff;
-	private Map<List<String>, Double> multigramFreqNorm;
-	private Map<List<String>, Double> phraseProb = new HashMap<>();
+	private Map<Term, Double> unigramCoeff;
+	private Map<List<Term>, Double> multigramFreqNorm;
+	private Map<List<Term>, Double> phraseProb = new HashMap<>();
 	
 	private Index index;
 
@@ -43,10 +43,10 @@ public class ProbabilisticSuggestor implements Suggestor {
 		return res;
 	}
 
-	private double getPpqt(List<String> phrase, String qt) {
+	private double getPpqt(List<Term> phrase, String qt) {
 		double res = 0;
-		for (String c : phrase) {
-			if (c.startsWith(qt)) {
+		for (Term c : phrase) {
+			if (c.text().toString().startsWith(qt)) {
 				res += unigramCoeff.get(c) * multigramFreqNorm.get(phrase);
 			}
 		}
@@ -72,6 +72,7 @@ public class ProbabilisticSuggestor implements Suggestor {
 				.limit(10)
 				.map(e -> qc + " " + e.getKey()
 					.stream()
+					.map(t -> t.text())
 					.collect(Collectors.joining(" ")))
 				.collect(Collectors.toList());
 	}
