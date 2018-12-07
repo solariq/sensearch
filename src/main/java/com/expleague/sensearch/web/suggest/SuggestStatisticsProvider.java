@@ -26,6 +26,7 @@ public class SuggestStatisticsProvider {
 	
 	private Path unigramsStorage;
 	private Path multigramsStorage;
+	private Path invIndexStorage;
 	
 	private int ndocs;
 	
@@ -40,8 +41,10 @@ public class SuggestStatisticsProvider {
 	 
 	private double[] avgOrderFreq = new double[maxNgramsOrder];
 	
+	//Maps, that used in suggestor
 	private Map<Term, Double> unigramCoeff = new HashMap<>();
 	private Map<List<Term>, Double> multigramFreqNorm = new HashMap<>();
+	private Map<Term, List<Integer>> invertedIndex = new HashMap<>();
 	
 	private <K> void addToMap(Map<K, Integer> m, K key, int inc) {
 		Integer oldVal = m.get(key);
@@ -67,12 +70,15 @@ public class SuggestStatisticsProvider {
 	}
 	
 	private boolean tryLoad() throws JsonParseException, JsonMappingException, IOException {
-		if (!Files.exists(unigramsStorage) || !Files.exists(multigramsStorage)) {
+		if (!Files.exists(unigramsStorage)
+				|| !Files.exists(multigramsStorage)
+				|| !Files.exists(invIndexStorage)) {
 			return false;
 		}
 		
 		unigramCoeff = mapper.readValue(unigramsStorage.toFile(), unigramCoeff.getClass());
 		multigramFreqNorm = mapper.readValue(multigramsStorage.toFile(), multigramFreqNorm.getClass());
+		invertedIndex = mapper.readValue(invIndexStorage.toFile(), invertedIndex.getClass());
 		
 		return true;
 	}
@@ -81,12 +87,14 @@ public class SuggestStatisticsProvider {
 		Files.createDirectories(unigramsStorage.getParent());
 		mapper.writeValue(unigramsStorage.toFile(), unigramCoeff);
 		mapper.writeValue(multigramsStorage.toFile(), multigramFreqNorm);
+		mapper.writeValue(invIndexStorage.toFile(), invertedIndex);
 	}
 	
 	public SuggestStatisticsProvider(Crawler crawler, Index index, Config config) throws JsonParseException, JsonMappingException, IOException {
 		
 		unigramsStorage = config.getTemporaryIndex().resolve("Suggest/unigram_coeff");
 		multigramsStorage = config.getTemporaryIndex().resolve("Suggest/multigram_coeff");
+		invIndexStorage = config.getTemporaryIndex().resolve("Suggest/inv_index");
 		
 		System.out.println("try to load suggest...");
 		if (tryLoad()) {
@@ -109,12 +117,18 @@ public class SuggestStatisticsProvider {
 	}
 
 	private void computeUnigrams(List<String> texts) {
+		int cnt = 0;
 		for (String t : texts) {
+			int docNum = ++cnt;
 			index.parse(t)
 			.peek(s -> {
 				addToMap(unigramFreq, s, 1);
-				addToMap(multigramFreq, Arrays.asList(s), 1);
+				//addToMap(multigramFreq, Arrays.asList(s), 1);
 				sumFreqNorm.put(s, 0.0);
+				if (!invertedIndex.containsKey(s)) {
+					invertedIndex.put(s, new ArrayList<>());
+				}
+				invertedIndex.get(s).add(docNum);
 			})
 			.distinct()
 			.forEach(s -> addToMap(unigramDF, s, 1));
@@ -135,10 +149,12 @@ public class SuggestStatisticsProvider {
 	}
 
 	private void computeMultigrams(List<String> texts) {
-		for (int i = 2; i <= maxNgramsOrder; i++) {
+		for (int i = 1; i <= maxNgramsOrder; i++) {
 			for (String t : texts) {
 				getNgrams(t, i).stream()
-				.forEach(l -> addToMap(multigramFreq, l, 1));
+				.forEach(l -> {
+					addToMap(multigramFreq, l, 1);
+					});
 			}
 		}
 	}
@@ -186,5 +202,9 @@ public class SuggestStatisticsProvider {
 	
 	public Map<Term, Double> getUnigramCoeff() {
 		return unigramCoeff;
+	}
+	
+	public Map<Term, List<Integer>> getInvertedIndex() {
+		return invertedIndex;
 	}
 }
