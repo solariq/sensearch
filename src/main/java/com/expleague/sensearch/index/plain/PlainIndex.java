@@ -37,7 +37,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.stream.Stream;
@@ -46,6 +45,7 @@ import org.fusesource.leveldbjni.JniDBFactory;
 import org.iq80.leveldb.CompressionType;
 import org.iq80.leveldb.DB;
 import org.iq80.leveldb.DBException;
+import org.iq80.leveldb.DBIterator;
 import org.iq80.leveldb.Options;
 import org.iq80.leveldb.ReadOptions;
 import org.jetbrains.annotations.Nullable;
@@ -132,47 +132,51 @@ public class PlainIndex implements Index {
     TLongObjectMap<String> idToWord = new TLongObjectHashMap<>();
 //    indexMeta.getIdMappingsList().forEach(m -> idToWord.put(m.getId(), m.getWord()));
 
-    for (Entry<byte[], byte[]> item : termBase) {
-      try {
-        IndexUnits.Term protoTerm = IndexUnits.Term.parseFrom(item.getValue());
+    DBIterator termIterator = termBase.iterator();
+    termIterator.seekToFirst();
+    termIterator.forEachRemaining(
+        item -> {
+          try {
+            IndexUnits.Term protoTerm = IndexUnits.Term.parseFrom(item.getValue());
 
-        final String word = protoTerm.getText();
+            final String word = protoTerm.getText();
 
-        //noinspection SuspiciousMethodCalls
-        if (wordToTerms.containsKey(word)) {
-          return;
-        }
+            //noinspection SuspiciousMethodCalls
+            if (wordToTerms.containsKey(word)) {
+              return;
+            }
 
-        PartOfSpeech pos = PartOfSpeech.valueOf(protoTerm.getPartOfSpeech().name());
+            PartOfSpeech pos = PartOfSpeech.valueOf(protoTerm.getPartOfSpeech().name());
 
-        final IndexTerm lemmaTerm;
+            final IndexTerm lemmaTerm;
 
-        final long lemmaId = wordToLemma.get(protoTerm.getId());
-        if (lemmaId == -1) {
-          lemmaTerm = null;
-        } else {
-          if (idToTerm.containsKey(lemmaId)) {
-            lemmaTerm = (IndexTerm) idToTerm.get(lemmaId);
-          } else {
-            CharSeq lemmaText = CharSeq.intern(idToWord.get(lemmaId));
+            final long lemmaId = wordToLemma.get(protoTerm.getId());
+            if (lemmaId == -1) {
+              lemmaTerm = null;
+            } else {
+              if (idToTerm.containsKey(lemmaId)) {
+                lemmaTerm = (IndexTerm) idToTerm.get(lemmaId);
+              } else {
+                CharSeq lemmaText = CharSeq.intern(idToWord.get(lemmaId));
 
-            lemmaTerm = new IndexTerm(this, lemmaText, lemmaId, null, pos);
-            idToTerm.put(lemmaId, lemmaTerm);
-            wordToTerms.put(lemmaText, lemmaTerm);
+                lemmaTerm = new IndexTerm(this, lemmaText, lemmaId, null, pos);
+                idToTerm.put(lemmaId, lemmaTerm);
+                wordToTerms.put(lemmaText, lemmaTerm);
+              }
+            }
+
+            final CharSeq compactText = CharSeq.intern(word);
+
+            IndexTerm term = new IndexTerm(this, compactText, protoTerm.getId(), lemmaTerm, pos);
+            idToTerm.put(protoTerm.getId(), term);
+            wordToTerms.put(compactText, term);
+
+          } catch (InvalidProtocolBufferException e) {
+            LOG.fatal("Invalid protobuf for term with id " + Longs.fromByteArray(item.getKey()));
+            throw new RuntimeException(e);
           }
         }
-
-        final CharSeq compactText = CharSeq.intern(word);
-
-        IndexTerm term = new IndexTerm(this, compactText, protoTerm.getId(), lemmaTerm, pos);
-        idToTerm.put(protoTerm.getId(), term);
-        wordToTerms.put(compactText, term);
-
-      } catch (InvalidProtocolBufferException e) {
-        LOG.fatal("Invalid protobuf for term with id " + Longs.fromByteArray(item.getKey()));
-        throw new RuntimeException(e);
-      }
-    }
+    );
 
     for (UriPageMapping mapping : indexMeta.getUriPageMappingsList()) {
       uriToPageIdMap.put(URI.create(mapping.getUri()), mapping.getPageId());
