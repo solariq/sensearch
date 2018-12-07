@@ -7,6 +7,7 @@ import com.expleague.commons.seq.CharSeq;
 import com.expleague.commons.seq.CharSeqTools;
 import com.expleague.commons.text.lemmer.MyStem;
 import com.expleague.commons.text.lemmer.MyStemImpl;
+import com.expleague.commons.text.lemmer.PartOfSpeech;
 import com.expleague.sensearch.Config;
 import com.expleague.sensearch.Page;
 import com.expleague.sensearch.core.Term;
@@ -18,7 +19,6 @@ import com.expleague.sensearch.index.Filter;
 import com.expleague.sensearch.index.Index;
 import com.expleague.sensearch.index.IndexedPage;
 import com.expleague.sensearch.protobuf.index.IndexUnits;
-import com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta.IdMapping;
 import com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta.UriPageMapping;
 import com.expleague.sensearch.protobuf.index.IndexUnits.TermStatistics;
 import com.expleague.sensearch.protobuf.index.IndexUnits.TermStatistics.TermFrequency;
@@ -37,6 +37,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.stream.Stream;
@@ -51,7 +52,7 @@ import org.jetbrains.annotations.Nullable;
 
 public class PlainIndex implements Index {
 
-  public static final int VERSION = 2;
+  public static final int VERSION = 3;
 
   private static final long DEFAULT_CACHE_SIZE = 128 * (1 << 20); // 128 MB
 
@@ -75,7 +76,8 @@ public class PlainIndex implements Index {
   private final TObjectLongMap<URI> uriToPageIdMap = new TObjectLongHashMap<>();
 
   private final DB termStatisticsBase;
-  private final DB plainBase;
+  private final DB pageBase;
+  private final DB termBase;
 
   private final double averagePageSize;
   private final int indexSize;
@@ -101,9 +103,13 @@ public class PlainIndex implements Index {
         JniDBFactory.factory.open(
             indexRoot.resolve(PlainIndexBuilder.TERM_STATISTICS_ROOT).toFile(), DEFAULT_DB_OPTIONS);
 
-    plainBase =
+    pageBase =
         JniDBFactory.factory.open(
-            indexRoot.resolve(PlainIndexBuilder.PLAIN_ROOT).toFile(), DEFAULT_DB_OPTIONS);
+            indexRoot.resolve(PlainIndexBuilder.PAGE_ROOT).toFile(), DEFAULT_DB_OPTIONS);
+
+    termBase =
+        JniDBFactory.factory.open(
+            indexRoot.resolve(PlainIndexBuilder.TERM_ROOT).toFile(), DEFAULT_DB_OPTIONS);
 
     tokenizer = new TokenizerImpl();
 
@@ -120,44 +126,52 @@ public class PlainIndex implements Index {
     indexSize = indexMeta.getPagesCount();
     vocabularySize = indexMeta.getVocabularySize();
 
-    final TObjectLongMap<CharSeq> ids = new TObjectLongHashMap<>();
-    indexMeta.getIdMappingsList().forEach(m -> ids.put(CharSeq.create(m.getWord()), m.getId()));
-
     final TLongLongMap wordToLemma = new TLongLongHashMap();
-    indexMeta.getLemmaIdMappingsList().forEach(m -> wordToLemma.put(m.getWordId(), m.getLemmaId()));
+//    indexMeta.getLemmaIdMappingsList().forEach(m -> wordToLemma.put(m.getWordId(), m.getLemmaId()));
 
     TLongObjectMap<String> idToWord = new TLongObjectHashMap<>();
-    indexMeta.getIdMappingsList().forEach(m -> idToWord.put(m.getId(), m.getWord()));
+//    indexMeta.getIdMappingsList().forEach(m -> idToWord.put(m.getId(), m.getWord()));
 
-    for (IdMapping idMapping : indexMeta.getIdMappingsList()) {
-      //noinspection SuspiciousMethodCalls
-      if (wordToTerms.containsKey(idMapping.getWord()))
-        continue;
+    for (Entry<byte[], byte[]> item : termBase) {
+      try {
+        IndexUnits.Term protoTerm = IndexUnits.Term.parseFrom(item.getValue());
 
-//      final List<WordInfo> parse = stemmer.parse(word);
-//      final LemmaInfo lemma = parse.size() > 0 ? parse.get(0).lemma() : null;
-      final IndexTerm lemmaTerm;
+        final String word = protoTerm.getText();
 
-      final String word = idMapping.getWord();
-      final long lemmaId = wordToLemma.get(idMapping.getId());
-      if (lemmaId == -1) {
-        lemmaTerm = null;
-      } else {
-        if (idToTerm.containsKey(lemmaId)) {
-          lemmaTerm = (IndexTerm) idToTerm.get(lemmaId);
-        } else {
-          CharSeq lemmaText = CharSeq.intern(idToWord.get(lemmaId));
-          lemmaTerm = new IndexTerm(this, lemmaText, lemmaId, null);
-          idToTerm.put(lemmaId, lemmaTerm);
-          wordToTerms.put(lemmaText, lemmaTerm);
+        //noinspection SuspiciousMethodCalls
+        if (wordToTerms.containsKey(word)) {
+          return;
         }
+
+        PartOfSpeech pos = PartOfSpeech.valueOf(protoTerm.getPartOfSpeech().name());
+
+        final IndexTerm lemmaTerm;
+
+        final long lemmaId = wordToLemma.get(protoTerm.getId());
+        if (lemmaId == -1) {
+          lemmaTerm = null;
+        } else {
+          if (idToTerm.containsKey(lemmaId)) {
+            lemmaTerm = (IndexTerm) idToTerm.get(lemmaId);
+          } else {
+            CharSeq lemmaText = CharSeq.intern(idToWord.get(lemmaId));
+
+            lemmaTerm = new IndexTerm(this, lemmaText, lemmaId, null, pos);
+            idToTerm.put(lemmaId, lemmaTerm);
+            wordToTerms.put(lemmaText, lemmaTerm);
+          }
+        }
+
+        final CharSeq compactText = CharSeq.intern(word);
+
+        IndexTerm term = new IndexTerm(this, compactText, protoTerm.getId(), lemmaTerm, pos);
+        idToTerm.put(protoTerm.getId(), term);
+        wordToTerms.put(compactText, term);
+
+      } catch (InvalidProtocolBufferException e) {
+        LOG.fatal("Invalid protobuf for term with id " + Longs.fromByteArray(item.getKey()));
+        throw new RuntimeException(e);
       }
-
-      final CharSeq compactText = CharSeq.intern(word);
-
-      IndexTerm term = new IndexTerm(this, compactText, idMapping.getId(), lemmaTerm);
-      idToTerm.put(idMapping.getId(), term);
-      wordToTerms.put(compactText, term);
     }
 
     for (UriPageMapping mapping : indexMeta.getUriPageMappingsList()) {
@@ -204,7 +218,7 @@ public class PlainIndex implements Index {
   @Nullable
   private IndexedPage idToPage(long id) {
     try {
-      return new PlainPage(IndexUnits.Page.parseFrom(plainBase.get(Longs.toByteArray(id))));
+      return new PlainPage(IndexUnits.Page.parseFrom(pageBase.get(Longs.toByteArray(id))));
     } catch (InvalidProtocolBufferException e) {
       LOG.fatal("Encountered invalid protobuf in Plain Base!");
       return null;

@@ -1,8 +1,8 @@
 package com.expleague.sensearch.index.plain;
 
 import com.expleague.commons.seq.CharSeq;
+import com.expleague.commons.text.lemmer.PartOfSpeech;
 import com.expleague.sensearch.core.Term;
-
 import java.util.stream.Stream;
 
 public class IndexTerm implements Term {
@@ -11,7 +11,8 @@ public class IndexTerm implements Term {
   private final IndexTerm lemma;
   private final long id;
 
-  public IndexTerm(PlainIndex owner, CharSeq text, long id, IndexTerm lemma) {
+  public IndexTerm(
+      PlainIndex owner, CharSeq text, long id, IndexTerm lemma, PartOfSpeech partOfSpeech) {
     this.owner = owner;
     this.text = text;
     this.id = id;
@@ -41,6 +42,11 @@ public class IndexTerm implements Term {
   @Override
   public int freq() {
     return owner.termFrequency(this);
+  }
+
+  @Override
+  public PartOfSpeech partOfSpeech() {
+    return partOfSpeech();
   }
 
   public long id() {

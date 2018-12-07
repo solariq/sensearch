@@ -1,20 +1,17 @@
 package com.expleague.sensearch.donkey.plain;
 
 import com.expleague.commons.math.vectors.Vec;
-import com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta.IdMapping;
 import com.expleague.sensearch.utils.SensearchTestCase;
-import com.google.common.collect.Lists;
 import gnu.trove.map.TLongIntMap;
 import gnu.trove.map.TLongObjectMap;
 import gnu.trove.map.TObjectLongMap;
 import gnu.trove.map.hash.TLongIntHashMap;
 import gnu.trove.map.hash.TLongObjectHashMap;
 import gnu.trove.map.hash.TObjectLongHashMap;
+import java.util.stream.Stream;
 import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
-
-import java.util.stream.Stream;
 
 public class PlainIndexBuilderMethodsTest extends SensearchTestCase {
   @Test
@@ -79,24 +76,6 @@ public class PlainIndexBuilderMethodsTest extends SensearchTestCase {
     Assert.assertEquals(2, knownIdMappings.get("word2"));
     Assert.assertEquals(3, knownIdMappings.get("word3"));
     Assert.assertArrayEquals(convertResult, new long[] {1, 2, 3});
-  }
-
-  @Test
-  public void idMappingsToProtobufTest() {
-    TObjectLongMap<String> knowIdMappings = new TObjectLongHashMap<>();
-    for (int i = 0; i < 10; ++i) {
-      knowIdMappings.put("word" + i, i);
-
-      Iterable<IdMapping> protobufMapings = PlainIndexBuilder.toProtobufIterable(knowIdMappings);
-
-      protobufMapings.forEach(
-          m -> {
-            Assert.assertTrue(knowIdMappings.containsKey(m.getWord()));
-            Assert.assertEquals(knowIdMappings.get(m.getWord()), m.getId());
-          });
-
-      Assert.assertEquals(knowIdMappings.size(), Lists.newArrayList(protobufMapings).size());
-    }
   }
 
   @Test

@@ -6,17 +6,6 @@ option java_package = "com.expleague.sensearch.protobuf.index";
 option java_outer_classname = "IndexUnits";
 
 message IndexMeta {
-
-  message IdMapping {
-    optional string word = 1;
-    optional int64 id = 2;
-  }
-
-  message LemmaIdMapping {
-    optional int64 word_id = 1;
-    optional int64 lemma_id = 2;
-  }
-
   message UriPageMapping {
     optional string uri = 1;
     optional int64 page_id = 2;
@@ -28,9 +17,7 @@ message IndexMeta {
 
   optional int32 vocabulary_size = 4;
 
-  repeated IdMapping id_mappings = 5;
-  repeated LemmaIdMapping lemma_id_mappings = 6;
-  repeated UriPageMapping uri_page_mappings = 7;
+  repeated UriPageMapping uri_page_mappings = 5;
 }
 
 message Page {
@@ -52,4 +39,31 @@ message TermStatistics {
   optional int64 term_frequency = 3;
 
   repeated TermFrequency bigram_frequency = 4;
+}
+
+message Term {
+  optional int64 id = 1;
+  // Will be missing if lemma can not be extracted or lemma equals to this term
+  optional int64 lemma_id = 2;
+
+  optional string text = 3;
+  optional PartOfSpeech part_of_speech = 4;
+
+  enum PartOfSpeech {
+    UNKNOWN = 0;
+    A = 1;
+    ADV = 2;
+    ADVPRO = 3;
+    ANUM = 4;
+    APRO = 5;
+    COM = 6;
+    CONJ = 7;
+    INTJ = 8;
+    NUM = 9;
+    PART = 10;
+    PR = 11;
+    S = 12;
+    SPRO = 13;
+    V = 14;
+  }
 }
