@@ -1,7 +1,7 @@
 package com.expleague.sensearch.index.plain;
 
 import com.expleague.commons.seq.CharSeq;
-import com.expleague.commons.text.lemmer.PartOfSpeech;
+import com.expleague.sensearch.core.PartOfSpeech;
 import com.expleague.sensearch.core.Term;
 import java.util.stream.Stream;
 import org.jetbrains.annotations.Nullable;

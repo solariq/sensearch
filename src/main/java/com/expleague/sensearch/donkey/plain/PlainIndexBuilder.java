@@ -5,10 +5,10 @@ import com.expleague.commons.math.vectors.impl.vectors.ArrayVec;
 import com.expleague.commons.seq.CharSeqTools;
 import com.expleague.commons.text.lemmer.LemmaInfo;
 import com.expleague.commons.text.lemmer.MyStem;
-import com.expleague.commons.text.lemmer.PartOfSpeech;
 import com.expleague.commons.text.lemmer.WordInfo;
 import com.expleague.sensearch.Config;
 import com.expleague.sensearch.core.Lemmer;
+import com.expleague.sensearch.core.PartOfSpeech;
 import com.expleague.sensearch.core.Tokenizer;
 import com.expleague.sensearch.core.impl.TokenizerImpl;
 import com.expleague.sensearch.donkey.IndexBuilder;
@@ -345,7 +345,10 @@ public class PlainIndexBuilder implements IndexBuilder {
 
           //noinspection EqualsBetweenInconvertibleTypes
           if (lemma == null || lemma.lemma().equals(word)) {
-            terms.put(wordId, new ParsedTerm(wordId, -1, lemma == null ? null : lemma.pos()));
+            terms.put(
+                wordId,
+                new ParsedTerm(
+                    wordId, -1, lemma == null ? null : PartOfSpeech.valueOf(lemma.pos().name())));
             return true;
           }
 
@@ -355,9 +358,11 @@ public class PlainIndexBuilder implements IndexBuilder {
           }
 
           long lemmaId = idMapping.get(lemma);
-          terms.put(wordId, new ParsedTerm(wordId, lemmaId, lemma.pos()));
+          terms.put(
+              wordId, new ParsedTerm(wordId, lemmaId, PartOfSpeech.valueOf(lemma.pos().name())));
           if (!terms.containsKey(lemmaId)) {
-            terms.put(wordId, new ParsedTerm(lemmaId, -1, lemma.pos()));
+            terms.put(
+                wordId, new ParsedTerm(lemmaId, -1, PartOfSpeech.valueOf(lemma.pos().name())));
           }
 
           return true;

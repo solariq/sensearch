@@ -1,11 +1,10 @@
 package com.expleague.sensearch.snippet;
 
 import com.expleague.commons.text.lemmer.LemmaInfo;
-import com.expleague.commons.text.lemmer.PartOfSpeech;
 import com.expleague.sensearch.Page;
 import com.expleague.sensearch.core.Lemmer;
+import com.expleague.sensearch.core.PartOfSpeech;
 import com.expleague.sensearch.query.Query;
-import com.expleague.sensearch.index.plain.IndexTerm;
 import com.expleague.sensearch.snippet.docbased_snippet.DocBasedSnippet;
 import com.expleague.sensearch.snippet.docbased_snippet.KeyWord;
 import com.expleague.sensearch.snippet.passage.Passage;
@@ -81,7 +80,7 @@ public class SnippetsCreator {
                   if (lemmaInfo == null) {
                     return false;
                   }
-                  PartOfSpeech partOfSpeech = lemmaInfo.pos();
+                  PartOfSpeech partOfSpeech = PartOfSpeech.valueOf(lemmaInfo.pos().name());
                   return partOfSpeech == PartOfSpeech.S;
                 })
             .peek(
