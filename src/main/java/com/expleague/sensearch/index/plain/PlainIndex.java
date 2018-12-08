@@ -142,10 +142,8 @@ public class PlainIndex implements Index {
         item -> {
           try {
             IndexUnits.Term protoTerm = IndexUnits.Term.parseFrom(item.getValue());
+            final CharSeq word = CharSeq.intern(protoTerm.getText());
 
-            final String word = protoTerm.getText();
-
-            //noinspection SuspiciousMethodCalls
             if (wordToTerms.containsKey(word)) {
               return;
             }
@@ -172,11 +170,9 @@ public class PlainIndex implements Index {
               }
             }
 
-            final CharSeq compactText = CharSeq.intern(word);
-
-            IndexTerm term = new IndexTerm(this, compactText, protoTerm.getId(), lemmaTerm, pos);
+            IndexTerm term = new IndexTerm(this, word, protoTerm.getId(), lemmaTerm, pos);
             idToTerm.put(protoTerm.getId(), term);
-            wordToTerms.put(compactText, term);
+            wordToTerms.put(word, term);
 
           } catch (InvalidProtocolBufferException e) {
             LOG.fatal("Invalid protobuf for term with id " + Longs.fromByteArray(item.getKey()));
@@ -221,6 +217,11 @@ public class PlainIndex implements Index {
    * TODO: What kind of terms is returned?
    */
   Stream<Term> synonyms(Term term) {
+    System.out.println("Synonyms for " + term.text());
+    filter
+        .filtrate(embedding.vec(((IndexTerm) term).id()), SYNONYMS_COUNT, PlainIndex::isWordId)
+        .mapToObj(idToTerm::get).forEach(ttt -> System.out.print(ttt.text() + " "));
+    System.out.println();
     return filter
         .filtrate(embedding.vec(((IndexTerm) term).id()), SYNONYMS_COUNT, PlainIndex::isWordId)
         .mapToObj(idToTerm::get);

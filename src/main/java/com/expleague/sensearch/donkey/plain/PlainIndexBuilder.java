@@ -183,6 +183,10 @@ public class PlainIndexBuilder implements IndexBuilder {
                         .mapToDouble(CharSeqTools::parseDouble)
                         .toArray();
                 synchronized (idMappings) {
+                  if (idMappings.containsKey(word)) {
+                    return;
+                    // TODO should be removed after new vectors are trained
+                  }
                   idMappings.put(word, idMappings.size() + 1);
                 }
                 synchronized (vectors) {

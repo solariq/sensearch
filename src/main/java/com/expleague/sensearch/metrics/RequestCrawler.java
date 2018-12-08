@@ -6,6 +6,7 @@ import com.expleague.sensearch.core.impl.ResultItemImpl;
 import com.expleague.sensearch.index.Index;
 import java.io.IOException;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLDecoder;
@@ -82,7 +83,13 @@ public class RequestCrawler implements WebCrawler {
               }
               String snippet = element.select("span.st").text();
               String snippetUrl = element.select("a[href]").attr("href");
-              final URI uri = URI.create(URLDecoder.decode(snippetUrl));
+              final URI uri;
+              try {
+                uri = new URI(URLDecoder.decode(snippetUrl));
+              } catch (URISyntaxException e) {
+                e.printStackTrace();
+                return;
+              }
               if (index.page(uri) == null) {
                 return;
               }

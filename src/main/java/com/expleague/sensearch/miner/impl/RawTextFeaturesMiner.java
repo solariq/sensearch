@@ -3,20 +3,16 @@ package com.expleague.sensearch.miner.impl;
 import com.expleague.commons.math.vectors.Vec;
 import com.expleague.commons.math.vectors.impl.vectors.ArrayVec;
 import com.expleague.sensearch.Page;
+import com.expleague.sensearch.core.Term;
 import com.expleague.sensearch.index.Index;
 import com.expleague.sensearch.miner.Features;
 import com.expleague.sensearch.miner.FeaturesMiner;
 import com.expleague.sensearch.query.Query;
-import com.expleague.sensearch.core.Term;
-import gnu.trove.map.TObjectLongMap;
 import gnu.trove.map.hash.TObjectIntHashMap;
-import gnu.trove.map.hash.TObjectLongHashMap;
-
-import java.util.*;
-import java.util.function.Predicate;
-import java.util.regex.Pattern;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class RawTextFeaturesMiner implements FeaturesMiner {
   // BM25 parameters
@@ -31,31 +27,39 @@ public class RawTextFeaturesMiner implements FeaturesMiner {
 
   interface TextFeatureAccumulator {
     void accept(Term term);
+
     double value();
   }
 
   @Override
   public Features extractFeatures(Query query, Page page) {
     final Set<Term> queryTerms = new HashSet<>(query.terms());
-    final Set<Term> queryLemmas = query.terms().stream().map(Term::lemma).collect(Collectors.toSet());
-//    final Set<Term> querySyn = query.terms().stream().flatMap(Term::synonyms).collect(Collectors.toSet());
-    final int pageSize = (int)index.parse(page.title() + " " + page.text()).count();
+    final Set<Term> queryLemmas =
+        query.terms().stream().map(Term::lemma).collect(Collectors.toSet());
+    final Set<Term> querySyn =
+        query.synonyms().values().stream().flatMap(List::stream).collect(Collectors.toSet());
+
+    final int pageSize = (int) index.parse(page.title() + " " + page.text()).count();
     TextFeatureAccumulator bm25 = new BM25Accumulator(pageSize);
     TextFeatureAccumulator bm25l = new BM25Accumulator(pageSize);
     TextFeatureAccumulator bm25s = new BM25Accumulator(pageSize);
-    index.parse(page.title() + " " + page.text()).forEach(term -> {
-      if (queryTerms.contains(term)) {
-        bm25.accept(term);
-        bm25l.accept(term);
-        bm25s.accept(term);
-      }
-      else {
-        if (queryLemmas.contains(term))
-          bm25l.accept(term);
-//        if (querySyn.contains(term))
-//          bm25s.accept(term);
-      }
-    });
+    index
+        .parse(page.title() + " " + page.text())
+        .forEach(
+            term -> {
+              if (queryTerms.contains(term)) {
+                bm25.accept(term);
+                bm25l.accept(term);
+                bm25s.accept(term);
+              } else {
+                if (queryLemmas.contains(term)) {
+                  bm25l.accept(term);
+                }
+                if (querySyn.contains(term)) {
+                  bm25s.accept(term);
+                }
+              }
+            });
 
     return new TextFeaturesImpl(bm25.value(), bm25l.value(), bm25s.value());
   }
@@ -94,69 +98,75 @@ public class RawTextFeaturesMiner implements FeaturesMiner {
     @Override
     public double value() {
       double[] result = new double[]{0};
-      freq.forEachEntry((term, freq) -> {
-        final int df = term.documentFreq();
-        final double idf = df == 0 ? 0 : Math.log((index.size() - df + 0.5) / (df + 0.5));
-        result[0] += df * (K + 1) * freq / (freq + K * (1 - B + B * pageSize / index.averagePageSize())) * idf;
-        return true;
-      });
+      freq.forEachEntry(
+          (term, freq) -> {
+            final int df = term.documentFreq();
+            final double idf = df == 0 ? 0 : Math.log((index.size() - df + 0.5) / (df + 0.5));
+            result[0] +=
+                df
+                    * (K + 1)
+                    * freq
+                    / (freq + K * (1 - B + B * pageSize / index.averagePageSize()))
+                    * idf;
+            return true;
+          });
       return result[0];
     }
   }
 
   // fuzzy rank parameter
-//  private static final int CONTEXT_WINDOW_SIZE = 4;
-//  private double fuzzyRank(String[] rawTerms, String[] contentTokens) {
-//    Set<String> rawTermsSet = Stream.of(rawTerms).collect(Collectors.toSet());
-//    TObjectLongMap<String> termsCounts = new TObjectLongHashMap<>();
-//    Map<String, TObjectLongMap<String>> termsCooccurrences = new HashMap<>();
-//
-//    int currentWindowSize = 0;
-//    LinkedList<String> window = new LinkedList<>();
-//    for (String token : contentTokens) {
-//      if (rawTermsSet.contains(token)) {
-//        for (String neighbour : window) {
-//          if (!termsCooccurrences.containsKey(token)) {
-//            termsCooccurrences.put(token, new TObjectLongHashMap<>());
-//          }
-//          if (!termsCooccurrences.get(token).containsKey(neighbour)) {
-//            termsCooccurrences.get(token).put(neighbour, 0);
-//          }
-//          termsCooccurrences.get(token).increment(neighbour);
-//        }
-//      } else {
-//        window.addLast(token);
-//      }
-//
-//      if (!termsCounts.containsKey(token)) {
-//        termsCounts.put(token, 0L);
-//      }
-//      termsCounts.increment(token);
-//
-//      if (currentWindowSize >= CONTEXT_WINDOW_SIZE) {
-//        window.pollFirst();
-//      } else {
-//        ++currentWindowSize;
-//      }
-//    }
-//
-//    double totalScore = 0.;
-//    for (Map.Entry<String, TObjectLongMap<String>> coocEntry : termsCooccurrences.entrySet()) {
-//      double wordScore = 1.;
-//      double keyCount = termsCounts.get(coocEntry.getKey());
-//
-//      TObjectLongMap<String> cooccurrences = coocEntry.getValue();
-//      for (String neighbour : cooccurrences.keySet()) {
-//        double neighbourCount = termsCounts.get(neighbour);
-//        double coocurrenncesCount = cooccurrences.get(neighbour);
-//        // keyCount >= 1, neighbourCount >= 1, coocurrenceCount < keyCount + neighbourCount
-//        wordScore *= 1. - coocurrenncesCount / (keyCount + neighbourCount - coocurrenncesCount);
-//      }
-//
-//      totalScore += (1 - wordScore);
-//    }
-//
-//    return totalScore;
-//  }
+  //  private static final int CONTEXT_WINDOW_SIZE = 4;
+  //  private double fuzzyRank(String[] rawTerms, String[] contentTokens) {
+  //    Set<String> rawTermsSet = Stream.of(rawTerms).collect(Collectors.toSet());
+  //    TObjectLongMap<String> termsCounts = new TObjectLongHashMap<>();
+  //    Map<String, TObjectLongMap<String>> termsCooccurrences = new HashMap<>();
+  //
+  //    int currentWindowSize = 0;
+  //    LinkedList<String> window = new LinkedList<>();
+  //    for (String token : contentTokens) {
+  //      if (rawTermsSet.contains(token)) {
+  //        for (String neighbour : window) {
+  //          if (!termsCooccurrences.containsKey(token)) {
+  //            termsCooccurrences.put(token, new TObjectLongHashMap<>());
+  //          }
+  //          if (!termsCooccurrences.get(token).containsKey(neighbour)) {
+  //            termsCooccurrences.get(token).put(neighbour, 0);
+  //          }
+  //          termsCooccurrences.get(token).increment(neighbour);
+  //        }
+  //      } else {
+  //        window.addLast(token);
+  //      }
+  //
+  //      if (!termsCounts.containsKey(token)) {
+  //        termsCounts.put(token, 0L);
+  //      }
+  //      termsCounts.increment(token);
+  //
+  //      if (currentWindowSize >= CONTEXT_WINDOW_SIZE) {
+  //        window.pollFirst();
+  //      } else {
+  //        ++currentWindowSize;
+  //      }
+  //    }
+  //
+  //    double totalScore = 0.;
+  //    for (Map.Entry<String, TObjectLongMap<String>> coocEntry : termsCooccurrences.entrySet()) {
+  //      double wordScore = 1.;
+  //      double keyCount = termsCounts.get(coocEntry.getKey());
+  //
+  //      TObjectLongMap<String> cooccurrences = coocEntry.getValue();
+  //      for (String neighbour : cooccurrences.keySet()) {
+  //        double neighbourCount = termsCounts.get(neighbour);
+  //        double coocurrenncesCount = cooccurrences.get(neighbour);
+  //        // keyCount >= 1, neighbourCount >= 1, coocurrenceCount < keyCount + neighbourCount
+  //        wordScore *= 1. - coocurrenncesCount / (keyCount + neighbourCount - coocurrenncesCount);
+  //      }
+  //
+  //      totalScore += (1 - wordScore);
+  //    }
+  //
+  //    return totalScore;
+  //  }
 
 }

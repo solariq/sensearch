@@ -10,5 +10,5 @@
   "pathToZIP": "../WikiDocs/Mini_Wiki_categories.zip",
 
   "pathToMetrics": "./resources/Metrics",
-  "buildIndexFlag": "true"
+  "buildIndexFlag": "false"
 }
