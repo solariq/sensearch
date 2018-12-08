@@ -17,7 +17,7 @@ public class TokenizerImpl implements Tokenizer {
 
   @Override
   public Stream<CharSequence> toWords(CharSequence sentence) {
-    return Stream.<CharSequence>of(WORD_SPLIT_PATTERN.split(CharSeqTools.replace(sentence, String.valueOf((char)769), ""))).filter(s -> s.length() > 0);
+    return Stream.<CharSequence>of(WORD_SPLIT_PATTERN.split(CharSeqTools.replace(sentence, String.valueOf((char) 769), ""))).filter(s -> s.length() > 0);
   }
   @Override
   public Stream<CharSequence> toSentences(CharSequence text) {
