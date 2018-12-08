@@ -120,17 +120,21 @@ public class PlainIndex implements Index {
             Files.newInputStream(indexRoot.resolve(PlainIndexBuilder.INDEX_META_FILE)));
 
     if (indexMeta.getVersion() != VERSION) {
-      throw new IllegalArgumentException(String.format("Built index has version %d while code version is %d", indexMeta.getVersion(), VERSION));
+      throw new IllegalArgumentException(
+          String.format(
+              "Built index has version %d while code version is %d",
+              indexMeta.getVersion(), VERSION));
     }
     averagePageSize = indexMeta.getAveragePageSize();
     indexSize = indexMeta.getPagesCount();
     vocabularySize = indexMeta.getVocabularySize();
 
     final TLongLongMap wordToLemma = new TLongLongHashMap();
-//    indexMeta.getLemmaIdMappingsList().forEach(m -> wordToLemma.put(m.getWordId(), m.getLemmaId()));
+    //    indexMeta.getLemmaIdMappingsList().forEach(m -> wordToLemma.put(m.getWordId(),
+    // m.getLemmaId()));
 
     TLongObjectMap<String> idToWord = new TLongObjectHashMap<>();
-//    indexMeta.getIdMappingsList().forEach(m -> idToWord.put(m.getId(), m.getWord()));
+    //    indexMeta.getIdMappingsList().forEach(m -> idToWord.put(m.getId(), m.getWord()));
 
     DBIterator termIterator = termBase.iterator();
     termIterator.seekToFirst();
@@ -146,7 +150,10 @@ public class PlainIndex implements Index {
               return;
             }
 
-            PartOfSpeech pos = PartOfSpeech.valueOf(protoTerm.getPartOfSpeech().name());
+            PartOfSpeech pos =
+                protoTerm.getPartOfSpeech() == IndexUnits.Term.PartOfSpeech.UNKNOWN
+                    ? null
+                    : PartOfSpeech.valueOf(protoTerm.getPartOfSpeech().name());
 
             final IndexTerm lemmaTerm;
 
@@ -175,8 +182,7 @@ public class PlainIndex implements Index {
             LOG.fatal("Invalid protobuf for term with id " + Longs.fromByteArray(item.getKey()));
             throw new RuntimeException(e);
           }
-        }
-    );
+        });
 
     for (UriPageMapping mapping : indexMeta.getUriPageMappingsList()) {
       uriToPageIdMap.put(URI.create(mapping.getUri()), mapping.getPageId());
@@ -197,7 +203,11 @@ public class PlainIndex implements Index {
   @Override
   public Stream<Term> mostFrequentNeighbours(Term term) {
     try {
-      return termStatistics(((IndexTerm)term).id()).getBigramFrequencyList().stream().mapToLong(TermFrequency::getTermId).mapToObj(idToTerm::get);
+      return termStatistics(((IndexTerm) term).id())
+          .getBigramFrequencyList()
+          .stream()
+          .mapToLong(TermFrequency::getTermId)
+          .mapToObj(idToTerm::get);
     } catch (InvalidProtocolBufferException e) {
       LOG.warn(
           String.format(
@@ -212,10 +222,7 @@ public class PlainIndex implements Index {
    */
   Stream<Term> synonyms(Term term) {
     return filter
-        .filtrate(
-            embedding.vec(((IndexTerm) term).id()),
-            SYNONYMS_COUNT,
-            PlainIndex::isWordId)
+        .filtrate(embedding.vec(((IndexTerm) term).id()), SYNONYMS_COUNT, PlainIndex::isWordId)
         .mapToObj(idToTerm::get);
   }
 
@@ -240,11 +247,15 @@ public class PlainIndex implements Index {
   @Override
   public Stream<Page> fetchDocuments(Query query) {
     final Vec queryVec = new ArrayVec(embedding.dim());
-    query.terms().stream()
+    query
+        .terms()
+        .stream()
         .mapToLong(t -> ((IndexTerm) t).id())
         .mapToObj(embedding::vec)
         .forEach(v -> VecTools.append(queryVec, v));
-    return filter.filtrate(queryVec, FILTERED_DOC_NUMBER, PlainIndex::isPageId).mapToObj(this::idToPage);
+    return filter
+        .filtrate(queryVec, FILTERED_DOC_NUMBER, PlainIndex::isPageId)
+        .mapToObj(this::idToPage);
   }
 
   @Override
@@ -281,7 +292,7 @@ public class PlainIndex implements Index {
 
   int termFrequency(Term term) {
     try {
-      return (int)termStatistics(((IndexTerm) term).id()).getTermFrequency();
+      return (int) termStatistics(((IndexTerm) term).id()).getTermFrequency();
     } catch (DBException | NoSuchElementException e) {
       return 0;
     } catch (InvalidProtocolBufferException e) {

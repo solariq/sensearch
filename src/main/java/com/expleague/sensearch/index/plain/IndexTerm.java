@@ -4,12 +4,14 @@ import com.expleague.commons.seq.CharSeq;
 import com.expleague.commons.text.lemmer.PartOfSpeech;
 import com.expleague.sensearch.core.Term;
 import java.util.stream.Stream;
+import org.jetbrains.annotations.Nullable;
 
 public class IndexTerm implements Term {
   private final PlainIndex owner;
   private final CharSeq text;
   private final IndexTerm lemma;
   private final long id;
+  private final PartOfSpeech partOfSpeech;
 
   public IndexTerm(
       PlainIndex owner, CharSeq text, long id, IndexTerm lemma, PartOfSpeech partOfSpeech) {
@@ -17,6 +19,7 @@ public class IndexTerm implements Term {
     this.text = text;
     this.id = id;
     this.lemma = lemma;
+    this.partOfSpeech = partOfSpeech;
   }
 
   @Override
@@ -44,9 +47,10 @@ public class IndexTerm implements Term {
     return owner.termFrequency(this);
   }
 
+  @Nullable
   @Override
   public PartOfSpeech partOfSpeech() {
-    return partOfSpeech();
+    return partOfSpeech;
   }
 
   public long id() {

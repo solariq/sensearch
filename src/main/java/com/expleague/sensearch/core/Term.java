@@ -2,6 +2,7 @@ package com.expleague.sensearch.core;
 
 import com.expleague.commons.text.lemmer.PartOfSpeech;
 import java.util.stream.Stream;
+import org.jetbrains.annotations.Nullable;
 
 public interface Term {
   CharSequence text();
@@ -13,5 +14,7 @@ public interface Term {
   int documentFreq();
   int freq();
 
+  // Can be null if lemma can not be determined
+  @Nullable
   PartOfSpeech partOfSpeech();
 }
