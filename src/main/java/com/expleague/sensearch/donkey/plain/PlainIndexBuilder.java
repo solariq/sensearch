@@ -184,8 +184,7 @@ public class PlainIndexBuilder implements IndexBuilder {
                         .toArray();
                 synchronized (idMappings) {
                   if (idMappings.containsKey(word)) {
-                    return;
-                    // TODO should be removed after new vectors are trained
+                    throw new IllegalArgumentException("Embedding contains duplicate words!");
                   }
                   idMappings.put(word, idMappings.size() + 1);
                 }
