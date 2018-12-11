@@ -21,10 +21,24 @@ message IndexMeta {
 }
 
 message Page {
+  message Link {
+    optional string text = 1;
+    // might be missing if link redirects to an image or page
+    // which is not int the index
+    optional int64 target_id = 2;
+    optional int64 position = 3;
+  }
+
   optional int64 page_id = 1;
   optional string uri = 2;
   optional string title = 3;
   optional string content = 4;
+  repeated Link links = 5;
+
+  // tree-like structure for pages
+  // parent_id might be absent
+  optional int64 parent_id = 6;
+  repeated int64 subpages_ids = 7;
 }
 
 message TermStatistics {

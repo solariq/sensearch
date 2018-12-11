@@ -13,13 +13,13 @@ public interface CrawlerDocument {
   CharSequence content();
 
   /**
-   * @return Page title or "" if page have no title
+   * @return Page title or "" if page has no title
    */
   @NotNull
   String title();
 
   /**
-   * @return List of categories this page or empty list if page have no categories
+   * @return List of categories of this page or empty list if the page has no categories
    */
   @NotNull
   List<String> categories();
@@ -31,7 +31,7 @@ public interface CrawlerDocument {
   List<Section> sections();
 
   /**
-   * @return Page ID or 0 if page have no ID
+   * @return Page ID or 0 if page has no ID
    */
   @NotNull
   long iD();
@@ -52,7 +52,7 @@ public interface CrawlerDocument {
 
     /**
      * @return Title of this section. As there can be sections, sub-sections and so on, this method
-     *     returns a list of parents titles. For example, for subsection C in section B in artile A
+     *     returns a list of parents titles. For example, for subsection C in section B in article A
      *     it will return [A, B, C]
      */
     @NotNull
@@ -75,7 +75,7 @@ public interface CrawlerDocument {
     CharSequence targetTitle();
 
     /**
-     * @return Id of wikipedia article this lini references. Equals to -1 if there is no article for
+     * @return Id of wikipedia article this link references. Equals to -1 if there is no article for
      *     this link or this link leads to some other resource (for example, image)
      */
     long targetId();
