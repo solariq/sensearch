@@ -40,7 +40,7 @@ public class RankingPhase implements SearchPhase {
             .textFeatures()
             .entrySet()
             .stream()
-            .map(p -> Pair.of(p.getKey(), p.getValue().features().get(0)))
+            .map(p -> Pair.of(p.getKey(), p.getValue().features().get(2)))
             .sorted(Comparator.<Pair<Page, Double>>comparingDouble(Pair::getRight).reversed())
             .map(Pair::getLeft)
             .skip(pageNo * pageSize)

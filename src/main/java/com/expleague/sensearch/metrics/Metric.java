@@ -37,7 +37,12 @@ public class Metric {
       System.err.println("Can't create directory: " + query);
     }
 
-    googleResults = crawler.getGoogleResults(ourTitles.size(), query);
+    try {
+      googleResults = crawler.getGoogleResults(ourTitles.size(), query);
+    } catch (IOException e) {
+      e.printStackTrace();
+      return new ResultItem[0];
+    }
 
     double DCG = 0.0;
     int ind = 0;
