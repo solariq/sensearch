@@ -128,6 +128,12 @@
       <version>1.4.6</version>
     </dependency>
 
+    <dependency>
+      <groupId>com.expleague</groupId>
+      <artifactId>jmll</artifactId>
+      <version>1.4.6</version>
+    </dependency>
+
     <!-- https://mvnrepository.com/artifact/com.fasterxml.jackson.core/jackson-core -->
     <dependency>
       <groupId>com.fasterxml.jackson.core</groupId>
