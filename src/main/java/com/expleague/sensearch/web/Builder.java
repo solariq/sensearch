@@ -49,8 +49,6 @@ public class Builder {
     suggestor = new BigramsBasedSuggestor(index);
     //suggestor = new ProbabilisticSuggestor(crawler, index, config);
 
-    suggestor = new BigramsBasedSuggestor(index);
-
     searcher = new SenSeArchImpl(this);
     metric = new Metric(new RequestCrawler(index), config.getPathToMetrics());
     return config;

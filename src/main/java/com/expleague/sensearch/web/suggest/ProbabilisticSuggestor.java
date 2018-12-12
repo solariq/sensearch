@@ -27,10 +27,14 @@ public class ProbabilisticSuggestor implements Suggestor {
 	public ProbabilisticSuggestor(Crawler crawl, Index index, Config config) throws JsonParseException, JsonMappingException, IOException {
 		this.index = index;
 		
-		SuggestStatisticsProvider provider = new SuggestStatisticsProvider(crawl, index, config);
+		SuggestStatisticsProvider provider = null; //new SuggestStatisticsProvider(crawl, index, config);
 		unigramCoeff = provider.getUnigramCoeff();
 		multigramFreqNorm = provider.getMultigramFreqNorm();
 		invertedIndex = provider.getInvertedIndex();
+		
+		for (Term t : unigramCoeff.keySet());
+		for (List<Term> t:  multigramFreqNorm.keySet());
+		for (Term t : invertedIndex.keySet());
 	}
 
 	@Override
@@ -93,9 +97,14 @@ public class ProbabilisticSuggestor implements Suggestor {
 		List<Integer> qcDocs = getDocsSetsIntersection(qc);
 		
 		phraseProb.clear();
-		
+		/*
 		multigramFreqNorm.keySet().stream()
 		.forEach(p -> phraseProb.put(p, getPpQt(p, qt) * getPQcp(qcDocs, p)));
+		*/
+		
+		for (List<Term> p : multigramFreqNorm.keySet()) {
+			phraseProb.put(p, getPpQt(p, qt) * getPQcp(qcDocs, p));
+		}
 		
 		String qcText = qc
 				.stream()

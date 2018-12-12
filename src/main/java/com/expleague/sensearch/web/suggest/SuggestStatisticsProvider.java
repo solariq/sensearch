@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -12,14 +11,24 @@ import java.util.stream.Collectors;
 
 import javax.xml.stream.XMLStreamException;
 
+import org.iq80.leveldb.DB;
+import org.iq80.leveldb.DBIterator;
+import org.iq80.leveldb.WriteBatch;
+import org.iq80.leveldb.WriteOptions;
+
 import com.expleague.sensearch.Config;
 import com.expleague.sensearch.core.Term;
 import com.expleague.sensearch.donkey.crawler.Crawler;
 import com.expleague.sensearch.index.Index;
+import com.expleague.sensearch.index.plain.IndexTerm;
 import com.fasterxml.jackson.core.JsonGenerationException;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.primitives.Doubles;
+import com.google.common.primitives.Longs;
+
+import gnu.trove.map.TLongObjectMap;
 
 public class SuggestStatisticsProvider {
 	private final int maxNgramsOrder = 3;
@@ -40,6 +49,12 @@ public class SuggestStatisticsProvider {
 	private Map<Term, Double> sumFreqNorm = new HashMap<>();
 	 
 	private double[] avgOrderFreq = new double[maxNgramsOrder];
+	
+	private final TLongObjectMap<Term> idToTerm;
+	
+	private static final WriteOptions DEFAULT_WRITE_OPTIONS =
+		      new WriteOptions().sync(true).snapshot(false);
+	private final DB suggestBase;
 	
 	//Maps, that used in suggestor
 	private Map<Term, Double> unigramCoeff = new HashMap<>();
@@ -70,6 +85,7 @@ public class SuggestStatisticsProvider {
 	}
 	
 	private boolean tryLoad() throws JsonParseException, JsonMappingException, IOException {
+		/*
 		if (!Files.exists(unigramsStorage)
 				|| !Files.exists(multigramsStorage)
 				|| !Files.exists(invIndexStorage)) {
@@ -79,18 +95,42 @@ public class SuggestStatisticsProvider {
 		unigramCoeff = mapper.readValue(unigramsStorage.toFile(), unigramCoeff.getClass());
 		multigramFreqNorm = mapper.readValue(multigramsStorage.toFile(), multigramFreqNorm.getClass());
 		invertedIndex = mapper.readValue(invIndexStorage.toFile(), invertedIndex.getClass());
+		*/
 		
+		DBIterator iter = suggestBase.iterator();
+		iter.seekToFirst();
+		
+		iter.forEachRemaining(item -> {
+			long termId = Longs.fromByteArray(item.getKey());
+			unigramCoeff.put(
+					idToTerm.get(Longs.fromByteArray(item.getKey())),
+					Double.longBitsToDouble(Longs.fromByteArray(item.getValue()))
+					);
+		});
 		return true;
 	}
 	
 	private void saveTargets() throws JsonGenerationException, JsonMappingException, IOException {
+		/*
 		Files.createDirectories(unigramsStorage.getParent());
 		mapper.writeValue(unigramsStorage.toFile(), unigramCoeff);
 		mapper.writeValue(multigramsStorage.toFile(), multigramFreqNorm);
 		mapper.writeValue(invIndexStorage.toFile(), invertedIndex);
+		*/
+		
+		WriteBatch batch = suggestBase.createWriteBatch();
+		unigramCoeff.entrySet().forEach(ent -> {
+			batch.put(Longs.toByteArray(((IndexTerm)ent.getKey()).id()),
+					Longs.toByteArray(Double.doubleToLongBits(ent.getValue())));
+		});
+		
+		suggestBase.write(batch, DEFAULT_WRITE_OPTIONS);
 	}
 	
-	public SuggestStatisticsProvider(Crawler crawler, Index index, Config config) throws JsonParseException, JsonMappingException, IOException {
+	public SuggestStatisticsProvider(Crawler crawler, Index index, Config config, TLongObjectMap<Term> idToTerm, DB termStats) throws JsonParseException, JsonMappingException, IOException {
+		
+		this.idToTerm = idToTerm;
+		suggestBase = termStats;
 		
 		unigramsStorage = config.getTemporaryIndex().resolve("Suggest/unigram_coeff");
 		multigramsStorage = config.getTemporaryIndex().resolve("Suggest/multigram_coeff");

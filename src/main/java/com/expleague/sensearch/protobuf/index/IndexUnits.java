@@ -1637,6 +1637,7 @@ public final class IndexUnits {
      *
      * <pre>
      * tree-like structure for pages
+     * parent_id might be absent
      * </pre>
      */
     boolean hasParentId();
@@ -1645,6 +1646,7 @@ public final class IndexUnits {
      *
      * <pre>
      * tree-like structure for pages
+     * parent_id might be absent
      * </pre>
      */
     long getParentId();
@@ -1836,10 +1838,20 @@ public final class IndexUnits {
 
       /**
        * <code>optional int64 target_id = 2;</code>
+       *
+       * <pre>
+       * might be missing if link redirects to an image or page
+       * which is not int the index
+       * </pre>
        */
       boolean hasTargetId();
       /**
        * <code>optional int64 target_id = 2;</code>
+       *
+       * <pre>
+       * might be missing if link redirects to an image or page
+       * which is not int the index
+       * </pre>
        */
       long getTargetId();
 
@@ -2006,12 +2018,22 @@ public final class IndexUnits {
       private long targetId_;
       /**
        * <code>optional int64 target_id = 2;</code>
+       *
+       * <pre>
+       * might be missing if link redirects to an image or page
+       * which is not int the index
+       * </pre>
        */
       public boolean hasTargetId() {
         return ((bitField0_ & 0x00000002) == 0x00000002);
       }
       /**
        * <code>optional int64 target_id = 2;</code>
+       *
+       * <pre>
+       * might be missing if link redirects to an image or page
+       * which is not int the index
+       * </pre>
        */
       public long getTargetId() {
         return targetId_;
@@ -2376,18 +2398,33 @@ public final class IndexUnits {
         private long targetId_ ;
         /**
          * <code>optional int64 target_id = 2;</code>
+         *
+         * <pre>
+         * might be missing if link redirects to an image or page
+         * which is not int the index
+         * </pre>
          */
         public boolean hasTargetId() {
           return ((bitField0_ & 0x00000002) == 0x00000002);
         }
         /**
          * <code>optional int64 target_id = 2;</code>
+         *
+         * <pre>
+         * might be missing if link redirects to an image or page
+         * which is not int the index
+         * </pre>
          */
         public long getTargetId() {
           return targetId_;
         }
         /**
          * <code>optional int64 target_id = 2;</code>
+         *
+         * <pre>
+         * might be missing if link redirects to an image or page
+         * which is not int the index
+         * </pre>
          */
         public Builder setTargetId(long value) {
           bitField0_ |= 0x00000002;
@@ -2397,6 +2434,11 @@ public final class IndexUnits {
         }
         /**
          * <code>optional int64 target_id = 2;</code>
+         *
+         * <pre>
+         * might be missing if link redirects to an image or page
+         * which is not int the index
+         * </pre>
          */
         public Builder clearTargetId() {
           bitField0_ = (bitField0_ & ~0x00000002);
@@ -2632,6 +2674,7 @@ public final class IndexUnits {
      *
      * <pre>
      * tree-like structure for pages
+     * parent_id might be absent
      * </pre>
      */
     public boolean hasParentId() {
@@ -2642,6 +2685,7 @@ public final class IndexUnits {
      *
      * <pre>
      * tree-like structure for pages
+     * parent_id might be absent
      * </pre>
      */
     public long getParentId() {
@@ -3559,6 +3603,7 @@ public final class IndexUnits {
        *
        * <pre>
        * tree-like structure for pages
+       * parent_id might be absent
        * </pre>
        */
       public boolean hasParentId() {
@@ -3569,6 +3614,7 @@ public final class IndexUnits {
        *
        * <pre>
        * tree-like structure for pages
+       * parent_id might be absent
        * </pre>
        */
       public long getParentId() {
@@ -3579,6 +3625,7 @@ public final class IndexUnits {
        *
        * <pre>
        * tree-like structure for pages
+       * parent_id might be absent
        * </pre>
        */
       public Builder setParentId(long value) {
@@ -3592,6 +3639,7 @@ public final class IndexUnits {
        *
        * <pre>
        * tree-like structure for pages
+       * parent_id might be absent
        * </pre>
        */
       public Builder clearParentId() {
@@ -6016,6 +6064,948 @@ public final class IndexUnits {
     // @@protoc_insertion_point(class_scope:index.Term)
   }
 
+  public interface TermListOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:index.TermList)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <code>repeated int64 termList = 1;</code>
+     */
+    java.util.List<java.lang.Long> getTermListList();
+    /**
+     * <code>repeated int64 termList = 1;</code>
+     */
+    int getTermListCount();
+    /**
+     * <code>repeated int64 termList = 1;</code>
+     */
+    long getTermList(int index);
+  }
+  /**
+   * Protobuf type {@code index.TermList}
+   */
+  public static final class TermList extends
+      com.google.protobuf.GeneratedMessage implements
+      // @@protoc_insertion_point(message_implements:index.TermList)
+      TermListOrBuilder {
+    // Use TermList.newBuilder() to construct.
+    private TermList(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
+      super(builder);
+      this.unknownFields = builder.getUnknownFields();
+    }
+    private TermList(boolean noInit) { this.unknownFields = com.google.protobuf.UnknownFieldSet.getDefaultInstance(); }
+
+    private static final TermList defaultInstance;
+    public static TermList getDefaultInstance() {
+      return defaultInstance;
+    }
+
+    public TermList getDefaultInstanceForType() {
+      return defaultInstance;
+    }
+
+    private final com.google.protobuf.UnknownFieldSet unknownFields;
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+        getUnknownFields() {
+      return this.unknownFields;
+    }
+    private TermList(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      initFields();
+      int mutable_bitField0_ = 0;
+      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder();
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            default: {
+              if (!parseUnknownField(input, unknownFields,
+                                     extensionRegistry, tag)) {
+                done = true;
+              }
+              break;
+            }
+            case 8: {
+              if (!((mutable_bitField0_ & 0x00000001) == 0x00000001)) {
+                termList_ = new java.util.ArrayList<java.lang.Long>();
+                mutable_bitField0_ |= 0x00000001;
+              }
+              termList_.add(input.readInt64());
+              break;
+            }
+            case 10: {
+              int length = input.readRawVarint32();
+              int limit = input.pushLimit(length);
+              if (!((mutable_bitField0_ & 0x00000001) == 0x00000001) && input.getBytesUntilLimit() > 0) {
+                termList_ = new java.util.ArrayList<java.lang.Long>();
+                mutable_bitField0_ |= 0x00000001;
+              }
+              while (input.getBytesUntilLimit() > 0) {
+                termList_.add(input.readInt64());
+              }
+              input.popLimit(limit);
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e.getMessage()).setUnfinishedMessage(this);
+      } finally {
+        if (((mutable_bitField0_ & 0x00000001) == 0x00000001)) {
+          termList_ = java.util.Collections.unmodifiableList(termList_);
+        }
+        this.unknownFields = unknownFields.build();
+        makeExtensionsImmutable();
+      }
+    }
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return com.expleague.sensearch.protobuf.index.IndexUnits.internal_static_index_TermList_descriptor;
+    }
+
+    protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return com.expleague.sensearch.protobuf.index.IndexUnits.internal_static_index_TermList_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              com.expleague.sensearch.protobuf.index.IndexUnits.TermList.class, com.expleague.sensearch.protobuf.index.IndexUnits.TermList.Builder.class);
+    }
+
+    public static com.google.protobuf.Parser<TermList> PARSER =
+        new com.google.protobuf.AbstractParser<TermList>() {
+      public TermList parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return new TermList(input, extensionRegistry);
+      }
+    };
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<TermList> getParserForType() {
+      return PARSER;
+    }
+
+    public static final int TERMLIST_FIELD_NUMBER = 1;
+    private java.util.List<java.lang.Long> termList_;
+    /**
+     * <code>repeated int64 termList = 1;</code>
+     */
+    public java.util.List<java.lang.Long>
+        getTermListList() {
+      return termList_;
+    }
+    /**
+     * <code>repeated int64 termList = 1;</code>
+     */
+    public int getTermListCount() {
+      return termList_.size();
+    }
+    /**
+     * <code>repeated int64 termList = 1;</code>
+     */
+    public long getTermList(int index) {
+      return termList_.get(index);
+    }
+
+    private void initFields() {
+      termList_ = java.util.Collections.emptyList();
+    }
+    private byte memoizedIsInitialized = -1;
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      getSerializedSize();
+      for (int i = 0; i < termList_.size(); i++) {
+        output.writeInt64(1, termList_.get(i));
+      }
+      getUnknownFields().writeTo(output);
+    }
+
+    private int memoizedSerializedSize = -1;
+    public int getSerializedSize() {
+      int size = memoizedSerializedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      {
+        int dataSize = 0;
+        for (int i = 0; i < termList_.size(); i++) {
+          dataSize += com.google.protobuf.CodedOutputStream
+            .computeInt64SizeNoTag(termList_.get(i));
+        }
+        size += dataSize;
+        size += 1 * getTermListList().size();
+      }
+      size += getUnknownFields().getSerializedSize();
+      memoizedSerializedSize = size;
+      return size;
+    }
+
+    private static final long serialVersionUID = 0L;
+    @java.lang.Override
+    protected java.lang.Object writeReplace()
+        throws java.io.ObjectStreamException {
+      return super.writeReplace();
+    }
+
+    public static com.expleague.sensearch.protobuf.index.IndexUnits.TermList parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.expleague.sensearch.protobuf.index.IndexUnits.TermList parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.expleague.sensearch.protobuf.index.IndexUnits.TermList parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.expleague.sensearch.protobuf.index.IndexUnits.TermList parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.expleague.sensearch.protobuf.index.IndexUnits.TermList parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return PARSER.parseFrom(input);
+    }
+    public static com.expleague.sensearch.protobuf.index.IndexUnits.TermList parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return PARSER.parseFrom(input, extensionRegistry);
+    }
+    public static com.expleague.sensearch.protobuf.index.IndexUnits.TermList parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return PARSER.parseDelimitedFrom(input);
+    }
+    public static com.expleague.sensearch.protobuf.index.IndexUnits.TermList parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return PARSER.parseDelimitedFrom(input, extensionRegistry);
+    }
+    public static com.expleague.sensearch.protobuf.index.IndexUnits.TermList parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return PARSER.parseFrom(input);
+    }
+    public static com.expleague.sensearch.protobuf.index.IndexUnits.TermList parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return PARSER.parseFrom(input, extensionRegistry);
+    }
+
+    public static Builder newBuilder() { return Builder.create(); }
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder(com.expleague.sensearch.protobuf.index.IndexUnits.TermList prototype) {
+      return newBuilder().mergeFrom(prototype);
+    }
+    public Builder toBuilder() { return newBuilder(this); }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * Protobuf type {@code index.TermList}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessage.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:index.TermList)
+        com.expleague.sensearch.protobuf.index.IndexUnits.TermListOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return com.expleague.sensearch.protobuf.index.IndexUnits.internal_static_index_TermList_descriptor;
+      }
+
+      protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return com.expleague.sensearch.protobuf.index.IndexUnits.internal_static_index_TermList_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                com.expleague.sensearch.protobuf.index.IndexUnits.TermList.class, com.expleague.sensearch.protobuf.index.IndexUnits.TermList.Builder.class);
+      }
+
+      // Construct using com.expleague.sensearch.protobuf.index.IndexUnits.TermList.newBuilder()
+      private Builder() {
+        maybeForceBuilderInitialization();
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders) {
+        }
+      }
+      private static Builder create() {
+        return new Builder();
+      }
+
+      public Builder clear() {
+        super.clear();
+        termList_ = java.util.Collections.emptyList();
+        bitField0_ = (bitField0_ & ~0x00000001);
+        return this;
+      }
+
+      public Builder clone() {
+        return create().mergeFrom(buildPartial());
+      }
+
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return com.expleague.sensearch.protobuf.index.IndexUnits.internal_static_index_TermList_descriptor;
+      }
+
+      public com.expleague.sensearch.protobuf.index.IndexUnits.TermList getDefaultInstanceForType() {
+        return com.expleague.sensearch.protobuf.index.IndexUnits.TermList.getDefaultInstance();
+      }
+
+      public com.expleague.sensearch.protobuf.index.IndexUnits.TermList build() {
+        com.expleague.sensearch.protobuf.index.IndexUnits.TermList result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      public com.expleague.sensearch.protobuf.index.IndexUnits.TermList buildPartial() {
+        com.expleague.sensearch.protobuf.index.IndexUnits.TermList result = new com.expleague.sensearch.protobuf.index.IndexUnits.TermList(this);
+        int from_bitField0_ = bitField0_;
+        if (((bitField0_ & 0x00000001) == 0x00000001)) {
+          termList_ = java.util.Collections.unmodifiableList(termList_);
+          bitField0_ = (bitField0_ & ~0x00000001);
+        }
+        result.termList_ = termList_;
+        onBuilt();
+        return result;
+      }
+
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof com.expleague.sensearch.protobuf.index.IndexUnits.TermList) {
+          return mergeFrom((com.expleague.sensearch.protobuf.index.IndexUnits.TermList)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(com.expleague.sensearch.protobuf.index.IndexUnits.TermList other) {
+        if (other == com.expleague.sensearch.protobuf.index.IndexUnits.TermList.getDefaultInstance()) return this;
+        if (!other.termList_.isEmpty()) {
+          if (termList_.isEmpty()) {
+            termList_ = other.termList_;
+            bitField0_ = (bitField0_ & ~0x00000001);
+          } else {
+            ensureTermListIsMutable();
+            termList_.addAll(other.termList_);
+          }
+          onChanged();
+        }
+        this.mergeUnknownFields(other.getUnknownFields());
+        return this;
+      }
+
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        com.expleague.sensearch.protobuf.index.IndexUnits.TermList parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (com.expleague.sensearch.protobuf.index.IndexUnits.TermList) e.getUnfinishedMessage();
+          throw e;
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
+          }
+        }
+        return this;
+      }
+      private int bitField0_;
+
+      private java.util.List<java.lang.Long> termList_ = java.util.Collections.emptyList();
+      private void ensureTermListIsMutable() {
+        if (!((bitField0_ & 0x00000001) == 0x00000001)) {
+          termList_ = new java.util.ArrayList<java.lang.Long>(termList_);
+          bitField0_ |= 0x00000001;
+         }
+      }
+      /**
+       * <code>repeated int64 termList = 1;</code>
+       */
+      public java.util.List<java.lang.Long>
+          getTermListList() {
+        return java.util.Collections.unmodifiableList(termList_);
+      }
+      /**
+       * <code>repeated int64 termList = 1;</code>
+       */
+      public int getTermListCount() {
+        return termList_.size();
+      }
+      /**
+       * <code>repeated int64 termList = 1;</code>
+       */
+      public long getTermList(int index) {
+        return termList_.get(index);
+      }
+      /**
+       * <code>repeated int64 termList = 1;</code>
+       */
+      public Builder setTermList(
+          int index, long value) {
+        ensureTermListIsMutable();
+        termList_.set(index, value);
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>repeated int64 termList = 1;</code>
+       */
+      public Builder addTermList(long value) {
+        ensureTermListIsMutable();
+        termList_.add(value);
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>repeated int64 termList = 1;</code>
+       */
+      public Builder addAllTermList(
+          java.lang.Iterable<? extends java.lang.Long> values) {
+        ensureTermListIsMutable();
+        com.google.protobuf.AbstractMessageLite.Builder.addAll(
+            values, termList_);
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>repeated int64 termList = 1;</code>
+       */
+      public Builder clearTermList() {
+        termList_ = java.util.Collections.emptyList();
+        bitField0_ = (bitField0_ & ~0x00000001);
+        onChanged();
+        return this;
+      }
+
+      // @@protoc_insertion_point(builder_scope:index.TermList)
+    }
+
+    static {
+      defaultInstance = new TermList(true);
+      defaultInstance.initFields();
+    }
+
+    // @@protoc_insertion_point(class_scope:index.TermList)
+  }
+
+  public interface IntegerListOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:index.IntegerList)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <code>repeated int32 intList = 1;</code>
+     */
+    java.util.List<java.lang.Integer> getIntListList();
+    /**
+     * <code>repeated int32 intList = 1;</code>
+     */
+    int getIntListCount();
+    /**
+     * <code>repeated int32 intList = 1;</code>
+     */
+    int getIntList(int index);
+  }
+  /**
+   * Protobuf type {@code index.IntegerList}
+   */
+  public static final class IntegerList extends
+      com.google.protobuf.GeneratedMessage implements
+      // @@protoc_insertion_point(message_implements:index.IntegerList)
+      IntegerListOrBuilder {
+    // Use IntegerList.newBuilder() to construct.
+    private IntegerList(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
+      super(builder);
+      this.unknownFields = builder.getUnknownFields();
+    }
+    private IntegerList(boolean noInit) { this.unknownFields = com.google.protobuf.UnknownFieldSet.getDefaultInstance(); }
+
+    private static final IntegerList defaultInstance;
+    public static IntegerList getDefaultInstance() {
+      return defaultInstance;
+    }
+
+    public IntegerList getDefaultInstanceForType() {
+      return defaultInstance;
+    }
+
+    private final com.google.protobuf.UnknownFieldSet unknownFields;
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+        getUnknownFields() {
+      return this.unknownFields;
+    }
+    private IntegerList(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      initFields();
+      int mutable_bitField0_ = 0;
+      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder();
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            default: {
+              if (!parseUnknownField(input, unknownFields,
+                                     extensionRegistry, tag)) {
+                done = true;
+              }
+              break;
+            }
+            case 8: {
+              if (!((mutable_bitField0_ & 0x00000001) == 0x00000001)) {
+                intList_ = new java.util.ArrayList<java.lang.Integer>();
+                mutable_bitField0_ |= 0x00000001;
+              }
+              intList_.add(input.readInt32());
+              break;
+            }
+            case 10: {
+              int length = input.readRawVarint32();
+              int limit = input.pushLimit(length);
+              if (!((mutable_bitField0_ & 0x00000001) == 0x00000001) && input.getBytesUntilLimit() > 0) {
+                intList_ = new java.util.ArrayList<java.lang.Integer>();
+                mutable_bitField0_ |= 0x00000001;
+              }
+              while (input.getBytesUntilLimit() > 0) {
+                intList_.add(input.readInt32());
+              }
+              input.popLimit(limit);
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e.getMessage()).setUnfinishedMessage(this);
+      } finally {
+        if (((mutable_bitField0_ & 0x00000001) == 0x00000001)) {
+          intList_ = java.util.Collections.unmodifiableList(intList_);
+        }
+        this.unknownFields = unknownFields.build();
+        makeExtensionsImmutable();
+      }
+    }
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return com.expleague.sensearch.protobuf.index.IndexUnits.internal_static_index_IntegerList_descriptor;
+    }
+
+    protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return com.expleague.sensearch.protobuf.index.IndexUnits.internal_static_index_IntegerList_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              com.expleague.sensearch.protobuf.index.IndexUnits.IntegerList.class, com.expleague.sensearch.protobuf.index.IndexUnits.IntegerList.Builder.class);
+    }
+
+    public static com.google.protobuf.Parser<IntegerList> PARSER =
+        new com.google.protobuf.AbstractParser<IntegerList>() {
+      public IntegerList parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return new IntegerList(input, extensionRegistry);
+      }
+    };
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<IntegerList> getParserForType() {
+      return PARSER;
+    }
+
+    public static final int INTLIST_FIELD_NUMBER = 1;
+    private java.util.List<java.lang.Integer> intList_;
+    /**
+     * <code>repeated int32 intList = 1;</code>
+     */
+    public java.util.List<java.lang.Integer>
+        getIntListList() {
+      return intList_;
+    }
+    /**
+     * <code>repeated int32 intList = 1;</code>
+     */
+    public int getIntListCount() {
+      return intList_.size();
+    }
+    /**
+     * <code>repeated int32 intList = 1;</code>
+     */
+    public int getIntList(int index) {
+      return intList_.get(index);
+    }
+
+    private void initFields() {
+      intList_ = java.util.Collections.emptyList();
+    }
+    private byte memoizedIsInitialized = -1;
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      getSerializedSize();
+      for (int i = 0; i < intList_.size(); i++) {
+        output.writeInt32(1, intList_.get(i));
+      }
+      getUnknownFields().writeTo(output);
+    }
+
+    private int memoizedSerializedSize = -1;
+    public int getSerializedSize() {
+      int size = memoizedSerializedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      {
+        int dataSize = 0;
+        for (int i = 0; i < intList_.size(); i++) {
+          dataSize += com.google.protobuf.CodedOutputStream
+            .computeInt32SizeNoTag(intList_.get(i));
+        }
+        size += dataSize;
+        size += 1 * getIntListList().size();
+      }
+      size += getUnknownFields().getSerializedSize();
+      memoizedSerializedSize = size;
+      return size;
+    }
+
+    private static final long serialVersionUID = 0L;
+    @java.lang.Override
+    protected java.lang.Object writeReplace()
+        throws java.io.ObjectStreamException {
+      return super.writeReplace();
+    }
+
+    public static com.expleague.sensearch.protobuf.index.IndexUnits.IntegerList parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.expleague.sensearch.protobuf.index.IndexUnits.IntegerList parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.expleague.sensearch.protobuf.index.IndexUnits.IntegerList parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.expleague.sensearch.protobuf.index.IndexUnits.IntegerList parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.expleague.sensearch.protobuf.index.IndexUnits.IntegerList parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return PARSER.parseFrom(input);
+    }
+    public static com.expleague.sensearch.protobuf.index.IndexUnits.IntegerList parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return PARSER.parseFrom(input, extensionRegistry);
+    }
+    public static com.expleague.sensearch.protobuf.index.IndexUnits.IntegerList parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return PARSER.parseDelimitedFrom(input);
+    }
+    public static com.expleague.sensearch.protobuf.index.IndexUnits.IntegerList parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return PARSER.parseDelimitedFrom(input, extensionRegistry);
+    }
+    public static com.expleague.sensearch.protobuf.index.IndexUnits.IntegerList parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return PARSER.parseFrom(input);
+    }
+    public static com.expleague.sensearch.protobuf.index.IndexUnits.IntegerList parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return PARSER.parseFrom(input, extensionRegistry);
+    }
+
+    public static Builder newBuilder() { return Builder.create(); }
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder(com.expleague.sensearch.protobuf.index.IndexUnits.IntegerList prototype) {
+      return newBuilder().mergeFrom(prototype);
+    }
+    public Builder toBuilder() { return newBuilder(this); }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * Protobuf type {@code index.IntegerList}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessage.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:index.IntegerList)
+        com.expleague.sensearch.protobuf.index.IndexUnits.IntegerListOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return com.expleague.sensearch.protobuf.index.IndexUnits.internal_static_index_IntegerList_descriptor;
+      }
+
+      protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return com.expleague.sensearch.protobuf.index.IndexUnits.internal_static_index_IntegerList_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                com.expleague.sensearch.protobuf.index.IndexUnits.IntegerList.class, com.expleague.sensearch.protobuf.index.IndexUnits.IntegerList.Builder.class);
+      }
+
+      // Construct using com.expleague.sensearch.protobuf.index.IndexUnits.IntegerList.newBuilder()
+      private Builder() {
+        maybeForceBuilderInitialization();
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders) {
+        }
+      }
+      private static Builder create() {
+        return new Builder();
+      }
+
+      public Builder clear() {
+        super.clear();
+        intList_ = java.util.Collections.emptyList();
+        bitField0_ = (bitField0_ & ~0x00000001);
+        return this;
+      }
+
+      public Builder clone() {
+        return create().mergeFrom(buildPartial());
+      }
+
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return com.expleague.sensearch.protobuf.index.IndexUnits.internal_static_index_IntegerList_descriptor;
+      }
+
+      public com.expleague.sensearch.protobuf.index.IndexUnits.IntegerList getDefaultInstanceForType() {
+        return com.expleague.sensearch.protobuf.index.IndexUnits.IntegerList.getDefaultInstance();
+      }
+
+      public com.expleague.sensearch.protobuf.index.IndexUnits.IntegerList build() {
+        com.expleague.sensearch.protobuf.index.IndexUnits.IntegerList result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      public com.expleague.sensearch.protobuf.index.IndexUnits.IntegerList buildPartial() {
+        com.expleague.sensearch.protobuf.index.IndexUnits.IntegerList result = new com.expleague.sensearch.protobuf.index.IndexUnits.IntegerList(this);
+        int from_bitField0_ = bitField0_;
+        if (((bitField0_ & 0x00000001) == 0x00000001)) {
+          intList_ = java.util.Collections.unmodifiableList(intList_);
+          bitField0_ = (bitField0_ & ~0x00000001);
+        }
+        result.intList_ = intList_;
+        onBuilt();
+        return result;
+      }
+
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof com.expleague.sensearch.protobuf.index.IndexUnits.IntegerList) {
+          return mergeFrom((com.expleague.sensearch.protobuf.index.IndexUnits.IntegerList)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(com.expleague.sensearch.protobuf.index.IndexUnits.IntegerList other) {
+        if (other == com.expleague.sensearch.protobuf.index.IndexUnits.IntegerList.getDefaultInstance()) return this;
+        if (!other.intList_.isEmpty()) {
+          if (intList_.isEmpty()) {
+            intList_ = other.intList_;
+            bitField0_ = (bitField0_ & ~0x00000001);
+          } else {
+            ensureIntListIsMutable();
+            intList_.addAll(other.intList_);
+          }
+          onChanged();
+        }
+        this.mergeUnknownFields(other.getUnknownFields());
+        return this;
+      }
+
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        com.expleague.sensearch.protobuf.index.IndexUnits.IntegerList parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (com.expleague.sensearch.protobuf.index.IndexUnits.IntegerList) e.getUnfinishedMessage();
+          throw e;
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
+          }
+        }
+        return this;
+      }
+      private int bitField0_;
+
+      private java.util.List<java.lang.Integer> intList_ = java.util.Collections.emptyList();
+      private void ensureIntListIsMutable() {
+        if (!((bitField0_ & 0x00000001) == 0x00000001)) {
+          intList_ = new java.util.ArrayList<java.lang.Integer>(intList_);
+          bitField0_ |= 0x00000001;
+         }
+      }
+      /**
+       * <code>repeated int32 intList = 1;</code>
+       */
+      public java.util.List<java.lang.Integer>
+          getIntListList() {
+        return java.util.Collections.unmodifiableList(intList_);
+      }
+      /**
+       * <code>repeated int32 intList = 1;</code>
+       */
+      public int getIntListCount() {
+        return intList_.size();
+      }
+      /**
+       * <code>repeated int32 intList = 1;</code>
+       */
+      public int getIntList(int index) {
+        return intList_.get(index);
+      }
+      /**
+       * <code>repeated int32 intList = 1;</code>
+       */
+      public Builder setIntList(
+          int index, int value) {
+        ensureIntListIsMutable();
+        intList_.set(index, value);
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>repeated int32 intList = 1;</code>
+       */
+      public Builder addIntList(int value) {
+        ensureIntListIsMutable();
+        intList_.add(value);
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>repeated int32 intList = 1;</code>
+       */
+      public Builder addAllIntList(
+          java.lang.Iterable<? extends java.lang.Integer> values) {
+        ensureIntListIsMutable();
+        com.google.protobuf.AbstractMessageLite.Builder.addAll(
+            values, intList_);
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>repeated int32 intList = 1;</code>
+       */
+      public Builder clearIntList() {
+        intList_ = java.util.Collections.emptyList();
+        bitField0_ = (bitField0_ & ~0x00000001);
+        onChanged();
+        return this;
+      }
+
+      // @@protoc_insertion_point(builder_scope:index.IntegerList)
+    }
+
+    static {
+      defaultInstance = new IntegerList(true);
+      defaultInstance.initFields();
+    }
+
+    // @@protoc_insertion_point(class_scope:index.IntegerList)
+  }
+
   private static final com.google.protobuf.Descriptors.Descriptor
     internal_static_index_IndexMeta_descriptor;
   private static
@@ -6051,6 +7041,16 @@ public final class IndexUnits {
   private static
     com.google.protobuf.GeneratedMessage.FieldAccessorTable
       internal_static_index_Term_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_index_TermList_descriptor;
+  private static
+    com.google.protobuf.GeneratedMessage.FieldAccessorTable
+      internal_static_index_TermList_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_index_IntegerList_descriptor;
+  private static
+    com.google.protobuf.GeneratedMessage.FieldAccessorTable
+      internal_static_index_IntegerList_fieldAccessorTable;
 
   public static com.google.protobuf.Descriptors.FileDescriptor
       getDescriptor() {
@@ -6082,9 +7082,10 @@ public final class IndexUnits {
       "artOfSpeech\022\013\n\007UNKNOWN\020\000\022\005\n\001A\020\001\022\007\n\003ADV\020\002",
       "\022\n\n\006ADVPRO\020\003\022\010\n\004ANUM\020\004\022\010\n\004APRO\020\005\022\007\n\003COM\020" +
       "\006\022\010\n\004CONJ\020\007\022\010\n\004INTJ\020\010\022\007\n\003NUM\020\t\022\010\n\004PART\020\n" +
-      "\022\006\n\002PR\020\013\022\005\n\001S\020\014\022\010\n\004SPRO\020\r\022\005\n\001V\020\016B4\n&com." +
-      "expleague.sensearch.protobuf.indexB\nInde" +
-      "xUnits"
+      "\022\006\n\002PR\020\013\022\005\n\001S\020\014\022\010\n\004SPRO\020\r\022\005\n\001V\020\016\"\034\n\010Term" +
+      "List\022\020\n\010termList\030\001 \003(\003\"\036\n\013IntegerList\022\017\n" +
+      "\007intList\030\001 \003(\005B4\n&com.expleague.sensearc" +
+      "h.protobuf.indexB\nIndexUnits"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
         new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
@@ -6140,6 +7141,18 @@ public final class IndexUnits {
       com.google.protobuf.GeneratedMessage.FieldAccessorTable(
         internal_static_index_Term_descriptor,
         new java.lang.String[] { "Id", "LemmaId", "Text", "PartOfSpeech", });
+    internal_static_index_TermList_descriptor =
+      getDescriptor().getMessageTypes().get(4);
+    internal_static_index_TermList_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessage.FieldAccessorTable(
+        internal_static_index_TermList_descriptor,
+        new java.lang.String[] { "TermList", });
+    internal_static_index_IntegerList_descriptor =
+      getDescriptor().getMessageTypes().get(5);
+    internal_static_index_IntegerList_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessage.FieldAccessorTable(
+        internal_static_index_IntegerList_descriptor,
+        new java.lang.String[] { "IntList", });
   }
 
   // @@protoc_insertion_point(outer_class_scope)
