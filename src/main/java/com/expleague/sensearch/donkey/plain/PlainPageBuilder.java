@@ -65,7 +65,7 @@ class PlainPageBuilder {
     writeBatch.put(pageIdBytes, pageBytes);
     ++pagesInBatch;
 
-    return flushedCount--;
+    return -flushedCount;
   }
 
   void build() throws IOException {
