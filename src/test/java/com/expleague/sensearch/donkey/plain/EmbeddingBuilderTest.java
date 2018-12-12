@@ -21,12 +21,14 @@ import java.util.Random;
 public class EmbeddingBuilderTest extends SensearchTestCase {
 
   private static final String EMBEDDING_TEST_ROOT = "embeddingTest";
-  private static final int MAIN_VEC_NUMBER = 10;
+  private static final int MAIN_VEC_NUMBER = 5;
   private static final int NEIGHBORS_NUMBER = 5;
   private static final int MAX_ID = MAIN_VEC_NUMBER * (NEIGHBORS_NUMBER + 1);
   private static final int DIFFERENT_COORDS_NUMBER = 10;
   private static final int VEC_SIZE = 130;
   private static final double EPS = 1e-2;
+  private static final double MIN_COORD_VAL = -1.;
+  private static final double MAX_COORD_VAL = 1.;
 
   private static Random random = new Random();
   private static TLongObjectMap<Vec> idVecMap;
@@ -46,7 +48,7 @@ public class EmbeddingBuilderTest extends SensearchTestCase {
     for (int mainId = 0; mainId < MAIN_VEC_NUMBER; mainId++) {
       double[] randCoords = new double[VEC_SIZE];
       for (int j = 0; j < randCoords.length; j++) {
-        randCoords[j] = random.nextDouble();
+        randCoords[j] = MIN_COORD_VAL + (MAX_COORD_VAL - MIN_COORD_VAL) * random.nextDouble();
       }
       Vec mainVec = new ArrayVec(randCoords);
       idVecMap.put((long) mainId, mainVec);
