@@ -10,13 +10,13 @@ public class MetricPhase implements SearchPhase {
 
   @Override
   public void accept(Whiteboard whiteboard) {
-    LOG.debug("Metric phase started");
+    LOG.info("Metric phase started");
     long startTime = System.nanoTime();
 
     Metric metric = whiteboard.builder().metric();
     whiteboard.putGoogleResults(metric.calculate(whiteboard.input(), whiteboard.results()));
 
-    LOG.debug(
+    LOG.info(
         String.format(
             "Metric phase finished in %.3f seconds", (System.nanoTime() - startTime) / 1e9));
   }

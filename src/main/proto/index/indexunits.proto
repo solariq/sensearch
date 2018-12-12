@@ -27,13 +27,17 @@ message Page {
     // which is not int the index
     optional int64 target_id = 2;
     optional int64 position = 3;
+    optional string target_uri = 4;
+    optional int64 page_id = 5;
   }
 
   optional int64 page_id = 1;
   optional string uri = 2;
+  // only section title
   optional string title = 3;
   optional string content = 4;
   repeated Link links = 5;
+  repeated Link input_links = 8;
 
   // tree-like structure for pages
   // parent_id might be absent
