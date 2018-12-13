@@ -92,7 +92,7 @@ public class CrawlerXML implements Crawler {
         CrawlerDocument result = parser.parseXML(file);
 
         if (!file.delete()) {
-          System.err.println("File " + result.iD() + ".xml isn't deleted");
+          System.err.println("File " + result.id() + ".xml isn't deleted");
         }
 
         return result;

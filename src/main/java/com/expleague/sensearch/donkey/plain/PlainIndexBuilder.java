@@ -214,19 +214,24 @@ public class PlainIndexBuilder implements IndexBuilder {
     final Path indexRoot = config.getTemporaryIndex();
     // ensure all roots
     Files.createDirectories(indexRoot.resolve(PAGE_ROOT));
-    final DB pageDb =
-        JniDBFactory.factory.open(indexRoot.resolve(PAGE_ROOT).toFile(), PAGE_DB_OPTIONS);
-    final PlainPageBuilder plainPageBuilder = new PlainPageBuilder(pageDb);
+    final DB pageDb = JniDBFactory.factory.open(
+        indexRoot.resolve(PAGE_ROOT).toFile(), PAGE_DB_OPTIONS
+    );
+    LOG.info("Creating mappings from wiki ids to raw index ids...");
+    final PlainPageBuilder plainPageBuilder = new PlainPageBuilder(
+        pageDb, indexRoot.resolve(PAGE_ROOT).resolve("TMP")
+    );
 
     Files.createDirectories(indexRoot.resolve(TERM_STATISTICS_ROOT));
-    final DB statisticsDb =
-        JniDBFactory.factory.open(
-            indexRoot.resolve(TERM_STATISTICS_ROOT).toFile(), STATS_DB_OPTIONS);
+    final DB statisticsDb = JniDBFactory.factory.open(
+        indexRoot.resolve(TERM_STATISTICS_ROOT).toFile(), STATS_DB_OPTIONS
+    );
     final StatisticsBuilder statisticsBuilder = new StatisticsBuilder(statisticsDb);
 
     Files.createDirectories(indexRoot.resolve(EMBEDDING_ROOT));
-    final EmbeddingBuilder embeddingBuilder =
-        new EmbeddingBuilder(indexRoot.resolve(EMBEDDING_ROOT));
+    final EmbeddingBuilder embeddingBuilder = new EmbeddingBuilder(
+        indexRoot.resolve(EMBEDDING_ROOT)
+    );
 
     final long[] pagesAndTokensCounts = new long[]{0, 0};
 

@@ -39,7 +39,7 @@ public class PlainPageBuilderTest extends SensearchTestCase {
     DB plainDb = JniDBFactory.factory.open(plainDbPath.toFile(), dbCreateOptions());
 
     TLongList pageIds = new TLongArrayList();
-    PlainPageBuilder plainPageBuilder = new PlainPageBuilder(plainDb);
+    PlainPageBuilder plainPageBuilder = new PlainPageBuilder(plainDb, plainDbPath.resolve("TMP"));
     for (CrawlerDocument cd : crawlerPages) {
       long pageId = plainPageBuilder.add(cd);
       // Test page ids are unique
@@ -56,7 +56,9 @@ public class PlainPageBuilderTest extends SensearchTestCase {
         JniDBFactory.factory.open(
             Files.createTempDirectory(testOutputRoot(), "tmp").toFile(), dbCreateOptions());
 
-    PlainPageBuilder plainPageBuilder = new PlainPageBuilder(plainDb);
+    PlainPageBuilder plainPageBuilder = new PlainPageBuilder(plainDb, testOutputRoot()
+        .resolve("TMP_PLAIN")
+    );
     plainPageBuilder.build();
 
     plainPageBuilder.add(new CrawlerDocumentMock("testTitle", "testContent"));
@@ -131,7 +133,7 @@ public class PlainPageBuilderTest extends SensearchTestCase {
     }
 
     @Override
-    public long iD() {
+    public long id() {
       return 0;
     }
 

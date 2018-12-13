@@ -1,123 +1,254 @@
 package com.expleague.sensearch.donkey.plain;
 
 import com.expleague.sensearch.donkey.crawler.document.CrawlerDocument;
+import com.expleague.sensearch.donkey.crawler.document.CrawlerDocument.Link;
 import com.expleague.sensearch.donkey.crawler.document.CrawlerDocument.Section;
-import com.expleague.sensearch.protobuf.index.IndexUnits;
 import com.expleague.sensearch.protobuf.index.IndexUnits.Page;
 import com.google.common.primitives.Longs;
+import gnu.trove.map.TLongLongMap;
+import gnu.trove.map.TLongObjectMap;
+import gnu.trove.map.hash.TLongLongHashMap;
+import gnu.trove.map.hash.TLongObjectHashMap;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+import org.apache.commons.io.FileUtils;
 import org.iq80.leveldb.DB;
 import org.iq80.leveldb.WriteBatch;
 import org.iq80.leveldb.WriteOptions;
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 class PlainPageBuilder {
 
+  public static final int ROOT_PAGE_ID_OFFSET_BITS = 16;
+
   private static final Logger LOG = LoggerFactory.getLogger(PlainPageBuilder.class);
 
-  private static final int MAX_PAGES_IN_BATCH = 100;
-
-  private static final int PAGE_ID_OFFSET_BITS = 16;
+  private static final String TEMP_INDEX_FILE = "TmpIndex";
 
   private static final WriteOptions DEFAULT_WRITE_OPTIONS =
       new WriteOptions().sync(true).snapshot(false);
 
   private final DB plainDb;
 
-  private int flushedCount = 0;
+  private final Path temporaryIndexRoot;
 
-  private WriteBatch writeBatch = null;
-  private int pagesInBatch = 0;
+  private List<Page.Link.Builder> linksList = new ArrayList<>();
 
-  PlainPageBuilder(DB plainDb) {
+  private TLongLongMap wikiIdToIndexId = new TLongLongHashMap();
+
+  private OutputStream temporaryIndexOs;
+
+  /**
+   * @param plainDb database where index pages will be stored
+   * @param tempFilesRoot root where temporary files while building will be stored
+   * if directory does not exist it will be created. It will be deleted after build()
+   * is called
+   * @throws IOException if it is failed to create root directory
+   */
+  PlainPageBuilder(DB plainDb, Path tempFilesRoot) throws IOException {
     this.plainDb = plainDb;
+    this.temporaryIndexRoot = tempFilesRoot;
+    Files.createDirectories(tempFilesRoot);
+    temporaryIndexOs = Files.newOutputStream(tempFilesRoot.resolve(TEMP_INDEX_FILE));
   }
-
   // TODO: resolve links between pages!
-  long add(CrawlerDocument newPage) {
-    if (writeBatch == null) {
-      writeBatch = plainDb.createWriteBatch();
+  long add(CrawlerDocument parsedPage) {
+    // create new page id
+    long newRootPageId = -((wikiIdToIndexId.size() + 1) << ROOT_PAGE_ID_OFFSET_BITS);
+    wikiIdToIndexId.put(parsedPage.id(), newRootPageId);
+
+    for (Page page : toPages(parsedPage.sections(), newRootPageId, linksList)) {
+      try {
+        page.writeDelimitedTo(temporaryIndexOs);
+      } catch (IOException e) {
+        throw new RuntimeException(
+            String.format(
+                "Failed to save page to temporary index [ %s ]. Cause: %s",
+                temporaryIndexRoot.toAbsolutePath().toString(),
+                e.toString()
+            )
+        );
+      }
     }
 
-    if (pagesInBatch >= MAX_PAGES_IN_BATCH) {
-      plainDb.write(writeBatch, DEFAULT_WRITE_OPTIONS);
-      pagesInBatch = 0;
-      writeBatch = plainDb.createWriteBatch();
+    try {
+      temporaryIndexOs.flush();
+    } catch (IOException e) {
+      throw new RuntimeException(
+          String.format("Failed to flush indexed pages to temporary directory: [ %s ]",
+              temporaryIndexRoot.toAbsolutePath().toString()
+          ), e
+      );
     }
 
-    ++flushedCount;
-
-    long pageId = flushedCount << PAGE_ID_OFFSET_BITS;
-
-    byte[] pageIdBytes = Longs.toByteArray(flushedCount);
-    byte[] pageBytes =
-        IndexUnits.Page.newBuilder()
-            .setPageId(flushedCount)
-            .setContent(newPage.content().toString())
-            .setTitle(newPage.title())
-            .setUri(newPage.uri().toString())
-            .build()
-            .toByteArray();
-
-    writeBatch.put(pageIdBytes, pageBytes);
-    ++pagesInBatch;
-
-    return -flushedCount;
+    return newRootPageId;
   }
 
   void build() throws IOException {
-    if (pagesInBatch > 0) {
-      plainDb.write(writeBatch, DEFAULT_WRITE_OPTIONS);
+    temporaryIndexOs.close();
+
+    TLongObjectMap<List<Page.Link>> incomingLinks = new TLongObjectHashMap<>();
+    TLongObjectMap<List<Page.Link>> outcomingLinks = new TLongObjectHashMap<>();
+    resolveLinks(linksList, wikiIdToIndexId, outcomingLinks, incomingLinks);
+
+    Page.Builder pageBuilder = Page.newBuilder();
+    Page rawPage;
+    WriteBatch writeBatch = plainDb.createWriteBatch();
+    int maxPagesInBatch = 1000;
+    int pagesInBatch = 0;
+    try (
+        InputStream temporaryIndexIs = Files.newInputStream(
+            temporaryIndexRoot.resolve(TEMP_INDEX_FILE)
+        )
+    ) {
+      while ((rawPage = Page.parseDelimitedFrom(temporaryIndexIs)) != null) {
+        pageBuilder.mergeFrom(rawPage);
+        long pageId = pageBuilder.getPageId();
+        if (outcomingLinks.containsKey(pageId)) {
+          pageBuilder.addAllOutcomingLinks(outcomingLinks.get(pageId));
+        }
+
+        if (incomingLinks.containsKey(pageId)) {
+          pageBuilder.addAllIncomingLinks(incomingLinks.get(pageId));
+        }
+
+        if (pagesInBatch >= maxPagesInBatch) {
+          plainDb.write(writeBatch, DEFAULT_WRITE_OPTIONS);
+          pagesInBatch = 0;
+          writeBatch = plainDb.createWriteBatch();
+        }
+
+        writeBatch.put(Longs.toByteArray(pageId), pageBuilder.build().toByteArray());
+        ++pagesInBatch;
+      }
+
+      if (pagesInBatch > 0) {
+        plainDb.write(writeBatch, DEFAULT_WRITE_OPTIONS);
+      }
+    } finally {
+      FileUtils.deleteDirectory(temporaryIndexRoot.toFile());
+      plainDb.close();
     }
 
-    plainDb.close();
   }
 
-  // TODO: Make more sensible names for variables
-  private List<Page> toPages(long currentPageId, List<Section> sections) {
-    LinkedList<Page.Builder> pagesStack = new LinkedList<>();
+  /**
+   * Receives list of links and splits it into two maps. Outcoming links map has
+   * link's source page id as a key, so for each id it stores all of the outcoming links.
+   * Incoming links map, on the other hand, stores all incoming links for each id in the
+   * similar fashion
+   * @param links list of Link.Builder each of which has wiki page id as a target id
+   * @param wikiIdToIndexIdMappings mapping from wiki ids to index ids
+   * @param outcomingLinks map of outcoming links
+   * @param incomingLinks map of incoming links
+   */
+  static void resolveLinks(List<Page.Link.Builder> links, TLongLongMap wikiIdToIndexIdMappings,
+      @NotNull TLongObjectMap<List<Page.Link>> outcomingLinks,
+      @NotNull TLongObjectMap<List<Page.Link>> incomingLinks) {
+    outcomingLinks.clear();
+    incomingLinks.clear();
+    for (Page.Link.Builder link : links) {
+      long wikiTargetId = link.getTargetPageId();
+      if (!wikiIdToIndexIdMappings.containsKey(wikiTargetId)) {
+        LOG.warn(
+            String.format("Mappings to index id for WikiPage with id [ %d ] was not found!",
+                wikiTargetId)
+        );
+        link.clearTargetPageId();
+      } else {
+        long targetIndexId = wikiIdToIndexIdMappings.get(wikiTargetId);
+        link.setTargetPageId(targetIndexId);
+      }
+
+      Page.Link builtLink = link.build();
+
+      if (builtLink.hasTargetPageId()) {
+        long targetId = builtLink.getTargetPageId();
+        incomingLinks.putIfAbsent(targetId, new LinkedList<>());
+        incomingLinks.get(targetId).add(builtLink);
+      }
+
+      long sourceId = link.getSourcePageId();
+      outcomingLinks.putIfAbsent(sourceId, new ArrayList<>());
+      outcomingLinks.get(sourceId).add(builtLink);
+    }
+  }
+
+  /**
+   * Converts given links to list of pages which are connected in tree manner Also enriches given
+   * list of know interpage links with links from given sections
+   *
+   * @param sections list of section from one page
+   * @param currentRootPageId id of the first section i.e. section right after page title. All other
+   * sctions id will be less than it
+   * @param knownLinks all know links
+   * @return list of pages
+   */
+  static List<Page> toPages(List<Section> sections, long currentRootPageId,
+      List<Page.Link.Builder> knownLinks) {
+    LinkedList<Page.Builder> parentPages = new LinkedList<>();
     List<Page> builtPages = new LinkedList<>();
+
+    long currentSectionId = currentRootPageId;
+    // TODO: check if sections count is more than set subpages limit
     for (Section section : sections) {
+      // enrich known links list
+      for (Link link : section.links()) {
+
+        Page.Link.Builder knownLink = Page.Link.newBuilder()
+            .setPosition(link.textOffset())
+            .setText(link.text().toString())
+            .setSourcePageId(currentSectionId)
+            .setTargetPageId(link.targetId());
+        knownLinks.add(knownLink);
+      }
+
       List<CharSequence> sectionTitleSeq = section.title();
       int sectionDepth = sectionTitleSeq.size();
 
-      if (sectionDepth - pagesStack.size() > 1) {
+      if (sectionDepth - parentPages.size() > 1) {
         LOG.warn(
             String.format(
                 "Received page with the depth [ %d ], when current depth is [ %d ]."
-                    + " Probably some sections are missing or pages order is incorrect",
+                    + " Probably some sections are missing or sections order is incorrect",
                 sectionDepth,
-                pagesStack.size()
+                parentPages.size()
             )
         );
       }
 
-      while (pagesStack.size() >= sectionDepth) {
-        builtPages.add(pagesStack.pollLast().build());
+      // section depth is always greater than 1
+      while (parentPages.size() >= sectionDepth) {
+        builtPages.add(parentPages.pollLast().build());
       }
-      // TODO: section uri
-      // TODO: Links
+
       CharSequence sectionTitle = sectionTitleSeq.get(sectionDepth - 1);
       Page.Builder pageBuilder = Page.newBuilder()
-          .setPageId(currentPageId)
+          .setPageId(currentSectionId)
           .setContent(section.text().toString())
           .setTitle(sectionTitle.toString());
 
-      if (!pagesStack.isEmpty()) {
-        pageBuilder.setParentId(pagesStack.peekLast().getPageId());
-        pagesStack.peekLast().addSubpagesIds(currentPageId);
+      if (!parentPages.isEmpty()) {
+        pageBuilder.setParentId(parentPages.peekLast().getPageId());
+        parentPages.peekLast().addSubpagesIds(currentSectionId);
       }
 
-      pagesStack.addLast(pageBuilder);
+      parentPages.addLast(pageBuilder);
 
-      ++currentPageId;
+      // page ids are below zero
+      --currentSectionId;
     }
 
-    while (!pagesStack.isEmpty()) {
-      builtPages.add(pagesStack.pollLast().build());
+    while (!parentPages.isEmpty()) {
+      builtPages.add(parentPages.pollLast().build());
     }
 
     return builtPages;

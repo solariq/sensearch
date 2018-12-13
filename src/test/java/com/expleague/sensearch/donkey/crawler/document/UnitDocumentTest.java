@@ -3,7 +3,6 @@ package com.expleague.sensearch.donkey.crawler.document;
 import com.expleague.sensearch.donkey.crawler.document.CrawlerDocument.Link;
 import com.expleague.sensearch.utils.SensearchTestCase;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -22,7 +21,7 @@ public class UnitDocumentTest extends SensearchTestCase {
   public void smallXMLTest() {
     page =
         parser.parseXML(RESOURCES_ROOT.resolve("smallXML").toFile());
-    Assert.assertEquals(page.iD(), 6673504);
+    Assert.assertEquals(page.id(), 6673504);
     Assert.assertEquals(page.title(), "Тэмусин (Когурё)»");
     Assert.assertEquals(
         page.sections().get(0).title(), Collections.singletonList("Тэмусин (Когурё)»"));
@@ -44,7 +43,7 @@ public class UnitDocumentTest extends SensearchTestCase {
   public void xMLWithEmptyLinksTest() {
     page =
         parser.parseXML(RESOURCES_ROOT.resolve("XMLwithEmptyLink").toFile());
-    Assert.assertEquals(page.iD(), 3666303);
+    Assert.assertEquals(page.id(), 3666303);
     Assert.assertEquals(page.sections().get(0).links().size(), 0);
     Assert.assertEquals(page.sections().get(1).links().size(), 1);
 
@@ -58,7 +57,7 @@ public class UnitDocumentTest extends SensearchTestCase {
   @Test
   public void xMLwithEmptySectionsTest() {
     page = parser.parseXML(RESOURCES_ROOT.resolve("XMLwithEmptySections").toFile());
-    Assert.assertEquals(page.iD(), 6676369);
+    Assert.assertEquals(page.id(), 6676369);
     Assert.assertEquals(page.title(), "Мужун Вэй");
     Assert.assertEquals(page.sections().size(), 6);
 
@@ -76,7 +75,7 @@ public class UnitDocumentTest extends SensearchTestCase {
     page = parser.parseXML(RESOURCES_ROOT.resolve("XMLwithoutCategories").toFile());
     Assert.assertEquals(page.categories().size(), 0);
 
-    Assert.assertEquals(page.iD(), 6673602);
+    Assert.assertEquals(page.id(), 6673602);
     Assert.assertEquals(page.title(), "Ги V (виконт Лиможа)");
     Assert.assertEquals(page.sections().size(), 2);
 
@@ -91,7 +90,7 @@ public class UnitDocumentTest extends SensearchTestCase {
   @Test
   public void xMLwithoutIDTest() {
     page = parser.parseXML(RESOURCES_ROOT.resolve("XMLwithoutID").toFile());
-    Assert.assertEquals(page.iD(), 0);
+    Assert.assertEquals(page.id(), 0);
 
     Assert.assertEquals(page.title(), "Тэсо (Тонбуё)");
     Assert.assertEquals(page.sections().size(), 1);
@@ -105,7 +104,7 @@ public class UnitDocumentTest extends SensearchTestCase {
     List<CharSequence> test = new ArrayList<>();
     test.add("Императоры Поздней Чжао");
     test.add("Правители Азии IV века");
-    Assert.assertEquals(page.iD(), 6673315);
+    Assert.assertEquals(page.id(), 6673315);
     Assert.assertEquals("", page.title());
     Assert.assertEquals(page.sections().size(), 3);
     Assert.assertEquals(page.categories(), test);
@@ -147,7 +146,7 @@ public class UnitDocumentTest extends SensearchTestCase {
   @Test
   public void xMLWithoutLinks() {
     page = parser.parseXML(RESOURCES_ROOT.resolve("XMLWithoutLinks").toFile());
-    Assert.assertEquals(page.iD(), 6675547);
+    Assert.assertEquals(page.id(), 6675547);
     Assert.assertEquals(page.title(), "Бонифаций дель Васто");
     Assert.assertEquals(page.sections().size(), 3);
     Assert.assertEquals(
