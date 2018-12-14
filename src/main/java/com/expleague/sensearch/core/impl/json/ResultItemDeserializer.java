@@ -38,7 +38,7 @@ public class ResultItemDeserializer extends StdDeserializer<ResultItem> {
           .elements()
           .forEachRemaining(
               n -> {
-                String text = n.get("content").asText();
+                String text = n.get("text").asText();
                 List<Segment> highlights = new ArrayList<>();
                 n.get("highlights")
                     .elements()

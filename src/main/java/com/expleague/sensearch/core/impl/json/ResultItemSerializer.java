@@ -31,7 +31,7 @@ public class ResultItemSerializer extends StdSerializer<ResultItem> {
     jsonGenerator.writeArrayFieldStart("passages");
     for (Pair<CharSequence, List<Segment>> passage : resultItem.passages()) {
       jsonGenerator.writeStartObject();
-      jsonGenerator.writeStringField("content", passage.first.toString());
+      jsonGenerator.writeStringField("text", passage.first.toString());
 
       jsonGenerator.writeArrayFieldStart("highlights");
       for (Segment highlight : passage.second) {
