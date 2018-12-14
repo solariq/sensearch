@@ -50,7 +50,7 @@ public class SamplesTest extends SensearchTestCase {
                   pages.add(
                       new Page() {
                         @Override
-                        public URI reference() {
+                        public URI uri() {
                           return null;
                         }
 
@@ -80,13 +80,23 @@ public class SamplesTest extends SensearchTestCase {
                         }
 
                         @Override
-                        public long parent() {
-                          return 0;
+                        public CharSequence fullContent() {
+                          return null;
                         }
 
                         @Override
-                        public Stream<Link> subpages() {
+                        public Page parent() {
                           return null;
+                        }
+
+                        @Override
+                        public Stream<Page> subpages() {
+                          return null;
+                        }
+
+                        @Override
+                        public boolean isEmpty() {
+                          return false;
                         }
                       });
 //                  queries.add(new BaseQuery(query, lemmer));

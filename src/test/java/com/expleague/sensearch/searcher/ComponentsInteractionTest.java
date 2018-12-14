@@ -1,6 +1,6 @@
 package com.expleague.sensearch.searcher;
 
-/** Created by sandulmv on 06.10.18. */
+
 public class ComponentsInteractionTest {
   //  private static final String[] TEST_DOCUMENTS = new String[]{
   //      "Information Retrieval and Web Search".toLowerCase(),
@@ -37,7 +37,7 @@ public class ComponentsInteractionTest {
   //    }
   //
   //    @Override
-  //    public URI reference() {
+  //    public URI uri() {
   //      throw new UnsupportedOperationException();
   //    }
   //

@@ -17,7 +17,6 @@ import com.expleague.sensearch.donkey.plain.PlainIndexBuilder;
 import com.expleague.sensearch.index.Embedding;
 import com.expleague.sensearch.index.Filter;
 import com.expleague.sensearch.index.Index;
-import com.expleague.sensearch.index.IndexedPage;
 import com.expleague.sensearch.metrics.FilterMetric;
 import com.expleague.sensearch.protobuf.index.IndexUnits;
 import com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta.UriPageMapping;
@@ -38,7 +37,11 @@ import java.io.IOException;
 import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.NoSuchElementException;
+import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.apache.log4j.Logger;
@@ -49,7 +52,6 @@ import org.iq80.leveldb.DBException;
 import org.iq80.leveldb.DBIterator;
 import org.iq80.leveldb.Options;
 import org.iq80.leveldb.ReadOptions;
-import org.jetbrains.annotations.Nullable;
 
 @Singleton
 public class PlainIndex implements Index {
@@ -192,12 +194,23 @@ public class PlainIndex implements Index {
         String.format("PlainIndex loaded in %.3f seconds", (System.nanoTime() - startTime) / 1e9));
   }
 
-  private static boolean isPageId(long id) {
+  static boolean isPageId(long id) {
     return id <= 0;
   }
 
-  private static boolean isWordId(long id) {
+  static boolean isWordId(long id) {
     return id > 0;
+  }
+
+  IndexUnits.Page protoPageLoad(long id) throws InvalidProtocolBufferException {
+    byte[] pageBytes = pageBase.get(Longs.toByteArray(id));
+    if (pageBytes == null) {
+      throw new NoSuchElementException(
+          String.format("No page with id [ %d ] was found in the index!", id)
+      );
+    }
+
+    return IndexUnits.Page.parseFrom(pageBytes);
   }
 
   @Override
@@ -217,57 +230,36 @@ public class PlainIndex implements Index {
     }
   }
 
-  /**
-   * TODO: What kind of terms is returned?
-   */
-  Stream<Term> synonyms(Term term) {
-    System.out.println("Synonyms for " + term.text());
-    filter
-        .filtrate(embedding.vec(((IndexTerm) term).id()), SYNONYMS_COUNT, PlainIndex::isWordId)
-        .mapToObj(idToTerm::get).forEach(ttt -> System.out.print(ttt.text() + " "));
-    System.out.println();
-    return filter
-        .filtrate(embedding.vec(((IndexTerm) term).id()), SYNONYMS_COUNT, PlainIndex::isWordId)
-        .mapToObj(idToTerm::get);
-  }
-
-  @Nullable
-  private IndexedPage idToPage(long id) {
-    try {
-      return new PlainPage(IndexUnits.Page.parseFrom(pageBase.get(Longs.toByteArray(id))));
-    } catch (InvalidProtocolBufferException e) {
-      LOG.fatal("Encountered invalid protobuf in Plain Base!");
-      return null;
-    }
-  }
-
-  @Nullable
   @Override
   public Page page(URI uri) {
-    // TODO: maybe add some sophisticated logic here and in builder like URI normalization
-    long pageId = uriToPageIdMap.get(uri);
-    return pageId == uriToPageIdMap.getNoEntryValue() ? null : idToPage(pageId);
+    if (!uriToPageIdMap.containsKey(uri)) {
+      return PlainPage.EMPTY_PAGE;
+    }
+    return PlainPage.create(uriToPageIdMap.get(uri), this);
   }
 
   @Override
   public Stream<Page> fetchDocuments(Query query) {
     final Vec queryVec = new ArrayVec(embedding.dim());
-    query
-        .terms()
+    query.terms()
         .stream()
         .mapToLong(t -> ((IndexTerm) t).id())
         .mapToObj(embedding::vec)
         .forEach(v -> VecTools.append(queryVec, v));
+
     List<Page> pages = filter
-            .filtrate(queryVec, FILTERED_DOC_NUMBER, PlainIndex::isPageId)
-            .mapToObj(this::idToPage).collect(Collectors.toList());
+        .filtrate(queryVec, FILTERED_DOC_NUMBER, PlainIndex::isPageId)
+        .mapToObj(id -> PlainPage.create(id, this))
+        .collect(Collectors.toList());
+
     double result = filterMetric.calc(query
                     .terms()
                     .stream()
                     .map(Term::text)
                     .collect(Collectors.joining(" ")),
-            pages.stream().map(Page::reference).collect(Collectors.toSet())
+        pages.stream().map(Page::uri).collect(Collectors.toSet())
     );
+
     LOG.info("FilterMetric: " + result);
     return pages.stream();
   }
@@ -293,6 +285,22 @@ public class PlainIndex implements Index {
     return averagePageSize;
   }
 
+  @Override
+  public int vocabularySize() {
+    return vocabularySize;
+  }
+
+  Stream<Term> synonyms(Term term) {
+    System.out.println("Synonyms for " + term.text());
+    filter
+        .filtrate(embedding.vec(((IndexTerm) term).id()), SYNONYMS_COUNT, PlainIndex::isWordId)
+        .mapToObj(idToTerm::get).forEach(ttt -> System.out.print(ttt.text() + " "));
+    System.out.println();
+    return filter
+        .filtrate(embedding.vec(((IndexTerm) term).id()), SYNONYMS_COUNT, PlainIndex::isWordId)
+        .mapToObj(idToTerm::get);
+  }
+
   int documentFrequency(Term term) {
     try {
       return termStatistics(((IndexTerm) term).id()).getDocuementFrequency();
@@ -315,17 +323,12 @@ public class PlainIndex implements Index {
     }
   }
 
-  private TermStatistics termStatistics(long termId) throws InvalidProtocolBufferException {
+  TermStatistics termStatistics(long termId) throws InvalidProtocolBufferException {
     if (lastTermStatistics == null || lastTermStatistics.getTermId() != termId) {
       lastTermStatistics =
           TermStatistics.parseFrom(
               termStatisticsBase.get(Longs.toByteArray(termId), DEFAULT_READ_OPTIONS));
     }
     return lastTermStatistics;
-  }
-
-  @Override
-  public int vocabularySize() {
-    return vocabularySize;
   }
 }

@@ -232,7 +232,7 @@ public class UnitMetricTest {
     }
 
     @Override
-    public URI reference() {
+    public URI uri() {
       return null;
     }
 
@@ -262,13 +262,23 @@ public class UnitMetricTest {
     }
 
     @Override
-    public long parent() {
-      return 0;
+    public Page parent() {
+      return null;
     }
 
     @Override
-    public Stream<Link> subpages() {
+    public Stream<Page> subpages() {
       return null;
+    }
+
+    @Override
+    public CharSequence fullContent() {
+      return null;
+    }
+
+    @Override
+    public boolean isEmpty() {
+      return false;
     }
   }
 }

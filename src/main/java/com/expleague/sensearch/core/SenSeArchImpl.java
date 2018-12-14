@@ -88,7 +88,7 @@ public class SenSeArchImpl implements SenSeArch {
     for (int i = 0; i < snippets.length; i++) {
       results[i] =
           new ResultItemImpl(
-              pages[i].reference(),
+              pages[i].uri(),
               pages[i].title(),
               Arrays.asList(Pair.create(snippets[i].getContent(), snippets[i].getSelection())),
               0);

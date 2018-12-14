@@ -28,7 +28,7 @@ public class RelevanceTest extends SensearchTestCase {
     d1 =
         new Page() {
           @Override
-          public URI reference() {
+          public URI uri() {
             return null;
           }
 
@@ -70,20 +70,29 @@ public class RelevanceTest extends SensearchTestCase {
           }
 
           @Override
-          public long parent() {
-            return 0;
-          }
-
-          @Override
-          public Stream<Link> subpages() {
+          public Page parent() {
             return null;
           }
 
+          @Override
+          public Stream<Page> subpages() {
+            return null;
+          }
+
+          @Override
+          public CharSequence fullContent() {
+            return null;
+          }
+
+          @Override
+          public boolean isEmpty() {
+            return false;
+          }
         };
     d2 =
         new Page() {
           @Override
-          public URI reference() {
+          public URI uri() {
             return null;
           }
 
@@ -125,20 +134,30 @@ public class RelevanceTest extends SensearchTestCase {
           }
 
           @Override
-          public long parent() {
-            return 0;
+          public Page parent() {
+            return null;
           }
 
           @Override
-          public Stream<Link> subpages() {
+          public Stream<Page> subpages() {
             return null;
+          }
+
+          @Override
+          public CharSequence fullContent() {
+            return null;
+          }
+
+          @Override
+          public boolean isEmpty() {
+            return false;
           }
         };
 
     d3 =
         new Page() {
           @Override
-          public URI reference() {
+          public URI uri() {
             return null;
           }
 
@@ -176,12 +195,22 @@ public class RelevanceTest extends SensearchTestCase {
           }
 
           @Override
-          public long parent() {
-            return 0;
+          public CharSequence fullContent() {
+            return null;
           }
 
           @Override
-          public Stream<Link> subpages() {
+          public boolean isEmpty() {
+            return false;
+          }
+
+          @Override
+          public Page parent() {
+            return null;
+          }
+
+          @Override
+          public Stream<Page> subpages() {
             return null;
           }
         };

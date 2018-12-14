@@ -130,7 +130,7 @@
 //    }
 //
 //    @Override
-//    public URI reference() {
+//    public URI uri() {
 //      throw new UnsupportedOperationException();
 //    }
 //

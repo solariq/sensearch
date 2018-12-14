@@ -4,6 +4,7 @@ import com.expleague.sensearch.donkey.crawler.document.CrawlerDocument;
 import com.expleague.sensearch.donkey.crawler.document.CrawlerDocument.Link;
 import com.expleague.sensearch.donkey.crawler.document.CrawlerDocument.Section;
 import com.expleague.sensearch.protobuf.index.IndexUnits.Page;
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.primitives.Longs;
 import gnu.trove.map.TLongLongMap;
 import gnu.trove.map.TLongObjectMap;
@@ -151,6 +152,7 @@ class PlainPageBuilder {
    * @param outcomingLinks map of outcoming links
    * @param incomingLinks map of incoming links
    */
+  @VisibleForTesting
   static void resolveLinks(List<Page.Link.Builder> links, TLongLongMap wikiIdToIndexIdMappings,
       @NotNull TLongObjectMap<List<Page.Link>> outcomingLinks,
       @NotNull TLongObjectMap<List<Page.Link>> incomingLinks) {
@@ -193,6 +195,7 @@ class PlainPageBuilder {
    * @param knownLinks all know links
    * @return list of pages
    */
+  @VisibleForTesting
   static List<Page> toPages(List<Section> sections, long currentRootPageId,
       List<Page.Link.Builder> knownLinks) {
     LinkedList<Page.Builder> parentPages = new LinkedList<>();
@@ -203,7 +206,6 @@ class PlainPageBuilder {
     for (Section section : sections) {
       // enrich known links list
       for (Link link : section.links()) {
-
         Page.Link.Builder knownLink = Page.Link.newBuilder()
             .setPosition(link.textOffset())
             .setText(link.text().toString())
