@@ -155,7 +155,7 @@ public class XMLParser {
           xmlStreamWriter.writeCharacters("\n");
 
           xmlStreamWriter.writeStartElement(startElement);
-          xmlStreamWriter.writeAttribute("id", Long.toString(page.iD()));
+          xmlStreamWriter.writeAttribute("id", Long.toString(page.id()));
           xmlStreamWriter.writeAttribute("title", page.title());
           xmlStreamWriter.writeAttribute("revision", page.revision);
           xmlStreamWriter.writeAttribute("type", page.type);

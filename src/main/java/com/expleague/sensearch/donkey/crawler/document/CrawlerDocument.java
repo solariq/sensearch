@@ -34,7 +34,7 @@ public interface CrawlerDocument {
    * @return Page ID or 0 if page has no ID
    */
   @NotNull
-  long iD();
+  long id();
 
   /**
    * @return Page URI constructed by Page.title

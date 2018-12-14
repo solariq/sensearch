@@ -1622,54 +1622,74 @@ public final class IndexUnits {
 
     /**
      * <code>repeated .index.Page.Link outcoming_links = 5;</code>
+     *
+     * <pre>
+     * Link structure
+     * </pre>
      */
     java.util.List<com.expleague.sensearch.protobuf.index.IndexUnits.Page.Link> 
         getOutcomingLinksList();
     /**
      * <code>repeated .index.Page.Link outcoming_links = 5;</code>
+     *
+     * <pre>
+     * Link structure
+     * </pre>
      */
     com.expleague.sensearch.protobuf.index.IndexUnits.Page.Link getOutcomingLinks(int index);
     /**
      * <code>repeated .index.Page.Link outcoming_links = 5;</code>
+     *
+     * <pre>
+     * Link structure
+     * </pre>
      */
     int getOutcomingLinksCount();
     /**
      * <code>repeated .index.Page.Link outcoming_links = 5;</code>
+     *
+     * <pre>
+     * Link structure
+     * </pre>
      */
     java.util.List<? extends com.expleague.sensearch.protobuf.index.IndexUnits.Page.LinkOrBuilder> 
         getOutcomingLinksOrBuilderList();
     /**
      * <code>repeated .index.Page.Link outcoming_links = 5;</code>
+     *
+     * <pre>
+     * Link structure
+     * </pre>
      */
     com.expleague.sensearch.protobuf.index.IndexUnits.Page.LinkOrBuilder getOutcomingLinksOrBuilder(
         int index);
 
     /**
-     * <code>repeated .index.Page.Link incoming_links = 8;</code>
+     * <code>repeated .index.Page.Link incoming_links = 6;</code>
      */
     java.util.List<com.expleague.sensearch.protobuf.index.IndexUnits.Page.Link> 
         getIncomingLinksList();
     /**
-     * <code>repeated .index.Page.Link incoming_links = 8;</code>
+     * <code>repeated .index.Page.Link incoming_links = 6;</code>
      */
     com.expleague.sensearch.protobuf.index.IndexUnits.Page.Link getIncomingLinks(int index);
     /**
-     * <code>repeated .index.Page.Link incoming_links = 8;</code>
+     * <code>repeated .index.Page.Link incoming_links = 6;</code>
      */
     int getIncomingLinksCount();
     /**
-     * <code>repeated .index.Page.Link incoming_links = 8;</code>
+     * <code>repeated .index.Page.Link incoming_links = 6;</code>
      */
     java.util.List<? extends com.expleague.sensearch.protobuf.index.IndexUnits.Page.LinkOrBuilder> 
         getIncomingLinksOrBuilderList();
     /**
-     * <code>repeated .index.Page.Link incoming_links = 8;</code>
+     * <code>repeated .index.Page.Link incoming_links = 6;</code>
      */
     com.expleague.sensearch.protobuf.index.IndexUnits.Page.LinkOrBuilder getIncomingLinksOrBuilder(
         int index);
 
     /**
-     * <code>optional int64 parent_id = 6;</code>
+     * <code>optional int64 parent_id = 7;</code>
      *
      * <pre>
      * tree-like structure for pages
@@ -1678,7 +1698,7 @@ public final class IndexUnits {
      */
     boolean hasParentId();
     /**
-     * <code>optional int64 parent_id = 6;</code>
+     * <code>optional int64 parent_id = 7;</code>
      *
      * <pre>
      * tree-like structure for pages
@@ -1688,15 +1708,15 @@ public final class IndexUnits {
     long getParentId();
 
     /**
-     * <code>repeated int64 subpages_ids = 7;</code>
+     * <code>repeated int64 subpages_ids = 8;</code>
      */
     java.util.List<java.lang.Long> getSubpagesIdsList();
     /**
-     * <code>repeated int64 subpages_ids = 7;</code>
+     * <code>repeated int64 subpages_ids = 8;</code>
      */
     int getSubpagesIdsCount();
     /**
-     * <code>repeated int64 subpages_ids = 7;</code>
+     * <code>repeated int64 subpages_ids = 8;</code>
      */
     long getSubpagesIds(int index);
   }
@@ -1783,12 +1803,20 @@ public final class IndexUnits {
               outcomingLinks_.add(input.readMessage(com.expleague.sensearch.protobuf.index.IndexUnits.Page.Link.PARSER, extensionRegistry));
               break;
             }
-            case 48: {
+            case 50: {
+              if (!((mutable_bitField0_ & 0x00000020) == 0x00000020)) {
+                incomingLinks_ = new java.util.ArrayList<com.expleague.sensearch.protobuf.index.IndexUnits.Page.Link>();
+                mutable_bitField0_ |= 0x00000020;
+              }
+              incomingLinks_.add(input.readMessage(com.expleague.sensearch.protobuf.index.IndexUnits.Page.Link.PARSER, extensionRegistry));
+              break;
+            }
+            case 56: {
               bitField0_ |= 0x00000010;
               parentId_ = input.readInt64();
               break;
             }
-            case 56: {
+            case 64: {
               if (!((mutable_bitField0_ & 0x00000080) == 0x00000080)) {
                 subpagesIds_ = new java.util.ArrayList<java.lang.Long>();
                 mutable_bitField0_ |= 0x00000080;
@@ -1796,7 +1824,7 @@ public final class IndexUnits {
               subpagesIds_.add(input.readInt64());
               break;
             }
-            case 58: {
+            case 66: {
               int length = input.readRawVarint32();
               int limit = input.pushLimit(length);
               if (!((mutable_bitField0_ & 0x00000080) == 0x00000080) && input.getBytesUntilLimit() > 0) {
@@ -1807,14 +1835,6 @@ public final class IndexUnits {
                 subpagesIds_.add(input.readInt64());
               }
               input.popLimit(limit);
-              break;
-            }
-            case 66: {
-              if (!((mutable_bitField0_ & 0x00000020) == 0x00000020)) {
-                incomingLinks_ = new java.util.ArrayList<com.expleague.sensearch.protobuf.index.IndexUnits.Page.Link>();
-                mutable_bitField0_ |= 0x00000020;
-              }
-              incomingLinks_.add(input.readMessage(com.expleague.sensearch.protobuf.index.IndexUnits.Page.Link.PARSER, extensionRegistry));
               break;
             }
           }
@@ -1828,11 +1848,11 @@ public final class IndexUnits {
         if (((mutable_bitField0_ & 0x00000010) == 0x00000010)) {
           outcomingLinks_ = java.util.Collections.unmodifiableList(outcomingLinks_);
         }
-        if (((mutable_bitField0_ & 0x00000080) == 0x00000080)) {
-          subpagesIds_ = java.util.Collections.unmodifiableList(subpagesIds_);
-        }
         if (((mutable_bitField0_ & 0x00000020) == 0x00000020)) {
           incomingLinks_ = java.util.Collections.unmodifiableList(incomingLinks_);
+        }
+        if (((mutable_bitField0_ & 0x00000080) == 0x00000080)) {
+          subpagesIds_ = java.util.Collections.unmodifiableList(subpagesIds_);
         }
         this.unknownFields = unknownFields.build();
         makeExtensionsImmutable();
@@ -2773,12 +2793,20 @@ public final class IndexUnits {
     private java.util.List<com.expleague.sensearch.protobuf.index.IndexUnits.Page.Link> outcomingLinks_;
     /**
      * <code>repeated .index.Page.Link outcoming_links = 5;</code>
+     *
+     * <pre>
+     * Link structure
+     * </pre>
      */
     public java.util.List<com.expleague.sensearch.protobuf.index.IndexUnits.Page.Link> getOutcomingLinksList() {
       return outcomingLinks_;
     }
     /**
      * <code>repeated .index.Page.Link outcoming_links = 5;</code>
+     *
+     * <pre>
+     * Link structure
+     * </pre>
      */
     public java.util.List<? extends com.expleague.sensearch.protobuf.index.IndexUnits.Page.LinkOrBuilder> 
         getOutcomingLinksOrBuilderList() {
@@ -2786,63 +2814,75 @@ public final class IndexUnits {
     }
     /**
      * <code>repeated .index.Page.Link outcoming_links = 5;</code>
+     *
+     * <pre>
+     * Link structure
+     * </pre>
      */
     public int getOutcomingLinksCount() {
       return outcomingLinks_.size();
     }
     /**
      * <code>repeated .index.Page.Link outcoming_links = 5;</code>
+     *
+     * <pre>
+     * Link structure
+     * </pre>
      */
     public com.expleague.sensearch.protobuf.index.IndexUnits.Page.Link getOutcomingLinks(int index) {
       return outcomingLinks_.get(index);
     }
     /**
      * <code>repeated .index.Page.Link outcoming_links = 5;</code>
+     *
+     * <pre>
+     * Link structure
+     * </pre>
      */
     public com.expleague.sensearch.protobuf.index.IndexUnits.Page.LinkOrBuilder getOutcomingLinksOrBuilder(
         int index) {
       return outcomingLinks_.get(index);
     }
 
-    public static final int INCOMING_LINKS_FIELD_NUMBER = 8;
+    public static final int INCOMING_LINKS_FIELD_NUMBER = 6;
     private java.util.List<com.expleague.sensearch.protobuf.index.IndexUnits.Page.Link> incomingLinks_;
     /**
-     * <code>repeated .index.Page.Link incoming_links = 8;</code>
+     * <code>repeated .index.Page.Link incoming_links = 6;</code>
      */
     public java.util.List<com.expleague.sensearch.protobuf.index.IndexUnits.Page.Link> getIncomingLinksList() {
       return incomingLinks_;
     }
     /**
-     * <code>repeated .index.Page.Link incoming_links = 8;</code>
+     * <code>repeated .index.Page.Link incoming_links = 6;</code>
      */
     public java.util.List<? extends com.expleague.sensearch.protobuf.index.IndexUnits.Page.LinkOrBuilder> 
         getIncomingLinksOrBuilderList() {
       return incomingLinks_;
     }
     /**
-     * <code>repeated .index.Page.Link incoming_links = 8;</code>
+     * <code>repeated .index.Page.Link incoming_links = 6;</code>
      */
     public int getIncomingLinksCount() {
       return incomingLinks_.size();
     }
     /**
-     * <code>repeated .index.Page.Link incoming_links = 8;</code>
+     * <code>repeated .index.Page.Link incoming_links = 6;</code>
      */
     public com.expleague.sensearch.protobuf.index.IndexUnits.Page.Link getIncomingLinks(int index) {
       return incomingLinks_.get(index);
     }
     /**
-     * <code>repeated .index.Page.Link incoming_links = 8;</code>
+     * <code>repeated .index.Page.Link incoming_links = 6;</code>
      */
     public com.expleague.sensearch.protobuf.index.IndexUnits.Page.LinkOrBuilder getIncomingLinksOrBuilder(
         int index) {
       return incomingLinks_.get(index);
     }
 
-    public static final int PARENT_ID_FIELD_NUMBER = 6;
+    public static final int PARENT_ID_FIELD_NUMBER = 7;
     private long parentId_;
     /**
-     * <code>optional int64 parent_id = 6;</code>
+     * <code>optional int64 parent_id = 7;</code>
      *
      * <pre>
      * tree-like structure for pages
@@ -2853,7 +2893,7 @@ public final class IndexUnits {
       return ((bitField0_ & 0x00000010) == 0x00000010);
     }
     /**
-     * <code>optional int64 parent_id = 6;</code>
+     * <code>optional int64 parent_id = 7;</code>
      *
      * <pre>
      * tree-like structure for pages
@@ -2864,23 +2904,23 @@ public final class IndexUnits {
       return parentId_;
     }
 
-    public static final int SUBPAGES_IDS_FIELD_NUMBER = 7;
+    public static final int SUBPAGES_IDS_FIELD_NUMBER = 8;
     private java.util.List<java.lang.Long> subpagesIds_;
     /**
-     * <code>repeated int64 subpages_ids = 7;</code>
+     * <code>repeated int64 subpages_ids = 8;</code>
      */
     public java.util.List<java.lang.Long>
         getSubpagesIdsList() {
       return subpagesIds_;
     }
     /**
-     * <code>repeated int64 subpages_ids = 7;</code>
+     * <code>repeated int64 subpages_ids = 8;</code>
      */
     public int getSubpagesIdsCount() {
       return subpagesIds_.size();
     }
     /**
-     * <code>repeated int64 subpages_ids = 7;</code>
+     * <code>repeated int64 subpages_ids = 8;</code>
      */
     public long getSubpagesIds(int index) {
       return subpagesIds_.get(index);
@@ -2924,14 +2964,14 @@ public final class IndexUnits {
       for (int i = 0; i < outcomingLinks_.size(); i++) {
         output.writeMessage(5, outcomingLinks_.get(i));
       }
+      for (int i = 0; i < incomingLinks_.size(); i++) {
+        output.writeMessage(6, incomingLinks_.get(i));
+      }
       if (((bitField0_ & 0x00000010) == 0x00000010)) {
-        output.writeInt64(6, parentId_);
+        output.writeInt64(7, parentId_);
       }
       for (int i = 0; i < subpagesIds_.size(); i++) {
-        output.writeInt64(7, subpagesIds_.get(i));
-      }
-      for (int i = 0; i < incomingLinks_.size(); i++) {
-        output.writeMessage(8, incomingLinks_.get(i));
+        output.writeInt64(8, subpagesIds_.get(i));
       }
       getUnknownFields().writeTo(output);
     }
@@ -2962,9 +3002,13 @@ public final class IndexUnits {
         size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(5, outcomingLinks_.get(i));
       }
+      for (int i = 0; i < incomingLinks_.size(); i++) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(6, incomingLinks_.get(i));
+      }
       if (((bitField0_ & 0x00000010) == 0x00000010)) {
         size += com.google.protobuf.CodedOutputStream
-          .computeInt64Size(6, parentId_);
+          .computeInt64Size(7, parentId_);
       }
       {
         int dataSize = 0;
@@ -2974,10 +3018,6 @@ public final class IndexUnits {
         }
         size += dataSize;
         size += 1 * getSubpagesIdsList().size();
-      }
-      for (int i = 0; i < incomingLinks_.size(); i++) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeMessageSize(8, incomingLinks_.get(i));
       }
       size += getUnknownFields().getSerializedSize();
       memoizedSerializedSize = size;
@@ -3617,6 +3657,10 @@ public final class IndexUnits {
 
       /**
        * <code>repeated .index.Page.Link outcoming_links = 5;</code>
+       *
+       * <pre>
+       * Link structure
+       * </pre>
        */
       public java.util.List<com.expleague.sensearch.protobuf.index.IndexUnits.Page.Link> getOutcomingLinksList() {
         if (outcomingLinksBuilder_ == null) {
@@ -3627,6 +3671,10 @@ public final class IndexUnits {
       }
       /**
        * <code>repeated .index.Page.Link outcoming_links = 5;</code>
+       *
+       * <pre>
+       * Link structure
+       * </pre>
        */
       public int getOutcomingLinksCount() {
         if (outcomingLinksBuilder_ == null) {
@@ -3637,6 +3685,10 @@ public final class IndexUnits {
       }
       /**
        * <code>repeated .index.Page.Link outcoming_links = 5;</code>
+       *
+       * <pre>
+       * Link structure
+       * </pre>
        */
       public com.expleague.sensearch.protobuf.index.IndexUnits.Page.Link getOutcomingLinks(int index) {
         if (outcomingLinksBuilder_ == null) {
@@ -3647,6 +3699,10 @@ public final class IndexUnits {
       }
       /**
        * <code>repeated .index.Page.Link outcoming_links = 5;</code>
+       *
+       * <pre>
+       * Link structure
+       * </pre>
        */
       public Builder setOutcomingLinks(
           int index, com.expleague.sensearch.protobuf.index.IndexUnits.Page.Link value) {
@@ -3664,6 +3720,10 @@ public final class IndexUnits {
       }
       /**
        * <code>repeated .index.Page.Link outcoming_links = 5;</code>
+       *
+       * <pre>
+       * Link structure
+       * </pre>
        */
       public Builder setOutcomingLinks(
           int index, com.expleague.sensearch.protobuf.index.IndexUnits.Page.Link.Builder builderForValue) {
@@ -3678,6 +3738,10 @@ public final class IndexUnits {
       }
       /**
        * <code>repeated .index.Page.Link outcoming_links = 5;</code>
+       *
+       * <pre>
+       * Link structure
+       * </pre>
        */
       public Builder addOutcomingLinks(com.expleague.sensearch.protobuf.index.IndexUnits.Page.Link value) {
         if (outcomingLinksBuilder_ == null) {
@@ -3694,6 +3758,10 @@ public final class IndexUnits {
       }
       /**
        * <code>repeated .index.Page.Link outcoming_links = 5;</code>
+       *
+       * <pre>
+       * Link structure
+       * </pre>
        */
       public Builder addOutcomingLinks(
           int index, com.expleague.sensearch.protobuf.index.IndexUnits.Page.Link value) {
@@ -3711,6 +3779,10 @@ public final class IndexUnits {
       }
       /**
        * <code>repeated .index.Page.Link outcoming_links = 5;</code>
+       *
+       * <pre>
+       * Link structure
+       * </pre>
        */
       public Builder addOutcomingLinks(
           com.expleague.sensearch.protobuf.index.IndexUnits.Page.Link.Builder builderForValue) {
@@ -3725,6 +3797,10 @@ public final class IndexUnits {
       }
       /**
        * <code>repeated .index.Page.Link outcoming_links = 5;</code>
+       *
+       * <pre>
+       * Link structure
+       * </pre>
        */
       public Builder addOutcomingLinks(
           int index, com.expleague.sensearch.protobuf.index.IndexUnits.Page.Link.Builder builderForValue) {
@@ -3739,6 +3815,10 @@ public final class IndexUnits {
       }
       /**
        * <code>repeated .index.Page.Link outcoming_links = 5;</code>
+       *
+       * <pre>
+       * Link structure
+       * </pre>
        */
       public Builder addAllOutcomingLinks(
           java.lang.Iterable<? extends com.expleague.sensearch.protobuf.index.IndexUnits.Page.Link> values) {
@@ -3754,6 +3834,10 @@ public final class IndexUnits {
       }
       /**
        * <code>repeated .index.Page.Link outcoming_links = 5;</code>
+       *
+       * <pre>
+       * Link structure
+       * </pre>
        */
       public Builder clearOutcomingLinks() {
         if (outcomingLinksBuilder_ == null) {
@@ -3767,6 +3851,10 @@ public final class IndexUnits {
       }
       /**
        * <code>repeated .index.Page.Link outcoming_links = 5;</code>
+       *
+       * <pre>
+       * Link structure
+       * </pre>
        */
       public Builder removeOutcomingLinks(int index) {
         if (outcomingLinksBuilder_ == null) {
@@ -3780,6 +3868,10 @@ public final class IndexUnits {
       }
       /**
        * <code>repeated .index.Page.Link outcoming_links = 5;</code>
+       *
+       * <pre>
+       * Link structure
+       * </pre>
        */
       public com.expleague.sensearch.protobuf.index.IndexUnits.Page.Link.Builder getOutcomingLinksBuilder(
           int index) {
@@ -3787,6 +3879,10 @@ public final class IndexUnits {
       }
       /**
        * <code>repeated .index.Page.Link outcoming_links = 5;</code>
+       *
+       * <pre>
+       * Link structure
+       * </pre>
        */
       public com.expleague.sensearch.protobuf.index.IndexUnits.Page.LinkOrBuilder getOutcomingLinksOrBuilder(
           int index) {
@@ -3797,6 +3893,10 @@ public final class IndexUnits {
       }
       /**
        * <code>repeated .index.Page.Link outcoming_links = 5;</code>
+       *
+       * <pre>
+       * Link structure
+       * </pre>
        */
       public java.util.List<? extends com.expleague.sensearch.protobuf.index.IndexUnits.Page.LinkOrBuilder> 
            getOutcomingLinksOrBuilderList() {
@@ -3808,6 +3908,10 @@ public final class IndexUnits {
       }
       /**
        * <code>repeated .index.Page.Link outcoming_links = 5;</code>
+       *
+       * <pre>
+       * Link structure
+       * </pre>
        */
       public com.expleague.sensearch.protobuf.index.IndexUnits.Page.Link.Builder addOutcomingLinksBuilder() {
         return getOutcomingLinksFieldBuilder().addBuilder(
@@ -3815,6 +3919,10 @@ public final class IndexUnits {
       }
       /**
        * <code>repeated .index.Page.Link outcoming_links = 5;</code>
+       *
+       * <pre>
+       * Link structure
+       * </pre>
        */
       public com.expleague.sensearch.protobuf.index.IndexUnits.Page.Link.Builder addOutcomingLinksBuilder(
           int index) {
@@ -3823,6 +3931,10 @@ public final class IndexUnits {
       }
       /**
        * <code>repeated .index.Page.Link outcoming_links = 5;</code>
+       *
+       * <pre>
+       * Link structure
+       * </pre>
        */
       public java.util.List<com.expleague.sensearch.protobuf.index.IndexUnits.Page.Link.Builder> 
            getOutcomingLinksBuilderList() {
@@ -3856,7 +3968,7 @@ public final class IndexUnits {
           com.expleague.sensearch.protobuf.index.IndexUnits.Page.Link, com.expleague.sensearch.protobuf.index.IndexUnits.Page.Link.Builder, com.expleague.sensearch.protobuf.index.IndexUnits.Page.LinkOrBuilder> incomingLinksBuilder_;
 
       /**
-       * <code>repeated .index.Page.Link incoming_links = 8;</code>
+       * <code>repeated .index.Page.Link incoming_links = 6;</code>
        */
       public java.util.List<com.expleague.sensearch.protobuf.index.IndexUnits.Page.Link> getIncomingLinksList() {
         if (incomingLinksBuilder_ == null) {
@@ -3866,7 +3978,7 @@ public final class IndexUnits {
         }
       }
       /**
-       * <code>repeated .index.Page.Link incoming_links = 8;</code>
+       * <code>repeated .index.Page.Link incoming_links = 6;</code>
        */
       public int getIncomingLinksCount() {
         if (incomingLinksBuilder_ == null) {
@@ -3876,7 +3988,7 @@ public final class IndexUnits {
         }
       }
       /**
-       * <code>repeated .index.Page.Link incoming_links = 8;</code>
+       * <code>repeated .index.Page.Link incoming_links = 6;</code>
        */
       public com.expleague.sensearch.protobuf.index.IndexUnits.Page.Link getIncomingLinks(int index) {
         if (incomingLinksBuilder_ == null) {
@@ -3886,7 +3998,7 @@ public final class IndexUnits {
         }
       }
       /**
-       * <code>repeated .index.Page.Link incoming_links = 8;</code>
+       * <code>repeated .index.Page.Link incoming_links = 6;</code>
        */
       public Builder setIncomingLinks(
           int index, com.expleague.sensearch.protobuf.index.IndexUnits.Page.Link value) {
@@ -3903,7 +4015,7 @@ public final class IndexUnits {
         return this;
       }
       /**
-       * <code>repeated .index.Page.Link incoming_links = 8;</code>
+       * <code>repeated .index.Page.Link incoming_links = 6;</code>
        */
       public Builder setIncomingLinks(
           int index, com.expleague.sensearch.protobuf.index.IndexUnits.Page.Link.Builder builderForValue) {
@@ -3917,7 +4029,7 @@ public final class IndexUnits {
         return this;
       }
       /**
-       * <code>repeated .index.Page.Link incoming_links = 8;</code>
+       * <code>repeated .index.Page.Link incoming_links = 6;</code>
        */
       public Builder addIncomingLinks(com.expleague.sensearch.protobuf.index.IndexUnits.Page.Link value) {
         if (incomingLinksBuilder_ == null) {
@@ -3933,7 +4045,7 @@ public final class IndexUnits {
         return this;
       }
       /**
-       * <code>repeated .index.Page.Link incoming_links = 8;</code>
+       * <code>repeated .index.Page.Link incoming_links = 6;</code>
        */
       public Builder addIncomingLinks(
           int index, com.expleague.sensearch.protobuf.index.IndexUnits.Page.Link value) {
@@ -3950,7 +4062,7 @@ public final class IndexUnits {
         return this;
       }
       /**
-       * <code>repeated .index.Page.Link incoming_links = 8;</code>
+       * <code>repeated .index.Page.Link incoming_links = 6;</code>
        */
       public Builder addIncomingLinks(
           com.expleague.sensearch.protobuf.index.IndexUnits.Page.Link.Builder builderForValue) {
@@ -3964,7 +4076,7 @@ public final class IndexUnits {
         return this;
       }
       /**
-       * <code>repeated .index.Page.Link incoming_links = 8;</code>
+       * <code>repeated .index.Page.Link incoming_links = 6;</code>
        */
       public Builder addIncomingLinks(
           int index, com.expleague.sensearch.protobuf.index.IndexUnits.Page.Link.Builder builderForValue) {
@@ -3978,7 +4090,7 @@ public final class IndexUnits {
         return this;
       }
       /**
-       * <code>repeated .index.Page.Link incoming_links = 8;</code>
+       * <code>repeated .index.Page.Link incoming_links = 6;</code>
        */
       public Builder addAllIncomingLinks(
           java.lang.Iterable<? extends com.expleague.sensearch.protobuf.index.IndexUnits.Page.Link> values) {
@@ -3993,7 +4105,7 @@ public final class IndexUnits {
         return this;
       }
       /**
-       * <code>repeated .index.Page.Link incoming_links = 8;</code>
+       * <code>repeated .index.Page.Link incoming_links = 6;</code>
        */
       public Builder clearIncomingLinks() {
         if (incomingLinksBuilder_ == null) {
@@ -4006,7 +4118,7 @@ public final class IndexUnits {
         return this;
       }
       /**
-       * <code>repeated .index.Page.Link incoming_links = 8;</code>
+       * <code>repeated .index.Page.Link incoming_links = 6;</code>
        */
       public Builder removeIncomingLinks(int index) {
         if (incomingLinksBuilder_ == null) {
@@ -4019,14 +4131,14 @@ public final class IndexUnits {
         return this;
       }
       /**
-       * <code>repeated .index.Page.Link incoming_links = 8;</code>
+       * <code>repeated .index.Page.Link incoming_links = 6;</code>
        */
       public com.expleague.sensearch.protobuf.index.IndexUnits.Page.Link.Builder getIncomingLinksBuilder(
           int index) {
         return getIncomingLinksFieldBuilder().getBuilder(index);
       }
       /**
-       * <code>repeated .index.Page.Link incoming_links = 8;</code>
+       * <code>repeated .index.Page.Link incoming_links = 6;</code>
        */
       public com.expleague.sensearch.protobuf.index.IndexUnits.Page.LinkOrBuilder getIncomingLinksOrBuilder(
           int index) {
@@ -4036,7 +4148,7 @@ public final class IndexUnits {
         }
       }
       /**
-       * <code>repeated .index.Page.Link incoming_links = 8;</code>
+       * <code>repeated .index.Page.Link incoming_links = 6;</code>
        */
       public java.util.List<? extends com.expleague.sensearch.protobuf.index.IndexUnits.Page.LinkOrBuilder> 
            getIncomingLinksOrBuilderList() {
@@ -4047,14 +4159,14 @@ public final class IndexUnits {
         }
       }
       /**
-       * <code>repeated .index.Page.Link incoming_links = 8;</code>
+       * <code>repeated .index.Page.Link incoming_links = 6;</code>
        */
       public com.expleague.sensearch.protobuf.index.IndexUnits.Page.Link.Builder addIncomingLinksBuilder() {
         return getIncomingLinksFieldBuilder().addBuilder(
             com.expleague.sensearch.protobuf.index.IndexUnits.Page.Link.getDefaultInstance());
       }
       /**
-       * <code>repeated .index.Page.Link incoming_links = 8;</code>
+       * <code>repeated .index.Page.Link incoming_links = 6;</code>
        */
       public com.expleague.sensearch.protobuf.index.IndexUnits.Page.Link.Builder addIncomingLinksBuilder(
           int index) {
@@ -4062,7 +4174,7 @@ public final class IndexUnits {
             index, com.expleague.sensearch.protobuf.index.IndexUnits.Page.Link.getDefaultInstance());
       }
       /**
-       * <code>repeated .index.Page.Link incoming_links = 8;</code>
+       * <code>repeated .index.Page.Link incoming_links = 6;</code>
        */
       public java.util.List<com.expleague.sensearch.protobuf.index.IndexUnits.Page.Link.Builder> 
            getIncomingLinksBuilderList() {
@@ -4085,7 +4197,7 @@ public final class IndexUnits {
 
       private long parentId_ ;
       /**
-       * <code>optional int64 parent_id = 6;</code>
+       * <code>optional int64 parent_id = 7;</code>
        *
        * <pre>
        * tree-like structure for pages
@@ -4096,7 +4208,7 @@ public final class IndexUnits {
         return ((bitField0_ & 0x00000040) == 0x00000040);
       }
       /**
-       * <code>optional int64 parent_id = 6;</code>
+       * <code>optional int64 parent_id = 7;</code>
        *
        * <pre>
        * tree-like structure for pages
@@ -4107,7 +4219,7 @@ public final class IndexUnits {
         return parentId_;
       }
       /**
-       * <code>optional int64 parent_id = 6;</code>
+       * <code>optional int64 parent_id = 7;</code>
        *
        * <pre>
        * tree-like structure for pages
@@ -4121,7 +4233,7 @@ public final class IndexUnits {
         return this;
       }
       /**
-       * <code>optional int64 parent_id = 6;</code>
+       * <code>optional int64 parent_id = 7;</code>
        *
        * <pre>
        * tree-like structure for pages
@@ -4143,26 +4255,26 @@ public final class IndexUnits {
          }
       }
       /**
-       * <code>repeated int64 subpages_ids = 7;</code>
+       * <code>repeated int64 subpages_ids = 8;</code>
        */
       public java.util.List<java.lang.Long>
           getSubpagesIdsList() {
         return java.util.Collections.unmodifiableList(subpagesIds_);
       }
       /**
-       * <code>repeated int64 subpages_ids = 7;</code>
+       * <code>repeated int64 subpages_ids = 8;</code>
        */
       public int getSubpagesIdsCount() {
         return subpagesIds_.size();
       }
       /**
-       * <code>repeated int64 subpages_ids = 7;</code>
+       * <code>repeated int64 subpages_ids = 8;</code>
        */
       public long getSubpagesIds(int index) {
         return subpagesIds_.get(index);
       }
       /**
-       * <code>repeated int64 subpages_ids = 7;</code>
+       * <code>repeated int64 subpages_ids = 8;</code>
        */
       public Builder setSubpagesIds(
           int index, long value) {
@@ -4172,7 +4284,7 @@ public final class IndexUnits {
         return this;
       }
       /**
-       * <code>repeated int64 subpages_ids = 7;</code>
+       * <code>repeated int64 subpages_ids = 8;</code>
        */
       public Builder addSubpagesIds(long value) {
         ensureSubpagesIdsIsMutable();
@@ -4181,7 +4293,7 @@ public final class IndexUnits {
         return this;
       }
       /**
-       * <code>repeated int64 subpages_ids = 7;</code>
+       * <code>repeated int64 subpages_ids = 8;</code>
        */
       public Builder addAllSubpagesIds(
           java.lang.Iterable<? extends java.lang.Long> values) {
@@ -4192,7 +4304,7 @@ public final class IndexUnits {
         return this;
       }
       /**
-       * <code>repeated int64 subpages_ids = 7;</code>
+       * <code>repeated int64 subpages_ids = 8;</code>
        */
       public Builder clearSubpagesIds() {
         subpagesIds_ = java.util.Collections.emptyList();
@@ -7555,8 +7667,8 @@ public final class IndexUnits {
       "\n\004Page\022\017\n\007page_id\030\001 \001(\003\022\013\n\003uri\030\002 \001(\t\022\r\n\005" +
       "title\030\003 \001(\t\022\017\n\007content\030\004 \001(\t\022)\n\017outcomin" +
       "g_links\030\005 \003(\0132\020.index.Page.Link\022(\n\016incom" +
-      "ing_links\030\010 \003(\0132\020.index.Page.Link\022\021\n\tpar",
-      "ent_id\030\006 \001(\003\022\024\n\014subpages_ids\030\007 \003(\003\032V\n\004Li" +
+      "ing_links\030\006 \003(\0132\020.index.Page.Link\022\021\n\tpar",
+      "ent_id\030\007 \001(\003\022\024\n\014subpages_ids\030\010 \003(\003\032V\n\004Li" +
       "nk\022\014\n\004text\030\001 \001(\t\022\026\n\016target_page_id\030\002 \001(\003" +
       "\022\020\n\010position\030\003 \001(\003\022\026\n\016source_page_id\030\004 \001" +
       "(\003\"\317\001\n\016TermStatistics\022\017\n\007term_id\030\001 \001(\003\022\033" +
