@@ -7,13 +7,16 @@ import com.expleague.sensearch.protobuf.index.IndexUnits.Page;
 import com.expleague.sensearch.utils.SensearchTestCase;
 import com.google.common.collect.Lists;
 import gnu.trove.map.TLongObjectMap;
+import gnu.trove.map.TObjectLongMap;
 import gnu.trove.map.hash.TLongObjectHashMap;
+import gnu.trove.map.hash.TObjectLongHashMap;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 
 public class PlainPageBuilderMethodsTest extends SensearchTestCase {
@@ -129,7 +132,6 @@ public class PlainPageBuilderMethodsTest extends SensearchTestCase {
     Assert.assertEquals(10, pages.size());
 
     TLongObjectMap<Page> pagesMap = new TLongObjectHashMap<>();
-
     for (Page p : pages) {
       pagesMap.put(p.getPageId(), p);
     }
@@ -137,9 +139,9 @@ public class PlainPageBuilderMethodsTest extends SensearchTestCase {
     pagesMap.forEachEntry(
         (id, p) -> {
           if ("s1".equals(p.getTitle())) {
-            Assert.assertEquals(rootId, p.getPageId());
             Assert.assertFalse(p.hasParentId());
-            Assert.assertEquals(3, p.getSubpagesIdsList().size());
+            Assert.assertEquals(rootId, p.getPageId());
+            Assert.assertEquals(3, p.getSubpagesIdsCount());
 
             Set<String> subpagesTitles = new HashSet<>();
             subpagesTitles.add("s1.1");
@@ -155,14 +157,14 @@ public class PlainPageBuilderMethodsTest extends SensearchTestCase {
           }
 
           if ("s1.1".equals(p.getTitle())) {
-            Assert.assertEquals(rootId, p.getParentId());
             Assert.assertTrue(p.hasParentId());
-            Assert.assertEquals(3, p.getSubpagesIdsList().size());
+            Assert.assertEquals(rootId, p.getParentId());
+            Assert.assertEquals(3, p.getSubpagesIdsCount());
 
             Set<String> subpagesTitles = new HashSet<>();
             subpagesTitles.add("s1.1.1");
             subpagesTitles.add("s1.1.2");
-            subpagesTitles.add("s1.2.3");
+            subpagesTitles.add("s1.1.3");
 
             Set<String> actualTitles = new HashSet<>();
             for (long sid : p.getSubpagesIdsList()) {
@@ -173,32 +175,33 @@ public class PlainPageBuilderMethodsTest extends SensearchTestCase {
           }
 
           if ("s1.2".equals(p.getTitle())) {
-            Assert.assertEquals(rootId, p.getParentId());
             Assert.assertTrue(p.hasParentId());
-            Assert.assertEquals(3, p.getSubpagesIdsList().size());
-
-            Set<String> subpagesTitles = new HashSet<>();
-            subpagesTitles.add("s1.1");
-            subpagesTitles.add("s1.2");
-            subpagesTitles.add("s1.3");
-
-            Set<String> actualTitles = new HashSet<>();
-            for (long sid : p.getSubpagesIdsList()) {
-              actualTitles.add(pagesMap.get(sid).getTitle());
-            }
-
-            Assert.assertEquals(subpagesTitles, actualTitles);
+            Assert.assertEquals(rootId, p.getParentId());
+            Assert.assertEquals("s1", pagesMap.get(rootId).getTitle());
+            Assert.assertEquals(0, p.getSubpagesIdsCount());
           }
 
           if ("s1.3".equals(p.getTitle())) {
-            Assert.assertEquals(rootId, p.getPageId());
-            Assert.assertFalse(p.hasParentId());
-            Assert.assertEquals(3, p.getSubpagesIdsList().size());
+            Assert.assertTrue(p.hasParentId());
+            Assert.assertEquals(rootId, p.getParentId());
+            Assert.assertEquals("s1", pagesMap.get(rootId).getTitle());
+            Assert.assertEquals(0, p.getSubpagesIdsCount());
+          }
+
+          if ("s1.1.1".equals(p.getTitle())) {
+            Assert.assertTrue(p.hasParentId());
+            Assert.assertEquals("s1.1", pagesMap.get(p.getParentId()).getTitle());
+            Assert.assertEquals(0, p.getSubpagesIdsCount());
+          }
+
+          if ("s1.1.2".equals(p.getTitle())) {
+            Assert.assertTrue(p.hasParentId());
+            Assert.assertEquals("s1.1", pagesMap.get(p.getParentId()).getTitle());
+            Assert.assertEquals(2, p.getSubpagesIdsCount());
 
             Set<String> subpagesTitles = new HashSet<>();
-            subpagesTitles.add("s1.1");
-            subpagesTitles.add("s1.2");
-            subpagesTitles.add("s1.3");
+            subpagesTitles.add("s1.1.2.1");
+            subpagesTitles.add("s1.1.2.2");
 
             Set<String> actualTitles = new HashSet<>();
             for (long sid : p.getSubpagesIdsList()) {
@@ -211,5 +214,12 @@ public class PlainPageBuilderMethodsTest extends SensearchTestCase {
           return true;
         }
     );
+  }
+
+  @Test
+  @Ignore
+  // TODO: write test
+  public void resolveLinksTest() {
+
   }
 }
