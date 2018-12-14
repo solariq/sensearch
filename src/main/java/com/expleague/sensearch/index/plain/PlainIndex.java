@@ -211,7 +211,7 @@ public class PlainIndex implements Index {
     } catch (InvalidProtocolBufferException e) {
       LOG.warn(
           String.format(
-              "Encountered invalid protobuf in statistics base for word with id [%d] and text [%s]",
+              "Encountered invalid protobuf in statistics base for word with id [%d] and content [%s]",
               ((IndexTerm) term).id(), term.text()));
       return Stream.empty();
     }

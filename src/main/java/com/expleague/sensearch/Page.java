@@ -2,6 +2,7 @@ package com.expleague.sensearch;
 
 import java.net.URI;
 import java.util.List;
+import java.util.stream.Stream;
 import javax.validation.constraints.NotNull;
 
 public interface Page {
@@ -18,50 +19,39 @@ public interface Page {
   CharSequence title();
 
   /**
-   * @return Page text
+   * @return Page content
    */
   @NotNull
-  CharSequence text();
+  CharSequence content();
 
   /**
    * @return List of categories this page or empty list if page have no categories
    */
+  @Deprecated
   @NotNull
   List<CharSequence> categories();
 
   /**
-   * @return List of {@link Section} this page
+   * @return List of referring Page
    */
   @NotNull
-  List<Section> sections();
+  Stream<Link> outcomingLinks();
 
   /**
    * @return List of referring Page
    */
-  List<Page> inputLinks();
+  @NotNull
+  Stream<Link> incomingLinks();
 
+  /**
+   * @return parent ID
+   */
+  long parent();
 
-  interface Section {
-
-    /**
-     * @return Section text
-     */
-    @NotNull
-    CharSequence text();
-
-    /**
-     * @return Title of this section. As there can be sections, sub-sections and so on, this method
-     *     returns a list of parents titles. For example, for subsection C in section B in artile A
-     *     it will return [A, B, C]
-     */
-    @NotNull
-    List<CharSequence> title();
-
-    /** @return {@link Link}s that are contained in this section */
-    @NotNull
-    List<Link> links();
-
-  }
+  /**
+   * @return subpages IDs
+   */
+  Stream<Link> subpages();
 
   /** Link to another {@link com.expleague.sensearch.Page} */
   interface Link {
@@ -71,17 +61,16 @@ public interface Page {
     CharSequence text();
 
     /**
-     * @return Sentence with this link
+     * @return referenced Page ID
      */
-    @NotNull
-    CharSequence context();
+    long targetPage();
 
     /**
-     * @return referenced Page
+     * @return source Page ID
      */
-    Page targetPage();
+    long sourcePage();
 
     /** @return Where this link starts in its sentence */
-    int textOffset();
+    long textOffset();
   }
 }

@@ -37,7 +37,7 @@ public class SnippetsCreator {
 
   public Snippet getSnippet(Page document, Query query, Lemmer lemmer) {
     CharSequence title = document.title();
-    CharSequence content = document.text();
+    CharSequence content = document.content();
 
     List<Passage> passages =
         Arrays.stream(splitPattern.split(content))

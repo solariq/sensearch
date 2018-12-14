@@ -27,7 +27,7 @@ public class ComponentsInteractionTest {
   //    }
   //
   //    @Override
-  //    public CharSequence text() {
+  //    public CharSequence content() {
   //      return documentContent;
   //    }
   //
@@ -78,7 +78,7 @@ public class ComponentsInteractionTest {
   //    }
   //
   //    private boolean filterByWord(Query query, IndexedPage document) {
-  //      String docContent = document.text().toString();
+  //      String docContent = document.content().toString();
   //      for (Term term : query.getTerms()) {
   //        if (docContent.contains(term.getRaw())) {
   //          return true;

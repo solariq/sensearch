@@ -39,12 +39,12 @@ public class RawTextFeaturesMiner implements FeaturesMiner {
     final Set<Term> querySyn =
         query.synonyms().values().stream().flatMap(List::stream).collect(Collectors.toSet());
 
-    final int pageSize = (int) index.parse(page.title() + " " + page.text()).count();
+    final int pageSize = (int) index.parse(page.title() + " " + page.content()).count();
     TextFeatureAccumulator bm25 = new BM25Accumulator(pageSize);
     TextFeatureAccumulator bm25l = new BM25Accumulator(pageSize);
     TextFeatureAccumulator bm25s = new BM25Accumulator(pageSize);
     index
-        .parse(page.title() + " " + page.text())
+        .parse(page.title() + " " + page.content())
         .forEach(
             term -> {
               if (queryTerms.contains(term)) {

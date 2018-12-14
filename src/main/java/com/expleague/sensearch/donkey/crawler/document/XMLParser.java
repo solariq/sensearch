@@ -81,8 +81,14 @@ public class XMLParser {
                     }
 
                     String sectionTitle = xmlSection.title == null ? "" : xmlSection.title;
+                    List<CharSequence> titles = Arrays.asList(sectionTitle.split("\\|@\\|"));
                     return new WikiSection(
-                        text, Arrays.asList(sectionTitle.split("\\|@\\|")), links);
+                        text, titles, links,
+                        URI.create(
+                            "https://ru.wikipedia.org/wiki/"
+                                + page.title().replace(" ", "_").replace("%", "%25")
+                                + "#" + titles.get(titles.size() - 1).toString().replace(" ", "_").replace("%", "%25"))
+                        );
                   })
               .collect(Collectors.toList());
 

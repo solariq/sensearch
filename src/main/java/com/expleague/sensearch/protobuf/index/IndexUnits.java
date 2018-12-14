@@ -1890,15 +1890,15 @@ public final class IndexUnits {
         com.google.protobuf.MessageOrBuilder {
 
       /**
-       * <code>optional string text = 1;</code>
+       * <code>optional string content = 1;</code>
        */
       boolean hasText();
       /**
-       * <code>optional string text = 1;</code>
+       * <code>optional string content = 1;</code>
        */
       java.lang.String getText();
       /**
-       * <code>optional string text = 1;</code>
+       * <code>optional string content = 1;</code>
        */
       com.google.protobuf.ByteString
           getTextBytes();
@@ -2056,13 +2056,13 @@ public final class IndexUnits {
       public static final int TEXT_FIELD_NUMBER = 1;
       private java.lang.Object text_;
       /**
-       * <code>optional string text = 1;</code>
+       * <code>optional string content = 1;</code>
        */
       public boolean hasText() {
         return ((bitField0_ & 0x00000001) == 0x00000001);
       }
       /**
-       * <code>optional string text = 1;</code>
+       * <code>optional string content = 1;</code>
        */
       public java.lang.String getText() {
         java.lang.Object ref = text_;
@@ -2079,7 +2079,7 @@ public final class IndexUnits {
         }
       }
       /**
-       * <code>optional string text = 1;</code>
+       * <code>optional string content = 1;</code>
        */
       public com.google.protobuf.ByteString
           getTextBytes() {
@@ -2434,13 +2434,13 @@ public final class IndexUnits {
 
         private java.lang.Object text_ = "";
         /**
-         * <code>optional string text = 1;</code>
+         * <code>optional string content = 1;</code>
          */
         public boolean hasText() {
           return ((bitField0_ & 0x00000001) == 0x00000001);
         }
         /**
-         * <code>optional string text = 1;</code>
+         * <code>optional string content = 1;</code>
          */
         public java.lang.String getText() {
           java.lang.Object ref = text_;
@@ -2457,7 +2457,7 @@ public final class IndexUnits {
           }
         }
         /**
-         * <code>optional string text = 1;</code>
+         * <code>optional string content = 1;</code>
          */
         public com.google.protobuf.ByteString
             getTextBytes() {
@@ -2473,7 +2473,7 @@ public final class IndexUnits {
           }
         }
         /**
-         * <code>optional string text = 1;</code>
+         * <code>optional string content = 1;</code>
          */
         public Builder setText(
             java.lang.String value) {
@@ -2486,7 +2486,7 @@ public final class IndexUnits {
           return this;
         }
         /**
-         * <code>optional string text = 1;</code>
+         * <code>optional string content = 1;</code>
          */
         public Builder clearText() {
           bitField0_ = (bitField0_ & ~0x00000001);
@@ -2495,7 +2495,7 @@ public final class IndexUnits {
           return this;
         }
         /**
-         * <code>optional string text = 1;</code>
+         * <code>optional string content = 1;</code>
          */
         public Builder setTextBytes(
             com.google.protobuf.ByteString value) {
@@ -5743,15 +5743,15 @@ public final class IndexUnits {
     long getLemmaId();
 
     /**
-     * <code>optional string text = 3;</code>
+     * <code>optional string content = 3;</code>
      */
     boolean hasText();
     /**
-     * <code>optional string text = 3;</code>
+     * <code>optional string content = 3;</code>
      */
     java.lang.String getText();
     /**
-     * <code>optional string text = 3;</code>
+     * <code>optional string content = 3;</code>
      */
     com.google.protobuf.ByteString
         getTextBytes();
@@ -6124,13 +6124,13 @@ public final class IndexUnits {
     public static final int TEXT_FIELD_NUMBER = 3;
     private java.lang.Object text_;
     /**
-     * <code>optional string text = 3;</code>
+     * <code>optional string content = 3;</code>
      */
     public boolean hasText() {
       return ((bitField0_ & 0x00000004) == 0x00000004);
     }
     /**
-     * <code>optional string text = 3;</code>
+     * <code>optional string content = 3;</code>
      */
     public java.lang.String getText() {
       java.lang.Object ref = text_;
@@ -6147,7 +6147,7 @@ public final class IndexUnits {
       }
     }
     /**
-     * <code>optional string text = 3;</code>
+     * <code>optional string content = 3;</code>
      */
     public com.google.protobuf.ByteString
         getTextBytes() {
@@ -6542,13 +6542,13 @@ public final class IndexUnits {
 
       private java.lang.Object text_ = "";
       /**
-       * <code>optional string text = 3;</code>
+       * <code>optional string content = 3;</code>
        */
       public boolean hasText() {
         return ((bitField0_ & 0x00000004) == 0x00000004);
       }
       /**
-       * <code>optional string text = 3;</code>
+       * <code>optional string content = 3;</code>
        */
       public java.lang.String getText() {
         java.lang.Object ref = text_;
@@ -6565,7 +6565,7 @@ public final class IndexUnits {
         }
       }
       /**
-       * <code>optional string text = 3;</code>
+       * <code>optional string content = 3;</code>
        */
       public com.google.protobuf.ByteString
           getTextBytes() {
@@ -6581,7 +6581,7 @@ public final class IndexUnits {
         }
       }
       /**
-       * <code>optional string text = 3;</code>
+       * <code>optional string content = 3;</code>
        */
       public Builder setText(
           java.lang.String value) {
@@ -6594,7 +6594,7 @@ public final class IndexUnits {
         return this;
       }
       /**
-       * <code>optional string text = 3;</code>
+       * <code>optional string content = 3;</code>
        */
       public Builder clearText() {
         bitField0_ = (bitField0_ & ~0x00000004);
@@ -6603,7 +6603,7 @@ public final class IndexUnits {
         return this;
       }
       /**
-       * <code>optional string text = 3;</code>
+       * <code>optional string content = 3;</code>
        */
       public Builder setTextBytes(
           com.google.protobuf.ByteString value) {

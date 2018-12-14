@@ -1,25 +1,71 @@
 package com.expleague.sensearch.index.plain;
 
-import com.expleague.sensearch.Page;
 import com.expleague.sensearch.index.IndexedPage;
 import com.expleague.sensearch.protobuf.index.IndexUnits;
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Stream;
 
 public class PlainPage implements IndexedPage {
 
   private final long id;
-  private final String text;
-  private final String title;
   private final URI uri;
-  private List<CharSequence> categories;
-  private List<Section> sections;
+
+  private final String title;
+  private final String content;
+
+  private final List<Link> outcomingLinks;
+  private final List<Link> incomingLinks;
+
+  private final long parentID;
+  private final List<Link> subpagesLinks;
+
+  private List<CharSequence> categories = new ArrayList<>();
 
   PlainPage(IndexUnits.Page page) {
-    text = page.getContent();
-    title = page.getTitle();
-    uri = URI.create(page.getUri());
     id = page.getPageId();
+    uri = URI.create(page.getUri());
+
+    title = page.getTitle();
+    content = page.getContent();
+
+    List<Link> links = new ArrayList<>();
+    Link tmp;
+
+    for (int ind = 0; ind < page.getOutcomingLinksCount(); ind++) {
+      tmp = new PageLink(page.getOutcomingLinks(ind).getText(),
+          page.getOutcomingLinks(ind).getPosition(),
+          page.getOutcomingLinks(ind).getTargetPageId(),
+          page.getOutcomingLinks(ind).getSourcePageId()
+          );
+      links.add(tmp);
+    }
+    outcomingLinks = links;
+
+    links.clear();
+    for (int ind = 0; ind < page.getIncomingLinksCount(); ind++) {
+      tmp = new PageLink(page.getIncomingLinks(ind).getText(),
+          page.getIncomingLinks(ind).getPosition(),
+          page.getIncomingLinks(ind).getTargetPageId(),
+          page.getIncomingLinks(ind).getSourcePageId()
+      );
+      links.add(tmp);
+    }
+    incomingLinks = links;
+
+    parentID = page.getParentId();
+
+    links.clear();
+    for (int ind = 0; ind < page.getSubpagesIdsCount(); ind++) {
+      tmp = new PageLink("",
+          0,
+          page.getSubpagesIds(ind),
+          id
+      );
+      links.add(tmp);
+    }
+    subpagesLinks = links;
   }
 
   @Override
@@ -33,8 +79,8 @@ public class PlainPage implements IndexedPage {
   }
 
   @Override
-  public CharSequence text() {
-    return text;
+  public CharSequence content() {
+    return content;
   }
 
   @Override
@@ -43,13 +89,23 @@ public class PlainPage implements IndexedPage {
   }
 
   @Override
-  public List<Section> sections() {
-    return sections;
+  public Stream<Link> outcomingLinks() {
+    return outcomingLinks.stream();
   }
 
   @Override
-  public List<Page> inputLinks() {
-    return null;
+  public Stream<Link> incomingLinks() {
+    return incomingLinks.stream();
+  }
+
+  @Override
+  public long parent() {
+    return parentID;
+  }
+
+  @Override
+  public Stream<Link> subpages() {
+    return subpagesLinks.stream();
   }
 
   @Override
@@ -67,52 +123,25 @@ public class PlainPage implements IndexedPage {
     return Long.hashCode(this.id);
   }
 
-  public static class PageSection implements Section {
-
-    private CharSequence text;
-    private List<CharSequence> title;
-    private List<Link> links;
-
-    public PageSection(
-        CharSequence text,
-        List<CharSequence> title,
-        List<Link> links
-    ) {
-      this.text = text;
-      this.title = title;
-      this.links = links;
-    }
-
-    @Override
-    public CharSequence text() {
-      return text;
-    }
-
-    @Override
-    public List<CharSequence> title() {
-      return title;
-    }
-
-    @Override
-    public List<Link> links() {
-      return links;
-    }
-  }
 
   public static class PageLink implements Link {
 
     private CharSequence text;
-    private CharSequence context;
-    private int linkOffset;
+    private long linkOffset;
 
-    public PageLink(
+    private long tagetLink;
+    private long sourceLink;
+
+    PageLink(
         CharSequence text,
-        CharSequence context,
-        int offset
+        long offset,
+        long target,
+        long source
     ) {
       this.text = text;
-      this.context = context;
       this.linkOffset = offset;
+      this.tagetLink = target;
+      this.sourceLink = source;
     }
 
     @Override
@@ -121,18 +150,17 @@ public class PlainPage implements IndexedPage {
     }
 
     @Override
-    public CharSequence context() {
-      return context;
-    }
-
-    //TODO: need to talk about this method
-    @Override
-    public Page targetPage() {
-      return null;
+    public long targetPage() {
+      return tagetLink;
     }
 
     @Override
-    public int textOffset() {
+    public long sourcePage() {
+      return sourceLink;
+    }
+
+    @Override
+    public long textOffset() {
       return linkOffset;
     }
   }

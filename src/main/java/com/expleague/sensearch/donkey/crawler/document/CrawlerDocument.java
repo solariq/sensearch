@@ -7,7 +7,7 @@ import javax.validation.constraints.NotNull;
 public interface CrawlerDocument {
 
   /**
-   * @return Page text
+   * @return Page content
    */
   @NotNull
   CharSequence content();
@@ -45,10 +45,12 @@ public interface CrawlerDocument {
   interface Section {
 
     /**
-     * @return Section text
+     * @return Section content
      */
     @NotNull
     CharSequence text();
+
+    URI uri();
 
     /**
      * @return Title of this section. As there can be sections, sub-sections and so on, this method
@@ -80,7 +82,7 @@ public interface CrawlerDocument {
      */
     long targetId();
 
-    /** @return Where this link starts in its section text */
+    /** @return Where this link starts in its section content */
     int textOffset();
   }
 }

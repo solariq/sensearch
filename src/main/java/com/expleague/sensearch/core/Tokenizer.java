@@ -13,17 +13,17 @@ public interface Tokenizer {
   Stream<CharSequence> toWords(CharSequence sentence);
 
   /**
-   * Splits text to sentences
+   * Splits content to sentences
    * @param text Text to be splitted
-   * @return Sentences of the text
+   * @return Sentences of the content
    */
   Stream<CharSequence> toSentences(CharSequence text);
 
   /**
-   * Splits text into words, removing all punctuation and special characters
+   * Splits content into words, removing all punctuation and special characters
    *
    * @param text Text to be split
-   * @return Words of this text
+   * @return Words of this content
    */
   default Stream<CharSequence> parseTextToWords(CharSequence text) {
     return toSentences(text).filter(s -> s.length() > 0).flatMap(this::toWords);

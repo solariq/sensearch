@@ -6,6 +6,7 @@ import com.expleague.sensearch.core.Lemmer;
 import com.expleague.sensearch.utils.SensearchTestCase;
 import java.net.URI;
 import java.util.List;
+import java.util.stream.Stream;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.rules.TestName;
@@ -37,7 +38,7 @@ public class RelevanceTest extends SensearchTestCase {
           }
 
           @Override
-          public CharSequence text() {
+          public CharSequence content() {
             return "Жил-был на свете добрый волшебник. "
                 + "Синяя машины быстрее красной. "
                 + "Он жил в мире, где магия стояла на первом месте и практически затмила собой науку. "
@@ -59,14 +60,25 @@ public class RelevanceTest extends SensearchTestCase {
           }
 
           @Override
-          public List<Section> sections() {
+          public Stream<Link> outcomingLinks() {
             return null;
           }
 
           @Override
-          public List<Page> inputLinks() {
+          public Stream<Link> incomingLinks() {
             return null;
           }
+
+          @Override
+          public long parent() {
+            return 0;
+          }
+
+          @Override
+          public Stream<Link> subpages() {
+            return null;
+          }
+
         };
     d2 =
         new Page() {
@@ -81,7 +93,7 @@ public class RelevanceTest extends SensearchTestCase {
           }
 
           @Override
-          public CharSequence text() {
+          public CharSequence content() {
             return "Несущая смерть (оригинальное название Тамара ) — американский фильм ужасов 2005 года режиссёра Джереми Хэвта.\n"
                 + "\n"
                 + "Тамара Райли застенчивая и непривлекательная, но очень умная девушка, увлекается колдовством и тайно влюблена в своего преподавателя литературы Билла Натолли. Когда девушка пишет критическую статью об употреблении стероидов школьными спортсменами, Шон и Патрик, уличённые в содеянном, желают отомстить. Тамара пытается совершить магический ритуал, который помог бы ей навсегда связать свою судьбу с Биллом Натолли, но не решается его закончить. В ту же ночь Шон с Патриком решают её разыграть. Выдавая себя за Натолли, Шон приглашает Тамару в номер мотеля, в котором он спрятал камеру. Спрятавшись в душе, Шон предлагает прибывшей Тамаре раздеться. В соседнем номере Патрик, вместе с Хлоей, Джесси и Роджером (не знавшими о розыгрыше), наблюдает за происходящим по телевизору. Когда обман раскрылся, Тамара бросилась на обидчиков. В результате борьбы Тамара погибает. Несмотря на требование Хлои сообщить о произошедшем в полицию, друзья закапывают труп в лесу.\n"
@@ -103,12 +115,22 @@ public class RelevanceTest extends SensearchTestCase {
           }
 
           @Override
-          public List<Section> sections() {
+          public Stream<Link> outcomingLinks() {
             return null;
           }
 
           @Override
-          public List<Page> inputLinks() {
+          public Stream<Link> incomingLinks() {
+            return null;
+          }
+
+          @Override
+          public long parent() {
+            return 0;
+          }
+
+          @Override
+          public Stream<Link> subpages() {
             return null;
           }
         };
@@ -126,7 +148,7 @@ public class RelevanceTest extends SensearchTestCase {
           }
 
           @Override
-          public CharSequence text() {
+          public CharSequence content() {
             return "Xenodon pulcher — вид змей из семейства ужеобразных, обитающий в Южной Америке.\n"
                 + "\n"
                 + "Общая длина достигает 75 см. Шея слабо выражена, голова практически не отграничена от туловища. Ростральний щиток на конце морды увеличен и поднят кверху, как у свиноносых ужей. Туловище компактное, коренастое. По окраске напоминает королевских змей чередованием красных, чёрных и светлых колец, однако границы между полосами нечёткие, размытые. За светлым (ярко-белыми или лимонно-жёлтыми) полосами располагаются многочисленные мелкие чёрные крапинки. Изредка встречаются меланисты.\n"
@@ -144,12 +166,22 @@ public class RelevanceTest extends SensearchTestCase {
           }
 
           @Override
-          public List<Section> sections() {
+          public Stream<Link> outcomingLinks() {
             return null;
           }
 
           @Override
-          public List<Page> inputLinks() {
+          public Stream<Link> incomingLinks() {
+            return null;
+          }
+
+          @Override
+          public long parent() {
+            return 0;
+          }
+
+          @Override
+          public Stream<Link> subpages() {
             return null;
           }
         };
