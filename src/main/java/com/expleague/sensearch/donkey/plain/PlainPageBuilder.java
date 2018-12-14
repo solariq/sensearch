@@ -59,7 +59,7 @@ class PlainPageBuilder {
     Files.createDirectories(tempFilesRoot);
     temporaryIndexOs = Files.newOutputStream(tempFilesRoot.resolve(TEMP_INDEX_FILE));
   }
-  // TODO: resolve links between pages!
+  
   long add(CrawlerDocument parsedPage) {
     // create new page id
     long newRootPageId = -((wikiIdToIndexId.size() + 1) << ROOT_PAGE_ID_OFFSET_BITS);
@@ -110,6 +110,7 @@ class PlainPageBuilder {
         )
     ) {
       while ((rawPage = Page.parseDelimitedFrom(temporaryIndexIs)) != null) {
+        pageBuilder.clear();
         pageBuilder.mergeFrom(rawPage);
         long pageId = pageBuilder.getPageId();
         if (outcomingLinks.containsKey(pageId)) {
