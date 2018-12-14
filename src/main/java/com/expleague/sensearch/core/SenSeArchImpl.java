@@ -6,7 +6,7 @@ import com.expleague.sensearch.core.impl.ResultItemImpl;
 import com.expleague.sensearch.core.impl.ResultPageImpl;
 import com.expleague.sensearch.core.impl.WhiteboardImpl;
 import com.expleague.sensearch.snippet.Snippet;
-import com.expleague.sensearch.web.Builder;
+import com.google.inject.Inject;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -20,24 +20,21 @@ import java.util.stream.Stream;
 
 public class SenSeArchImpl implements SenSeArch {
 
-  private final Builder builder;
+  private final SearchPhaseProvider searchPhaseProvider;
 
-  public SenSeArchImpl(Builder builder) {
-    this.builder = builder;
+  @Inject
+  public SenSeArchImpl(SearchPhaseProvider searchPhaseProvider) {
+    this.searchPhaseProvider = searchPhaseProvider;
   }
 
   @Override
   public ResultPage search(String query, int pageNo) {
     final Set<SearchPhase> phases =
-        Stream.of(SearchPhase.FACTORIES)
-            .map(
-                f -> {
-                  f.setConfig(builder);
-                  return f.get();
-                })
+        Stream.of(SearchPhase.SEARCH_PHASES)
+            .map(searchPhaseProvider::get)
             .collect(Collectors.toSet());
 
-    final Whiteboard wb = new WhiteboardImpl(query, pageNo, builder);
+    final Whiteboard wb = new WhiteboardImpl(query, pageNo);
     final ThreadPoolExecutor executor =
         new ThreadPoolExecutor(
             Runtime.getRuntime().availableProcessors() - 1,

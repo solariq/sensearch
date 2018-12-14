@@ -2,6 +2,7 @@ package com.expleague.sensearch.metrics;
 
 import com.expleague.sensearch.Page;
 import com.expleague.sensearch.SenSeArch.ResultItem;
+import com.expleague.sensearch.core.Annotations;
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
@@ -9,6 +10,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import javax.inject.Inject;
 
 public class Metric {
 
@@ -16,7 +18,8 @@ public class Metric {
   private WebCrawler crawler;
   private Path pathToMetrics;
 
-  public Metric(WebCrawler requestCrawler, Path path) {
+  @Inject
+  public Metric(WebCrawler requestCrawler, @Annotations.MetricPath Path path) {
     crawler = requestCrawler;
     pathToMetrics = path;
     requestCrawler.setPath(path);
@@ -73,4 +76,5 @@ public class Metric {
 
     return googleResults.toArray(new ResultItem[0]);
   }
+
 }

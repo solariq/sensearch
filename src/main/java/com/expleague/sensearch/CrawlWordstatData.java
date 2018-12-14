@@ -27,12 +27,12 @@ public class CrawlWordstatData {
     Builder builder = injector.getInstance(Builder.class);
     Config config = builder.build();
 
-    RequestCrawler crawler = new RequestCrawler(builder.getIndex());
+    RequestCrawler crawler = injector.getInstance(RequestCrawler.class);
     ObjectMapper mapper = new ObjectMapper();
     Random random = new Random(239);
 
     // If Google bans us, then update this number and restart
-    int[] queryNum = new int[]{93};
+    int[] queryNum = new int[]{101};
 
     try (BufferedReader reader = Files.newBufferedReader(Paths.get("wordstat/queries.txt"))) {
       reader

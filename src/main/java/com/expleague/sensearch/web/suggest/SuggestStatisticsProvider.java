@@ -1,21 +1,5 @@
 package com.expleague.sensearch.web.suggest;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-
-import javax.xml.stream.XMLStreamException;
-
-import org.iq80.leveldb.DB;
-import org.iq80.leveldb.DBIterator;
-import org.iq80.leveldb.WriteBatch;
-import org.iq80.leveldb.WriteOptions;
-
 import com.expleague.sensearch.Config;
 import com.expleague.sensearch.core.Term;
 import com.expleague.sensearch.donkey.crawler.Crawler;
@@ -25,10 +9,21 @@ import com.fasterxml.jackson.core.JsonGenerationException;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.primitives.Doubles;
 import com.google.common.primitives.Longs;
-
+import com.google.inject.Inject;
 import gnu.trove.map.TLongObjectMap;
+import java.io.IOException;
+import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+import javax.xml.stream.XMLStreamException;
+import org.iq80.leveldb.DB;
+import org.iq80.leveldb.DBIterator;
+import org.iq80.leveldb.WriteBatch;
+import org.iq80.leveldb.WriteOptions;
 
 public class SuggestStatisticsProvider {
 	private final int maxNgramsOrder = 3;
@@ -126,7 +121,8 @@ public class SuggestStatisticsProvider {
 		
 		suggestBase.write(batch, DEFAULT_WRITE_OPTIONS);
 	}
-	
+
+	@Inject
 	public SuggestStatisticsProvider(Crawler crawler, Index index, Config config, TLongObjectMap<Term> idToTerm, DB termStats) throws JsonParseException, JsonMappingException, IOException {
 		
 		this.idToTerm = idToTerm;

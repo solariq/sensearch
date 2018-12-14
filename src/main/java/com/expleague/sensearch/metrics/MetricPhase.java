@@ -2,18 +2,25 @@ package com.expleague.sensearch.metrics;
 
 import com.expleague.sensearch.core.SearchPhase;
 import com.expleague.sensearch.core.Whiteboard;
+import com.google.inject.Inject;
 import org.apache.log4j.Logger;
 
 public class MetricPhase implements SearchPhase {
 
   private static final Logger LOG = Logger.getLogger(MetricPhase.class.getName());
+  private final Metric metric;
+
+  @Inject
+  public MetricPhase(Metric metric) {
+    this.metric = metric;
+  }
+
 
   @Override
   public void accept(Whiteboard whiteboard) {
     LOG.info("Metric phase started");
     long startTime = System.nanoTime();
 
-    Metric metric = whiteboard.builder().metric();
     whiteboard.putGoogleResults(metric.calculate(whiteboard.input(), whiteboard.results()));
 
     LOG.info(

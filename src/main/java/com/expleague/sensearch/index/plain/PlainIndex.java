@@ -24,6 +24,8 @@ import com.expleague.sensearch.protobuf.index.IndexUnits.TermStatistics;
 import com.expleague.sensearch.protobuf.index.IndexUnits.TermStatistics.TermFrequency;
 import com.expleague.sensearch.query.Query;
 import com.google.common.primitives.Longs;
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import com.google.protobuf.InvalidProtocolBufferException;
 import gnu.trove.map.TLongLongMap;
 import gnu.trove.map.TLongObjectMap;
@@ -50,9 +52,10 @@ import org.iq80.leveldb.Options;
 import org.iq80.leveldb.ReadOptions;
 import org.jetbrains.annotations.Nullable;
 
+@Singleton
 public class PlainIndex implements Index {
 
-  public static final int VERSION = 5;
+  public static final int VERSION = 6;
 
   private static final long DEFAULT_CACHE_SIZE = 128 * (1 << 20); // 128 MB
 
@@ -90,6 +93,7 @@ public class PlainIndex implements Index {
 
   private TermStatistics lastTermStatistics;
 
+  @Inject
   public PlainIndex(Config config) throws IOException {
     LOG.info("Loading PlainIndex...");
     long startTime = System.nanoTime();

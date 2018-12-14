@@ -20,6 +20,7 @@ import com.expleague.sensearch.protobuf.index.IndexUnits.Term;
 import com.expleague.sensearch.protobuf.index.IndexUnits.Term.Builder;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.primitives.Longs;
+import com.google.inject.Inject;
 import gnu.trove.map.TLongIntMap;
 import gnu.trove.map.TLongObjectMap;
 import gnu.trove.map.TObjectLongMap;
@@ -89,8 +90,15 @@ public class PlainIndexBuilder implements IndexBuilder {
           .compressionType(CompressionType.SNAPPY);
 
   private static final Logger LOG = Logger.getLogger(PlainIndexBuilder.class.getName());
+  private final Crawler crawler;
+  private final Config config;
+  private final Lemmer lemmer;
 
-  public PlainIndexBuilder() {
+  @Inject
+  public PlainIndexBuilder(Crawler crawler, Config config, Lemmer lemmer) {
+    this.crawler = crawler;
+    this.config = config;
+    this.lemmer = lemmer;
   }
 
   // TODO refactor this
@@ -198,7 +206,7 @@ public class PlainIndexBuilder implements IndexBuilder {
   }
 
   @Override
-  public void buildIndex(Crawler crawler, Config config, Lemmer lemmer) throws IOException {
+  public void buildIndex() throws IOException {
     final Tokenizer tokenizer = new TokenizerImpl();
     final TLongObjectMap<Vec> gloveVectors = new TLongObjectHashMap<>();
     final TObjectLongMap<String> idMappings = new TObjectLongHashMap<>();

@@ -1,7 +1,7 @@
 package com.expleague.sensearch.utils;
 
 import com.expleague.commons.text.lemmer.MyStem;
-import com.expleague.sensearch.Config;
+import com.expleague.sensearch.ConfigImpl;
 import com.expleague.sensearch.core.Lemmer;
 import com.expleague.sensearch.donkey.plain.PlainIndexBuilder;
 import com.expleague.sensearch.index.Index;
@@ -24,7 +24,7 @@ public abstract class IndexBasedTestCase extends CrawlerBasedTestCase {
 
   private static Index miniIndex;
 
-  private static TestConfig indexConfig;
+  private static TestConfigImpl indexConfig;
 
   @BeforeClass
   public static void initIndex() throws IOException {
@@ -47,18 +47,18 @@ public abstract class IndexBasedTestCase extends CrawlerBasedTestCase {
     Path indexDataRoot = testDataRoot().resolve(INDEX_DATA_ROOT);
     Path logsBasedMyStemRoot = indexDataRoot.resolve(LOG_BASED_LEMMER_ROOT);
     MyStem myStem = new LogBasedMyStem(logsBasedMyStemRoot);
-    new PlainIndexBuilder().buildIndex(crawler(), indexConfig, new Lemmer(myStem));
+    new PlainIndexBuilder(crawler(), indexConfig, new Lemmer(myStem)).buildIndex();
   }
 
-  protected static TestConfig indexConfig() {
-    return new TestConfig(indexConfig);
+  protected static TestConfigImpl indexConfig() {
+    return new TestConfigImpl(indexConfig);
   }
 
   protected static Index index() {
     return miniIndex;
   }
 
-  protected Config config() {
-    return new TestConfig(indexConfig);
+  protected ConfigImpl config() {
+    return new TestConfigImpl(indexConfig);
   }
 }

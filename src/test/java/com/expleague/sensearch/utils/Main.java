@@ -8,7 +8,7 @@ import java.nio.file.Paths;
 public class Main {
   public static void main(String[] args) throws Exception {
     Path minWikiPath = Paths.get("./src/test/DATA/ForIndex/MiniWiki.zip");
-    TestConfig config = new TestConfig()
+    TestConfigImpl config = new TestConfigImpl()
         .setPathToZIP(minWikiPath)
         .setTemporaryDocuments(Paths.get("./src/test/UNIVERSE/TempDocs"));
 

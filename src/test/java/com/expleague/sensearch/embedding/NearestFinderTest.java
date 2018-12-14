@@ -2,7 +2,7 @@
 //
 // import com.expleague.commons.math.vectors.Vec;
 // import com.expleague.commons.math.vectors.VecTools;
-// import com.expleague.sensearch.Config;
+// import com.expleague.sensearch.ConfigImpl;
 // import com.fasterxml.jackson.databind.ObjectMapper;
 // import java.io.IOException;
 // import java.nio.file.Files;
@@ -37,7 +37,7 @@
 //  @Before
 //  public void initEmbedding() throws IOException {
 //    byte[] jsonData = Files.readAllBytes(Paths.get("./config.json"));
-//    Config config = new ObjectMapper().readValue(jsonData, Config.class);
+//    ConfigImpl config = new ObjectMapper().readValue(jsonData, ConfigImpl.class);
 //    embedding = new EmbeddingImpl(config);
 //    Vec v = VecTools.append(VecTools.subtract(embedding.vec("король"),
 // embedding.vec("мужчина")), embedding.vec("женщина"));

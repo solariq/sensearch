@@ -6,7 +6,6 @@ import com.expleague.sensearch.core.Whiteboard;
 import com.expleague.sensearch.miner.Features;
 import com.expleague.sensearch.query.Query;
 import com.expleague.sensearch.snippet.Snippet;
-import com.expleague.sensearch.web.Builder;
 import java.util.Map;
 import org.jetbrains.annotations.Nullable;
 
@@ -14,22 +13,15 @@ public class WhiteboardImpl implements Whiteboard {
 
   private final String input;
   private final int page;
-  private final Builder builder;
   private Page[] results;
   private Snippet[] snippets;
   private Query query;
   private Map<Page, Features> textFeatures;
   private ResultItem[] googleResults;
 
-  public WhiteboardImpl(String input, int page, Builder builder) {
+  public WhiteboardImpl(String input, int page) {
     this.input = input;
     this.page = page;
-    this.builder = builder;
-  }
-
-  @Override
-  public Builder builder() {
-    return builder;
   }
 
   @Override

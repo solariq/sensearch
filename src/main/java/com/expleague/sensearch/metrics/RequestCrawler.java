@@ -4,6 +4,7 @@ import com.expleague.commons.util.Pair;
 import com.expleague.sensearch.SenSeArch.ResultItem;
 import com.expleague.sensearch.core.impl.ResultItemImpl;
 import com.expleague.sensearch.index.Index;
+import com.google.inject.Inject;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -62,6 +63,7 @@ public class RequestCrawler implements WebCrawler {
     dummyRequests.add("Balalaika");
   }
 
+  @Inject
   public RequestCrawler(Index index) {
     this.index = index;
     agentsList.forEach(agent -> cookies.put(agent, null));

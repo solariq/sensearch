@@ -27,7 +27,8 @@ public class MetricTest {
     Injector injector = Guice.createInjector(new AppModule());
     builder = injector.getInstance(Builder.class);
     config = builder.build();
-    searcher = builder.getSearcher();
+
+    searcher = injector.getInstance(SenSeArch.class);
   }
 
   @Test
@@ -40,7 +41,7 @@ public class MetricTest {
         BufferedReader readOld =
             Files.newBufferedReader(pathToMetric.resolve(line).resolve("METRIC"));
         System.err.println(readOld.readLine());
-        builder.getSearcher().search(line, 0);
+        searcher.search(line, 0);
       }
     } catch (IOException e) {
       e.printStackTrace();

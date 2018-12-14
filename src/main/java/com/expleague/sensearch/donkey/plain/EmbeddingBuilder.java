@@ -7,6 +7,7 @@ import com.google.common.primitives.Longs;
 import gnu.trove.list.TLongList;
 import gnu.trove.list.array.TLongArrayList;
 import gnu.trove.map.TLongObjectMap;
+import gnu.trove.map.hash.TLongObjectHashMap;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
@@ -14,8 +15,6 @@ import java.io.Writer;
 import java.nio.file.Path;
 import java.util.Random;
 import java.util.function.ToLongFunction;
-
-import gnu.trove.map.hash.TLongObjectHashMap;
 import org.fusesource.leveldbjni.JniDBFactory;
 import org.iq80.leveldb.CompressionType;
 import org.iq80.leveldb.DB;
@@ -29,8 +28,8 @@ public class EmbeddingBuilder {
   public static final String LSH_ROOT = "lsh";
   public static final String RAND_VECS = "rand";
   public static final int TABLES_NUMBER = 10;
-  public static final int TUPLE_SIZE = 32;
-  private static final int MAX_BATCH_SIZE = 1_000_000;
+  public static final int TUPLE_SIZE = 20;
+  private static final int MAX_BATCH_SIZE = 1_000;
   private static final double MIN_COORD_VAL = -1.;
   private static final double MAX_COORD_VAL = 1.;
 

@@ -2,6 +2,7 @@ package com.expleague.sensearch.web;
 
 import com.expleague.sensearch.AppModule;
 import com.expleague.sensearch.Config;
+import com.expleague.sensearch.donkey.IndexBuilder;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import java.nio.file.Files;
@@ -35,6 +36,11 @@ public class SearchServer {
     Injector injector = Guice.createInjector(new AppModule());
     Builder builder = injector.getInstance(Builder.class);
     Config config = builder.build();
+
+    if (config.getBuildIndexFlag()) {
+      IndexBuilder indexBuilder = injector.getInstance(IndexBuilder.class);
+      indexBuilder.buildIndex();
+    }
 
     ServletContextHandler context = new ServletContextHandler(ServletContextHandler.SESSIONS);
     context.setContextPath("/api");

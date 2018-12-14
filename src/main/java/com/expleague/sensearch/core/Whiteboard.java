@@ -5,13 +5,10 @@ import com.expleague.sensearch.SenSeArch.ResultItem;
 import com.expleague.sensearch.miner.Features;
 import com.expleague.sensearch.query.Query;
 import com.expleague.sensearch.snippet.Snippet;
-import com.expleague.sensearch.web.Builder;
 import java.util.Map;
 import org.jetbrains.annotations.Nullable;
 
 public interface Whiteboard {
-
-  Builder builder();
 
   @Nullable
   Map<Page, Features> textFeatures();

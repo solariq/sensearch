@@ -1,18 +1,17 @@
 package com.expleague.sensearch.web.suggest;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-
 import com.expleague.sensearch.Config;
 import com.expleague.sensearch.core.Term;
 import com.expleague.sensearch.donkey.crawler.Crawler;
 import com.expleague.sensearch.index.Index;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 public class ProbabilisticSuggestor implements Suggestor {
 

@@ -1,9 +1,10 @@
 package com.expleague.sensearch.donkey.crawler;
 
-import com.expleague.sensearch.ConfigJson;
+import com.expleague.sensearch.Config;
 import com.expleague.sensearch.donkey.crawler.document.CrawlerDocument;
 import com.expleague.sensearch.donkey.crawler.document.WikiPage;
 import com.expleague.sensearch.donkey.crawler.document.XMLParser;
+import com.google.inject.Inject;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -22,10 +23,11 @@ import org.apache.commons.io.FileUtils;
 
 public class CrawlerXML implements Crawler {
 
-  private final ConfigJson config;
+  private final Config config;
   private Path path;
 
-  public CrawlerXML(ConfigJson config) {
+  @Inject
+  public CrawlerXML(Config config) {
     this.path = config.getPathToZIP();
     this.config = config;
   }
