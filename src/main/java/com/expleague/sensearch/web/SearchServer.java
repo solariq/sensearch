@@ -34,8 +34,7 @@ public class SearchServer {
     PropertyConfigurator.configure(logProperties);
 
     Injector injector = Guice.createInjector(new AppModule());
-    Builder builder = injector.getInstance(Builder.class);
-    Config config = builder.build();
+    Config config = injector.getInstance(Config.class);
 
     if (config.getBuildIndexFlag()) {
       IndexBuilder indexBuilder = injector.getInstance(IndexBuilder.class);

@@ -2,7 +2,6 @@ package com.expleague.sensearch;
 
 import com.expleague.sensearch.SenSeArch.ResultItem;
 import com.expleague.sensearch.metrics.RequestCrawler;
-import com.expleague.sensearch.web.Builder;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
@@ -24,8 +23,6 @@ public class CrawlWordstatData {
     PropertyConfigurator.configure(logProperties);
 
     Injector injector = Guice.createInjector(new AppModule());
-    Builder builder = injector.getInstance(Builder.class);
-    Config config = builder.build();
 
     RequestCrawler crawler = injector.getInstance(RequestCrawler.class);
     ObjectMapper mapper = new ObjectMapper();

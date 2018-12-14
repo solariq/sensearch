@@ -4,7 +4,6 @@ import com.expleague.sensearch.AppModule;
 import com.expleague.sensearch.Config;
 import com.expleague.sensearch.SenSeArch;
 import com.expleague.sensearch.SenSeArch.ResultPage;
-import com.expleague.sensearch.web.Builder;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
@@ -19,8 +18,7 @@ public class RebaseMetrics {
 
   public static void main(String[] args) throws IOException, XMLStreamException {
     Injector injector = Guice.createInjector(new AppModule());
-    Builder builder = injector.getInstance(Builder.class);
-    Config config = builder.build();
+    Config config = injector.getInstance(Config.class);
     SenSeArch searcher = injector.getInstance(SenSeArch.class);
 
     FileUtils.deleteDirectory(Paths.get("./resources/Metrics").toFile());
