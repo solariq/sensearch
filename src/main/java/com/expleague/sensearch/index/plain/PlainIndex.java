@@ -18,6 +18,7 @@ import com.expleague.sensearch.index.Embedding;
 import com.expleague.sensearch.index.Filter;
 import com.expleague.sensearch.index.Index;
 import com.expleague.sensearch.index.IndexedPage;
+import com.expleague.sensearch.metrics.FilterMetric;
 import com.expleague.sensearch.protobuf.index.IndexUnits;
 import com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta.UriPageMapping;
 import com.expleague.sensearch.protobuf.index.IndexUnits.TermStatistics;
@@ -37,10 +38,8 @@ import java.io.IOException;
 import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.NoSuchElementException;
-import java.util.Objects;
+import java.util.*;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.apache.log4j.Logger;
 import org.fusesource.leveldbjni.JniDBFactory;
@@ -88,6 +87,7 @@ public class PlainIndex implements Index {
 
   private final Embedding embedding;
   private final Filter filter;
+  private final FilterMetric filterMetric = new FilterMetric();
   private final MyStem stemmer;
   private final Tokenizer tokenizer;
 
@@ -258,9 +258,18 @@ public class PlainIndex implements Index {
         .mapToLong(t -> ((IndexTerm) t).id())
         .mapToObj(embedding::vec)
         .forEach(v -> VecTools.append(queryVec, v));
-    return filter
-        .filtrate(queryVec, FILTERED_DOC_NUMBER, PlainIndex::isPageId)
-        .mapToObj(this::idToPage);
+    List<Page> pages = filter
+            .filtrate(queryVec, FILTERED_DOC_NUMBER, PlainIndex::isPageId)
+            .mapToObj(this::idToPage).collect(Collectors.toList());
+    double result = filterMetric.calc(query
+                    .terms()
+                    .stream()
+                    .map(Term::text)
+                    .collect(Collectors.joining(" ")),
+            pages.stream().map(Page::reference).collect(Collectors.toSet())
+    );
+    LOG.info("FilterMetric: " + result);
+    return pages.stream();
   }
 
   @Override
