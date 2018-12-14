@@ -57,6 +57,10 @@ public class PlainIndexBuilder implements IndexBuilder {
   public static final String PAGE_ROOT = "page";
   public static final String TERM_ROOT = "term";
   public static final String EMBEDDING_ROOT = "embedding";
+  
+  public static final String SUGGEST_UNIGRAM_ROOT = "suggest/unigram_coeff";
+  public static final String SUGGEST_MULTIGRAMS_ROOT = "suggest/multigram_freq_norm";
+  public static final String SUGGEST_INVERTED_INDEX_ROOT = "suggest/inverted_index";
 
   public static final String INDEX_META_FILE = "index.meta";
   public static final int DEFAULT_VEC_SIZE = 130;
@@ -240,6 +244,22 @@ public class PlainIndexBuilder implements IndexBuilder {
     final EmbeddingBuilder embeddingBuilder = new EmbeddingBuilder(
         indexRoot.resolve(EMBEDDING_ROOT)
     );
+    
+    Files.createDirectories(indexRoot.resolve(SUGGEST_UNIGRAM_ROOT));
+    final DB suggest_unigram_DB = JniDBFactory.factory.open(
+    		indexRoot.resolve(SUGGEST_UNIGRAM_ROOT).toFile(), STATS_DB_OPTIONS
+    );
+    final DB suggest_multigram_DB = JniDBFactory.factory.open(
+    		indexRoot.resolve(SUGGEST_MULTIGRAMS_ROOT).toFile(), STATS_DB_OPTIONS
+    );
+    final DB suggest_inverted_index_DB = JniDBFactory.factory.open(
+    		indexRoot.resolve(SUGGEST_INVERTED_INDEX_ROOT).toFile(), STATS_DB_OPTIONS
+    );
+    final SuggestInformationBuilder suggestBuilder =
+    		new SuggestInformationBuilder(
+    				suggest_unigram_DB,
+    				suggest_multigram_DB,
+    				suggest_inverted_index_DB);
 
     final long[] pagesAndTokensCounts = new long[]{0, 0};
 
@@ -265,7 +285,12 @@ public class PlainIndexBuilder implements IndexBuilder {
                         tokenizer.parseTextToWords(
                             (doc.title() + " " + doc.content()).toLowerCase()),
                         idMappings);
-
+                
+                long[] titleTokens =
+                		toIds(tokenizer.parseTextToWords(doc.title()), idMappings);
+                
+                suggestBuilder.accept(titleTokens);
+                
                 termFrequencyMap.clear();
                 bigramFrequencyMap.clear();
                 enrichFrequencies(tokens, termFrequencyMap, bigramFrequencyMap);
@@ -276,7 +301,9 @@ public class PlainIndexBuilder implements IndexBuilder {
 
                 uriPageIdMapping.put(doc.uri().toString(), pageId);
               });
-
+      
+      suggestBuilder.build();
+      
       LOG.info("Storing term-wise data...");
       saveTermData(idMappings, terms, indexRoot);
 
