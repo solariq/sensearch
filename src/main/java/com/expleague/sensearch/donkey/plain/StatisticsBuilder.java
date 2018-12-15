@@ -5,6 +5,7 @@ import com.expleague.sensearch.protobuf.index.IndexUnits.TermStatistics.TermFreq
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.MinMaxPriorityQueue;
 import com.google.common.primitives.Longs;
+import gnu.trove.list.TLongList;
 import gnu.trove.map.TLongIntMap;
 import gnu.trove.map.TLongLongMap;
 import gnu.trove.map.TLongObjectMap;
@@ -66,15 +67,36 @@ public class StatisticsBuilder {
     return termFrequencies;
   }
 
-  void enrich(TLongIntMap pageWiseTf, TLongObjectMap<TLongIntMap> pageWiseBigramTf) {
-    pageWiseTf.forEachEntry(
+  @VisibleForTesting
+  static void enrichFrequencies(
+      long[] tokens, TLongIntMap termFrequencyMap, TLongObjectMap<TLongIntMap> bigramFrequencyMap) {
+    if (tokens.length < 1) {
+      return;
+    }
+    termFrequencyMap.put(tokens[0], 1);
+    for (int i = 1; i < tokens.length; ++i) {
+      termFrequencyMap.adjustOrPutValue(tokens[i], 1, 1);
+
+      bigramFrequencyMap.putIfAbsent(tokens[i - 1], new TLongIntHashMap());
+      bigramFrequencyMap.get(tokens[i - 1]).adjustOrPutValue(tokens[i], 1, 1);
+    }
+  }
+
+  // TODO: save lemma statistics
+  void enrich(TLongList termIdSeq, TLongList lemmaIdSeq) {
+    TLongIntMap termFreqMap = new TLongIntHashMap();
+    TLongObjectMap<TLongIntMap> bigramFreqMap = new TLongObjectHashMap<>();
+    enrichFrequencies(termIdSeq.toArray(), termFreqMap, bigramFreqMap);
+
+    termFreqMap.forEachEntry(
         (tok, freq) -> {
           wordFrequencyMap.adjustOrPutValue(tok, freq, freq);
           documentFrequencyMap.adjustOrPutValue(tok, 1, 1);
           return true;
-        });
+        }
+    );
 
-    pageWiseBigramTf.forEachEntry(
+    bigramFreqMap.forEachEntry(
         (tId, neigh) -> {
           largeBigramsMap.putIfAbsent(tId, new TLongIntHashMap());
           TLongIntMap existingNeighStats = largeBigramsMap.get(tId);
@@ -84,7 +106,8 @@ public class StatisticsBuilder {
                 return true;
               });
           return true;
-        });
+        }
+    );
   }
 
   void build() throws IOException {

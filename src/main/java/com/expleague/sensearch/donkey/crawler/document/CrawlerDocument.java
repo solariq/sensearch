@@ -2,6 +2,7 @@ package com.expleague.sensearch.donkey.crawler.document;
 
 import java.net.URI;
 import java.util.List;
+import java.util.stream.Stream;
 import javax.validation.constraints.NotNull;
 
 public interface CrawlerDocument {
@@ -28,7 +29,7 @@ public interface CrawlerDocument {
    * @return List of {@link Section} this page
    */
   @NotNull
-  List<Section> sections();
+  Stream<Section> sections();
 
   /**
    * @return Page ID or 0 if page has no ID
