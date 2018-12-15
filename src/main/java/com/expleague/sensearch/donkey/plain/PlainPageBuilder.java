@@ -237,7 +237,8 @@ class PlainPageBuilder {
       Page.Builder pageBuilder = Page.newBuilder()
           .setPageId(currentSectionId)
           .setContent(section.text().toString())
-          .setTitle(sectionTitle.toString());
+          .setTitle(sectionTitle.toString())
+          .setUri(section.uri().toString());
 
       if (!parentPages.isEmpty()) {
         pageBuilder.setParentId(parentPages.peekLast().getPageId());
