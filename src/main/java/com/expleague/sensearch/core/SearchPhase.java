@@ -2,6 +2,7 @@ package com.expleague.sensearch.core;
 
 import com.expleague.sensearch.metrics.MetricPhase;
 import com.expleague.sensearch.miner.MinerPhase;
+import com.expleague.sensearch.query.MergePhase;
 import com.expleague.sensearch.query.QueryPhase;
 import com.expleague.sensearch.ranking.RankingPhase;
 import com.expleague.sensearch.ranking.impl.Bm25Ranker;
@@ -15,7 +16,7 @@ public interface SearchPhase extends Predicate<Whiteboard>, Consumer<Whiteboard>
 
   @SuppressWarnings("unchecked")
   Factory<? extends SearchPhase>[] FACTORIES =
-      new Factory[]{
+      new Factory[] {
           QueryPhase::new,
           SnippetPhase::new,
           new Factory<RankingPhase>() {
@@ -44,6 +45,7 @@ public interface SearchPhase extends Predicate<Whiteboard>, Consumer<Whiteboard>
               return new MinerPhase(config.getIndex());
             }
           },
+          MergePhase::new,
           MetricPhase::new
       };
 

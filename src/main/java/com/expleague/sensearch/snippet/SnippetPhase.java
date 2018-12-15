@@ -27,7 +27,7 @@ public class SnippetPhase implements SearchPhase {
     final List<Snippet> snippets = new ArrayList<>();
     for (Page doc : Objects.requireNonNull(whiteboard.results())) {
       snippets.add(
-          snippetsCreator.getSnippet(doc, whiteboard.query(), whiteboard.builder().getLemmer()));
+          snippetsCreator.getSnippet(doc, whiteboard.query()[0], whiteboard.builder().getLemmer()));
     }
     //noinspection ToArrayCallWithZeroLengthArrayArgument
     whiteboard.putSnippets(snippets.toArray(new Snippet[snippets.size()]));

@@ -16,9 +16,10 @@ public class WhiteboardImpl implements Whiteboard {
   private final int page;
   private final Builder builder;
   private Page[] results;
+  private Page[][] subResults;
   private Snippet[] snippets;
-  private Query query;
-  private Map<Page, Features> textFeatures;
+  private Query[] queries;
+  private Map<Page, Features>[] textFeatures;
   private ResultItem[] googleResults;
 
   public WhiteboardImpl(String input, int page, Builder builder) {
@@ -33,12 +34,12 @@ public class WhiteboardImpl implements Whiteboard {
   }
 
   @Override
-  public synchronized Map<Page, Features> textFeatures() {
+  public synchronized Map<Page, Features>[] textFeatures() {
     return textFeatures;
   }
 
   @Override
-  public synchronized void putTextFeatures(Map<Page, Features> textFeatures) {
+  public synchronized void putTextFeatures(Map<Page, Features>[] textFeatures) {
     this.textFeatures = textFeatures;
   }
 
@@ -53,6 +54,21 @@ public class WhiteboardImpl implements Whiteboard {
     this.results = pages;
   }
 
+  @Nullable
+  @Override
+  public synchronized Page[][] subResults() {
+    return subResults;
+  }
+
+  @Override
+  public synchronized void putSubResults(Page[][] subResults) {
+    this.subResults = subResults;
+  }
+
+  public synchronized void putSubResult(Page[] subResult, int index) {
+    this.subResults[index] = subResult;
+  }
+
   @Override
   public Snippet[] snippets() {
     return this.snippets;
@@ -65,8 +81,8 @@ public class WhiteboardImpl implements Whiteboard {
 
   @Nullable
   @Override
-  public synchronized Query query() {
-    return query;
+  public synchronized Query[] query() {
+    return queries;
   }
 
   @Nullable
@@ -76,8 +92,8 @@ public class WhiteboardImpl implements Whiteboard {
   }
 
   @Override
-  public synchronized void putQuery(Query query) {
-    this.query = query;
+  public synchronized void putQuery(Query[] query) {
+    this.queries = query;
   }
 
   @Override

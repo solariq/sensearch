@@ -2,6 +2,8 @@ package com.expleague.sensearch.query;
 
 import com.expleague.sensearch.core.SearchPhase;
 import com.expleague.sensearch.core.Whiteboard;
+import java.util.ArrayList;
+import java.util.List;
 import org.apache.log4j.Logger;
 
 
@@ -20,7 +22,11 @@ public class QueryPhase implements SearchPhase {
     long startTime = System.nanoTime();
 
     final String input = whiteboard.input();
-    whiteboard.putQuery(BaseQuery.create(input, whiteboard.builder().getIndex()));
+    List<Query> queries = new ArrayList<>();
+
+    queries.add(BaseQuery.create(input, whiteboard.builder().getIndex()));
+
+    whiteboard.putQuery(queries.stream().toArray(Query[]::new));
 
     LOG.info(String
         .format("Query phase finished in %.3f seconds", (System.nanoTime() - startTime) / 1e9));
