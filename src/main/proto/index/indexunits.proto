@@ -38,6 +38,7 @@ message Page {
   // Link structure
   repeated Link outcoming_links = 5;
   repeated Link incoming_links = 6;
+  repeated string categories = 9;
 
   // tree-like structure for pages
   // parent_id might be absent

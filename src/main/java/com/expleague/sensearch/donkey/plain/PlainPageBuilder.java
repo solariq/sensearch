@@ -16,6 +16,7 @@ import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import org.apache.commons.io.FileUtils;
@@ -185,6 +186,13 @@ class PlainPageBuilder {
     }
   }
 
+  @VisibleForTesting
+  static List<Page> toPages(List<Section> sections,
+      long currentRootPageId,
+      List<Page.Link.Builder> knownLinks) {
+    return toPages(sections, currentRootPageId, Collections.emptyList(), knownLinks);
+  }
+
   /**
    * Converts given links to list of pages which are connected in tree manner Also enriches given
    * list of know interpage links with links from given sections
@@ -196,7 +204,9 @@ class PlainPageBuilder {
    * @return list of pages
    */
   @VisibleForTesting
-  static List<Page> toPages(List<Section> sections, long currentRootPageId,
+  static List<Page> toPages(List<Section> sections,
+      long currentRootPageId,
+      List<String> categories,
       List<Page.Link.Builder> knownLinks) {
     LinkedList<Page.Builder> parentPages = new LinkedList<>();
     List<Page> builtPages = new LinkedList<>();
@@ -238,7 +248,8 @@ class PlainPageBuilder {
           .setPageId(currentSectionId)
           .setContent(section.text().toString())
           .setTitle(sectionTitle.toString())
-          .setUri(section.uri().toString());
+          .setUri(section.uri().toString())
+          .addAllCategories(categories);
 
       if (!parentPages.isEmpty()) {
         pageBuilder.setParentId(parentPages.peekLast().getPageId());
