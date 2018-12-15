@@ -82,13 +82,22 @@ public class XMLParser {
 
                     String sectionTitle = xmlSection.title == null ? "" : xmlSection.title;
                     List<CharSequence> titles = Arrays.asList(sectionTitle.split("\\|@\\|"));
+                    String section = titles.get(titles.size() - 1).toString().replace(" ", "_")
+                        .replace("%", "%25");
+                    URI subPageURI = URI.create(
+                        "https://ru.wikipedia.org/wiki/"
+                            + page.title().replace(" ", "_").replace("%", "%25"));
+                    try {
+                      subPageURI = URI.create(
+                          "https://ru.wikipedia.org/wiki/"
+                              + page.title().replace(" ", "_").replace("%", "%25")
+                              + "#" + section);
+                    } catch (IllegalArgumentException ignored) {
+                    }
                     return new WikiSection(
                         text, titles, links,
-                        URI.create(
-                            "https://ru.wikipedia.org/wiki/"
-                                + page.title().replace(" ", "_").replace("%", "%25")
-                                + "#" + titles.get(titles.size() - 1).toString().replace(" ", "_").replace("%", "%25"))
-                        );
+                        subPageURI
+                    );
                   })
               .collect(Collectors.toList());
 
@@ -102,12 +111,14 @@ public class XMLParser {
 
   @XmlRootElement(name = "pages")
   private static class XmlPageRootElement {
+
     @XmlElement(name = "page")
     XmlPage page;
   }
 
   @XmlRootElement(name = "page")
   private static class XmlPage {
+
     @XmlAttribute(name = "id")
     long id;
 
@@ -124,6 +135,7 @@ public class XMLParser {
 
   @XmlRootElement(name = "section")
   private static class XmlSection {
+
     @XmlAttribute(name = "title")
     String title;
 
