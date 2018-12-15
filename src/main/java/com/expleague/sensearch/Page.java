@@ -20,7 +20,7 @@ public interface Page {
   @NotNull
   CharSequence content();
 
-  @Deprecated
+  @NotNull
   List<CharSequence> categories();
 
   @NotNull

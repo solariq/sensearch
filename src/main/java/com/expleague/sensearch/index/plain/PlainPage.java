@@ -8,6 +8,7 @@ import java.net.URI;
 import java.util.Collections;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.stream.Collectors;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 import javax.ws.rs.NotSupportedException;
@@ -159,7 +160,10 @@ public class PlainPage implements IndexedPage {
 
   @Override
   public List<CharSequence> categories() {
-    return Collections.emptyList();
+    return protoPage.getCategoriesList()
+        .stream()
+        .map(CharSequence.class::cast)
+        .collect(Collectors.toList());
   }
 
   @Override
