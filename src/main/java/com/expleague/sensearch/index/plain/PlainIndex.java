@@ -135,7 +135,7 @@ public class PlainIndex implements Index {
         	JniDBFactory.factory.open(
         			indexRoot.resolve(PlainIndexBuilder.SUGGEST_INVERTED_INDEX_ROOT).toFile(), DEFAULT_DB_OPTIONS);
     
-    suggestLoader = new SuggestInformationLoader(suggest_unigram_DB, suggest_multigram_DB, suggest_inverted_index_DB, idToTerm);
+    //suggestLoader = new SuggestInformationLoader(suggest_unigram_DB, suggest_multigram_DB, suggest_inverted_index_DB, idToTerm);
     
     tokenizer = new TokenizerImpl();
 
