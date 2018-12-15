@@ -93,11 +93,6 @@ public class SamplesTest extends SensearchTestCase {
                         public Stream<Page> subpages() {
                           return null;
                         }
-
-                        @Override
-                        public boolean isEmpty() {
-                          return false;
-                        }
                       });
 //                  queries.add(new BaseQuery(query, lemmer));
                 } catch (IOException e) {

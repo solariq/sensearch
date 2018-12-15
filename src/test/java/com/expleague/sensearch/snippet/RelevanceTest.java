@@ -83,11 +83,6 @@ public class RelevanceTest extends SensearchTestCase {
           public CharSequence fullContent() {
             return null;
           }
-
-          @Override
-          public boolean isEmpty() {
-            return false;
-          }
         };
     d2 =
         new Page() {
@@ -147,11 +142,6 @@ public class RelevanceTest extends SensearchTestCase {
           public CharSequence fullContent() {
             return null;
           }
-
-          @Override
-          public boolean isEmpty() {
-            return false;
-          }
         };
 
     d3 =
@@ -197,11 +187,6 @@ public class RelevanceTest extends SensearchTestCase {
           @Override
           public CharSequence fullContent() {
             return null;
-          }
-
-          @Override
-          public boolean isEmpty() {
-            return false;
           }
 
           @Override

@@ -275,10 +275,5 @@ public class UnitMetricTest {
     public CharSequence fullContent() {
       return null;
     }
-
-    @Override
-    public boolean isEmpty() {
-      return false;
-    }
   }
 }

@@ -10,14 +10,75 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
+import javax.ws.rs.NotSupportedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class PlainPage implements IndexedPage {
 
-  public static final PlainPage EMPTY_PAGE = new PlainPage();
-  private static final String EMPTY_STRING = "";
-  private static final URI DEFAULT_URI = URI.create("https://www.wikipedia.org/");
+  public static final IndexedPage EMPTY_PAGE = new IndexedPage() {
+    private final URI DEFAULT_URI = URI.create("https://www.wikipedia.org/");
+    private static final String EMPTY_STRING = "";
+    @Override
+    public long id() {
+      throw new NotSupportedException("Id is not determined for an EmptyPage");
+    }
+
+    @Override
+    public long parentId() {
+      throw new NotSupportedException("Parent id is not determined for an EmptyPage");
+    }
+
+    @Override
+    public LongStream subpagesIds() {
+      return LongStream.empty();
+    }
+
+    @Override
+    public URI uri() {
+      return DEFAULT_URI;
+    }
+
+    @Override
+    public CharSequence title() {
+      return EMPTY_STRING;
+    }
+
+    @Override
+    public CharSequence fullContent() {
+      return EMPTY_STRING;
+    }
+
+    @Override
+    public CharSequence content() {
+      return EMPTY_STRING;
+    }
+
+    @Override
+    public List<CharSequence> categories() {
+      return Collections.emptyList();
+    }
+
+    @Override
+    public Stream<Link> outcomingLinks() {
+      return Stream.empty();
+    }
+
+    @Override
+    public Stream<Link> incomingLinks() {
+      return Stream.empty();
+    }
+
+    @Override
+    public Page parent() {
+      return this;
+    }
+
+    @Override
+    public Stream<Page> subpages() {
+      return Stream.empty();
+    }
+  };
 
   private static final Logger LOG = LoggerFactory.getLogger(PlainPage.class);
 
@@ -30,12 +91,6 @@ public class PlainPage implements IndexedPage {
 
   private boolean isEmpty;
 
-  private PlainPage() {
-    isEmpty = true;
-    id = 0;
-    index = null;
-  }
-
   private PlainPage(IndexUnits.Page protoPage, PlainIndex index) {
     this.index = index;
     this.protoPage = protoPage;
@@ -45,7 +100,7 @@ public class PlainPage implements IndexedPage {
     isEmpty = false;
   }
 
-  static PlainPage create(long id, PlainIndex plainIndex) {
+  static IndexedPage create(long id, PlainIndex plainIndex) {
     try {
       IndexUnits.Page protoPage = plainIndex.protoPageLoad(id);
       return new PlainPage(protoPage, plainIndex);
@@ -71,9 +126,6 @@ public class PlainPage implements IndexedPage {
 
   @Override
   public long parentId() {
-    if (isEmpty) {
-      throw new UnsupportedOperationException("There is no parent id for an empty page!");
-    }
     if (protoPage.hasParentId()) {
       return protoPage.getParentId();
     }
@@ -82,7 +134,7 @@ public class PlainPage implements IndexedPage {
 
   @Override
   public LongStream subpagesIds() {
-    if (isEmpty || protoPage.getSubpagesIdsCount() == 0) {
+    if (protoPage.getSubpagesIdsCount() == 0) {
       return LongStream.empty();
     }
 
@@ -91,28 +143,18 @@ public class PlainPage implements IndexedPage {
 
   @Override
   public URI uri() {
-    if (isEmpty) {
-      return DEFAULT_URI;
-    }
     return uri;
   }
 
   @Override
   public CharSequence content() {
-    if (isEmpty) {
-      return EMPTY_STRING;
-    }
     return protoPage.getContent();
   }
 
   @Override
   // TODO: implement
   public CharSequence fullContent() {
-    if (isEmpty) {
-      return EMPTY_STRING;
-    }
-
-    return EMPTY_STRING;
+    return "";
   }
 
   @Override
@@ -122,7 +164,7 @@ public class PlainPage implements IndexedPage {
 
   @Override
   public Stream<Link> outcomingLinks() {
-    if (isEmpty || protoPage.getOutcomingLinksCount() == 0) {
+    if (protoPage.getOutcomingLinksCount() == 0) {
       return Stream.empty();
     }
 
@@ -133,7 +175,7 @@ public class PlainPage implements IndexedPage {
 
   @Override
   public Stream<Link> incomingLinks() {
-    if (isEmpty || protoPage.getIncomingLinksCount() == 0) {
+    if (protoPage.getIncomingLinksCount() == 0) {
       return Stream.empty();
     }
 
@@ -144,7 +186,7 @@ public class PlainPage implements IndexedPage {
 
   @Override
   public Page parent() {
-    if (!isEmpty && protoPage.hasParentId()) {
+    if (protoPage.hasParentId()) {
       PlainPage.create(protoPage.getParentId(), this.index);
     }
 
@@ -160,17 +202,9 @@ public class PlainPage implements IndexedPage {
 
   @Override
   public CharSequence title() {
-    if (isEmpty) {
-      return EMPTY_STRING;
-    }
-
     return protoPage.getTitle();
   }
 
-  @Override
-  public boolean isEmpty() {
-    return isEmpty;
-  }
 
   @Override
   public boolean equals(Object other) {

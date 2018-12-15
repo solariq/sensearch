@@ -34,8 +34,6 @@ public interface Page {
 
   Stream<Page> subpages();
 
-  boolean isEmpty();
-
   interface Link {
 
     CharSequence text();
