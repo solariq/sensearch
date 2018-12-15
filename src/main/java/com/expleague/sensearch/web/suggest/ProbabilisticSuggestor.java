@@ -1,13 +1,9 @@
 package com.expleague.sensearch.web.suggest;
 
-import com.expleague.sensearch.Config;
 import com.expleague.sensearch.core.Term;
-import com.expleague.sensearch.donkey.crawler.Crawler;
 import com.expleague.sensearch.index.Index;
-import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.databind.JsonMappingException;
-import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -16,24 +12,21 @@ import java.util.stream.Collectors;
 public class ProbabilisticSuggestor implements Suggestor {
 
 	private Map<Term, Double> unigramCoeff;
-	private Map<List<Term>, Double> multigramFreqNorm;
-	private Map<Term, List<Integer>> invertedIndex = new HashMap<>();
-	
-	private Map<List<Term>, Double> phraseProb = new HashMap<>();
-	
+	private Map<Term[], Double> multigramFreqNorm;
+	private Map<Term, int[]> invertedIndex = new HashMap<>();
+
+	private Map<Term[], Double> phraseProb = new HashMap<>();
+
 	private Index index;
 
-	public ProbabilisticSuggestor(Crawler crawl, Index index, Config config) throws JsonParseException, JsonMappingException, IOException {
+	public ProbabilisticSuggestor(Index index) {
 		this.index = index;
-		
-		SuggestStatisticsProvider provider = null; //new SuggestStatisticsProvider(crawl, index, config);
-		unigramCoeff = provider.getUnigramCoeff();
-		multigramFreqNorm = provider.getMultigramFreqNorm();
-		invertedIndex = provider.getInvertedIndex();
-		
-		for (Term t : unigramCoeff.keySet());
-		for (List<Term> t:  multigramFreqNorm.keySet());
-		for (Term t : invertedIndex.keySet());
+
+		SuggestInformationLoader provider = index.getSuggestInformation();
+		unigramCoeff = provider.unigramCoeff;
+		multigramFreqNorm = provider.multigramFreqNorm;
+		invertedIndex = provider.invertedIndex;
+
 	}
 
 	@Override
@@ -42,7 +35,7 @@ public class ProbabilisticSuggestor implements Suggestor {
 		List<String> res = null;
 		try {
 			res = getSuggestions(index.parse(searchString).collect(Collectors.toList()));
-			
+
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -50,7 +43,7 @@ public class ProbabilisticSuggestor implements Suggestor {
 		return res;
 	}
 
-	private double getPpQt(List<Term> phrase, String qt) {
+	private double getPpQt(Term[] phrase, String qt) {
 		double res = 0;
 		for (Term c : phrase) {
 			if (c.text().toString().startsWith(qt)) {
@@ -59,64 +52,62 @@ public class ProbabilisticSuggestor implements Suggestor {
 		}
 		return res;
 	}
-	
+
 	private List<Integer> getDocumentList(Term t) {
-		List<Integer> res = invertedIndex.get(t);
+		List<Integer> res = Arrays.stream(invertedIndex.get(t))
+				.boxed()
+				.collect(Collectors.toList());
+
 		if (res == null) {
 			return new ArrayList<>();
 		}
 		return res;
 	}
-	
-	private List<Integer> getDocsSetsIntersection(List<Integer> init, List<Term> terms) {
+
+	private List<Integer> getDocsSetsIntersection(List<Integer> init, Term[] terms) {
 		for (Term t : terms) {
 			init.retainAll(getDocumentList(t));
 		}
 		return init;
 	}
-	
-	private List<Integer> getDocsSetsIntersection(List<Term> terms) {
-		if (terms.isEmpty()) {
+
+	private List<Integer> getDocsSetsIntersection(Term[] terms) {
+		if (terms.length == 0) {
 			return new ArrayList<>();
 		}
-		
-		return getDocsSetsIntersection(getDocumentList(terms.get(0)), terms);
+
+		return getDocsSetsIntersection(getDocumentList(terms[0]), terms);
 	}
-	
-	private double getPQcp(List<Integer> docsForQc, List<Term> phrase) {
+
+	private double getPQcp(List<Integer> docsForQc, Term[] phrase) {
 		List<Integer> init = new ArrayList<>(docsForQc);
 		return getDocsSetsIntersection(init, phrase).size() + 0.5;
 	}
-	
+
 	public List<String> getSuggestions(List<Term> terms) {
 
 		String qt = terms.get(terms.size() - 1).text().toString();
 		List<Term> qc = terms.subList(0, terms.size() - 1);
-		
-		List<Integer> qcDocs = getDocsSetsIntersection(qc);
-		
+
+		List<Integer> qcDocs = getDocsSetsIntersection((Term[]) qc.toArray());
+
 		phraseProb.clear();
-		/*
-		multigramFreqNorm.keySet().stream()
-		.forEach(p -> phraseProb.put(p, getPpQt(p, qt) * getPQcp(qcDocs, p)));
-		*/
-		
-		for (List<Term> p : multigramFreqNorm.keySet()) {
+
+		for (Term[] p : multigramFreqNorm.keySet()) {
 			phraseProb.put(p, getPpQt(p, qt) * getPQcp(qcDocs, p));
 		}
-		
+
 		String qcText = qc
 				.stream()
 				.map(t -> t.text())
 				.collect(Collectors.joining(" "));
-		
+
 		return phraseProb.entrySet().stream()
 				.sorted((e1, e2) -> -Double.compare(e1.getValue(), e2.getValue()))
 				.limit(10)
-				.map(e -> qcText + " " + e.getKey()
-					.stream()
-					.map(t -> t.text())
-					.collect(Collectors.joining(" ")))
+				.map(e -> qcText + " " + Arrays.stream(e.getKey())
+				.map(t -> t.text())
+				.collect(Collectors.joining(" ")))
 				.collect(Collectors.toList());
 	}
 

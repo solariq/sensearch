@@ -23,6 +23,7 @@ import com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta.UriPageMappin
 import com.expleague.sensearch.protobuf.index.IndexUnits.TermStatistics;
 import com.expleague.sensearch.protobuf.index.IndexUnits.TermStatistics.TermFrequency;
 import com.expleague.sensearch.query.Query;
+import com.expleague.sensearch.web.suggest.SuggestInformationLoader;
 import com.google.common.primitives.Longs;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -82,6 +83,10 @@ public class PlainIndex implements Index {
   private final DB termStatisticsBase;
   private final DB pageBase;
   private final DB termBase;
+  
+  private final DB suggest_unigram_DB;
+  private final DB suggest_multigram_DB;
+  private final DB suggest_inverted_index_DB;
 
   private final double averagePageSize;
   private final int indexSize;
@@ -94,7 +99,8 @@ public class PlainIndex implements Index {
   private final Tokenizer tokenizer;
 
   private TermStatistics lastTermStatistics;
-
+  
+  private SuggestInformationLoader suggestLoader;
   @Inject
   public PlainIndex(Config config) throws IOException {
     LOG.info("Loading PlainIndex...");
@@ -116,7 +122,21 @@ public class PlainIndex implements Index {
     termBase =
         JniDBFactory.factory.open(
             indexRoot.resolve(PlainIndexBuilder.TERM_ROOT).toFile(), DEFAULT_DB_OPTIONS);
-
+    
+    suggest_unigram_DB =
+    	JniDBFactory.factory.open(
+    			indexRoot.resolve(PlainIndexBuilder.SUGGEST_UNIGRAM_ROOT).toFile(), DEFAULT_DB_OPTIONS);
+    
+    suggest_multigram_DB =
+        	JniDBFactory.factory.open(
+        			indexRoot.resolve(PlainIndexBuilder.SUGGEST_MULTIGRAMS_ROOT).toFile(), DEFAULT_DB_OPTIONS);
+    
+    suggest_inverted_index_DB =
+        	JniDBFactory.factory.open(
+        			indexRoot.resolve(PlainIndexBuilder.SUGGEST_INVERTED_INDEX_ROOT).toFile(), DEFAULT_DB_OPTIONS);
+    
+    suggestLoader = new SuggestInformationLoader(suggest_unigram_DB, suggest_multigram_DB, suggest_inverted_index_DB, idToTerm);
+    
     tokenizer = new TokenizerImpl();
 
     stemmer = new MyStemImpl(config.getMyStem());
@@ -331,4 +351,9 @@ public class PlainIndex implements Index {
     }
     return lastTermStatistics;
   }
+
+	@Override
+	public SuggestInformationLoader getSuggestInformation() {
+		return suggestLoader;
+	}
 }
