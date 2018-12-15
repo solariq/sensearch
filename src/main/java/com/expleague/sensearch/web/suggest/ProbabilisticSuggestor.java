@@ -1,32 +1,32 @@
 package com.expleague.sensearch.web.suggest;
 
-import java.io.IOException;
+import com.expleague.sensearch.core.Term;
+import com.expleague.sensearch.index.Index;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import com.expleague.sensearch.Config;
-import com.expleague.sensearch.core.Term;
-import com.expleague.sensearch.donkey.crawler.Crawler;
-import com.expleague.sensearch.index.Index;
-import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.databind.JsonMappingException;
-
 public class ProbabilisticSuggestor implements Suggestor {
 
-	private Map<String, Double> unigramCoeff;
-	private Map<List<String>, Double> multigramFreqNorm;
-	private Map<List<String>, Double> phraseProb = new HashMap<>();
-	
+	private Map<Term, Double> unigramCoeff;
+	private Map<Term[], Double> multigramFreqNorm;
+	private Map<Term, int[]> invertedIndex = new HashMap<>();
+
+	private Map<Term[], Double> phraseProb = new HashMap<>();
+
 	private Index index;
 
-	public ProbabilisticSuggestor(Crawler crawl, Index index, Config config) throws JsonParseException, JsonMappingException, IOException {
+	public ProbabilisticSuggestor(Index index) {
 		this.index = index;
-		
-		SuggestStatisticsProvider provider = new SuggestStatisticsProvider(crawl, index, config);
-		unigramCoeff = provider.getUnigramCoeff();
-		multigramFreqNorm = provider.getMultigramFreqNorm();
+
+		SuggestInformationLoader provider = index.getSuggestInformation();
+		unigramCoeff = provider.unigramCoeff;
+		multigramFreqNorm = provider.multigramFreqNorm;
+		invertedIndex = provider.invertedIndex;
+
 	}
 
 	@Override
@@ -35,7 +35,7 @@ public class ProbabilisticSuggestor implements Suggestor {
 		List<String> res = null;
 		try {
 			res = getSuggestions(index.parse(searchString).collect(Collectors.toList()));
-			
+
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -43,36 +43,71 @@ public class ProbabilisticSuggestor implements Suggestor {
 		return res;
 	}
 
-	private double getPpqt(List<String> phrase, String qt) {
+	private double getPpQt(Term[] phrase, String qt) {
 		double res = 0;
-		for (String c : phrase) {
-			if (c.startsWith(qt)) {
+		for (Term c : phrase) {
+			if (c.text().toString().startsWith(qt)) {
 				res += unigramCoeff.get(c) * multigramFreqNorm.get(phrase);
 			}
 		}
 		return res;
 	}
 
+	private List<Integer> getDocumentList(Term t) {
+		List<Integer> res = Arrays.stream(invertedIndex.get(t))
+				.boxed()
+				.collect(Collectors.toList());
+
+		if (res == null) {
+			return new ArrayList<>();
+		}
+		return res;
+	}
+
+	private List<Integer> getDocsSetsIntersection(List<Integer> init, Term[] terms) {
+		for (Term t : terms) {
+			init.retainAll(getDocumentList(t));
+		}
+		return init;
+	}
+
+	private List<Integer> getDocsSetsIntersection(Term[] terms) {
+		if (terms.length == 0) {
+			return new ArrayList<>();
+		}
+
+		return getDocsSetsIntersection(getDocumentList(terms[0]), terms);
+	}
+
+	private double getPQcp(List<Integer> docsForQc, Term[] phrase) {
+		List<Integer> init = new ArrayList<>(docsForQc);
+		return getDocsSetsIntersection(init, phrase).size() + 0.5;
+	}
+
 	public List<String> getSuggestions(List<Term> terms) {
 
 		String qt = terms.get(terms.size() - 1).text().toString();
-		
+		List<Term> qc = terms.subList(0, terms.size() - 1);
+
+		List<Integer> qcDocs = getDocsSetsIntersection((Term[]) qc.toArray());
+
 		phraseProb.clear();
-		
-		multigramFreqNorm.keySet().stream()
-		.forEach(p -> phraseProb.put(p, getPpqt(p, qt)));
-		
-		String qc = terms.subList(0, terms.size() - 1)
+
+		for (Term[] p : multigramFreqNorm.keySet()) {
+			phraseProb.put(p, getPpQt(p, qt) * getPQcp(qcDocs, p));
+		}
+
+		String qcText = qc
 				.stream()
 				.map(t -> t.text())
 				.collect(Collectors.joining(" "));
-		
+
 		return phraseProb.entrySet().stream()
 				.sorted((e1, e2) -> -Double.compare(e1.getValue(), e2.getValue()))
 				.limit(10)
-				.map(e -> qc + " " + e.getKey()
-					.stream()
-					.collect(Collectors.joining(" ")))
+				.map(e -> qcText + " " + Arrays.stream(e.getKey())
+				.map(t -> t.text())
+				.collect(Collectors.joining(" ")))
 				.collect(Collectors.toList());
 	}
 

@@ -1,104 +1,26 @@
 package com.expleague.sensearch;
 
 import java.nio.file.Path;
-import java.nio.file.Paths;
 
-public class Config implements ConfigJson {
+public interface Config {
 
-  private String temporaryDocuments;
+  Path getTemporaryDocuments();
 
-  private String temporaryIndex;
+  Path getTemporaryIndex();
 
-  private String webRoot;
+  String getWebRoot();
 
-  private String embeddingVectors;
+  Path getMyStem();
 
-  private String myStem;
+  Path getPathToZIP();
 
-  private String pathToZIP;
+  String getEmbeddingVectors();
 
-  private String pathToMetrics;
+  Path getPathToMetrics();
 
-  private int pageSize = 10;
+  int getPageSize();
 
-  private boolean buildIndexFlag;
-
-  public int getPageSize() {
-    return pageSize;
-  }
-
-  public void setPageSize(int pageSize) {
-    this.pageSize = pageSize;
-  }
-
-  public boolean getBuildIndexFlag() {
-    return buildIndexFlag;
-  }
-
-  private void setBuildIndexFlag(boolean buildIndexFlag) {
-    this.buildIndexFlag = buildIndexFlag;
-  }
-
-  @Override
-  public Path getTemporaryDocuments() {
-    return Paths.get(temporaryDocuments);
-  }
-
-  private void setTemporaryDocuments(String temporaryDocuments) {
-    this.temporaryDocuments = temporaryDocuments;
-  }
-
-  @Override
-  public Path getTemporaryIndex() {
-    return Paths.get(".").resolve(temporaryIndex);
-  }
-
-  private void setTemporaryIndex(String temporaryIndex) {
-    this.temporaryIndex = temporaryIndex;
-  }
-
-  @Override
-  public String getWebRoot() {
-    return webRoot;
-  }
-
-  private void setWebRoot(String webRoot) {
-    this.webRoot = webRoot;
-  }
-
-  @Override
-  public Path getMyStem() {
-    return Paths.get(myStem);
-  }
-
-  private void setMyStem(String myStem) {
-    this.myStem = myStem;
-  }
-
-  @Override
-  public Path getPathToZIP() {
-    return Paths.get(pathToZIP);
-  }
-
-  private void setPathToZIP(String pathToZIP) {
-    this.pathToZIP = pathToZIP;
-  }
-
-  @Override
-  public String getEmbeddingVectors() {
-    return embeddingVectors;
-  }
-
-  private void setEmbeddingVectors(String embeddingVectors) {
-    this.embeddingVectors = embeddingVectors;
-  }
-
-  @Override
-  public Path getPathToMetrics() {
-    return Paths.get(pathToMetrics);
-  }
-
-  private void setPathToMetrics(String pathToMetrics) {
-    this.pathToMetrics = pathToMetrics;
+  default boolean getBuildIndexFlag() {
+    return false;
   }
 }

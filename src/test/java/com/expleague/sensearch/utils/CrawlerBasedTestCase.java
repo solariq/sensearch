@@ -1,6 +1,6 @@
 package com.expleague.sensearch.utils;
 
-import com.expleague.sensearch.Config;
+import com.expleague.sensearch.ConfigImpl;
 import com.expleague.sensearch.donkey.crawler.Crawler;
 import com.expleague.sensearch.donkey.crawler.CrawlerXML;
 import java.nio.file.Files;
@@ -14,7 +14,7 @@ public abstract class CrawlerBasedTestCase extends SensearchTestCase {
 
   private static Crawler miniCrawler;
 
-  private static TestConfig crawlerConfig;
+  private static TestConfigImpl crawlerConfig;
 
   @BeforeClass
   public static void initCrawler() {
@@ -32,15 +32,15 @@ public abstract class CrawlerBasedTestCase extends SensearchTestCase {
     miniCrawler = new CrawlerXML(crawlerConfig);
   }
 
-  protected static TestConfig crawlerConfig() {
-    return new TestConfig(crawlerConfig);
+  protected static TestConfigImpl crawlerConfig() {
+    return new TestConfigImpl(crawlerConfig);
   }
 
   protected static Crawler crawler() {
     return miniCrawler;
   }
 
-  protected Config config() {
-    return new TestConfig(crawlerConfig);
+  protected ConfigImpl config() {
+    return new TestConfigImpl(crawlerConfig);
   }
 }

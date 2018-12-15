@@ -66,7 +66,7 @@ public class WikiPage implements CrawlerDocument {
   }
 
   @Override
-  public long iD() {
+  public long id() {
     return this.id;
   }
 
@@ -80,16 +80,23 @@ public class WikiPage implements CrawlerDocument {
     private CharSequence text;
     private List<CharSequence> title;
     private List<Link> links;
+    private URI uri;
 
-    public WikiSection(CharSequence text, List<CharSequence> title, List<Link> links) {
+    public WikiSection(CharSequence text, List<CharSequence> title, List<Link> links, URI uri) {
       this.text = text;
       this.title = title;
       this.links = links;
+      this.uri = uri;
     }
 
     @Override
     public CharSequence text() {
       return text;
+    }
+
+    @Override
+    public URI uri() {
+      return uri;
     }
 
     @Override

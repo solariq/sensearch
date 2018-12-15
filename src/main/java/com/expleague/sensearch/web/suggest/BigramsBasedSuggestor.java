@@ -1,6 +1,7 @@
 package com.expleague.sensearch.web.suggest;
 
 import com.expleague.sensearch.index.Index;
+import com.google.inject.Inject;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
@@ -10,6 +11,7 @@ public class BigramsBasedSuggestor implements Suggestor {
 
   private final Index index;
 
+  @Inject
   public BigramsBasedSuggestor(Index index) throws IOException {
     this.index = index;
   }

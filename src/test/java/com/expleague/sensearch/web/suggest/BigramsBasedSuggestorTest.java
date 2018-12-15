@@ -1,6 +1,6 @@
 // package com.expleague.sensearch.web.suggest;
 //
-// import com.expleague.sensearch.Config;
+// import com.expleague.sensearch.ConfigImpl;
 // import com.expleague.sensearch.utils.IndexBasedTestCase;
 // import com.fasterxml.jackson.core.JsonGenerationException;
 // import com.fasterxml.jackson.databind.JsonMappingException;
@@ -64,7 +64,7 @@
 //
 //  @Test
 //  public void testSuggester() throws IOException {
-//    class TestConf extends Config {
+//    class TestConf extends ConfigImpl {
 //
 //      @Override
 //      public Path getBigramsFileName() {

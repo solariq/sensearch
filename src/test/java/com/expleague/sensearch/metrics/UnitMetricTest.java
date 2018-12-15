@@ -12,6 +12,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Stream;
 import org.apache.commons.io.FileUtils;
 import org.junit.After;
 import org.junit.Assert;
@@ -231,7 +232,7 @@ public class UnitMetricTest {
     }
 
     @Override
-    public URI reference() {
+    public URI uri() {
       return null;
     }
 
@@ -241,7 +242,7 @@ public class UnitMetricTest {
     }
 
     @Override
-    public CharSequence text() {
+    public CharSequence content() {
       return null;
     }
 
@@ -251,12 +252,27 @@ public class UnitMetricTest {
     }
 
     @Override
-    public List<Section> sections() {
+    public Stream<Link> outcomingLinks() {
       return null;
     }
 
     @Override
-    public List<Page> inputLinks() {
+    public Stream<Link> incomingLinks() {
+      return null;
+    }
+
+    @Override
+    public Page parent() {
+      return null;
+    }
+
+    @Override
+    public Stream<Page> subpages() {
+      return null;
+    }
+
+    @Override
+    public CharSequence fullContent() {
       return null;
     }
   }

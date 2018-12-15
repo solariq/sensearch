@@ -1,7 +1,7 @@
 package com.expleague.sensearch.utils;
 
 import com.expleague.commons.text.lemmer.MyStem;
-import com.expleague.sensearch.Config;
+import com.expleague.sensearch.ConfigImpl;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -29,7 +29,7 @@ public abstract class SensearchTestCase {
   private static Path myStemLogsRoot;
   private static Path miniWikiRoot;
   private static Path gloveVectorsFile;
-  private static TestConfig config;
+  private static TestConfigImpl config;
 
   @BeforeClass
   public static void initWorkingPaths() {
@@ -93,7 +93,7 @@ public abstract class SensearchTestCase {
       );
     }
 
-    config = new TestConfig()
+    config = new TestConfigImpl()
         .setEmbeddingVectors(gloveVectorsFile)
         .setPathToZIP(miniWikiRoot);
 
@@ -163,11 +163,11 @@ public abstract class SensearchTestCase {
         .compressionType(CompressionType.NONE);
   }
 
-  protected static TestConfig sensearchConfig() {
-    return new TestConfig(config);
+  protected static TestConfigImpl sensearchConfig() {
+    return new TestConfigImpl(config);
   }
 
-  protected Config config() {
-    return new TestConfig(config);
+  protected ConfigImpl config() {
+    return new TestConfigImpl(config);
   }
 }

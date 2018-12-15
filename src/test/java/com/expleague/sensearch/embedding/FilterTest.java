@@ -1,7 +1,7 @@
 // package com.expleague.sensearch.embedding;
 //
 // import com.expleague.commons.text.lemmer.LemmaInfo;
-// import com.expleague.sensearch.Config;
+// import com.expleague.sensearch.ConfigImpl;
 // import com.expleague.sensearch.Page;
 // import com.expleague.sensearch.donkey.crawler.CrawlerXML;
 // import com.expleague.sensearch.donkey.plain.PlainIndexBuilder;
@@ -36,7 +36,7 @@
 //  @Before
 //  public void initIndex() throws Exception {
 //    byte[] jsonData = Files.readAllBytes(Paths.get("./config.json"));
-//    Config config = new ObjectMapper().readValue(jsonData, Config.class);
+//    ConfigImpl config = new ObjectMapper().readValue(jsonData, ConfigImpl.class);
 //    index = new PlainIndexBuilder(config).buildIndex(new CrawlerXML(config).makeStream());
 //  }
 //

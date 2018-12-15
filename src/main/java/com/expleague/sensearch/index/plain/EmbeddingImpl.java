@@ -12,7 +12,9 @@ import com.expleague.sensearch.index.Embedding;
 import com.google.common.primitives.Ints;
 import com.google.common.primitives.Longs;
 import gnu.trove.list.TIntList;
+import gnu.trove.list.TLongList;
 import gnu.trove.list.array.TIntArrayList;
+import gnu.trove.list.array.TLongArrayList;
 import gnu.trove.set.TLongSet;
 import gnu.trove.set.hash.TLongHashSet;
 import org.fusesource.leveldbjni.JniDBFactory;
@@ -32,6 +34,7 @@ import java.util.List;
 import java.util.function.BiFunction;
 import java.util.function.LongPredicate;
 import java.util.function.ToIntFunction;
+import java.util.function.ToLongFunction;
 import java.util.stream.LongStream;
 
 public class EmbeddingImpl implements Embedding {
@@ -42,53 +45,53 @@ public class EmbeddingImpl implements Embedding {
   private BiFunction<Vec, Vec, Double> nearestMeasure = VecTools::distanceAV;
 
   private DB vecDB, tablesDB;
-  private ToIntFunction<Vec>[] hashFuncs;
+  private ToLongFunction<Vec>[] hashFuncs;
 
   public EmbeddingImpl(Path embeddingPath) throws IOException {
     vecDB =
-        JniDBFactory.factory.open(
-            embeddingPath.resolve(EmbeddingBuilder.VECS_ROOT).toFile(), DB_OPTIONS);
+            JniDBFactory.factory.open(
+                    embeddingPath.resolve(EmbeddingBuilder.VECS_ROOT).toFile(), DB_OPTIONS);
 
     tablesDB =
-        JniDBFactory.factory.open(
-            embeddingPath.resolve(EmbeddingBuilder.LSH_ROOT).toFile(), DB_OPTIONS);
+            JniDBFactory.factory.open(
+                    embeddingPath.resolve(EmbeddingBuilder.LSH_ROOT).toFile(), DB_OPTIONS);
 
     List<Vec> randVecs = new ArrayList<>();
     try (Reader input =
-        new InputStreamReader(
-            new FileInputStream(embeddingPath.resolve(EmbeddingBuilder.RAND_VECS).toFile()))) {
+                 new InputStreamReader(
+                         new FileInputStream(embeddingPath.resolve(EmbeddingBuilder.RAND_VECS).toFile()))) {
       CharSeqTools.lines(input)
-          .forEach(
-              line -> {
-                CharSequence[] parts = CharSeqTools.split(line, ' ');
-                randVecs.add(
-                    new ArrayVec(
-                        Arrays.stream(parts).mapToDouble(CharSeqTools::parseDouble).toArray()));
-              });
+              .forEach(
+                      line -> {
+                        CharSequence[] parts = CharSeqTools.split(line, ' ');
+                        randVecs.add(
+                                new ArrayVec(
+                                        Arrays.stream(parts).mapToDouble(CharSeqTools::parseDouble).toArray()));
+                      });
     }
 
-    hashFuncs = new ToIntFunction[EmbeddingBuilder.TABLES_NUMBER];
+    hashFuncs = new ToLongFunction[EmbeddingBuilder.TABLES_NUMBER];
     for (int i = 0; i < hashFuncs.length; i++) {
 
       final int hashNum = i;
       hashFuncs[i] =
-          (vec) -> {
-            boolean[] mask = new boolean[TUPLE_SIZE];
-            for (int j = 0; j < mask.length; j++) {
-              mask[j] =
-                  VecTools.multiply(vec, randVecs.get(TUPLE_SIZE * hashNum + j))
-                      >= 0;
-            }
+              (vec) -> {
+                boolean[] mask = new boolean[TUPLE_SIZE];
+                for (int j = 0; j < mask.length; j++) {
+                  mask[j] =
+                          VecTools.multiply(vec, randVecs.get(TUPLE_SIZE * hashNum + j))
+                                  >= 0;
+                }
 
-            int hash = (hashNum << TUPLE_SIZE);
-            for (int j = 0; j < mask.length; j++) {
-              if (mask[j]) {
-                hash += 1 << j;
-              }
-            }
+                long hash = ((long) hashNum) << ((long) TUPLE_SIZE);
+                for (int j = 0; j < mask.length; j++) {
+                  if (mask[j]) {
+                    hash += 1L << ((long) j);
+                  }
+                }
 
-            return hash;
-          };
+                return hash;
+              };
     }
   }
 
@@ -101,7 +104,7 @@ public class EmbeddingImpl implements Embedding {
     return null;
   }
 
-  private static void nearestIndexes(TIntList nearestIndexes, int index, int pos, int remaining) {
+  private static void nearestIndexes(TLongList nearestIndexes, long index, int pos, int remaining) {
     if (remaining == 0) {
       nearestIndexes.add(index);
       return;
@@ -110,33 +113,34 @@ public class EmbeddingImpl implements Embedding {
       return;
     }
     nearestIndexes(nearestIndexes, index, pos + 1, remaining);
-    index = (index ^ (1 << pos));
+    index = index ^ (1L << ((long) pos));
     nearestIndexes(nearestIndexes, index, pos + 1, remaining - 1);
   }
 
   @Override
   public LongStream nearest(Vec mainVec, int numberOfNeighbors, LongPredicate predicate) {
-    int[] indexes = new int[hashFuncs.length];
+    long[] indexes = new long[hashFuncs.length];
     for (int i = 0; i < hashFuncs.length; i++) {
-      indexes[i] = hashFuncs[i].applyAsInt(mainVec);
+      indexes[i] = hashFuncs[i].applyAsLong(mainVec);
     }
 
     final TLongSet lshNeighbors = new TLongHashSet();
-    TIntList nearestIndexes = new TIntArrayList();
+    TLongList nearestIndexes = new TLongArrayList();
     for (int diffBitsN = 0; diffBitsN <= MAX_DIFFERENT_BITS; diffBitsN++) {
-      for (int index : indexes) {
+      for (long index : indexes) {
         nearestIndexes.clear();
         nearestIndexes(nearestIndexes, index, 0, diffBitsN);
         for (int i = 0; i < nearestIndexes.size(); i++) {
-          LongStream.of(
-                  ByteTools.toLongArray(
-                          tablesDB.get(
-                                  Ints.toByteArray(
-                                          nearestIndexes.get(i)
-                                  )
-                          )
+          byte[] bytes = tablesDB.get(
+                  Longs.toByteArray(
+                          nearestIndexes.get(i)
                   )
-          ).forEach(lshNeighbors::add);
+          );
+          if (bytes != null) {
+            LongStream.of(
+                    ByteTools.toLongArray(bytes)
+            ).forEach(lshNeighbors::add);
+          }
         }
       }
       if (lshNeighbors.size() >= numberOfNeighbors) {
@@ -150,9 +154,9 @@ public class EmbeddingImpl implements Embedding {
     }
 
     final double[] dist = LongStream.of(order)
-        .mapToObj(this::vec)
-        .mapToDouble(v -> -VecTools.cosine(mainVec, v))
-        .toArray();
+            .mapToObj(this::vec)
+            .mapToDouble(v -> -VecTools.cosine(mainVec, v))
+            .toArray();
     ArrayTools.parallelSort(dist, order);
     return Arrays.stream(order, 0, numberOfNeighbors);
   }

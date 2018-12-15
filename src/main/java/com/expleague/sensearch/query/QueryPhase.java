@@ -4,12 +4,20 @@ import com.expleague.sensearch.core.SearchPhase;
 import com.expleague.sensearch.core.Whiteboard;
 import java.util.ArrayList;
 import java.util.List;
+import com.expleague.sensearch.index.Index;
+import com.google.inject.Inject;
 import org.apache.log4j.Logger;
 
 
 public class QueryPhase implements SearchPhase {
 
   private static final Logger LOG = Logger.getLogger(QueryPhase.class.getName());
+  private final Index index;
+
+  @Inject
+  public QueryPhase(Index index) {
+    this.index = index;
+  }
 
   @Override
   public boolean test(Whiteboard whiteboard) {
@@ -22,9 +30,10 @@ public class QueryPhase implements SearchPhase {
     long startTime = System.nanoTime();
 
     final String input = whiteboard.input();
+
     List<Query> queries = new ArrayList<>();
 
-    queries.add(BaseQuery.create(input, whiteboard.builder().getIndex()));
+    queries.add(BaseQuery.create(input, index));
 
     whiteboard.putQuery(queries.stream().toArray(Query[]::new));
 

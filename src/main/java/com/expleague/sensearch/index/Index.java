@@ -2,6 +2,7 @@ package com.expleague.sensearch.index;
 
 import com.expleague.sensearch.Page;
 import com.expleague.sensearch.query.Query;
+import com.expleague.sensearch.web.suggest.SuggestInformationLoader;
 import com.expleague.sensearch.core.Term;
 import org.jetbrains.annotations.Nullable;
 
@@ -22,4 +23,6 @@ public interface Index {
   int size();
   int vocabularySize();
   double averagePageSize();
+  
+  SuggestInformationLoader getSuggestInformation();
 }

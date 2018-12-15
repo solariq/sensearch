@@ -22,9 +22,9 @@ public class SearchEndpoint {
 
   // Note: this is javax @Inject, not Guice's as Jersey uses HK2 DI under the hood
   @Inject
-  public SearchEndpoint(Builder builder) {
-    search = builder.getSearcher();
-    suggestor = builder.getSuggestor();
+  public SearchEndpoint(SenSeArch search, Suggestor suggestor) {
+    this.search = search;
+    this.suggestor = suggestor;
   }
 
   @GET
@@ -48,7 +48,7 @@ public class SearchEndpoint {
   //  @GET
   //  @Produces(MediaType.TEXT_HTML)
   //  public String index() throws IOException {
-  //    return String.join("\n", Files.readAllLines(Paths.get(Config.getMainPageHTML())));
+  //    return String.join("\n", Files.readAllLines(Paths.get(ConfigImpl.getMainPageHTML())));
   //  }
 
 }

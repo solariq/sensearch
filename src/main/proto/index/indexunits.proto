@@ -6,17 +6,6 @@ option java_package = "com.expleague.sensearch.protobuf.index";
 option java_outer_classname = "IndexUnits";
 
 message IndexMeta {
-
-  message IdMapping {
-    optional string word = 1;
-    optional int64 id = 2;
-  }
-
-  message LemmaIdMapping {
-    optional int64 word_id = 1;
-    optional int64 lemma_id = 2;
-  }
-
   message UriPageMapping {
     optional string uri = 1;
     optional int64 page_id = 2;
@@ -28,16 +17,33 @@ message IndexMeta {
 
   optional int32 vocabulary_size = 4;
 
-  repeated IdMapping id_mappings = 5;
-  repeated LemmaIdMapping lemma_id_mappings = 6;
-  repeated UriPageMapping uri_page_mappings = 7;
+  repeated UriPageMapping uri_page_mappings = 5;
 }
 
 message Page {
+  message Link {
+    optional string text = 1;
+    // might be missing if link redirects to an image or page
+    // which is not int the index
+    optional int64 target_page_id = 2;
+    optional int64 position = 3;
+    optional int64 source_page_id = 4;
+  }
+
   optional int64 page_id = 1;
   optional string uri = 2;
+  // only section title
   optional string title = 3;
   optional string content = 4;
+  // Link structure
+  repeated Link outcoming_links = 5;
+  repeated Link incoming_links = 6;
+  repeated string categories = 9;
+
+  // tree-like structure for pages
+  // parent_id might be absent
+  optional int64 parent_id = 7;
+  repeated int64 subpages_ids = 8;
 }
 
 message TermStatistics {
@@ -52,4 +58,39 @@ message TermStatistics {
   optional int64 term_frequency = 3;
 
   repeated TermFrequency bigram_frequency = 4;
+}
+
+message Term {
+  optional int64 id = 1;
+  // Will be missing if lemma can not be extracted or lemma equals to this term
+  optional int64 lemma_id = 2;
+
+  optional string text = 3;
+  optional PartOfSpeech part_of_speech = 4;
+
+  enum PartOfSpeech {
+    UNKNOWN = 0;
+    A = 1;
+    ADV = 2;
+    ADVPRO = 3;
+    ANUM = 4;
+    APRO = 5;
+    COM = 6;
+    CONJ = 7;
+    INTJ = 8;
+    NUM = 9;
+    PART = 10;
+    PR = 11;
+    S = 12;
+    SPRO = 13;
+    V = 14;
+  }
+}
+
+message TermList {
+	repeated int64 termList = 1;
+}
+
+message IntegerList {
+	repeated int32 intList = 1;
 }

@@ -1,6 +1,6 @@
 package com.expleague.sensearch.searcher;
 
-/** Created by sandulmv on 06.10.18. */
+
 public class ComponentsInteractionTest {
   //  private static final String[] TEST_DOCUMENTS = new String[]{
   //      "Information Retrieval and Web Search".toLowerCase(),
@@ -27,7 +27,7 @@ public class ComponentsInteractionTest {
   //    }
   //
   //    @Override
-  //    public CharSequence text() {
+  //    public CharSequence content() {
   //      return documentContent;
   //    }
   //
@@ -37,7 +37,7 @@ public class ComponentsInteractionTest {
   //    }
   //
   //    @Override
-  //    public URI reference() {
+  //    public URI uri() {
   //      throw new UnsupportedOperationException();
   //    }
   //
@@ -78,7 +78,7 @@ public class ComponentsInteractionTest {
   //    }
   //
   //    private boolean filterByWord(Query query, IndexedPage document) {
-  //      String docContent = document.text().toString();
+  //      String docContent = document.content().toString();
   //      for (Term term : query.getTerms()) {
   //        if (docContent.contains(term.getRaw())) {
   //          return true;

@@ -1,10 +1,10 @@
 package com.expleague.sensearch.utils;
 
-import com.expleague.sensearch.Config;
+import com.expleague.sensearch.ConfigImpl;
 import java.nio.file.Path;
 
 // TODO: more sensible config class with setters for all variables
-public class TestConfig extends Config {
+public class TestConfigImpl extends ConfigImpl {
 
   private Path miniWikiPath;
   private Path indexRoot;
@@ -12,10 +12,10 @@ public class TestConfig extends Config {
   private Path tempDocumentsPath;
 
   // TODO: copy constructor!
-  public TestConfig() {
+  public TestConfigImpl() {
   }
 
-  public TestConfig(TestConfig other) {
+  public TestConfigImpl(TestConfigImpl other) {
     this.miniWikiPath = other.miniWikiPath;
     this.indexRoot = other.indexRoot;
     this.gloveVectorsPath = other.gloveVectorsPath;
@@ -65,22 +65,22 @@ public class TestConfig extends Config {
     throw new UnsupportedOperationException();
   }
 
-  public TestConfig setPathToZIP(Path pathToZIP) {
+  public TestConfigImpl setPathToZIP(Path pathToZIP) {
     this.miniWikiPath = pathToZIP;
     return this;
   }
 
-  public TestConfig setEmbeddingVectors(Path gloveVectors) {
+  public TestConfigImpl setEmbeddingVectors(Path gloveVectors) {
     this.gloveVectorsPath = gloveVectors;
     return this;
   }
 
-  public TestConfig setTemporaryIndex(Path indexRoot) {
+  public TestConfigImpl setTemporaryIndex(Path indexRoot) {
     this.indexRoot = indexRoot;
     return this;
   }
 
-  public TestConfig setTemporaryDocuments(Path tempDocumentsPath) {
+  public TestConfigImpl setTemporaryDocuments(Path tempDocumentsPath) {
     this.tempDocumentsPath = tempDocumentsPath;
     return this;
   }

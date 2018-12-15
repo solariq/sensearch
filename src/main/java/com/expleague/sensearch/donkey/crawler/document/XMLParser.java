@@ -6,7 +6,9 @@ import com.expleague.sensearch.donkey.crawler.document.WikiPage.WikiLink;
 import com.expleague.sensearch.donkey.crawler.document.WikiPage.WikiSection;
 import java.io.File;
 import java.io.Serializable;
+import java.io.UnsupportedEncodingException;
 import java.net.URI;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -33,11 +35,12 @@ public class XMLParser {
       XmlPage xmlPage = element.page;
 
       page.setTitle(xmlPage.title == null ? "" : xmlPage.title);
-      // TODO (tehnar): proper escaping
+      String pageURI = URLEncoder.encode(page.title().replace(" ", "_").replace("%", "%25"), "UTF-8");
+
       page.setUri(
           URI.create(
               "https://ru.wikipedia.org/wiki/"
-                  + page.title().replace(" ", "_").replace("%", "%25")));
+                  + pageURI));
       if (xmlPage.categories == null) {
         page.setCategories(new ArrayList<>());
       } else {
@@ -45,49 +48,75 @@ public class XMLParser {
       }
       page.setId(xmlPage.id);
 
-      List<Section> sections =
-          xmlPage
-              .sections
-              .stream()
-              .map(
-                  xmlSection -> {
-                    List<Link> links = new ArrayList<>();
-                    StringBuilder text = new StringBuilder();
+      List<Section> sections;
+      sections = xmlPage
+          .sections
+          .stream()
+          .map(
+              xmlSection -> {
+                List<Link> links = new ArrayList<>();
+                StringBuilder text = new StringBuilder();
 
-                    if (xmlSection.content != null) {
-                      for (Serializable serializable : xmlSection.content) {
-                        if (serializable instanceof String) {
-                          text.append(((String) serializable).trim());
-                        } else if (serializable instanceof XmlSectionLink) {
-                          XmlSectionLink link = (XmlSectionLink) serializable;
+                if (xmlSection.content != null) {
+                  for (Serializable serializable : xmlSection.content) {
+                    if (serializable instanceof String) {
+                      text.append(((String) serializable).trim());
+                    } else if (serializable instanceof XmlSectionLink) {
+                      XmlSectionLink link = (XmlSectionLink) serializable;
 
-                          if (link.targetId == 0) {
-                            link.targetId = -1;
-                          }
-                          if (link.targetTitle == null) {
-                            link.targetTitle = "";
-                          }
-
-                          if (text.length() > 0 && text.charAt(text.length() - 1) != ' ') {
-                            text.append(" ");
-                          }
-                          links.add(
-                              new WikiLink(
-                                  link.text, link.targetTitle, link.targetId, text.length()));
-                          text.append(link.text.trim());
-                          text.append(" ");
-                        }
+                      if (link.targetId == 0) {
+                        link.targetId = -1;
                       }
-                    }
+                      if (link.targetTitle == null) {
+                        link.targetTitle = "";
+                      }
 
-                    String sectionTitle = xmlSection.title == null ? "" : xmlSection.title;
-                    return new WikiSection(
-                        text, Arrays.asList(sectionTitle.split("\\|@\\|")), links);
-                  })
-              .collect(Collectors.toList());
+                      if (text.length() > 0 && text.charAt(text.length() - 1) != ' ') {
+                        text.append(" ");
+                      }
+                      links.add(
+                          new WikiLink(
+                              link.text, link.targetTitle, link.targetId, text.length()));
+                      text.append(link.text.trim());
+                      text.append(" ");
+                    }
+                  }
+                }
+
+                String sectionTitle = xmlSection.title == null ? "" : xmlSection.title;
+                List<CharSequence> titles = Arrays.asList(sectionTitle.split("\\|@\\|"));
+                String section = titles.get(titles.size() - 1).toString().replaceAll("\\p{Zs}", "_")
+                    .replaceAll("\\p{javaWhitespace}", "_")
+                    .replace("%", "%25");
+                URI subPageURI = null;
+                try {
+                  subPageURI = URI.create(
+                      "https://ru.wikipedia.org/wiki/"
+                          + pageURI + "#" + URLEncoder.encode(section, "UTF-8"));
+                } catch (UnsupportedEncodingException e) {
+                  System.err.println(e.getMessage());
+                }
+
+                /*
+                try {
+                  subPageURI = URI.create(
+                      "https://ru.wikipedia.org/wiki/"
+                          + page.title().replace(" ", "_").replace("%", "%25")
+                          + "#" + URLEncoder.encode(section));
+                } catch (IllegalArgumentException e) {
+                  System.err.println(e.getMessage());
+                }
+                System.err.println(subPageURI.toString());//*/
+
+                return new WikiSection(
+                    text, titles, links,
+                    subPageURI
+                );
+              })
+          .collect(Collectors.toList());
 
       page.setSections(sections);
-    } catch (JAXBException e) {
+    } catch (JAXBException | UnsupportedEncodingException e) {
       throw new IllegalArgumentException(e);
     }
 
@@ -96,12 +125,14 @@ public class XMLParser {
 
   @XmlRootElement(name = "pages")
   private static class XmlPageRootElement {
+
     @XmlElement(name = "page")
     XmlPage page;
   }
 
   @XmlRootElement(name = "page")
   private static class XmlPage {
+
     @XmlAttribute(name = "id")
     long id;
 
@@ -118,6 +149,7 @@ public class XMLParser {
 
   @XmlRootElement(name = "section")
   private static class XmlSection {
+
     @XmlAttribute(name = "title")
     String title;
 
@@ -155,7 +187,7 @@ public class XMLParser {
           xmlStreamWriter.writeCharacters("\n");
 
           xmlStreamWriter.writeStartElement(startElement);
-          xmlStreamWriter.writeAttribute("id", Long.toString(page.iD()));
+          xmlStreamWriter.writeAttribute("id", Long.toString(page.id()));
           xmlStreamWriter.writeAttribute("title", page.title());
           xmlStreamWriter.writeAttribute("revision", page.revision);
           xmlStreamWriter.writeAttribute("type", page.type);

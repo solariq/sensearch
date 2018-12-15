@@ -13,6 +13,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Stream;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -49,7 +50,7 @@ public class SamplesTest extends SensearchTestCase {
                   pages.add(
                       new Page() {
                         @Override
-                        public URI reference() {
+                        public URI uri() {
                           return null;
                         }
 
@@ -59,7 +60,7 @@ public class SamplesTest extends SensearchTestCase {
                         }
 
                         @Override
-                        public CharSequence text() {
+                        public CharSequence content() {
                           return content;
                         }
 
@@ -69,12 +70,27 @@ public class SamplesTest extends SensearchTestCase {
                         }
 
                         @Override
-                        public List<Section> sections() {
+                        public Stream<Link> outcomingLinks() {
                           return null;
                         }
 
                         @Override
-                        public List<Page> inputLinks() {
+                        public Stream<Link> incomingLinks() {
+                          return null;
+                        }
+
+                        @Override
+                        public CharSequence fullContent() {
+                          return null;
+                        }
+
+                        @Override
+                        public Page parent() {
+                          return null;
+                        }
+
+                        @Override
+                        public Stream<Page> subpages() {
                           return null;
                         }
                       });
