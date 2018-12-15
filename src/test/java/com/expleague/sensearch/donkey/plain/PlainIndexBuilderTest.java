@@ -6,7 +6,7 @@ import com.expleague.sensearch.utils.TestConfigImpl;
 import org.junit.Before;
 import org.junit.Test;
 
-public class CompleteIndexBuildTest extends SensearchTestCase {
+public class PlainIndexBuilderTest extends SensearchTestCase {
 
   private static String INDEX_ROOT_NAME = "index";
   private static String TEMP_DOC_PATH = "tempDoc";
