@@ -170,19 +170,25 @@ public class PlainIndexBuilder implements IndexBuilder {
   @VisibleForTesting
   static void readGloveVectors(
       Path glovePath, TObjectLongMap<String> idMappings, TLongObjectMap<Vec> vectors) {
-    try (Reader input =
-        new InputStreamReader(
-            new GZIPInputStream(new FileInputStream(glovePath.toFile())), StandardCharsets.UTF_8)) {
-      CharSeqTools.lines(input)
+    try (Reader vecInput =
+            new InputStreamReader(
+                new FileInputStream(Paths.get("./resources/train_vectors.txt").toFile()));
+        Reader wordInput =
+            new InputStreamReader(
+                new FileInputStream(Paths.get("./resources/vocab.txt").toFile()))) {
+      Streams.zip(
+              CharSeqTools.lines(vecInput)
+                  .skip(1)
+                  .map(s -> s.toString().split(" "))
+                  .filter(a -> a.length == 130),
+              CharSeqTools.lines(wordInput),
+              Pair::of)
           .parallel()
           .forEach(
-              line -> {
-                CharSequence[] parts = CharSeqTools.split(line, ' ');
-                final String word = parts[0].toString().toLowerCase();
+              p -> {
+                final String word = p.getRight().toString().toLowerCase();
                 double[] doubles =
-                    Arrays.stream(parts, 1, parts.length)
-                        .mapToDouble(CharSeqTools::parseDouble)
-                        .toArray();
+                    Arrays.stream(p.getLeft()).mapToDouble(CharSeqTools::parseDouble).toArray();
                 synchronized (idMappings) {
                   if (idMappings.containsKey(word)) {
                     throw new IllegalArgumentException("Embedding contains duplicate words!");
@@ -296,12 +302,6 @@ public class PlainIndexBuilder implements IndexBuilder {
                 );
                 plainPageBuilder.endPage();
                 ++pagesCount[0];
-
-                long[] titleIds = toIds(
-                    tokenizer.parseTextToWords(doc.title().toLowerCase()),
-                    idMappings
-                );
-                embeddingBuilder.add(rootPageId, toVector(titleIds, gloveVectors));
 
                 long[] titleTokens = toIds(tokenizer.parseTextToWords(doc.title()), idMappings);
 

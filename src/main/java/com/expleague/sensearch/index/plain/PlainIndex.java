@@ -57,7 +57,7 @@ import org.iq80.leveldb.ReadOptions;
 @Singleton
 public class PlainIndex implements Index {
 
-  public static final int VERSION = 6;
+  public static final int VERSION = 7;
 
   private static final long DEFAULT_CACHE_SIZE = 128 * (1 << 20); // 128 MB
 
@@ -312,13 +312,14 @@ public class PlainIndex implements Index {
 
   Stream<Term> synonyms(Term term) {
     System.out.println("Synonyms for " + term.text());
-    filter
-        .filtrate(embedding.vec(((IndexTerm) term).id()), SYNONYMS_COUNT, PlainIndex::isWordId)
-        .mapToObj(idToTerm::get).forEach(ttt -> System.out.print(ttt.text() + " "));
-    System.out.println();
-    return filter
-        .filtrate(embedding.vec(((IndexTerm) term).id()), SYNONYMS_COUNT, PlainIndex::isWordId)
-        .mapToObj(idToTerm::get);
+//    filter
+//        .filtrate(embedding.vec(((IndexTerm) term).id()), SYNONYMS_COUNT, PlainIndex::isWordId)
+//        .mapToObj(idToTerm::get).forEach(ttt -> System.out.print(ttt.text() + " "));
+//    System.out.println();
+//    return filter
+//        .filtrate(embedding.vec(((IndexTerm) term).id()), SYNONYMS_COUNT, PlainIndex::isWordId)
+//        .mapToObj(idToTerm::get);
+    return Stream.empty();
   }
 
   int documentFrequency(Term term) {
