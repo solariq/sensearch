@@ -282,7 +282,7 @@ public class PlainIndexBuilder implements IndexBuilder {
                           tokenizer.parseTextToWords(sectionTitle.toLowerCase()),
                           idMappings
                       );
-                      embeddingBuilder.add(sectionId[0], toVector(titleIds, gloveVectors));
+//                      embeddingBuilder.add(sectionId[0], toVector(titleIds, gloveVectors));
 
                       pageTokens.addAll(titleIds);
                       pageTokens.addAll(
@@ -296,6 +296,12 @@ public class PlainIndexBuilder implements IndexBuilder {
                 );
                 plainPageBuilder.endPage();
                 ++pagesCount[0];
+
+                long[] titleIds = toIds(
+                    tokenizer.parseTextToWords(doc.title().toLowerCase()),
+                    idMappings
+                );
+                embeddingBuilder.add(rootPageId, toVector(titleIds, gloveVectors));
 
                 long[] titleTokens = toIds(tokenizer.parseTextToWords(doc.title()), idMappings);
 
