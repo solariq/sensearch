@@ -19,6 +19,7 @@ import com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta.UriPageMappin
 import com.expleague.sensearch.protobuf.index.IndexUnits.Term;
 import com.expleague.sensearch.protobuf.index.IndexUnits.Term.Builder;
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.collect.Streams;
 import com.google.common.primitives.Longs;
 import com.google.inject.Inject;
 import gnu.trove.list.TLongList;
@@ -33,7 +34,6 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -41,7 +41,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Stream;
-import java.util.zip.GZIPInputStream;
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.log4j.Logger;
 import org.fusesource.leveldbjni.JniDBFactory;
 import org.iq80.leveldb.CompressionType;
@@ -221,40 +221,35 @@ public class PlainIndexBuilder implements IndexBuilder {
     final Path indexRoot = config.getTemporaryIndex();
     // ensure all roots
     Files.createDirectories(indexRoot.resolve(PAGE_ROOT));
-    final DB pageDb = JniDBFactory.factory.open(
-        indexRoot.resolve(PAGE_ROOT).toFile(), PAGE_DB_OPTIONS
-    );
+    final DB pageDb =
+        JniDBFactory.factory.open(indexRoot.resolve(PAGE_ROOT).toFile(), PAGE_DB_OPTIONS);
     LOG.info("Creating mappings from wiki ids to raw index ids...");
-    final PlainPageBuilder plainPageBuilder = new PlainPageBuilder(
-        pageDb, indexRoot.resolve(PAGE_ROOT).resolve("TMP")
-    );
+    final PlainPageBuilder plainPageBuilder =
+        new PlainPageBuilder(pageDb, indexRoot.resolve(PAGE_ROOT).resolve("TMP"));
 
     Files.createDirectories(indexRoot.resolve(TERM_STATISTICS_ROOT));
-    final DB statisticsDb = JniDBFactory.factory.open(
-        indexRoot.resolve(TERM_STATISTICS_ROOT).toFile(), STATS_DB_OPTIONS
-    );
+    final DB statisticsDb =
+        JniDBFactory.factory.open(
+            indexRoot.resolve(TERM_STATISTICS_ROOT).toFile(), STATS_DB_OPTIONS);
     final StatisticsBuilder statisticsBuilder = new StatisticsBuilder(statisticsDb);
 
     Files.createDirectories(indexRoot.resolve(EMBEDDING_ROOT));
-    final EmbeddingBuilder embeddingBuilder = new EmbeddingBuilder(
-        indexRoot.resolve(EMBEDDING_ROOT)
-    );
+    final EmbeddingBuilder embeddingBuilder =
+        new EmbeddingBuilder(indexRoot.resolve(EMBEDDING_ROOT));
 
     Files.createDirectories(indexRoot.resolve(SUGGEST_UNIGRAM_ROOT));
-    final DB suggest_unigram_DB = JniDBFactory.factory.open(
-        indexRoot.resolve(SUGGEST_UNIGRAM_ROOT).toFile(), STATS_DB_OPTIONS
-    );
-    final DB suggest_multigram_DB = JniDBFactory.factory.open(
-        indexRoot.resolve(SUGGEST_MULTIGRAMS_ROOT).toFile(), STATS_DB_OPTIONS
-    );
-    final DB suggest_inverted_index_DB = JniDBFactory.factory.open(
-        indexRoot.resolve(SUGGEST_INVERTED_INDEX_ROOT).toFile(), STATS_DB_OPTIONS
-    );
+    final DB suggest_unigram_DB =
+        JniDBFactory.factory.open(
+            indexRoot.resolve(SUGGEST_UNIGRAM_ROOT).toFile(), STATS_DB_OPTIONS);
+    final DB suggest_multigram_DB =
+        JniDBFactory.factory.open(
+            indexRoot.resolve(SUGGEST_MULTIGRAMS_ROOT).toFile(), STATS_DB_OPTIONS);
+    final DB suggest_inverted_index_DB =
+        JniDBFactory.factory.open(
+            indexRoot.resolve(SUGGEST_INVERTED_INDEX_ROOT).toFile(), STATS_DB_OPTIONS);
     final SuggestInformationBuilder suggestBuilder =
         new SuggestInformationBuilder(
-            suggest_unigram_DB,
-            suggest_multigram_DB,
-            suggest_inverted_index_DB);
+            suggest_unigram_DB, suggest_multigram_DB, suggest_inverted_index_DB);
 
     final long[] pagesAndTokensCounts = new long[]{0, 0};
 
@@ -273,36 +268,35 @@ public class PlainIndexBuilder implements IndexBuilder {
                 TLongList pageTokens = new TLongArrayList();
                 long rootPageId = -((pagesCount[0] + 1) << ROOT_PAGE_ID_OFFSET_BITS);
                 sectionId[0] = rootPageId;
-                plainPageBuilder.startPage(
-                    doc.id(),
-                    rootPageId,
-                    doc.categories()
-                );
-                doc.sections().forEachOrdered(
-                    s -> {
-                      plainPageBuilder.addSection(sectionId[0], s);
+                plainPageBuilder.startPage(doc.id(), rootPageId, doc.categories());
+                doc.sections()
+                    .forEachOrdered(
+                        s -> {
+                          plainPageBuilder.addSection(sectionId[0], s);
 
-                      List<CharSequence> sectionTitles = s.title();
-                      String sectionTitle = sectionTitles.get(sectionTitles.size() - 1).toString();
-                      long[] titleIds = toIds(
-                          tokenizer.parseTextToWords(sectionTitle.toLowerCase()),
-                          idMappings
-                      );
-//                      embeddingBuilder.add(sectionId[0], toVector(titleIds, gloveVectors));
+                          List<CharSequence> sectionTitles = s.title();
+                          String sectionTitle =
+                              sectionTitles.get(sectionTitles.size() - 1).toString();
+                          long[] titleIds =
+                              toIds(
+                                  tokenizer.parseTextToWords(sectionTitle.toLowerCase()),
+                                  idMappings);
+//                          embeddingBuilder.add(sectionId[0], toVector(titleIds, gloveVectors));
 
-                      pageTokens.addAll(titleIds);
-                      pageTokens.addAll(
-                          toIds(
-                              tokenizer.parseTextToWords(s.text().toString().toLowerCase()),
-                              idMappings
-                          )
-                      );
-                      --sectionId[0];
-                    }
-                );
+                          pageTokens.addAll(titleIds);
+                          pageTokens.addAll(
+                              toIds(
+                                  tokenizer.parseTextToWords(s.text().toString().toLowerCase()),
+                                  idMappings));
+                          --sectionId[0];
+                        });
                 plainPageBuilder.endPage();
                 ++pagesCount[0];
 
+                long[] titleIds =
+                    toIds(tokenizer.parseTextToWords(doc.title().toLowerCase()), idMappings);
+
+                embeddingBuilder.add(rootPageId, toVector(titleIds, gloveVectors));
                 long[] titleTokens = toIds(tokenizer.parseTextToWords(doc.title()), idMappings);
 
                 suggestBuilder.accept(titleTokens);
@@ -313,8 +307,7 @@ public class PlainIndexBuilder implements IndexBuilder {
                 pagesAndTokensCounts[1] += pageTokens.size();
 
                 uriPageIdMapping.put(doc.uri().toString(), rootPageId);
-              }
-          );
+              });
 
       suggestBuilder.build();
 
