@@ -29,10 +29,8 @@ import com.google.common.primitives.Longs;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.protobuf.InvalidProtocolBufferException;
-import gnu.trove.map.TLongLongMap;
 import gnu.trove.map.TLongObjectMap;
 import gnu.trove.map.TObjectLongMap;
-import gnu.trove.map.hash.TLongLongHashMap;
 import gnu.trove.map.hash.TLongObjectHashMap;
 import gnu.trove.map.hash.TObjectLongHashMap;
 import java.io.IOException;
@@ -167,7 +165,6 @@ public class PlainIndex implements Index {
     indexSize = indexMeta.getPagesCount();
     vocabularySize = indexMeta.getVocabularySize();
 
-    final TLongLongMap wordToLemma = new TLongLongHashMap();
     //    indexMeta.getLemmaIdMappingsList().forEach(m -> wordToLemma.put(m.getWordId(),
     // m.getLemmaId()));
 
@@ -193,7 +190,7 @@ public class PlainIndex implements Index {
 
             final IndexTerm lemmaTerm;
 
-            final long lemmaId = wordToLemma.get(protoTerm.getId());
+            final long lemmaId = protoTerm.hasLemmaId() ? protoTerm.getLemmaId() : -1;
             if (lemmaId == -1) {
               lemmaTerm = null;
             } else {
