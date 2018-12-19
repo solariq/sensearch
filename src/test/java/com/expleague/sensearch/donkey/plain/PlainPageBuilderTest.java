@@ -8,6 +8,7 @@ import gnu.trove.list.array.TLongArrayList;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import javax.xml.stream.XMLStreamException;
@@ -29,14 +30,17 @@ public class PlainPageBuilderTest extends CrawlerBasedTestCase {
     Path plainDbPath = testOutputRoot().resolve(PLAIN_DB_ROOT);
     DB plainDb = JniDBFactory.factory.open(plainDbPath.toFile(), dbCreateOptions());
 
-    TLongList pageIds = new TLongArrayList();
     PlainPageBuilder plainPageBuilder = new PlainPageBuilder(plainDb, plainDbPath.resolve("TMP"));
+    long[] flushedPageId = new long[]{0};
     crawler().makeStream().forEach(
         cd -> {
-          long pageId = plainPageBuilder.add(cd);
-          // Test page ids are unique
-          Assert.assertFalse(pageIds.contains(pageId));
-          pageIds.add(pageId);
+          plainPageBuilder.startPage(cd.id(), flushedPageId[0], Collections.emptyList());
+          cd.sections().forEach(
+              s -> {
+                plainPageBuilder.addSection(flushedPageId[0], s);
+                ++flushedPageId[0];
+              }
+          );
         }
     );
     plainPageBuilder.build();

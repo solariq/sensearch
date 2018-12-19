@@ -14,30 +14,6 @@ import org.junit.Ignore;
 import org.junit.Test;
 
 public class PlainIndexBuilderMethodsTest extends SensearchTestCase {
-  @Test
-  public void enrichFrequenciesTest() {
-    long[] idSequence = new long[] {1, 2, 3, 1, 2, 1, 3, 2, 3, 3, 2, 3, 1};
-    TLongIntMap frequenciesMap = new TLongIntHashMap();
-    TLongObjectMap<TLongIntMap> bigramsMap = new TLongObjectHashMap<>();
-
-    PlainIndexBuilder.enrichFrequencies(idSequence, frequenciesMap, bigramsMap);
-    // test frequencies
-    Assert.assertFalse(frequenciesMap.isEmpty());
-    Assert.assertEquals(3, frequenciesMap.size());
-    Assert.assertEquals(4, frequenciesMap.get(1));
-    Assert.assertEquals(4, frequenciesMap.get(2));
-    Assert.assertEquals(5, frequenciesMap.get(3));
-
-    // test bigrams
-    Assert.assertFalse(bigramsMap.isEmpty());
-    Assert.assertEquals(bigramsMap.size(), 3);
-
-    TLongIntMap bigramsFor1 = bigramsMap.get(1);
-    Assert.assertFalse(bigramsFor1.isEmpty());
-    Assert.assertFalse(bigramsFor1.containsKey(1));
-    Assert.assertEquals(2, bigramsFor1.get(2));
-    Assert.assertEquals(1, bigramsFor1.get(3));
-  }
 
   @Test
   public void toWordIdsTest() {

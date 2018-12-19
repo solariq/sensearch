@@ -4,6 +4,7 @@ import com.expleague.sensearch.protobuf.index.IndexUnits.TermStatistics;
 import com.expleague.sensearch.protobuf.index.IndexUnits.TermStatistics.TermFrequency;
 import com.expleague.sensearch.utils.SensearchTestCase;
 import com.google.common.primitives.Longs;
+import gnu.trove.list.array.TLongArrayList;
 import gnu.trove.map.TLongIntMap;
 import gnu.trove.map.TLongObjectMap;
 import gnu.trove.map.hash.TLongIntHashMap;
@@ -32,7 +33,7 @@ public class StatisticsBuilderBuildTest extends SensearchTestCase {
     TLongIntMap frequenciesMap = new TLongIntHashMap();
     TLongObjectMap<TLongIntMap> bigramsMap = new TLongObjectHashMap<>();
 
-    PlainIndexBuilder.enrichFrequencies(WORD_ID_SEQ[0], frequenciesMap, bigramsMap);
+    StatisticsBuilder.enrichFrequencies(WORD_ID_SEQ[0], frequenciesMap, bigramsMap);
     // test frequencies
     Assert.assertFalse(frequenciesMap.isEmpty());
     Assert.assertEquals(3, frequenciesMap.size());
@@ -65,8 +66,7 @@ public class StatisticsBuilderBuildTest extends SensearchTestCase {
     for (long[] seq : WORD_ID_SEQ) {
       tFreqMap.clear();
       bFreqMap.clear();
-      PlainIndexBuilder.enrichFrequencies(seq, tFreqMap, bFreqMap);
-      statisticsBuilder.enrich(tFreqMap, bFreqMap);
+      statisticsBuilder.enrich(new TLongArrayList(seq), null);
     }
 
     statisticsBuilder.build();
@@ -83,7 +83,7 @@ public class StatisticsBuilderBuildTest extends SensearchTestCase {
 
     TLongIntMap freqMap = new TLongIntHashMap();
     freqMap.put(1, 1);
-    statisticsBuilder.enrich(freqMap, new TLongObjectHashMap<>());
+    statisticsBuilder.enrich(new TLongArrayList(WORD_ID_SEQ[0]), null);
     statisticsBuilder.build();
   }
 
@@ -98,7 +98,7 @@ public class StatisticsBuilderBuildTest extends SensearchTestCase {
       TLongIntMap tFreqMap = new TLongIntHashMap();
       TLongObjectMap<TLongIntMap> bFreqMap = new TLongObjectHashMap<>();
       for (long[] wordSeq : WORD_ID_SEQ) {
-        PlainIndexBuilder.enrichFrequencies(wordSeq, tFreqMap, bFreqMap);
+        StatisticsBuilder.enrichFrequencies(wordSeq, tFreqMap, bFreqMap);
       }
 
       TermStatistics statsFor1 = TermStatistics.parseFrom(statsDb.get(Longs.toByteArray(1)));

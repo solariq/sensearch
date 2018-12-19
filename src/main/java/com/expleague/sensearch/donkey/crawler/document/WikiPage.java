@@ -2,6 +2,7 @@ package com.expleague.sensearch.donkey.crawler.document;
 
 import java.net.URI;
 import java.util.List;
+import java.util.stream.Stream;
 
 public class WikiPage implements CrawlerDocument {
 
@@ -49,8 +50,8 @@ public class WikiPage implements CrawlerDocument {
   }
 
   @Override
-  public List<Section> sections() {
-    return sections;
+  public Stream<Section> sections() {
+    return sections.stream();
   }
 
   @Override

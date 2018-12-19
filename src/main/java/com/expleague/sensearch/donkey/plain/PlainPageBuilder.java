@@ -3,6 +3,7 @@ package com.expleague.sensearch.donkey.plain;
 import com.expleague.sensearch.donkey.crawler.document.CrawlerDocument;
 import com.expleague.sensearch.donkey.crawler.document.CrawlerDocument.Link;
 import com.expleague.sensearch.donkey.crawler.document.CrawlerDocument.Section;
+import com.expleague.sensearch.protobuf.index.IndexUnits;
 import com.expleague.sensearch.protobuf.index.IndexUnits.Page;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.primitives.Longs;
@@ -17,8 +18,10 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Deque;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.stream.Collectors;
 import org.apache.commons.io.FileUtils;
 import org.iq80.leveldb.DB;
 import org.iq80.leveldb.WriteBatch;
@@ -28,8 +31,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 class PlainPageBuilder {
-
-  public static final int ROOT_PAGE_ID_OFFSET_BITS = 16;
 
   private static final Logger LOG = LoggerFactory.getLogger(PlainPageBuilder.class);
 
@@ -42,17 +43,29 @@ class PlainPageBuilder {
 
   private final Path temporaryIndexRoot;
 
-  private List<Page.Link.Builder> linksList = new ArrayList<>();
-
-  private TLongLongMap wikiIdToIndexId = new TLongLongHashMap();
-
   private OutputStream temporaryIndexOs;
 
+  // accumulates for all pages
+  private List<Page.Link.Builder> linkBuilders = new ArrayList<>();
+  private TLongLongMap wikiIdToIndexId = new TLongLongHashMap();
+
+  // accumulates for single page then clears when next page is received
+  private List<String> categories = Collections.emptyList();
+  private Deque<IndexUnits.Page.Builder> parentPagesStack = new LinkedList<>();
+  private List<Page> builtPages = new ArrayList<>();
+
   /**
+   * PlainPageBuilder provides builder for the database of indexed pages.
+   * It processes each page section-wise. To start processing new page call
+   * {@link #startPage(long, long, List)},
+   * To add sections of the page call {@link #addSection(long, Section)}
+   * And to finish the page call {@link #endPage()}
+   *
+   * Call {@link #build()} to create database of received pages
+   *
    * @param plainDb database where index pages will be stored
-   * @param tempFilesRoot root where temporary files while building will be stored
-   * if directory does not exist it will be created. It will be deleted after build()
-   * is called
+   * @param tempFilesRoot root where temporary files while building will be stored if directory does
+   * not exist it will be created. It will be deleted after build() is called
    * @throws IOException if it is failed to create root directory
    */
   PlainPageBuilder(DB plainDb, Path tempFilesRoot) throws IOException {
@@ -61,25 +74,141 @@ class PlainPageBuilder {
     Files.createDirectories(tempFilesRoot);
     temporaryIndexOs = Files.newOutputStream(tempFilesRoot.resolve(TEMP_INDEX_FILE));
   }
-  
-  long add(CrawlerDocument parsedPage) {
-    // create new page id
-    long newRootPageId = -((wikiIdToIndexId.size() + 1) << ROOT_PAGE_ID_OFFSET_BITS);
-    wikiIdToIndexId.put(parsedPage.id(), newRootPageId);
 
-    for (Page page : toPages(parsedPage.sections(), newRootPageId, linksList)) {
-      try {
-        page.writeDelimitedTo(temporaryIndexOs);
-      } catch (IOException e) {
-        throw new RuntimeException(
-            String.format(
-                "Failed to save page to temporary index [ %s ]. Cause: %s",
-                temporaryIndexRoot.toAbsolutePath().toString(),
-                e.toString()
-            )
+  /**
+   * Receives list of links and splits it into two maps. Outcoming links map has
+   * link's source page id as a key, so for each id it stores all of the outcoming links.
+   * Incoming links map, on the other hand, stores all incoming links for each id in the
+   * similar fashion
+   *
+   * @param links list of Link.Builder each of which has wiki page id as a target id
+   * @param wikiIdToIndexIdMappings mapping from wiki ids to index ids
+   * @param outcomingLinks map of outcoming links
+   * @param incomingLinks map of incoming links
+   */
+  @VisibleForTesting
+  static void resolveLinks(List<Page.Link.Builder> links, TLongLongMap wikiIdToIndexIdMappings,
+      @NotNull TLongObjectMap<List<Page.Link>> outcomingLinks,
+      @NotNull TLongObjectMap<List<Page.Link>> incomingLinks) {
+    outcomingLinks.clear();
+    incomingLinks.clear();
+    for (Page.Link.Builder link : links) {
+      long wikiTargetId = link.getTargetPageId();
+      if (!wikiIdToIndexIdMappings.containsKey(wikiTargetId)) {
+        LOG.warn(
+            String.format("Mappings to index id for WikiPage with id [ %d ] was not found!",
+                wikiTargetId)
         );
+        link.clearTargetPageId();
+      } else {
+        long targetIndexId = wikiIdToIndexIdMappings.get(wikiTargetId);
+        link.setTargetPageId(targetIndexId);
       }
+
+      Page.Link builtLink = link.build();
+
+      if (builtLink.hasTargetPageId()) {
+        long targetId = builtLink.getTargetPageId();
+        incomingLinks.putIfAbsent(targetId, new LinkedList<>());
+        incomingLinks.get(targetId).add(builtLink);
+      }
+
+      long sourceId = link.getSourcePageId();
+      outcomingLinks.putIfAbsent(sourceId, new ArrayList<>());
+      outcomingLinks.get(sourceId).add(builtLink);
     }
+  }
+
+  /**
+   * Prepares for receiving sections of the page. Erases all information about the previous page
+   *
+   * @param originalId original id of a page. Id is required for building links
+   * between pages when build() is called
+   * @param indexId mapping from original id to inner index id
+   * @param categories the categories page belongs to
+   */
+  void startPage(long originalId, long indexId, List<? extends CharSequence> categories) {
+    wikiIdToIndexId.put(originalId, indexId);
+    this.categories = categories.stream().map(CharSequence::toString).collect(Collectors.toList());
+    parentPagesStack.clear();
+    builtPages.clear();
+  }
+
+  /**
+   * Adds new section to the started page. The methods provides tying section int tree-like manner
+   * that is each page has links to its children and to its parent
+   *
+   * @param sectionId id of this section that will be used in index
+   * @param section section of a crawler document
+   */
+  void addSection(long sectionId, CrawlerDocument.Section section) {
+    for (Link link : section.links()) {
+      Page.Link.Builder linkBuilder = Page.Link.newBuilder()
+          .setPosition(link.textOffset())
+          .setText(link.text().toString())
+          .setSourcePageId(sectionId)
+          .setTargetPageId(link.targetId());
+      linkBuilders.add(linkBuilder);
+    }
+
+    List<? extends CharSequence> sectionTitleSeq = section.title();
+    int sectionDepth = sectionTitleSeq.size();
+
+    if (sectionDepth - parentPagesStack.size() > 1) {
+      LOG.warn(
+          String.format(
+              "Received page with the depth [ %d ], when current depth is [ %d ]."
+                  + " Probably some sections are missing or sections order is incorrect",
+              sectionDepth,
+              parentPagesStack.size()
+          )
+      );
+    }
+
+    // section depth is always greater than 1
+    while (parentPagesStack.size() >= sectionDepth) {
+      builtPages.add(parentPagesStack.pollLast().build());
+    }
+
+    CharSequence sectionTitle = sectionTitleSeq.get(sectionDepth - 1);
+    Page.Builder pageBuilder = Page.newBuilder()
+        .setPageId(sectionId)
+        .setContent(section.text().toString())
+        .setTitle(sectionTitle.toString())
+        .setUri(section.uri().toString())
+        .addAllCategories(categories);
+
+    if (!parentPagesStack.isEmpty()) {
+      pageBuilder.setParentId(parentPagesStack.peekLast().getPageId());
+      parentPagesStack.peekLast().addSubpagesIds(sectionId);
+    }
+
+    parentPagesStack.addLast(pageBuilder);
+  }
+
+  /**
+   * Signals the end of the page. Does necessary aggregation of sections.
+   * Clears all temporary information about the page
+   */
+  void endPage() {
+    while (!parentPagesStack.isEmpty()) {
+      builtPages.add(parentPagesStack.pollLast().build());
+    }
+
+    builtPages.forEach(p -> {
+          try {
+            p.writeDelimitedTo(temporaryIndexOs);
+          } catch (IOException e) {
+            throw new RuntimeException(
+                String.format(
+                    "Failed to save page to temporary index [ %s ]. Cause: %s",
+                    temporaryIndexRoot.toAbsolutePath().toString(),
+                    e.toString()
+                )
+            );
+          }
+        }
+    );
 
     try {
       temporaryIndexOs.flush();
@@ -91,7 +220,9 @@ class PlainPageBuilder {
       );
     }
 
-    return newRootPageId;
+    builtPages.clear();
+    parentPagesStack.clear();
+    categories.clear();
   }
 
   void build() throws IOException {
@@ -99,7 +230,7 @@ class PlainPageBuilder {
 
     TLongObjectMap<List<Page.Link>> incomingLinks = new TLongObjectHashMap<>();
     TLongObjectMap<List<Page.Link>> outcomingLinks = new TLongObjectHashMap<>();
-    resolveLinks(linksList, wikiIdToIndexId, outcomingLinks, incomingLinks);
+    resolveLinks(linkBuilders, wikiIdToIndexId, outcomingLinks, incomingLinks);
 
     Page.Builder pageBuilder = Page.newBuilder();
     Page rawPage;
@@ -141,131 +272,5 @@ class PlainPageBuilder {
       plainDb.close();
     }
 
-  }
-
-  /**
-   * Receives list of links and splits it into two maps. Outcoming links map has
-   * link's source page id as a key, so for each id it stores all of the outcoming links.
-   * Incoming links map, on the other hand, stores all incoming links for each id in the
-   * similar fashion
-   * @param links list of Link.Builder each of which has wiki page id as a target id
-   * @param wikiIdToIndexIdMappings mapping from wiki ids to index ids
-   * @param outcomingLinks map of outcoming links
-   * @param incomingLinks map of incoming links
-   */
-  @VisibleForTesting
-  static void resolveLinks(List<Page.Link.Builder> links, TLongLongMap wikiIdToIndexIdMappings,
-      @NotNull TLongObjectMap<List<Page.Link>> outcomingLinks,
-      @NotNull TLongObjectMap<List<Page.Link>> incomingLinks) {
-    outcomingLinks.clear();
-    incomingLinks.clear();
-    for (Page.Link.Builder link : links) {
-      long wikiTargetId = link.getTargetPageId();
-      if (!wikiIdToIndexIdMappings.containsKey(wikiTargetId)) {
-        LOG.warn(
-            String.format("Mappings to index id for WikiPage with id [ %d ] was not found!",
-                wikiTargetId)
-        );
-        link.clearTargetPageId();
-      } else {
-        long targetIndexId = wikiIdToIndexIdMappings.get(wikiTargetId);
-        link.setTargetPageId(targetIndexId);
-      }
-
-      Page.Link builtLink = link.build();
-
-      if (builtLink.hasTargetPageId()) {
-        long targetId = builtLink.getTargetPageId();
-        incomingLinks.putIfAbsent(targetId, new LinkedList<>());
-        incomingLinks.get(targetId).add(builtLink);
-      }
-
-      long sourceId = link.getSourcePageId();
-      outcomingLinks.putIfAbsent(sourceId, new ArrayList<>());
-      outcomingLinks.get(sourceId).add(builtLink);
-    }
-  }
-
-  @VisibleForTesting
-  static List<Page> toPages(List<Section> sections,
-      long currentRootPageId,
-      List<Page.Link.Builder> knownLinks) {
-    return toPages(sections, currentRootPageId, Collections.emptyList(), knownLinks);
-  }
-
-  /**
-   * Converts given links to list of pages which are connected in tree manner Also enriches given
-   * list of know interpage links with links from given sections
-   *
-   * @param sections list of section from one page
-   * @param currentRootPageId id of the first section i.e. section right after page title. All other
-   * sctions id will be less than it
-   * @param knownLinks all know links
-   * @return list of pages
-   */
-  @VisibleForTesting
-  static List<Page> toPages(List<Section> sections,
-      long currentRootPageId,
-      List<String> categories,
-      List<Page.Link.Builder> knownLinks) {
-    LinkedList<Page.Builder> parentPages = new LinkedList<>();
-    List<Page> builtPages = new LinkedList<>();
-
-    long currentSectionId = currentRootPageId;
-    // TODO: check if sections count is more than set subpages limit
-    for (Section section : sections) {
-      // enrich known links list
-      for (Link link : section.links()) {
-        Page.Link.Builder knownLink = Page.Link.newBuilder()
-            .setPosition(link.textOffset())
-            .setText(link.text().toString())
-            .setSourcePageId(currentSectionId)
-            .setTargetPageId(link.targetId());
-        knownLinks.add(knownLink);
-      }
-
-      List<CharSequence> sectionTitleSeq = section.title();
-      int sectionDepth = sectionTitleSeq.size();
-
-      if (sectionDepth - parentPages.size() > 1) {
-        LOG.warn(
-            String.format(
-                "Received page with the depth [ %d ], when current depth is [ %d ]."
-                    + " Probably some sections are missing or sections order is incorrect",
-                sectionDepth,
-                parentPages.size()
-            )
-        );
-      }
-
-      // section depth is always greater than 1
-      while (parentPages.size() >= sectionDepth) {
-        builtPages.add(parentPages.pollLast().build());
-      }
-
-      CharSequence sectionTitle = sectionTitleSeq.get(sectionDepth - 1);
-      Page.Builder pageBuilder = Page.newBuilder()
-          .setPageId(currentSectionId)
-          .setContent(section.text().toString())
-          .setTitle(sectionTitle.toString())
-          .setUri(section.uri().toString())
-          .addAllCategories(categories);
-
-      if (!parentPages.isEmpty()) {
-        pageBuilder.setParentId(parentPages.peekLast().getPageId());
-        parentPages.peekLast().addSubpagesIds(currentSectionId);
-      }
-
-      parentPages.addLast(pageBuilder);
-
-      // page ids are below zero
-      --currentSectionId;
-    }
-
-    while (!parentPages.isEmpty()) {
-      builtPages.add(parentPages.pollLast().build());
-    }
-
-    return builtPages;
   }
 }

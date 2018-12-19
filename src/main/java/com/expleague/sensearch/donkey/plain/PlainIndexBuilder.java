@@ -1,6 +1,7 @@
 package com.expleague.sensearch.donkey.plain;
 
 import com.expleague.commons.math.vectors.Vec;
+import com.expleague.commons.math.vectors.VecTools;
 import com.expleague.commons.math.vectors.impl.vectors.ArrayVec;
 import com.expleague.commons.seq.CharSeqTools;
 import com.expleague.commons.text.lemmer.LemmaInfo;
@@ -19,8 +20,11 @@ import com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta.UriPageMappin
 import com.expleague.sensearch.protobuf.index.IndexUnits.Term;
 import com.expleague.sensearch.protobuf.index.IndexUnits.Term.Builder;
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.collect.Streams;
 import com.google.common.primitives.Longs;
 import com.google.inject.Inject;
+import gnu.trove.list.TLongList;
+import gnu.trove.list.array.TLongArrayList;
 import gnu.trove.map.TLongIntMap;
 import gnu.trove.map.TLongObjectMap;
 import gnu.trove.map.TObjectLongMap;
@@ -28,18 +32,27 @@ import gnu.trove.map.hash.TLongIntHashMap;
 import gnu.trove.map.hash.TLongObjectHashMap;
 import gnu.trove.map.hash.TObjectLongHashMap;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.io.Reader;
-import java.nio.charset.StandardCharsets;
+import java.io.Writer;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Random;
+import java.util.Set;
+import java.util.TreeMap;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import java.util.zip.GZIPInputStream;
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.log4j.Logger;
 import org.fusesource.leveldbjni.JniDBFactory;
 import org.iq80.leveldb.CompressionType;
@@ -49,6 +62,7 @@ import org.iq80.leveldb.WriteBatch;
 import org.iq80.leveldb.WriteOptions;
 
 public class PlainIndexBuilder implements IndexBuilder {
+
   public static final int STATISTICS_BLOCK_SIZE = 1 << 10;
   public static final int PLAIN_PAGE_BLOCK_SIZE = 1 << 20;
   public static final int PLAIN_TERM_BLOCK_SIZE = 1 << 20;
@@ -57,13 +71,18 @@ public class PlainIndexBuilder implements IndexBuilder {
   public static final String PAGE_ROOT = "page";
   public static final String TERM_ROOT = "term";
   public static final String EMBEDDING_ROOT = "embedding";
-  
+  public static final String LSH_METRIC_ROOT = "lsh_metric";
+
   public static final String SUGGEST_UNIGRAM_ROOT = "suggest/unigram_coeff";
   public static final String SUGGEST_MULTIGRAMS_ROOT = "suggest/multigram_freq_norm";
   public static final String SUGGEST_INVERTED_INDEX_ROOT = "suggest/inverted_index";
 
   public static final String INDEX_META_FILE = "index.meta";
   public static final int DEFAULT_VEC_SIZE = 130;
+  public static final int ROOT_PAGE_ID_OFFSET_BITS = 16;
+
+  private static final int NEIGHBORS_NUM = 50;
+  private static final int NUM_OF_RANDOM_IDS = 100;
 
   private static final int TERM_BATCH_SIZE = 1024;
   private static final WriteOptions DEFAULT_TERM_WRITE_OPTIONS =
@@ -92,6 +111,8 @@ public class PlainIndexBuilder implements IndexBuilder {
           .createIfMissing(true)
           .errorIfExists(true)
           .compressionType(CompressionType.SNAPPY);
+
+  private static final String[] REQUIRED_WORDS = new String[]{"путин", "медведев", "александр"};
 
   private static final Logger LOG = Logger.getLogger(PlainIndexBuilder.class.getName());
   private final Crawler crawler;
@@ -146,21 +167,6 @@ public class PlainIndexBuilder implements IndexBuilder {
   }
 
   @VisibleForTesting
-  static void enrichFrequencies(
-      long[] tokens, TLongIntMap termFrequencyMap, TLongObjectMap<TLongIntMap> bigramFrequencyMap) {
-    if (tokens.length < 1) {
-      return;
-    }
-    termFrequencyMap.put(tokens[0], 1);
-    for (int i = 1; i < tokens.length; ++i) {
-      termFrequencyMap.adjustOrPutValue(tokens[i], 1, 1);
-
-      bigramFrequencyMap.putIfAbsent(tokens[i - 1], new TLongIntHashMap());
-      bigramFrequencyMap.get(tokens[i - 1]).adjustOrPutValue(tokens[i], 1, 1);
-    }
-  }
-
-  @VisibleForTesting
   static Vec toVector(long[] tokens, TLongObjectMap<Vec> vectors) {
     ArrayVec mean = new ArrayVec(new double[DEFAULT_VEC_SIZE]);
     int vectorsFound = 0;
@@ -178,22 +184,86 @@ public class PlainIndexBuilder implements IndexBuilder {
     return mean;
   }
 
+    private Comparator<Vec> comparator(Vec main) {
+        return (v1, v2) -> {
+            double val1 = 1. - VecTools.cosine(v1, main);
+            double val2 = 1. - VecTools.cosine(v2, main);
+            if (val1 < val2) {
+                return -1;
+            } else if (val1 > val2) {
+                return 1;
+            }
+            return 0;
+        };
+    }
+
+    private Collection<Long> nearest(TLongObjectMap<Vec> vecs, long mainId) {
+        Comparator<Vec> comparator = comparator(vecs.get(mainId));
+        TreeMap<Vec, Long> neighbors = new TreeMap<>(comparator);
+        vecs.forEachEntry((id, vec) -> {
+            if (neighbors.size() < NEIGHBORS_NUM) {
+                neighbors.put(vec, id);
+            } else if (comparator.compare(neighbors.lastKey(), vec) > 0) {
+                neighbors.remove(neighbors.lastKey());
+                neighbors.put(vec, id);
+            }
+            return true;
+        });
+        return neighbors.values();
+    }
+
+    private void saveIds(Path root, TLongObjectMap<Vec> vecs, Set<Long> ids) throws IOException {
+        for (long mainId : ids) {
+            try (Writer out =
+                new OutputStreamWriter(
+                    new FileOutputStream(
+                        root.resolve("_" + mainId).toFile()
+                    )
+                )
+            ) {
+                for (long id : nearest(vecs, mainId)) {
+                    out.write(id + " ");
+                }
+            }
+        }
+    }
+
+    private void saveLSHMetricInfo(Path root, TLongObjectMap<Vec> vecs, Set<Long> requiredIds) throws IOException {
+        saveIds(root, vecs, requiredIds);
+        Random random = new Random();
+        Set<Long> randomIds = new HashSet<>();
+        for (int i = 0; i < NUM_OF_RANDOM_IDS; i++) {
+            long mainId;
+            do {
+                mainId = random.nextInt(vecs.size());
+            } while (requiredIds.contains(mainId));
+            randomIds.add(mainId);
+        }
+        saveIds(root, vecs, randomIds);
+    }
+
   @VisibleForTesting
   static void readGloveVectors(
       Path glovePath, TObjectLongMap<String> idMappings, TLongObjectMap<Vec> vectors) {
-    try (Reader input =
-        new InputStreamReader(
-            new GZIPInputStream(new FileInputStream(glovePath.toFile())), StandardCharsets.UTF_8)) {
-      CharSeqTools.lines(input)
+    try (Reader vecInput =
+            new InputStreamReader(
+                new FileInputStream(Paths.get("./resources/train_vectors.txt").toFile()));
+        Reader wordInput =
+            new InputStreamReader(
+                new FileInputStream(Paths.get("./resources/vocab.txt").toFile()))) {
+      Streams.zip(
+              CharSeqTools.lines(vecInput)
+                  .skip(1)
+                  .map(s -> s.toString().split(" "))
+                  .filter(a -> a.length == 130),
+              CharSeqTools.lines(wordInput),
+              Pair::of)
           .parallel()
           .forEach(
-              line -> {
-                CharSequence[] parts = CharSeqTools.split(line, ' ');
-                final String word = parts[0].toString().toLowerCase();
+              p -> {
+                final String word = p.getRight().toString().toLowerCase();
                 double[] doubles =
-                    Arrays.stream(parts, 1, parts.length)
-                        .mapToDouble(CharSeqTools::parseDouble)
-                        .toArray();
+                    Arrays.stream(p.getLeft()).mapToDouble(CharSeqTools::parseDouble).toArray();
                 synchronized (idMappings) {
                   if (idMappings.containsKey(word)) {
                     throw new IllegalArgumentException("Embedding contains duplicate words!");
@@ -224,42 +294,38 @@ public class PlainIndexBuilder implements IndexBuilder {
 
     LOG.info("Creating database files...");
     final Path indexRoot = config.getTemporaryIndex();
+
     // ensure all roots
     Files.createDirectories(indexRoot.resolve(PAGE_ROOT));
-    final DB pageDb = JniDBFactory.factory.open(
-        indexRoot.resolve(PAGE_ROOT).toFile(), PAGE_DB_OPTIONS
-    );
+    final DB pageDb =
+        JniDBFactory.factory.open(indexRoot.resolve(PAGE_ROOT).toFile(), PAGE_DB_OPTIONS);
     LOG.info("Creating mappings from wiki ids to raw index ids...");
-    final PlainPageBuilder plainPageBuilder = new PlainPageBuilder(
-        pageDb, indexRoot.resolve(PAGE_ROOT).resolve("TMP")
-    );
+    final PlainPageBuilder plainPageBuilder =
+        new PlainPageBuilder(pageDb, indexRoot.resolve(PAGE_ROOT).resolve("TMP"));
 
     Files.createDirectories(indexRoot.resolve(TERM_STATISTICS_ROOT));
-    final DB statisticsDb = JniDBFactory.factory.open(
-        indexRoot.resolve(TERM_STATISTICS_ROOT).toFile(), STATS_DB_OPTIONS
-    );
+    final DB statisticsDb =
+        JniDBFactory.factory.open(
+            indexRoot.resolve(TERM_STATISTICS_ROOT).toFile(), STATS_DB_OPTIONS);
     final StatisticsBuilder statisticsBuilder = new StatisticsBuilder(statisticsDb);
 
     Files.createDirectories(indexRoot.resolve(EMBEDDING_ROOT));
-    final EmbeddingBuilder embeddingBuilder = new EmbeddingBuilder(
-        indexRoot.resolve(EMBEDDING_ROOT)
-    );
-    
+    final EmbeddingBuilder embeddingBuilder =
+        new EmbeddingBuilder(indexRoot.resolve(EMBEDDING_ROOT));
+
     Files.createDirectories(indexRoot.resolve(SUGGEST_UNIGRAM_ROOT));
-    final DB suggest_unigram_DB = JniDBFactory.factory.open(
-    		indexRoot.resolve(SUGGEST_UNIGRAM_ROOT).toFile(), STATS_DB_OPTIONS
-    );
-    final DB suggest_multigram_DB = JniDBFactory.factory.open(
-    		indexRoot.resolve(SUGGEST_MULTIGRAMS_ROOT).toFile(), STATS_DB_OPTIONS
-    );
-    final DB suggest_inverted_index_DB = JniDBFactory.factory.open(
-    		indexRoot.resolve(SUGGEST_INVERTED_INDEX_ROOT).toFile(), STATS_DB_OPTIONS
-    );
+    final DB suggest_unigram_DB =
+        JniDBFactory.factory.open(
+            indexRoot.resolve(SUGGEST_UNIGRAM_ROOT).toFile(), STATS_DB_OPTIONS);
+    final DB suggest_multigram_DB =
+        JniDBFactory.factory.open(
+            indexRoot.resolve(SUGGEST_MULTIGRAMS_ROOT).toFile(), STATS_DB_OPTIONS);
+    final DB suggest_inverted_index_DB =
+        JniDBFactory.factory.open(
+            indexRoot.resolve(SUGGEST_INVERTED_INDEX_ROOT).toFile(), STATS_DB_OPTIONS);
     final SuggestInformationBuilder suggestBuilder =
-    		new SuggestInformationBuilder(
-    				suggest_unigram_DB,
-    				suggest_multigram_DB,
-    				suggest_inverted_index_DB);
+        new SuggestInformationBuilder(
+            suggest_unigram_DB, suggest_multigram_DB, suggest_inverted_index_DB);
 
     final long[] pagesAndTokensCounts = new long[]{0, 0};
 
@@ -268,48 +334,72 @@ public class PlainIndexBuilder implements IndexBuilder {
 
     // saving page-wise data
     LOG.info("Storing page-wise data...");
+    long[] pagesCount = new long[]{0};
+    long[] sectionId = new long[]{0};
     try {
       crawler
           .makeStream()
           .forEach(
               doc -> {
-                long pageId = plainPageBuilder.add(doc);
+                TLongList pageTokens = new TLongArrayList();
+                long rootPageId = -((pagesCount[0] + 1) << ROOT_PAGE_ID_OFFSET_BITS);
+                sectionId[0] = rootPageId;
+                plainPageBuilder.startPage(doc.id(), rootPageId, doc.categories());
+                doc.sections()
+                    .forEachOrdered(
+                        s -> {
+                          plainPageBuilder.addSection(sectionId[0], s);
+
+                          List<CharSequence> sectionTitles = s.title();
+                          String sectionTitle =
+                              sectionTitles.get(sectionTitles.size() - 1).toString();
+                          long[] titleIds =
+                              toIds(
+                                  tokenizer.parseTextToWords(sectionTitle.toLowerCase()),
+                                  idMappings);
+//                          embeddingBuilder.add(sectionId[0], toVector(titleIds, gloveVectors));
+
+                          pageTokens.addAll(titleIds);
+                          pageTokens.addAll(
+                              toIds(
+                                  tokenizer.parseTextToWords(s.text().toString().toLowerCase()),
+                                  idMappings));
+                          --sectionId[0];
+                        });
+                plainPageBuilder.endPage();
+                ++pagesCount[0];
 
                 long[] titleIds =
                     toIds(tokenizer.parseTextToWords(doc.title().toLowerCase()), idMappings);
 
-                embeddingBuilder.add(pageId, toVector(titleIds, gloveVectors));
+                embeddingBuilder.add(rootPageId, toVector(titleIds, gloveVectors));
+                long[] titleTokens = toIds(tokenizer.parseTextToWords(doc.title()), idMappings);
 
-                long[] tokens =
-                    toIds(
-                        tokenizer.parseTextToWords(
-                            (doc.title() + " " + doc.content()).toLowerCase()),
-                        idMappings);
-                
-                long[] titleTokens =
-                		toIds(tokenizer.parseTextToWords(doc.title()), idMappings);
-                
                 suggestBuilder.accept(titleTokens);
-                
-                termFrequencyMap.clear();
-                bigramFrequencyMap.clear();
-                enrichFrequencies(tokens, termFrequencyMap, bigramFrequencyMap);
-                statisticsBuilder.enrich(termFrequencyMap, bigramFrequencyMap);
+
+                statisticsBuilder.enrich(pageTokens, null);
 
                 ++pagesAndTokensCounts[0];
-                pagesAndTokensCounts[1] += tokens.length;
+                pagesAndTokensCounts[1] += pageTokens.size();
 
-                uriPageIdMapping.put(doc.uri().toString(), pageId);
+                uriPageIdMapping.put(doc.uri().toString(), rootPageId);
               });
-      
+
       suggestBuilder.build();
-      
+
       LOG.info("Storing term-wise data...");
       saveTermData(idMappings, terms, indexRoot);
 
       LOG.info("Building embedding...");
       embeddingBuilder.addAll(gloveVectors);
       embeddingBuilder.build();
+
+      Path lshMetricPath = indexRoot.resolve(EMBEDDING_ROOT).resolve(LSH_METRIC_ROOT);
+      Files.createDirectories(lshMetricPath);
+      saveLSHMetricInfo(lshMetricPath,
+              gloveVectors,
+              Arrays.stream(REQUIRED_WORDS).map(idMappings::get).collect(Collectors.toSet())
+      );
 
       plainPageBuilder.build();
       statisticsBuilder.build();
