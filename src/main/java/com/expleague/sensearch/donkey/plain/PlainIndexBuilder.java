@@ -1,6 +1,7 @@
 package com.expleague.sensearch.donkey.plain;
 
 import com.expleague.commons.math.vectors.Vec;
+import com.expleague.commons.math.vectors.VecTools;
 import com.expleague.commons.math.vectors.impl.vectors.ArrayVec;
 import com.expleague.commons.seq.CharSeqTools;
 import com.expleague.commons.text.lemmer.LemmaInfo;
@@ -30,16 +31,13 @@ import gnu.trove.map.TObjectLongMap;
 import gnu.trove.map.hash.TLongIntHashMap;
 import gnu.trove.map.hash.TLongObjectHashMap;
 import gnu.trove.map.hash.TObjectLongHashMap;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.Reader;
+
+import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.log4j.Logger;
@@ -60,6 +58,7 @@ public class PlainIndexBuilder implements IndexBuilder {
   public static final String PAGE_ROOT = "page";
   public static final String TERM_ROOT = "term";
   public static final String EMBEDDING_ROOT = "embedding";
+  public static final String LSH_METRIC_ROOT = "lsh_metric";
 
   public static final String SUGGEST_UNIGRAM_ROOT = "suggest/unigram_coeff";
   public static final String SUGGEST_MULTIGRAMS_ROOT = "suggest/multigram_freq_norm";
@@ -68,6 +67,9 @@ public class PlainIndexBuilder implements IndexBuilder {
   public static final String INDEX_META_FILE = "index.meta";
   public static final int DEFAULT_VEC_SIZE = 130;
   public static final int ROOT_PAGE_ID_OFFSET_BITS = 16;
+
+  private static final int NEIGHBORS_NUM = 50;
+  private static final int NUM_OF_RANDOM_IDS = 100;
 
   private static final int TERM_BATCH_SIZE = 1024;
   private static final WriteOptions DEFAULT_TERM_WRITE_OPTIONS =
@@ -96,6 +98,8 @@ public class PlainIndexBuilder implements IndexBuilder {
           .createIfMissing(true)
           .errorIfExists(true)
           .compressionType(CompressionType.SNAPPY);
+
+  private static final String[] REQUIRED_WORDS = new String[]{"путин", "медведев", "александр"};
 
   private static final Logger LOG = Logger.getLogger(PlainIndexBuilder.class.getName());
   private final Crawler crawler;
@@ -167,6 +171,64 @@ public class PlainIndexBuilder implements IndexBuilder {
     return mean;
   }
 
+    private Comparator<Vec> comparator(Vec main) {
+        return (v1, v2) -> {
+            double val1 = 1. - VecTools.cosine(v1, main);
+            double val2 = 1. - VecTools.cosine(v2, main);
+            if (val1 < val2) {
+                return -1;
+            } else if (val1 > val2) {
+                return 1;
+            }
+            return 0;
+        };
+    }
+
+    private Collection<Long> nearest(TLongObjectMap<Vec> vecs, long mainId) {
+        Comparator<Vec> comparator = comparator(vecs.get(mainId));
+        TreeMap<Vec, Long> neighbors = new TreeMap<>(comparator);
+        vecs.forEachEntry((id, vec) -> {
+            if (neighbors.size() < NEIGHBORS_NUM) {
+                neighbors.put(vec, id);
+            } else if (comparator.compare(neighbors.lastKey(), vec) > 0) {
+                neighbors.remove(neighbors.lastKey());
+                neighbors.put(vec, id);
+            }
+            return true;
+        });
+        return neighbors.values();
+    }
+
+    private void saveIds(Path root, TLongObjectMap<Vec> vecs, Set<Long> ids) throws IOException {
+        for (long mainId : ids) {
+            try (Writer out =
+                new OutputStreamWriter(
+                    new FileOutputStream(
+                        root.resolve("_" + mainId).toFile()
+                    )
+                )
+            ) {
+                for (long id : nearest(vecs, mainId)) {
+                    out.write(id + " ");
+                }
+            }
+        }
+    }
+
+    private void saveLSHMetricInfo(Path root, TLongObjectMap<Vec> vecs, Set<Long> requiredIds) throws IOException {
+        saveIds(root, vecs, requiredIds);
+        Random random = new Random();
+        Set<Long> randomIds = new HashSet<>();
+        for (int i = 0; i < NUM_OF_RANDOM_IDS; i++) {
+            long mainId;
+            do {
+                mainId = random.nextInt(vecs.size());
+            } while (requiredIds.contains(mainId));
+            randomIds.add(mainId);
+        }
+        saveIds(root, vecs, randomIds);
+    }
+
   @VisibleForTesting
   static void readGloveVectors(
       Path glovePath, TObjectLongMap<String> idMappings, TLongObjectMap<Vec> vectors) {
@@ -219,6 +281,7 @@ public class PlainIndexBuilder implements IndexBuilder {
 
     LOG.info("Creating database files...");
     final Path indexRoot = config.getTemporaryIndex();
+
     // ensure all roots
     Files.createDirectories(indexRoot.resolve(PAGE_ROOT));
     final DB pageDb =
@@ -317,6 +380,13 @@ public class PlainIndexBuilder implements IndexBuilder {
       LOG.info("Building embedding...");
       embeddingBuilder.addAll(gloveVectors);
       embeddingBuilder.build();
+
+      Path lshMetricPath =  indexRoot.resolve(indexRoot.resolve(EMBEDDING_ROOT).resolve(LSH_METRIC_ROOT));
+      Files.createDirectories(lshMetricPath);
+      saveLSHMetricInfo(lshMetricPath,
+              gloveVectors,
+              Arrays.stream(REQUIRED_WORDS).map(idMappings::get).collect(Collectors.toSet())
+      );
 
       plainPageBuilder.build();
       statisticsBuilder.build();

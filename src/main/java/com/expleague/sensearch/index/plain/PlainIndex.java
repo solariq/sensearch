@@ -18,6 +18,7 @@ import com.expleague.sensearch.index.Embedding;
 import com.expleague.sensearch.index.Filter;
 import com.expleague.sensearch.index.Index;
 import com.expleague.sensearch.metrics.FilterMetric;
+import com.expleague.sensearch.metrics.LSHSynonymsMetric;
 import com.expleague.sensearch.protobuf.index.IndexUnits;
 import com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta.UriPageMapping;
 import com.expleague.sensearch.protobuf.index.IndexUnits.TermStatistics;
@@ -38,11 +39,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.NoSuchElementException;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.apache.log4j.Logger;
@@ -95,6 +92,7 @@ public class PlainIndex implements Index {
   private final Embedding embedding;
   private final Filter filter;
   private final FilterMetric filterMetric = new FilterMetric();
+  private final LSHSynonymsMetric lshSynonymsMetric;
   private final MyStem stemmer;
   private final Tokenizer tokenizer;
 
@@ -108,7 +106,9 @@ public class PlainIndex implements Index {
 
     indexRoot = config.getTemporaryIndex();
 
-    embedding = new EmbeddingImpl(indexRoot.resolve(PlainIndexBuilder.EMBEDDING_ROOT));
+    Path embeddingPath = indexRoot.resolve(PlainIndexBuilder.EMBEDDING_ROOT);
+    embedding = new EmbeddingImpl(embeddingPath);
+    lshSynonymsMetric = new LSHSynonymsMetric(embeddingPath.resolve(PlainIndexBuilder.LSH_METRIC_ROOT));
     filter = new FilterImpl(embedding);
 
     termStatisticsBase =
@@ -312,14 +312,17 @@ public class PlainIndex implements Index {
 
   Stream<Term> synonyms(Term term) {
     System.out.println("Synonyms for " + term.text());
-//    filter
-//        .filtrate(embedding.vec(((IndexTerm) term).id()), SYNONYMS_COUNT, PlainIndex::isWordId)
-//        .mapToObj(idToTerm::get).forEach(ttt -> System.out.print(ttt.text() + " "));
-//    System.out.println();
-//    return filter
-//        .filtrate(embedding.vec(((IndexTerm) term).id()), SYNONYMS_COUNT, PlainIndex::isWordId)
-//        .mapToObj(idToTerm::get);
-    return Stream.empty();
+
+    Set<Long> LSHIds = filter.filtrate(embedding.vec(((IndexTerm) term).id()), SYNONYMS_COUNT, PlainIndex::isWordId)
+            .boxed().collect(Collectors.toSet());
+
+    double result = lshSynonymsMetric.calc(((IndexTerm) term).id(), LSHIds);
+
+    LOG.info("LSHSynonymsMetric: " + result);
+
+    return filter
+        .filtrate(embedding.vec(((IndexTerm) term).id()), SYNONYMS_COUNT, PlainIndex::isWordId)
+        .mapToObj(idToTerm::get);
   }
 
   int documentFrequency(Term term) {
