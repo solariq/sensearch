@@ -9,30 +9,33 @@ import com.expleague.sensearch.snippet.Snippet;
 import com.google.inject.Inject;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class SenSeArchImpl implements SenSeArch {
 
-  private final SearchPhaseProvider searchPhaseProvider;
+  private final SearchPhaseFactory searchPhaseFactory;
 
   @Inject
-  public SenSeArchImpl(SearchPhaseProvider searchPhaseProvider) {
-    this.searchPhaseProvider = searchPhaseProvider;
+  public SenSeArchImpl(SearchPhaseFactory searchPhaseFactory) {
+    this.searchPhaseFactory = searchPhaseFactory;
   }
 
   @Override
   public ResultPage search(String query, int pageNo) {
-    final Set<SearchPhase> phases =
-        Stream.of(SearchPhase.SEARCH_PHASES)
-            .map(searchPhaseProvider::get)
-            .collect(Collectors.toSet());
+    final Set<SearchPhase> phases = new HashSet<>();
+    phases.add(searchPhaseFactory.createQueryPhase());
+
+    phases.add(searchPhaseFactory.createMinerPhase(0));
+    phases.add(searchPhaseFactory.createRankingPhase(0));
+    phases.add(searchPhaseFactory.createSnippetPhase(0));
+
+    phases.add(searchPhaseFactory.createMetricPhase());
 
     final Whiteboard wb = new WhiteboardImpl(query, pageNo);
     final ThreadPoolExecutor executor =

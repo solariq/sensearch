@@ -3,6 +3,7 @@ package com.expleague.sensearch;
 import com.expleague.sensearch.core.Annotations.MetricPath;
 import com.expleague.sensearch.core.Annotations.PageSize;
 import com.expleague.sensearch.core.Lemmer;
+import com.expleague.sensearch.core.SearchPhaseFactory;
 import com.expleague.sensearch.core.SenSeArchImpl;
 import com.expleague.sensearch.donkey.IndexBuilder;
 import com.expleague.sensearch.donkey.crawler.Crawler;
@@ -16,6 +17,7 @@ import com.expleague.sensearch.web.suggest.BigramsBasedSuggestor;
 import com.expleague.sensearch.web.suggest.Suggestor;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.AbstractModule;
+import com.google.inject.assistedinject.FactoryModuleBuilder;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -43,6 +45,10 @@ public class AppModule extends AbstractModule {
       bind(Crawler.class).to(CrawlerXML.class);
       bind(WebCrawler.class).to(RequestCrawler.class);
 
+      install(new FactoryModuleBuilder().build(SearchPhaseFactory.class));
+      //      bind(SearchPhaseFactory.class)
+      //          .toProvider(FactoryProvider.newFactory(SearchPhaseFactory.class,
+      // QueryPhase.class));
     } catch (IOException e) {
       e.printStackTrace();
     }

@@ -5,6 +5,7 @@ import com.expleague.sensearch.core.Lemmer;
 import com.expleague.sensearch.core.SearchPhase;
 import com.expleague.sensearch.core.Whiteboard;
 import com.google.inject.Inject;
+import com.google.inject.assistedinject.Assisted;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -16,10 +17,12 @@ public class SnippetPhase implements SearchPhase {
 
   private final SnippetsCreator snippetsCreator = new SnippetsCreator();
   private final Lemmer lemmer;
+  private final int phaseId;
 
   @Inject
-  public SnippetPhase(Lemmer lemmer) {
+  public SnippetPhase(Lemmer lemmer, @Assisted int phaseId) {
     this.lemmer = lemmer;
+    this.phaseId = phaseId;
   }
 
   @Override

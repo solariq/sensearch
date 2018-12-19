@@ -128,11 +128,11 @@
       <version>1.4.6</version>
     </dependency>
 
-    <dependency>
-      <groupId>com.expleague</groupId>
-      <artifactId>jmll</artifactId>
-      <version>1.4.6</version>
-    </dependency>
+    <!--<dependency>-->
+    <!--<groupId>com.expleague</groupId>-->
+    <!--<artifactId>jmll</artifactId>-->
+    <!--<version>1.4.6</version>-->
+    <!--</dependency>-->
 
     <!-- https://mvnrepository.com/artifact/com.fasterxml.jackson.core/jackson-core -->
     <dependency>
@@ -157,8 +157,16 @@
     <dependency>
       <groupId>com.google.inject</groupId>
       <artifactId>guice</artifactId>
-      <version>4.0</version>
+      <version>4.2.1</version>
     </dependency>
+
+    <!-- https://mvnrepository.com/artifact/com.google.inject.extensions/guice-assistedinject -->
+    <dependency>
+      <groupId>com.google.inject.extensions</groupId>
+      <artifactId>guice-assistedinject</artifactId>
+      <version>4.2.1</version>
+    </dependency>
+
 
     <!-- https://mvnrepository.com/artifact/org.jsoup/jsoup -->
     <dependency>

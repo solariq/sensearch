@@ -6,6 +6,7 @@ import com.expleague.sensearch.index.Index;
 import com.expleague.sensearch.miner.impl.RawTextFeaturesMiner;
 import com.expleague.sensearch.query.Query;
 import com.google.inject.Inject;
+import com.google.inject.assistedinject.Assisted;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import org.apache.log4j.Logger;
@@ -20,11 +21,13 @@ public class MinerPhase implements SearchPhase {
 
   private final Index index;
   private final FeaturesMiner featuresExtractor;
+  private final int phaseId;
 
   @Inject
-  public MinerPhase(Index index) {
+  public MinerPhase(Index index, @Assisted int phaseId) {
     this.index = index;
     this.featuresExtractor = new RawTextFeaturesMiner(index);
+    this.phaseId = phaseId;
   }
 
   @Override

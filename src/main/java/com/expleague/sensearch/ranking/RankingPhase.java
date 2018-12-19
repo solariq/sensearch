@@ -5,6 +5,7 @@ import com.expleague.sensearch.core.Annotations.PageSize;
 import com.expleague.sensearch.core.SearchPhase;
 import com.expleague.sensearch.core.Whiteboard;
 import com.google.inject.Inject;
+import com.google.inject.assistedinject.Assisted;
 import java.util.Comparator;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.log4j.Logger;
@@ -19,10 +20,12 @@ public class RankingPhase implements SearchPhase {
   private static final Logger LOG = Logger.getLogger(RankingPhase.class.getName());
 
   private final int pageSize;
+  private final int phaseId;
 
   @Inject
-  public RankingPhase(@PageSize int pageSize) {
+  public RankingPhase(@PageSize int pageSize, @Assisted int phaseId) {
     this.pageSize = pageSize;
+    this.phaseId = phaseId;
   }
 
   @Override
@@ -48,7 +51,8 @@ public class RankingPhase implements SearchPhase {
             .limit(pageSize)
             .toArray(Page[]::new));
 
-    LOG.info(String
-        .format("Ranking phase finished in %.3f seconds", (System.nanoTime() - startTime) / 1e9));
+    LOG.info(
+        String.format(
+            "Ranking phase finished in %.3f seconds", (System.nanoTime() - startTime) / 1e9));
   }
 }
