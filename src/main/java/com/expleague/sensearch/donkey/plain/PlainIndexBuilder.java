@@ -31,12 +31,25 @@ import gnu.trove.map.TObjectLongMap;
 import gnu.trove.map.hash.TLongIntHashMap;
 import gnu.trove.map.hash.TLongObjectHashMap;
 import gnu.trove.map.hash.TObjectLongHashMap;
-
-import java.io.*;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.io.Reader;
+import java.io.Writer;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Random;
+import java.util.Set;
+import java.util.TreeMap;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.apache.commons.lang3.tuple.Pair;
@@ -381,7 +394,7 @@ public class PlainIndexBuilder implements IndexBuilder {
       embeddingBuilder.addAll(gloveVectors);
       embeddingBuilder.build();
 
-      Path lshMetricPath =  indexRoot.resolve(indexRoot.resolve(EMBEDDING_ROOT).resolve(LSH_METRIC_ROOT));
+      Path lshMetricPath = indexRoot.resolve(EMBEDDING_ROOT).resolve(LSH_METRIC_ROOT);
       Files.createDirectories(lshMetricPath);
       saveLSHMetricInfo(lshMetricPath,
               gloveVectors,
