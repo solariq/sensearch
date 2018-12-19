@@ -14,6 +14,7 @@ public interface Index {
 
   @Nullable
   Term term(CharSequence seq);
+  Stream<CharSequence> sentences(CharSequence sequence);
   Stream<Term> parse(CharSequence sequence);
   Stream<Term> mostFrequentNeighbours(Term term);
 

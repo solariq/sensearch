@@ -169,7 +169,7 @@ public class PlainIndex implements Index {
     // m.getLemmaId()));
 
     TLongObjectMap<String> idToWord = new TLongObjectHashMap<>();
-    //    indexMeta.getIdMappingsList().forEach(m -> idToWord.put(m.getId(), m.getWord()));
+    //    indexMeta.getIdMappingsList().forEach(m -> idToWord.put(m.getId(), m.word()));
 
     DBIterator termIterator = termBase.iterator();
     termIterator.seekToFirst();
@@ -295,6 +295,11 @@ public class PlainIndex implements Index {
   public Term term(CharSequence seq) {
     final CharSequence normalized = CharSeqTools.toLowerCase(CharSeqTools.trim(seq));
     return wordToTerms.get(CharSeq.intern(normalized));
+  }
+
+  @Override
+  public Stream<CharSequence> sentences(CharSequence sequence) {
+    return tokenizer.toSentences(sequence);
   }
 
   @Override

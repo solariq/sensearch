@@ -1,5 +1,6 @@
 package com.expleague.sensearch;
 
+import com.expleague.sensearch.core.Term;
 import java.net.URI;
 import java.util.List;
 import java.util.stream.Stream;
@@ -33,6 +34,9 @@ public interface Page {
   Page parent();
 
   Stream<Page> subpages();
+
+  Stream<CharSequence> sentences();
+  Stream<Term> parse(CharSequence sequence);
 
   interface Link {
 

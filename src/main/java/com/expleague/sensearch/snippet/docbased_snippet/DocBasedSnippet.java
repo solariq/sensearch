@@ -25,7 +25,7 @@ public class DocBasedSnippet implements Snippet {
     List<Passage> bestPassages =
         passages
             .stream()
-            .filter(passage -> passage.getRating() * 2 > bestPassage)
+            .filter(passage -> passage.getRating() * 2 >= bestPassage)
             .sorted(Comparator.comparingLong(Passage::getId))
             .collect(Collectors.toList());
 
