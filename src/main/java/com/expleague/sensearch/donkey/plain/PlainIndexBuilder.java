@@ -491,7 +491,7 @@ public class PlainIndexBuilder implements IndexBuilder {
             newIds.put(lemma.lemma().toString(), idMapping.size() + newIds.size());
           }
 
-          long lemmaId = idMapping.get(lemma);
+          long lemmaId = idMapping.get(lemma.lemma().toString());
           terms.put(
               wordId, new ParsedTerm(wordId, lemmaId, PartOfSpeech.valueOf(lemma.pos().name())));
           if (!terms.containsKey(lemmaId)) {

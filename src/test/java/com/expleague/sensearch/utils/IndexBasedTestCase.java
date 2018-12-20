@@ -9,6 +9,7 @@ import com.expleague.sensearch.index.plain.PlainIndex;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import org.junit.BeforeClass;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -46,7 +47,7 @@ public abstract class IndexBasedTestCase extends CrawlerBasedTestCase {
 
     Path indexDataRoot = testDataRoot().resolve(INDEX_DATA_ROOT);
     Path logsBasedMyStemRoot = indexDataRoot.resolve(LOG_BASED_LEMMER_ROOT);
-    MyStem myStem = new LogBasedMyStem(logsBasedMyStemRoot);
+    MyStem myStem = new RecordingMyStem(Paths.get("./resources/mystem"), logsBasedMyStemRoot);
     new PlainIndexBuilder(crawler(), indexConfig, new Lemmer(myStem)).buildIndex();
   }
 

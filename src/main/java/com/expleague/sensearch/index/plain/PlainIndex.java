@@ -5,8 +5,6 @@ import com.expleague.commons.math.vectors.VecTools;
 import com.expleague.commons.math.vectors.impl.vectors.ArrayVec;
 import com.expleague.commons.seq.CharSeq;
 import com.expleague.commons.seq.CharSeqTools;
-import com.expleague.commons.text.lemmer.MyStem;
-import com.expleague.commons.text.lemmer.MyStemImpl;
 import com.expleague.sensearch.Config;
 import com.expleague.sensearch.Page;
 import com.expleague.sensearch.core.PartOfSpeech;
@@ -96,7 +94,6 @@ public class PlainIndex implements Index {
   private final Filter filter;
   private final FilterMetric filterMetric = new FilterMetric();
   private final LSHSynonymsMetric lshSynonymsMetric;
-  private final MyStem stemmer;
   private final Tokenizer tokenizer;
 
   private TermStatistics lastTermStatistics;
@@ -105,6 +102,7 @@ public class PlainIndex implements Index {
 
   @Inject
   public PlainIndex(Config config) throws IOException {
+
     LOG.info("Loading PlainIndex...");
     long startTime = System.nanoTime();
 
@@ -146,8 +144,6 @@ public class PlainIndex implements Index {
     // suggest_inverted_index_DB, idToTerm);
 
     tokenizer = new TokenizerImpl();
-
-    stemmer = new MyStemImpl(config.getMyStem());
 
     IndexUnits.IndexMeta indexMeta =
         IndexUnits.IndexMeta.parseFrom(
