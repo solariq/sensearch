@@ -73,7 +73,7 @@ public class StatisticsBuilder {
     if (tokens.length < 1) {
       return;
     }
-    termFrequencyMap.put(tokens[0], 1);
+    termFrequencyMap.adjustOrPutValue(tokens[0], 1, 1);
     for (int i = 1; i < tokens.length; ++i) {
       termFrequencyMap.adjustOrPutValue(tokens[i], 1, 1);
 
@@ -93,8 +93,7 @@ public class StatisticsBuilder {
           wordFrequencyMap.adjustOrPutValue(tok, freq, freq);
           documentFrequencyMap.adjustOrPutValue(tok, 1, 1);
           return true;
-        }
-    );
+        });
 
     bigramFreqMap.forEachEntry(
         (tId, neigh) -> {
@@ -106,8 +105,7 @@ public class StatisticsBuilder {
                 return true;
               });
           return true;
-        }
-    );
+        });
   }
 
   void build() throws IOException {

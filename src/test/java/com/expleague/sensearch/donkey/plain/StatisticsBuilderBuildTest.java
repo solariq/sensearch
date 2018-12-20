@@ -29,7 +29,7 @@ public class StatisticsBuilderBuildTest extends SensearchTestCase {
       };
 
   @Test
-  public void enrichFrequenciesTest() {
+  public void enrichFrequenciesTest_oneDocument() {
     TLongIntMap frequenciesMap = new TLongIntHashMap();
     TLongObjectMap<TLongIntMap> bigramsMap = new TLongObjectHashMap<>();
 
@@ -40,6 +40,7 @@ public class StatisticsBuilderBuildTest extends SensearchTestCase {
     Assert.assertEquals(4, frequenciesMap.get(1));
     Assert.assertEquals(3, frequenciesMap.get(2));
     Assert.assertEquals(4, frequenciesMap.get(3));
+    Assert.assertEquals(0, frequenciesMap.get(4));
 
     // test bigrams
     Assert.assertFalse(bigramsMap.isEmpty());
@@ -50,6 +51,24 @@ public class StatisticsBuilderBuildTest extends SensearchTestCase {
     Assert.assertEquals(1, bigramsFor1.get(1));
     Assert.assertEquals(1, bigramsFor1.get(2));
     Assert.assertEquals(1, bigramsFor1.get(3));
+  }
+
+  @Test
+  public void enrichFrequenciesTest_multipleDocuments() {
+    TLongIntMap frequenciesMap = new TLongIntHashMap();
+    TLongObjectMap<TLongIntMap> bigramsMap = new TLongObjectHashMap<>();
+
+    StatisticsBuilder.enrichFrequencies(WORD_ID_SEQ[0], frequenciesMap, bigramsMap);
+    StatisticsBuilder.enrichFrequencies(WORD_ID_SEQ[1], frequenciesMap, bigramsMap);
+    StatisticsBuilder.enrichFrequencies(WORD_ID_SEQ[2], frequenciesMap, bigramsMap);
+
+    // test frequencies
+    Assert.assertFalse(frequenciesMap.isEmpty());
+    Assert.assertEquals(4, frequenciesMap.size());
+    Assert.assertEquals(8, frequenciesMap.get(1));
+    Assert.assertEquals(10, frequenciesMap.get(2));
+    Assert.assertEquals(11, frequenciesMap.get(3));
+    Assert.assertEquals(4, frequenciesMap.get(4));
   }
 
   @Test
