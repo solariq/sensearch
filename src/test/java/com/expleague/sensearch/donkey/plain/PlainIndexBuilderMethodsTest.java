@@ -94,6 +94,8 @@ public class PlainIndexBuilderMethodsTest extends SensearchTestCase {
     idMapping.put("walk", 4);
     idMapping.put("kekekekeke", 5);
     idMapping.put("greatest", 6);
+    idMapping.put("walking", 7);
+    idMapping.put("catsss", 8);
 
     MyStem fakeMyStem =
         charSequence -> {
@@ -116,6 +118,13 @@ public class PlainIndexBuilderMethodsTest extends SensearchTestCase {
             case "kekekekeke":
               return createWordInfo("kekekekeke", null, null);
 
+            case "walking":
+              return createWordInfo("walk", "walk", PartOfSpeech.V);
+
+            case "catsss":
+              return createWordInfo("catsss", "cat", PartOfSpeech.S);
+
+
             default:
               throw new IllegalArgumentException("Unexpected token " + charSequence);
           }
@@ -136,21 +145,23 @@ public class PlainIndexBuilderMethodsTest extends SensearchTestCase {
     assertEquals(4, idMapping.get("walk"));
     assertEquals(5, idMapping.get("kekekekeke"));
     assertEquals(6, idMapping.get("greatest"));
+    assertEquals(7, idMapping.get("walking"));
+    assertEquals(8, idMapping.get("catsss"));
 
     assertTrue(idMapping.containsKey("cat"));
     assertTrue(idMapping.containsKey("dog"));
     assertTrue(idMapping.containsKey("great"));
 
-    assertEquals(9, idMapping.size());
+    assertEquals(11, idMapping.size());
     assertEquals(
-        "All ids must be different", 9, LongStream.of(idMapping.values()).distinct().count());
+        "All ids must be different", 11, LongStream.of(idMapping.values()).distinct().count());
 
     Set<Long> termsIds = terms.valueCollection().stream().map(term -> term.id)
         .collect(Collectors.toSet());
-    for (int i = 1; i <= 9; i++) {
+    for (int i = 1; i <= 11; i++) {
       assertTrue(termsIds.contains((long) i));
     }
-    assertEquals(9, terms.size());
+    assertEquals(11, terms.size());
 
     Map<String, ParsedTerm> parsedTermMap =
         terms
@@ -173,6 +184,11 @@ public class PlainIndexBuilderMethodsTest extends SensearchTestCase {
         parsedTermMap.get("walked").partOfSpeech);
     assertEquals(3, parsedTermMap.get("walked").id);
 
+    assertEquals(-1, parsedTermMap.get("walk").lemmaId);
+    assertEquals(com.expleague.sensearch.core.PartOfSpeech.V,
+        parsedTermMap.get("walked").partOfSpeech);
+    assertEquals(4, parsedTermMap.get("walk").id);
+
     assertEquals(-1, parsedTermMap.get("kekekekeke").lemmaId);
     assertNull(parsedTermMap.get("kekekekeke").partOfSpeech);
     assertEquals(5, parsedTermMap.get("kekekekeke").id);
@@ -181,6 +197,16 @@ public class PlainIndexBuilderMethodsTest extends SensearchTestCase {
     assertEquals(com.expleague.sensearch.core.PartOfSpeech.A,
         parsedTermMap.get("greatest").partOfSpeech);
     assertEquals(6, parsedTermMap.get("greatest").id);
+
+    assertEquals(4, parsedTermMap.get("walking").lemmaId);
+    assertEquals(com.expleague.sensearch.core.PartOfSpeech.V,
+        parsedTermMap.get("walking").partOfSpeech);
+    assertEquals(7, parsedTermMap.get("walking").id);
+
+    assertEquals(idMapping.get("cat"), parsedTermMap.get("catsss").lemmaId);
+    assertEquals(com.expleague.sensearch.core.PartOfSpeech.S,
+        parsedTermMap.get("catsss").partOfSpeech);
+    assertEquals(8, parsedTermMap.get("catsss").id);
 
     assertEquals(-1, parsedTermMap.get("cat").lemmaId);
     assertEquals(com.expleague.sensearch.core.PartOfSpeech.S,

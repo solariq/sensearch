@@ -486,9 +486,14 @@ public class PlainIndexBuilder implements IndexBuilder {
             return true;
           }
 
-          long lemmaId = idMapping.get(lemma.lemma().toString());
-          if (!idMapping.containsKey(lemma.lemma().toString())
-              && !newIds.containsKey(lemma.lemma().toString())) {
+          long lemmaId;
+
+          String lemmaStr = lemma.lemma().toString();
+          if (idMapping.containsKey(lemmaStr)) {
+            lemmaId = idMapping.get(lemmaStr);
+          } else if (newIds.containsKey(lemmaStr)) {
+            lemmaId = newIds.get(lemmaStr);
+          } else {
             lemmaId = idMapping.size() + newIds.size() + 1;
             newIds.put(lemma.lemma().toString(), lemmaId);
           }
