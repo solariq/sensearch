@@ -140,9 +140,6 @@ public class PlainIndex implements Index {
             indexRoot.resolve(PlainIndexBuilder.SUGGEST_INVERTED_INDEX_ROOT).toFile(),
             DEFAULT_DB_OPTIONS);
 
-    // suggestLoader = new SuggestInformationLoader(suggest_unigram_DB, suggest_multigram_DB,
-    // suggest_inverted_index_DB, idToTerm);
-
     tokenizer = new TokenizerImpl();
 
     IndexUnits.IndexMeta indexMeta =
@@ -210,7 +207,13 @@ public class PlainIndex implements Index {
             throw new RuntimeException(e);
           }
         });
-
+    
+    suggestLoader = new SuggestInformationLoader(
+    		suggest_unigram_DB,
+    		suggest_multigram_DB,
+    		suggest_inverted_index_DB,
+    		idToTerm);
+    
     for (UriPageMapping mapping : indexMeta.getUriPageMappingsList()) {
       uriToPageIdMap.put(URI.create(mapping.getUri()), mapping.getPageId());
     }

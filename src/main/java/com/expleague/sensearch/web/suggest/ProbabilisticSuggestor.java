@@ -2,6 +2,8 @@ package com.expleague.sensearch.web.suggest;
 
 import com.expleague.sensearch.core.Term;
 import com.expleague.sensearch.index.Index;
+import com.google.inject.Inject;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -18,7 +20,8 @@ public class ProbabilisticSuggestor implements Suggestor {
 	private Map<Term[], Double> phraseProb = new HashMap<>();
 
 	private Index index;
-
+	
+	@Inject
 	public ProbabilisticSuggestor(Index index) {
 		this.index = index;
 
@@ -54,6 +57,9 @@ public class ProbabilisticSuggestor implements Suggestor {
 	}
 
 	private List<Integer> getDocumentList(Term t) {
+		if (!invertedIndex.containsKey(t)) {
+			return Arrays.asList();
+		}
 		List<Integer> res = Arrays.stream(invertedIndex.get(t))
 				.boxed()
 				.collect(Collectors.toList());
@@ -89,7 +95,7 @@ public class ProbabilisticSuggestor implements Suggestor {
 		String qt = terms.get(terms.size() - 1).text().toString();
 		List<Term> qc = terms.subList(0, terms.size() - 1);
 
-		List<Integer> qcDocs = getDocsSetsIntersection((Term[]) qc.toArray());
+		List<Integer> qcDocs = getDocsSetsIntersection(qc.stream().toArray(Term[]::new));
 
 		phraseProb.clear();
 

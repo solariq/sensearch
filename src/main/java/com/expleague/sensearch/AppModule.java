@@ -14,6 +14,7 @@ import com.expleague.sensearch.index.plain.PlainIndex;
 import com.expleague.sensearch.metrics.RequestCrawler;
 import com.expleague.sensearch.metrics.WebCrawler;
 import com.expleague.sensearch.web.suggest.BigramsBasedSuggestor;
+import com.expleague.sensearch.web.suggest.ProbabilisticSuggestor;
 import com.expleague.sensearch.web.suggest.Suggestor;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.AbstractModule;
@@ -40,6 +41,7 @@ public class AppModule extends AbstractModule {
 
       bind(Index.class).to(PlainIndex.class);
       bind(Suggestor.class).to(BigramsBasedSuggestor.class);
+      //bind(Suggestor.class).to(ProbabilisticSuggestor.class);
       bind(SenSeArch.class).to(SenSeArchImpl.class);
       bind(IndexBuilder.class).to(PlainIndexBuilder.class);
       bind(Crawler.class).to(CrawlerXML.class);
