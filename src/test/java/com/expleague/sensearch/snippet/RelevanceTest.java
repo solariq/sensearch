@@ -3,6 +3,7 @@ package com.expleague.sensearch.snippet;
 import com.expleague.commons.text.lemmer.MyStem;
 import com.expleague.sensearch.Page;
 import com.expleague.sensearch.core.Lemmer;
+import com.expleague.sensearch.core.Term;
 import com.expleague.sensearch.utils.SensearchTestCase;
 import java.net.URI;
 import java.util.List;
@@ -80,6 +81,16 @@ public class RelevanceTest extends SensearchTestCase {
           }
 
           @Override
+          public Stream<CharSequence> sentences() {
+            return null;
+          }
+
+          @Override
+          public Stream<Term> parse(CharSequence sequence) {
+            return null;
+          }
+
+          @Override
           public CharSequence fullContent() {
             return null;
           }
@@ -135,6 +146,16 @@ public class RelevanceTest extends SensearchTestCase {
 
           @Override
           public Stream<Page> subpages() {
+            return null;
+          }
+
+          @Override
+          public Stream<CharSequence> sentences() {
+            return null;
+          }
+
+          @Override
+          public Stream<Term> parse(CharSequence sequence) {
             return null;
           }
 
@@ -196,6 +217,16 @@ public class RelevanceTest extends SensearchTestCase {
 
           @Override
           public Stream<Page> subpages() {
+            return null;
+          }
+
+          @Override
+          public Stream<CharSequence> sentences() {
+            return null;
+          }
+
+          @Override
+          public Stream<Term> parse(CharSequence sequence) {
             return null;
           }
         };

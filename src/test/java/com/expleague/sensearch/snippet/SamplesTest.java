@@ -3,6 +3,7 @@ package com.expleague.sensearch.snippet;
 import com.expleague.commons.text.lemmer.MyStem;
 import com.expleague.sensearch.Page;
 import com.expleague.sensearch.core.Lemmer;
+import com.expleague.sensearch.core.Term;
 import com.expleague.sensearch.core.Tokenizer;
 import com.expleague.sensearch.core.impl.TokenizerImpl;
 import com.expleague.sensearch.query.BaseQuery;
@@ -97,6 +98,16 @@ public class SamplesTest extends SensearchTestCase {
                         public Stream<Page> subpages() {
                           return null;
                         }
+
+                        @Override
+                        public Stream<CharSequence> sentences() {
+                          return null;
+                        }
+
+                        @Override
+                        public Stream<Term> parse(CharSequence sequence) {
+                          return null;
+                        }
                       });
                   // FIXME: parsed terms are needed to for queries
 //                  queries.add(new BaseQuery(query));
@@ -110,10 +121,10 @@ public class SamplesTest extends SensearchTestCase {
   @Test
   @Ignore
   public void test() {
-    for (int i = 0; i < pages.size(); i++) {
+    /*for (int i = 0; i < pages.size(); i++) {
       Snippet snippet = sc.getSnippet(pages.get(i), queries.get(i), lemmer);
       System.out.println(snippet.getContent());
       System.out.println();
-    }
+    }*/
   }
 }

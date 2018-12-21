@@ -1,6 +1,7 @@
 package com.expleague.sensearch.index.plain;
 
 import com.expleague.sensearch.Page;
+import com.expleague.sensearch.core.Term;
 import com.expleague.sensearch.index.IndexedPage;
 import com.expleague.sensearch.protobuf.index.IndexUnits;
 import com.google.protobuf.InvalidProtocolBufferException;
@@ -77,6 +78,16 @@ public class PlainPage implements IndexedPage {
 
     @Override
     public Stream<Page> subpages() {
+      return Stream.empty();
+    }
+
+    @Override
+    public Stream<CharSequence> sentences() {
+      return Stream.empty();
+    }
+
+    @Override
+    public Stream<Term> parse(CharSequence sequence) {
       return Stream.empty();
     }
   };
@@ -202,6 +213,16 @@ public class PlainPage implements IndexedPage {
     return this
         .subpagesIds()
         .mapToObj(id -> PlainPage.create(id, this.index));
+  }
+
+  @Override
+  public Stream<CharSequence> sentences() {
+    return index.sentences(content());
+  }
+
+  @Override
+  public Stream<Term> parse(CharSequence sequence) {
+    return index.parse(sequence);
   }
 
   @Override

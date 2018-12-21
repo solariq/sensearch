@@ -2,21 +2,27 @@ package com.expleague.sensearch.snippet.docbased_snippet;
 
 import com.expleague.commons.text.lemmer.LemmaInfo;
 import com.expleague.commons.text.lemmer.WordInfo;
+import com.expleague.sensearch.core.Term;
+import java.util.Objects;
 
 public class KeyWord {
-  private WordInfo word;
-  private double rank;
+  private Term word;
+  private double rank = 0;
 
-  public KeyWord(WordInfo word, double rank) {
+  public KeyWord(Term word) {
+    this.word = word;
+  }
+
+  public KeyWord(Term word, double rank) {
     this.word = word;
     this.rank = rank;
   }
 
-  public WordInfo getWord() {
+  public Term word() {
     return word;
   }
 
-  public double getRank() {
+  public double rank() {
     return rank;
   }
 
@@ -27,20 +33,14 @@ public class KeyWord {
   @Override
   public boolean equals(Object o) {
     if (o instanceof KeyWord) {
-      final LemmaInfo lemma = this.word.lemma();
-      final WordInfo oword = ((KeyWord) o).word;
-      if (lemma == null || oword.lemma() == null)
-        return word.token().equals(oword.token());
-      return lemma.lemma().equals(oword.lemma().lemma());
+      KeyWord oKeyWord = (KeyWord) o;
+      return word == oKeyWord.word;
     }
     return false;
   }
 
   @Override
   public int hashCode() {
-    final LemmaInfo lemma = word.lemma();
-    if (lemma == null)
-      return word.token().hashCode();
-    return lemma.lemma().hashCode();
+    return Objects.hashCode(word);
   }
 }

@@ -5,8 +5,6 @@ import com.expleague.commons.math.vectors.VecTools;
 import com.expleague.commons.math.vectors.impl.vectors.ArrayVec;
 import com.expleague.commons.seq.CharSeq;
 import com.expleague.commons.seq.CharSeqTools;
-import com.expleague.commons.text.lemmer.MyStem;
-import com.expleague.commons.text.lemmer.MyStemImpl;
 import com.expleague.sensearch.Config;
 import com.expleague.sensearch.Page;
 import com.expleague.sensearch.core.PartOfSpeech;
@@ -29,10 +27,8 @@ import com.google.common.primitives.Longs;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.protobuf.InvalidProtocolBufferException;
-import gnu.trove.map.TLongLongMap;
 import gnu.trove.map.TLongObjectMap;
 import gnu.trove.map.TObjectLongMap;
-import gnu.trove.map.hash.TLongLongHashMap;
 import gnu.trove.map.hash.TLongObjectHashMap;
 import gnu.trove.map.hash.TObjectLongHashMap;
 import java.io.IOException;
@@ -85,7 +81,7 @@ public class PlainIndex implements Index {
   private final DB termStatisticsBase;
   private final DB pageBase;
   private final DB termBase;
-  
+
   private final DB suggest_unigram_DB;
   private final DB suggest_multigram_DB;
   private final DB suggest_inverted_index_DB;
@@ -98,14 +94,15 @@ public class PlainIndex implements Index {
   private final Filter filter;
   private final FilterMetric filterMetric = new FilterMetric();
   private final LSHSynonymsMetric lshSynonymsMetric;
-  private final MyStem stemmer;
   private final Tokenizer tokenizer;
 
   private TermStatistics lastTermStatistics;
-  
+
   private SuggestInformationLoader suggestLoader;
+
   @Inject
   public PlainIndex(Config config) throws IOException {
+
     LOG.info("Loading PlainIndex...");
     long startTime = System.nanoTime();
 
@@ -113,7 +110,8 @@ public class PlainIndex implements Index {
 
     Path embeddingPath = indexRoot.resolve(PlainIndexBuilder.EMBEDDING_ROOT);
     embedding = new EmbeddingImpl(embeddingPath);
-    lshSynonymsMetric = new LSHSynonymsMetric(embeddingPath.resolve(PlainIndexBuilder.LSH_METRIC_ROOT));
+    lshSynonymsMetric =
+        new LSHSynonymsMetric(embeddingPath.resolve(PlainIndexBuilder.LSH_METRIC_ROOT));
     filter = new FilterImpl(embedding);
 
     termStatisticsBase =
@@ -127,45 +125,44 @@ public class PlainIndex implements Index {
     termBase =
         JniDBFactory.factory.open(
             indexRoot.resolve(PlainIndexBuilder.TERM_ROOT).toFile(), DEFAULT_DB_OPTIONS);
-    
-    suggest_unigram_DB =
-    	JniDBFactory.factory.open(
-    			indexRoot.resolve(PlainIndexBuilder.SUGGEST_UNIGRAM_ROOT).toFile(), DEFAULT_DB_OPTIONS);
-    
-    suggest_multigram_DB =
-        	JniDBFactory.factory.open(
-        			indexRoot.resolve(PlainIndexBuilder.SUGGEST_MULTIGRAMS_ROOT).toFile(), DEFAULT_DB_OPTIONS);
-    
-    suggest_inverted_index_DB =
-        	JniDBFactory.factory.open(
-        			indexRoot.resolve(PlainIndexBuilder.SUGGEST_INVERTED_INDEX_ROOT).toFile(), DEFAULT_DB_OPTIONS);
-    
-    //suggestLoader = new SuggestInformationLoader(suggest_unigram_DB, suggest_multigram_DB, suggest_inverted_index_DB, idToTerm);
-    
-    tokenizer = new TokenizerImpl();
 
-    stemmer = new MyStemImpl(config.getMyStem());
+    suggest_unigram_DB =
+        JniDBFactory.factory.open(
+            indexRoot.resolve(PlainIndexBuilder.SUGGEST_UNIGRAM_ROOT).toFile(), DEFAULT_DB_OPTIONS);
+
+    suggest_multigram_DB =
+        JniDBFactory.factory.open(
+            indexRoot.resolve(PlainIndexBuilder.SUGGEST_MULTIGRAMS_ROOT).toFile(),
+            DEFAULT_DB_OPTIONS);
+
+    suggest_inverted_index_DB =
+        JniDBFactory.factory.open(
+            indexRoot.resolve(PlainIndexBuilder.SUGGEST_INVERTED_INDEX_ROOT).toFile(),
+            DEFAULT_DB_OPTIONS);
+
+    tokenizer = new TokenizerImpl();
 
     IndexUnits.IndexMeta indexMeta =
         IndexUnits.IndexMeta.parseFrom(
             Files.newInputStream(indexRoot.resolve(PlainIndexBuilder.INDEX_META_FILE)));
 
     if (indexMeta.getVersion() != VERSION) {
-      throw new IllegalArgumentException(
+      String errorMessage =
           String.format(
               "Built index has version %d while code version is %d",
-              indexMeta.getVersion(), VERSION));
+              indexMeta.getVersion(), VERSION);
+      LOG.fatal(errorMessage);
+      throw new IllegalArgumentException(errorMessage);
     }
     averagePageSize = indexMeta.getAveragePageSize();
     indexSize = indexMeta.getPagesCount();
     vocabularySize = indexMeta.getVocabularySize();
 
-    final TLongLongMap wordToLemma = new TLongLongHashMap();
     //    indexMeta.getLemmaIdMappingsList().forEach(m -> wordToLemma.put(m.getWordId(),
     // m.getLemmaId()));
 
     TLongObjectMap<String> idToWord = new TLongObjectHashMap<>();
-    //    indexMeta.getIdMappingsList().forEach(m -> idToWord.put(m.getId(), m.getWord()));
+    //    indexMeta.getIdMappingsList().forEach(m -> idToWord.put(m.getId(), m.word()));
 
     DBIterator termIterator = termBase.iterator();
     termIterator.seekToFirst();
@@ -186,7 +183,7 @@ public class PlainIndex implements Index {
 
             final IndexTerm lemmaTerm;
 
-            final long lemmaId = wordToLemma.get(protoTerm.getId());
+            final long lemmaId = protoTerm.hasLemmaId() ? protoTerm.getLemmaId() : -1;
             if (lemmaId == -1) {
               lemmaTerm = null;
             } else {
@@ -210,7 +207,13 @@ public class PlainIndex implements Index {
             throw new RuntimeException(e);
           }
         });
-
+    
+    suggestLoader = new SuggestInformationLoader(
+    		suggest_unigram_DB,
+    		suggest_multigram_DB,
+    		suggest_inverted_index_DB,
+    		idToTerm);
+    
     for (UriPageMapping mapping : indexMeta.getUriPageMappingsList()) {
       uriToPageIdMap.put(URI.create(mapping.getUri()), mapping.getPageId());
     }
@@ -231,8 +234,7 @@ public class PlainIndex implements Index {
     byte[] pageBytes = pageBase.get(Longs.toByteArray(id));
     if (pageBytes == null) {
       throw new NoSuchElementException(
-          String.format("No page with id [ %d ] was found in the index!", id)
-      );
+          String.format("No page with id [ %d ] was found in the index!", id));
     }
 
     return IndexUnits.Page.parseFrom(pageBytes);
@@ -266,24 +268,23 @@ public class PlainIndex implements Index {
   @Override
   public Stream<Page> fetchDocuments(Query query) {
     final Vec queryVec = new ArrayVec(embedding.dim());
-    query.terms()
+    query
+        .terms()
         .stream()
         .mapToLong(t -> ((IndexTerm) t).id())
         .mapToObj(embedding::vec)
         .forEach(v -> VecTools.append(queryVec, v));
 
-    List<Page> pages = filter
-        .filtrate(queryVec, FILTERED_DOC_NUMBER, PlainIndex::isPageId)
-        .mapToObj(id -> PlainPage.create(id, this))
-        .collect(Collectors.toList());
+    List<Page> pages =
+        filter
+            .filtrate(queryVec, FILTERED_DOC_NUMBER, PlainIndex::isPageId)
+            .mapToObj(id -> PlainPage.create(id, this))
+            .collect(Collectors.toList());
 
-    double result = filterMetric.calc(query
-                    .terms()
-                    .stream()
-                    .map(Term::text)
-                    .collect(Collectors.joining(" ")),
-        pages.stream().map(Page::uri).collect(Collectors.toSet())
-    );
+    double result =
+        filterMetric.calc(
+            query.terms().stream().map(Term::text).collect(Collectors.joining(" ")),
+            pages.stream().map(Page::uri).collect(Collectors.toSet()));
 
     LOG.info("FilterMetric: " + result);
     return pages.stream();
@@ -293,6 +294,11 @@ public class PlainIndex implements Index {
   public Term term(CharSequence seq) {
     final CharSequence normalized = CharSeqTools.toLowerCase(CharSeqTools.trim(seq));
     return wordToTerms.get(CharSeq.intern(normalized));
+  }
+
+  @Override
+  public Stream<CharSequence> sentences(CharSequence sequence) {
+    return tokenizer.toSentences(sequence);
   }
 
   @Override
@@ -318,8 +324,11 @@ public class PlainIndex implements Index {
   Stream<Term> synonyms(Term term) {
     System.out.println("Synonyms for " + term.text());
 
-    Set<Long> LSHIds = filter.filtrate(embedding.vec(((IndexTerm) term).id()), SYNONYMS_COUNT, PlainIndex::isWordId)
-            .boxed().collect(Collectors.toSet());
+    Set<Long> LSHIds =
+        filter
+            .filtrate(embedding.vec(((IndexTerm) term).id()), SYNONYMS_COUNT, PlainIndex::isWordId)
+            .boxed()
+            .collect(Collectors.toSet());
 
     double result = lshSynonymsMetric.calc(((IndexTerm) term).id(), LSHIds);
 
@@ -361,8 +370,8 @@ public class PlainIndex implements Index {
     return lastTermStatistics;
   }
 
-	@Override
-	public SuggestInformationLoader getSuggestInformation() {
-		return suggestLoader;
-	}
+  @Override
+  public SuggestInformationLoader getSuggestInformation() {
+    return suggestLoader;
+  }
 }

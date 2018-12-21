@@ -3,6 +3,7 @@ package com.expleague.sensearch.web;
 import com.expleague.sensearch.AppModule;
 import com.expleague.sensearch.Config;
 import com.expleague.sensearch.donkey.IndexBuilder;
+import com.expleague.sensearch.index.Index;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import java.nio.file.Files;
@@ -73,6 +74,8 @@ public class SearchServer {
     context.addServlet(jerseyServlet, "/*");
 
     server.start();
+
+    injector.getInstance(Index.class);
 
     LOG.info("Server started!");
 

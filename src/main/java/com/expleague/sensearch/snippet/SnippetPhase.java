@@ -16,12 +16,10 @@ public class SnippetPhase implements SearchPhase {
   private static final Logger LOG = Logger.getLogger(SnippetPhase.class.getName());
 
   private final SnippetsCreator snippetsCreator = new SnippetsCreator();
-  private final Lemmer lemmer;
   private final int phaseId;
 
   @Inject
-  public SnippetPhase(Lemmer lemmer, @Assisted int phaseId) {
-    this.lemmer = lemmer;
+  public SnippetPhase(@Assisted int phaseId) {
     this.phaseId = phaseId;
   }
 
@@ -38,7 +36,7 @@ public class SnippetPhase implements SearchPhase {
     final List<Snippet> snippets = new ArrayList<>();
     for (Page doc : Objects.requireNonNull(whiteboard.results())) {
       snippets.add(
-          snippetsCreator.getSnippet(doc, whiteboard.query()[0], lemmer));
+          snippetsCreator.getSnippet(doc, whiteboard.query()[0]));
     }
     //noinspection ToArrayCallWithZeroLengthArrayArgument
     whiteboard.putSnippets(snippets.toArray(new Snippet[snippets.size()]));

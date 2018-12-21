@@ -53,10 +53,10 @@ public class SuggestInformationLoader {
 			iter.forEachRemaining(item -> {
 				Term[] terms = null;
 				try {
-					terms = (Term[]) IndexUnits.TermList.parseFrom(item.getKey())
+					terms = IndexUnits.TermList.parseFrom(item.getKey())
 							.getTermListList().stream()
 							.map(l -> idToTerm.get(l))
-							.toArray();
+							.toArray(Term[]::new);
 				} catch (InvalidProtocolBufferException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
