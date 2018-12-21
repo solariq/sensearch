@@ -6,8 +6,10 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Properties;
 import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
+import org.apache.log4j.PropertyConfigurator;
 import org.iq80.leveldb.CompressionType;
 import org.iq80.leveldb.Options;
 import org.junit.AfterClass;
@@ -32,7 +34,11 @@ public abstract class SensearchTestCase {
   private static TestConfigImpl config;
 
   @BeforeClass
-  public static void initWorkingPaths() {
+  public static void initWorkingPaths() throws IOException {
+    Properties logProperties = new Properties();
+    logProperties.load(Files.newInputStream(Paths.get("log4j.properties")));
+    PropertyConfigurator.configure(logProperties);
+
     //
     LOG.info("Initializing test environment...");
 

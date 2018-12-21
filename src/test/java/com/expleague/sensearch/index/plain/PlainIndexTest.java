@@ -12,7 +12,6 @@ import com.expleague.sensearch.utils.IndexBasedTestCase;
 import org.junit.Test;
 
 public class PlainIndexTest extends IndexBasedTestCase {
-
   @Test
   public void testFetchDocuments() {
     // TODO: what do we test there?
@@ -26,17 +25,17 @@ public class PlainIndexTest extends IndexBasedTestCase {
 
   @Test
   public void testTerm_exists() {
-    // Crawler xml with id 6673315
-    String word = "китаец";
+    // Crawler xml with id 3774964
+    String word = "ведущий";
 
     Term term = index().term(word);
     assertNotNull(term);
-    assertEquals("китаец", term.text().toString());
-    // Lemma of "китаец" is "китаец"
+    assertEquals("ведущий", term.text().toString());
+    // Lemma of "ведущий" is "ведущий"
     assertSame(term, term.lemma());
     // This term occurs at least once
     assertTrue(term.documentFreq() > 0);
     assertTrue(term.freq() > 0);
-    assertEquals(PartOfSpeech.S, term.partOfSpeech());
+    assertEquals(PartOfSpeech.A, term.partOfSpeech());
   }
 }
