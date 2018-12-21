@@ -466,7 +466,8 @@ public class PlainIndexBuilder implements IndexBuilder {
     }
   }
 
-  private TLongObjectMap<ParsedTerm> parseTerms(TObjectLongMap<String> idMapping, Lemmer lemmer) {
+  @VisibleForTesting
+  static TLongObjectMap<ParsedTerm> parseTerms(TObjectLongMap<String> idMapping, Lemmer lemmer) {
     MyStem stem = lemmer.myStem;
     TLongObjectMap<ParsedTerm> terms = new TLongObjectHashMap<>();
     TObjectLongMap<String> newIds = new TObjectLongHashMap<>();
@@ -477,7 +478,6 @@ public class PlainIndexBuilder implements IndexBuilder {
           final LemmaInfo lemma = parse.size() > 0 ? parse.get(0).lemma() : null;
           final long wordId = idMapping.get(word);
 
-          //noinspection EqualsBetweenInconvertibleTypes
           if (lemma == null || lemma.lemma().equals(word)) {
             terms.put(
                 wordId,
@@ -486,17 +486,18 @@ public class PlainIndexBuilder implements IndexBuilder {
             return true;
           }
 
-          if (!idMapping.containsKey(lemma.lemma())
+          long lemmaId = idMapping.get(lemma.lemma().toString());
+          if (!idMapping.containsKey(lemma.lemma().toString())
               && !newIds.containsKey(lemma.lemma().toString())) {
-            newIds.put(lemma.lemma().toString(), idMapping.size() + newIds.size());
+            lemmaId = idMapping.size() + newIds.size() + 1;
+            newIds.put(lemma.lemma().toString(), lemmaId);
           }
 
-          long lemmaId = idMapping.get(lemma.lemma().toString());
           terms.put(
               wordId, new ParsedTerm(wordId, lemmaId, PartOfSpeech.valueOf(lemma.pos().name())));
           if (!terms.containsKey(lemmaId)) {
             terms.put(
-                wordId, new ParsedTerm(lemmaId, -1, PartOfSpeech.valueOf(lemma.pos().name())));
+                lemmaId, new ParsedTerm(lemmaId, -1, PartOfSpeech.valueOf(lemma.pos().name())));
           }
 
           return true;
@@ -506,7 +507,7 @@ public class PlainIndexBuilder implements IndexBuilder {
     return terms;
   }
 
-  private static class ParsedTerm {
+  static class ParsedTerm {
 
     long id;
     long lemmaId;
