@@ -17,8 +17,6 @@ import org.apache.log4j.Logger;
  */
 public class RankingPhase implements SearchPhase {
 
-  private int rankerId;
-
   private static final Logger LOG = Logger.getLogger(RankingPhase.class.getName());
 
   private final int pageSize;
@@ -30,15 +28,9 @@ public class RankingPhase implements SearchPhase {
     this.phaseId = phaseId;
   }
 
-  public RankingPhase(PointWiseRanker ranker, int pageSize, int rankerId) {
-    this.ranker = ranker;
-    this.pageSize = pageSize;
-    this.rankerId = rankerId;
-  }
-
   @Override
   public boolean test(Whiteboard whiteboard) {
-    return whiteboard.textFeatures() != null && whiteboard.textFeatures() != null && whiteboard.textFeatures()[rankerId] != null;
+    return whiteboard.textFeatures() != null && whiteboard.textFeatures()[phaseId] != null;
   }
 
   @Override
@@ -47,9 +39,9 @@ public class RankingPhase implements SearchPhase {
     long startTime = System.nanoTime();
 
     final int pageNo = whiteboard.pageNo();
-    whiteboard.putResults(
+    whiteboard.putSubResult(
         whiteboard
-            .textFeatures()[rankerId]
+            .textFeatures()[phaseId]
             .entrySet()
             .stream()
             .map(p -> Pair.of(p.getKey(), p.getValue().features().get(0)))
@@ -57,7 +49,7 @@ public class RankingPhase implements SearchPhase {
             .map(Pair::getLeft)
             .skip(pageNo * pageSize)
             .limit(pageSize)
-            .toArray(Page[]::new));
+            .toArray(Page[]::new), phaseId);
 
     LOG.info(
         String.format(

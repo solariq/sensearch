@@ -17,8 +17,6 @@ import org.apache.log4j.Logger;
  */
 public class MinerPhase implements SearchPhase {
 
-  private int minerId = 0;
-
   private static final Logger LOG = Logger.getLogger(MinerPhase.class.getName());
 
   private final Index index;
@@ -32,15 +30,9 @@ public class MinerPhase implements SearchPhase {
     this.phaseId = phaseId;
   }
 
-  public MinerPhase(Index index, int minerId) {
-    this.index = index;
-    this.featuresExtractor = new RawTextFeaturesMiner(index);
-    this.minerId = minerId;
-  }
-
   @Override
   public boolean test(Whiteboard whiteboard) {
-    return whiteboard.query() != null && whiteboard.query()[minerId] != null;
+    return whiteboard.query() != null && whiteboard.query()[phaseId] != null;
   }
 
   @Override
@@ -48,7 +40,7 @@ public class MinerPhase implements SearchPhase {
     LOG.info("Miner phase started");
     long startTime = System.nanoTime();
 
-    final Query query = whiteboard.query()[minerId];
+    final Query query = whiteboard.query()[phaseId];
     whiteboard.putTextFeatures(
         index
             .fetchDocuments(query)

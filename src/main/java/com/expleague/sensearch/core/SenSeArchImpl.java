@@ -28,16 +28,19 @@ public class SenSeArchImpl implements SenSeArch {
 
   @Override
   public ResultPage search(String query, int pageNo) {
+    final Whiteboard wb = new WhiteboardImpl(query, pageNo);
+
     final Set<SearchPhase> phases = new HashSet<>();
     phases.add(searchPhaseFactory.createQueryPhase());
 
-    phases.add(searchPhaseFactory.createMinerPhase(0));
-    phases.add(searchPhaseFactory.createRankingPhase(0));
-    phases.add(searchPhaseFactory.createSnippetPhase(0));
+    for (int i = 0; i < wb.queriesNumber(); ++i) {
+        phases.add(searchPhaseFactory.createMinerPhase(i));
+        phases.add(searchPhaseFactory.createRankingPhase(i));
+        phases.add(searchPhaseFactory.createSnippetPhase(i));
+    }
 
     phases.add(searchPhaseFactory.createMetricPhase());
 
-    final Whiteboard wb = new WhiteboardImpl(query, pageNo);
     final ThreadPoolExecutor executor =
         new ThreadPoolExecutor(
             Runtime.getRuntime().availableProcessors() - 1,

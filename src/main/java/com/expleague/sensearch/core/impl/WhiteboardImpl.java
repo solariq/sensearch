@@ -6,6 +6,9 @@ import com.expleague.sensearch.core.Whiteboard;
 import com.expleague.sensearch.miner.Features;
 import com.expleague.sensearch.query.Query;
 import com.expleague.sensearch.snippet.Snippet;
+
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import org.jetbrains.annotations.Nullable;
 
@@ -13,11 +16,12 @@ public class WhiteboardImpl implements Whiteboard {
 
   private final String input;
   private final int page;
+  private final int queriesNumber = 1;
   private Page[] results;
-  private Page[][] subResults;
+  private List<Page[]> subResults = new ArrayList<>(queriesNumber);
   private Snippet[] snippets;
-  private Query[] queries;
-  private Map<Page, Features>[] textFeatures;
+  private List<Query> queries;
+  private List<Map<Page, Features>> textFeatures = new ArrayList<>(queriesNumber);
   private ResultItem[] googleResults;
 
   public WhiteboardImpl(String input, int page) {
@@ -26,13 +30,18 @@ public class WhiteboardImpl implements Whiteboard {
   }
 
   @Override
-  public synchronized Map<Page, Features>[] textFeatures() {
+  public synchronized List<Map<Page, Features>> textFeatures() {
     return textFeatures;
   }
 
   @Override
-  public synchronized void putTextFeatures(Map<Page, Features>[] textFeatures) {
+  public synchronized void putTextFeatures(List<Map<Page, Features>> textFeatures) {
     this.textFeatures = textFeatures;
+  }
+
+  @Override
+  public synchronized void putTextFeatures(Map<Page, Features> textFeatures, int index) {
+      this.textFeatures.set(index, textFeatures);
   }
 
   @Nullable
@@ -48,17 +57,18 @@ public class WhiteboardImpl implements Whiteboard {
 
   @Nullable
   @Override
-  public synchronized Page[][] subResults() {
+  public synchronized List<Page[]> subResults() {
     return subResults;
   }
 
   @Override
-  public synchronized void putSubResults(Page[][] subResults) {
+  public synchronized void putSubResults(List<Page[]> subResults) {
     this.subResults = subResults;
   }
 
+  @Override
   public synchronized void putSubResult(Page[] subResult, int index) {
-    this.subResults[index] = subResult;
+    this.subResults.set(index, subResult);
   }
 
   @Override
@@ -73,7 +83,7 @@ public class WhiteboardImpl implements Whiteboard {
 
   @Nullable
   @Override
-  public synchronized Query[] query() {
+  public synchronized List<Query> query() {
     return queries;
   }
 
@@ -84,7 +94,7 @@ public class WhiteboardImpl implements Whiteboard {
   }
 
   @Override
-  public synchronized void putQuery(Query[] query) {
+  public synchronized void putQuery(List<Query> query) {
     this.queries = query;
   }
 
@@ -107,5 +117,10 @@ public class WhiteboardImpl implements Whiteboard {
   @Override
   public ResultItem[] googleResults() {
     return googleResults;
+  }
+
+  @Override
+  public int queriesNumber() {
+      return queriesNumber;
   }
 }

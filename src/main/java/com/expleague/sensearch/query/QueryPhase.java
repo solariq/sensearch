@@ -1,5 +1,6 @@
 package com.expleague.sensearch.query;
 
+import com.expleague.sensearch.Page;
 import com.expleague.sensearch.core.SearchPhase;
 import com.expleague.sensearch.core.Whiteboard;
 import java.util.ArrayList;
@@ -28,6 +29,7 @@ public class QueryPhase implements SearchPhase {
   public void accept(Whiteboard whiteboard) {
     LOG.info("Query phase started");
     long startTime = System.nanoTime();
+    int queriesNumber = whiteboard.queriesNumber();
 
     final String input = whiteboard.input();
 
@@ -35,7 +37,7 @@ public class QueryPhase implements SearchPhase {
 
     queries.add(BaseQuery.create(input, index));
 
-    whiteboard.putQuery(queries.stream().toArray(Query[]::new));
+    whiteboard.putQuery(queries);
 
     LOG.info(String
         .format("Query phase finished in %.3f seconds", (System.nanoTime() - startTime) / 1e9));
