@@ -4,7 +4,7 @@
 
   "webRoot": "webapp/dist/webapp",
 
-  "embeddingVectors": "./resources/vectors.txt.gz",
+  "embeddingVectors": "./resources/vectors(lowcase).txt.gz",
   "myStem": "./resources/mystem",
 
   "pathToZIP": "../WikiDocs/Mini_Wiki_categories.zip",
