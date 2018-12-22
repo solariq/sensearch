@@ -40,6 +40,7 @@ public class SenSeArchImpl implements SenSeArch {
     }
 
     phases.add(searchPhaseFactory.createMetricPhase());
+    phases.add(searchPhaseFactory.createMergePhase());
 
     final ThreadPoolExecutor executor =
         new ThreadPoolExecutor(

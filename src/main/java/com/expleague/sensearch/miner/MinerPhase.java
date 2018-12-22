@@ -32,7 +32,7 @@ public class MinerPhase implements SearchPhase {
 
   @Override
   public boolean test(Whiteboard whiteboard) {
-    return whiteboard.query() != null && whiteboard.query()[phaseId] != null;
+    return whiteboard.query() != null && whiteboard.query().size() != 0 && whiteboard.query().get(phaseId) != null;
   }
 
   @Override
@@ -40,13 +40,13 @@ public class MinerPhase implements SearchPhase {
     LOG.info("Miner phase started");
     long startTime = System.nanoTime();
 
-    final Query query = whiteboard.query()[phaseId];
+    final Query query = whiteboard.query().get(phaseId);
     whiteboard.putTextFeatures(
         index
             .fetchDocuments(query)
             .collect(
                 Collectors.toMap(
-                    Function.identity(), page -> featuresExtractor.extractFeatures(query, page))));
+                    Function.identity(), page -> featuresExtractor.extractFeatures(query, page))), phaseId);
 
     LOG.info(
         String.format(

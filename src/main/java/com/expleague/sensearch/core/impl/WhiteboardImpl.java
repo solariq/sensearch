@@ -27,6 +27,11 @@ public class WhiteboardImpl implements Whiteboard {
   public WhiteboardImpl(String input, int page) {
     this.input = input;
     this.page = page;
+
+    for (int i = 0; i < queriesNumber; ++i) {
+      subResults.add(null);
+      textFeatures.add(null);
+    }
   }
 
   @Override

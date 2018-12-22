@@ -30,7 +30,7 @@ public class RankingPhase implements SearchPhase {
 
   @Override
   public boolean test(Whiteboard whiteboard) {
-    return whiteboard.textFeatures() != null && whiteboard.textFeatures()[phaseId] != null;
+    return whiteboard.textFeatures() != null && whiteboard.textFeatures().size() != 0 && whiteboard.textFeatures().get(phaseId) != null;
   }
 
   @Override
@@ -41,7 +41,7 @@ public class RankingPhase implements SearchPhase {
     final int pageNo = whiteboard.pageNo();
     whiteboard.putSubResult(
         whiteboard
-            .textFeatures()[phaseId]
+            .textFeatures().get(phaseId)
             .entrySet()
             .stream()
             .map(p -> Pair.of(p.getKey(), p.getValue().features().get(0)))
