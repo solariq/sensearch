@@ -48,10 +48,8 @@ public class MinerPhase implements SearchPhase {
     LOG.info("Miner phase started");
     long startTime = System.nanoTime();
 
-    final List<Map<Page, Features>> documentsFeaturesQueries = new ArrayList<>();
-    for (Query query : whiteboard.query()) {
       final Map<Page, Features> documentsFeatures = new HashMap<>();
-
+      Query query = whiteboard.query().get(phaseId);
       index.fetchDocuments(query).forEach(page -> {
         features.accept(new QURLItem(page, query));
         Vec all = features.advance();
@@ -78,10 +76,8 @@ public class MinerPhase implements SearchPhase {
           }
         });
       });
-      documentsFeaturesQueries.add(documentsFeatures);
-    }
 
-    whiteboard.putTextFeatures(documentsFeaturesQueries);
+    whiteboard.putTextFeatures(documentsFeatures, phaseId);
     LOG.info(String.format("Miner phase finished in %.3f seconds", (System.nanoTime() - startTime) / 1e9));
   }
 }
