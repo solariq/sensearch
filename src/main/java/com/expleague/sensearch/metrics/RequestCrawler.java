@@ -6,6 +6,7 @@ import com.expleague.sensearch.core.impl.ResultItemImpl;
 import com.expleague.sensearch.index.Index;
 import com.google.inject.Inject;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -150,8 +151,8 @@ public class RequestCrawler implements WebCrawler {
             String snippetUrl = element.select("a[href]").attr("href");
             final URI uri;
             try {
-              uri = new URI(URLDecoder.decode(snippetUrl));
-            } catch (URISyntaxException e) {
+              uri = new URI(URLDecoder.decode(snippetUrl, "UTF-8"));
+            } catch (URISyntaxException | UnsupportedEncodingException e) {
               e.printStackTrace();
               return;
             }
