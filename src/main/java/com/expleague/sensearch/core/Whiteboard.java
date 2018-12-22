@@ -11,7 +11,6 @@ import java.util.Map;
 import org.jetbrains.annotations.Nullable;
 
 public interface Whiteboard {
-
   @Nullable
   List<Map<Page, Features>> textFeatures();
 
