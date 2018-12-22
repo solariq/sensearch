@@ -7,7 +7,6 @@ import com.expleague.ml.meta.FeatureMeta.ValueType;
 import com.expleague.sensearch.core.Term;
 import com.expleague.sensearch.query.Query;
 import gnu.trove.map.hash.TObjectIntHashMap;
-
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -15,9 +14,13 @@ import java.util.stream.Collectors;
 
 
 public class BM25FeatureSet extends FeatureSet.Stub<QURLItem> implements TextFeatureSet {
-  private final static FeatureMeta BM25 = FeatureMeta.create("bm25", "Title + text bm25", ValueType.VEC);
-  private final static FeatureMeta BM25L = FeatureMeta.create("bm25l", "Title + text bm25 by lemmas", ValueType.VEC);
-  private final static FeatureMeta BM25S = FeatureMeta.create("bm25s", "Title + text bm25 by synonyms", ValueType.VEC);
+
+  public final static FeatureMeta BM25 = FeatureMeta
+      .create("bm25", "Title + text bm25", ValueType.VEC);
+  public final static FeatureMeta BM25L = FeatureMeta
+      .create("bm25l", "Title + text bm25 by lemmas", ValueType.VEC);
+  public final static FeatureMeta BM25S = FeatureMeta
+      .create("bm25s", "Title + text bm25 by synonyms", ValueType.VEC);
 
   private static final double K = 1.2;
   private static final double B = 0.75;

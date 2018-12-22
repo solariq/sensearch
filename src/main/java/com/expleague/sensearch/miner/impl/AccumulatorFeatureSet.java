@@ -6,7 +6,6 @@ import com.expleague.ml.data.tools.FeatureSet;
 import com.expleague.sensearch.Page;
 import com.expleague.sensearch.core.Term;
 import com.expleague.sensearch.index.Index;
-
 import java.util.Objects;
 import java.util.function.Consumer;
 
@@ -50,6 +49,11 @@ public class AccumulatorFeatureSet extends FeatureSet.Stub<QURLItem> {
   @Override
   public Vec advanceTo(Vec to) {
     return features.advanceTo(to);
+  }
+
+  @Override
+  public int dim() {
+    return features.dim();
   }
 
   private class TermConsumer implements Consumer<Term> {
