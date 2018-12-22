@@ -36,12 +36,14 @@ public class AccumulatorFeatureSet extends FeatureSet.Stub<QURLItem> {
       { // Title processing
         features.components().map(Functions.cast(TextFeatureSet.class)).filter(Objects::nonNull)
             .forEach(fs -> fs.withSegment(TextFeatureSet.Segment.TITLE, titleLength));
-        index.parse(page.title()).forEach(new TermConsumer());
+        TermConsumer termConsumer = new TermConsumer();
+        index.parse(page.title()).forEach(termConsumer);
       }
       { // Content processing
         features.components().map(Functions.cast(TextFeatureSet.class)).filter(Objects::nonNull)
             .forEach(fs -> fs.withSegment(TextFeatureSet.Segment.BODY, contentLength));
-        index.parse(page.fullContent()).forEach(new TermConsumer());
+        TermConsumer termConsumer = new TermConsumer();
+        index.parse(page.fullContent()).forEach(termConsumer);
       }
     }
   }
