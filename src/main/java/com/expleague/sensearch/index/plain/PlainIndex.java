@@ -158,11 +158,6 @@ public class PlainIndex implements Index {
     indexSize = indexMeta.getPagesCount();
     vocabularySize = indexMeta.getVocabularySize();
 
-    //    indexMeta.getLemmaIdMappingsList().forEach(m -> wordToLemma.put(m.getWordId(),
-    // m.getLemmaId()));
-
-    //    indexMeta.getIdMappingsList().forEach(m -> idToWord.put(m.getId(), m.word()));
-
     DBIterator termIterator = termBase.iterator();
     termIterator.seekToFirst();
     termIterator.forEachRemaining(
