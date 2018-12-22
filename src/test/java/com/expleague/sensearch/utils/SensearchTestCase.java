@@ -20,7 +20,7 @@ public abstract class SensearchTestCase {
   protected static final String INDEX_DATA_ROOT = "ForIndex";
 
   protected static final String MINI_WIKI_ZIP = "MiniWiki.zip";
-  protected static final String VECTORS_FILE = "Vectors.txt.gz";
+  protected static final String VECTORS_FILE = "vectors.decomp";
 
   protected static final String MY_STEM_LOGS_ROOT = "MyStemTestLogs";
 

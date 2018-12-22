@@ -20,7 +20,6 @@ import com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta.UriPageMappin
 import com.expleague.sensearch.protobuf.index.IndexUnits.Term;
 import com.expleague.sensearch.protobuf.index.IndexUnits.Term.Builder;
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.collect.Streams;
 import com.google.common.primitives.Longs;
 import com.google.inject.Inject;
 import gnu.trove.list.TLongList;
@@ -37,7 +36,9 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.Reader;
+import java.io.UnsupportedEncodingException;
 import java.io.Writer;
+import java.net.URLDecoder;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -52,7 +53,6 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import org.apache.commons.lang3.tuple.Pair;
 import org.apache.log4j.Logger;
 import org.fusesource.leveldbjni.JniDBFactory;
 import org.iq80.leveldb.CompressionType;
@@ -184,86 +184,87 @@ public class PlainIndexBuilder implements IndexBuilder {
     return mean;
   }
 
-    private Comparator<Vec> comparator(Vec main) {
-        return (v1, v2) -> {
-            double val1 = 1. - VecTools.cosine(v1, main);
-            double val2 = 1. - VecTools.cosine(v2, main);
-            if (val1 < val2) {
-                return -1;
-            } else if (val1 > val2) {
-                return 1;
-            }
-            return 0;
-        };
-    }
+  private Comparator<Vec> comparator(Vec main) {
+    return (v1, v2) -> {
+      double val1 = 1. - VecTools.cosine(v1, main);
+      double val2 = 1. - VecTools.cosine(v2, main);
+      if (val1 < val2) {
+        return -1;
+      } else if (val1 > val2) {
+        return 1;
+      }
+      return 0;
+    };
+  }
 
-    private Collection<Long> nearest(TLongObjectMap<Vec> vecs, long mainId) {
-        Comparator<Vec> comparator = comparator(vecs.get(mainId));
-        TreeMap<Vec, Long> neighbors = new TreeMap<>(comparator);
-        vecs.forEachEntry((id, vec) -> {
-            if (neighbors.size() < NEIGHBORS_NUM) {
-                neighbors.put(vec, id);
-            } else if (comparator.compare(neighbors.lastKey(), vec) > 0) {
-                neighbors.remove(neighbors.lastKey());
-                neighbors.put(vec, id);
-            }
-            return true;
+  private Collection<Long> nearest(TLongObjectMap<Vec> vecs, long mainId) {
+    Vec mainVec = vecs.get(mainId);
+    if (mainVec == null) {
+      return new ArrayList<>();
+    }
+    Comparator<Vec> comparator = comparator(mainVec);
+    TreeMap<Vec, Long> neighbors = new TreeMap<>(comparator);
+    vecs.forEachEntry(
+        (id, vec) -> {
+          if (neighbors.size() < NEIGHBORS_NUM) {
+            neighbors.put(vec, id);
+          } else if (comparator.compare(neighbors.lastKey(), vec) > 0) {
+            neighbors.remove(neighbors.lastKey());
+            neighbors.put(vec, id);
+          }
+          return true;
         });
-        return neighbors.values();
-    }
+    return neighbors.values();
+  }
 
-    private void saveIds(Path root, TLongObjectMap<Vec> vecs, Set<Long> ids) throws IOException {
-        for (long mainId : ids) {
-            try (Writer out =
-                new OutputStreamWriter(
-                    new FileOutputStream(
-                        root.resolve("_" + mainId).toFile()
-                    )
-                )
-            ) {
-                for (long id : nearest(vecs, mainId)) {
-                    out.write(id + " ");
-                }
-            }
+  private void saveIds(Path root, TLongObjectMap<Vec> vecs, Set<Long> ids) throws IOException {
+    for (long mainId : ids) {
+      try (Writer out =
+          new OutputStreamWriter(new FileOutputStream(root.resolve("_" + mainId).toFile()))) {
+        for (long id : nearest(vecs, mainId)) {
+          out.write(id + " ");
         }
+      }
     }
+  }
 
-    private void saveLSHMetricInfo(Path root, TLongObjectMap<Vec> vecs, Set<Long> requiredIds) throws IOException {
-        saveIds(root, vecs, requiredIds);
-        Random random = new Random();
-        Set<Long> randomIds = new HashSet<>();
-        for (int i = 0; i < NUM_OF_RANDOM_IDS; i++) {
-            long mainId;
-            do {
-                mainId = random.nextInt(vecs.size());
-            } while (requiredIds.contains(mainId));
-            randomIds.add(mainId);
-        }
-        saveIds(root, vecs, randomIds);
+  private void saveLSHMetricInfo(Path root, TLongObjectMap<Vec> vecs, Set<Long> requiredIds)
+      throws IOException {
+    saveIds(root, vecs, requiredIds);
+    Random random = new Random();
+    Set<Long> randomIds = new HashSet<>();
+    for (int i = 0; i < NUM_OF_RANDOM_IDS; i++) {
+      long mainId;
+      do {
+        mainId = random.nextInt(vecs.size());
+      } while (requiredIds.contains(mainId));
+      randomIds.add(mainId);
     }
+    saveIds(root, vecs, randomIds);
+  }
 
   @VisibleForTesting
   static void readGloveVectors(
       Path glovePath, TObjectLongMap<String> idMappings, TLongObjectMap<Vec> vectors) {
-    try (Reader vecInput =
-            new InputStreamReader(
-                new FileInputStream(Paths.get("./resources/train_vectors.txt").toFile()));
-        Reader wordInput =
-            new InputStreamReader(
-                new FileInputStream(Paths.get("./resources/vocab.txt").toFile()))) {
-      Streams.zip(
-              CharSeqTools.lines(vecInput)
-                  .skip(1)
-                  .map(s -> s.toString().split(" "))
-                  .filter(a -> a.length == 130),
-              CharSeqTools.lines(wordInput),
-              Pair::of)
+    try (Reader input = new InputStreamReader(new FileInputStream(glovePath.toFile()))) {
+
+      CharSeqTools.lines(input)
           .parallel()
           .forEach(
-              p -> {
-                final String word = p.getRight().toString().toLowerCase();
+              line -> {
+                String[] tokens = line.toString().split("\\s");
+                final String word = tokens[0].toLowerCase();
+                final int dim = Integer.parseInt(tokens[1]);
+
+                if (dim != DEFAULT_VEC_SIZE) {
+                  throw new IllegalArgumentException(
+                      "Wrong vectors dim:  expected " + DEFAULT_VEC_SIZE + ", found " + dim);
+                }
+
                 double[] doubles =
-                    Arrays.stream(p.getLeft()).mapToDouble(CharSeqTools::parseDouble).toArray();
+                    Arrays.stream(tokens, 2, tokens.length)
+                        .mapToDouble(CharSeqTools::parseDouble)
+                        .toArray();
                 synchronized (idMappings) {
                   if (idMappings.containsKey(word)) {
                     throw new IllegalArgumentException("Embedding contains duplicate words!");
@@ -383,6 +384,12 @@ public class PlainIndexBuilder implements IndexBuilder {
                   pagesAndTokensCounts[1] += pageTokens.size();
 
                   uriPageIdMapping.put(doc.uri().toString(), rootPageId);
+                  try {
+                    uriPageIdMapping.put(
+                        URLDecoder.decode(doc.uri().toString(), "UTF-8"), rootPageId);
+                  } catch (UnsupportedEncodingException e) {
+                    LOG.warn(e);
+                  }
                 });
 
         suggestBuilder.build();
