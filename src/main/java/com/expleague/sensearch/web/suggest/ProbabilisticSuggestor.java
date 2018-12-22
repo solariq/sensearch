@@ -37,7 +37,8 @@ public class ProbabilisticSuggestor implements Suggestor {
 		System.out.println("suggest requested: " + searchString);
 		List<String> res = null;
 		try {
-			res = getSuggestions(index.parse(searchString).collect(Collectors.toList()));
+			res = getSuggestions(index.parse(searchString.toLowerCase())
+					.collect(Collectors.toList()));
 
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -90,8 +91,12 @@ public class ProbabilisticSuggestor implements Suggestor {
 		return getDocsSetsIntersection(init, phrase).size() + 0.5;
 	}
 
-	public List<String> getSuggestions(List<Term> terms) {
-
+	private List<String> getSuggestions(List<Term> terms) {
+		
+		if (terms.isEmpty()) {
+			return Arrays.asList();
+		}
+		
 		String qt = terms.get(terms.size() - 1).text().toString();
 		List<Term> qc = terms.subList(0, terms.size() - 1);
 

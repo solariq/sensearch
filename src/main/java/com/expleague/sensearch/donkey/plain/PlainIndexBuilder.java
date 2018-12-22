@@ -374,7 +374,9 @@ public class PlainIndexBuilder implements IndexBuilder {
                       toIds(tokenizer.parseTextToWords(doc.title().toLowerCase()), idMappings);
 
                   embeddingBuilder.add(rootPageId, toVector(titleIds, gloveVectors));
-                  long[] titleTokens = toIds(tokenizer.parseTextToWords(doc.title()), idMappings);
+                  long[] titleTokens = toIds(
+                		  tokenizer.parseTextToWords(doc.title().toLowerCase()), 
+                		  idMappings);
 
                   suggestBuilder.accept(titleTokens);
 
