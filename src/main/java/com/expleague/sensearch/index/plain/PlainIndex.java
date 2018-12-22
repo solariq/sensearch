@@ -268,6 +268,7 @@ public class PlainIndex implements Index {
         .stream()
         .mapToLong(t -> ((IndexTerm) t).id())
         .mapToObj(embedding::vec)
+        .filter(Objects::nonNull)
         .forEach(v -> VecTools.append(queryVec, v));
 
     List<Page> pages =
