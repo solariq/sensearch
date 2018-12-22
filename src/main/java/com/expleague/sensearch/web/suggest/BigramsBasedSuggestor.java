@@ -3,6 +3,7 @@ package com.expleague.sensearch.web.suggest;
 import com.expleague.sensearch.index.Index;
 import com.google.inject.Inject;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -39,6 +40,9 @@ public class BigramsBasedSuggestor implements Suggestor {
     }
 
     // TODO fix this (token can be missing)
+    if (index.term(lastToken) == null) {
+      return new ArrayList<>();
+    }
     return index
         .mostFrequentNeighbours(index.term(lastToken))
         .map(t-> searchString + " " + t.text())
