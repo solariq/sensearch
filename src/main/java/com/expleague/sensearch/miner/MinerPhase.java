@@ -12,6 +12,8 @@ import com.expleague.sensearch.miner.impl.QURLItem;
 import com.expleague.sensearch.query.Query;
 import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
+import java.util.ArrayList;
+import java.util.List;
 import org.apache.log4j.Logger;
 
 import java.util.HashMap;
@@ -46,37 +48,40 @@ public class MinerPhase implements SearchPhase {
     LOG.info("Miner phase started");
     long startTime = System.nanoTime();
 
-    final Query query = whiteboard.query();
-    assert query != null;
-    final Map<Page, Features> documentsFeatures = new HashMap<>();
+    final List<Map<Page, Features>> documentsFeaturesQueries = new ArrayList<>();
+    for (Query query : whiteboard.query()) {
+      final Map<Page, Features> documentsFeatures = new HashMap<>();
 
-    index.fetchDocuments(query).forEach(page -> {
-      features.accept(new QURLItem(page, query));
-      Vec all = features.advance();
-      documentsFeatures.put(page, new Features() {
-        @Override
-        public Vec features() {
-          return all;
-        }
+      index.fetchDocuments(query).forEach(page -> {
+        features.accept(new QURLItem(page, query));
+        Vec all = features.advance();
+        documentsFeatures.put(page, new Features() {
+          @Override
+          public Vec features() {
+            return all;
+          }
 
-        @Override
-        public Vec features(FeatureMeta... metas) {
-          return new ArrayVec(Stream.of(metas).mapToInt(features::index).mapToDouble(all::get).toArray());
-        }
+          @Override
+          public Vec features(FeatureMeta... metas) {
+            return new ArrayVec(
+                Stream.of(metas).mapToInt(features::index).mapToDouble(all::get).toArray());
+          }
 
-        @Override
-        public FeatureMeta meta(int index) {
-          return features.meta(index);
-        }
+          @Override
+          public FeatureMeta meta(int index) {
+            return features.meta(index);
+          }
 
-        @Override
-        public int dim() {
-          return features.dim();
-        }
+          @Override
+          public int dim() {
+            return features.dim();
+          }
+        });
       });
-    });
+      documentsFeaturesQueries.add(documentsFeatures);
+    }
 
-    whiteboard.putTextFeatures(documentsFeatures);
+    whiteboard.putTextFeatures(documentsFeaturesQueries);
     LOG.info(String.format("Miner phase finished in %.3f seconds", (System.nanoTime() - startTime) / 1e9));
   }
 }
