@@ -100,7 +100,8 @@ public class PlainIndexTest extends IndexBasedTestCase {
 
   @Test
   public void testSentences_multipleSentences() {
-    String text = "Неограниченная власть не означает, что диктатор единолично принимает все принципиальные решения, поскольку это физически невозможно! Также следует отметить, что при нём могут быть (и часто бывают) совещательные органы, формально наделённые высшими властными полномочиями... Однако в условиях диктатуры любые такие органы издают свои постановления и указы согласно воле диктатора";
+    String text =
+        "Неограниченная власть не означает, что диктатор единолично принимает все принципиальные решения, поскольку это физически невозможно! Также следует отметить, что при нём могут быть (и часто бывают) совещательные органы, формально наделённые высшими властными полномочиями... Однако в условиях диктатуры любые такие органы издают свои постановления и указы согласно воле диктатора";
 
     List<CharSequence> sentences = index().sentences(text).collect(Collectors.toList());
 
@@ -158,19 +159,25 @@ public class PlainIndexTest extends IndexBasedTestCase {
   @Ignore("Sections are not indexed for now")
   @Test
   public void testPage_sectionContent() {
-    String content = "Журнал Foreign Policy в 2010 году опубликовал список 23 худших диктаторов современности. По состоянию на ноябрь 2017 года 12 правителей из списка лишились власти, из них 5 умерли.";
-    URI uri = URI.create(
-        "https://ru.wikipedia.org/wiki/Диктатор#Диктаторы_XXI_века_по_версии_журнала_The_Foreign_Policy");
+    String content =
+        "Журнал Foreign Policy в 2010 году опубликовал список 23 худших диктаторов современности. По состоянию на ноябрь 2017 года 12 правителей из списка лишились власти, из них 5 умерли.";
+    URI uri =
+        URI.create(
+            "https://ru.wikipedia.org/wiki/Диктатор#Диктаторы_XXI_века_по_версии_журнала_The_Foreign_Policy");
     Page page = index().page(uri);
 
     assertEquals(content, page.content());
     assertEquals(content, page.fullContent());
   }
 
+  @Ignore("Wiki dump is not formatted correctly")
   @Test
   public void testPage_content() {
     String content =
-        "Суффет — название двух главных должностных лиц (магистратов) в Тире, а также в северной Африке, на территории Карфагенской республики. Обычно они были верховными судьями. Во время военных действий часто — главнокомандующими. В древнем Израиле так называли военных предводителей и судей.\n"
+        "Суффет — название двух главных должностных лиц (магистратов) в Тире, а также в северной Африке, на территории Карфагенской республики. Обычно они были верховными судьями. Во время военных действий часто — главнокомандующими. В древнем Израиле так называли военных предводителей и судей.\n";
+
+    String fullContent =
+        content
             + "«судья», , родительный падеж sufetis.\n"
             + "Суффеты существовали с V век до н. э. Они избирались ежегодно на народных собраниях.\n"
             + "Эпоха Судей\n"
@@ -180,6 +187,21 @@ public class PlainIndexTest extends IndexBasedTestCase {
     Page page = index().page(uri);
 
     assertEquals(content, page.content());
-    assertEquals(content, page.fullContent());
+    assertEquals(fullContent, page.fullContent());
+  }
+
+  @Test
+  public void testSize() {
+    assertEquals(30, index().size());
+  }
+
+  @Test
+  public void testVocabularySize() {
+    assertTrue(index().vocabularySize() > 0);
+  }
+
+  @Test
+  public void testAveragePageSize() {
+    assertTrue(index().averagePageSize() > 0);
   }
 }
