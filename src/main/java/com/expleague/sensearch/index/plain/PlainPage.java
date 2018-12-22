@@ -1,5 +1,7 @@
 package com.expleague.sensearch.index.plain;
 
+import com.expleague.commons.seq.CharSeq;
+import com.expleague.commons.seq.CharSeqTools;
 import com.expleague.sensearch.Page;
 import com.expleague.sensearch.core.Term;
 import com.expleague.sensearch.index.IndexedPage;
@@ -164,9 +166,8 @@ public class PlainPage implements IndexedPage {
   }
 
   @Override
-  // TODO: implement
   public CharSequence fullContent() {
-    return "";
+    return CharSeqTools.concat(content(), "\n", subpages().map(Page::fullContent).collect(Collectors.joining("\n")));
   }
 
   @Override
