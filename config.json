@@ -3,12 +3,11 @@
   "temporaryIndex": "../WikiDocs/IndexTmp",
 
   "webRoot": "webapp/dist/webapp",
-
-  "embeddingVectors": "./resources/vectors(lowcase).txt.gz",
+  "embeddingVectors": "./resources/vectors.decomp",
   "myStem": "./resources/mystem",
 
   "pathToZIP": "../WikiDocs/Mini_Wiki_categories.zip",
 
   "pathToMetrics": "./resources/Metrics",
-  "buildIndexFlag": "false"
+  "buildIndexFlag": "true"
 }

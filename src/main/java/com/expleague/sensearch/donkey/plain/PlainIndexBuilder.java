@@ -156,9 +156,10 @@ public class PlainIndexBuilder implements IndexBuilder {
         .mapToLong(
             word -> {
               if (!mappings.containsKey(word)) {
-                LOG.warn(
-                    String.format(
-                        "For the word '%s' was not found any vector representation!", word));
+                // TODO: currently it generates A LOT of warnings (it's ok but I don't want to se them)
+//                LOG.warn(
+//                    String.format(
+//                        "For the word '%s' was not found any vector representation!", word));
                 mappings.put(word, mappings.size() + 1);
               }
               return mappings.get(word);
