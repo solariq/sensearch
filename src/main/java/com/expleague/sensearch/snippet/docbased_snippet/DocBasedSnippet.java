@@ -20,7 +20,7 @@ public class DocBasedSnippet implements Snippet {
   public DocBasedSnippet(CharSequence title, List<Passage> passages, Query query) {
     this.title = title;
 
-    double bestPassage = passages.stream().mapToDouble(Passage::getRating).max().getAsDouble();
+    double bestPassage = passages.stream().mapToDouble(Passage::getRating).max().orElse(1);
 
     List<Passage> bestPassages =
         passages

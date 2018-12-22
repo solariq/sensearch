@@ -134,7 +134,7 @@ public class SnippetsCreator {
                 })
             .collect(Collectors.toList());
 
-    double best = passages.stream().mapToDouble(Passage::getRating).max().getAsDouble();
+    double best = passages.stream().mapToDouble(Passage::getRating).max().orElse(1);
 
     for (Passage passage : passages) {
       double newRating = (passage.getRating() / best)
