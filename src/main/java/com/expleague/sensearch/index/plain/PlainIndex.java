@@ -318,10 +318,14 @@ public class PlainIndex implements Index {
 
   Stream<Term> synonyms(Term term) {
     System.out.println("Synonyms for " + term.text());
+    Vec termVec = embedding.vec(((IndexTerm) term).id());
+    if (termVec == null) {
+      return Stream.empty();
+    }
 
     Set<Long> LSHIds =
         filter
-            .filtrate(embedding.vec(((IndexTerm) term).id()), SYNONYMS_COUNT, PlainIndex::isWordId)
+            .filtrate(termVec, SYNONYMS_COUNT, PlainIndex::isWordId)
             .boxed()
             .collect(Collectors.toSet());
 
@@ -330,7 +334,7 @@ public class PlainIndex implements Index {
     LOG.info("LSHSynonymsMetric: " + result);
 
     return filter
-        .filtrate(embedding.vec(((IndexTerm) term).id()), SYNONYMS_COUNT, PlainIndex::isWordId)
+        .filtrate(termVec, SYNONYMS_COUNT, PlainIndex::isWordId)
         .mapToObj(idToTerm::get);
   }
 
