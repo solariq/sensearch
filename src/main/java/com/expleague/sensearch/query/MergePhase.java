@@ -4,6 +4,7 @@ import com.expleague.sensearch.Page;
 import com.expleague.sensearch.core.SearchPhase;
 import com.expleague.sensearch.core.Whiteboard;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import org.apache.log4j.Logger;
 
@@ -17,6 +18,10 @@ public class MergePhase implements SearchPhase {
   }
 
   private boolean allSubResultsArePresent(Whiteboard whiteboard) {
+
+    if (whiteboard.subResults() == null) {
+      return false;
+    }
 
     boolean result = true;
 
@@ -37,10 +42,10 @@ public class MergePhase implements SearchPhase {
     final List<Page> results = new ArrayList<>();
 
     for (Page[] subResult : whiteboard.subResults()) {
-      for (Page result : subResult) {
-        results.add(result);
-      }
+      Collections.addAll(results, subResult);
     }
+
+    whiteboard.putResults(results.toArray(new Page[0]));
 
     LOG.info(String
         .format("Merge phase finished in %.3f seconds", (System.nanoTime() - startTime) / 1e9));
