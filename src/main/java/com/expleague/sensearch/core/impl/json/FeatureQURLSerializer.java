@@ -19,11 +19,11 @@ public class FeatureQURLSerializer extends StdSerializer<QURLItem> {
   @Override
   public void serialize(QURLItem QURLItem, JsonGenerator jsonGenerator,
       SerializerProvider serializerProvider) throws IOException {
-    jsonGenerator.writeStartObject();
-
-    jsonGenerator.writeObjectField("query", QURLItem.query());
-    jsonGenerator.writeObjectField("page", QURLItem.page());
-
-    jsonGenerator.writeEndObject();
+//    jsonGenerator.writeStartObject();
+//
+//    jsonGenerator.writeObjectField("query", QURLItem.query());
+//    jsonGenerator.writeObjectField("page", QURLItem.page());
+//
+//    jsonGenerator.writeEndObject();
   }
 }

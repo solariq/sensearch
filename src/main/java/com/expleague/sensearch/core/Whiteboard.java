@@ -9,7 +9,6 @@ import java.util.Map;
 import org.jetbrains.annotations.Nullable;
 
 public interface Whiteboard {
-
   @Nullable
   Map<Page, Features> textFeatures();
 

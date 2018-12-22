@@ -26,7 +26,7 @@
 //
 //  private static final Pattern SIMPLE_SPLITTER = Pattern.compile("[^а-яё0-9]+");
 //  private static final Map<String, String> DOCUMENTS_AND_TITLES = new HashMap<>();
-//  private static FeaturesMiner miner;
+//  private static AccumulatorFeatureSet miner;
 //  private static List<Page> pages;
 //
 //  static {

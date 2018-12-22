@@ -5,8 +5,8 @@ import java.util.List;
 import java.util.Map;
 
 public interface Query {
-
   List<Term> terms();
-
   Map<Term, List<Term>> synonyms();
+
+  String text();
 }

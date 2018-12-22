@@ -23,14 +23,14 @@ public class FeatureQURLDeserializer extends StdDeserializer<QURLItem> {
   @Override
   public QURLItem deserialize(JsonParser jsonParser,
       DeserializationContext deserializationContext) throws IOException, JsonProcessingException {
-    ObjectCodec codec = jsonParser.getCodec();
-    JsonNode node = codec.readTree(jsonParser);
-
-    CharSequence query = node.get("query").asText();
-
-    JsonNode pageJSON = node.get("page");
-    Page page = codec.treeToValue(pageJSON, Page.class);
-
-    return new QURLItem(query, page);
+//    ObjectCodec codec = jsonParser.getCodec();
+//    JsonNode node = codec.readTree(jsonParser);
+//
+//    CharSequence query = node.get("query").asText();
+//
+//    JsonNode pageJSON = node.get("page");
+//    Page page = codec.treeToValue(pageJSON, Page.class);
+//
+    return null; //new QURLItem(query, page);
   }
 }
