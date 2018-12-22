@@ -161,7 +161,6 @@ public class PlainIndex implements Index {
     //    indexMeta.getLemmaIdMappingsList().forEach(m -> wordToLemma.put(m.getWordId(),
     // m.getLemmaId()));
 
-    TLongObjectMap<String> idToWord = new TLongObjectHashMap<>();
     //    indexMeta.getIdMappingsList().forEach(m -> idToWord.put(m.getId(), m.word()));
 
     DBIterator termIterator = termBase.iterator();
@@ -190,7 +189,10 @@ public class PlainIndex implements Index {
               if (idToTerm.containsKey(lemmaId)) {
                 lemmaTerm = (IndexTerm) idToTerm.get(lemmaId);
               } else {
-                CharSeq lemmaText = CharSeq.intern(idToWord.get(lemmaId));
+                CharSeq lemmaText =
+                    CharSeq.intern(
+                        IndexUnits.Term.parseFrom(termBase.get(Longs.toByteArray(lemmaId)))
+                            .getText());
 
                 lemmaTerm = new IndexTerm(this, lemmaText, lemmaId, null, pos);
                 idToTerm.put(lemmaId, lemmaTerm);
@@ -207,13 +209,11 @@ public class PlainIndex implements Index {
             throw new RuntimeException(e);
           }
         });
-    
-    suggestLoader = new SuggestInformationLoader(
-    		suggest_unigram_DB,
-    		suggest_multigram_DB,
-    		suggest_inverted_index_DB,
-    		idToTerm);
-    
+
+    suggestLoader =
+        new SuggestInformationLoader(
+            suggest_unigram_DB, suggest_multigram_DB, suggest_inverted_index_DB, idToTerm);
+
     for (UriPageMapping mapping : indexMeta.getUriPageMappingsList()) {
       uriToPageIdMap.put(URI.create(mapping.getUri()), mapping.getPageId());
     }

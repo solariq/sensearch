@@ -167,6 +167,7 @@ public class PlainIndexTest extends IndexBasedTestCase {
     assertEquals(content, page.fullContent());
   }
 
+  @Test
   public void testPage_content() {
     String content =
         "Суффет — название двух главных должностных лиц (магистратов) в Тире, а также в северной Африке, на территории Карфагенской республики. Обычно они были верховными судьями. Во время военных действий часто — главнокомандующими. В древнем Израиле так называли военных предводителей и судей.\n"
