@@ -3,10 +3,13 @@ package com.expleague.sensearch.donkey.plain;
 import com.expleague.commons.math.vectors.Vec;
 import com.expleague.commons.math.vectors.VecTools;
 import com.expleague.commons.math.vectors.impl.vectors.ArrayVec;
+import com.expleague.commons.seq.CharSeq;
 import com.expleague.commons.seq.CharSeqTools;
 import com.expleague.commons.text.lemmer.LemmaInfo;
 import com.expleague.commons.text.lemmer.MyStem;
 import com.expleague.commons.text.lemmer.WordInfo;
+import com.expleague.ml.embedding.Embedding;
+import com.expleague.ml.embedding.decomp.DecompBuilder;
 import com.expleague.sensearch.Config;
 import com.expleague.sensearch.core.Lemmer;
 import com.expleague.sensearch.core.PartOfSpeech;
@@ -30,18 +33,11 @@ import gnu.trove.map.TObjectLongMap;
 import gnu.trove.map.hash.TLongIntHashMap;
 import gnu.trove.map.hash.TLongObjectHashMap;
 import gnu.trove.map.hash.TObjectLongHashMap;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
-import java.io.Reader;
-import java.io.UnsupportedEncodingException;
-import java.io.Writer;
+
+import java.io.*;
 import java.net.URLDecoder;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -53,6 +49,8 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 import org.fusesource.leveldbjni.JniDBFactory;
 import org.iq80.leveldb.CompressionType;
@@ -72,6 +70,7 @@ public class PlainIndexBuilder implements IndexBuilder {
   public static final String TERM_ROOT = "term";
   public static final String EMBEDDING_ROOT = "embedding";
   public static final String LSH_METRIC_ROOT = "lsh_metric";
+  private static final String TEMP_EMBEDDING_ROOT = "temp_embedding";
 
   public static final String SUGGEST_UNIGRAM_ROOT = "suggest/unigram_coeff";
   public static final String SUGGEST_MULTIGRAMS_ROOT = "suggest/multigram_freq_norm";
@@ -244,6 +243,7 @@ public class PlainIndexBuilder implements IndexBuilder {
     saveIds(root, vecs, randomIds);
   }
 
+  @Deprecated
   @VisibleForTesting
   static void readGloveVectors(
       Path glovePath, TObjectLongMap<String> idMappings, TLongObjectMap<Vec> vectors) {
@@ -281,12 +281,12 @@ public class PlainIndexBuilder implements IndexBuilder {
     }
   }
 
+  //TODO: Make it more readable, add possibility of incomplete rebuilding
   @Override
   public void buildIndex() throws IOException {
     final Tokenizer tokenizer = new TokenizerImpl();
-    final TLongObjectMap<Vec> gloveVectors = new TLongObjectHashMap<>();
-    final TObjectLongMap<String> idMappings = new TObjectLongHashMap<>();
     final TObjectLongMap<String> uriPageIdMapping = new TObjectLongHashMap<>();
+    final TObjectLongMap<String> idMappings = new TObjectLongHashMap<>();
 
     LOG.info("Creating database files...");
     final Path indexRoot = config.getTemporaryIndex();
@@ -309,11 +309,8 @@ public class PlainIndexBuilder implements IndexBuilder {
         final DB suggest_inverted_index_DB =
             JniDBFactory.factory.open(
                 indexRoot.resolve(SUGGEST_INVERTED_INDEX_ROOT).toFile(), STATS_DB_OPTIONS)) {
-      LOG.info("Reading vectors...");
-      readGloveVectors(Paths.get(config.getEmbeddingVectors()), idMappings, gloveVectors);
-
-      LOG.info("Parsing lemmas...");
-      TLongObjectMap<ParsedTerm> terms = parseTerms(idMappings, lemmer);
+      //LOG.info("Reading vectors...");
+      //readGloveVectors(Paths.get(config.getEmbeddingVectors()), idMappings, gloveVectors);
 
       LOG.info("Creating mappings from wiki ids to raw index ids...");
       final PlainPageBuilder plainPageBuilder =
@@ -337,7 +334,14 @@ public class PlainIndexBuilder implements IndexBuilder {
       LOG.info("Storing page-wise data...");
       long[] pagesCount = new long[]{0};
       long[] sectionId = new long[]{0};
+
+      Path tempEmbeddingPath = indexRoot.resolve(TEMP_EMBEDDING_ROOT);
+      Files.createDirectories(tempEmbeddingPath);
+      Path corpus = tempEmbeddingPath.resolve("corpus");
+
+      TLongObjectMap<String> titles = new TLongObjectHashMap<>();
       try {
+        try (Writer to = new OutputStreamWriter(new FileOutputStream(corpus.toFile()))) {
         crawler
             .makeStream()
             .forEach(
@@ -371,12 +375,14 @@ public class PlainIndexBuilder implements IndexBuilder {
                   plainPageBuilder.endPage();
                   ++pagesCount[0];
 
-                  long[] titleIds =
+                  /*long[] titleIds =
                       toIds(tokenizer.parseTextToWords(doc.title().toLowerCase()), idMappings);
 
-                  embeddingBuilder.add(rootPageId, toVector(titleIds, gloveVectors));
+                  embeddingBuilder.add(rootPageId, toVector(titleIds, gloveVectors));*/
+                  titles.put(rootPageId, doc.title());
+
                   long[] titleTokens = toIds(
-                		  tokenizer.parseTextToWords(doc.title().toLowerCase()), 
+                		  tokenizer.parseTextToWords(doc.title().toLowerCase()),
                 		  idMappings);
 
                   suggestBuilder.accept(titleTokens);
@@ -393,15 +399,56 @@ public class PlainIndexBuilder implements IndexBuilder {
                   } catch (UnsupportedEncodingException e) {
                     LOG.warn(e);
                   }
+
+                  try {
+                      String title = doc.title();
+                      for (char c : title.toCharArray()) {
+                          to.write(filtrateChar(c));
+                      }
+                      to.write(' ');
+                      CharSequence content = doc.content();
+                      for (int i = 0; i < content.length(); i++) {
+                          to.write(filtrateChar(content.charAt(i)));
+                      }
+                      to.write(' ');
+                  } catch (IOException e) {
+                      LOG.warn(e);
+                  }
                 });
+        }
 
         suggestBuilder.build();
+
+        LOG.info("Parsing lemmas...");
+        TLongObjectMap<ParsedTerm> terms = parseTerms(idMappings, lemmer);
 
         LOG.info("Storing term-wise data...");
         saveTermData(idMappings, terms, indexRoot);
 
         LOG.info("Building embedding...");
+
+        DecompBuilder builder = (DecompBuilder) Embedding.builder(Embedding.Type.DECOMP);
+        final Embedding<CharSeq> result = builder
+                  .file(corpus)
+                  .build();
+
+        FileUtils.deleteDirectory(tempEmbeddingPath.toFile());
+
+        final TLongObjectMap<Vec> gloveVectors = new TLongObjectHashMap<>();
+
+        idMappings.forEachEntry((word, id) -> {
+            gloveVectors.put(id, result.apply(CharSeq.create(word)));
+            return true;
+        });
+
         embeddingBuilder.addAll(gloveVectors);
+
+        titles.forEachEntry((id, title) -> {
+            long[] titleIds = toIds(tokenizer.parseTextToWords(title), idMappings);
+            embeddingBuilder.add(id, toVector(titleIds, gloveVectors));
+            return true;
+        });
+
         embeddingBuilder.build();
 
         Path lshMetricPath = indexRoot.resolve(EMBEDDING_ROOT).resolve(LSH_METRIC_ROOT);
@@ -430,6 +477,15 @@ public class PlainIndexBuilder implements IndexBuilder {
       }
     }
     LOG.info("Index built!");
+  }
+
+  private char filtrateChar(char c) {
+      if (Character.isLetter(c)) {
+          return Character.toLowerCase(c);
+      } else if (Character.isDigit(c)) {
+          return c;
+      }
+      return ' ';
   }
 
   private void saveTermData(
