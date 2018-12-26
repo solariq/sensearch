@@ -69,7 +69,7 @@ public class PlainIndex implements Index {
 
   private static final Logger LOG = Logger.getLogger(PlainIndex.class.getName());
 
-  private static final int FILTERED_DOC_NUMBER = 50;
+  private static final int FILTERED_DOC_NUMBER = 10;
   private static final int SYNONYMS_COUNT = 50;
 
   private final Path indexRoot;
@@ -87,6 +87,8 @@ public class PlainIndex implements Index {
   private final DB suggest_inverted_index_DB;
 
   private final double averagePageSize;
+  //TODO save at database
+  private double averageTitleSize = 0;
   private final int indexSize;
   private final int vocabularySize;
 
@@ -205,6 +207,19 @@ public class PlainIndex implements Index {
           }
         });
 
+    DBIterator pageIterator = pageBase.iterator();
+    pageIterator.seekToFirst();
+    pageIterator.forEachRemaining(page -> {
+      try {
+        IndexUnits.Page protoPage = IndexUnits.Page.parseFrom(page.getValue());
+        averageTitleSize += parse(protoPage.getTitle()).count();
+      } catch (InvalidProtocolBufferException e) {
+        e.printStackTrace();
+      }
+    });
+
+    averageTitleSize = 1.0 / averageTitleSize;
+
     suggestLoader =
         new SuggestInformationLoader(
             suggest_unigram_DB, suggest_multigram_DB, suggest_inverted_index_DB, idToTerm);
@@ -310,6 +325,11 @@ public class PlainIndex implements Index {
   @Override
   public double averagePageSize() {
     return averagePageSize;
+  }
+
+  @Override
+  public double averageTitleSize() {
+    return averageTitleSize;
   }
 
   @Override
