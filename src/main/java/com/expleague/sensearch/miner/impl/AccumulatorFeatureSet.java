@@ -13,7 +13,8 @@ import java.util.function.Consumer;
 public class AccumulatorFeatureSet extends FeatureSet.Stub<QURLItem> {
   private final Index index;
   private final FeatureSet<QURLItem> features = FeatureSet.join(
-      new BM25FeatureSet()
+      new BM25FeatureSet(),
+      new HHFeatureSet()
   );
 
   public AccumulatorFeatureSet(Index index) {
