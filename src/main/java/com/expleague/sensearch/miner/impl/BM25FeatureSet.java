@@ -87,7 +87,7 @@ public class BM25FeatureSet extends FeatureSet.Stub<QURLItem> implements TextFea
     private final TObjectIntHashMap<Term> freq = new TObjectIntHashMap<>();
     private final int collectionSize;
     private double normalizer;
-    private int pageLen;
+    private final int pageLen;
 
     BM25Accumulator(int pageLen, double avgLen, int indexSize) {
       normalizer = K * (1 - B + B * pageLen / avgLen);
