@@ -87,12 +87,10 @@ public class BM25FeatureSet extends FeatureSet.Stub<QURLItem> implements TextFea
     private final TObjectIntHashMap<Term> freq = new TObjectIntHashMap<>();
     private final int collectionSize;
     private double normalizer;
-    private final int pageLen;
 
     BM25Accumulator(int pageLen, double avgLen, int indexSize) {
       normalizer = K * (1 - B + B * pageLen / avgLen);
       this.collectionSize = indexSize;
-      this.pageLen = pageLen;
     }
 
     @Override
@@ -107,12 +105,9 @@ public class BM25FeatureSet extends FeatureSet.Stub<QURLItem> implements TextFea
           (term, freq) -> {
             final int df = term.documentFreq();
             final double idf = df == 0 ? 0 : Math.log((collectionSize - df + 0.5) / (df + 0.5));
-            result[0] += df
-                    / (pageLen + .0)
-                    * (K + 1)
-                    * freq
-                    / (freq + normalizer)
-                    * idf;
+            result[0] += idf * freq
+                    / (freq+ normalizer)
+                    ;
             return true;
           });
       return result[0];
