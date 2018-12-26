@@ -3,6 +3,7 @@ package com.expleague.sensearch.miner.impl;
 import com.expleague.commons.func.Functions;
 import com.expleague.commons.math.vectors.Vec;
 import com.expleague.ml.data.tools.FeatureSet;
+import com.expleague.ml.meta.FeatureMeta;
 import com.expleague.sensearch.Page;
 import com.expleague.sensearch.core.Term;
 import com.expleague.sensearch.index.Index;
@@ -56,6 +57,11 @@ public class AccumulatorFeatureSet extends FeatureSet.Stub<QURLItem> {
   @Override
   public int dim() {
     return features.dim();
+  }
+
+  @Override
+  public FeatureMeta meta(int ind) {
+    return features.meta(ind);
   }
 
   private class TermConsumer implements Consumer<Term> {

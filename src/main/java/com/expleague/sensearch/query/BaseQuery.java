@@ -16,6 +16,7 @@ public class BaseQuery implements Query {
     this.terms = terms;
     this.synonyms = terms.stream()
         .map(term -> Pair.of(term, term.synonyms().collect(Collectors.toList())))
+        .collect(Collectors.toSet()).stream()
         .collect(Collectors.toMap(Pair::getLeft, Pair::getRight));
     this.text = input;
   }

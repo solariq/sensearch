@@ -12,15 +12,13 @@ import java.net.URI;
 
 @JsonPropertyOrder({"query", "uri"})
 public class QURLItem extends DSItem.Stub {
-  @JsonProperty("query")
+
   private String query;
 
-  @JsonProperty("uri")
   private URI pageURI;
 
-  @JsonIgnore
   private transient Page pageCache;
-  @JsonIgnore
+
   private transient Query queryCache;
 
   @JsonCreator
@@ -34,6 +32,16 @@ public class QURLItem extends DSItem.Stub {
     this.pageURI = page.uri();
     pageCache = page;
     queryCache = query;
+  }
+
+  @JsonProperty("query")
+  public String getQuery() {
+    return query;
+  }
+
+  @JsonProperty("uri")
+  public URI getPageURI() {
+    return pageURI;
   }
 
   public Page pageCache() {
