@@ -1,5 +1,6 @@
 package com.expleague.sensearch.ranking;
 
+import com.expleague.commons.math.vectors.Vec;
 import com.expleague.sensearch.Page;
 import com.expleague.sensearch.core.Annotations.PageSize;
 import com.expleague.sensearch.core.SearchPhase;
@@ -44,7 +45,7 @@ public class RankingPhase implements SearchPhase {
             .textFeatures().get(phaseId)
             .entrySet()
             .stream()
-            .map(p -> Pair.of(p.getKey(), p.getValue().features().get(0)))
+            .map(p -> Pair.of(p.getKey(), rank(p.getValue().features())))
             .sorted(Comparator.<Pair<Page, Double>>comparingDouble(Pair::getRight).reversed())
             .map(Pair::getLeft)
             .skip(pageNo * pageSize)
@@ -54,5 +55,16 @@ public class RankingPhase implements SearchPhase {
     LOG.info(
         String.format(
             "Ranking phase finished in %.3f seconds", (System.nanoTime() - startTime) / 1e9));
+  }
+
+  private double rank(Vec features) {
+    /*double vec = 0;
+    for (int ind = 0;  ind < features.dim(); ind++) {
+      double normalize = 1.0 / (ind + 1);
+      double f =features.get(ind);
+      vec += (f * normalize);
+    }
+    return vec;*/
+    return features.get(0);
   }
 }
