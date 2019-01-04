@@ -15,7 +15,7 @@ import com.expleague.sensearch.query.Query;
 public class HHFeatureSet extends FeatureSet.Stub<QURLItem> implements TextFeatureSet {
 
 	public final static FeatureMeta HHP = FeatureMeta
-			.create("hhp", "Title hhp", ValueType.VEC);
+			.create("hhp", "Title + text hhp", ValueType.VEC);
 
 	private Query query;
 	private Set<Term> queryTerms;
@@ -62,13 +62,13 @@ public class HHFeatureSet extends FeatureSet.Stub<QURLItem> implements TextFeatu
 	}
 
 	private final double z = 1.75;
-	private double frac(Term term, Integer neighPos) {
+	private double frac(Term term, Integer neighPos, int center) {
 
 		if (neighPos == null) {
 			return 0;
 		}
 
-		return idf.get(term) / Math.pow(neighPos + 1, z);
+		return idf.get(term) / Math.pow(Math.abs(neighPos - center), z);
 	}
 
 	private double tc(Term t, int p) {
@@ -79,8 +79,8 @@ public class HHFeatureSet extends FeatureSet.Stub<QURLItem> implements TextFeatu
 			if (positions == null)
 				continue;
 			
-			res += (frac(term, positions.lower(p)) +
-					frac(term, positions.higher(p)))
+			res += (frac(term, positions.lower(p), p) +
+					frac(term, positions.higher(p), p))
 					* (t.equals(term) ? 0.25 : 1);
 		}
 
