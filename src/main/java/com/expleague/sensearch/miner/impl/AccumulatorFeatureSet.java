@@ -11,10 +11,12 @@ import java.util.Objects;
 import java.util.function.Consumer;
 
 public class AccumulatorFeatureSet extends FeatureSet.Stub<QURLItem> {
+
   private final Index index;
   private final FeatureSet<QURLItem> features = FeatureSet.join(
       new BM25FeatureSet(),
-      new HHFeatureSet()
+      new HHFeatureSet(),
+      new LinkFeatureSet()
   );
 
   public AccumulatorFeatureSet(Index index) {
@@ -48,6 +50,11 @@ public class AccumulatorFeatureSet extends FeatureSet.Stub<QURLItem> {
         index.parse(page.fullContent()).forEach(termConsumer);
       }
     }
+    { //Link Processing
+
+      features.components().map(Functions.cast(LinkFeatureSet.class)).filter(Objects::nonNull)
+          .forEach(fs -> fs.withIndexSize(index.size()));
+    }
   }
 
   @Override
@@ -66,6 +73,7 @@ public class AccumulatorFeatureSet extends FeatureSet.Stub<QURLItem> {
   }
 
   private class TermConsumer implements Consumer<Term> {
+
     int index = 0;
 
     TermConsumer() {
