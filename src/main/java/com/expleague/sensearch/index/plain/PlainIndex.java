@@ -220,10 +220,6 @@ public class PlainIndex implements Index {
 
     averageTitleSize = 1.0 / averageTitleSize;
 
-    suggestLoader =
-        new SuggestInformationLoader(
-            suggest_unigram_DB, suggest_multigram_DB, suggest_inverted_index_DB, idToTerm);
-
     for (UriPageMapping mapping : indexMeta.getUriPageMappingsList()) {
       uriToPageIdMap.put(URI.create(mapping.getUri()), mapping.getPageId());
     }
@@ -389,9 +385,15 @@ public class PlainIndex implements Index {
     }
     return lastTermStatistics;
   }
-
+  
+  //однопоточно
   @Override
   public SuggestInformationLoader getSuggestInformation() {
-    return suggestLoader;
+	  if (suggestLoader == null) {
+		  suggestLoader =
+				  new SuggestInformationLoader(
+						  suggest_unigram_DB, suggest_multigram_DB, suggest_inverted_index_DB, idToTerm);
+	  }
+	  return suggestLoader;
   }
 }
