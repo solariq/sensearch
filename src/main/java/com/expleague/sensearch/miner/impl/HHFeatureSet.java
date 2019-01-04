@@ -68,7 +68,7 @@ public class HHFeatureSet extends FeatureSet.Stub<QURLItem> implements TextFeatu
 			return 0;
 		}
 
-		return idf.get(term) / Math.pow(neighPos, z);
+		return idf.get(term) / Math.pow(neighPos + 1, z);
 	}
 
 	private double tc(Term t, int p) {
