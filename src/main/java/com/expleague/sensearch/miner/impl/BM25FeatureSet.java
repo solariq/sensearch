@@ -71,7 +71,8 @@ public class BM25FeatureSet extends FeatureSet.Stub<QURLItem> implements TextFea
 
   @Override
   public void withSegment(Segment type, Term term) {
-    if (queryTerms.contains(term)) {
+    if (queryTerms.contains(term)
+        || queryLemmas.contains(term)) {
       bm25f.accept(type, term);
     }
   }
@@ -129,20 +130,15 @@ public class BM25FeatureSet extends FeatureSet.Stub<QURLItem> implements TextFea
     private final Set<Term> terms = new HashSet<>();
     private final TObjectIntHashMap<Term> freqTITLE = new TObjectIntHashMap<>();
     private final TObjectIntHashMap<Term> freqBODY = new TObjectIntHashMap<>();
-
-    private final int pageLen;
-    private final double avgLen;
-    private final int titleLen;
-    private final double avgTitle;
     private final int indexLen;
 
+    private double normalizerTITLE;
+    private double normalizerBODY;
 
     public BM25FAccumulator(int pageLen, double avgLen, int titleLen, double avgTitle,
         int indexLen) {
-      this.pageLen = pageLen;
-      this.avgLen = avgLen;
-      this.titleLen = titleLen;
-      this.avgTitle = avgTitle;
+      normalizerTITLE = (1 + B * (titleLen / avgTitle - 1));
+      normalizerBODY = (1 + B * (pageLen / avgLen - 1));
       this.indexLen = indexLen;
     }
 
@@ -164,8 +160,8 @@ public class BM25FeatureSet extends FeatureSet.Stub<QURLItem> implements TextFea
         final double idf = df == 0 ? 0 : Math.log((indexLen - df + 0.5) / (df + 0.5));
 
         double tf = 0;
-        tf += freqTITLE.get(term) / (1 + B * (titleLen / avgTitle - 1));
-        tf += freqBODY.get(term) / (1 + B * (pageLen / avgLen - 1));
+        tf += freqTITLE.get(term) / normalizerTITLE;
+        tf += freqBODY.get(term) / normalizerBODY;
         result[0] += tf / (K + tf) * idf;
       });
 
