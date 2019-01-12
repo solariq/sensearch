@@ -89,6 +89,10 @@ public class PlainIndex implements Index {
   private final double averagePageSize;
   //TODO save at database
   private double averageTitleSize = 0;
+  private int titleCnt = 0;
+  private double averageLinkSize = 0;
+  private int linkCnt = 0;
+
   private final int indexSize;
   private final int vocabularySize;
 
@@ -213,12 +217,18 @@ public class PlainIndex implements Index {
       try {
         IndexUnits.Page protoPage = IndexUnits.Page.parseFrom(page.getValue());
         averageTitleSize += parse(protoPage.getTitle()).count();
+        titleCnt++;
+        for (int i = 0; i < protoPage.getIncomingLinksCount(); i++) {
+          linkCnt++;
+          averageLinkSize += parse(protoPageLoad(protoPage.getIncomingLinks(i).getTargetPageId()).getTitle()).count();
+        }
       } catch (InvalidProtocolBufferException e) {
         e.printStackTrace();
       }
     });
 
-    averageTitleSize = 1.0 / averageTitleSize;
+    averageTitleSize = averageTitleSize / titleCnt;
+    averageLinkSize = averageLinkSize / linkCnt;
 
     for (UriPageMapping mapping : indexMeta.getUriPageMappingsList()) {
       uriToPageIdMap.put(URI.create(mapping.getUri()), mapping.getPageId());
@@ -327,6 +337,12 @@ public class PlainIndex implements Index {
   public double averageTitleSize() {
     return averageTitleSize;
   }
+
+  @Override
+  public double averageLinkSize() {
+    return averageLinkSize;
+  }
+
 
   @Override
   public int vocabularySize() {

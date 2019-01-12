@@ -296,6 +296,14 @@ public class PlainPage implements IndexedPage {
     }
 
     @Override
+    public CharSequence content() {
+      if (targetPage == null) {
+        return "";
+      }
+      return targetPage.title();
+    }
+
+    @Override
     public CharSequence text() {
       return protoLink.getText();
     }

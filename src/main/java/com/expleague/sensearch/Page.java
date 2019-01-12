@@ -40,6 +40,8 @@ public interface Page {
 
   interface Link {
 
+    CharSequence content();
+
     CharSequence text();
 
     boolean hasTarget();

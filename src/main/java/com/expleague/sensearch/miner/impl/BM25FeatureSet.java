@@ -24,7 +24,6 @@ public class BM25FeatureSet extends FeatureSet.Stub<QURLItem> implements TextFea
   public final static FeatureMeta BM25F = FeatureMeta
       .create("bm25f", "field-dependent bm25", ValueType.VEC);
 
-
   private static final double K = 1.2;
   private static final double B = 0.75;
 

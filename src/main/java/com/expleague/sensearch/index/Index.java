@@ -23,6 +23,7 @@ public interface Index {
   int vocabularySize();
   double averagePageSize();
   double averageTitleSize();
+  double averageLinkSize();
   
   SuggestInformationLoader getSuggestInformation();
 }
