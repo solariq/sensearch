@@ -48,7 +48,6 @@ public class Metric {
     }
 
     double DCG = 0.0;
-    int ind = 0;
     for (String title : ourTitles) {
       ResultItem googleResult =
           googleResults
@@ -56,13 +55,12 @@ public class Metric {
               .filter(item -> item.title().equals(title))
               .findFirst()
               .orElse(null);
-      ind++;
       if (googleResult == null) {
         continue;
       }
       double numDouble = googleResults.indexOf(googleResult) + 1;
       numDouble = 1.0 / numDouble;
-      DCG += numDouble / (Math.log(1 + ind) / Math.log(2));
+      DCG += numDouble;
     }
 
     System.err.println("Query: " + query + " DCG: " + DCG);

@@ -25,10 +25,6 @@ public class UnitMetricTest {
   private Metric metric;
   private WebCrawler crawler;
 
-  private double log2(int ind) {
-    return (Math.log(1 + ind) / Math.log(2));
-  }
-
   private double readDCG() {
     double DCG = -1;
     try (BufferedReader reader =
@@ -67,16 +63,16 @@ public class UnitMetricTest {
     double DCG = readDCG();
 
     double rightDCG =
-        ((1.0 / 1) / (log2(1)))
-            + ((1.0 / 2) / (log2(2)))
-            + ((1.0 / 3) / (log2(3)))
-            + ((1.0 / 4) / (log2(4)))
-            + ((1.0 / 5) / (log2(5)))
-            + ((1.0 / 6) / (log2(6)))
-            + ((1.0 / 7) / (log2(7)))
-            + ((1.0 / 8) / (log2(8)))
-            + ((1.0 / 9) / (log2(9)))
-            + ((1.0 / 10) / (log2(10)));
+        ((1.0 / 1))
+            + ((1.0 / 2))
+            + ((1.0 / 3))
+            + ((1.0 / 4))
+            + ((1.0 / 5))
+            + ((1.0 / 6))
+            + ((1.0 / 7))
+            + ((1.0 / 8))
+            + ((1.0 / 9))
+            + ((1.0 / 10));
 
     Assert.assertEquals(DCG, rightDCG, 1e-10);
   }
@@ -121,16 +117,16 @@ public class UnitMetricTest {
     double DCG = readDCG();
 
     double rightDCG =
-        ((1.0 / 1) / (log2(1)))
-            + ((1.0 / 7) / (log2(2)))
-            + ((1.0 / 10) / (log2(3)))
-            + ((1.0 / 2) / (log2(4)))
-            + ((1.0 / 6) / (log2(5)))
-            + ((1.0 / 4) / (log2(6)))
-            + ((1.0 / 8) / (log2(7)))
-            + ((1.0 / 3) / (log2(8)))
-            + ((1.0 / 9) / (log2(9)))
-            + ((1.0 / 5) / (log2(10)));
+        (1.0 / 1)
+            + (1.0 / 7)
+            + (1.0 / 10)
+            + (1.0 / 2)
+            + (1.0 / 6)
+            + ((1.0 / 4) )
+            + ((1.0 / 8) )
+            + ((1.0 / 3) )
+            + ((1.0 / 9) )
+            + ((1.0 / 5) );
 
     Assert.assertEquals(DCG, rightDCG, 1e-10);
   }
@@ -154,15 +150,15 @@ public class UnitMetricTest {
 
     double rightDCG =
         0.0
-            + ((1.0 / 7) / (log2(2)))
-            + ((1.0 / 10) / (log2(3)))
-            + ((1.0 / 2) / (log2(4)))
-            + ((1.0 / 6) / (log2(5)))
+            + ((1.0 / 7))
+            + ((1.0 / 10))
+            + ((1.0 / 2) )
+            + ((1.0 / 6) )
             + 0.0
-            + ((1.0 / 8) / (log2(7)))
-            + ((1.0 / 3) / (log2(8)))
+            + ((1.0 / 8) )
+            + ((1.0 / 3) )
             + 0.0
-            + ((1.0 / 5) / (log2(10)));
+            + ((1.0 / 5) );
 
     Assert.assertEquals(DCG, rightDCG, 1e-10);
   }
