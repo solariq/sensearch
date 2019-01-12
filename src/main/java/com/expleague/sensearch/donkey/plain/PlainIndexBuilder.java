@@ -434,6 +434,7 @@ public class PlainIndexBuilder implements IndexBuilder {
 
         DecompBuilder builder = (DecompBuilder) Embedding.builder(Embedding.Type.DECOMP);
         final Embedding<CharSeq> result = builder
+            .dimSym(DEFAULT_VEC_SIZE)
             .file(corpus)
             .build();
 
@@ -441,10 +442,14 @@ public class PlainIndexBuilder implements IndexBuilder {
 
         final TLongObjectMap<Vec> gloveVectors = new TLongObjectHashMap<>();
 
-        idMappings.forEachEntry((word, id) -> {
-          gloveVectors.put(id, result.apply(CharSeq.create(word)));
-          return true;
-        });
+        idMappings.forEachEntry(
+            (word, id) -> {
+              Vec vec = result.apply(CharSeq.create(word));
+              if (vec != null) {
+                gloveVectors.put(id, vec);
+              }
+              return true;
+            });
 
         embeddingBuilder.addAll(gloveVectors);
 
