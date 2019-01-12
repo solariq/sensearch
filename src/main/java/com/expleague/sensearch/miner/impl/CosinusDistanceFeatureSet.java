@@ -8,7 +8,7 @@ import com.expleague.ml.meta.FeatureMeta.ValueType;
 public class CosinusDistanceFeatureSet extends FeatureSet.Stub<QURLItem> {
 
   public final static FeatureMeta COSINUS_DISTANCE = FeatureMeta
-      .create("cosinus distance", "cosinus distance between Query and Title", ValueType.VEC);
+      .create("cosinus_distance", "cosinus distance between Query and Title", ValueType.VEC);
 
 
   private Vec queryVec;
