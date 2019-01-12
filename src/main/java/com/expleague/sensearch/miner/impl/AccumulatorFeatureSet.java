@@ -17,7 +17,8 @@ public class AccumulatorFeatureSet extends FeatureSet.Stub<QURLItem> {
   private final FeatureSet<QURLItem> features = FeatureSet.join(
       new BM25FeatureSet(),
       new HHFeatureSet(),
-      new LinkFeatureSet()
+      new LinkFeatureSet(),
+      new CosinusDistanceFeatureSet()
   );
 
   public AccumulatorFeatureSet(Index index) {
