@@ -1,5 +1,6 @@
 package com.expleague.sensearch.snippet.docbased_snippet;
 
+import com.expleague.commons.seq.CharSeqTools;
 import com.expleague.sensearch.query.Query;
 import com.expleague.sensearch.snippet.Segment;
 import com.expleague.sensearch.snippet.Snippet;
@@ -32,6 +33,8 @@ public class DocBasedSnippet implements Snippet {
     StringBuilder sb = new StringBuilder();
     for (int i = 0; i < bestPassages.size(); ++i) {
       if (sb.length() + bestPassages.get(i).getSentence().length() > MAX_LENGTH) {
+        long prefix = MAX_LENGTH - sb.length();
+        sb.append(bestPassages.get(i).getSentence().subSequence(0, (int) prefix)).append("...");
         break;
       }
       if (i > 0 && bestPassages.get(i - 1).getId() + 1 < bestPassages.get(i).getId()) {
