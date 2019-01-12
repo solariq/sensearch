@@ -57,7 +57,7 @@ public class DataSetMain {
               .newBufferedReader(Paths.get("./wordstat").resolve("query_" + query.text()))) {
             ObjectMapper objectMapper = new ObjectMapper();
             ResultItem[] res = objectMapper.readValue(queryReader, ResultItemImpl[].class);
-            for(ResultItem page : res) {
+            for (ResultItem page : res) {
               uniqQURL.add(page.title().toString());
               poolBuilder.accept(new QURLItem(index.page(page.reference()), query));
               poolBuilder.advance();
@@ -65,7 +65,8 @@ public class DataSetMain {
           } catch (IOException ignored) {
           }
 
-          Stream<Page> sensearchResult = index.fetchDocuments(query);
+          Stream<Page> sensearchResult = index.fetchDocuments(query)
+              .filter(page -> !uniqQURL.contains(page.title().toString())).limit(10);
           sensearchResult.forEach(page -> {
             if (!uniqQURL.contains(page.title().toString())) {
               uniqQURL.add(page.title().toString());

@@ -69,7 +69,7 @@ public class PlainIndex implements Index {
 
   private static final Logger LOG = Logger.getLogger(PlainIndex.class.getName());
 
-  private static final int FILTERED_DOC_NUMBER = 10;
+  private static final int FILTERED_DOC_NUMBER = 1000;
   private static final int SYNONYMS_COUNT = 50;
 
   private final Path indexRoot;
