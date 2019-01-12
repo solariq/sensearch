@@ -7,6 +7,7 @@ import com.expleague.ml.meta.FeatureMeta;
 import com.expleague.ml.meta.FeatureMeta.ValueType;
 
 public class CosinusDistanceFeatureSet extends FeatureSet.Stub<QURLItem> {
+
   public final static FeatureMeta COSINUS_DISTANCE = FeatureMeta
       .create("cos-title", "cosinus distance between Query and Title", ValueType.VEC);
 
@@ -20,7 +21,7 @@ public class CosinusDistanceFeatureSet extends FeatureSet.Stub<QURLItem> {
 
   @Override
   public Vec advance() {
-    set(COSINUS_DISTANCE, 1 - 2 * VecTools.cosine(queryVec, titleVec));
+    set(COSINUS_DISTANCE, (1 - VecTools.cosine(queryVec, titleVec)) / 2);
     return super.advance();
   }
 }
