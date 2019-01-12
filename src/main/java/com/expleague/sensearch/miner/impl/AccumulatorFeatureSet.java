@@ -7,6 +7,7 @@ import com.expleague.ml.meta.FeatureMeta;
 import com.expleague.sensearch.Page;
 import com.expleague.sensearch.core.Term;
 import com.expleague.sensearch.index.Index;
+import com.expleague.sensearch.miner.impl.TextFeatureSet.Segment;
 import java.util.Objects;
 import java.util.function.Consumer;
 
@@ -36,18 +37,30 @@ public class AccumulatorFeatureSet extends FeatureSet.Stub<QURLItem> {
       features.components()
           .map(Functions.cast(TextFeatureSet.class))
           .filter(Objects::nonNull)
-          .forEach(fs -> fs.withStats(totalLength, index.averagePageSize(), index.size()));
+          .forEach(fs -> fs.withStats(totalLength, index.averagePageSize(), titleLength, index.averageTitleSize(), index.size()));
       { // Title processing
-        features.components().map(Functions.cast(TextFeatureSet.class)).filter(Objects::nonNull)
-            .forEach(fs -> fs.withSegment(TextFeatureSet.Segment.TITLE, titleLength));
+        //features.components().map(Functions.cast(TextFeatureSet.class)).filter(Objects::nonNull)
+        //    .forEach(fs -> fs.withSegment(TextFeatureSet.Segment.TITLE, titleLength));
         TermConsumer termConsumer = new TermConsumer();
         index.parse(page.title()).forEach(termConsumer);
+        index.parse(page.title()).forEach(term -> {
+          features.components()
+              .map(Functions.cast(TextFeatureSet.class))
+              .filter(Objects::nonNull)
+              .forEach(fs -> fs.withSegment(Segment.TITLE, term));
+        });
       }
       { // Content processing
-        features.components().map(Functions.cast(TextFeatureSet.class)).filter(Objects::nonNull)
-            .forEach(fs -> fs.withSegment(TextFeatureSet.Segment.BODY, contentLength));
+        //features.components().map(Functions.cast(TextFeatureSet.class)).filter(Objects::nonNull)
+        //    .forEach(fs -> fs.withSegment(TextFeatureSet.Segment.BODY, contentLength));
         TermConsumer termConsumer = new TermConsumer();
         index.parse(page.fullContent()).forEach(termConsumer);
+        index.parse(page.title()).forEach(term -> {
+          features.components()
+              .map(Functions.cast(TextFeatureSet.class))
+              .filter(Objects::nonNull)
+              .forEach(fs -> fs.withSegment(Segment.BODY, term));
+        });
       }
     }
     { //Link Processing

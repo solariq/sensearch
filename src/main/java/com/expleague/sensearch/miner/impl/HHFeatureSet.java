@@ -34,7 +34,7 @@ public class HHFeatureSet extends FeatureSet.Stub<QURLItem> implements TextFeatu
 	}
 
 	@Override
-	public void withStats(int pageLen, double avgLen, int indexLen) {
+	public void withStats(int pageLen, double avgLen, int titleLen, double avgTitle, int indexLen) {
 		termPositions.clear();
 		queryTerms.forEach(term -> {
 			final int df = term.documentFreq();
@@ -44,9 +44,8 @@ public class HHFeatureSet extends FeatureSet.Stub<QURLItem> implements TextFeatu
 	}
 
 	@Override
-	public void withSegment(Segment type, int length) {
+	public void withSegment(Segment type, Term t) {
 		// TODO Auto-generated method stub
-
 	}
 
 	@Override

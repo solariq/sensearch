@@ -21,6 +21,9 @@ public class BM25FeatureSet extends FeatureSet.Stub<QURLItem> implements TextFea
       .create("bm25l", "Title + text bm25 by lemmas", ValueType.VEC);
   public final static FeatureMeta BM25S = FeatureMeta
       .create("bm25s", "Title + text bm25 by synonyms", ValueType.VEC);
+  public final static FeatureMeta BM25F = FeatureMeta
+      .create("bm25f", "field-dependent bm25", ValueType.VEC);
+
 
   private static final double K = 1.2;
   private static final double B = 0.75;
@@ -33,6 +36,7 @@ public class BM25FeatureSet extends FeatureSet.Stub<QURLItem> implements TextFea
   private TextFeatureAccumulator bm25;
   private TextFeatureAccumulator bm25l;
   private TextFeatureAccumulator bm25s;
+  private BM25FAccumulator bm25f;
 
   @Override
   public void accept(QURLItem item) {
@@ -51,19 +55,24 @@ public class BM25FeatureSet extends FeatureSet.Stub<QURLItem> implements TextFea
     set(BM25, bm25.value());
     set(BM25L, bm25l.value());
     set(BM25S, bm25s.value());
+    set(BM25F, bm25f.value());
     return super.advance();
   }
 
 
   @Override
-  public void withStats(int pageLen, double avgLen, int indexLen) {
+  public void withStats(int pageLen, double avgLen, int titleLen, double avgTitle, int indexLen) {
     bm25 = new BM25Accumulator(pageLen, avgLen, indexLen);
     bm25l = new BM25Accumulator(pageLen, avgLen, indexLen);
     bm25s = new BM25Accumulator(pageLen, avgLen, indexLen);
+    bm25f = new BM25FAccumulator(pageLen, avgLen, titleLen, avgTitle, indexLen);
   }
 
   @Override
-  public void withSegment(Segment type, int length) {
+  public void withSegment(Segment type, Term term) {
+    if (queryTerms.contains(term)) {
+      bm25f.accept(type, term);
+    }
   }
 
   @Override
@@ -106,10 +115,64 @@ public class BM25FeatureSet extends FeatureSet.Stub<QURLItem> implements TextFea
             final int df = term.documentFreq();
             final double idf = df == 0 ? 0 : Math.log((collectionSize - df + 0.5) / (df + 0.5));
             result[0] += idf * freq
-                    / (freq+ normalizer)
+                    / (freq + normalizer)
                     ;
             return true;
           });
+      return result[0];
+    }
+  }
+
+  private class BM25FAccumulator {
+
+    private final TObjectIntHashMap<Term> freqTITLE = new TObjectIntHashMap<>();
+    private final TObjectIntHashMap<Term> freqCONTENT = new TObjectIntHashMap<>();
+
+    private final int pageLen;
+    private final double avgLen;
+    private final int titleLen;
+    private final double avgTitle;
+    private final int indexLen;
+
+
+    public BM25FAccumulator(int pageLen, double avgLen, int titleLen, double avgTitle, int indexLen) {
+      this.pageLen = pageLen;
+      this.avgLen = avgLen;
+      this.titleLen = titleLen;
+      this.avgTitle = avgTitle;
+      this.indexLen = indexLen;
+    }
+
+    public void accept(Segment type, Term term) {
+      switch (type) {
+        case TITLE:
+          freqTITLE.adjustOrPutValue(term, 1, 1);
+        case BODY:
+          freqCONTENT.adjustOrPutValue(term, 1, 1);
+      }
+    }
+
+    public double value() {
+      double[] result = new double[]{0};
+      freqTITLE.forEachEntry(
+          (term, freq) -> {
+            final int df = term.documentFreq();
+            final double idf = df == 0 ? 0 : Math.log((indexLen - df + 0.5) / (df + 0.5));
+            result[0] += idf * freq
+                / (freq + K);
+            ;
+            return true;
+          });
+      freqCONTENT.forEachEntry(
+          (term, freq) -> {
+            final int df = term.documentFreq();
+            final double idf = df == 0 ? 0 : Math.log((indexLen - df + 0.5) / (df + 0.5));
+            result[0] += idf * freq
+                / (freq + K);
+            ;
+            return true;
+          });
+
       return result[0];
     }
   }
