@@ -101,7 +101,8 @@ public class ProbabilisticSuggestor implements Suggestor {
 		List<Term> qc = terms.subList(0, terms.size() - 1);
 
 		List<Integer> qcDocs = getDocsSetsIntersection(qc.stream().toArray(Term[]::new));
-
+		//List<Integer> qcDocs = Arrays.asList();
+		
 		phraseProb.clear();
 
 		for (Term[] p : multigramFreqNorm.keySet()) {

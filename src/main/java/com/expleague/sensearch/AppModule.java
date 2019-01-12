@@ -40,8 +40,8 @@ public class AppModule extends AbstractModule {
       bind(Lemmer.class).toInstance(lemmer);
 
       bind(Index.class).to(PlainIndex.class);
-      bind(Suggestor.class).to(BigramsBasedSuggestor.class);
-      //bind(Suggestor.class).to(ProbabilisticSuggestor.class);
+      //bind(Suggestor.class).to(BigramsBasedSuggestor.class);
+      bind(Suggestor.class).to(ProbabilisticSuggestor.class);
       bind(SenSeArch.class).to(SenSeArchImpl.class);
       bind(IndexBuilder.class).to(PlainIndexBuilder.class);
       bind(Crawler.class).to(CrawlerXML.class);
