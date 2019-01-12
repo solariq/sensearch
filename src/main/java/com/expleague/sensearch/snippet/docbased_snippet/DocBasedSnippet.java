@@ -1,11 +1,13 @@
 package com.expleague.sensearch.snippet.docbased_snippet;
 
 import com.expleague.commons.seq.CharSeqTools;
+import com.expleague.sensearch.core.Term;
 import com.expleague.sensearch.query.Query;
 import com.expleague.sensearch.snippet.Segment;
 import com.expleague.sensearch.snippet.Snippet;
 import com.expleague.sensearch.snippet.passage.Passage;
 import com.expleague.sensearch.snippet.passage.Passages;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -16,7 +18,7 @@ public class DocBasedSnippet implements Snippet {
 
   private CharSequence title;
   private CharSequence content;
-  private List<Segment> selection;
+  private List<Segment> selection = new ArrayList<>();
 
   public DocBasedSnippet(CharSequence title, List<Passage> passages, Query query) {
     this.title = title;
@@ -42,15 +44,25 @@ public class DocBasedSnippet implements Snippet {
       }
       sb.append(bestPassages.get(i).getSentence());
     }
-    this.content = sb;
+    content = sb;
 
-    this.selection =
+    selection.addAll(
         query
             .terms()
             .stream()
             .flatMap(x -> Passages.containsSelection(content, x.text()).stream())
-            .sorted(Comparator.comparingInt(Segment::getLeft))
-            .collect(Collectors.toList());
+            .collect(Collectors.toList()));
+
+    selection.addAll(
+        query
+            .terms()
+            .stream()
+            .map(Term::lemma)
+            .flatMap(x -> Passages.containsSelection(content, x.text()).stream())
+            .collect(Collectors.toList()));
+
+    selection.sort(Comparator.comparingInt(Segment::getLeft));
+
   }
 
   @Override

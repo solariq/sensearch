@@ -18,6 +18,11 @@ public class Passages {
     return !containsSelection(s, t).isEmpty();
   }
 
+  private static boolean compareChars(char q, char p) {
+    if ((q == 'ё' && p == 'е') || (q == 'е' && p == 'ё')) return true;
+    return q == p;
+  }
+
   public static List<Segment> containsSelection(CharSequence text, CharSequence t) {
     final CharSequence s = text.toString().toLowerCase();
     int n = s.length();
@@ -37,7 +42,7 @@ public class Passages {
       if (j <= maxZ) {
         z[j] = Math.min(maxZ - j + 1, z[j - maxJ]);
       }
-      while (j + z[j] < m && t.charAt(m - 1 - z[j]) == t.charAt(m - 1 - (j + z[j]))) {
+      while (j + z[j] < m && compareChars(t.charAt(m - 1 - z[j]),t.charAt(m - 1 - (j + z[j])))) {
         z[j]++;
       }
       if (j + z[j] - 1 > maxZ) {
@@ -61,7 +66,7 @@ public class Passages {
     boolean ok = false;
     int j, bound = 0;
     for (int i = 0; i <= n - m; i += suffixShift[j + 1]) {
-      for (j = m - 1; j >= bound && t.charAt(j) == s.charAt(i + j); j--) {
+      for (j = m - 1; j >= bound && compareChars(t.charAt(j), s.charAt(i + j)); j--) {
         ;
       }
       if (j < bound) {
