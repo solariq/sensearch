@@ -14,12 +14,6 @@ public class LinkFeatureSet extends FeatureSet.Stub<QURLItem> {
       .create("outcoming links", "outcoming wiki-links", ValueType.VEC);
 
   private Page page;
-  private long indexSize;
-
-  public void withIndexSize(long indexSize) {
-    this.indexSize = indexSize;
-  }
-
   @Override
   public void accept(QURLItem item) {
     this.page = item.pageCache();
@@ -27,8 +21,8 @@ public class LinkFeatureSet extends FeatureSet.Stub<QURLItem> {
 
   @Override
   public Vec advance() {
-    set(INCOMING_LINK, page.incomingLinks().count() / (double)indexSize);
-    set(OUTCOMING_LINK, page.outcomingLinks().count() / (double)indexSize);
+    set(INCOMING_LINK, page.incomingLinks().count());
+    set(OUTCOMING_LINK, page.outcomingLinks().count());
     return super.advance();
   }
 }

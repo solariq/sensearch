@@ -64,9 +64,6 @@ public class AccumulatorFeatureSet extends FeatureSet.Stub<QURLItem> {
       }
     }
     { //Link Processing
-
-      features.components().map(Functions.cast(LinkFeatureSet.class)).filter(Objects::nonNull)
-          .forEach(fs -> fs.withIndexSize(index.size()));
     }
   }
 
