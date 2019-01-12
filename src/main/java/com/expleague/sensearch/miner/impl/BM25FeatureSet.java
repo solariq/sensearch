@@ -164,8 +164,8 @@ public class BM25FeatureSet extends FeatureSet.Stub<QURLItem> implements TextFea
         final double idf = df == 0 ? 0 : Math.log((indexLen - df + 0.5) / (df + 0.5));
 
         double tf = 0;
-        tf += freqTITLE.get(term) / (1 + B * (titleLen / (avgTitle + .0) - 1));
-        tf += freqBODY.get(term) / (1 + B * (pageLen / (avgLen + .0) - 1));
+        tf += freqTITLE.get(term) / (1 + B * (titleLen / avgTitle - 1));
+        tf += freqBODY.get(term) / (1 + B * (pageLen / avgLen - 1));
         result[0] += tf / (K + tf) * idf;
       });
 
