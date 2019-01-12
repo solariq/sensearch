@@ -29,7 +29,7 @@ public class CrawlWordstatData {
     Random random = new Random(239);
 
     // If Google bans us, then update this number and restart
-    int[] queryNum = new int[]{101};
+    int[] queryNum = new int[]{168};
 
     try (BufferedReader reader = Files.newBufferedReader(Paths.get("wordstat/queries.txt"))) {
       reader
