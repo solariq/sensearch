@@ -10,6 +10,7 @@ import com.expleague.sensearch.index.Index;
 import com.expleague.sensearch.miner.impl.TextFeatureSet.Segment;
 import java.util.Objects;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 public class AccumulatorFeatureSet extends FeatureSet.Stub<QURLItem> {
 
@@ -68,6 +69,15 @@ public class AccumulatorFeatureSet extends FeatureSet.Stub<QURLItem> {
       }
     }
     { //Link Processing
+    }
+    { //CosDist processing
+      Vec queryVec = index.vecByTerms(item.queryCache().terms());
+      Vec titleVec = index.vecByTerms(index.parse(item.pageCache().title()).collect(Collectors.toList()));
+
+      features.components()
+          .map(Functions.cast(CosinusDistanceFeatureSet.class))
+          .filter(Objects::nonNull)
+          .forEach(fs -> fs.withStats(queryVec, titleVec));
     }
   }
 
