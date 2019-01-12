@@ -27,8 +27,8 @@ public class CosinusDistanceFeatureSet extends FeatureSet.Stub<QURLItem> {
 
     for (int i = 0; i < queryVec.dim(); i++) {
       result += (queryVec.get(i) * titleVec.get(i));
-      querySum += Math.pow(queryVec.get(i), 2);
-      titleSum += Math.pow(titleVec.get(i), 2);
+      querySum += queryVec.get(i) * queryVec.get(i);
+      titleSum += titleVec.get(i) * titleVec.get(i);
     }
     querySum = Math.sqrt(querySum);
     titleSum = Math.sqrt(titleSum);
