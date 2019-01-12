@@ -220,7 +220,8 @@ public class PlainIndex implements Index {
         titleCnt++;
         for (int i = 0; i < protoPage.getIncomingLinksCount(); i++) {
           linkCnt++;
-          averageLinkSize += parse(protoPageLoad(protoPage.getIncomingLinks(i).getTargetPageId()).getTitle()).count();
+          averageLinkSize += parse(
+              protoPageLoad(protoPage.getIncomingLinks(i).getTargetPageId()).getTitle()).count();
         }
       } catch (InvalidProtocolBufferException e) {
         e.printStackTrace();
@@ -282,15 +283,20 @@ public class PlainIndex implements Index {
   }
 
   @Override
-  public Stream<Page> fetchDocuments(Query query) {
-    final Vec queryVec = new ArrayVec(embedding.dim());
-    query
-        .terms()
+  public Vec vecByTerms(List<Term> terms) {
+    final Vec answerVec = new ArrayVec(embedding.dim());
+    terms
         .stream()
         .mapToLong(t -> ((IndexTerm) t).id())
         .mapToObj(embedding::vec)
         .filter(Objects::nonNull)
-        .forEach(v -> VecTools.append(queryVec, v));
+        .forEach(v -> VecTools.append(answerVec, v));
+    return answerVec;
+  }
+
+  @Override
+  public Stream<Page> fetchDocuments(Query query) {
+    final Vec queryVec = vecByTerms(query.terms());
 
     List<Page> pages =
         filter
@@ -401,15 +407,15 @@ public class PlainIndex implements Index {
     }
     return lastTermStatistics;
   }
-  
+
   //однопоточно
   @Override
   public SuggestInformationLoader getSuggestInformation() {
-	  if (suggestLoader == null) {
-		  suggestLoader =
-				  new SuggestInformationLoader(
-						  suggest_unigram_DB, suggest_multigram_DB, suggest_inverted_index_DB, idToTerm);
-	  }
-	  return suggestLoader;
+    if (suggestLoader == null) {
+      suggestLoader =
+          new SuggestInformationLoader(
+              suggest_unigram_DB, suggest_multigram_DB, suggest_inverted_index_DB, idToTerm);
+    }
+    return suggestLoader;
   }
 }
