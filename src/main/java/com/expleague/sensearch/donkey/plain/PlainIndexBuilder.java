@@ -17,7 +17,6 @@ import com.expleague.sensearch.core.Tokenizer;
 import com.expleague.sensearch.core.impl.TokenizerImpl;
 import com.expleague.sensearch.donkey.IndexBuilder;
 import com.expleague.sensearch.donkey.crawler.Crawler;
-import com.expleague.sensearch.donkey.crawler.document.CrawlerDocument;
 import com.expleague.sensearch.index.plain.PlainIndex;
 import com.expleague.sensearch.protobuf.index.IndexUnits;
 import com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta.UriPageMapping;
@@ -34,8 +33,14 @@ import gnu.trove.map.TObjectLongMap;
 import gnu.trove.map.hash.TLongIntHashMap;
 import gnu.trove.map.hash.TLongObjectHashMap;
 import gnu.trove.map.hash.TObjectLongHashMap;
-
-import java.io.*;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.io.Reader;
+import java.io.UnsupportedEncodingException;
+import java.io.Writer;
 import java.net.URLDecoder;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -50,7 +55,6 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
 import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 import org.fusesource.leveldbjni.JniDBFactory;
@@ -71,7 +75,7 @@ public class PlainIndexBuilder implements IndexBuilder {
   public static final String TERM_ROOT = "term";
   public static final String EMBEDDING_ROOT = "embedding";
   public static final String LSH_METRIC_ROOT = "lsh_metric";
-  private static final String JMLL_ROOT = "jmll";
+  private static final String TEMP_EMBEDDING_ROOT = "temp_embedding";
 
   public static final String SUGGEST_UNIGRAM_ROOT = "suggest/unigram_coeff";
   public static final String SUGGEST_MULTIGRAMS_ROOT = "suggest/multigram_freq_norm";
@@ -221,7 +225,7 @@ public class PlainIndexBuilder implements IndexBuilder {
   private void saveIds(Path root, TLongObjectMap<Vec> vecs, Set<Long> ids) throws IOException {
     for (long mainId : ids) {
       try (Writer out =
-          new OutputStreamWriter(new FileOutputStream(root.resolve(mainId + "").toFile()))) {
+          new OutputStreamWriter(new FileOutputStream(root.resolve("_" + mainId).toFile()))) {
         for (long id : nearest(vecs, mainId)) {
           out.write(id + " ");
         }
@@ -282,313 +286,255 @@ public class PlainIndexBuilder implements IndexBuilder {
     }
   }
 
-  private void buildPage(Path indexRoot, List<CrawlerDocument> docs) throws IOException {
-      Path pagePath = indexRoot.resolve(PAGE_ROOT);
-      if (!Files.exists(pagePath)) {
-          LOG.info("Build page...");
-          Files.createDirectories(pagePath);
-          try (final DB pageDb =
-                       JniDBFactory.factory.open(indexRoot.resolve(PAGE_ROOT).toFile(), PAGE_DB_OPTIONS)
-          ) {
-              final PlainPageBuilder plainPageBuilder =
-                      new PlainPageBuilder(pageDb, indexRoot.resolve(PAGE_ROOT).resolve("TMP"));
-              long[] pagesCount = new long[]{0};
-              long[] sectionId = new long[]{0};
-              for (CrawlerDocument doc : docs) {
-                  long rootPageId = -((pagesCount[0] + 1) << ROOT_PAGE_ID_OFFSET_BITS);
-                  sectionId[0] = rootPageId;
-                  plainPageBuilder.startPage(doc.id(), rootPageId, doc.categories());
-                  doc.sections()
-                          .forEachOrdered(
-                                  s -> {
-                                      plainPageBuilder.addSection(sectionId[0], s);
-                                      //                          embeddingBuilder.add(sectionId[0],
-                                      // toVector(titleIds, gloveVectors));
-                                      --sectionId[0];
-                                  });
-                  plainPageBuilder.endPage();
-                  ++pagesCount[0];
-              }
-              plainPageBuilder.build();
-          }
-      } else {
-          LOG.info("Page exists");
-      }
-  }
+  //TODO: Make it more readable, add possibility of incomplete rebuilding
+  @Override
+  public void buildIndex() throws IOException {
+    final Tokenizer tokenizer = new TokenizerImpl();
+    final TObjectLongMap<String> uriPageIdMapping = new TObjectLongHashMap<>();
+    final TObjectLongMap<String> idMappings = new TObjectLongHashMap<>();
 
-  private void buildTermStatistics(Path indexRoot, List<CrawlerDocument> docs, TObjectLongMap<String> idMappings) throws IOException {
-      Path termStatisticsPath = indexRoot.resolve(TERM_STATISTICS_ROOT);
-      if (!Files.exists(termStatisticsPath)) {
-          LOG.info("Build stat...");
-          Files.createDirectories(termStatisticsPath);
-          try (final DB statisticsDb =
-                  JniDBFactory.factory.open(
-                          indexRoot.resolve(TERM_STATISTICS_ROOT).toFile(), STATS_DB_OPTIONS)
-          ) {
-              final StatisticsBuilder statisticsBuilder = new StatisticsBuilder(statisticsDb);
-              for (CrawlerDocument doc : docs) {
-                  TLongList pageTokens = new TLongArrayList();
-                  doc.sections()
-                          .forEachOrdered(
-                                  s -> {
-                                      List<CharSequence> sectionTitles = s.title();
-                                      String sectionTitle =
-                                              sectionTitles.get(sectionTitles.size() - 1).toString();
-                                      long[] titleIds =
-                                              toIds(
-                                                      tokenizer.parseTextToWords(sectionTitle.toLowerCase()),
-                                                      idMappings);
-                                      //                          embeddingBuilder.add(sectionId[0],
-                                      // toVector(titleIds, gloveVectors));
+    LOG.info("Creating database files...");
+    final Path indexRoot = config.getTemporaryIndex();
+    Files.createDirectories(indexRoot.resolve(PAGE_ROOT));
+    Files.createDirectories(indexRoot.resolve(TERM_STATISTICS_ROOT));
+    Files.createDirectories(indexRoot.resolve(EMBEDDING_ROOT));
+    Files.createDirectories(indexRoot.resolve(SUGGEST_UNIGRAM_ROOT));
 
-                                      pageTokens.addAll(titleIds);
-                                      pageTokens.addAll(
-                                              toIds(
-                                                      tokenizer.parseTextToWords(s.text().toString().toLowerCase()),
-                                                      idMappings));
-                                  });
-                  statisticsBuilder.enrich(pageTokens, null);
-              }
-              statisticsBuilder.build();
-          }
-      } else {
-          LOG.info("Stat exists");
-      }
-  }
+    try (final DB pageDb =
+        JniDBFactory.factory.open(indexRoot.resolve(PAGE_ROOT).toFile(), PAGE_DB_OPTIONS);
+        final DB statisticsDb =
+            JniDBFactory.factory.open(
+                indexRoot.resolve(TERM_STATISTICS_ROOT).toFile(), STATS_DB_OPTIONS);
+        final DB suggest_unigram_DB =
+            JniDBFactory.factory.open(
+                indexRoot.resolve(SUGGEST_UNIGRAM_ROOT).toFile(), STATS_DB_OPTIONS);
+        final DB suggest_multigram_DB =
+            JniDBFactory.factory.open(
+                indexRoot.resolve(SUGGEST_MULTIGRAMS_ROOT).toFile(), STATS_DB_OPTIONS);
+        final DB suggest_inverted_index_DB =
+            JniDBFactory.factory.open(
+                indexRoot.resolve(SUGGEST_INVERTED_INDEX_ROOT).toFile(), STATS_DB_OPTIONS)) {
+      //LOG.info("Reading vectors...");
+      //readGloveVectors(Paths.get(config.getEmbeddingVectors()), idMappings, gloveVectors);
 
-  private void buildSuggest(Path indexRoot, List<CrawlerDocument> docs, TObjectLongMap<String> idMappings) throws IOException {
-      Path suggestParh = indexRoot.resolve("suggest");
-      if (!Files.exists(suggestParh)) {
-          LOG.info("Build suggest...");
-          Files.createDirectories(indexRoot.resolve(SUGGEST_UNIGRAM_ROOT));
-          try (final DB suggest_unigram_DB =
-                       JniDBFactory.factory.open(
-                               indexRoot.resolve(SUGGEST_UNIGRAM_ROOT).toFile(), STATS_DB_OPTIONS);
-               final DB suggest_multigram_DB =
-                       JniDBFactory.factory.open(
-                               indexRoot.resolve(SUGGEST_MULTIGRAMS_ROOT).toFile(), STATS_DB_OPTIONS);
-               final DB suggest_inverted_index_DB =
-                       JniDBFactory.factory.open(
-                               indexRoot.resolve(SUGGEST_INVERTED_INDEX_ROOT).toFile(), STATS_DB_OPTIONS)) {
-              final SuggestInformationBuilder suggestBuilder =
-                      new SuggestInformationBuilder(
-                              suggest_unigram_DB, suggest_multigram_DB, suggest_inverted_index_DB);
-              for (CrawlerDocument doc : docs) {
-                  long[] titleTokens = toIds(
-                          tokenizer.parseTextToWords(doc.title().toLowerCase()),
-                          idMappings);
-                  suggestBuilder.accept(titleTokens);
-              }
-              suggestBuilder.build();
-          }
-      } else {
-          LOG.info("Suggest exists");
-      }
-  }
+      LOG.info("Creating mappings from wiki ids to raw index ids...");
+      final PlainPageBuilder plainPageBuilder =
+          new PlainPageBuilder(pageDb, indexRoot.resolve(PAGE_ROOT).resolve("TMP"));
 
-  private void buildJmll(Path indexRoot, List<CrawlerDocument> docs, TObjectLongMap<String> idMappings, TLongObjectMap<Vec> vectors) throws IOException {
-      Path jmllPath = indexRoot.resolve(JMLL_ROOT);
-      if (!Files.exists(jmllPath)) {
-          LOG.info("Build jmll...");
-          Files.createDirectories(jmllPath);
-          Path corpus = jmllPath.resolve("corpus");
-          try (Writer to = new OutputStreamWriter(new FileOutputStream(corpus.toFile()))) {
-              for (CrawlerDocument doc : docs) {
-                  try {
-                      String title = doc.title();
-                      for (char c : title.toCharArray()) {
-                          to.write(filtrateChar(c));
-                      }
-                      to.write(' ');
-                      CharSequence content = doc.content();
-                      for (int i = 0; i < content.length(); i++) {
-                          to.write(filtrateChar(content.charAt(i)));
-                      }
-                      to.write(' ');
-                  } catch (IOException e) {
-                      LOG.warn(e);
-                  }
-              }
-          }
-          DecompBuilder builder = (DecompBuilder) Embedding.builder(Embedding.Type.DECOMP);
-          final Embedding<CharSeq> jmllEmbedding = builder.file(corpus).build();
-          try (Writer to = Files.newBufferedWriter(jmllPath.resolve("vecs"))) {
-              Embedding.write(jmllEmbedding, to);
-          }
-          idMappings.forEachEntry((word, id) -> {
-              vectors.put(id, jmllEmbedding.apply(CharSeq.create(word)));
-              return true;
-          });
-      } else {
-          LOG.info("Jmll exists");
-          //TODO: read vectors
-      }
-  }
+      final StatisticsBuilder statisticsBuilder = new StatisticsBuilder(statisticsDb);
 
-  private void buildEmbedding(Path indexRoot, List<CrawlerDocument> docs, TObjectLongMap<String> idMappings, TLongObjectMap<Vec> vectors) throws IOException {
-      Path embeddingPath = indexRoot.resolve(EMBEDDING_ROOT);
-      if (!Files.exists(embeddingPath)) {
-          LOG.info("Build embedding");
-          final EmbeddingBuilder embeddingBuilder = new EmbeddingBuilder(embeddingPath);
-          long[] pagesCount = new long[]{0};
-          embeddingBuilder.addAll(vectors);
-          for (CrawlerDocument doc : docs) {
-              long rootPageId = -((pagesCount[0] + 1) << ROOT_PAGE_ID_OFFSET_BITS);
-              long[] titleIds = toIds(tokenizer.parseTextToWords(doc.title()), idMappings);
-              embeddingBuilder.add(rootPageId, toVector(titleIds, vectors));
-              ++pagesCount[0];
-          }
-          embeddingBuilder.build();
-          Path lshMetricPath = embeddingPath.resolve(LSH_METRIC_ROOT);
-          Files.createDirectories(lshMetricPath);
-          saveLSHMetricInfo(
-                  lshMetricPath,
-                  vectors,
-                  Arrays.stream(REQUIRED_WORDS).map(idMappings::get).collect(Collectors.toSet()));
-      } else {
-          LOG.info("Embedding exists");
-      }
-  }
+      final EmbeddingBuilder embeddingBuilder =
+          new EmbeddingBuilder(indexRoot.resolve(EMBEDDING_ROOT));
 
-  private void buildTerm(Path indexRoot, TObjectLongMap<String> idMappings) throws IOException {
-      Path termPath = indexRoot.resolve(TERM_ROOT);
-      if (!Files.exists(termPath)) {
-          LOG.info("Build term...");
-          Files.createDirectories(indexRoot.resolve(TERM_ROOT));
-          TLongObjectMap<ParsedTerm> idToTermMapping = parseTerms(idMappings, lemmer);
-          try (DB termDb =
-                       JniDBFactory.factory.open(indexRoot.resolve(TERM_ROOT).toFile(), TERM_DB_OPTIONS)) {
+      final SuggestInformationBuilder suggestBuilder =
+          new SuggestInformationBuilder(
+              suggest_unigram_DB, suggest_multigram_DB, suggest_inverted_index_DB);
 
-              WriteBatch[] batch = new WriteBatch[]{termDb.createWriteBatch()};
-              int[] curBatchSize = new int[]{0};
-
-              idMappings.forEachEntry(
-                      (word, id) -> {
-                          Builder termBuilder = Term.newBuilder().setId(id).setText(word);
-                          ParsedTerm term = idToTermMapping.get(id);
-                          if (term != null) {
-                              if (term.lemmaId != -1) {
-                                  termBuilder.setLemmaId(term.lemmaId);
-                              }
-                              if (term.partOfSpeech != null) {
-                                  termBuilder.setPartOfSpeech(
-                                          IndexUnits.Term.PartOfSpeech.valueOf(term.partOfSpeech.name()));
-                              }
-                          }
-
-                          batch[0].put(Longs.toByteArray(id), termBuilder.build().toByteArray());
-                          curBatchSize[0]++;
-                          if (curBatchSize[0] >= TERM_BATCH_SIZE) {
-                              termDb.write(batch[0], DEFAULT_TERM_WRITE_OPTIONS);
-
-                              batch[0] = termDb.createWriteBatch();
-                              curBatchSize[0] = 0;
-                          }
-
-                          return true;
-                      });
-
-              if (curBatchSize[0] > 0) {
-                  termDb.write(batch[0], DEFAULT_TERM_WRITE_OPTIONS);
-              }
-          }
-      } else {
-          LOG.info("Term exists");
-      }
-  }
-
-  private void saveIndexMeta(Path indexRoot, List<CrawlerDocument> docs, TObjectLongMap<String> idMappings) throws IOException {
-      LOG.info("Storing index meta...");
-      long[] pagesCount = new long[]{0};
       final long[] pagesAndTokensCounts = new long[]{0, 0};
-      final TObjectLongMap<String> uriPageIdMapping = new TObjectLongHashMap<>();
-      for (CrawlerDocument doc : docs) {
-          long rootPageId = -((pagesCount[0] + 1) << ROOT_PAGE_ID_OFFSET_BITS);
-          TLongList pageTokens = new TLongArrayList();
-          doc.sections()
-                  .forEachOrdered(
-                          s -> {
+
+      final TLongIntMap termFrequencyMap = new TLongIntHashMap();
+      final TLongObjectMap<TLongIntMap> bigramFrequencyMap = new TLongObjectHashMap<>();
+
+      // saving page-wise data
+      LOG.info("Storing page-wise data...");
+      long[] pagesCount = new long[]{0};
+      long[] sectionId = new long[]{0};
+
+      Path tempEmbeddingPath = indexRoot.resolve(TEMP_EMBEDDING_ROOT);
+      Files.createDirectories(tempEmbeddingPath);
+      Path corpus = tempEmbeddingPath.resolve("corpus");
+
+      TLongObjectMap<String> titles = new TLongObjectHashMap<>();
+      try {
+        try (Writer to = new OutputStreamWriter(new FileOutputStream(corpus.toFile()))) {
+          crawler
+              .makeStream()
+              .forEach(
+                  doc -> {
+                    TLongList pageTokens = new TLongArrayList();
+                    long rootPageId = -((pagesCount[0] + 1) << ROOT_PAGE_ID_OFFSET_BITS);
+                    sectionId[0] = rootPageId;
+                    plainPageBuilder.startPage(doc.id(), rootPageId, doc.categories());
+                    doc.sections()
+                        .forEachOrdered(
+                            s -> {
+                              plainPageBuilder.addSection(sectionId[0], s);
+
                               List<CharSequence> sectionTitles = s.title();
                               String sectionTitle =
-                                      sectionTitles.get(sectionTitles.size() - 1).toString();
+                                  sectionTitles.get(sectionTitles.size() - 1).toString();
                               long[] titleIds =
-                                      toIds(
-                                              tokenizer.parseTextToWords(sectionTitle.toLowerCase()),
-                                              idMappings);
+                                  toIds(
+                                      tokenizer.parseTextToWords(sectionTitle.toLowerCase()),
+                                      idMappings);
                               //                          embeddingBuilder.add(sectionId[0],
                               // toVector(titleIds, gloveVectors));
 
                               pageTokens.addAll(titleIds);
                               pageTokens.addAll(
-                                      toIds(
-                                              tokenizer.parseTextToWords(s.text().toString().toLowerCase()),
-                                              idMappings));
-                          });
-          ++pagesCount[0];
-          ++pagesAndTokensCounts[0];
-          pagesAndTokensCounts[1] += pageTokens.size();
-          uriPageIdMapping.put(doc.uri().toString(), rootPageId);
-          try {
-              uriPageIdMapping.put(
-                      URLDecoder.decode(doc.uri().toString(), "UTF-8"), rootPageId);
-          } catch (UnsupportedEncodingException e) {
-              LOG.warn(e);
-          }
-      }
-      IndexUnits.IndexMeta.newBuilder()
-              .setVersion(PlainIndex.VERSION)
-              .setAveragePageSize((double) pagesAndTokensCounts[1] / pagesAndTokensCounts[0])
-              .setVocabularySize(idMappings.size())
-              .addAllUriPageMappings(toProtobufIterableUri(uriPageIdMapping))
-              .setPagesCount((int) pagesAndTokensCounts[0])
-              .build()
-              .writeTo(Files.newOutputStream(indexRoot.resolve(INDEX_META_FILE)));
-  }
+                                  toIds(
+                                      tokenizer.parseTextToWords(s.text().toString().toLowerCase()),
+                                      idMappings));
+                              --sectionId[0];
+                            });
+                    plainPageBuilder.endPage();
+                    ++pagesCount[0];
 
-  private final Tokenizer tokenizer = new TokenizerImpl();
+                  /*long[] titleIds =
+                      toIds(tokenizer.parseTextToWords(doc.title().toLowerCase()), idMappings);
 
-  //TODO: remove duplicate code
-  @Override
-  public void buildIndex() throws IOException {
-      LOG.info("Building started...");
-      try {
-          final Path indexRoot = config.getTemporaryIndex();
-          final TObjectLongMap<String> idMappings = new TObjectLongHashMap<>();
-          final TLongObjectMap<Vec> vectors = new TLongObjectHashMap<>();
+                  embeddingBuilder.add(rootPageId, toVector(titleIds, gloveVectors));*/
+                    titles.put(rootPageId, doc.title());
 
-          List<CrawlerDocument> docs = crawler.makeStream().collect(Collectors.toList());
-          for (CrawlerDocument doc : docs) {
-              doc.sections()
-                      .forEachOrdered(
-                              s -> {
-                                  List<CharSequence> sectionTitles = s.title();
-                                  String sectionTitle = sectionTitles.get(sectionTitles.size() - 1).toString();
-                                  toIds(tokenizer.parseTextToWords(sectionTitle.toLowerCase()), idMappings);
-                                  toIds(tokenizer.parseTextToWords(s.text().toString().toLowerCase()), idMappings);
-                              });
-              toIds(tokenizer.parseTextToWords(doc.title().toLowerCase()), idMappings);
-          }
+                    long[] titleTokens = toIds(
+                        tokenizer.parseTextToWords(doc.title().toLowerCase()),
+                        idMappings);
 
-          buildPage(indexRoot, docs);
-          buildTermStatistics(indexRoot, docs, idMappings);
-          buildSuggest(indexRoot, docs, idMappings);
-          buildJmll(indexRoot, docs, idMappings, vectors);
-          buildEmbedding(indexRoot, docs, idMappings, vectors);
-          buildTerm(indexRoot, idMappings);
-          saveIndexMeta(indexRoot, docs, idMappings);
+                    suggestBuilder.accept(titleTokens);
+
+                    statisticsBuilder.enrich(pageTokens, null);
+
+                    ++pagesAndTokensCounts[0];
+                    pagesAndTokensCounts[1] += pageTokens.size();
+
+                    uriPageIdMapping.put(doc.uri().toString(), rootPageId);
+                    try {
+                      uriPageIdMapping.put(
+                          URLDecoder.decode(doc.uri().toString(), "UTF-8"), rootPageId);
+                    } catch (UnsupportedEncodingException e) {
+                      LOG.warn(e);
+                    }
+
+                    try {
+                      String title = doc.title();
+                      for (char c : title.toCharArray()) {
+                        to.write(filtrateChar(c));
+                      }
+                      to.write(' ');
+                      CharSequence content = doc.content();
+                      for (int i = 0; i < content.length(); i++) {
+                        to.write(filtrateChar(content.charAt(i)));
+                      }
+                      to.write(' ');
+                    } catch (IOException e) {
+                      LOG.warn(e);
+                    }
+                  });
+        }
+
+        suggestBuilder.build();
+
+        LOG.info("Parsing lemmas...");
+        TLongObjectMap<ParsedTerm> terms = parseTerms(idMappings, lemmer);
+
+        LOG.info("Storing term-wise data...");
+        saveTermData(idMappings, terms, indexRoot);
+
+        LOG.info("Building embedding...");
+
+        DecompBuilder builder = (DecompBuilder) Embedding.builder(Embedding.Type.DECOMP);
+        final Embedding<CharSeq> result = builder
+            .file(corpus)
+            .build();
+
+        FileUtils.deleteDirectory(tempEmbeddingPath.toFile());
+
+        final TLongObjectMap<Vec> gloveVectors = new TLongObjectHashMap<>();
+
+        idMappings.forEachEntry((word, id) -> {
+          gloveVectors.put(id, result.apply(CharSeq.create(word)));
+          return true;
+        });
+
+        embeddingBuilder.addAll(gloveVectors);
+
+        titles.forEachEntry((id, title) -> {
+          long[] titleIds = toIds(tokenizer.parseTextToWords(title), idMappings);
+          embeddingBuilder.add(id, toVector(titleIds, gloveVectors));
+          return true;
+        });
+
+        embeddingBuilder.build();
+
+        Path lshMetricPath = indexRoot.resolve(EMBEDDING_ROOT).resolve(LSH_METRIC_ROOT);
+        Files.createDirectories(lshMetricPath);
+        saveLSHMetricInfo(
+            lshMetricPath,
+            gloveVectors,
+            Arrays.stream(REQUIRED_WORDS).map(idMappings::get).collect(Collectors.toSet()));
+
+        plainPageBuilder.build();
+        statisticsBuilder.build();
+
+        LOG.info("Storing index meta...");
+        // saving index-wise data
+        IndexUnits.IndexMeta.newBuilder()
+            .setVersion(PlainIndex.VERSION)
+            .setAveragePageSize((double) pagesAndTokensCounts[1] / pagesAndTokensCounts[0])
+            .setVocabularySize(idMappings.size())
+            .addAllUriPageMappings(toProtobufIterableUri(uriPageIdMapping))
+            .setPagesCount((int) pagesAndTokensCounts[0])
+            .build()
+            .writeTo(Files.newOutputStream(indexRoot.resolve(INDEX_META_FILE)));
+
       } catch (Exception e) {
-          throw new RuntimeException(e);
+        throw new IOException(e);
       }
-      LOG.info("Index built!");
+    }
+    LOG.info("Index built!");
   }
 
   private char filtrateChar(char c) {
-      if (Character.isLetter(c)) {
-          return Character.toLowerCase(c);
-      } else if (Character.isDigit(c)) {
-          return c;
+    if (Character.isLetter(c)) {
+      return Character.toLowerCase(c);
+    } else if (Character.isDigit(c)) {
+      return c;
+    }
+    return ' ';
+  }
+
+  private void saveTermData(
+      TObjectLongMap<String> idMapping, TLongObjectMap<ParsedTerm> idToTermMapping, Path indexRoot)
+      throws IOException {
+    Files.createDirectories(indexRoot.resolve(TERM_ROOT));
+    try (DB termDb =
+        JniDBFactory.factory.open(indexRoot.resolve(TERM_ROOT).toFile(), TERM_DB_OPTIONS)) {
+
+      WriteBatch[] batch = new WriteBatch[]{termDb.createWriteBatch()};
+      int[] curBatchSize = new int[]{0};
+
+      idMapping.forEachEntry(
+          (word, id) -> {
+            Builder termBuilder = Term.newBuilder().setId(id).setText(word);
+
+            ParsedTerm term = idToTermMapping.get(id);
+            if (term != null) {
+              if (term.lemmaId != -1) {
+                termBuilder.setLemmaId(term.lemmaId);
+              }
+
+              if (term.partOfSpeech != null) {
+                termBuilder.setPartOfSpeech(
+                    IndexUnits.Term.PartOfSpeech.valueOf(term.partOfSpeech.name()));
+              }
+            }
+
+            batch[0].put(Longs.toByteArray(id), termBuilder.build().toByteArray());
+            curBatchSize[0]++;
+            if (curBatchSize[0] >= TERM_BATCH_SIZE) {
+              termDb.write(batch[0], DEFAULT_TERM_WRITE_OPTIONS);
+
+              batch[0] = termDb.createWriteBatch();
+              curBatchSize[0] = 0;
+            }
+
+            return true;
+          });
+
+      if (curBatchSize[0] > 0) {
+        termDb.write(batch[0], DEFAULT_TERM_WRITE_OPTIONS);
       }
-      return ' ';
+    }
   }
 
   @VisibleForTesting
