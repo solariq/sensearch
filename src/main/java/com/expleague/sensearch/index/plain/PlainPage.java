@@ -64,7 +64,7 @@ public class PlainPage implements IndexedPage {
     }
 
     @Override
-    public Stream<Link> outcomingLinks() {
+    public Stream<Link> outgoingLinks() {
       return Stream.empty();
     }
 
@@ -179,12 +179,12 @@ public class PlainPage implements IndexedPage {
   }
 
   @Override
-  public Stream<Link> outcomingLinks() {
-    if (protoPage.getOutcomingLinksCount() == 0) {
+  public Stream<Link> outgoingLinks() {
+    if (protoPage.getOutgoingLinksCount() == 0) {
       return Stream.empty();
     }
 
-    return protoPage.getOutcomingLinksList()
+    return protoPage.getOutgoingLinksList()
         .stream()
         .map(l -> PlainLink.withSource(l, index, this));
   }

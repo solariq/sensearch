@@ -36,7 +36,7 @@ message Page {
   optional string title = 3;
   optional string content = 4;
   // Link structure
-  repeated Link outcoming_links = 5;
+  repeated Link outgoing_links = 5;
   repeated Link incoming_links = 6;
   repeated string categories = 9;
 

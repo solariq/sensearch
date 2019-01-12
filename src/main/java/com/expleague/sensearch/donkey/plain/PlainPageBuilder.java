@@ -76,21 +76,21 @@ class PlainPageBuilder {
   }
 
   /**
-   * Receives list of links and splits it into two maps. Outcoming links map has
-   * link's source page id as a key, so for each id it stores all of the outcoming links.
+   * Receives list of links and splits it into two maps. Outgoing links map has
+   * link's source page id as a key, so for each id it stores all of the outgoing links.
    * Incoming links map, on the other hand, stores all incoming links for each id in the
    * similar fashion
    *
    * @param links list of Link.Builder each of which has wiki page id as a target id
    * @param wikiIdToIndexIdMappings mapping from wiki ids to index ids
-   * @param outcomingLinks map of outcoming links
+   * @param outgoingLinks map of outgoing links links
    * @param incomingLinks map of incoming links
    */
   @VisibleForTesting
   static void resolveLinks(List<Page.Link.Builder> links, TLongLongMap wikiIdToIndexIdMappings,
-      @NotNull TLongObjectMap<List<Page.Link>> outcomingLinks,
+      @NotNull TLongObjectMap<List<Page.Link>> outgoingLinks,
       @NotNull TLongObjectMap<List<Page.Link>> incomingLinks) {
-    outcomingLinks.clear();
+    outgoingLinks.clear();
     incomingLinks.clear();
     for (Page.Link.Builder link : links) {
       long wikiTargetId = link.getTargetPageId();
@@ -114,8 +114,8 @@ class PlainPageBuilder {
       }
 
       long sourceId = link.getSourcePageId();
-      outcomingLinks.putIfAbsent(sourceId, new ArrayList<>());
-      outcomingLinks.get(sourceId).add(builtLink);
+      outgoingLinks.putIfAbsent(sourceId, new ArrayList<>());
+      outgoingLinks.get(sourceId).add(builtLink);
     }
   }
 
@@ -229,8 +229,8 @@ class PlainPageBuilder {
     temporaryIndexOs.close();
 
     TLongObjectMap<List<Page.Link>> incomingLinks = new TLongObjectHashMap<>();
-    TLongObjectMap<List<Page.Link>> outcomingLinks = new TLongObjectHashMap<>();
-    resolveLinks(linkBuilders, wikiIdToIndexId, outcomingLinks, incomingLinks);
+    TLongObjectMap<List<Page.Link>> outgoingLinks = new TLongObjectHashMap<>();
+    resolveLinks(linkBuilders, wikiIdToIndexId, outgoingLinks, incomingLinks);
 
     Page.Builder pageBuilder = Page.newBuilder();
     Page rawPage;
@@ -246,8 +246,8 @@ class PlainPageBuilder {
         pageBuilder.clear();
         pageBuilder.mergeFrom(rawPage);
         long pageId = pageBuilder.getPageId();
-        if (outcomingLinks.containsKey(pageId)) {
-          pageBuilder.addAllOutcomingLinks(outcomingLinks.get(pageId));
+        if (outgoingLinks.containsKey(pageId)) {
+          pageBuilder.addAllOutgoingLinks(outgoingLinks.get(pageId));
         }
 
         if (incomingLinks.containsKey(pageId)) {

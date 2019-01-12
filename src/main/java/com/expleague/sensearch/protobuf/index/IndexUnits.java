@@ -1621,47 +1621,47 @@ public final class IndexUnits {
         getContentBytes();
 
     /**
-     * <code>repeated .index.Page.Link outcoming_links = 5;</code>
+     * <code>repeated .index.Page.Link outgoing_links = 5;</code>
      *
      * <pre>
      * Link structure
      * </pre>
      */
     java.util.List<com.expleague.sensearch.protobuf.index.IndexUnits.Page.Link> 
-        getOutcomingLinksList();
+        getOutgoingLinksList();
     /**
-     * <code>repeated .index.Page.Link outcoming_links = 5;</code>
+     * <code>repeated .index.Page.Link outgoing_links = 5;</code>
      *
      * <pre>
      * Link structure
      * </pre>
      */
-    com.expleague.sensearch.protobuf.index.IndexUnits.Page.Link getOutcomingLinks(int index);
+    com.expleague.sensearch.protobuf.index.IndexUnits.Page.Link getOutgoingLinks(int index);
     /**
-     * <code>repeated .index.Page.Link outcoming_links = 5;</code>
+     * <code>repeated .index.Page.Link outgoing_links = 5;</code>
      *
      * <pre>
      * Link structure
      * </pre>
      */
-    int getOutcomingLinksCount();
+    int getOutgoingLinksCount();
     /**
-     * <code>repeated .index.Page.Link outcoming_links = 5;</code>
+     * <code>repeated .index.Page.Link outgoing_links = 5;</code>
      *
      * <pre>
      * Link structure
      * </pre>
      */
     java.util.List<? extends com.expleague.sensearch.protobuf.index.IndexUnits.Page.LinkOrBuilder> 
-        getOutcomingLinksOrBuilderList();
+        getOutgoingLinksOrBuilderList();
     /**
-     * <code>repeated .index.Page.Link outcoming_links = 5;</code>
+     * <code>repeated .index.Page.Link outgoing_links = 5;</code>
      *
      * <pre>
      * Link structure
      * </pre>
      */
-    com.expleague.sensearch.protobuf.index.IndexUnits.Page.LinkOrBuilder getOutcomingLinksOrBuilder(
+    com.expleague.sensearch.protobuf.index.IndexUnits.Page.LinkOrBuilder getOutgoingLinksOrBuilder(
         int index);
 
     /**
@@ -1816,10 +1816,10 @@ public final class IndexUnits {
             }
             case 42: {
               if (!((mutable_bitField0_ & 0x00000010) == 0x00000010)) {
-                outcomingLinks_ = new java.util.ArrayList<com.expleague.sensearch.protobuf.index.IndexUnits.Page.Link>();
+                outgoingLinks_ = new java.util.ArrayList<com.expleague.sensearch.protobuf.index.IndexUnits.Page.Link>();
                 mutable_bitField0_ |= 0x00000010;
               }
-              outcomingLinks_.add(input.readMessage(com.expleague.sensearch.protobuf.index.IndexUnits.Page.Link.PARSER, extensionRegistry));
+              outgoingLinks_.add(input.readMessage(com.expleague.sensearch.protobuf.index.IndexUnits.Page.Link.PARSER, extensionRegistry));
               break;
             }
             case 50: {
@@ -1874,7 +1874,7 @@ public final class IndexUnits {
             e.getMessage()).setUnfinishedMessage(this);
       } finally {
         if (((mutable_bitField0_ & 0x00000010) == 0x00000010)) {
-          outcomingLinks_ = java.util.Collections.unmodifiableList(outcomingLinks_);
+          outgoingLinks_ = java.util.Collections.unmodifiableList(outgoingLinks_);
         }
         if (((mutable_bitField0_ & 0x00000020) == 0x00000020)) {
           incomingLinks_ = java.util.Collections.unmodifiableList(incomingLinks_);
@@ -2820,59 +2820,59 @@ public final class IndexUnits {
       }
     }
 
-    public static final int OUTCOMING_LINKS_FIELD_NUMBER = 5;
-    private java.util.List<com.expleague.sensearch.protobuf.index.IndexUnits.Page.Link> outcomingLinks_;
+    public static final int OUTGOING_LINKS_FIELD_NUMBER = 5;
+    private java.util.List<com.expleague.sensearch.protobuf.index.IndexUnits.Page.Link> outgoingLinks_;
     /**
-     * <code>repeated .index.Page.Link outcoming_links = 5;</code>
+     * <code>repeated .index.Page.Link outgoing_links = 5;</code>
      *
      * <pre>
      * Link structure
      * </pre>
      */
-    public java.util.List<com.expleague.sensearch.protobuf.index.IndexUnits.Page.Link> getOutcomingLinksList() {
-      return outcomingLinks_;
+    public java.util.List<com.expleague.sensearch.protobuf.index.IndexUnits.Page.Link> getOutgoingLinksList() {
+      return outgoingLinks_;
     }
     /**
-     * <code>repeated .index.Page.Link outcoming_links = 5;</code>
+     * <code>repeated .index.Page.Link outgoing_links = 5;</code>
      *
      * <pre>
      * Link structure
      * </pre>
      */
     public java.util.List<? extends com.expleague.sensearch.protobuf.index.IndexUnits.Page.LinkOrBuilder> 
-        getOutcomingLinksOrBuilderList() {
-      return outcomingLinks_;
+        getOutgoingLinksOrBuilderList() {
+      return outgoingLinks_;
     }
     /**
-     * <code>repeated .index.Page.Link outcoming_links = 5;</code>
+     * <code>repeated .index.Page.Link outgoing_links = 5;</code>
      *
      * <pre>
      * Link structure
      * </pre>
      */
-    public int getOutcomingLinksCount() {
-      return outcomingLinks_.size();
+    public int getOutgoingLinksCount() {
+      return outgoingLinks_.size();
     }
     /**
-     * <code>repeated .index.Page.Link outcoming_links = 5;</code>
+     * <code>repeated .index.Page.Link outgoing_links = 5;</code>
      *
      * <pre>
      * Link structure
      * </pre>
      */
-    public com.expleague.sensearch.protobuf.index.IndexUnits.Page.Link getOutcomingLinks(int index) {
-      return outcomingLinks_.get(index);
+    public com.expleague.sensearch.protobuf.index.IndexUnits.Page.Link getOutgoingLinks(int index) {
+      return outgoingLinks_.get(index);
     }
     /**
-     * <code>repeated .index.Page.Link outcoming_links = 5;</code>
+     * <code>repeated .index.Page.Link outgoing_links = 5;</code>
      *
      * <pre>
      * Link structure
      * </pre>
      */
-    public com.expleague.sensearch.protobuf.index.IndexUnits.Page.LinkOrBuilder getOutcomingLinksOrBuilder(
+    public com.expleague.sensearch.protobuf.index.IndexUnits.Page.LinkOrBuilder getOutgoingLinksOrBuilder(
         int index) {
-      return outcomingLinks_.get(index);
+      return outgoingLinks_.get(index);
     }
 
     public static final int INCOMING_LINKS_FIELD_NUMBER = 6;
@@ -2991,7 +2991,7 @@ public final class IndexUnits {
       uri_ = "";
       title_ = "";
       content_ = "";
-      outcomingLinks_ = java.util.Collections.emptyList();
+      outgoingLinks_ = java.util.Collections.emptyList();
       incomingLinks_ = java.util.Collections.emptyList();
       categories_ = com.google.protobuf.LazyStringArrayList.EMPTY;
       parentId_ = 0L;
@@ -3022,8 +3022,8 @@ public final class IndexUnits {
       if (((bitField0_ & 0x00000008) == 0x00000008)) {
         output.writeBytes(4, getContentBytes());
       }
-      for (int i = 0; i < outcomingLinks_.size(); i++) {
-        output.writeMessage(5, outcomingLinks_.get(i));
+      for (int i = 0; i < outgoingLinks_.size(); i++) {
+        output.writeMessage(5, outgoingLinks_.get(i));
       }
       for (int i = 0; i < incomingLinks_.size(); i++) {
         output.writeMessage(6, incomingLinks_.get(i));
@@ -3062,9 +3062,9 @@ public final class IndexUnits {
         size += com.google.protobuf.CodedOutputStream
           .computeBytesSize(4, getContentBytes());
       }
-      for (int i = 0; i < outcomingLinks_.size(); i++) {
+      for (int i = 0; i < outgoingLinks_.size(); i++) {
         size += com.google.protobuf.CodedOutputStream
-          .computeMessageSize(5, outcomingLinks_.get(i));
+          .computeMessageSize(5, outgoingLinks_.get(i));
       }
       for (int i = 0; i < incomingLinks_.size(); i++) {
         size += com.google.protobuf.CodedOutputStream
@@ -3201,7 +3201,7 @@ public final class IndexUnits {
       }
       private void maybeForceBuilderInitialization() {
         if (com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders) {
-          getOutcomingLinksFieldBuilder();
+          getOutgoingLinksFieldBuilder();
           getIncomingLinksFieldBuilder();
         }
       }
@@ -3219,11 +3219,11 @@ public final class IndexUnits {
         bitField0_ = (bitField0_ & ~0x00000004);
         content_ = "";
         bitField0_ = (bitField0_ & ~0x00000008);
-        if (outcomingLinksBuilder_ == null) {
-          outcomingLinks_ = java.util.Collections.emptyList();
+        if (outgoingLinksBuilder_ == null) {
+          outgoingLinks_ = java.util.Collections.emptyList();
           bitField0_ = (bitField0_ & ~0x00000010);
         } else {
-          outcomingLinksBuilder_.clear();
+          outgoingLinksBuilder_.clear();
         }
         if (incomingLinksBuilder_ == null) {
           incomingLinks_ = java.util.Collections.emptyList();
@@ -3281,14 +3281,14 @@ public final class IndexUnits {
           to_bitField0_ |= 0x00000008;
         }
         result.content_ = content_;
-        if (outcomingLinksBuilder_ == null) {
+        if (outgoingLinksBuilder_ == null) {
           if (((bitField0_ & 0x00000010) == 0x00000010)) {
-            outcomingLinks_ = java.util.Collections.unmodifiableList(outcomingLinks_);
+            outgoingLinks_ = java.util.Collections.unmodifiableList(outgoingLinks_);
             bitField0_ = (bitField0_ & ~0x00000010);
           }
-          result.outcomingLinks_ = outcomingLinks_;
+          result.outgoingLinks_ = outgoingLinks_;
         } else {
-          result.outcomingLinks_ = outcomingLinksBuilder_.build();
+          result.outgoingLinks_ = outgoingLinksBuilder_.build();
         }
         if (incomingLinksBuilder_ == null) {
           if (((bitField0_ & 0x00000020) == 0x00000020)) {
@@ -3347,29 +3347,29 @@ public final class IndexUnits {
           content_ = other.content_;
           onChanged();
         }
-        if (outcomingLinksBuilder_ == null) {
-          if (!other.outcomingLinks_.isEmpty()) {
-            if (outcomingLinks_.isEmpty()) {
-              outcomingLinks_ = other.outcomingLinks_;
+        if (outgoingLinksBuilder_ == null) {
+          if (!other.outgoingLinks_.isEmpty()) {
+            if (outgoingLinks_.isEmpty()) {
+              outgoingLinks_ = other.outgoingLinks_;
               bitField0_ = (bitField0_ & ~0x00000010);
             } else {
-              ensureOutcomingLinksIsMutable();
-              outcomingLinks_.addAll(other.outcomingLinks_);
+              ensureOutgoingLinksIsMutable();
+              outgoingLinks_.addAll(other.outgoingLinks_);
             }
             onChanged();
           }
         } else {
-          if (!other.outcomingLinks_.isEmpty()) {
-            if (outcomingLinksBuilder_.isEmpty()) {
-              outcomingLinksBuilder_.dispose();
-              outcomingLinksBuilder_ = null;
-              outcomingLinks_ = other.outcomingLinks_;
+          if (!other.outgoingLinks_.isEmpty()) {
+            if (outgoingLinksBuilder_.isEmpty()) {
+              outgoingLinksBuilder_.dispose();
+              outgoingLinksBuilder_ = null;
+              outgoingLinks_ = other.outgoingLinks_;
               bitField0_ = (bitField0_ & ~0x00000010);
-              outcomingLinksBuilder_ = 
+              outgoingLinksBuilder_ = 
                 com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders ?
-                   getOutcomingLinksFieldBuilder() : null;
+                   getOutgoingLinksFieldBuilder() : null;
             } else {
-              outcomingLinksBuilder_.addAllMessages(other.outcomingLinks_);
+              outgoingLinksBuilder_.addAllMessages(other.outgoingLinks_);
             }
           }
         }
@@ -3733,316 +3733,316 @@ public final class IndexUnits {
         return this;
       }
 
-      private java.util.List<com.expleague.sensearch.protobuf.index.IndexUnits.Page.Link> outcomingLinks_ =
+      private java.util.List<com.expleague.sensearch.protobuf.index.IndexUnits.Page.Link> outgoingLinks_ =
         java.util.Collections.emptyList();
-      private void ensureOutcomingLinksIsMutable() {
+      private void ensureOutgoingLinksIsMutable() {
         if (!((bitField0_ & 0x00000010) == 0x00000010)) {
-          outcomingLinks_ = new java.util.ArrayList<com.expleague.sensearch.protobuf.index.IndexUnits.Page.Link>(outcomingLinks_);
+          outgoingLinks_ = new java.util.ArrayList<com.expleague.sensearch.protobuf.index.IndexUnits.Page.Link>(outgoingLinks_);
           bitField0_ |= 0x00000010;
          }
       }
 
       private com.google.protobuf.RepeatedFieldBuilder<
-          com.expleague.sensearch.protobuf.index.IndexUnits.Page.Link, com.expleague.sensearch.protobuf.index.IndexUnits.Page.Link.Builder, com.expleague.sensearch.protobuf.index.IndexUnits.Page.LinkOrBuilder> outcomingLinksBuilder_;
+          com.expleague.sensearch.protobuf.index.IndexUnits.Page.Link, com.expleague.sensearch.protobuf.index.IndexUnits.Page.Link.Builder, com.expleague.sensearch.protobuf.index.IndexUnits.Page.LinkOrBuilder> outgoingLinksBuilder_;
 
       /**
-       * <code>repeated .index.Page.Link outcoming_links = 5;</code>
+       * <code>repeated .index.Page.Link outgoing_links = 5;</code>
        *
        * <pre>
        * Link structure
        * </pre>
        */
-      public java.util.List<com.expleague.sensearch.protobuf.index.IndexUnits.Page.Link> getOutcomingLinksList() {
-        if (outcomingLinksBuilder_ == null) {
-          return java.util.Collections.unmodifiableList(outcomingLinks_);
+      public java.util.List<com.expleague.sensearch.protobuf.index.IndexUnits.Page.Link> getOutgoingLinksList() {
+        if (outgoingLinksBuilder_ == null) {
+          return java.util.Collections.unmodifiableList(outgoingLinks_);
         } else {
-          return outcomingLinksBuilder_.getMessageList();
+          return outgoingLinksBuilder_.getMessageList();
         }
       }
       /**
-       * <code>repeated .index.Page.Link outcoming_links = 5;</code>
+       * <code>repeated .index.Page.Link outgoing_links = 5;</code>
        *
        * <pre>
        * Link structure
        * </pre>
        */
-      public int getOutcomingLinksCount() {
-        if (outcomingLinksBuilder_ == null) {
-          return outcomingLinks_.size();
+      public int getOutgoingLinksCount() {
+        if (outgoingLinksBuilder_ == null) {
+          return outgoingLinks_.size();
         } else {
-          return outcomingLinksBuilder_.getCount();
+          return outgoingLinksBuilder_.getCount();
         }
       }
       /**
-       * <code>repeated .index.Page.Link outcoming_links = 5;</code>
+       * <code>repeated .index.Page.Link outgoing_links = 5;</code>
        *
        * <pre>
        * Link structure
        * </pre>
        */
-      public com.expleague.sensearch.protobuf.index.IndexUnits.Page.Link getOutcomingLinks(int index) {
-        if (outcomingLinksBuilder_ == null) {
-          return outcomingLinks_.get(index);
+      public com.expleague.sensearch.protobuf.index.IndexUnits.Page.Link getOutgoingLinks(int index) {
+        if (outgoingLinksBuilder_ == null) {
+          return outgoingLinks_.get(index);
         } else {
-          return outcomingLinksBuilder_.getMessage(index);
+          return outgoingLinksBuilder_.getMessage(index);
         }
       }
       /**
-       * <code>repeated .index.Page.Link outcoming_links = 5;</code>
+       * <code>repeated .index.Page.Link outgoing_links = 5;</code>
        *
        * <pre>
        * Link structure
        * </pre>
        */
-      public Builder setOutcomingLinks(
+      public Builder setOutgoingLinks(
           int index, com.expleague.sensearch.protobuf.index.IndexUnits.Page.Link value) {
-        if (outcomingLinksBuilder_ == null) {
+        if (outgoingLinksBuilder_ == null) {
           if (value == null) {
             throw new NullPointerException();
           }
-          ensureOutcomingLinksIsMutable();
-          outcomingLinks_.set(index, value);
+          ensureOutgoingLinksIsMutable();
+          outgoingLinks_.set(index, value);
           onChanged();
         } else {
-          outcomingLinksBuilder_.setMessage(index, value);
+          outgoingLinksBuilder_.setMessage(index, value);
         }
         return this;
       }
       /**
-       * <code>repeated .index.Page.Link outcoming_links = 5;</code>
+       * <code>repeated .index.Page.Link outgoing_links = 5;</code>
        *
        * <pre>
        * Link structure
        * </pre>
        */
-      public Builder setOutcomingLinks(
+      public Builder setOutgoingLinks(
           int index, com.expleague.sensearch.protobuf.index.IndexUnits.Page.Link.Builder builderForValue) {
-        if (outcomingLinksBuilder_ == null) {
-          ensureOutcomingLinksIsMutable();
-          outcomingLinks_.set(index, builderForValue.build());
+        if (outgoingLinksBuilder_ == null) {
+          ensureOutgoingLinksIsMutable();
+          outgoingLinks_.set(index, builderForValue.build());
           onChanged();
         } else {
-          outcomingLinksBuilder_.setMessage(index, builderForValue.build());
+          outgoingLinksBuilder_.setMessage(index, builderForValue.build());
         }
         return this;
       }
       /**
-       * <code>repeated .index.Page.Link outcoming_links = 5;</code>
+       * <code>repeated .index.Page.Link outgoing_links = 5;</code>
        *
        * <pre>
        * Link structure
        * </pre>
        */
-      public Builder addOutcomingLinks(com.expleague.sensearch.protobuf.index.IndexUnits.Page.Link value) {
-        if (outcomingLinksBuilder_ == null) {
+      public Builder addOutgoingLinks(com.expleague.sensearch.protobuf.index.IndexUnits.Page.Link value) {
+        if (outgoingLinksBuilder_ == null) {
           if (value == null) {
             throw new NullPointerException();
           }
-          ensureOutcomingLinksIsMutable();
-          outcomingLinks_.add(value);
+          ensureOutgoingLinksIsMutable();
+          outgoingLinks_.add(value);
           onChanged();
         } else {
-          outcomingLinksBuilder_.addMessage(value);
+          outgoingLinksBuilder_.addMessage(value);
         }
         return this;
       }
       /**
-       * <code>repeated .index.Page.Link outcoming_links = 5;</code>
+       * <code>repeated .index.Page.Link outgoing_links = 5;</code>
        *
        * <pre>
        * Link structure
        * </pre>
        */
-      public Builder addOutcomingLinks(
+      public Builder addOutgoingLinks(
           int index, com.expleague.sensearch.protobuf.index.IndexUnits.Page.Link value) {
-        if (outcomingLinksBuilder_ == null) {
+        if (outgoingLinksBuilder_ == null) {
           if (value == null) {
             throw new NullPointerException();
           }
-          ensureOutcomingLinksIsMutable();
-          outcomingLinks_.add(index, value);
+          ensureOutgoingLinksIsMutable();
+          outgoingLinks_.add(index, value);
           onChanged();
         } else {
-          outcomingLinksBuilder_.addMessage(index, value);
+          outgoingLinksBuilder_.addMessage(index, value);
         }
         return this;
       }
       /**
-       * <code>repeated .index.Page.Link outcoming_links = 5;</code>
+       * <code>repeated .index.Page.Link outgoing_links = 5;</code>
        *
        * <pre>
        * Link structure
        * </pre>
        */
-      public Builder addOutcomingLinks(
+      public Builder addOutgoingLinks(
           com.expleague.sensearch.protobuf.index.IndexUnits.Page.Link.Builder builderForValue) {
-        if (outcomingLinksBuilder_ == null) {
-          ensureOutcomingLinksIsMutable();
-          outcomingLinks_.add(builderForValue.build());
+        if (outgoingLinksBuilder_ == null) {
+          ensureOutgoingLinksIsMutable();
+          outgoingLinks_.add(builderForValue.build());
           onChanged();
         } else {
-          outcomingLinksBuilder_.addMessage(builderForValue.build());
+          outgoingLinksBuilder_.addMessage(builderForValue.build());
         }
         return this;
       }
       /**
-       * <code>repeated .index.Page.Link outcoming_links = 5;</code>
+       * <code>repeated .index.Page.Link outgoing_links = 5;</code>
        *
        * <pre>
        * Link structure
        * </pre>
        */
-      public Builder addOutcomingLinks(
+      public Builder addOutgoingLinks(
           int index, com.expleague.sensearch.protobuf.index.IndexUnits.Page.Link.Builder builderForValue) {
-        if (outcomingLinksBuilder_ == null) {
-          ensureOutcomingLinksIsMutable();
-          outcomingLinks_.add(index, builderForValue.build());
+        if (outgoingLinksBuilder_ == null) {
+          ensureOutgoingLinksIsMutable();
+          outgoingLinks_.add(index, builderForValue.build());
           onChanged();
         } else {
-          outcomingLinksBuilder_.addMessage(index, builderForValue.build());
+          outgoingLinksBuilder_.addMessage(index, builderForValue.build());
         }
         return this;
       }
       /**
-       * <code>repeated .index.Page.Link outcoming_links = 5;</code>
+       * <code>repeated .index.Page.Link outgoing_links = 5;</code>
        *
        * <pre>
        * Link structure
        * </pre>
        */
-      public Builder addAllOutcomingLinks(
+      public Builder addAllOutgoingLinks(
           java.lang.Iterable<? extends com.expleague.sensearch.protobuf.index.IndexUnits.Page.Link> values) {
-        if (outcomingLinksBuilder_ == null) {
-          ensureOutcomingLinksIsMutable();
+        if (outgoingLinksBuilder_ == null) {
+          ensureOutgoingLinksIsMutable();
           com.google.protobuf.AbstractMessageLite.Builder.addAll(
-              values, outcomingLinks_);
+              values, outgoingLinks_);
           onChanged();
         } else {
-          outcomingLinksBuilder_.addAllMessages(values);
+          outgoingLinksBuilder_.addAllMessages(values);
         }
         return this;
       }
       /**
-       * <code>repeated .index.Page.Link outcoming_links = 5;</code>
+       * <code>repeated .index.Page.Link outgoing_links = 5;</code>
        *
        * <pre>
        * Link structure
        * </pre>
        */
-      public Builder clearOutcomingLinks() {
-        if (outcomingLinksBuilder_ == null) {
-          outcomingLinks_ = java.util.Collections.emptyList();
+      public Builder clearOutgoingLinks() {
+        if (outgoingLinksBuilder_ == null) {
+          outgoingLinks_ = java.util.Collections.emptyList();
           bitField0_ = (bitField0_ & ~0x00000010);
           onChanged();
         } else {
-          outcomingLinksBuilder_.clear();
+          outgoingLinksBuilder_.clear();
         }
         return this;
       }
       /**
-       * <code>repeated .index.Page.Link outcoming_links = 5;</code>
+       * <code>repeated .index.Page.Link outgoing_links = 5;</code>
        *
        * <pre>
        * Link structure
        * </pre>
        */
-      public Builder removeOutcomingLinks(int index) {
-        if (outcomingLinksBuilder_ == null) {
-          ensureOutcomingLinksIsMutable();
-          outcomingLinks_.remove(index);
+      public Builder removeOutgoingLinks(int index) {
+        if (outgoingLinksBuilder_ == null) {
+          ensureOutgoingLinksIsMutable();
+          outgoingLinks_.remove(index);
           onChanged();
         } else {
-          outcomingLinksBuilder_.remove(index);
+          outgoingLinksBuilder_.remove(index);
         }
         return this;
       }
       /**
-       * <code>repeated .index.Page.Link outcoming_links = 5;</code>
+       * <code>repeated .index.Page.Link outgoing_links = 5;</code>
        *
        * <pre>
        * Link structure
        * </pre>
        */
-      public com.expleague.sensearch.protobuf.index.IndexUnits.Page.Link.Builder getOutcomingLinksBuilder(
+      public com.expleague.sensearch.protobuf.index.IndexUnits.Page.Link.Builder getOutgoingLinksBuilder(
           int index) {
-        return getOutcomingLinksFieldBuilder().getBuilder(index);
+        return getOutgoingLinksFieldBuilder().getBuilder(index);
       }
       /**
-       * <code>repeated .index.Page.Link outcoming_links = 5;</code>
+       * <code>repeated .index.Page.Link outgoing_links = 5;</code>
        *
        * <pre>
        * Link structure
        * </pre>
        */
-      public com.expleague.sensearch.protobuf.index.IndexUnits.Page.LinkOrBuilder getOutcomingLinksOrBuilder(
+      public com.expleague.sensearch.protobuf.index.IndexUnits.Page.LinkOrBuilder getOutgoingLinksOrBuilder(
           int index) {
-        if (outcomingLinksBuilder_ == null) {
-          return outcomingLinks_.get(index);  } else {
-          return outcomingLinksBuilder_.getMessageOrBuilder(index);
+        if (outgoingLinksBuilder_ == null) {
+          return outgoingLinks_.get(index);  } else {
+          return outgoingLinksBuilder_.getMessageOrBuilder(index);
         }
       }
       /**
-       * <code>repeated .index.Page.Link outcoming_links = 5;</code>
+       * <code>repeated .index.Page.Link outgoing_links = 5;</code>
        *
        * <pre>
        * Link structure
        * </pre>
        */
       public java.util.List<? extends com.expleague.sensearch.protobuf.index.IndexUnits.Page.LinkOrBuilder> 
-           getOutcomingLinksOrBuilderList() {
-        if (outcomingLinksBuilder_ != null) {
-          return outcomingLinksBuilder_.getMessageOrBuilderList();
+           getOutgoingLinksOrBuilderList() {
+        if (outgoingLinksBuilder_ != null) {
+          return outgoingLinksBuilder_.getMessageOrBuilderList();
         } else {
-          return java.util.Collections.unmodifiableList(outcomingLinks_);
+          return java.util.Collections.unmodifiableList(outgoingLinks_);
         }
       }
       /**
-       * <code>repeated .index.Page.Link outcoming_links = 5;</code>
+       * <code>repeated .index.Page.Link outgoing_links = 5;</code>
        *
        * <pre>
        * Link structure
        * </pre>
        */
-      public com.expleague.sensearch.protobuf.index.IndexUnits.Page.Link.Builder addOutcomingLinksBuilder() {
-        return getOutcomingLinksFieldBuilder().addBuilder(
+      public com.expleague.sensearch.protobuf.index.IndexUnits.Page.Link.Builder addOutgoingLinksBuilder() {
+        return getOutgoingLinksFieldBuilder().addBuilder(
             com.expleague.sensearch.protobuf.index.IndexUnits.Page.Link.getDefaultInstance());
       }
       /**
-       * <code>repeated .index.Page.Link outcoming_links = 5;</code>
+       * <code>repeated .index.Page.Link outgoing_links = 5;</code>
        *
        * <pre>
        * Link structure
        * </pre>
        */
-      public com.expleague.sensearch.protobuf.index.IndexUnits.Page.Link.Builder addOutcomingLinksBuilder(
+      public com.expleague.sensearch.protobuf.index.IndexUnits.Page.Link.Builder addOutgoingLinksBuilder(
           int index) {
-        return getOutcomingLinksFieldBuilder().addBuilder(
+        return getOutgoingLinksFieldBuilder().addBuilder(
             index, com.expleague.sensearch.protobuf.index.IndexUnits.Page.Link.getDefaultInstance());
       }
       /**
-       * <code>repeated .index.Page.Link outcoming_links = 5;</code>
+       * <code>repeated .index.Page.Link outgoing_links = 5;</code>
        *
        * <pre>
        * Link structure
        * </pre>
        */
       public java.util.List<com.expleague.sensearch.protobuf.index.IndexUnits.Page.Link.Builder> 
-           getOutcomingLinksBuilderList() {
-        return getOutcomingLinksFieldBuilder().getBuilderList();
+           getOutgoingLinksBuilderList() {
+        return getOutgoingLinksFieldBuilder().getBuilderList();
       }
       private com.google.protobuf.RepeatedFieldBuilder<
           com.expleague.sensearch.protobuf.index.IndexUnits.Page.Link, com.expleague.sensearch.protobuf.index.IndexUnits.Page.Link.Builder, com.expleague.sensearch.protobuf.index.IndexUnits.Page.LinkOrBuilder> 
-          getOutcomingLinksFieldBuilder() {
-        if (outcomingLinksBuilder_ == null) {
-          outcomingLinksBuilder_ = new com.google.protobuf.RepeatedFieldBuilder<
+          getOutgoingLinksFieldBuilder() {
+        if (outgoingLinksBuilder_ == null) {
+          outgoingLinksBuilder_ = new com.google.protobuf.RepeatedFieldBuilder<
               com.expleague.sensearch.protobuf.index.IndexUnits.Page.Link, com.expleague.sensearch.protobuf.index.IndexUnits.Page.Link.Builder, com.expleague.sensearch.protobuf.index.IndexUnits.Page.LinkOrBuilder>(
-                  outcomingLinks_,
+                  outgoingLinks_,
                   ((bitField0_ & 0x00000010) == 0x00000010),
                   getParentForChildren(),
                   isClean());
-          outcomingLinks_ = null;
+          outgoingLinks_ = null;
         }
-        return outcomingLinksBuilder_;
+        return outgoingLinksBuilder_;
       }
 
       private java.util.List<com.expleague.sensearch.protobuf.index.IndexUnits.Page.Link> incomingLinks_ =
@@ -7846,30 +7846,30 @@ public final class IndexUnits {
       "\021average_page_size\030\003 \001(\001\022\027\n\017vocabulary_s" +
       "ize\030\004 \001(\005\022:\n\021uri_page_mappings\030\005 \003(\0132\037.i" +
       "ndex.IndexMeta.UriPageMapping\032.\n\016UriPage" +
-      "Mapping\022\013\n\003uri\030\001 \001(\t\022\017\n\007page_id\030\002 \001(\003\"\256\002" +
+      "Mapping\022\013\n\003uri\030\001 \001(\t\022\017\n\007page_id\030\002 \001(\003\"\255\002" +
       "\n\004Page\022\017\n\007page_id\030\001 \001(\003\022\013\n\003uri\030\002 \001(\t\022\r\n\005" +
-      "title\030\003 \001(\t\022\017\n\007content\030\004 \001(\t\022)\n\017outcomin" +
-      "g_links\030\005 \003(\0132\020.index.Page.Link\022(\n\016incom" +
-      "ing_links\030\006 \003(\0132\020.index.Page.Link\022\022\n\ncat",
-      "egories\030\t \003(\t\022\021\n\tparent_id\030\007 \001(\003\022\024\n\014subp" +
-      "ages_ids\030\010 \003(\003\032V\n\004Link\022\014\n\004text\030\001 \001(\t\022\026\n\016" +
-      "target_page_id\030\002 \001(\003\022\020\n\010position\030\003 \001(\003\022\026" +
-      "\n\016source_page_id\030\004 \001(\003\"\317\001\n\016TermStatistic" +
-      "s\022\017\n\007term_id\030\001 \001(\003\022\033\n\023docuement_frequenc" +
-      "y\030\002 \001(\005\022\026\n\016term_frequency\030\003 \001(\003\022=\n\020bigra" +
-      "m_frequency\030\004 \003(\0132#.index.TermStatistics" +
-      ".TermFrequency\0328\n\rTermFrequency\022\017\n\007term_" +
-      "id\030\001 \001(\003\022\026\n\016term_frequency\030\002 \001(\005\"\202\002\n\004Ter" +
-      "m\022\n\n\002id\030\001 \001(\003\022\020\n\010lemma_id\030\002 \001(\003\022\014\n\004text\030",
-      "\003 \001(\t\0220\n\016part_of_speech\030\004 \001(\0162\030.index.Te" +
-      "rm.PartOfSpeech\"\233\001\n\014PartOfSpeech\022\013\n\007UNKN" +
-      "OWN\020\000\022\005\n\001A\020\001\022\007\n\003ADV\020\002\022\n\n\006ADVPRO\020\003\022\010\n\004ANU" +
-      "M\020\004\022\010\n\004APRO\020\005\022\007\n\003COM\020\006\022\010\n\004CONJ\020\007\022\010\n\004INTJ" +
-      "\020\010\022\007\n\003NUM\020\t\022\010\n\004PART\020\n\022\006\n\002PR\020\013\022\005\n\001S\020\014\022\010\n\004" +
-      "SPRO\020\r\022\005\n\001V\020\016\"\034\n\010TermList\022\020\n\010termList\030\001 " +
-      "\003(\003\"\036\n\013IntegerList\022\017\n\007intList\030\001 \003(\005B4\n&c" +
-      "om.expleague.sensearch.protobuf.indexB\nI" +
-      "ndexUnits"
+      "title\030\003 \001(\t\022\017\n\007content\030\004 \001(\t\022(\n\016outgoing" +
+      "_links\030\005 \003(\0132\020.index.Page.Link\022(\n\016incomi" +
+      "ng_links\030\006 \003(\0132\020.index.Page.Link\022\022\n\ncate",
+      "gories\030\t \003(\t\022\021\n\tparent_id\030\007 \001(\003\022\024\n\014subpa" +
+      "ges_ids\030\010 \003(\003\032V\n\004Link\022\014\n\004text\030\001 \001(\t\022\026\n\016t" +
+      "arget_page_id\030\002 \001(\003\022\020\n\010position\030\003 \001(\003\022\026\n" +
+      "\016source_page_id\030\004 \001(\003\"\317\001\n\016TermStatistics" +
+      "\022\017\n\007term_id\030\001 \001(\003\022\033\n\023docuement_frequency" +
+      "\030\002 \001(\005\022\026\n\016term_frequency\030\003 \001(\003\022=\n\020bigram" +
+      "_frequency\030\004 \003(\0132#.index.TermStatistics." +
+      "TermFrequency\0328\n\rTermFrequency\022\017\n\007term_i" +
+      "d\030\001 \001(\003\022\026\n\016term_frequency\030\002 \001(\005\"\202\002\n\004Term" +
+      "\022\n\n\002id\030\001 \001(\003\022\020\n\010lemma_id\030\002 \001(\003\022\014\n\004text\030\003",
+      " \001(\t\0220\n\016part_of_speech\030\004 \001(\0162\030.index.Ter" +
+      "m.PartOfSpeech\"\233\001\n\014PartOfSpeech\022\013\n\007UNKNO" +
+      "WN\020\000\022\005\n\001A\020\001\022\007\n\003ADV\020\002\022\n\n\006ADVPRO\020\003\022\010\n\004ANUM" +
+      "\020\004\022\010\n\004APRO\020\005\022\007\n\003COM\020\006\022\010\n\004CONJ\020\007\022\010\n\004INTJ\020" +
+      "\010\022\007\n\003NUM\020\t\022\010\n\004PART\020\n\022\006\n\002PR\020\013\022\005\n\001S\020\014\022\010\n\004S" +
+      "PRO\020\r\022\005\n\001V\020\016\"\034\n\010TermList\022\020\n\010termList\030\001 \003" +
+      "(\003\"\036\n\013IntegerList\022\017\n\007intList\030\001 \003(\005B4\n&co" +
+      "m.expleague.sensearch.protobuf.indexB\nIn" +
+      "dexUnits"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
         new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
@@ -7900,7 +7900,7 @@ public final class IndexUnits {
     internal_static_index_Page_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessage.FieldAccessorTable(
         internal_static_index_Page_descriptor,
-        new java.lang.String[] { "PageId", "Uri", "Title", "Content", "OutcomingLinks", "IncomingLinks", "Categories", "ParentId", "SubpagesIds", });
+        new java.lang.String[] { "PageId", "Uri", "Title", "Content", "OutgoingLinks", "IncomingLinks", "Categories", "ParentId", "SubpagesIds", });
     internal_static_index_Page_Link_descriptor =
       internal_static_index_Page_descriptor.getNestedTypes().get(0);
     internal_static_index_Page_Link_fieldAccessorTable = new

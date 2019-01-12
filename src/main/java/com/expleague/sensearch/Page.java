@@ -25,7 +25,7 @@ public interface Page {
   List<CharSequence> categories();
 
   @NotNull
-  Stream<Link> outcomingLinks();
+  Stream<Link> outgoingLinks();
 
   @NotNull
   Stream<Link> incomingLinks();

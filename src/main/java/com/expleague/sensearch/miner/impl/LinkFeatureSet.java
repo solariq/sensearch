@@ -22,7 +22,7 @@ public class LinkFeatureSet extends FeatureSet.Stub<QURLItem> {
   @Override
   public Vec advance() {
     set(INCOMING_LINK, page.incomingLinks().count());
-    set(OUTGOING_LINK, page.outcomingLinks().count());
+    set(OUTGOING_LINK, page.outgoingLinks().count());
     return super.advance();
   }
 }
