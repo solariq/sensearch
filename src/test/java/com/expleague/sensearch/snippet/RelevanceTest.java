@@ -61,7 +61,7 @@ public class RelevanceTest extends SensearchTestCase {
           }
 
           @Override
-          public Stream<Link> outcomingLinks() {
+          public Stream<Link> outgoingLinks() {
             return null;
           }
 
@@ -130,7 +130,7 @@ public class RelevanceTest extends SensearchTestCase {
           }
 
           @Override
-          public Stream<Link> outcomingLinks() {
+          public Stream<Link> outgoingLinks() {
             return null;
           }
 
@@ -196,7 +196,7 @@ public class RelevanceTest extends SensearchTestCase {
           }
 
           @Override
-          public Stream<Link> outcomingLinks() {
+          public Stream<Link> outgoingLinks() {
             return null;
           }
 

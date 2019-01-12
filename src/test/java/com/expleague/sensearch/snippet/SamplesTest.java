@@ -75,7 +75,7 @@ public class SamplesTest extends SensearchTestCase {
                         }
 
                         @Override
-                        public Stream<Link> outcomingLinks() {
+                        public Stream<Link> outgoingLinks() {
                           return null;
                         }
 

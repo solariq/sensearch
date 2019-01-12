@@ -253,7 +253,7 @@ public class UnitMetricTest {
     }
 
     @Override
-    public Stream<Link> outcomingLinks() {
+    public Stream<Link> outgoingLinks() {
       return null;
     }
 
