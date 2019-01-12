@@ -358,7 +358,7 @@ public class PlainIndex implements Index {
   int documentFrequency(Term term) {
     try {
       return termStatistics(((IndexTerm) term).id()).getDocuementFrequency();
-    } catch (DBException | NoSuchElementException e) {
+    } catch (DBException | NoSuchElementException | NullPointerException e) {
       return 0;
     } catch (InvalidProtocolBufferException e) {
       LOG.fatal("Encountered invalid protobuf in Term Statistics Base!");
