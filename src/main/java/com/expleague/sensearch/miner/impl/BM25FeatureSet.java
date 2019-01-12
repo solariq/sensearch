@@ -61,11 +61,14 @@ public class BM25FeatureSet extends FeatureSet.Stub<QURLItem> implements TextFea
 
 
   @Override
-  public void withStats(int pageLen, double avgLen, int titleLen, double avgTitle, int indexLen) {
-    bm25 = new BM25Accumulator(pageLen, avgLen, indexLen);
-    bm25l = new BM25Accumulator(pageLen, avgLen, indexLen);
-    bm25s = new BM25Accumulator(pageLen, avgLen, indexLen);
-    bm25f = new BM25FAccumulator(pageLen, avgLen, titleLen, avgTitle, indexLen);
+  public void withStats(int totalLength, double averageTotalLength,
+      int titleLength, double averageTitleLength, int contentLength, double averageContentLength,
+      int indexLength) {
+    bm25 = new BM25Accumulator(totalLength, averageTotalLength, indexLength);
+    bm25l = new BM25Accumulator(totalLength, averageTotalLength, indexLength);
+    bm25s = new BM25Accumulator(totalLength, averageTotalLength, indexLength);
+    bm25f = new BM25FAccumulator(contentLength, averageContentLength, titleLength,
+        averageTitleLength, indexLength);
   }
 
   @Override
@@ -134,7 +137,7 @@ public class BM25FeatureSet extends FeatureSet.Stub<QURLItem> implements TextFea
     private double normalizerTITLE;
     private double normalizerBODY;
 
-    public BM25FAccumulator(int pageLen, double avgLen, int titleLen, double avgTitle,
+    BM25FAccumulator(int pageLen, double avgLen, int titleLen, double avgTitle,
         int indexLen) {
       normalizerTITLE = (1 + B * (titleLen / avgTitle - 1));
       normalizerBODY = (1 + B * (pageLen / avgLen - 1));
