@@ -4,7 +4,6 @@ import com.expleague.commons.math.vectors.Vec;
 import com.expleague.commons.math.vectors.VecTools;
 import com.expleague.commons.math.vectors.impl.vectors.ArrayVec;
 import com.expleague.commons.seq.CharSeq;
-import com.expleague.commons.seq.CharSeqTools;
 import com.expleague.ml.embedding.Embedding;
 import com.expleague.sensearch.Config;
 import com.expleague.sensearch.core.Lemmer;
@@ -13,25 +12,19 @@ import com.expleague.sensearch.core.impl.TokenizerImpl;
 import com.expleague.sensearch.donkey.IndexBuilder;
 import com.expleague.sensearch.donkey.crawler.Crawler;
 import com.expleague.sensearch.index.plain.PlainIndex;
-import com.google.common.annotations.VisibleForTesting;
 import com.google.inject.Inject;
 import gnu.trove.list.TLongList;
 import gnu.trove.list.array.TLongArrayList;
 import gnu.trove.map.TLongObjectMap;
-import gnu.trove.map.TObjectLongMap;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
-import java.io.Reader;
 import java.io.UnsupportedEncodingException;
 import java.io.Writer;
 import java.net.URLDecoder;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashSet;
@@ -202,44 +195,6 @@ public class PlainIndexBuilder implements IndexBuilder {
       randomIds.add(mainId);
     }
     saveIds(root, vecs, randomIds);
-  }
-
-  @Deprecated
-  @VisibleForTesting
-  static void readGloveVectors(
-      Path glovePath, TObjectLongMap<String> idMappings, TLongObjectMap<Vec> vectors) {
-    try (Reader input = new InputStreamReader(new FileInputStream(glovePath.toFile()))) {
-
-      CharSeqTools.lines(input)
-          .parallel()
-          .forEach(
-              line -> {
-                String[] tokens = line.toString().split("\\s");
-                final String word = tokens[0].toLowerCase();
-                final int dim = Integer.parseInt(tokens[1]);
-
-                if (dim != DEFAULT_VEC_SIZE) {
-                  throw new IllegalArgumentException(
-                      "Wrong vectors dim:  expected " + DEFAULT_VEC_SIZE + ", found " + dim);
-                }
-
-                double[] doubles =
-                    Arrays.stream(tokens, 2, tokens.length)
-                        .mapToDouble(CharSeqTools::parseDouble)
-                        .toArray();
-                synchronized (idMappings) {
-                  if (idMappings.containsKey(word)) {
-                    throw new IllegalArgumentException("Embedding contains duplicate words!");
-                  }
-                  idMappings.put(word, idMappings.size() + 1);
-                }
-                synchronized (vectors) {
-                  vectors.put(idMappings.get(word), new ArrayVec(doubles));
-                }
-              });
-    } catch (IOException e) {
-      throw new RuntimeException(e);
-    }
   }
 
   // TODO: Make it more readable, add possibility of incomplete rebuilding
