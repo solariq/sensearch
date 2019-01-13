@@ -5,34 +5,20 @@ import com.expleague.commons.math.vectors.VecTools;
 import com.expleague.commons.math.vectors.impl.vectors.ArrayVec;
 import com.expleague.commons.seq.CharSeq;
 import com.expleague.commons.seq.CharSeqTools;
-import com.expleague.commons.text.lemmer.LemmaInfo;
-import com.expleague.commons.text.lemmer.MyStem;
-import com.expleague.commons.text.lemmer.WordInfo;
 import com.expleague.ml.embedding.Embedding;
-import com.expleague.ml.embedding.decomp.DecompBuilder;
 import com.expleague.sensearch.Config;
 import com.expleague.sensearch.core.Lemmer;
-import com.expleague.sensearch.core.PartOfSpeech;
 import com.expleague.sensearch.core.Tokenizer;
 import com.expleague.sensearch.core.impl.TokenizerImpl;
 import com.expleague.sensearch.donkey.IndexBuilder;
 import com.expleague.sensearch.donkey.crawler.Crawler;
 import com.expleague.sensearch.index.plain.PlainIndex;
-import com.expleague.sensearch.protobuf.index.IndexUnits;
-import com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta.UriPageMapping;
-import com.expleague.sensearch.protobuf.index.IndexUnits.Term;
-import com.expleague.sensearch.protobuf.index.IndexUnits.Term.Builder;
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.primitives.Longs;
 import com.google.inject.Inject;
 import gnu.trove.list.TLongList;
 import gnu.trove.list.array.TLongArrayList;
-import gnu.trove.map.TLongIntMap;
 import gnu.trove.map.TLongObjectMap;
 import gnu.trove.map.TObjectLongMap;
-import gnu.trove.map.hash.TLongIntHashMap;
-import gnu.trove.map.hash.TLongObjectHashMap;
-import gnu.trove.map.hash.TObjectLongHashMap;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -50,19 +36,16 @@ import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Random;
 import java.util.Set;
 import java.util.TreeMap;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 import org.fusesource.leveldbjni.JniDBFactory;
 import org.iq80.leveldb.CompressionType;
 import org.iq80.leveldb.DB;
 import org.iq80.leveldb.Options;
-import org.iq80.leveldb.WriteBatch;
-import org.iq80.leveldb.WriteOptions;
 
 public class PlainIndexBuilder implements IndexBuilder {
 
@@ -87,10 +70,6 @@ public class PlainIndexBuilder implements IndexBuilder {
 
   private static final int NEIGHBORS_NUM = 50;
   private static final int NUM_OF_RANDOM_IDS = 100;
-
-  private static final int TERM_BATCH_SIZE = 1024;
-  private static final WriteOptions DEFAULT_TERM_WRITE_OPTIONS =
-      new WriteOptions().sync(true).snapshot(false);
 
   // DB configurations
   private static final long DEFAULT_CACHE_SIZE = 1 << 10; // 1 KB
@@ -122,6 +101,7 @@ public class PlainIndexBuilder implements IndexBuilder {
   private final Crawler crawler;
   private final Config config;
   private final Lemmer lemmer;
+  private final Tokenizer tokenizer = new TokenizerImpl();
 
   @Inject
   public PlainIndexBuilder(Crawler crawler, Config config, Lemmer lemmer) {
@@ -130,63 +110,40 @@ public class PlainIndexBuilder implements IndexBuilder {
     this.lemmer = lemmer;
   }
 
-  // TODO refactor this
-  // Yes, this is a dirty copy-paste
-  @VisibleForTesting
-  static Iterable<UriPageMapping> toProtobufIterableUri(TObjectLongMap<String> mappings) {
-    final List<UriPageMapping> protobufMappings = new ArrayList<>();
-    final UriPageMapping.Builder uriMappingsBuilder = UriPageMapping.newBuilder();
-    mappings.forEachEntry(
-        (w, id) -> {
-          protobufMappings.add(uriMappingsBuilder.setPageId(id).setUri(w).build());
-          return true;
-        });
-
-    return protobufMappings;
-  }
-
   /**
-   * Converts an array of words to an array of integer ids. Also if a word was not found in mappings
-   * the method adds a new entry to mapping for such word
+   * Tokenizes given text and adds it to the @code{termBuilder}.
    *
-   * @param words array of words to be converted to ids
-   * @param mappings all known word to int mappings
-   * @return array of word ids in the same order as given words
+   * @param text text to be parsed and converted to ids
+   * @return array of term ids returned by @code{termBuilder}
    */
-  @VisibleForTesting
-  static long[] toIds(Stream<CharSequence> words, TObjectLongMap<String> mappings) {
-    return words
-        .map(Object::toString)
-        .mapToLong(
-            word -> {
-              if (!mappings.containsKey(word)) {
-                // TODO: currently it generates A LOT of warnings (it's ok but I don't want to se them)
-//                LOG.warn(
-//                    String.format(
-//                        "For the word '%s' was not found any vector representation!", word));
-                mappings.put(word, mappings.size() + 1);
-              }
-              return mappings.get(word);
-            })
+  private long[] toTermIds(String text, TermBuilder termBuilder) {
+    return tokenizer
+        .parseTextToWords(text)
+        .map(s -> s.toString().toLowerCase())
+        .map(word -> termBuilder.addTerm(word).termId)
+        .mapToLong(i -> i)
         .toArray();
   }
 
-  @VisibleForTesting
-  static Vec toVector(long[] tokens, TLongObjectMap<Vec> vectors) {
-    ArrayVec mean = new ArrayVec(new double[DEFAULT_VEC_SIZE]);
-    int vectorsFound = 0;
-    for (long i : tokens) {
-      if (vectors.containsKey(i)) {
-        mean.add((ArrayVec) vectors.get(i));
-        ++vectorsFound;
-      }
-    }
-    if (vectorsFound != tokens.length) {
-      LOG.warn("");
+  private Vec toVector(String text, Embedding<CharSeq> jmllEmbedding) {
+    Vec[] vectors =
+        (Vec[])
+            tokenizer
+                .parseTextToWords(text)
+                .map(CharSeq::intern)
+                .map(jmllEmbedding)
+                .filter(Objects::nonNull)
+                .toArray();
+
+    if (vectors.length == 0) {
+      return new ArrayVec(DEFAULT_VEC_SIZE);
     }
 
-    mean.scale(vectorsFound == 0 ? 1 : 1.0 / vectorsFound);
-    return mean;
+    ArrayVec mean = new ArrayVec(DEFAULT_VEC_SIZE);
+    for (Vec vec : vectors) {
+      VecTools.append(mean, vec);
+    }
+    return VecTools.scale(mean, 1.0 / vectors.length);
   }
 
   private Comparator<Vec> comparator(Vec main) {
@@ -286,12 +243,9 @@ public class PlainIndexBuilder implements IndexBuilder {
     }
   }
 
-  //TODO: Make it more readable, add possibility of incomplete rebuilding
+  // TODO: Make it more readable, add possibility of incomplete rebuilding
   @Override
   public void buildIndex() throws IOException {
-    final Tokenizer tokenizer = new TokenizerImpl();
-    final TObjectLongMap<String> uriPageIdMapping = new TObjectLongHashMap<>();
-    final TObjectLongMap<String> idMappings = new TObjectLongHashMap<>();
 
     LOG.info("Creating database files...");
     final Path indexRoot = config.getTemporaryIndex();
@@ -300,11 +254,20 @@ public class PlainIndexBuilder implements IndexBuilder {
     Files.createDirectories(indexRoot.resolve(EMBEDDING_ROOT));
     Files.createDirectories(indexRoot.resolve(SUGGEST_UNIGRAM_ROOT));
 
-    try (final DB pageDb =
-        JniDBFactory.factory.open(indexRoot.resolve(PAGE_ROOT).toFile(), PAGE_DB_OPTIONS);
-        final DB statisticsDb =
-            JniDBFactory.factory.open(
-                indexRoot.resolve(TERM_STATISTICS_ROOT).toFile(), STATS_DB_OPTIONS);
+    try (final PlainPageBuilder plainPageBuilder =
+        new PlainPageBuilder(
+            JniDBFactory.factory.open(indexRoot.resolve(PAGE_ROOT).toFile(), PAGE_DB_OPTIONS),
+            indexRoot.resolve(PAGE_ROOT).resolve("TMP"));
+        final TermBuilder termBuilder =
+            new TermBuilder(
+                JniDBFactory.factory.open(indexRoot.resolve(TERM_ROOT).toFile(), STATS_DB_OPTIONS),
+                lemmer);
+        final StatisticsBuilder statisticsBuilder =
+            new StatisticsBuilder(
+                JniDBFactory.factory.open(
+                    indexRoot.resolve(TERM_STATISTICS_ROOT).toFile(), STATS_DB_OPTIONS));
+        final EmbeddingBuilder embeddingBuilder =
+            new EmbeddingBuilder(indexRoot.resolve(EMBEDDING_ROOT));
         final DB suggest_unigram_DB =
             JniDBFactory.factory.open(
                 indexRoot.resolve(SUGGEST_UNIGRAM_ROOT).toFile(), STATS_DB_OPTIONS);
@@ -314,290 +277,107 @@ public class PlainIndexBuilder implements IndexBuilder {
         final DB suggest_inverted_index_DB =
             JniDBFactory.factory.open(
                 indexRoot.resolve(SUGGEST_INVERTED_INDEX_ROOT).toFile(), STATS_DB_OPTIONS)) {
-      //LOG.info("Reading vectors...");
-      //readGloveVectors(Paths.get(config.getEmbeddingVectors()), idMappings, gloveVectors);
+
+      IndexMetaBuilder indexMetaBuilder = new IndexMetaBuilder(PlainIndex.VERSION);
+
+      // LOG.info("Reading vectors...");
+      // readGloveVectors(Paths.get(config.getEmbeddingVectors()), idMappings, gloveVectors);
 
       LOG.info("Creating mappings from wiki ids to raw index ids...");
-      final PlainPageBuilder plainPageBuilder =
-          new PlainPageBuilder(pageDb, indexRoot.resolve(PAGE_ROOT).resolve("TMP"));
-
-      final StatisticsBuilder statisticsBuilder = new StatisticsBuilder(statisticsDb);
-
-      final EmbeddingBuilder embeddingBuilder =
-          new EmbeddingBuilder(indexRoot.resolve(EMBEDDING_ROOT));
 
       final SuggestInformationBuilder suggestBuilder =
           new SuggestInformationBuilder(
               suggest_unigram_DB, suggest_multigram_DB, suggest_inverted_index_DB);
 
-      final long[] pagesAndTokensCounts = new long[]{0, 0};
-
-      final TLongIntMap termFrequencyMap = new TLongIntHashMap();
-      final TLongObjectMap<TLongIntMap> bigramFrequencyMap = new TLongObjectHashMap<>();
-
       // saving page-wise data
-      LOG.info("Storing page-wise data...");
       long[] pagesCount = new long[]{0};
       long[] sectionId = new long[]{0};
 
-      Path tempEmbeddingPath = indexRoot.resolve(TEMP_EMBEDDING_ROOT);
-      Files.createDirectories(tempEmbeddingPath);
-      Path corpus = tempEmbeddingPath.resolve("corpus");
-
-      TLongObjectMap<String> titles = new TLongObjectHashMap<>();
       try {
-        try (Writer to = new OutputStreamWriter(new FileOutputStream(corpus.toFile()))) {
-          crawler
-              .makeStream()
-              .forEach(
-                  doc -> {
-                    TLongList pageTokens = new TLongArrayList();
-                    long rootPageId = -((pagesCount[0] + 1) << ROOT_PAGE_ID_OFFSET_BITS);
-                    sectionId[0] = rootPageId;
-                    plainPageBuilder.startPage(doc.id(), rootPageId, doc.categories());
-                    doc.sections()
-                        .forEachOrdered(
-                            s -> {
-                              plainPageBuilder.addSection(sectionId[0], s);
+        LOG.info("Building JMLL embedding...");
+        Embedding<CharSeq> jmllEmbedding =
+            new JmllEmbeddingBuilder(DEFAULT_VEC_SIZE, indexRoot.resolve(TEMP_EMBEDDING_ROOT))
+                .build(crawler.makeStream());
 
-                              List<CharSequence> sectionTitles = s.title();
-                              String sectionTitle =
-                                  sectionTitles.get(sectionTitles.size() - 1).toString();
-                              long[] titleIds =
-                                  toIds(
-                                      tokenizer.parseTextToWords(sectionTitle.toLowerCase()),
-                                      idMappings);
-                              //                          embeddingBuilder.add(sectionId[0],
-                              // toVector(titleIds, gloveVectors));
+        LOG.info("Storing page-wise data...");
+        crawler
+            .makeStream()
+            .forEach(
+                doc -> {
+                  TLongList pageTokens = new TLongArrayList();
+                  // TODO: maybe move this id logic to the PlainPageBuilder?
+                  long rootPageId = -((pagesCount[0] + 1) << ROOT_PAGE_ID_OFFSET_BITS);
+                  sectionId[0] = rootPageId;
+                  plainPageBuilder.startPage(doc.id(), rootPageId, doc.categories());
+                  doc.sections()
+                      .forEachOrdered(
+                          s -> {
+                            plainPageBuilder.addSection(sectionId[0], s);
 
-                              pageTokens.addAll(titleIds);
-                              pageTokens.addAll(
-                                  toIds(
-                                      tokenizer.parseTextToWords(s.text().toString().toLowerCase()),
-                                      idMappings));
-                              --sectionId[0];
-                            });
-                    plainPageBuilder.endPage();
-                    ++pagesCount[0];
+                            List<CharSequence> sectionTitles = s.title();
+                            String sectionTitle =
+                                sectionTitles.get(sectionTitles.size() - 1).toString();
+
+                            Stream.concat(
+                                tokenizer.parseTextToWords(sectionTitle),
+                                tokenizer.parseTextToWords(s.text().toString()))
+                                .map(word -> word.toString().toLowerCase())
+                                .forEach(
+                                    word -> {
+                                      long termId = termBuilder.addTerm(word).termId;
+                                      embeddingBuilder.add(
+                                          termId, jmllEmbedding.apply(CharSeq.intern(word)));
+                                      indexMetaBuilder.acceptTermId(termId);
+                                    });
+
+                            // embeddingBuilder.add(sectionId[0],
+                            // toVector(titleIds, gloveVectors));
+
+                            --sectionId[0];
+                          });
+                  plainPageBuilder.endPage();
+                  ++pagesCount[0];
 
                   /*long[] titleIds =
                       toIds(tokenizer.parseTextToWords(doc.title().toLowerCase()), idMappings);
 
                   embeddingBuilder.add(rootPageId, toVector(titleIds, gloveVectors));*/
-                    titles.put(rootPageId, doc.title());
+                  embeddingBuilder.add(
+                      rootPageId, toVector(doc.title().toLowerCase(), jmllEmbedding));
 
-                    long[] titleTokens = toIds(
-                        tokenizer.parseTextToWords(doc.title().toLowerCase()),
-                        idMappings);
+                  long[] titleTokens = toTermIds(doc.title(), termBuilder);
+                  suggestBuilder.accept(titleTokens);
 
-                    suggestBuilder.accept(titleTokens);
+                  statisticsBuilder.enrich(pageTokens, null);
 
-                    statisticsBuilder.enrich(pageTokens, null);
-
-                    ++pagesAndTokensCounts[0];
-                    pagesAndTokensCounts[1] += pageTokens.size();
-
-                    uriPageIdMapping.put(doc.uri().toString(), rootPageId);
-                    try {
-                      uriPageIdMapping.put(
-                          URLDecoder.decode(doc.uri().toString(), "UTF-8"), rootPageId);
-                    } catch (UnsupportedEncodingException e) {
-                      LOG.warn(e);
-                    }
-
-                    try {
-                      String title = doc.title();
-                      for (char c : title.toCharArray()) {
-                        to.write(filtrateChar(c));
-                      }
-                      to.write(' ');
-                      CharSequence content = doc.content();
-                      for (int i = 0; i < content.length(); i++) {
-                        to.write(filtrateChar(content.charAt(i)));
-                      }
-                      to.write(' ');
-                    } catch (IOException e) {
-                      LOG.warn(e);
-                    }
-                  });
-        }
+                  String uri = "";
+                  try {
+                    uri = URLDecoder.decode(doc.uri().toString(), "UTF-8");
+                  } catch (UnsupportedEncodingException e) {
+                    LOG.warn(e);
+                  }
+                  indexMetaBuilder.acceptPage(rootPageId, pageTokens.size(), uri);
+                });
 
         suggestBuilder.build();
 
-        LOG.info("Parsing lemmas...");
-        TLongObjectMap<ParsedTerm> terms = parseTerms(idMappings, lemmer);
-
-        LOG.info("Storing term-wise data...");
-        saveTermData(idMappings, terms, indexRoot);
-
-        LOG.info("Building embedding...");
-
-        DecompBuilder builder = (DecompBuilder) Embedding.builder(Embedding.Type.DECOMP);
-        final Embedding<CharSeq> result = builder
-            .dimSym(DEFAULT_VEC_SIZE)
-            .file(corpus)
-            .build();
-
-        FileUtils.deleteDirectory(tempEmbeddingPath.toFile());
-
-        final TLongObjectMap<Vec> gloveVectors = new TLongObjectHashMap<>();
-
-        idMappings.forEachEntry(
-            (word, id) -> {
-              Vec vec = result.apply(CharSeq.create(word));
-              if (vec != null) {
-                gloveVectors.put(id, vec);
-              }
-              return true;
-            });
-
-        embeddingBuilder.addAll(gloveVectors);
-
-        titles.forEachEntry((id, title) -> {
-          long[] titleIds = toIds(tokenizer.parseTextToWords(title), idMappings);
-          embeddingBuilder.add(id, toVector(titleIds, gloveVectors));
-          return true;
-        });
-
-        embeddingBuilder.build();
-
         Path lshMetricPath = indexRoot.resolve(EMBEDDING_ROOT).resolve(LSH_METRIC_ROOT);
         Files.createDirectories(lshMetricPath);
-        saveLSHMetricInfo(
-            lshMetricPath,
-            gloveVectors,
-            Arrays.stream(REQUIRED_WORDS).map(idMappings::get).collect(Collectors.toSet()));
 
-        plainPageBuilder.build();
-        statisticsBuilder.build();
+        // TODO: uncomment this
+//        saveLSHMetricInfo(
+//            lshMetricPath,
+//            gloveVectors,
+//            Arrays.stream(REQUIRED_WORDS).map(idMappings::get).collect(Collectors.toSet()));
 
         LOG.info("Storing index meta...");
         // saving index-wise data
-        IndexUnits.IndexMeta.newBuilder()
-            .setVersion(PlainIndex.VERSION)
-            .setAveragePageSize((double) pagesAndTokensCounts[1] / pagesAndTokensCounts[0])
-            .setVocabularySize(idMappings.size())
-            .addAllUriPageMappings(toProtobufIterableUri(uriPageIdMapping))
-            .setPagesCount((int) pagesAndTokensCounts[0])
-            .build()
-            .writeTo(Files.newOutputStream(indexRoot.resolve(INDEX_META_FILE)));
+        indexMetaBuilder.build().writeTo(Files.newOutputStream(indexRoot.resolve(INDEX_META_FILE)));
 
       } catch (Exception e) {
         throw new IOException(e);
       }
     }
     LOG.info("Index built!");
-  }
-
-  private char filtrateChar(char c) {
-    if (Character.isLetter(c)) {
-      return Character.toLowerCase(c);
-    } else if (Character.isDigit(c)) {
-      return c;
-    }
-    return ' ';
-  }
-
-  private void saveTermData(
-      TObjectLongMap<String> idMapping, TLongObjectMap<ParsedTerm> idToTermMapping, Path indexRoot)
-      throws IOException {
-    Files.createDirectories(indexRoot.resolve(TERM_ROOT));
-    try (DB termDb =
-        JniDBFactory.factory.open(indexRoot.resolve(TERM_ROOT).toFile(), TERM_DB_OPTIONS)) {
-
-      WriteBatch[] batch = new WriteBatch[]{termDb.createWriteBatch()};
-      int[] curBatchSize = new int[]{0};
-
-      idMapping.forEachEntry(
-          (word, id) -> {
-            Builder termBuilder = Term.newBuilder().setId(id).setText(word);
-
-            ParsedTerm term = idToTermMapping.get(id);
-            if (term != null) {
-              if (term.lemmaId != -1) {
-                termBuilder.setLemmaId(term.lemmaId);
-              }
-
-              if (term.partOfSpeech != null) {
-                termBuilder.setPartOfSpeech(
-                    IndexUnits.Term.PartOfSpeech.valueOf(term.partOfSpeech.name()));
-              }
-            }
-
-            batch[0].put(Longs.toByteArray(id), termBuilder.build().toByteArray());
-            curBatchSize[0]++;
-            if (curBatchSize[0] >= TERM_BATCH_SIZE) {
-              termDb.write(batch[0], DEFAULT_TERM_WRITE_OPTIONS);
-
-              batch[0] = termDb.createWriteBatch();
-              curBatchSize[0] = 0;
-            }
-
-            return true;
-          });
-
-      if (curBatchSize[0] > 0) {
-        termDb.write(batch[0], DEFAULT_TERM_WRITE_OPTIONS);
-      }
-    }
-  }
-
-  @VisibleForTesting
-  static TLongObjectMap<ParsedTerm> parseTerms(TObjectLongMap<String> idMapping, Lemmer lemmer) {
-    MyStem stem = lemmer.myStem;
-    TLongObjectMap<ParsedTerm> terms = new TLongObjectHashMap<>();
-    TObjectLongMap<String> newIds = new TObjectLongHashMap<>();
-
-    idMapping.forEachKey(
-        word -> {
-          final List<WordInfo> parse = stem.parse(word);
-          final LemmaInfo lemma = parse.size() > 0 ? parse.get(0).lemma() : null;
-          final long wordId = idMapping.get(word);
-
-          if (lemma == null || lemma.lemma().equals(word)) {
-            terms.put(
-                wordId,
-                new ParsedTerm(
-                    wordId, -1, lemma == null ? null : PartOfSpeech.valueOf(lemma.pos().name())));
-            return true;
-          }
-
-          long lemmaId;
-
-          String lemmaStr = lemma.lemma().toString();
-          if (idMapping.containsKey(lemmaStr)) {
-            lemmaId = idMapping.get(lemmaStr);
-          } else if (newIds.containsKey(lemmaStr)) {
-            lemmaId = newIds.get(lemmaStr);
-          } else {
-            lemmaId = idMapping.size() + newIds.size() + 1;
-            newIds.put(lemma.lemma().toString(), lemmaId);
-          }
-
-          terms.put(
-              wordId, new ParsedTerm(wordId, lemmaId, PartOfSpeech.valueOf(lemma.pos().name())));
-          if (!terms.containsKey(lemmaId)) {
-            terms.put(
-                lemmaId, new ParsedTerm(lemmaId, -1, PartOfSpeech.valueOf(lemma.pos().name())));
-          }
-
-          return true;
-        });
-
-    idMapping.putAll(newIds);
-    return terms;
-  }
-
-  static class ParsedTerm {
-
-    long id;
-    long lemmaId;
-    PartOfSpeech partOfSpeech;
-
-    public ParsedTerm(long id, long lemmaId, PartOfSpeech partOfSpeech) {
-      this.id = id;
-      this.lemmaId = lemmaId;
-      this.partOfSpeech = partOfSpeech;
-    }
   }
 }

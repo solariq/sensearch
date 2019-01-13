@@ -20,7 +20,7 @@ import org.iq80.leveldb.DB;
 import org.iq80.leveldb.WriteBatch;
 import org.iq80.leveldb.WriteOptions;
 
-public class StatisticsBuilder {
+public class StatisticsBuilder implements AutoCloseable {
 
   private static final WriteOptions DEFAULT_WRITE_OPTIONS =
       new WriteOptions().sync(true).snapshot(false);
@@ -108,7 +108,8 @@ public class StatisticsBuilder {
         });
   }
 
-  void build() throws IOException {
+  @Override
+  public void close() throws IOException {
     WriteBatch writeBatch = statisticsDb.createWriteBatch();
     final TermStatistics.Builder tsBuilder = TermStatistics.newBuilder();
     wordFrequencyMap.forEachKey(
@@ -118,7 +119,7 @@ public class StatisticsBuilder {
               tsBuilder
                   .setTermId(k)
                   .setTermFrequency(wordFrequencyMap.get(k))
-                  .setDocuementFrequency(documentFrequencyMap.get(k))
+                  .setDocumentFrequency(documentFrequencyMap.get(k))
                   .addAllBigramFrequency(
                       mostFrequentBigrams(largeBigramsMap.get(k), MOST_FREQUENT_BIGRAMS_COUNT))
                   .build()

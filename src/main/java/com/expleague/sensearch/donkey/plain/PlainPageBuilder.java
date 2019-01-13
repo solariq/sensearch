@@ -30,7 +30,7 @@ import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-class PlainPageBuilder {
+class PlainPageBuilder implements AutoCloseable {
 
   private static final Logger LOG = LoggerFactory.getLogger(PlainPageBuilder.class);
 
@@ -60,8 +60,6 @@ class PlainPageBuilder {
    * {@link #startPage(long, long, List)},
    * To add sections of the page call {@link #addSection(long, Section)}
    * And to finish the page call {@link #endPage()}
-   *
-   * Call {@link #build()} to create database of received pages
    *
    * @param plainDb database where index pages will be stored
    * @param tempFilesRoot root where temporary files while building will be stored if directory does
@@ -225,7 +223,8 @@ class PlainPageBuilder {
     categories.clear();
   }
 
-  void build() throws IOException {
+  @Override
+  public void close() throws IOException {
     temporaryIndexOs.close();
 
     TLongObjectMap<List<Page.Link>> incomingLinks = new TLongObjectHashMap<>();
@@ -271,6 +270,5 @@ class PlainPageBuilder {
       FileUtils.deleteDirectory(temporaryIndexRoot.toFile());
       plainDb.close();
     }
-
   }
 }

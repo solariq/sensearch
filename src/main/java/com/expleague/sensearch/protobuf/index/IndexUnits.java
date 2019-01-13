@@ -4521,13 +4521,13 @@ public final class IndexUnits {
     long getTermId();
 
     /**
-     * <code>optional int32 docuement_frequency = 2;</code>
+     * <code>optional int32 document_frequency = 2;</code>
      */
-    boolean hasDocuementFrequency();
+    boolean hasDocumentFrequency();
     /**
-     * <code>optional int32 docuement_frequency = 2;</code>
+     * <code>optional int32 document_frequency = 2;</code>
      */
-    int getDocuementFrequency();
+    int getDocumentFrequency();
 
     /**
      * <code>optional int64 term_frequency = 3;</code>
@@ -4621,7 +4621,7 @@ public final class IndexUnits {
             }
             case 16: {
               bitField0_ |= 0x00000002;
-              docuementFrequency_ = input.readInt32();
+              documentFrequency_ = input.readInt32();
               break;
             }
             case 24: {
@@ -5170,19 +5170,19 @@ public final class IndexUnits {
       return termId_;
     }
 
-    public static final int DOCUEMENT_FREQUENCY_FIELD_NUMBER = 2;
-    private int docuementFrequency_;
+    public static final int DOCUMENT_FREQUENCY_FIELD_NUMBER = 2;
+    private int documentFrequency_;
     /**
-     * <code>optional int32 docuement_frequency = 2;</code>
+     * <code>optional int32 document_frequency = 2;</code>
      */
-    public boolean hasDocuementFrequency() {
+    public boolean hasDocumentFrequency() {
       return ((bitField0_ & 0x00000002) == 0x00000002);
     }
     /**
-     * <code>optional int32 docuement_frequency = 2;</code>
+     * <code>optional int32 document_frequency = 2;</code>
      */
-    public int getDocuementFrequency() {
-      return docuementFrequency_;
+    public int getDocumentFrequency() {
+      return documentFrequency_;
     }
 
     public static final int TERM_FREQUENCY_FIELD_NUMBER = 3;
@@ -5237,7 +5237,7 @@ public final class IndexUnits {
 
     private void initFields() {
       termId_ = 0L;
-      docuementFrequency_ = 0;
+      documentFrequency_ = 0;
       termFrequency_ = 0L;
       bigramFrequency_ = java.util.Collections.emptyList();
     }
@@ -5258,7 +5258,7 @@ public final class IndexUnits {
         output.writeInt64(1, termId_);
       }
       if (((bitField0_ & 0x00000002) == 0x00000002)) {
-        output.writeInt32(2, docuementFrequency_);
+        output.writeInt32(2, documentFrequency_);
       }
       if (((bitField0_ & 0x00000004) == 0x00000004)) {
         output.writeInt64(3, termFrequency_);
@@ -5281,7 +5281,7 @@ public final class IndexUnits {
       }
       if (((bitField0_ & 0x00000002) == 0x00000002)) {
         size += com.google.protobuf.CodedOutputStream
-          .computeInt32Size(2, docuementFrequency_);
+            .computeInt32Size(2, documentFrequency_);
       }
       if (((bitField0_ & 0x00000004) == 0x00000004)) {
         size += com.google.protobuf.CodedOutputStream
@@ -5411,7 +5411,7 @@ public final class IndexUnits {
         super.clear();
         termId_ = 0L;
         bitField0_ = (bitField0_ & ~0x00000001);
-        docuementFrequency_ = 0;
+        documentFrequency_ = 0;
         bitField0_ = (bitField0_ & ~0x00000002);
         termFrequency_ = 0L;
         bitField0_ = (bitField0_ & ~0x00000004);
@@ -5456,7 +5456,7 @@ public final class IndexUnits {
         if (((from_bitField0_ & 0x00000002) == 0x00000002)) {
           to_bitField0_ |= 0x00000002;
         }
-        result.docuementFrequency_ = docuementFrequency_;
+        result.documentFrequency_ = documentFrequency_;
         if (((from_bitField0_ & 0x00000004) == 0x00000004)) {
           to_bitField0_ |= 0x00000004;
         }
@@ -5489,8 +5489,8 @@ public final class IndexUnits {
         if (other.hasTermId()) {
           setTermId(other.getTermId());
         }
-        if (other.hasDocuementFrequency()) {
-          setDocuementFrequency(other.getDocuementFrequency());
+        if (other.hasDocumentFrequency()) {
+          setDocumentFrequency(other.getDocumentFrequency());
         }
         if (other.hasTermFrequency()) {
           setTermFrequency(other.getTermFrequency());
@@ -5580,34 +5580,34 @@ public final class IndexUnits {
         return this;
       }
 
-      private int docuementFrequency_ ;
+      private int documentFrequency_;
       /**
-       * <code>optional int32 docuement_frequency = 2;</code>
+       * <code>optional int32 document_frequency = 2;</code>
        */
-      public boolean hasDocuementFrequency() {
+      public boolean hasDocumentFrequency() {
         return ((bitField0_ & 0x00000002) == 0x00000002);
       }
       /**
-       * <code>optional int32 docuement_frequency = 2;</code>
+       * <code>optional int32 document_frequency = 2;</code>
        */
-      public int getDocuementFrequency() {
-        return docuementFrequency_;
+      public int getDocumentFrequency() {
+        return documentFrequency_;
       }
       /**
-       * <code>optional int32 docuement_frequency = 2;</code>
+       * <code>optional int32 document_frequency = 2;</code>
        */
-      public Builder setDocuementFrequency(int value) {
+      public Builder setDocumentFrequency(int value) {
         bitField0_ |= 0x00000002;
-        docuementFrequency_ = value;
+        documentFrequency_ = value;
         onChanged();
         return this;
       }
       /**
-       * <code>optional int32 docuement_frequency = 2;</code>
+       * <code>optional int32 document_frequency = 2;</code>
        */
-      public Builder clearDocuementFrequency() {
+      public Builder clearDocumentFrequency() {
         bitField0_ = (bitField0_ & ~0x00000002);
-        docuementFrequency_ = 0;
+        documentFrequency_ = 0;
         onChanged();
         return this;
       }
@@ -7854,22 +7854,27 @@ public final class IndexUnits {
       "gories\030\t \003(\t\022\021\n\tparent_id\030\007 \001(\003\022\024\n\014subpa" +
       "ges_ids\030\010 \003(\003\032V\n\004Link\022\014\n\004text\030\001 \001(\t\022\026\n\016t" +
       "arget_page_id\030\002 \001(\003\022\020\n\010position\030\003 \001(\003\022\026\n" +
-      "\016source_page_id\030\004 \001(\003\"\317\001\n\016TermStatistics" +
-      "\022\017\n\007term_id\030\001 \001(\003\022\033\n\023docuement_frequency" +
-      "\030\002 \001(\005\022\026\n\016term_frequency\030\003 \001(\003\022=\n\020bigram" +
-      "_frequency\030\004 \003(\0132#.index.TermStatistics." +
-      "TermFrequency\0328\n\rTermFrequency\022\017\n\007term_i" +
-      "d\030\001 \001(\003\022\026\n\016term_frequency\030\002 \001(\005\"\202\002\n\004Term" +
-      "\022\n\n\002id\030\001 \001(\003\022\020\n\010lemma_id\030\002 \001(\003\022\014\n\004text\030\003",
-      " \001(\t\0220\n\016part_of_speech\030\004 \001(\0162\030.index.Ter" +
-      "m.PartOfSpeech\"\233\001\n\014PartOfSpeech\022\013\n\007UNKNO" +
-      "WN\020\000\022\005\n\001A\020\001\022\007\n\003ADV\020\002\022\n\n\006ADVPRO\020\003\022\010\n\004ANUM" +
-      "\020\004\022\010\n\004APRO\020\005\022\007\n\003COM\020\006\022\010\n\004CONJ\020\007\022\010\n\004INTJ\020" +
-      "\010\022\007\n\003NUM\020\t\022\010\n\004PART\020\n\022\006\n\002PR\020\013\022\005\n\001S\020\014\022\010\n\004S" +
-      "PRO\020\r\022\005\n\001V\020\016\"\034\n\010TermList\022\020\n\010termList\030\001 \003" +
-      "(\003\"\036\n\013IntegerList\022\017\n\007intList\030\001 \003(\005B4\n&co" +
-      "m.expleague.sensearch.protobuf.indexB\nIn" +
-      "dexUnits"
+          "\016source_page_id\030\004 \001(\003\"\316\001\n\016TermStatistics" +
+          "\022\017\n\007term_id\030\001 \001(\003\022\032\n\022document_frequency\030" +
+          "\002 \001(\005\022\026\n\016term_frequency\030\003 \001(\003\022=\n\020bigram_" +
+          "frequency\030\004 \003(\0132#.index.TermStatistics.T" +
+          "ermFrequency\0328\n\rTermFrequency\022\017\n\007term_id" +
+          "\030\001 \001(\003\022\026\n\016term_frequency\030\002 \001(\005\"\202\002\n\004Term\022"
+          +
+          "\n\n\002id\030\001 \001(\003\022\020\n\010lemma_id\030\002 \001(\003\022\014\n\004text\030\003 ",
+        "\001(\t\0220\n\016part_of_speech\030\004 \001(\0162\030.index.Term" +
+            ".PartOfSpeech\"\233\001\n\014PartOfSpeech\022\013\n\007UNKNOW" +
+            "N\020\000\022\005\n\001A\020\001\022\007\n\003ADV\020\002\022\n\n\006ADVPRO\020\003\022\010\n\004ANUM\020"
+            +
+            "\004\022\010\n\004APRO\020\005\022\007\n\003COM\020\006\022\010\n\004CONJ\020\007\022\010\n\004INTJ\020\010"
+            +
+            "\022\007\n\003NUM\020\t\022\010\n\004PART\020\n\022\006\n\002PR\020\013\022\005\n\001S\020\014\022\010\n\004SP"
+            +
+            "RO\020\r\022\005\n\001V\020\016\"\034\n\010TermList\022\020\n\010termList\030\001 \003("
+            +
+            "\003\"\036\n\013IntegerList\022\017\n\007intList\030\001 \003(\005B4\n&com" +
+            ".expleague.sensearch.protobuf.indexB\nInd" +
+            "exUnits"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
         new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
@@ -7912,7 +7917,7 @@ public final class IndexUnits {
     internal_static_index_TermStatistics_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessage.FieldAccessorTable(
         internal_static_index_TermStatistics_descriptor,
-        new java.lang.String[] { "TermId", "DocuementFrequency", "TermFrequency", "BigramFrequency", });
+        new java.lang.String[]{"TermId", "DocumentFrequency", "TermFrequency", "BigramFrequency",});
     internal_static_index_TermStatistics_TermFrequency_descriptor =
       internal_static_index_TermStatistics_descriptor.getNestedTypes().get(0);
     internal_static_index_TermStatistics_TermFrequency_fieldAccessorTable = new

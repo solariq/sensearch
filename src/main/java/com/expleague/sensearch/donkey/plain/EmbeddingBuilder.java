@@ -8,6 +8,7 @@ import gnu.trove.list.TLongList;
 import gnu.trove.list.array.TLongArrayList;
 import gnu.trove.map.TLongObjectMap;
 import gnu.trove.map.hash.TLongObjectHashMap;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
@@ -22,7 +23,7 @@ import org.iq80.leveldb.Options;
 import org.iq80.leveldb.WriteBatch;
 import org.iq80.leveldb.WriteOptions;
 
-public class EmbeddingBuilder {
+public class EmbeddingBuilder implements AutoCloseable {
 
   public static final String VECS_ROOT = "vecs";
   public static final String LSH_ROOT = "lsh";
@@ -34,10 +35,10 @@ public class EmbeddingBuilder {
   private static final double MAX_COORD_VAL = 1.;
 
   private static final Options DB_OPTIONS =
-          new Options()
-                  .createIfMissing(true)
-                  .errorIfExists(true)
-                  .compressionType(CompressionType.SNAPPY);
+      new Options()
+          .createIfMissing(true)
+          .errorIfExists(true)
+          .compressionType(CompressionType.SNAPPY);
 
   private static final WriteOptions WRITE_OPTIONS = new WriteOptions().sync(true);
   // .snapshot(false);
@@ -57,7 +58,7 @@ public class EmbeddingBuilder {
     hashFuncs = new ToLongFunction[TABLES_NUMBER];
 
     try (Writer output =
-                 new OutputStreamWriter(new FileOutputStream(embeddingPath.resolve(RAND_VECS).toFile()))) {
+        new OutputStreamWriter(new FileOutputStream(embeddingPath.resolve(RAND_VECS).toFile()))) {
       Random random = new Random();
       for (int i = 0; i < hashFuncs.length; i++) {
 
@@ -74,23 +75,51 @@ public class EmbeddingBuilder {
 
         final int hashNum = i;
         hashFuncs[i] =
-                (vec) -> {
-                  boolean[] mask = new boolean[TUPLE_SIZE];
-                  for (int j = 0; j < mask.length; j++) {
-                    mask[j] = VecTools.multiply(vec, randVecs[j]) >= 0;
-                  }
+            (vec) -> {
+              boolean[] mask = new boolean[TUPLE_SIZE];
+              for (int j = 0; j < mask.length; j++) {
+                mask[j] = VecTools.multiply(vec, randVecs[j]) >= 0;
+              }
 
-                  long hash = (((long) hashNum) << ((long) TUPLE_SIZE));
-                  for (int j = 0; j < mask.length; j++) {
-                    if (mask[j]) {
-                      hash += (1L << ((long) j));
-                    }
-                  }
+              long hash = (((long) hashNum) << ((long) TUPLE_SIZE));
+              for (int j = 0; j < mask.length; j++) {
+                if (mask[j]) {
+                  hash += (1L << ((long) j));
+                }
+              }
 
-                  return hash;
-                };
+              return hash;
+            };
       }
+    } catch (FileNotFoundException e) {
+      e.printStackTrace();
+    } catch (IOException e) {
+      e.printStackTrace();
     }
+  }
+
+  @Override
+  public void close() throws IOException {
+    if (batchSize > 0) {
+      vecDB.write(batch, WRITE_OPTIONS);
+      batchSize = 0;
+      batch = null;
+    }
+
+    tables.forEachEntry(
+        (bucket, entry) -> {
+          addToTablesDB(bucket, entry.toArray());
+          return true;
+        });
+
+    if (batchSize > 0) {
+      tablesDB.write(batch, WRITE_OPTIONS);
+      batchSize = 0;
+      batch = null;
+    }
+
+    tablesDB.close();
+    vecDB.close();
   }
 
   private void addToTables(long id, Vec vec) {
@@ -125,35 +154,15 @@ public class EmbeddingBuilder {
 
   public void addAll(TLongObjectMap<Vec> vecs) {
     vecs.forEachEntry(
-            (id, vec) -> {
-              add(id, vec);
-              return true;
-            });
+        (id, vec) -> {
+          add(id, vec);
+          return true;
+        });
   }
 
   private void addToTablesDB(long bucket, long[] ids) {
     check(tablesDB);
     batch.put(Longs.toByteArray(bucket), ByteTools.toBytes(ids));
     batchSize++;
-  }
-
-  public void build() throws IOException {
-    if (batchSize > 0) {
-      vecDB.write(batch, WRITE_OPTIONS);
-      batchSize = 0;
-      batch = null;
-    }
-    vecDB.close();
-
-    tables.forEachEntry((bucket, entry) -> {
-      addToTablesDB(bucket, entry.toArray());
-      return true;
-    });
-    if (batchSize > 0) {
-      tablesDB.write(batch, WRITE_OPTIONS);
-      batchSize = 0;
-      batch = null;
-    }
-    tablesDB.close();
   }
 }

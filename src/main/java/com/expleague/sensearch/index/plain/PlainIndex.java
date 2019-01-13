@@ -183,7 +183,7 @@ public class PlainIndex implements Index {
 
             final IndexTerm lemmaTerm;
 
-            final long lemmaId = protoTerm.hasLemmaId() ? protoTerm.getLemmaId() : -1;
+            final long lemmaId = protoTerm.getLemmaId();
             if (lemmaId == -1) {
               lemmaTerm = null;
             } else {
@@ -369,7 +369,7 @@ public class PlainIndex implements Index {
 
   int documentFrequency(Term term) {
     try {
-      return termStatistics(((IndexTerm) term).id()).getDocuementFrequency();
+      return termStatistics(((IndexTerm) term).id()).getDocumentFrequency();
     } catch (DBException | NoSuchElementException | NullPointerException e) {
       return 0;
     } catch (InvalidProtocolBufferException e) {
