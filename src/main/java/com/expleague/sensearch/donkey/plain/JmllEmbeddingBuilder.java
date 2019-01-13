@@ -42,7 +42,7 @@ public class JmllEmbeddingBuilder {
           for (int i = 0; i < content.length(); i++) {
             to.write(filtrateChar(content.charAt(i)));
           }
-          to.write(' ');
+          to.write('\n');
         } catch (IOException e) {
           LOG.warn(e);
         }

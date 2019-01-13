@@ -127,13 +127,12 @@ public class PlainIndexBuilder implements IndexBuilder {
 
   private Vec toVector(String text, Embedding<CharSeq> jmllEmbedding) {
     Vec[] vectors =
-        (Vec[])
-            tokenizer
-                .parseTextToWords(text)
-                .map(CharSeq::intern)
-                .map(jmllEmbedding)
-                .filter(Objects::nonNull)
-                .toArray();
+        tokenizer
+            .parseTextToWords(text)
+            .map(CharSeq::intern)
+            .map(jmllEmbedding)
+            .filter(Objects::nonNull)
+            .toArray(Vec[]::new);
 
     if (vectors.length == 0) {
       return new ArrayVec(DEFAULT_VEC_SIZE);
@@ -325,8 +324,10 @@ public class PlainIndexBuilder implements IndexBuilder {
                                 .forEach(
                                     word -> {
                                       long termId = termBuilder.addTerm(word).termId;
-                                      embeddingBuilder.add(
-                                          termId, jmllEmbedding.apply(CharSeq.intern(word)));
+                                      Vec vec = jmllEmbedding.apply(CharSeq.intern(word));
+                                      if (vec != null) {
+                                        embeddingBuilder.add(termId, vec);
+                                      }
                                       indexMetaBuilder.acceptTermId(termId);
                                     });
 
@@ -365,10 +366,11 @@ public class PlainIndexBuilder implements IndexBuilder {
         Files.createDirectories(lshMetricPath);
 
         // TODO: uncomment this
-//        saveLSHMetricInfo(
-//            lshMetricPath,
-//            gloveVectors,
-//            Arrays.stream(REQUIRED_WORDS).map(idMappings::get).collect(Collectors.toSet()));
+        //        saveLSHMetricInfo(
+        //            lshMetricPath,
+        //            gloveVectors,
+        //
+        // Arrays.stream(REQUIRED_WORDS).map(idMappings::get).collect(Collectors.toSet()));
 
         LOG.info("Storing index meta...");
         // saving index-wise data

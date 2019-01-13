@@ -138,7 +138,8 @@ public abstract class SensearchTestCase {
   protected static MyStem myStemForTest(String testClassName, String testName) {
     Path pathToSpecificStem =
         myStemLogsRoot.resolve(String.format("%s_%s", testClassName, testName));
-    return new LogBasedMyStem(pathToSpecificStem);
+    return new RecordingMyStem(Paths.get("/home/tehnar/AU/sensearch/resources/mystem"),
+        pathToSpecificStem);
   }
 
   protected static void clearOutputRoot() {

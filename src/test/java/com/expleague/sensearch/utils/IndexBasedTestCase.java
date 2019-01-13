@@ -42,11 +42,7 @@ public abstract class IndexBasedTestCase extends CrawlerBasedTestCase {
 
   private static void buildIndex() throws IOException {
     LOG.info("Rebuilding index...");
-    long startTime = System.currentTimeMillis();
-
-    Path indexDataRoot = testDataRoot().resolve(INDEX_DATA_ROOT);
-    Path logsBasedMyStemRoot = indexDataRoot.resolve(LOG_BASED_LEMMER_ROOT);
-    MyStem myStem = new LogBasedMyStem(logsBasedMyStemRoot);
+    MyStem myStem = myStemForTest("IndexBasedTestCase", "initIndex");
     new PlainIndexBuilder(crawler(), indexConfig, new Lemmer(myStem)).buildIndex();
   }
 
