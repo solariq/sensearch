@@ -306,7 +306,7 @@ public class PlainIndexBuilder implements IndexBuilder {
 
                   statisticsBuilder.enrich(pageTokens, null);
 
-                  String uri = "";
+                  String uri = null;
                   try {
                     uri = URLDecoder.decode(doc.uri().toString(), "UTF-8");
                   } catch (UnsupportedEncodingException e) {

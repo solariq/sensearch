@@ -8,11 +8,13 @@ import gnu.trove.set.TLongSet;
 import gnu.trove.set.hash.TLongHashSet;
 import java.util.ArrayList;
 import java.util.List;
+import org.jetbrains.annotations.Nullable;
 
 public class IndexMetaBuilder {
 
   private final int version;
   private final TLongSet termIds = new TLongHashSet();
+  private final TLongSet pageIds = new TLongHashSet();
   private final TLongObjectMap<String> pageUri = new TLongObjectHashMap<>();
   private int totalTokenCount = 0;
 
@@ -24,10 +26,13 @@ public class IndexMetaBuilder {
     termIds.add(termId);
   }
 
-  public void acceptPage(long pageId, int pageTokenCount, String uri) {
-    if (!pageUri.containsKey(pageId)) {
+  public void acceptPage(long pageId, int pageTokenCount, @Nullable String uri) {
+    if (uri != null) {
       pageUri.put(pageId, uri);
+    }
+    if (!pageIds.contains(pageId)) {
       totalTokenCount += pageTokenCount;
+      pageIds.add(pageId);
     }
   }
 
@@ -41,8 +46,8 @@ public class IndexMetaBuilder {
 
     return IndexMeta.newBuilder()
         .setVersion(version)
-        .setAveragePageSize(1.0 * pageUri.size() / totalTokenCount)
-        .setPagesCount(pageUri.size())
+        .setAveragePageSize(1.0 * pageIds.size() / totalTokenCount)
+        .setPagesCount(pageIds.size())
         .setVocabularySize(termIds.size())
         .addAllUriPageMappings(mappings)
         .build();
