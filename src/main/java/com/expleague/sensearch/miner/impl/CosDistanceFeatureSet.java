@@ -8,7 +8,7 @@ import com.expleague.ml.meta.FeatureMeta.ValueType;
 import java.util.ArrayList;
 import java.util.List;
 
-public class CosinusDistanceFeatureSet extends FeatureSet.Stub<QURLItem> {
+public class CosDistanceFeatureSet extends FeatureSet.Stub<QURLItem> {
 
   public final static FeatureMeta COS_TITLE = FeatureMeta
       .create("cos-title", "cos distance between Query and Title", ValueType.VEC);
@@ -23,6 +23,7 @@ public class CosinusDistanceFeatureSet extends FeatureSet.Stub<QURLItem> {
 
   @Override
   public void accept(QURLItem item) {
+    super.accept(item);
     passages.clear();
   }
 
