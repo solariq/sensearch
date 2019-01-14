@@ -106,6 +106,20 @@ __Инструкция по применению__
 2. Запустить `MetricTest`, после чего на кансоли появится значения старой метрики и новой по всем запросам из файла `resources/Queries.txt`.
 3. Теперь можно оценивать прогресс.
 
+### Формула
+Чтобы потренировать формулу нужны следующие вещи: 
+* pool, который собирается `com.expleague.sensearch.miner.pool.DataSetMain`
+* jmll в виде jar, который можно получить с помощью команды (запущеной в руте jmll):  
+`mvn -DskipTests=true package -P build-ml-jar,!publish`  результат работы этой штуки будет лежать в `ml/target/ml.jar`
+Фомула тренируется следующей командой:
+`java -classpath <sensearch-dir>/target/classes:<jmll-path>/ml/target/ml.jar com.expleague.ml.JMLLCLI fit --print-period 10  --json-format --learn <pool-name.pool> -X 1/0.7 -v -O 'GradientBoosting(local=SatL2, weak=GreedyObliviousTree(depth=6), step=0.01, iterations=600)'`
+В результате этой мумба-юмбы получатся 2 файлика: `<pool-name.pool>.model` и `<pool-name.pool>.grid`. Чтобы поиск начал работать
+с новой формулой, нужно первый из низ (который .model) положить в `src/main/resources/models/ranking.model`.
+
+Если вы хотите посмотреть насколько тот или иной фактор важен для формулы, запускаем другую магическую команду:
+`java -classpath <sensearch-dir>/target/classes:<jmll-path>/ml/target/ml.jar com.expleague.ml.JMLLCLI interpret --model <pool-name.pool>.model --grid <pool-name.pool>.grid --json-format --learn <pool-name.pool> -I histogram`
+В результате будет сгенерирована табличка состоящая из таких элементов `bin:x-val:y-val`, читать ее надо так: при изменении x-val от одного элемента до другого приведет к разнице в значении формулы, соответствующего разнице y-val.
+ 
 
 [1]: https://drive.google.com/drive/folders/1JGMrne_8oFg5V6bvbEb88nTbRJ830u1C?usp=sharing
 [2]: https://tech.yandex.ru/mystem/
