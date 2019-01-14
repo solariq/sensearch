@@ -9,19 +9,13 @@ import com.expleague.sensearch.donkey.plain.ByteTools;
 import com.expleague.sensearch.donkey.plain.EmbeddingBuilder;
 import com.expleague.sensearch.donkey.plain.PlainIndexBuilder;
 import com.expleague.sensearch.index.Embedding;
-import com.google.common.primitives.Ints;
 import com.google.common.primitives.Longs;
-import gnu.trove.list.TIntList;
 import gnu.trove.list.TLongList;
-import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.list.array.TLongArrayList;
-import gnu.trove.set.TLongSet;
-import gnu.trove.set.hash.TLongHashSet;
 import org.fusesource.leveldbjni.JniDBFactory;
 import org.iq80.leveldb.DB;
+import org.iq80.leveldb.DBIterator;
 import org.iq80.leveldb.Options;
-
-import static com.expleague.sensearch.donkey.plain.EmbeddingBuilder.TUPLE_SIZE;
 
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -31,16 +25,19 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.function.BiFunction;
 import java.util.function.LongPredicate;
-import java.util.function.ToIntFunction;
 import java.util.function.ToLongFunction;
 import java.util.stream.LongStream;
+
+import static com.expleague.sensearch.donkey.plain.EmbeddingBuilder.TUPLE_SIZE;
 
 public class EmbeddingImpl implements Embedding {
   private static final long CACHE_SIZE = 16 * (1 << 20);
   private static final Options DB_OPTIONS = new Options().cacheSize(CACHE_SIZE);
   private static final int MAX_DIFFERENT_BITS = 5;
+  private final long[] allIds;
 
   private BiFunction<Vec, Vec, Double> nearestMeasure = VecTools::distanceAV;
 
@@ -69,6 +66,18 @@ public class EmbeddingImpl implements Embedding {
                                         Arrays.stream(parts).mapToDouble(CharSeqTools::parseDouble).toArray()));
                       });
     }
+    {
+      TLongArrayList allIds = new TLongArrayList();
+      DBIterator iterator = vecDB.iterator();
+      iterator.seekToFirst();
+      while (iterator.hasNext()) {
+        Map.Entry<byte[], byte[]> next = iterator.next();
+        long id = Longs.fromByteArray(next.getKey());
+        allIds.add(id);
+      }
+      this.allIds = allIds.toArray();
+    }
+
 
     hashFuncs = new ToLongFunction[EmbeddingBuilder.TABLES_NUMBER];
     for (int i = 0; i < hashFuncs.length; i++) {
@@ -119,40 +128,10 @@ public class EmbeddingImpl implements Embedding {
 
   @Override
   public LongStream nearest(Vec mainVec, int numberOfNeighbors, LongPredicate predicate) {
-    long[] indexes = new long[hashFuncs.length];
-    for (int i = 0; i < hashFuncs.length; i++) {
-      indexes[i] = hashFuncs[i].applyAsLong(mainVec);
-    }
-
-    final TLongSet lshNeighbors = new TLongHashSet();
-    TLongList nearestIndexes = new TLongArrayList();
-    for (int diffBitsN = 0; diffBitsN <= MAX_DIFFERENT_BITS; diffBitsN++) {
-      for (long index : indexes) {
-        nearestIndexes.clear();
-        nearestIndexes(nearestIndexes, index, 0, diffBitsN);
-        for (int i = 0; i < nearestIndexes.size(); i++) {
-          byte[] bytes = tablesDB.get(
-                  Longs.toByteArray(
-                          nearestIndexes.get(i)
-                  )
-          );
-          if (bytes != null) {
-            LongStream.of(
-                    ByteTools.toLongArray(bytes)
-            ).forEach(lshNeighbors::add);
-          }
-        }
-      }
-      if (lshNeighbors.size() >= numberOfNeighbors) {
-        break;
-      }
-    }
-
-    final long[] order = LongStream.of(lshNeighbors.toArray()).filter(predicate).toArray();
+    final long[] order = LongStream.of(allIds).filter(predicate).toArray();
     if (order.length <= numberOfNeighbors) {
       return LongStream.of(order);
     }
-
     final double[] dist = LongStream.of(order)
             .mapToObj(this::vec)
             .mapToDouble(v -> -VecTools.cosine(mainVec, v))

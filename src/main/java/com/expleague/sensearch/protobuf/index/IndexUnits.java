@@ -5316,7 +5316,7 @@ public final class IndexUnits {
     }
     public static com.expleague.sensearch.protobuf.index.IndexUnits.TermStatistics parseFrom(byte[] data)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data);
+      return data != null ? PARSER.parseFrom(data) : getDefaultInstance();
     }
     public static com.expleague.sensearch.protobuf.index.IndexUnits.TermStatistics parseFrom(
         byte[] data,

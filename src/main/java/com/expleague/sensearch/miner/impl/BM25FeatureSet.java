@@ -7,6 +7,8 @@ import com.expleague.ml.meta.FeatureMeta.ValueType;
 import com.expleague.sensearch.core.Term;
 import com.expleague.sensearch.query.Query;
 import gnu.trove.map.hash.TObjectIntHashMap;
+
+import java.util.BitSet;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -23,6 +25,14 @@ public class BM25FeatureSet extends FeatureSet.Stub<QURLItem> implements TextFea
       .create("bm25s", "Title + text bm25 by synonyms", ValueType.VEC);
   public final static FeatureMeta BM25F = FeatureMeta
       .create("bm25f", "field-dependent bm25", ValueType.VEC);
+  public final static FeatureMeta WORDS_SHARE = FeatureMeta
+      .create("words-share", "Document contained words idf sum normalized by total idf", ValueType.VEC);
+  public final static FeatureMeta WORDS_COUNT = FeatureMeta
+      .create("words-count", "Words in query", ValueType.VEC);
+  public final static FeatureMeta QUERY_LENGTH = FeatureMeta
+      .create("query-length", "Query text length in characters", ValueType.VEC);
+  public final static FeatureMeta IDF_TOTAL = FeatureMeta
+      .create("idf-total", "Total idf sum of query words", ValueType.VEC);
 
   private static final double K = 1.2;
   private static final double B = 0.75;
@@ -31,16 +41,19 @@ public class BM25FeatureSet extends FeatureSet.Stub<QURLItem> implements TextFea
   private Set<Term> queryLemmas;
   private Set<Term> querySyn;
   private Query query;
+  private BitSet contains;
 
   private TextFeatureAccumulator bm25;
   private TextFeatureAccumulator bm25l;
   private TextFeatureAccumulator bm25s;
   private BM25FAccumulator bm25f;
+  private int collectionSize;
 
   @Override
   public void accept(QURLItem item) {
     final Query query = item.queryCache();
     if (query.equals(this.query)) {
+      contains.clear();
       return;
     }
 
@@ -48,6 +61,7 @@ public class BM25FeatureSet extends FeatureSet.Stub<QURLItem> implements TextFea
     queryTerms = new HashSet<>(query.terms());
     queryLemmas = query.terms().stream().map(Term::lemma).collect(Collectors.toSet());
     querySyn = query.synonyms().values().stream().flatMap(List::stream).collect(Collectors.toSet());
+    contains = new BitSet(query.terms().size());
   }
 
   @Override
@@ -56,6 +70,13 @@ public class BM25FeatureSet extends FeatureSet.Stub<QURLItem> implements TextFea
     set(BM25L, bm25l.value());
     set(BM25S, bm25s.value());
     set(BM25F, bm25f.value());
+    {
+      final double totalIdf = query.terms().stream().mapToDouble(term -> idf(term.documentFreq())).sum();
+      set(IDF_TOTAL, totalIdf);
+      set(WORDS_COUNT, query.terms().size());
+      set(QUERY_LENGTH, query.text().trim().length());
+      set(WORDS_SHARE, contains.stream().mapToObj(query.terms()::get).mapToDouble(term -> idf(term.documentFreq())).sum() / totalIdf);
+    }
     return super.advance();
   }
 
@@ -64,17 +85,16 @@ public class BM25FeatureSet extends FeatureSet.Stub<QURLItem> implements TextFea
   public void withStats(int totalLength, double averageTotalLength,
       int titleLength, double averageTitleLength, int contentLength, double averageContentLength,
       int indexLength) {
-    bm25 = new BM25Accumulator(totalLength, averageTotalLength, indexLength);
-    bm25l = new BM25Accumulator(totalLength, averageTotalLength, indexLength);
-    bm25s = new BM25Accumulator(totalLength, averageTotalLength, indexLength);
-    bm25f = new BM25FAccumulator(contentLength, averageContentLength, titleLength,
-        averageTitleLength, indexLength);
+    collectionSize = indexLength;
+    bm25 = new BM25Accumulator(totalLength, averageTotalLength);
+    bm25l = new BM25Accumulator(totalLength, averageTotalLength);
+    bm25s = new BM25Accumulator(totalLength, averageTotalLength);
+    bm25f = new BM25FAccumulator(contentLength, averageContentLength, titleLength, averageTitleLength);
   }
 
   @Override
   public void withSegment(Segment type, Term term) {
-    if (queryTerms.contains(term)
-        || queryLemmas.contains(term)) {
+    if (queryTerms.contains(term) || queryLemmas.contains(term)) {
       bm25f.accept(type, term);
     }
   }
@@ -82,6 +102,8 @@ public class BM25FeatureSet extends FeatureSet.Stub<QURLItem> implements TextFea
   @Override
   public void withTerm(Term term, int offset) {
     if (queryTerms.contains(term)) {
+      int termIndex = query.terms().indexOf(term);
+      contains.set(termIndex);
       bm25.accept(term);
       bm25l.accept(term);
       bm25s.accept(term);
@@ -98,12 +120,10 @@ public class BM25FeatureSet extends FeatureSet.Stub<QURLItem> implements TextFea
   private class BM25Accumulator implements TextFeatureAccumulator {
 
     private final TObjectIntHashMap<Term> freq = new TObjectIntHashMap<>();
-    private final int collectionSize;
     private double normalizer;
 
-    BM25Accumulator(int pageLen, double avgLen, int indexSize) {
+    BM25Accumulator(int pageLen, double avgLen) {
       normalizer = K * (1 - B + B * pageLen / avgLen);
-      this.collectionSize = indexSize;
     }
 
     @Override
@@ -114,15 +134,10 @@ public class BM25FeatureSet extends FeatureSet.Stub<QURLItem> implements TextFea
     @Override
     public double value() {
       double[] result = new double[]{0};
-      freq.forEachEntry(
-          (term, freq) -> {
-            final int df = term.documentFreq();
-            final double idf = df == 0 ? 0 : Math.log((collectionSize - df + 0.5) / (df + 0.5));
-            result[0] += idf * freq
-                / (freq + normalizer)
-            ;
-            return true;
-          });
+      freq.forEachEntry((term, freq) -> {
+        result[0] += idf(term.documentFreq()) * freq / (freq + normalizer);
+        return true;
+      });
       return result[0];
     }
   }
@@ -132,16 +147,13 @@ public class BM25FeatureSet extends FeatureSet.Stub<QURLItem> implements TextFea
     private final Set<Term> terms = new HashSet<>();
     private final TObjectIntHashMap<Term> freqTITLE = new TObjectIntHashMap<>();
     private final TObjectIntHashMap<Term> freqBODY = new TObjectIntHashMap<>();
-    private final int indexLen;
 
     private double normalizerTITLE;
     private double normalizerBODY;
 
-    BM25FAccumulator(int pageLen, double avgLen, int titleLen, double avgTitle,
-        int indexLen) {
+    BM25FAccumulator(int pageLen, double avgLen, int titleLen, double avgTitle) {
       normalizerTITLE = (1 + B * (titleLen / avgTitle - 1));
       normalizerBODY = (1 + B * (pageLen / avgLen - 1));
-      this.indexLen = indexLen;
     }
 
     public void accept(Segment type, Term term) {
@@ -159,7 +171,7 @@ public class BM25FeatureSet extends FeatureSet.Stub<QURLItem> implements TextFea
 
       terms.forEach(term -> {
         final int df = term.documentFreq();
-        final double idf = df == 0 ? 0 : Math.log((indexLen - df + 0.5) / (df + 0.5));
+        final double idf = idf(df);
 
         double tf = 0;
         tf += freqTITLE.get(term) / normalizerTITLE;
@@ -171,4 +183,7 @@ public class BM25FeatureSet extends FeatureSet.Stub<QURLItem> implements TextFea
     }
   }
 
+  private double idf(int df) {
+    return df == 0 ? 0 : Math.log((collectionSize - df + 0.5) / (df + 0.5));
+  }
 }

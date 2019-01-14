@@ -69,7 +69,7 @@ public class PlainIndex implements Index {
 
   private static final Logger LOG = Logger.getLogger(PlainIndex.class.getName());
 
-  private static final int FILTERED_DOC_NUMBER = 1000;
+  private static final int FILTERED_DOC_NUMBER = 500;
   private static final int SYNONYMS_COUNT = 50;
 
   private final Path indexRoot;
@@ -356,7 +356,7 @@ public class PlainIndex implements Index {
   }
 
   Stream<Term> synonyms(Term term) {
-    System.out.println("Synonyms for " + term.text());
+//    System.out.println("Synonyms for " + term.text());
     Vec termVec = embedding.vec(((IndexTerm) term).id());
     if (termVec == null) {
       return Stream.empty();

@@ -1,13 +1,22 @@
 package com.expleague.sensearch.ranking;
 
+import com.expleague.commons.math.Func;
+import com.expleague.commons.math.Trans;
 import com.expleague.commons.math.vectors.Vec;
+import com.expleague.ml.data.tools.DataTools;
 import com.expleague.sensearch.Page;
 import com.expleague.sensearch.core.Annotations.PageSize;
 import com.expleague.sensearch.core.SearchPhase;
 import com.expleague.sensearch.core.Whiteboard;
 import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
+
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.Comparator;
+import java.util.Objects;
+
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.log4j.Logger;
 
@@ -22,6 +31,16 @@ public class RankingPhase implements SearchPhase {
 
   private final int pageSize;
   private final int phaseId;
+
+  private static Trans model;
+  static {
+    try {
+      model = DataTools.readModel(Objects.requireNonNull(RankingPhase.class.getClassLoader().getResourceAsStream("models/ranking.model")));
+    }
+    catch (IOException | ClassNotFoundException e) {
+      throw new RuntimeException(e);
+    }
+  }
 
   @Inject
   public RankingPhase(@PageSize int pageSize, @Assisted int phaseId) {
@@ -65,6 +84,6 @@ public class RankingPhase implements SearchPhase {
       vec += (f * normalize);
     }
     return vec;*/
-    return features.get(0);
+    return model.trans(features).get(0);
   }
 }

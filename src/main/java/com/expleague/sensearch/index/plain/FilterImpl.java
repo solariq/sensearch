@@ -39,10 +39,10 @@ public class FilterImpl implements Filter {
         LOG.info(
             String.format(
                 "Filtering finished in %.3f seconds", (System.nanoTime() - startTime) / 1e9));
-        return Arrays.stream(result.subList(0, number).toArray());
+        break;
       }
       embNumber *= 2;
     }
-    throw new IllegalArgumentException("number is too large");
+    return Arrays.stream(result.subList(0, Math.min(number, result.size())).toArray());
   }
 }

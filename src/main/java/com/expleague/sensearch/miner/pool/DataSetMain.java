@@ -66,7 +66,7 @@ public class DataSetMain {
           }
 
           Stream<Page> sensearchResult = index.fetchDocuments(query)
-              .filter(page -> !uniqQURL.contains(page.title().toString())).limit(10);
+              .filter(page -> !uniqQURL.contains(page.title().toString())).limit(100);
           sensearchResult.forEach(page -> {
             if (!uniqQURL.contains(page.title().toString())) {
               uniqQURL.add(page.title().toString());
