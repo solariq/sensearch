@@ -61,7 +61,7 @@ public class AccumulatorFeatureSet extends FeatureSet.Stub<QURLItem> {
         //    .forEach(fs -> fs.withSegment(TextFeatureSet.Segment.BODY, contentLength));
         TermConsumer termConsumer = new TermConsumer();
         index.parse(page.fullContent()).forEach(termConsumer);
-        index.parse(page.title()).forEach(term -> {
+        index.parse(page.fullContent()).forEach(term -> {
           features.components()
               .map(Functions.cast(TextFeatureSet.class))
               .filter(Objects::nonNull)
