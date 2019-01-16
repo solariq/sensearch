@@ -1,10 +1,10 @@
 {
   "temporaryDocuments": "PagesTmp",
-  "temporaryIndex": "/Users/solar/data/search/IndexTmp",
+  "temporaryIndex": "../WikiDocs/IndexTmp",
 
   "webRoot": "webapp/dist/webapp",
   "embeddingVectors": "./resources/vectors.decomp",
-  "myStem": "/Users/solar/bin/mystem",
+  "myStem": "./resources/mystem",
 
   "pathToZIP": "../WikiDocs/Mini_Wiki_categories.zip",
 
