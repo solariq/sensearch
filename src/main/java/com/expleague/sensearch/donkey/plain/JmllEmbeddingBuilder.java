@@ -30,6 +30,7 @@ public class JmllEmbeddingBuilder {
     Files.createDirectories(tempEmbeddingPath);
     Path corpus = tempEmbeddingPath.resolve("corpus");
 
+    LOG.info("Creating corpus for embedding...");
     try (Writer to = new OutputStreamWriter(new FileOutputStream(corpus.toFile()))) {
       documents.forEach(doc -> {
         try {
@@ -50,10 +51,13 @@ public class JmllEmbeddingBuilder {
       });
     }
 
+    LOG.info("Training embedding...");
+
     DecompBuilder builder = (DecompBuilder) Embedding.builder(Embedding.Type.DECOMP);
     final Embedding<CharSeq> result = builder.dimSym(vecSize).file(corpus).build();
     FileUtils.deleteDirectory(tempEmbeddingPath.toFile());
 
+    LOG.info("Jmll embedding trained");
     return result;
   }
 

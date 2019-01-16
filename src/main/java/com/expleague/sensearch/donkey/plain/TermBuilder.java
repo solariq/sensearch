@@ -14,7 +14,10 @@ import gnu.trove.map.TObjectLongMap;
 import gnu.trove.map.hash.TLongObjectHashMap;
 import gnu.trove.map.hash.TObjectLongHashMap;
 import java.io.IOException;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import org.apache.log4j.Logger;
 import org.iq80.leveldb.DB;
 import org.iq80.leveldb.WriteBatch;
@@ -24,6 +27,8 @@ import org.jetbrains.annotations.NotNull;
 public class TermBuilder implements AutoCloseable {
 
   private static final int TERM_BATCH_SIZE = 1024;
+  private static final int CACHE_LEMMAS_NUM = 1 << 20;
+
   private static final Logger LOG = Logger.getLogger(TermBuilder.class);
 
   private static final WriteOptions DEFAULT_TERM_WRITE_OPTIONS =
@@ -33,10 +38,18 @@ public class TermBuilder implements AutoCloseable {
   private final DB termDb;
   private final MyStem myStem;
   private final TLongObjectMap<ParsedTerm> terms = new TLongObjectHashMap<>();
+  private final IdGenerator idGenerator;
+  private final Map<String, LemmaInfo> cachedLemmas = new LinkedHashMap<String, LemmaInfo>() {
+    @Override
+    protected boolean removeEldestEntry(Entry entry) {
+      return size() > CACHE_LEMMAS_NUM;
+    }
+  };
 
-  public TermBuilder(DB termDb, Lemmer lemmer) {
+  public TermBuilder(DB termDb, Lemmer lemmer, IdGenerator idGenerator) {
     this.termDb = termDb;
     this.myStem = lemmer.myStem;
+    this.idGenerator = idGenerator;
   }
 
   /**
@@ -44,15 +57,22 @@ public class TermBuilder implements AutoCloseable {
    * for this word or if lemma is the same word, lemmaId equals to -1. In all other cases, ids are
    * strictly greater than 0
    */
+  // TODO: do not store terms in memory as we have only write access to them
   @NotNull
   public TermAndLemmaIdPair addTerm(String word) {
-    final List<WordInfo> parse = myStem.parse(word);
-    final LemmaInfo lemma = parse.size() > 0 ? parse.get(0).lemma() : null;
+    LemmaInfo lemma;
+    if (cachedLemmas.containsKey(word)) {
+      lemma = cachedLemmas.get(word);
+    } else {
+      final List<WordInfo> parse = myStem.parse(word);
+      lemma = parse.size() > 0 ? parse.get(0).lemma() : null;
+      cachedLemmas.put(word, lemma);
+    }
 
     long wordId;
     if (!idMapping.containsKey(word)) {
       // Ids start from 1
-      wordId = idMapping.size() + 1;
+      wordId = idGenerator.termId(word);
       idMapping.put(word, wordId);
     } else {
       wordId = idMapping.get(word);
@@ -73,7 +93,7 @@ public class TermBuilder implements AutoCloseable {
       lemmaId = idMapping.get(lemmaStr);
     } else {
       // Ids start from 1
-      lemmaId = idMapping.size() + 1;
+      lemmaId = idGenerator.termId(lemmaStr);
       idMapping.put(lemma.lemma().toString(), lemmaId);
     }
 

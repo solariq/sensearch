@@ -6,6 +6,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.MinMaxPriorityQueue;
 import com.google.common.primitives.Longs;
 import gnu.trove.list.TLongList;
+import gnu.trove.list.array.TLongArrayList;
 import gnu.trove.map.TLongIntMap;
 import gnu.trove.map.TLongLongMap;
 import gnu.trove.map.TLongObjectMap;
@@ -32,6 +33,7 @@ public class StatisticsBuilder implements AutoCloseable {
   private final TLongObjectMap<TLongIntMap> largeBigramsMap = new TLongObjectHashMap<>();
 
   private final DB statisticsDb;
+  private boolean isProcessingPage = false;
 
   StatisticsBuilder(DB statisticsDb) {
     this.statisticsDb = statisticsDb;
@@ -67,26 +69,35 @@ public class StatisticsBuilder implements AutoCloseable {
     return termFrequencies;
   }
 
-  @VisibleForTesting
-  static void enrichFrequencies(
-      long[] tokens, TLongIntMap termFrequencyMap, TLongObjectMap<TLongIntMap> bigramFrequencyMap) {
-    if (tokens.length < 1) {
-      return;
-    }
-    termFrequencyMap.adjustOrPutValue(tokens[0], 1, 1);
-    for (int i = 1; i < tokens.length; ++i) {
-      termFrequencyMap.adjustOrPutValue(tokens[i], 1, 1);
+  private final TLongList pageTokens = new TLongArrayList();
 
-      bigramFrequencyMap.putIfAbsent(tokens[i - 1], new TLongIntHashMap());
-      bigramFrequencyMap.get(tokens[i - 1]).adjustOrPutValue(tokens[i], 1, 1);
+  public void startPage() {
+    if (isProcessingPage) {
+      throw new IllegalStateException("Duplicate startPage call: page is already being processed");
     }
+    isProcessingPage = true;
   }
 
-  // TODO: save lemma statistics
-  void enrich(TLongList termIdSeq, TLongList lemmaIdSeq) {
+  public void endPage() {
+    if (!isProcessingPage) {
+      throw new IllegalStateException("Illegal call to endPage: no page is being processed");
+    }
+    isProcessingPage = false;
+
     TLongIntMap termFreqMap = new TLongIntHashMap();
     TLongObjectMap<TLongIntMap> bigramFreqMap = new TLongObjectHashMap<>();
-    enrichFrequencies(termIdSeq.toArray(), termFreqMap, bigramFreqMap);
+
+    if (pageTokens.isEmpty()) {
+      return;
+    }
+
+    termFreqMap.adjustOrPutValue(pageTokens.get(0), 1, 1);
+    for (int i = 1; i < pageTokens.size(); ++i) {
+      termFreqMap.adjustOrPutValue(termFreqMap.get(i), 1, 1);
+
+      bigramFreqMap.putIfAbsent(pageTokens.get(i - 1), new TLongIntHashMap());
+      bigramFreqMap.get(pageTokens.get(i - 1)).adjustOrPutValue(pageTokens.get(i), 1, 1);
+    }
 
     termFreqMap.forEachEntry(
         (tok, freq) -> {
@@ -106,6 +117,13 @@ public class StatisticsBuilder implements AutoCloseable {
               });
           return true;
         });
+
+    pageTokens.clear();
+  }
+
+  // TODO: save lemma statistics
+  void enrich(long termId, long lemmaId) {
+    pageTokens.add(termId);
   }
 
   @Override

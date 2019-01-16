@@ -23,4 +23,8 @@ public interface Config {
   default boolean getBuildIndexFlag() {
     return false;
   }
+
+  default boolean getTrainEmbeddingFlag() {
+    return false;
+  }
 }

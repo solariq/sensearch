@@ -96,7 +96,7 @@ public class TermBuilderTest {
     try (TermBuilder termBuilder =
         new TermBuilder(
             JniDBFactory.factory.open(TERM_DB_PATH.toFile(), new Options().errorIfExists(true)),
-            new Lemmer(fakeMyStem))) {
+            new Lemmer(fakeMyStem), new IdGenerator())) {
 
       for (String word : words) {
         TermAndLemmaIdPair termAndLemmaIdPair = termBuilder.addTerm(word);
@@ -133,9 +133,6 @@ public class TermBuilderTest {
     // Check that all terms are created and stored into DB
     Set<Long> termsIds =
         terms.valueCollection().stream().map(Term::getId).collect(Collectors.toSet());
-    for (int i = 1; i <= 11; i++) {
-      assertTrue(termsIds.contains((long) i));
-    }
     assertEquals(11, terms.size());
     for (String word : words) {
       assertTrue(textToTerm.containsKey(word));

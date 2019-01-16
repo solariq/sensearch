@@ -5,23 +5,24 @@ import com.expleague.commons.math.vectors.VecTools;
 import com.expleague.commons.math.vectors.impl.vectors.ArrayVec;
 import com.expleague.commons.seq.CharSeq;
 import com.expleague.ml.embedding.Embedding;
+import com.expleague.ml.embedding.impl.EmbeddingImpl;
 import com.expleague.sensearch.Config;
 import com.expleague.sensearch.core.Lemmer;
 import com.expleague.sensearch.core.Tokenizer;
 import com.expleague.sensearch.core.impl.TokenizerImpl;
 import com.expleague.sensearch.donkey.IndexBuilder;
 import com.expleague.sensearch.donkey.crawler.Crawler;
+import com.expleague.sensearch.donkey.crawler.document.CrawlerDocument;
+import com.expleague.sensearch.donkey.plain.TermBuilder.TermAndLemmaIdPair;
 import com.expleague.sensearch.index.plain.PlainIndex;
 import com.google.inject.Inject;
-import gnu.trove.list.TLongList;
-import gnu.trove.list.array.TLongArrayList;
 import gnu.trove.map.TLongObjectMap;
 import java.io.FileOutputStream;
+import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
-import java.io.UnsupportedEncodingException;
 import java.io.Writer;
-import java.net.URLDecoder;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -34,6 +35,7 @@ import java.util.Random;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.stream.Stream;
+import javax.xml.stream.XMLStreamException;
 import org.apache.log4j.Logger;
 import org.fusesource.leveldbjni.JniDBFactory;
 import org.iq80.leveldb.CompressionType;
@@ -59,7 +61,6 @@ public class PlainIndexBuilder implements IndexBuilder {
 
   public static final String INDEX_META_FILE = "index.meta";
   public static final int DEFAULT_VEC_SIZE = 130;
-  public static final int ROOT_PAGE_ID_OFFSET_BITS = 16;
 
   private static final int NEIGHBORS_NUM = 50;
   private static final int NUM_OF_RANDOM_IDS = 100;
@@ -90,17 +91,19 @@ public class PlainIndexBuilder implements IndexBuilder {
 
   private static final String[] REQUIRED_WORDS = new String[]{"путин", "медведев", "александр"};
 
-  private static final Logger LOG = Logger.getLogger(PlainIndexBuilder.class.getName());
+  private static final Logger LOG = Logger.getLogger(PlainIndexBuilder.class);
   private final Crawler crawler;
   private final Config config;
   private final Lemmer lemmer;
   private final Tokenizer tokenizer = new TokenizerImpl();
+  private final IdGenerator idGenerator;
 
   @Inject
-  public PlainIndexBuilder(Crawler crawler, Config config, Lemmer lemmer) {
+  public PlainIndexBuilder(Crawler crawler, Config config, Lemmer lemmer, IdGenerator idGenerator) {
     this.crawler = crawler;
     this.config = config;
     this.lemmer = lemmer;
+    this.idGenerator = idGenerator;
   }
 
   /**
@@ -197,10 +200,32 @@ public class PlainIndexBuilder implements IndexBuilder {
     saveIds(root, vecs, randomIds);
   }
 
-  // TODO: Make it more readable, add possibility of incomplete rebuilding
   @Override
   public void buildIndex() throws IOException {
+    final Path indexRoot = config.getTemporaryIndex();
+    LOG.info("Building JMLL embedding...");
+    EmbeddingImpl<CharSeq> jmllEmbedding;
+    try {
+      jmllEmbedding =
+          (EmbeddingImpl<CharSeq>)
+              new JmllEmbeddingBuilder(DEFAULT_VEC_SIZE, indexRoot.resolve(TEMP_EMBEDDING_ROOT))
+                  .build(crawler.makeStream());
+    } catch (XMLStreamException e) {
+      LOG.error(e);
+      throw new RuntimeException(e);
+    }
 
+    jmllEmbedding.write(new FileWriter(config.getEmbeddingVectors()));
+    buildIndex(jmllEmbedding);
+  }
+
+  // TODO: Make it more readable, add possibility of incomplete rebuilding
+  @Override
+  public void buildIndex(Path embeddingPath) throws IOException {
+    buildIndex(EmbeddingImpl.read(new FileReader(embeddingPath.toFile()), CharSeq.class));
+  }
+
+  private void buildIndex(Embedding<CharSeq> jmllEmbedding) throws IOException {
     LOG.info("Creating database files...");
     final Path indexRoot = config.getTemporaryIndex();
     Files.createDirectories(indexRoot.resolve(PAGE_ROOT));
@@ -211,11 +236,13 @@ public class PlainIndexBuilder implements IndexBuilder {
     try (final PlainPageBuilder plainPageBuilder =
         new PlainPageBuilder(
             JniDBFactory.factory.open(indexRoot.resolve(PAGE_ROOT).toFile(), PAGE_DB_OPTIONS),
-            indexRoot.resolve(PAGE_ROOT).resolve("TMP"));
+            indexRoot.resolve(PAGE_ROOT).resolve("TMP"),
+            idGenerator);
         final TermBuilder termBuilder =
             new TermBuilder(
-                JniDBFactory.factory.open(indexRoot.resolve(TERM_ROOT).toFile(), STATS_DB_OPTIONS),
-                lemmer);
+                JniDBFactory.factory.open(indexRoot.resolve(TERM_ROOT).toFile(), TERM_DB_OPTIONS),
+                lemmer,
+                idGenerator);
         final StatisticsBuilder statisticsBuilder =
             new StatisticsBuilder(
                 JniDBFactory.factory.open(
@@ -234,39 +261,27 @@ public class PlainIndexBuilder implements IndexBuilder {
 
       IndexMetaBuilder indexMetaBuilder = new IndexMetaBuilder(PlainIndex.VERSION);
 
-      // LOG.info("Reading vectors...");
-      // readGloveVectors(Paths.get(config.getEmbeddingVectors()), idMappings, gloveVectors);
-
       LOG.info("Creating mappings from wiki ids to raw index ids...");
 
       final SuggestInformationBuilder suggestBuilder =
           new SuggestInformationBuilder(
               suggest_unigram_DB, suggest_multigram_DB, suggest_inverted_index_DB);
 
-      // saving page-wise data
-      long[] pagesCount = new long[]{0};
-      long[] sectionId = new long[]{0};
-
       try {
-        LOG.info("Building JMLL embedding...");
-        Embedding<CharSeq> jmllEmbedding =
-            new JmllEmbeddingBuilder(DEFAULT_VEC_SIZE, indexRoot.resolve(TEMP_EMBEDDING_ROOT))
-                .build(crawler.makeStream());
-
-        LOG.info("Storing page-wise data...");
+        LOG.info("Parsing pages...");
         crawler
             .makeStream()
             .forEach(
                 doc -> {
-                  TLongList pageTokens = new TLongArrayList();
-                  // TODO: maybe move this id logic to the PlainPageBuilder?
-                  long rootPageId = -((pagesCount[0] + 1) << ROOT_PAGE_ID_OFFSET_BITS);
-                  sectionId[0] = rootPageId;
-                  plainPageBuilder.startPage(doc.id(), rootPageId, doc.categories());
+                  long rootPageId =
+                      plainPageBuilder.startPage(doc.id(), doc.categories(), doc.uri());
+                  statisticsBuilder.startPage();
+                  indexMetaBuilder.startPage(rootPageId, doc.uri());
+
                   doc.sections()
                       .forEachOrdered(
                           s -> {
-                            plainPageBuilder.addSection(sectionId[0], s);
+                            plainPageBuilder.addSection(s);
 
                             List<CharSequence> sectionTitles = s.title();
                             String sectionTitle =
@@ -278,41 +293,25 @@ public class PlainIndexBuilder implements IndexBuilder {
                                 .map(word -> word.toString().toLowerCase())
                                 .forEach(
                                     word -> {
-                                      long termId = termBuilder.addTerm(word).termId;
+                                      TermAndLemmaIdPair termLemmaId = termBuilder.addTerm(word);
                                       Vec vec = jmllEmbedding.apply(CharSeq.intern(word));
                                       if (vec != null) {
-                                        embeddingBuilder.add(termId, vec);
+                                        embeddingBuilder.add(termLemmaId.termId, vec);
                                       }
-                                      indexMetaBuilder.acceptTermId(termId);
+                                      indexMetaBuilder.acceptTermId(termLemmaId.termId);
+                                      statisticsBuilder.enrich(
+                                          termLemmaId.termId, termLemmaId.lemmaId);
                                     });
-
-                            // embeddingBuilder.add(sectionId[0],
-                            // toVector(titleIds, gloveVectors));
-
-                            --sectionId[0];
                           });
-                  plainPageBuilder.endPage();
-                  ++pagesCount[0];
-
-                  /*long[] titleIds =
-                      toIds(tokenizer.parseTextToWords(doc.title().toLowerCase()), idMappings);
-
-                  embeddingBuilder.add(rootPageId, toVector(titleIds, gloveVectors));*/
                   embeddingBuilder.add(
                       rootPageId, toVector(doc.title().toLowerCase(), jmllEmbedding));
 
                   long[] titleTokens = toTermIds(doc.title(), termBuilder);
                   suggestBuilder.accept(titleTokens);
 
-                  statisticsBuilder.enrich(pageTokens, null);
-
-                  String uri = null;
-                  try {
-                    uri = URLDecoder.decode(doc.uri().toString(), "UTF-8");
-                  } catch (UnsupportedEncodingException e) {
-                    LOG.warn(e);
-                  }
-                  indexMetaBuilder.acceptPage(rootPageId, pageTokens.size(), uri);
+                  indexMetaBuilder.endPage();
+                  statisticsBuilder.endPage();
+                  plainPageBuilder.endPage();
                 });
 
         suggestBuilder.build();
@@ -336,5 +335,14 @@ public class PlainIndexBuilder implements IndexBuilder {
       }
     }
     LOG.info("Index built!");
+  }
+
+  private void withDocument(
+      PlainPageBuilder plainPageBuilder,
+      StatisticsBuilder statisticsBuilder,
+      CrawlerDocument document,
+      Runnable runnable) {
+
+    runnable.run();
   }
 }

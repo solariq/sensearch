@@ -6,34 +6,55 @@ import gnu.trove.map.TLongObjectMap;
 import gnu.trove.map.hash.TLongObjectHashMap;
 import gnu.trove.set.TLongSet;
 import gnu.trove.set.hash.TLongHashSet;
+import java.io.UnsupportedEncodingException;
+import java.net.URI;
+import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.List;
-import org.jetbrains.annotations.Nullable;
+import org.apache.log4j.Logger;
 
 public class IndexMetaBuilder {
 
+  private static final Logger LOG = Logger.getLogger(IndexMetaBuilder.class);
+
   private final int version;
   private final TLongSet termIds = new TLongHashSet();
-  private final TLongSet pageIds = new TLongHashSet();
   private final TLongObjectMap<String> pageUri = new TLongObjectHashMap<>();
   private int totalTokenCount = 0;
+  private boolean isProcessingPage = false;
 
   public IndexMetaBuilder(int version) {
     this.version = version;
   }
 
+  public void startPage(long pageId, URI uri) {
+    if (isProcessingPage) {
+      throw new IllegalStateException("Duplicate startPage call: page is already being processed");
+    }
+    isProcessingPage = true;
+
+    if (pageUri.containsKey(pageId)) {
+      throw new IllegalStateException("Page with id " + pageId + " is already in IndexMeta");
+    }
+    String uriDecoded = null;
+    try {
+      uriDecoded = URLDecoder.decode(uri.toString(), "UTF-8");
+    } catch (UnsupportedEncodingException e) {
+      LOG.warn(e);
+    }
+    pageUri.put(pageId, uriDecoded);
+  }
+
   public void acceptTermId(long termId) {
+    totalTokenCount += 1;
     termIds.add(termId);
   }
 
-  public void acceptPage(long pageId, int pageTokenCount, @Nullable String uri) {
-    if (uri != null) {
-      pageUri.put(pageId, uri);
+  public void endPage() {
+    if (!isProcessingPage) {
+      throw new IllegalStateException("Illegal call to endPage: no page is being processed");
     }
-    if (!pageIds.contains(pageId)) {
-      totalTokenCount += pageTokenCount;
-      pageIds.add(pageId);
-    }
+    isProcessingPage = false;
   }
 
   public IndexMeta build() {
@@ -46,8 +67,8 @@ public class IndexMetaBuilder {
 
     return IndexMeta.newBuilder()
         .setVersion(version)
-        .setAveragePageSize(1.0 * pageIds.size() / totalTokenCount)
-        .setPagesCount(pageIds.size())
+        .setAveragePageSize(1.0 * pageUri.size() / totalTokenCount)
+        .setPagesCount(pageUri.size())
         .setVocabularySize(termIds.size())
         .addAllUriPageMappings(mappings)
         .build();

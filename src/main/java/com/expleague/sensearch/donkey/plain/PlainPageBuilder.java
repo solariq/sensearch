@@ -14,6 +14,7 @@ import gnu.trove.map.hash.TLongObjectHashMap;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -42,6 +43,7 @@ class PlainPageBuilder implements AutoCloseable {
   private final DB plainDb;
 
   private final Path temporaryIndexRoot;
+  private final IdGenerator idGenerator;
 
   private OutputStream temporaryIndexOs;
 
@@ -53,6 +55,7 @@ class PlainPageBuilder implements AutoCloseable {
   private List<String> categories = Collections.emptyList();
   private Deque<IndexUnits.Page.Builder> parentPagesStack = new LinkedList<>();
   private List<Page> builtPages = new ArrayList<>();
+  private boolean isProcessingPage = false;
 
   /**
    * PlainPageBuilder provides builder for the database of indexed pages.
@@ -66,9 +69,11 @@ class PlainPageBuilder implements AutoCloseable {
    * not exist it will be created. It will be deleted after build() is called
    * @throws IOException if it is failed to create root directory
    */
-  PlainPageBuilder(DB plainDb, Path tempFilesRoot) throws IOException {
+  PlainPageBuilder(DB plainDb, Path tempFilesRoot, IdGenerator idGenerator) throws IOException {
     this.plainDb = plainDb;
     this.temporaryIndexRoot = tempFilesRoot;
+    this.idGenerator = idGenerator;
+
     Files.createDirectories(tempFilesRoot);
     temporaryIndexOs = Files.newOutputStream(tempFilesRoot.resolve(TEMP_INDEX_FILE));
   }
@@ -125,11 +130,17 @@ class PlainPageBuilder implements AutoCloseable {
    * @param indexId mapping from original id to inner index id
    * @param categories the categories page belongs to
    */
-  void startPage(long originalId, long indexId, List<? extends CharSequence> categories) {
-    wikiIdToIndexId.put(originalId, indexId);
+  long startPage(long wikiPageId, List<? extends CharSequence> categories, URI uri) {
+    if (isProcessingPage) {
+      throw new IllegalStateException("Duplicate startPage call: page is already being processed");
+    }
+    isProcessingPage = true;
+
+    long pageId = idGenerator.pageId(uri);
+    wikiIdToIndexId.put(wikiPageId, pageId);
     this.categories = categories.stream().map(CharSequence::toString).collect(Collectors.toList());
     parentPagesStack.clear();
-    builtPages.clear();
+    return pageId;
   }
 
   /**
@@ -139,7 +150,8 @@ class PlainPageBuilder implements AutoCloseable {
    * @param sectionId id of this section that will be used in index
    * @param section section of a crawler document
    */
-  void addSection(long sectionId, CrawlerDocument.Section section) {
+  void addSection(CrawlerDocument.Section section) {
+    long sectionId = idGenerator.sectionId(section.uri());
     for (Link link : section.links()) {
       Page.Link.Builder linkBuilder = Page.Link.newBuilder()
           .setPosition(link.textOffset())
@@ -189,6 +201,11 @@ class PlainPageBuilder implements AutoCloseable {
    * Clears all temporary information about the page
    */
   void endPage() {
+    if (!isProcessingPage) {
+      throw new IllegalStateException("Illegal call to endPage: no page is being processed");
+    }
+    isProcessingPage = false;
+
     while (!parentPagesStack.isEmpty()) {
       builtPages.add(parentPagesStack.pollLast().build());
     }
