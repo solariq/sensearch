@@ -93,7 +93,7 @@ public class StatisticsBuilder implements AutoCloseable {
 
     termFreqMap.adjustOrPutValue(pageTokens.get(0), 1, 1);
     for (int i = 1; i < pageTokens.size(); ++i) {
-      termFreqMap.adjustOrPutValue(termFreqMap.get(i), 1, 1);
+      termFreqMap.adjustOrPutValue(pageTokens.get(i), 1, 1);
 
       bigramFreqMap.putIfAbsent(pageTokens.get(i - 1), new TLongIntHashMap());
       bigramFreqMap.get(pageTokens.get(i - 1)).adjustOrPutValue(pageTokens.get(i), 1, 1);
