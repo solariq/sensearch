@@ -4,6 +4,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import com.expleague.sensearch.donkey.crawler.document.WikiPage.WikiLink;
 import com.expleague.sensearch.donkey.crawler.document.WikiPage.WikiSection;
 import com.expleague.sensearch.protobuf.index.IndexUnits.Page;
 import com.expleague.sensearch.utils.CrawlerBasedTestCase;
@@ -53,8 +54,9 @@ public class PlainPageBuilderTest extends CrawlerBasedTestCase {
             JniDBFactory.factory.open(PAGE_DB_PATH.toFile(), new Options().errorIfExists(true)),
             TEMP_FILES_ROOT,
             new IdGenerator())) {
-      rootPageId = pageBuilder.startPage(
-          1, Arrays.asList("Category1", "Category2"), URI.create("http://someuri"));
+      rootPageId =
+          pageBuilder.startPage(
+              1, Arrays.asList("Category1", "Category2"), URI.create("http://someuri"));
 
       idsFromPageBuilder.put(
           "someuri#root",
@@ -173,8 +175,8 @@ public class PlainPageBuilderTest extends CrawlerBasedTestCase {
             JniDBFactory.factory.open(PAGE_DB_PATH.toFile(), new Options().errorIfExists(true)),
             TEMP_FILES_ROOT,
             new IdGenerator())) {
-      page1Id = pageBuilder
-          .startPage(1, Arrays.asList("Category 1", "Category 2"), URI.create("Page1"));
+      page1Id =
+          pageBuilder.startPage(1, Arrays.asList("Category 1", "Category 2"), URI.create("Page1"));
       pageBuilder.addSection(
           new WikiSection(
               "Some text",
@@ -235,6 +237,98 @@ public class PlainPageBuilderTest extends CrawlerBasedTestCase {
     assertFalse(pageByUri.get("Page1#root").hasParentId());
     assertFalse(pageByUri.get("Page2#root").hasParentId());
     assertFalse(pageByUri.get("Page3#root").hasParentId());
+  }
+
+  @Test
+  public void testLinks() throws IOException {
+    try (PlainPageBuilder pageBuilder =
+        new PlainPageBuilder(
+            JniDBFactory.factory.open(PAGE_DB_PATH.toFile(), new Options().errorIfExists(true)),
+            TEMP_FILES_ROOT,
+            new IdGenerator())) {
+      pageBuilder.startPage(1, Arrays.asList("Category1", "Category2"), URI.create("Page1"));
+
+      pageBuilder.addSection(
+          new WikiSection(
+              "Some text for first page",
+              Collections.singletonList("First title"),
+              Collections.singletonList(new WikiLink("text", "First title", 1, 5)),
+              URI.create("Page1#root")));
+
+      pageBuilder.addSection(
+          new WikiSection(
+              "First page subsection",
+              Arrays.asList("First title", "Subtitle"),
+              Collections.singletonList(new WikiLink("page", "Third title", 3, 6)),
+              URI.create("suburi")));
+
+      pageBuilder.addSection(
+          new WikiSection(
+              "Another first page subsection",
+              Arrays.asList("First title", "Subtitle2"),
+              Arrays.asList(
+                  new WikiLink("Another", "Second title", 2, 0),
+                  new WikiLink("subsection", "First title", 1, 19)),
+              URI.create("suburi2")));
+
+      pageBuilder.endPage();
+
+      pageBuilder.startPage(2, Collections.singletonList("Category 1"), URI.create("Page2"));
+
+      pageBuilder.addSection(
+          new WikiSection(
+              "Second page section text",
+              Collections.singletonList("Second page"),
+              Collections.emptyList(),
+              URI.create("Page2#root")));
+
+      pageBuilder.addSection(
+          new WikiSection(
+              "Second page subsection text",
+              Arrays.asList("Second page", "Second page subsection"),
+              Arrays.asList(
+                  new WikiLink("Second", "Second page", 2, 0),
+                  new WikiLink("page", "First page", 1, 6)),
+              URI.create("Page2subpage")));
+
+      pageBuilder.endPage();
+
+      pageBuilder.startPage(3, Collections.emptyList(), URI.create("Page3"));
+
+      pageBuilder.addSection(
+          new WikiSection(
+              "Third page section text",
+              Collections.singletonList("Third page"),
+              Arrays.asList(
+                  new WikiLink("Third", "Third page", 3, 0),
+                  new WikiLink("page", "Unexisting page", -1, 7)),
+              URI.create("Page3#root")));
+      pageBuilder.endPage();
+    }
+
+    Map<Long, Page> pages = new HashMap<>();
+    Map<String, Page> pageByUri = new HashMap<>();
+    readPagesFromDb(pages, pageByUri);
+
+    assertEquals(3, pageByUri.get("Page1#root").getIncomingLinksCount());
+    // NOTE: these links are only links from the specific SECTION
+    assertEquals(1, pageByUri.get("Page1#root").getOutgoingLinksCount());
+    // As for incoming links, they always lead to the root section, so non-root sections always have
+    // 0 incoming links
+    assertEquals(0, pageByUri.get("suburi").getIncomingLinksCount());
+    assertEquals(1, pageByUri.get("suburi").getOutgoingLinksCount());
+    assertEquals(0, pageByUri.get("suburi2").getIncomingLinksCount());
+    assertEquals(2, pageByUri.get("suburi2").getOutgoingLinksCount());
+
+    assertEquals(2, pageByUri.get("Page2#root").getIncomingLinksCount());
+    assertEquals(0, pageByUri.get("Page2#root").getOutgoingLinksCount());
+    assertEquals(0, pageByUri.get("Page2subpage").getIncomingLinksCount());
+    assertEquals(2, pageByUri.get("Page2subpage").getOutgoingLinksCount());
+
+    assertEquals(2, pageByUri.get("Page3#root").getIncomingLinksCount());
+    assertEquals(2, pageByUri.get("Page3#root").getOutgoingLinksCount());
+
+    // TODO (tehnar): check link contents
   }
 
   private void readPagesFromDb(Map<Long, Page> pages, Map<String, Page> pageByUri)
