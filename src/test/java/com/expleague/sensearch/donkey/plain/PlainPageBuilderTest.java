@@ -1,99 +1,257 @@
-//package com.expleague.sensearch.donkey.plain;
-//
-//import com.expleague.sensearch.protobuf.index.IndexUnits.Page;
-//import com.expleague.sensearch.utils.CrawlerBasedTestCase;
-//import com.google.protobuf.InvalidProtocolBufferException;
-//import gnu.trove.list.TLongList;
-//import gnu.trove.list.array.TLongArrayList;
-//import java.io.IOException;
-//import java.nio.file.Files;
-//import java.nio.file.Path;
-//import java.util.Collections;
-//import java.util.LinkedList;
-//import java.util.List;
-//import javax.xml.stream.XMLStreamException;
-//import org.fusesource.leveldbjni.JniDBFactory;
-//import org.iq80.leveldb.DB;
-//import org.iq80.leveldb.DBException;
-//import org.iq80.leveldb.DBIterator;
-//import org.junit.Assert;
-//import org.junit.Ignore;
-//import org.junit.Test;
-//
-//public class PlainPageBuilderTest extends CrawlerBasedTestCase {
-//
-//  private static final String PLAIN_DB_ROOT = "PlainDB";
-//
-//  @Test
-//  public void testBuildPlainDb() throws IOException, XMLStreamException {
-//    clearOutputRoot();
-//    Path plainDbPath = testOutputRoot().resolve(PLAIN_DB_ROOT);
-//    DB plainDb = JniDBFactory.factory.open(plainDbPath.toFile(), dbCreateOptions());
-//
-//    PlainPageBuilder plainPageBuilder = new PlainPageBuilder(plainDb, plainDbPath.resolve("TMP"));
-//    long[] flushedPageId = new long[]{0};
-//    crawler().makeStream().forEach(
-//        cd -> {
-//          plainPageBuilder.startPage(cd.id(), flushedPageId[0], Collections.emptyList());
-//          cd.sections().forEach(
-//              s -> {
-//                plainPageBuilder.addSection(flushedPageId[0], s);
-//                ++flushedPageId[0];
-//              }
-//          );
-//        }
-//    );
-//    plainPageBuilder.build();
-//  }
-//
-//  @Test(expected = DBException.class)
-//  @Ignore
-//  public void buildPlainDbTwice() throws IOException, XMLStreamException {
-//    DB plainDb =
-//        JniDBFactory.factory.open(
-//            Files.createTempDirectory(testOutputRoot(), "tmp").toFile(), dbCreateOptions());
-//
-//    PlainPageBuilder plainPageBuilder = new PlainPageBuilder(plainDb, testOutputRoot()
-//        .resolve("TMP_PLAIN")
-//    );
-//    plainPageBuilder.build();
-//    plainPageBuilder.build();
-//  }
-//
-//  @Test
-//  public void testReadPlainDb() throws IOException, XMLStreamException {
-//    testBuildPlainDb();
-//    try (DB plainDb =
-//        JniDBFactory.factory.open(
-//            testOutputRoot().resolve(PLAIN_DB_ROOT).toFile(), dbOpenOptions())) {
-//
-//      List<Page> dbContent = new LinkedList<>();
-//      DBIterator dbIterator = plainDb.iterator();
-//      dbIterator.seekToFirst();
-//      dbIterator.forEachRemaining(
-//          kv -> {
-//            try {
-//              dbContent.add(Page.parseFrom(kv.getValue()));
-//            } catch (InvalidProtocolBufferException e) {
-//              Assert.fail("Data base contain invalid protobuf!");
-//            }
-//          });
-//
-////      Assert.assertEquals(crawlerPages.size(), dbContent.size());
-////      for (CrawlerDocument cd : crawlerPages) {
-////
-////        boolean hasPageInDb = false;
-////        for (Page p : dbContent) {
-////          hasPageInDb |= (cd.content().equals(p.getContent()) && cd.title().equals(p.getTitle()));
-////        }
-////
-////        if (!hasPageInDb) {
-////          Assert.fail(
-////              String.format(
-////                  "Document with title '%s' and content '%s' was not found in base!",
-////                  cd.title(), cd.content()));
-////        }
-////      }
-//    }
-//  }
-//}
+package com.expleague.sensearch.donkey.plain;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
+import com.expleague.sensearch.donkey.crawler.document.WikiPage.WikiSection;
+import com.expleague.sensearch.protobuf.index.IndexUnits.Page;
+import com.expleague.sensearch.utils.CrawlerBasedTestCase;
+import com.google.common.primitives.Longs;
+import com.google.protobuf.InvalidProtocolBufferException;
+import java.io.IOException;
+import java.net.URI;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+import org.apache.commons.io.FileUtils;
+import org.fusesource.leveldbjni.JniDBFactory;
+import org.iq80.leveldb.DB;
+import org.iq80.leveldb.DBIterator;
+import org.iq80.leveldb.Options;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+
+public class PlainPageBuilderTest extends CrawlerBasedTestCase {
+
+  private static final Path PAGE_DB_PATH = Paths.get("testPageDbPath");
+  private static final Path TEMP_FILES_ROOT = Paths.get("tempPagesPath");
+
+  @Before
+  public void beforeTest() throws IOException {
+    Files.createDirectories(PAGE_DB_PATH);
+  }
+
+  @After
+  public void afterTest() throws IOException {
+    FileUtils.deleteDirectory(PAGE_DB_PATH.toFile());
+  }
+
+  @Test
+  public void testPageWithSubsections() throws IOException {
+
+    Map<String, Long> idsFromPageBuilder = new HashMap<>();
+    long rootPageId;
+
+    try (PlainPageBuilder pageBuilder =
+        new PlainPageBuilder(
+            JniDBFactory.factory.open(PAGE_DB_PATH.toFile(), new Options().errorIfExists(true)),
+            TEMP_FILES_ROOT,
+            new IdGenerator())) {
+      rootPageId = pageBuilder.startPage(
+          1, Arrays.asList("Category1", "Category2"), URI.create("http://someuri"));
+
+      idsFromPageBuilder.put(
+          "someuri#root",
+          pageBuilder.addSection(
+              new WikiSection(
+                  "Some text for first page",
+                  Collections.singletonList("First title"),
+                  Collections.emptyList(),
+                  URI.create("someuri#root"))));
+
+      idsFromPageBuilder.put(
+          "suburi",
+          pageBuilder.addSection(
+              new WikiSection(
+                  "First page subsection",
+                  Arrays.asList("First title", "Subtitle"),
+                  Collections.emptyList(),
+                  URI.create("suburi"))));
+
+      idsFromPageBuilder.put(
+          "suburi2",
+          pageBuilder.addSection(
+              new WikiSection(
+                  "Another first page subsection",
+                  Arrays.asList("First title", "Subtitle2"),
+                  Collections.emptyList(),
+                  URI.create("suburi2"))));
+
+      idsFromPageBuilder.put(
+          "deeper",
+          pageBuilder.addSection(
+              new WikiSection(
+                  "Deeper",
+                  Arrays.asList("First title", "Subtitle2", "Going deeper"),
+                  Collections.emptyList(),
+                  URI.create("deeper"))));
+
+      idsFromPageBuilder.put(
+          "evenmore",
+          pageBuilder.addSection(
+              new WikiSection(
+                  "text text text",
+                  Arrays.asList("First title", "Subtitle2", "Going deeper", "Even more"),
+                  Collections.emptyList(),
+                  URI.create("evenmore"))));
+
+      idsFromPageBuilder.put(
+          "almosttop",
+          pageBuilder.addSection(
+              new WikiSection(
+                  "Almost on the top",
+                  Arrays.asList("First title", "Title"),
+                  Collections.emptyList(),
+                  URI.create("almosttop"))));
+
+      pageBuilder.endPage();
+    }
+
+    Map<Long, Page> pages = new HashMap<>();
+    Map<String, Page> pageByUri = new HashMap<>();
+    readPagesFromDb(pages, pageByUri);
+
+    System.out.println(idsFromPageBuilder.keySet());
+    System.out.println(pageByUri.keySet());
+
+    // Check ids that return builder's methods
+    idsFromPageBuilder.forEach(
+        (uri, id) -> assertEquals(id.longValue(), pageByUri.get(uri).getPageId()));
+    assertEquals(rootPageId, pageByUri.get("someuri#root").getPageId());
+
+    assertEquals(6, pages.size());
+    // Only root page doesn't have parent
+    assertEquals(5, pages.values().stream().filter(Page::hasParentId).count());
+    assertFalse(pageByUri.get("someuri#root").hasParentId());
+
+    // All sections have the same categories
+    pages
+        .values()
+        .forEach(
+            page ->
+                assertEquals(Arrays.asList("Category1", "Category2"), page.getCategoriesList()));
+
+    // No links are set
+    assertEquals(
+        0, pages.values().stream().filter(page -> page.getIncomingLinksCount() > 0).count());
+    assertEquals(
+        0, pages.values().stream().filter(page -> page.getOutgoingLinksCount() > 0).count());
+
+    // Check titles
+    assertEquals("First title", pageByUri.get("someuri#root").getTitle());
+    assertEquals("Subtitle", pageByUri.get("suburi").getTitle());
+    assertEquals("Subtitle2", pageByUri.get("suburi2").getTitle());
+    assertEquals("Going deeper", pageByUri.get("deeper").getTitle());
+    assertEquals("Even more", pageByUri.get("evenmore").getTitle());
+    assertEquals("Title", pageByUri.get("almosttop").getTitle());
+
+    // Check content for some pages
+    assertEquals("Almost on the top", pageByUri.get("almosttop").getContent());
+    assertEquals("Some text for first page", pageByUri.get("someuri#root").getContent());
+
+    // Check parents
+    assertEquals(pageByUri.get("someuri#root"), pages.get(pageByUri.get("suburi").getParentId()));
+    assertEquals(pageByUri.get("someuri#root"), pages.get(pageByUri.get("suburi2").getParentId()));
+    assertEquals(pageByUri.get("suburi2"), pages.get(pageByUri.get("deeper").getParentId()));
+    assertEquals(pageByUri.get("deeper"), pages.get(pageByUri.get("evenmore").getParentId()));
+    assertEquals(
+        pageByUri.get("someuri#root"), pages.get(pageByUri.get("almosttop").getParentId()));
+  }
+
+  @Test
+  public void testMultiplePages() throws IOException {
+    long page1Id, page2Id, page3Id;
+
+    try (PlainPageBuilder pageBuilder =
+        new PlainPageBuilder(
+            JniDBFactory.factory.open(PAGE_DB_PATH.toFile(), new Options().errorIfExists(true)),
+            TEMP_FILES_ROOT,
+            new IdGenerator())) {
+      page1Id = pageBuilder
+          .startPage(1, Arrays.asList("Category 1", "Category 2"), URI.create("Page1"));
+      pageBuilder.addSection(
+          new WikiSection(
+              "Some text",
+              Collections.singletonList("Some title"),
+              Collections.emptyList(),
+              URI.create("Page1#root")));
+      pageBuilder.endPage();
+
+      // Page without sections should not be inserted
+      pageBuilder.startPage(239, Arrays.asList("1", "2"), URI.create("Page239"));
+      pageBuilder.endPage();
+
+      page2Id = pageBuilder.startPage(2, Arrays.asList("Category 1", "2"), URI.create("Page2"));
+      pageBuilder.addSection(
+          new WikiSection(
+              "second text",
+              Collections.singletonList("Second title"),
+              Collections.emptyList(),
+              URI.create("Page2#root")));
+      pageBuilder.addSection(
+          new WikiSection(
+              "second text in subsection",
+              Arrays.asList("Second title", "Second subtitle"),
+              Collections.emptyList(),
+              URI.create("Page2subsection")));
+      pageBuilder.endPage();
+
+      page3Id = pageBuilder.startPage(3, Arrays.asList("Category 1", "222"), URI.create("Page3"));
+      pageBuilder.addSection(
+          new WikiSection(
+              "third text",
+              Collections.singletonList("Third title"),
+              Collections.emptyList(),
+              URI.create("Page3#root")));
+      pageBuilder.endPage();
+    }
+
+    Map<Long, Page> pages = new HashMap<>();
+    Map<String, Page> pageByUri = new HashMap<>();
+    readPagesFromDb(pages, pageByUri);
+
+    assertEquals(4, pages.size());
+
+    assertEquals(page1Id, pageByUri.get("Page1#root").getPageId());
+    assertEquals(page2Id, pageByUri.get("Page2#root").getPageId());
+    assertEquals(page3Id, pageByUri.get("Page3#root").getPageId());
+
+    // Page without sections should not be presented in the database
+    assertFalse(pageByUri.containsKey("Page239"));
+
+    assertTrue(pageByUri.containsKey("Page1#root"));
+    assertTrue(pageByUri.containsKey("Page2#root"));
+    assertTrue(pageByUri.containsKey("Page3#root"));
+
+    // Check parents
+    assertEquals(
+        pageByUri.get("Page2#root"), pages.get(pageByUri.get("Page2subsection").getParentId()));
+    assertFalse(pageByUri.get("Page1#root").hasParentId());
+    assertFalse(pageByUri.get("Page2#root").hasParentId());
+    assertFalse(pageByUri.get("Page3#root").hasParentId());
+  }
+
+  private void readPagesFromDb(Map<Long, Page> pages, Map<String, Page> pageByUri)
+      throws IOException {
+    try (DB pageDb = JniDBFactory.factory.open(PAGE_DB_PATH.toFile(), new Options())) {
+      DBIterator iterator = pageDb.iterator();
+      iterator.seekToFirst();
+      iterator.forEachRemaining(
+          entry -> {
+            try {
+              Page page = Page.parseFrom(entry.getValue());
+              pages.put(Longs.fromByteArray(entry.getKey()), page);
+              pageByUri.put(page.getUri(), page);
+            } catch (InvalidProtocolBufferException e) {
+              throw new RuntimeException(e);
+            }
+          });
+    }
+  }
+}

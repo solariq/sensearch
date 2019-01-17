@@ -2,7 +2,6 @@ package com.expleague.sensearch.donkey.plain;
 
 import com.expleague.sensearch.donkey.crawler.document.CrawlerDocument;
 import com.expleague.sensearch.donkey.crawler.document.CrawlerDocument.Link;
-import com.expleague.sensearch.donkey.crawler.document.CrawlerDocument.Section;
 import com.expleague.sensearch.protobuf.index.IndexUnits;
 import com.expleague.sensearch.protobuf.index.IndexUnits.Page;
 import com.google.common.annotations.VisibleForTesting;
@@ -55,18 +54,21 @@ class PlainPageBuilder implements AutoCloseable {
   private List<String> categories = Collections.emptyList();
   private Deque<IndexUnits.Page.Builder> parentPagesStack = new LinkedList<>();
   private List<Page> builtPages = new ArrayList<>();
+
   private boolean isProcessingPage = false;
+  // Flag that indicates if there as at least one section added for current page
+  private boolean hasSection = false;
+  private long curPageId;
 
   /**
-   * PlainPageBuilder provides builder for the database of indexed pages.
-   * It processes each page section-wise. To start processing new page call
-   * {@link #startPage(long, long, List)},
-   * To add sections of the page call {@link #addSection(long, Section)}
-   * And to finish the page call {@link #endPage()}
+   * PlainPageBuilder provides builder for the database of indexed pages. It processes each page
+   * section-wise. To start processing new page call {@link #startPage}, To add
+   * sections of the page call {@link #addSection} And to finish the page call {@link
+   * #endPage()}
    *
    * @param plainDb database where index pages will be stored
    * @param tempFilesRoot root where temporary files while building will be stored if directory does
-   * not exist it will be created. It will be deleted after build() is called
+   *     not exist it will be created. It will be deleted after build() is called
    * @throws IOException if it is failed to create root directory
    */
   PlainPageBuilder(DB plainDb, Path tempFilesRoot, IdGenerator idGenerator) throws IOException {
@@ -79,10 +81,9 @@ class PlainPageBuilder implements AutoCloseable {
   }
 
   /**
-   * Receives list of links and splits it into two maps. Outgoing links map has
-   * link's source page id as a key, so for each id it stores all of the outgoing links.
-   * Incoming links map, on the other hand, stores all incoming links for each id in the
-   * similar fashion
+   * Receives list of links and splits it into two maps. Outgoing links map has link's source page
+   * id as a key, so for each id it stores all of the outgoing links. Incoming links map, on the
+   * other hand, stores all incoming links for each id in the similar fashion
    *
    * @param links list of Link.Builder each of which has wiki page id as a target id
    * @param wikiIdToIndexIdMappings mapping from wiki ids to index ids
@@ -90,7 +91,9 @@ class PlainPageBuilder implements AutoCloseable {
    * @param incomingLinks map of incoming links
    */
   @VisibleForTesting
-  static void resolveLinks(List<Page.Link.Builder> links, TLongLongMap wikiIdToIndexIdMappings,
+  static void resolveLinks(
+      List<Page.Link.Builder> links,
+      TLongLongMap wikiIdToIndexIdMappings,
       @NotNull TLongObjectMap<List<Page.Link>> outgoingLinks,
       @NotNull TLongObjectMap<List<Page.Link>> incomingLinks) {
     outgoingLinks.clear();
@@ -99,9 +102,8 @@ class PlainPageBuilder implements AutoCloseable {
       long wikiTargetId = link.getTargetPageId();
       if (!wikiIdToIndexIdMappings.containsKey(wikiTargetId)) {
         LOG.warn(
-            String.format("Mappings to index id for WikiPage with id [ %d ] was not found!",
-                wikiTargetId)
-        );
+            String.format(
+                "Mappings to index id for WikiPage with id [ %d ] was not found!", wikiTargetId));
         link.clearTargetPageId();
       } else {
         long targetIndexId = wikiIdToIndexIdMappings.get(wikiTargetId);
@@ -125,39 +127,47 @@ class PlainPageBuilder implements AutoCloseable {
   /**
    * Prepares for receiving sections of the page. Erases all information about the previous page
    *
-   * @param originalId original id of a page. Id is required for building links
-   * between pages when build() is called
-   * @param indexId mapping from original id to inner index id
+   * @param originalPageId original id of a page. Id is required for building links between pages
+   *     when build() is called
    * @param categories the categories page belongs to
+   * @param uri URI of the page. URIs must be unique among the collection
+   * @return id associated with this page. This id will be equal to the id of the root (first)
+   *     section
    */
-  long startPage(long wikiPageId, List<? extends CharSequence> categories, URI uri) {
+  long startPage(long originalPageId, List<? extends CharSequence> categories, URI uri) {
     if (isProcessingPage) {
       throw new IllegalStateException("Duplicate startPage call: page is already being processed");
     }
-    isProcessingPage = true;
 
-    long pageId = idGenerator.pageId(uri);
-    wikiIdToIndexId.put(wikiPageId, pageId);
+    isProcessingPage = true;
+    hasSection = false;
+
+    curPageId = idGenerator.pageId(uri);
+    wikiIdToIndexId.put(originalPageId, curPageId);
     this.categories = categories.stream().map(CharSequence::toString).collect(Collectors.toList());
     parentPagesStack.clear();
-    return pageId;
+    return curPageId;
   }
 
   /**
    * Adds new section to the started page. The methods provides tying section int tree-like manner
    * that is each page has links to its children and to its parent
    *
-   * @param sectionId id of this section that will be used in index
    * @param section section of a crawler document
+   * @return id of the section. Id of the root (first) section of the page equals to the id returned
+   *     by {@link #startPage}
    */
-  void addSection(CrawlerDocument.Section section) {
-    long sectionId = idGenerator.sectionId(section.uri());
+  long addSection(CrawlerDocument.Section section) {
+    long sectionId = hasSection ? idGenerator.sectionId(section.uri()) : curPageId;
+    hasSection = true;
+
     for (Link link : section.links()) {
-      Page.Link.Builder linkBuilder = Page.Link.newBuilder()
-          .setPosition(link.textOffset())
-          .setText(link.text().toString())
-          .setSourcePageId(sectionId)
-          .setTargetPageId(link.targetId());
+      Page.Link.Builder linkBuilder =
+          Page.Link.newBuilder()
+              .setPosition(link.textOffset())
+              .setText(link.text().toString())
+              .setSourcePageId(sectionId)
+              .setTargetPageId(link.targetId());
       linkBuilders.add(linkBuilder);
     }
 
@@ -169,10 +179,7 @@ class PlainPageBuilder implements AutoCloseable {
           String.format(
               "Received page with the depth [ %d ], when current depth is [ %d ]."
                   + " Probably some sections are missing or sections order is incorrect",
-              sectionDepth,
-              parentPagesStack.size()
-          )
-      );
+              sectionDepth, parentPagesStack.size()));
     }
 
     // section depth is always greater than 1
@@ -181,12 +188,13 @@ class PlainPageBuilder implements AutoCloseable {
     }
 
     CharSequence sectionTitle = sectionTitleSeq.get(sectionDepth - 1);
-    Page.Builder pageBuilder = Page.newBuilder()
-        .setPageId(sectionId)
-        .setContent(section.text().toString())
-        .setTitle(sectionTitle.toString())
-        .setUri(section.uri().toString())
-        .addAllCategories(categories);
+    Page.Builder pageBuilder =
+        Page.newBuilder()
+            .setPageId(sectionId)
+            .setContent(section.text().toString())
+            .setTitle(sectionTitle.toString())
+            .setUri(section.uri().toString())
+            .addAllCategories(categories);
 
     if (!parentPagesStack.isEmpty()) {
       pageBuilder.setParentId(parentPagesStack.peekLast().getPageId());
@@ -194,11 +202,13 @@ class PlainPageBuilder implements AutoCloseable {
     }
 
     parentPagesStack.addLast(pageBuilder);
+
+    return sectionId;
   }
 
   /**
-   * Signals the end of the page. Does necessary aggregation of sections.
-   * Clears all temporary information about the page
+   * Signals the end of the page. Does necessary aggregation of sections. Clears all temporary
+   * information about the page
    */
   void endPage() {
     if (!isProcessingPage) {
@@ -210,29 +220,26 @@ class PlainPageBuilder implements AutoCloseable {
       builtPages.add(parentPagesStack.pollLast().build());
     }
 
-    builtPages.forEach(p -> {
+    builtPages.forEach(
+        p -> {
           try {
             p.writeDelimitedTo(temporaryIndexOs);
           } catch (IOException e) {
             throw new RuntimeException(
                 String.format(
                     "Failed to save page to temporary index [ %s ]. Cause: %s",
-                    temporaryIndexRoot.toAbsolutePath().toString(),
-                    e.toString()
-                )
-            );
+                    temporaryIndexRoot.toAbsolutePath().toString(), e.toString()));
           }
-        }
-    );
+        });
 
     try {
       temporaryIndexOs.flush();
     } catch (IOException e) {
       throw new RuntimeException(
-          String.format("Failed to flush indexed pages to temporary directory: [ %s ]",
-              temporaryIndexRoot.toAbsolutePath().toString()
-          ), e
-      );
+          String.format(
+              "Failed to flush indexed pages to temporary directory: [ %s ]",
+              temporaryIndexRoot.toAbsolutePath().toString()),
+          e);
     }
 
     builtPages.clear();
@@ -253,11 +260,8 @@ class PlainPageBuilder implements AutoCloseable {
     WriteBatch writeBatch = plainDb.createWriteBatch();
     int maxPagesInBatch = 1000;
     int pagesInBatch = 0;
-    try (
-        InputStream temporaryIndexIs = Files.newInputStream(
-            temporaryIndexRoot.resolve(TEMP_INDEX_FILE)
-        )
-    ) {
+    try (InputStream temporaryIndexIs =
+        Files.newInputStream(temporaryIndexRoot.resolve(TEMP_INDEX_FILE))) {
       while ((rawPage = Page.parseDelimitedFrom(temporaryIndexIs)) != null) {
         pageBuilder.clear();
         pageBuilder.mergeFrom(rawPage);

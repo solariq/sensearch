@@ -305,9 +305,7 @@ public class PlainIndexBuilder implements IndexBuilder {
                           });
                   embeddingBuilder.add(
                       rootPageId, toVector(doc.title().toLowerCase(), jmllEmbedding));
-
-                  long[] titleTokens = toTermIds(doc.title(), termBuilder);
-                  suggestBuilder.accept(titleTokens);
+                  suggestBuilder.accept(toTermIds(doc.title(), termBuilder));
 
                   indexMetaBuilder.endPage();
                   statisticsBuilder.endPage();
