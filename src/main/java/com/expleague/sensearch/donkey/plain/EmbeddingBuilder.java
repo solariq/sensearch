@@ -29,7 +29,7 @@ public class EmbeddingBuilder implements AutoCloseable {
   public static final String RAND_VECS = "rand";
   public static final int TABLES_NUMBER = 10;
   public static final int TUPLE_SIZE = 20;
-  private static final int MAX_BATCH_SIZE = 1_000;
+  private static final int MAX_BATCH_SIZE = 1 << 14;
   private static final double MIN_COORD_VAL = -1.;
   private static final double MAX_COORD_VAL = 1.;
 
@@ -138,6 +138,11 @@ public class EmbeddingBuilder implements AutoCloseable {
     if (batchSize > MAX_BATCH_SIZE) {
       db.write(batch, WRITE_OPTIONS);
       batchSize = 0;
+      try {
+        batch.close();
+      } catch (IOException e) {
+        throw new RuntimeException(e);
+      }
       batch = db.createWriteBatch();
     }
   }

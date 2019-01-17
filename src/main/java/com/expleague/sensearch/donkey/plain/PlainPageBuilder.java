@@ -273,6 +273,7 @@ class PlainPageBuilder implements AutoCloseable {
         if (pagesInBatch >= maxPagesInBatch) {
           plainDb.write(writeBatch, DEFAULT_WRITE_OPTIONS);
           pagesInBatch = 0;
+          writeBatch.close();
           writeBatch = plainDb.createWriteBatch();
         }
 

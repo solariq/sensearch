@@ -126,6 +126,7 @@ public class StatisticsBuilder implements AutoCloseable {
     pageTokens.add(termId);
   }
 
+
   @Override
   public void close() throws IOException {
     WriteBatch writeBatch = statisticsDb.createWriteBatch();

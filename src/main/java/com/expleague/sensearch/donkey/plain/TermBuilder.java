@@ -130,7 +130,11 @@ public class TermBuilder implements AutoCloseable {
           curBatchSize[0]++;
           if (curBatchSize[0] >= TERM_BATCH_SIZE) {
             termDb.write(batch[0], DEFAULT_TERM_WRITE_OPTIONS);
-
+            try {
+              batch[0].close();
+            } catch (IOException e) {
+              throw new RuntimeException(e);
+            }
             batch[0] = termDb.createWriteBatch();
             curBatchSize[0] = 0;
           }

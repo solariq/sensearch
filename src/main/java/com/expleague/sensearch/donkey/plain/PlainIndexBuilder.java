@@ -294,7 +294,7 @@ public class PlainIndexBuilder implements IndexBuilder {
                                 .forEach(
                                     word -> {
                                       TermAndLemmaIdPair termLemmaId = termBuilder.addTerm(word);
-                                      Vec vec = jmllEmbedding.apply(CharSeq.intern(word));
+                                      Vec vec = jmllEmbedding.apply(CharSeq.compact(word));
                                       if (vec != null) {
                                         embeddingBuilder.add(termLemmaId.termId, vec);
                                       }
