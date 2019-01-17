@@ -26,10 +26,19 @@ import javax.xml.bind.annotation.XmlValue;
 
 public class XMLParser {
 
+  private static final JAXBContext context;
+
+  static {
+    try {
+      context = JAXBContext.newInstance(XmlPageRootElement.class);
+    } catch (JAXBException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
   public WikiPage parseXML(File file) {
     WikiPage page = new WikiPage();
     try {
-      JAXBContext context = JAXBContext.newInstance(XmlPageRootElement.class);
       Unmarshaller um = context.createUnmarshaller();
       XmlPageRootElement element = (XmlPageRootElement) um.unmarshal(file);
       XmlPage xmlPage = element.page;

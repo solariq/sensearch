@@ -5316,7 +5316,7 @@ public final class IndexUnits {
     }
     public static com.expleague.sensearch.protobuf.index.IndexUnits.TermStatistics parseFrom(byte[] data)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return data != null ? PARSER.parseFrom(data) : getDefaultInstance();
+      return PARSER.parseFrom(data);
     }
     public static com.expleague.sensearch.protobuf.index.IndexUnits.TermStatistics parseFrom(
         byte[] data,
@@ -5912,7 +5912,7 @@ public final class IndexUnits {
      * <code>optional int64 lemma_id = 2;</code>
      *
      * <pre>
-     * Will be missing if lemma can not be extracted or lemma equals to this term
+     * Equals to -1 if lemma can not be extracted or lemma equals to this term
      * </pre>
      */
     boolean hasLemmaId();
@@ -5920,7 +5920,7 @@ public final class IndexUnits {
      * <code>optional int64 lemma_id = 2;</code>
      *
      * <pre>
-     * Will be missing if lemma can not be extracted or lemma equals to this term
+     * Equals to -1 if lemma can not be extracted or lemma equals to this term
      * </pre>
      */
     long getLemmaId();
@@ -6287,7 +6287,7 @@ public final class IndexUnits {
      * <code>optional int64 lemma_id = 2;</code>
      *
      * <pre>
-     * Will be missing if lemma can not be extracted or lemma equals to this term
+     * Equals to -1 if lemma can not be extracted or lemma equals to this term
      * </pre>
      */
     public boolean hasLemmaId() {
@@ -6297,7 +6297,7 @@ public final class IndexUnits {
      * <code>optional int64 lemma_id = 2;</code>
      *
      * <pre>
-     * Will be missing if lemma can not be extracted or lemma equals to this term
+     * Equals to -1 if lemma can not be extracted or lemma equals to this term
      * </pre>
      */
     public long getLemmaId() {
@@ -6680,7 +6680,7 @@ public final class IndexUnits {
        * <code>optional int64 lemma_id = 2;</code>
        *
        * <pre>
-       * Will be missing if lemma can not be extracted or lemma equals to this term
+       * Equals to -1 if lemma can not be extracted or lemma equals to this term
        * </pre>
        */
       public boolean hasLemmaId() {
@@ -6690,7 +6690,7 @@ public final class IndexUnits {
        * <code>optional int64 lemma_id = 2;</code>
        *
        * <pre>
-       * Will be missing if lemma can not be extracted or lemma equals to this term
+       * Equals to -1 if lemma can not be extracted or lemma equals to this term
        * </pre>
        */
       public long getLemmaId() {
@@ -6700,7 +6700,7 @@ public final class IndexUnits {
        * <code>optional int64 lemma_id = 2;</code>
        *
        * <pre>
-       * Will be missing if lemma can not be extracted or lemma equals to this term
+       * Equals to -1 if lemma can not be extracted or lemma equals to this term
        * </pre>
        */
       public Builder setLemmaId(long value) {
@@ -6713,7 +6713,7 @@ public final class IndexUnits {
        * <code>optional int64 lemma_id = 2;</code>
        *
        * <pre>
-       * Will be missing if lemma can not be extracted or lemma equals to this term
+       * Equals to -1 if lemma can not be extracted or lemma equals to this term
        * </pre>
        */
       public Builder clearLemmaId() {
