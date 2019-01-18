@@ -81,6 +81,16 @@ public class RequestCrawler implements WebCrawler {
     urlConnection.setRequestProperty("Cookie", resultCookie);
   }
 
+  private Map<String, String> getDefaultCookies(String userAgent) throws IOException {
+    URLConnection urlConnection = new URL("http://google.com").openConnection();
+    urlConnection.setRequestProperty("User-Agent", userAgent);
+    urlConnection.connect();
+
+    Map<String, String> cookies = new HashMap<>();
+    updateCookies(cookies, urlConnection.getHeaderFields().get("Set-Cookie"));
+    return cookies;
+  }
+
   private void updateCookies(Map<String, String> cookies, List<String> newCookieStr) {
     newCookieStr.forEach(
         newCookie -> {
@@ -90,6 +100,24 @@ public class RequestCrawler implements WebCrawler {
               String.join("=", Arrays.stream(tokens, 1, tokens.length).collect(Collectors.toList()))
                   .split(";")[0]);
         });
+  }
+
+
+  private Document makeRequest(String request, String userAgent) throws IOException {
+    URL url = new URL(request);
+    URLConnection connection = url.openConnection();
+    connection.setRequestProperty("User-Agent", userAgent);
+    setCookies(cookies.get(userAgent), connection);
+
+    Document document = Jsoup.parse(connection.getInputStream(), "UTF-8", url.toString());
+
+    if (connection.getHeaderField("Set-Cookie") != null) {
+      //System.out.println(userAgent);
+      //System.out.println(String.join("\n", connection.getHeaderFields().get("Set-Cookie")));
+      updateCookies(cookies.get(userAgent), connection.getHeaderFields().get("Set-Cookie"));
+    }
+
+    return document;
   }
 
   private String normalizeTitle(String title) {
@@ -175,33 +203,6 @@ public class RequestCrawler implements WebCrawler {
       }
     }
     return results;
-  }
-
-  private Document makeRequest(String request, String userAgent) throws IOException {
-    URL url = new URL(request);
-    URLConnection connection = url.openConnection();
-    connection.setRequestProperty("User-Agent", userAgent);
-    setCookies(cookies.get(userAgent), connection);
-
-    Document document = Jsoup.parse(connection.getInputStream(), "UTF-8", url.toString());
-
-    if (connection.getHeaderField("Set-Cookie") != null) {
-      System.out.println(userAgent);
-      System.out.println(String.join("\n", connection.getHeaderFields().get("Set-Cookie")));
-      updateCookies(cookies.get(userAgent), connection.getHeaderFields().get("Set-Cookie"));
-    }
-
-    return document;
-  }
-
-  private Map<String, String> getDefaultCookies(String userAgent) throws IOException {
-    URLConnection urlConnection = new URL("http://google.com").openConnection();
-    urlConnection.setRequestProperty("User-Agent", userAgent);
-    urlConnection.connect();
-
-    Map<String, String> cookies = new HashMap<>();
-    updateCookies(cookies, urlConnection.getHeaderFields().get("Set-Cookie"));
-    return cookies;
   }
 
   @Override
