@@ -1,18 +1,26 @@
 package com.expleague.sensearch.donkey.plain;
 
+import static com.expleague.sensearch.donkey.plain.PlainIndexBuilder.DEFAULT_VEC_SIZE;
+
 import com.expleague.commons.math.vectors.Vec;
 import com.expleague.commons.math.vectors.VecTools;
 import com.expleague.commons.math.vectors.impl.vectors.ArrayVec;
+import com.expleague.commons.seq.CharSeq;
+import com.expleague.ml.embedding.Embedding;
+import com.expleague.sensearch.core.Tokenizer;
 import com.google.common.primitives.Longs;
-import gnu.trove.list.TLongList;
-import gnu.trove.list.array.TLongArrayList;
 import gnu.trove.map.TLongObjectMap;
 import gnu.trove.map.hash.TLongObjectHashMap;
+import gnu.trove.set.TLongSet;
+import gnu.trove.set.hash.TLongHashSet;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 import java.util.Random;
 import java.util.function.ToLongFunction;
 import org.fusesource.leveldbjni.JniDBFactory;
@@ -40,17 +48,29 @@ public class EmbeddingBuilder implements AutoCloseable {
           .compressionType(CompressionType.SNAPPY);
 
   private static final WriteOptions WRITE_OPTIONS = new WriteOptions().sync(true);
+  private final Tokenizer tokenizer;
+  private final Embedding<CharSeq> jmllEmbedding;
+  private final IdGenerator idGenerator;
   // .snapshot(false);
 
   private DB vecDB;
   private WriteBatch batch = null;
   private int batchSize = 0;
 
-  private TLongObjectMap<TLongList> tables = new TLongObjectHashMap<>();
+  private TLongObjectMap<TLongSet> tables = new TLongObjectHashMap<>();
   private DB tablesDB;
   private ToLongFunction<Vec>[] hashFuncs;
 
-  public EmbeddingBuilder(Path embeddingPath) throws IOException {
+  public EmbeddingBuilder(
+      Path embeddingPath,
+      Embedding<CharSeq> jmllEmbedding,
+      Tokenizer tokenizer,
+      IdGenerator idGenerator)
+      throws IOException {
+    this.jmllEmbedding = jmllEmbedding;
+    this.tokenizer = tokenizer;
+    this.idGenerator = idGenerator;
+
     vecDB = JniDBFactory.factory.open(embeddingPath.resolve(VECS_ROOT).toFile(), DB_OPTIONS);
     tablesDB = JniDBFactory.factory.open(embeddingPath.resolve(LSH_ROOT).toFile(), DB_OPTIONS);
 
@@ -63,7 +83,7 @@ public class EmbeddingBuilder implements AutoCloseable {
 
         Vec[] randVecs = new Vec[TUPLE_SIZE];
         for (int j = 0; j < randVecs.length; j++) {
-          double[] randCoords = new double[PlainIndexBuilder.DEFAULT_VEC_SIZE];
+          double[] randCoords = new double[DEFAULT_VEC_SIZE];
           for (int k = 0; k < randCoords.length; k++) {
             randCoords[k] = MIN_COORD_VAL + (MAX_COORD_VAL - MIN_COORD_VAL) * random.nextDouble();
             output.write(randCoords[k] + (k < randCoords.length - 1 ? " " : ""));
@@ -122,9 +142,9 @@ public class EmbeddingBuilder implements AutoCloseable {
   private void addToTables(long id, Vec vec) {
     for (ToLongFunction<Vec> hashFunc : hashFuncs) {
       long bucketIndex = hashFunc.applyAsLong(vec);
-      TLongList bucketEntry = tables.get(bucketIndex);
+      TLongSet bucketEntry = tables.get(bucketIndex);
       if (bucketEntry == null) {
-        bucketEntry = new TLongArrayList();
+        bucketEntry = new TLongHashSet();
         tables.put(bucketIndex, bucketEntry);
       }
       bucketEntry.add(id);
@@ -147,24 +167,74 @@ public class EmbeddingBuilder implements AutoCloseable {
     }
   }
 
-  public void add(long id, Vec vec) {
-    addToTables(id, vec);
-    check(vecDB);
-    batch.put(Longs.toByteArray(id), ByteTools.toBytes(vec));
-    batchSize++;
+  private long curPageId = 0;
+  private List<Vec> curPageVecs = new ArrayList<>();
+
+  public void startPage(long pageId) {
+    if (curPageId != 0) {
+      throw new IllegalStateException(
+          "Invalid call to startPage(): already processing page [" + curPageId + "]");
+    }
+    curPageId = pageId;
+    curPageVecs = new ArrayList<>();
   }
 
-  public void addAll(TLongObjectMap<Vec> vecs) {
-    vecs.forEachEntry(
-        (id, vec) -> {
-          add(id, vec);
-          return true;
-        });
+  public void add(String text) {
+    tokenizer
+        .toParagraphs(text)
+        .map(this::toVector)
+        .forEach(
+            vec -> {
+              addToTables(curPageId, vec);
+              curPageVecs.add(vec);
+            });
+
+    tokenizer.toWords(text).forEach(word -> {
+      long id = idGenerator.termId(word);
+
+      Vec vec = jmllEmbedding.apply(CharSeq.compact(word));
+      if (vec != null) {
+        check(vecDB);
+        batch.put(Longs.toByteArray(id), ByteTools.toBytes(vec));
+        batchSize++;
+        addToTables(id, vec);
+      }
+
+    });
+  }
+
+  public void endPage() {
+
+    check(vecDB);
+    batch.put(Longs.toByteArray(curPageId), ByteTools.toBytes(curPageVecs));
+    batchSize++;
+
+    curPageId = 0;
   }
 
   private void addToTablesDB(long bucket, long[] ids) {
     check(tablesDB);
     batch.put(Longs.toByteArray(bucket), ByteTools.toBytes(ids));
     batchSize++;
+  }
+
+  private Vec toVector(CharSequence text) {
+    Vec[] vectors =
+        tokenizer
+            .parseTextToWords(text)
+            .map(CharSeq::intern)
+            .map(jmllEmbedding)
+            .filter(Objects::nonNull)
+            .toArray(Vec[]::new);
+
+    if (vectors.length == 0) {
+      return new ArrayVec(DEFAULT_VEC_SIZE);
+    }
+
+    ArrayVec mean = new ArrayVec(DEFAULT_VEC_SIZE);
+    for (Vec vec : vectors) {
+      VecTools.append(mean, vec);
+    }
+    return VecTools.scale(mean, 1.0 / vectors.length);
   }
 }

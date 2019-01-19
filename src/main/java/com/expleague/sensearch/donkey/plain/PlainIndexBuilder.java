@@ -2,7 +2,6 @@ package com.expleague.sensearch.donkey.plain;
 
 import com.expleague.commons.math.vectors.Vec;
 import com.expleague.commons.math.vectors.VecTools;
-import com.expleague.commons.math.vectors.impl.vectors.ArrayVec;
 import com.expleague.commons.seq.CharSeq;
 import com.expleague.ml.embedding.Embedding;
 import com.expleague.ml.embedding.impl.EmbeddingImpl;
@@ -30,7 +29,6 @@ import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Objects;
 import java.util.Random;
 import java.util.Set;
 import java.util.TreeMap;
@@ -53,7 +51,7 @@ public class PlainIndexBuilder implements IndexBuilder {
   public static final String TERM_ROOT = "term";
   public static final String EMBEDDING_ROOT = "embedding";
   public static final String LSH_METRIC_ROOT = "lsh_metric";
-  private static final String TEMP_EMBEDDING_ROOT = "temp_embedding";
+  public static final String TEMP_EMBEDDING_ROOT = "temp_embedding";
 
   public static final String SUGGEST_UNIGRAM_ROOT = "suggest/unigram_coeff";
   public static final String SUGGEST_MULTIGRAMS_ROOT = "suggest/multigram_freq_norm";
@@ -119,26 +117,6 @@ public class PlainIndexBuilder implements IndexBuilder {
         .map(word -> termBuilder.addTerm(word).termId)
         .mapToLong(i -> i)
         .toArray();
-  }
-
-  private Vec toVector(String text, Embedding<CharSeq> jmllEmbedding) {
-    Vec[] vectors =
-        tokenizer
-            .parseTextToWords(text)
-            .map(CharSeq::intern)
-            .map(jmllEmbedding)
-            .filter(Objects::nonNull)
-            .toArray(Vec[]::new);
-
-    if (vectors.length == 0) {
-      return new ArrayVec(DEFAULT_VEC_SIZE);
-    }
-
-    ArrayVec mean = new ArrayVec(DEFAULT_VEC_SIZE);
-    for (Vec vec : vectors) {
-      VecTools.append(mean, vec);
-    }
-    return VecTools.scale(mean, 1.0 / vectors.length);
   }
 
   private Comparator<Vec> comparator(Vec main) {
@@ -248,7 +226,8 @@ public class PlainIndexBuilder implements IndexBuilder {
                 JniDBFactory.factory.open(
                     indexRoot.resolve(TERM_STATISTICS_ROOT).toFile(), STATS_DB_OPTIONS));
         final EmbeddingBuilder embeddingBuilder =
-            new EmbeddingBuilder(indexRoot.resolve(EMBEDDING_ROOT));
+            new EmbeddingBuilder(indexRoot.resolve(EMBEDDING_ROOT), jmllEmbedding, tokenizer,
+                idGenerator);
         final DB suggest_unigram_DB =
             JniDBFactory.factory.open(
                 indexRoot.resolve(SUGGEST_UNIGRAM_ROOT).toFile(), STATS_DB_OPTIONS);
@@ -277,11 +256,13 @@ public class PlainIndexBuilder implements IndexBuilder {
                       plainPageBuilder.startPage(doc.id(), doc.categories(), doc.uri());
                   statisticsBuilder.startPage();
                   indexMetaBuilder.startPage(rootPageId, doc.uri());
+                  embeddingBuilder.startPage(rootPageId);
 
                   doc.sections()
                       .forEachOrdered(
                           s -> {
-                            plainPageBuilder.addSection(s);
+                            long sectionId = plainPageBuilder.addSection(s);
+                            indexMetaBuilder.addSection(s.uri(), sectionId);
 
                             List<CharSequence> sectionTitles = s.title();
                             String sectionTitle =
@@ -294,19 +275,17 @@ public class PlainIndexBuilder implements IndexBuilder {
                                 .forEach(
                                     word -> {
                                       TermAndLemmaIdPair termLemmaId = termBuilder.addTerm(word);
-                                      Vec vec = jmllEmbedding.apply(CharSeq.compact(word));
-                                      if (vec != null) {
-                                        embeddingBuilder.add(termLemmaId.termId, vec);
-                                      }
                                       indexMetaBuilder.acceptTermId(termLemmaId.termId);
                                       statisticsBuilder.enrich(
                                           termLemmaId.termId, termLemmaId.lemmaId);
                                     });
                           });
-                  embeddingBuilder.add(
-                      rootPageId, toVector(doc.title().toLowerCase(), jmllEmbedding));
+                  embeddingBuilder.add(doc.title());
+                  embeddingBuilder.add(doc.content().toString());
+
                   suggestBuilder.accept(toTermIds(doc.title(), termBuilder));
 
+                  embeddingBuilder.endPage();
                   indexMetaBuilder.endPage();
                   statisticsBuilder.endPage();
                   plainPageBuilder.endPage();

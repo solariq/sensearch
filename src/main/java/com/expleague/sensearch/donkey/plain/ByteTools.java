@@ -5,10 +5,25 @@ import com.expleague.commons.math.vectors.impl.vectors.ArrayVec;
 import java.nio.ByteBuffer;
 import java.nio.DoubleBuffer;
 import java.nio.LongBuffer;
+import java.util.List;
 
 public final class ByteTools {
 
   private ByteTools() {
+  }
+
+  public static byte[] toBytes(List<Vec> vecs) {
+    if (vecs.size() == 0) {
+      return new byte[0];
+    }
+
+    ByteBuffer byteBuf = ByteBuffer.allocate(Double.BYTES * vecs.get(0).length() * vecs.size());
+    DoubleBuffer doubleBuf = byteBuf.asDoubleBuffer();
+    for (int i = 0; i < vecs.size(); i++) {
+      double[] coords = vecs.get(i).toArray();
+      doubleBuf.put(coords);
+    }
+    return byteBuf.array();
   }
 
   public static byte[] toBytes(Vec vec) {

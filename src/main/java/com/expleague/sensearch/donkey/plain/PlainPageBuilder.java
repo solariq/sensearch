@@ -62,9 +62,8 @@ class PlainPageBuilder implements AutoCloseable {
 
   /**
    * PlainPageBuilder provides builder for the database of indexed pages. It processes each page
-   * section-wise. To start processing new page call {@link #startPage}, To add
-   * sections of the page call {@link #addSection} And to finish the page call {@link
-   * #endPage()}
+   * section-wise. To start processing new page call {@link #startPage}, To add sections of the page
+   * call {@link #addSection} And to finish the page call {@link #endPage()}
    *
    * @param plainDb database where index pages will be stored
    * @param tempFilesRoot root where temporary files while building will be stored if directory does
@@ -175,11 +174,13 @@ class PlainPageBuilder implements AutoCloseable {
     int sectionDepth = sectionTitleSeq.size();
 
     if (sectionDepth - parentPagesStack.size() > 1) {
-      LOG.warn(
+      LOG.error(
           String.format(
-              "Received page with the depth [ %d ], when current depth is [ %d ]."
-                  + " Probably some sections are missing or sections order is incorrect",
-              sectionDepth, parentPagesStack.size()));
+              "Received page (id [ %d ] section id [ %d ] with the depth [ %d ], when current depth is [ %d ]."
+                  + " Probably some sections are missing or sections order is incorrect. Index may become corrupted",
+              curPageId, sectionId, sectionDepth, parentPagesStack.size()));
+      // TODO: if there were a missing section then we should add it to the stack otherwise parents
+      // might become incorrect
     }
 
     // section depth is always greater than 1

@@ -7,8 +7,8 @@ import java.security.NoSuchAlgorithmException;
 
 public class IdGenerator {
 
-  public long termId(String term) {
-    long md5HighBytes = getMd5HighBytes(term);
+  public long termId(CharSequence term) {
+    long md5HighBytes = getMd5HighBytes(term.toString());
     if (md5HighBytes == 0 || md5HighBytes == Long.MIN_VALUE) {
       return 1;
     }

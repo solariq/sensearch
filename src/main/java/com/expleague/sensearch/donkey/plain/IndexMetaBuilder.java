@@ -2,8 +2,8 @@ package com.expleague.sensearch.donkey.plain;
 
 import com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta;
 import com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta.UriPageMapping;
-import gnu.trove.map.TLongObjectMap;
-import gnu.trove.map.hash.TLongObjectHashMap;
+import gnu.trove.map.TObjectLongMap;
+import gnu.trove.map.hash.TObjectLongHashMap;
 import gnu.trove.set.TLongSet;
 import gnu.trove.set.hash.TLongHashSet;
 import java.io.UnsupportedEncodingException;
@@ -19,7 +19,7 @@ public class IndexMetaBuilder {
 
   private final int version;
   private final TLongSet termIds = new TLongHashSet();
-  private final TLongObjectMap<String> pageUri = new TLongObjectHashMap<>();
+  private final TObjectLongMap<String> pageUri = new TObjectLongHashMap<>();
   private int totalTokenCount = 0;
   private boolean isProcessingPage = false;
 
@@ -33,8 +33,8 @@ public class IndexMetaBuilder {
     }
     isProcessingPage = true;
 
-    if (pageUri.containsKey(pageId)) {
-      throw new IllegalStateException("Page with id " + pageId + " is already in IndexMeta");
+    if (pageUri.containsKey(pageUri)) {
+      throw new IllegalStateException("Uri " + uri + " is already in IndexMeta");
     }
     String uriDecoded = null;
     try {
@@ -42,7 +42,7 @@ public class IndexMetaBuilder {
     } catch (UnsupportedEncodingException e) {
       LOG.warn(e);
     }
-    pageUri.put(pageId, uriDecoded);
+    pageUri.put(uriDecoded, pageId);
   }
 
   public void acceptTermId(long termId) {
@@ -60,7 +60,7 @@ public class IndexMetaBuilder {
   public IndexMeta build() {
     List<UriPageMapping> mappings = new ArrayList<>();
 
-    pageUri.forEachEntry((id, uri) -> {
+    pageUri.forEachEntry((uri, id) -> {
       mappings.add(UriPageMapping.newBuilder().setPageId(id).setUri(uri).build());
       return true;
     });
@@ -72,5 +72,9 @@ public class IndexMetaBuilder {
         .setVocabularySize(termIds.size())
         .addAllUriPageMappings(mappings)
         .build();
+  }
+
+  public void addSection(URI sectionUri, long sectionId) {
+    pageUri.put(sectionUri.toString(), sectionId);
   }
 }
