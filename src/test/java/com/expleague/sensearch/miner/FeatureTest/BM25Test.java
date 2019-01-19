@@ -118,5 +118,3 @@ public class BM25Test extends IndexBasedTestCase {
   }
 
 }
-
-//0.46563

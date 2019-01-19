@@ -1,5 +1,13 @@
 package com.expleague.sensearch.web.suggest.hh_phrases;
 
+import com.expleague.sensearch.Config;
+import com.expleague.sensearch.ConfigImpl;
+import com.expleague.sensearch.Page;
+import com.expleague.sensearch.Page.SegmentType;
+import com.expleague.sensearch.core.Term;
+import com.expleague.sensearch.index.Index;
+import com.expleague.sensearch.index.plain.PlainIndex;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -11,15 +19,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
-
-import com.expleague.sensearch.Config;
-import com.expleague.sensearch.ConfigImpl;
-import com.expleague.sensearch.Page;
-import com.expleague.sensearch.core.PartOfSpeech;
-import com.expleague.sensearch.core.Term;
-import com.expleague.sensearch.index.Index;
-import com.expleague.sensearch.index.plain.PlainIndex;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 class Phrase {
 	Term[] content;
@@ -163,7 +162,7 @@ public class HHPhrases {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		CharSequence content = p.fullContent();
+		CharSequence content = p.content(SegmentType.BODY);
 		System.out.println("Content length " + content.length());
 		terms = index.parse(content)
 				//.map(t -> t.lemma())
