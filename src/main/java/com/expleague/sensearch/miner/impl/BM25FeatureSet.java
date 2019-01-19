@@ -71,7 +71,7 @@ public class BM25FeatureSet extends FeatureSet.Stub<QURLItem> implements TextFea
     set(BM25S, bm25s.value());
     set(BM25F, bm25f.value());
     {
-      final double totalIdf = query.terms().stream().mapToDouble(term -> idf(term.documentFreq())).sum();
+      final double totalIdf = query.terms().stream().mapToDouble(term -> idf(term.documentFreq())).sum() + 1;
       set(IDF_TOTAL, totalIdf);
       set(WORDS_COUNT, query.terms().size());
       set(QUERY_LENGTH, query.text().trim().length());
@@ -184,6 +184,6 @@ public class BM25FeatureSet extends FeatureSet.Stub<QURLItem> implements TextFea
   }
 
   private double idf(int df) {
-    return df == 0 ? 0 : Math.log((collectionSize - df + 0.5) / (df + 0.5));
+    return df == 0 ? 0 : Math.log((double) collectionSize / df);
   }
 }
