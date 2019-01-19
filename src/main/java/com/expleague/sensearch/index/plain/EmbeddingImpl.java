@@ -1,5 +1,7 @@
 package com.expleague.sensearch.index.plain;
 
+import static com.expleague.sensearch.donkey.plain.EmbeddingBuilder.TUPLE_SIZE;
+
 import com.expleague.commons.math.vectors.Vec;
 import com.expleague.commons.math.vectors.VecTools;
 import com.expleague.commons.math.vectors.impl.vectors.ArrayVec;
@@ -12,23 +14,25 @@ import com.expleague.sensearch.index.Embedding;
 import com.google.common.primitives.Longs;
 import gnu.trove.list.TLongList;
 import gnu.trove.list.array.TLongArrayList;
-import org.fusesource.leveldbjni.JniDBFactory;
-import org.iq80.leveldb.DB;
-import org.iq80.leveldb.DBIterator;
-import org.iq80.leveldb.Options;
-
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.nio.file.Path;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.function.BiFunction;
 import java.util.function.LongPredicate;
 import java.util.function.ToLongFunction;
 import java.util.stream.LongStream;
-
-import static com.expleague.sensearch.donkey.plain.EmbeddingBuilder.TUPLE_SIZE;
+import org.fusesource.leveldbjni.JniDBFactory;
+import org.iq80.leveldb.DB;
+import org.iq80.leveldb.DBIterator;
+import org.iq80.leveldb.Options;
 
 public class EmbeddingImpl implements Embedding {
   private static final long CACHE_SIZE = 16 * (1 << 20);
@@ -44,11 +48,11 @@ public class EmbeddingImpl implements Embedding {
   public EmbeddingImpl(Path embeddingPath) throws IOException {
     vecDB =
             JniDBFactory.factory.open(
-                    embeddingPath.resolve(EmbeddingBuilder.VECS_ROOT).toFile(), DB_OPTIONS);
+                embeddingPath.resolve(PlainIndexBuilder.VECS_ROOT).toFile(), DB_OPTIONS);
 
     tablesDB =
             JniDBFactory.factory.open(
-                    embeddingPath.resolve(EmbeddingBuilder.LSH_ROOT).toFile(), DB_OPTIONS);
+                embeddingPath.resolve(PlainIndexBuilder.LSH_ROOT).toFile(), DB_OPTIONS);
 
     List<Vec> randVecs = new ArrayList<>();
     try (Reader input =
@@ -105,9 +109,19 @@ public class EmbeddingImpl implements Embedding {
   public Vec vec(long id) {
     byte[] bytes = vecDB.get(Longs.toByteArray(id));
     if (bytes != null) {
-      return ByteTools.toVec(bytes);
+      List<Vec> vecs = ByteTools.toVecs(bytes);
+      return vecs.size() == 0 ? null : vecs.get(0);
     }
     return null;
+  }
+
+  @Override
+  public List<Vec> allVecs(long id) {
+    byte[] bytes = vecDB.get(Longs.toByteArray(id));
+    if (bytes != null) {
+      return ByteTools.toVecs(bytes);
+    }
+    return Collections.emptyList();
   }
 
   private static void nearestIndexes(TLongList nearestIndexes, long index, int pos, int remaining) {

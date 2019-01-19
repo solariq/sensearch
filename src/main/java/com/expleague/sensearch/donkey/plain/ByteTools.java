@@ -5,6 +5,9 @@ import com.expleague.commons.math.vectors.impl.vectors.ArrayVec;
 import java.nio.ByteBuffer;
 import java.nio.DoubleBuffer;
 import java.nio.LongBuffer;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 public final class ByteTools {
@@ -53,5 +56,31 @@ public final class ByteTools {
     long[] longs = new long[longBuf.remaining()];
     longBuf.get(longs);
     return longs;
+  }
+
+  public static List<Vec> toVecs(byte[] bytes) {
+    DoubleBuffer doubleBuf = ByteBuffer.wrap(bytes).asDoubleBuffer();
+    double[] doubles = new double[doubleBuf.remaining()];
+    doubleBuf.get(doubles);
+
+    if (doubles.length == 0) {
+      return Collections.emptyList();
+    }
+    if (doubles.length == PlainIndexBuilder.DEFAULT_VEC_SIZE) {
+      return Collections.singletonList(new ArrayVec(doubles));
+    }
+
+    if (doubles.length % PlainIndexBuilder.DEFAULT_VEC_SIZE != 0) {
+      throw new IllegalArgumentException(
+          String.format("Invalid buffer size ([%d])", doubles.length));
+    }
+
+    List<Vec> result = new ArrayList<>();
+    for (int i = 0; i < doubles.length; i += PlainIndexBuilder.DEFAULT_VEC_SIZE) {
+      result.add(
+          new ArrayVec(Arrays.copyOfRange(doubles, i, i + PlainIndexBuilder.DEFAULT_VEC_SIZE)));
+    }
+
+    return result;
   }
 }

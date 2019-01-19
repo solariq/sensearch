@@ -10,5 +10,5 @@
 
   "pathToMetrics": "./resources/Metrics",
   "buildIndexFlag": "true",
-  "trainEmbeddingFlag": "true"
+  "trainEmbeddingFlag": "false"
 }

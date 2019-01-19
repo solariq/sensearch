@@ -51,7 +51,9 @@ public class PlainIndexBuilder implements IndexBuilder {
   public static final String TERM_ROOT = "term";
   public static final String EMBEDDING_ROOT = "embedding";
   public static final String LSH_METRIC_ROOT = "lsh_metric";
+  public static final String LSH_ROOT = "lsh";
   public static final String TEMP_EMBEDDING_ROOT = "temp_embedding";
+  public static final String VECS_ROOT = "vecs";
 
   public static final String SUGGEST_UNIGRAM_ROOT = "suggest/unigram_coeff";
   public static final String SUGGEST_MULTIGRAMS_ROOT = "suggest/multigram_freq_norm";
@@ -83,6 +85,12 @@ public class PlainIndexBuilder implements IndexBuilder {
       new Options()
           .cacheSize(DEFAULT_CACHE_SIZE)
           .blockRestartInterval(PLAIN_TERM_BLOCK_SIZE)
+          .createIfMissing(true)
+          .errorIfExists(true)
+          .compressionType(CompressionType.SNAPPY);
+
+  private static final Options EMBEDDING_DB_OPTIONS =
+      new Options()
           .createIfMissing(true)
           .errorIfExists(true)
           .compressionType(CompressionType.SNAPPY);
@@ -226,7 +234,16 @@ public class PlainIndexBuilder implements IndexBuilder {
                 JniDBFactory.factory.open(
                     indexRoot.resolve(TERM_STATISTICS_ROOT).toFile(), STATS_DB_OPTIONS));
         final EmbeddingBuilder embeddingBuilder =
-            new EmbeddingBuilder(indexRoot.resolve(EMBEDDING_ROOT), jmllEmbedding, tokenizer,
+            new EmbeddingBuilder(
+                JniDBFactory.factory.open(
+                    indexRoot.resolve(EMBEDDING_ROOT).resolve(VECS_ROOT).toFile(),
+                    EMBEDDING_DB_OPTIONS),
+                JniDBFactory.factory.open(
+                    indexRoot.resolve(EMBEDDING_ROOT).resolve(LSH_ROOT).toFile(),
+                    EMBEDDING_DB_OPTIONS),
+                indexRoot.resolve(EMBEDDING_ROOT),
+                jmllEmbedding,
+                tokenizer,
                 idGenerator);
         final DB suggest_unigram_DB =
             JniDBFactory.factory.open(

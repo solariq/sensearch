@@ -23,31 +23,19 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Random;
 import java.util.function.ToLongFunction;
-import org.fusesource.leveldbjni.JniDBFactory;
-import org.iq80.leveldb.CompressionType;
 import org.iq80.leveldb.DB;
-import org.iq80.leveldb.Options;
 import org.iq80.leveldb.WriteBatch;
 import org.iq80.leveldb.WriteOptions;
 
 public class EmbeddingBuilder implements AutoCloseable {
-
-  public static final String VECS_ROOT = "vecs";
-  public static final String LSH_ROOT = "lsh";
   public static final String RAND_VECS = "rand";
   public static final int TABLES_NUMBER = 10;
   public static final int TUPLE_SIZE = 20;
   private static final int MAX_BATCH_SIZE = 1 << 14;
   private static final double MIN_COORD_VAL = -1.;
   private static final double MAX_COORD_VAL = 1.;
-
-  private static final Options DB_OPTIONS =
-      new Options()
-          .createIfMissing(true)
-          .errorIfExists(true)
-          .compressionType(CompressionType.SNAPPY);
-
   private static final WriteOptions WRITE_OPTIONS = new WriteOptions().sync(true);
+
   private final Tokenizer tokenizer;
   private final Embedding<CharSeq> jmllEmbedding;
   private final IdGenerator idGenerator;
@@ -62,17 +50,18 @@ public class EmbeddingBuilder implements AutoCloseable {
   private ToLongFunction<Vec>[] hashFuncs;
 
   public EmbeddingBuilder(
+      DB vecDb,
+      DB tablesD,
       Path embeddingPath,
       Embedding<CharSeq> jmllEmbedding,
       Tokenizer tokenizer,
-      IdGenerator idGenerator)
-      throws IOException {
+      IdGenerator idGenerator) {
     this.jmllEmbedding = jmllEmbedding;
     this.tokenizer = tokenizer;
     this.idGenerator = idGenerator;
 
-    vecDB = JniDBFactory.factory.open(embeddingPath.resolve(VECS_ROOT).toFile(), DB_OPTIONS);
-    tablesDB = JniDBFactory.factory.open(embeddingPath.resolve(LSH_ROOT).toFile(), DB_OPTIONS);
+    this.vecDB = vecDb;
+    this.tablesDB = tablesD;
 
     hashFuncs = new ToLongFunction[TABLES_NUMBER];
 
@@ -189,7 +178,7 @@ public class EmbeddingBuilder implements AutoCloseable {
               curPageVecs.add(vec);
             });
 
-    tokenizer.toWords(text).forEach(word -> {
+    tokenizer.toWords(text).map(word -> word.toString().toLowerCase()).forEach(word -> {
       long id = idGenerator.termId(word);
 
       Vec vec = jmllEmbedding.apply(CharSeq.compact(word));
