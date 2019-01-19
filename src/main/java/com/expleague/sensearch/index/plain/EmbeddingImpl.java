@@ -22,10 +22,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.BiFunction;
 import java.util.function.LongPredicate;
 import java.util.function.ToLongFunction;
@@ -133,11 +130,35 @@ public class EmbeddingImpl implements Embedding {
       return LongStream.of(order);
     }
     final double[] dist = LongStream.of(order)
-            .mapToObj(this::vec)
-            .mapToDouble(v -> -VecTools.cosine(mainVec, v))
-            .toArray();
+        .mapToObj(this::vec)
+        .filter(Objects::nonNull)
+        .mapToDouble(v -> -VecTools.multiply(mainVec, v))
+        .toArray();
     ArrayTools.parallelSort(dist, order);
     return Arrays.stream(order, 0, numberOfNeighbors);
+  }
+
+  @Override
+  public LongStream nearest(Vec mainVec, double maxDistance, LongPredicate predicate) {
+    final double queryNorm = VecTools.norm(mainVec);
+    if (queryNorm == 0)
+      return LongStream.empty();
+    final long[] order = LongStream.of(allIds).filter(predicate).toArray();
+    final double[] dist = LongStream.of(order)
+        .mapToObj(this::vec)
+        .filter(Objects::nonNull)
+        .mapToDouble(v -> distance(mainVec, queryNorm, v))
+        .toArray();
+    ArrayTools.parallelSort(dist, order);
+    int end = Arrays.binarySearch(dist, maxDistance);
+    if (end < 0)
+      end = -end - 1;
+    return Arrays.stream(order, 0, end);
+  }
+
+  private double distance(Vec mainVec, double queryNorm, Vec v) {
+    double norm = VecTools.norm(v);
+    return norm == 0 ? Double.POSITIVE_INFINITY : (1 - VecTools.multiply(mainVec, v)/ norm / queryNorm) / 2;
   }
 
   @Override

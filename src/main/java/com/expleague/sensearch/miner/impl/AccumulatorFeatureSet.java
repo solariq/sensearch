@@ -20,7 +20,7 @@ public class AccumulatorFeatureSet extends FeatureSet.Stub<QURLItem> {
       new BM25FeatureSet(),
       new HHFeatureSet(),
       new LinkFeatureSet(),
-      new CosinusDistanceFeatureSet(),
+      new CosDistanceFeatureSet(),
       new DocBasedFeatureSet(),
       new QuotationFeatureSet()
   );

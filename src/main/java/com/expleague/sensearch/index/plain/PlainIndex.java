@@ -296,21 +296,11 @@ public class PlainIndex implements Index {
 
   @Override
   public Stream<Page> fetchDocuments(Query query) {
-    final Vec queryVec = vecByTerms(query.terms());
-
-    List<Page> pages =
-        filter
-            .filtrate(queryVec, FILTERED_DOC_NUMBER, PlainIndex::isPageId)
-            .mapToObj(id -> PlainPage.create(id, this))
-            .collect(Collectors.toList());
-
-    double result =
-        filterMetric.calc(
-            query.terms().stream().map(Term::text).collect(Collectors.joining(" ")),
-            pages.stream().map(Page::uri).collect(Collectors.toSet()));
-
-    LOG.info("FilterMetric: " + result);
-    return pages.stream();
+    final Vec mainVec = vecByTerms(query.terms());
+    return filter
+        .filtrate(mainVec, 0.5, PlainIndex::isPageId)
+        .limit(FILTERED_DOC_NUMBER)
+        .mapToObj(id -> PlainPage.create(id, this));
   }
 
   @Override

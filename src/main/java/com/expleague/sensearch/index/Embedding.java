@@ -11,6 +11,7 @@ public interface Embedding {
   Vec vec(long id);
 
   LongStream nearest(Vec mainVec, int numberOfNeighbors, LongPredicate predicate);
+  LongStream nearest(Vec mainVec, double maxDistance, LongPredicate predicate);
 
   int dim();
 }
