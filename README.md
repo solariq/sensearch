@@ -1,5 +1,7 @@
 ## Лёгкий поиск
 
+[Тект статьи][5]
+
 [![Build Status](https://travis-ci.org/solariq/sensearch.svg?branch=master)](https://travis-ci.org/solariq/sensearch)
 
 У нас есть [GDrive][1] где можно найти архивы со статьями из Википедии,
@@ -125,3 +127,4 @@ __Инструкция по применению__
 [2]: https://tech.yandex.ru/mystem/
 [3]: http://nodejs.org
 [4]: https://github.com/solariq/sensearch/blob/master/src/main/java/com/expleague/sensearch/CrawlWordstatData.java
+[5]: https://www.papeeria.com/join?token_id=ed389d64-b87c-40ba-8c6b-0cee02d2c66d&retry=3
