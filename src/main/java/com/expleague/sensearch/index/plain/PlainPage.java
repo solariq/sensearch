@@ -218,7 +218,7 @@ public class PlainPage implements IndexedPage {
 
   @Override
   public Stream<CharSequence> sentences() {
-    return index.sentences(content());
+    return index.sentences(fullContent());
   }
 
   @Override

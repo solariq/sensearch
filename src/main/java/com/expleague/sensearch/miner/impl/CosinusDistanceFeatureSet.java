@@ -21,6 +21,11 @@ public class CosinusDistanceFeatureSet extends FeatureSet.Stub<QURLItem> {
   private Vec titleVec;
   private List<Vec> passages = new ArrayList<>();
 
+  @Override
+  public void accept(QURLItem item) {
+    passages.clear();
+  }
+
   public void withPassage(Vec passage) {
     passages.add(passage);
   }

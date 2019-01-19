@@ -20,7 +20,9 @@ public class AccumulatorFeatureSet extends FeatureSet.Stub<QURLItem> {
       new BM25FeatureSet(),
       new HHFeatureSet(),
       new LinkFeatureSet(),
-      new CosinusDistanceFeatureSet()
+      new CosinusDistanceFeatureSet(),
+      new DocBasedFeatureSet(),
+      new QuotationFeatureSet()
   );
 
   public AccumulatorFeatureSet(Index index) {
@@ -67,6 +69,13 @@ public class AccumulatorFeatureSet extends FeatureSet.Stub<QURLItem> {
               .filter(Objects::nonNull)
               .forEach(fs -> fs.withSegment(Segment.BODY, term));
         });
+        index.parse(page.fullContent()).forEach(term -> {
+          features.components()
+              .map(Functions.cast(DocBasedFeatureSet.class))
+              .filter(Objects::nonNull)
+              .forEach(fs -> fs.withTerm(term));
+        });
+
       }
     }
     { //Link Processing
@@ -86,6 +95,14 @@ public class AccumulatorFeatureSet extends FeatureSet.Stub<QURLItem> {
             .map(Functions.cast(CosinusDistanceFeatureSet.class))
             .filter(Objects::nonNull)
             .forEach(fs -> fs.withPassage(passageVec));
+      });
+    }
+    { //Quotation
+      item.pageCache().sentences().forEach(sentence -> {
+        features.components()
+            .map(Functions.cast(QuotationFeatureSet.class))
+            .filter(Objects::nonNull)
+            .forEach(fs -> fs.withPassage(index.parse(sentence).collect(Collectors.toList())));
       });
     }
   }
