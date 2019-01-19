@@ -10,124 +10,182 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.TreeMap;
+import java.util.TreeSet;
 
 import com.expleague.sensearch.Config;
 import com.expleague.sensearch.ConfigImpl;
 import com.expleague.sensearch.Page;
+import com.expleague.sensearch.core.PartOfSpeech;
 import com.expleague.sensearch.core.Term;
 import com.expleague.sensearch.index.Index;
 import com.expleague.sensearch.index.plain.PlainIndex;
-import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-public class HHPhrases {
-	
-	public double idf(Term t) {
-		int df = t.documentFreq();
-		return Math.log((index.size() - df + 0.5) / (df + 0.5));
+class Phrase {
+	Term[] content;
+	double hhFeature;
+	double coocSum;
+
+	public Phrase(Term[] content,
+			double hhFeature,
+			double coocSum) {
+		this.content = content;
+		this.hhFeature = hhFeature;
+		this.coocSum = coocSum;
 	}
 	
-	public final Map<List<Term>, Double> map = new HashMap<>();
-	Term[] terms;
-	
+	public Phrase(Term[] content) {
+		this.content = content;
+	}
+}
+
+public class HHPhrases {
+
+	public double idf(Term t) {
+		int df = t.documentFreq();
+		return Math.pow(1 / (df + 0.5), 0.5);
+	}
+
+	private final Map<List<Term>, Double> map = new HashMap<>();
+	private Term[] terms;
+
 	final static double z = 0.75;
 	
-	public void countSums(Map<List<Term>, Double> map, Term[] terms) {
+	public boolean termToSkip(Term t) {
+		/*
+		return t.partOfSpeech() == PartOfSpeech.PR
+				|| t.partOfSpeech() == PartOfSpeech.CONJ
+				|| t.partOfSpeech() == PartOfSpeech.PART;
+		*/
+		return false;
+	}
+	
+	public void countSums(Map<List<Term>, Double> map, int windowSize) {
 		Set<Term> nearestForPosition = new HashSet<>();
 		for (int i = 0; i < terms.length; i++) {
 			Term t = terms[i];
+			if (termToSkip(t)) {
+				continue;
+			}
 			nearestForPosition.clear();
-			for (int j = i - 1; j >= 0; j--) {
+			for (int j = i - 1; j >= 0 && i - j < windowSize; j--) {
 				if (nearestForPosition.add(terms[j])) {
 					Term t1 = terms[j];
+					if (termToSkip(t1))
+						continue;
 					List<Term> key = Arrays.asList(terms[i], terms[j]);
 					map.putIfAbsent(key, 0.0);
 					double oldval = map.get(key);
-					oldval += idf(t1) / Math.pow(Math.abs(i - j), z) * 
+					oldval += 1 / Math.pow(Math.abs(i - j), z) * 
 							(t.equals(t1) ? 0.25 : 1.0);
 					map.put(key, oldval);
 				}
 			}
-			
+
 			nearestForPosition.clear();
-			for (int j = i + 1; j < terms.length; j++) {
+			for (int j = i + 1; j < terms.length && j - i < windowSize; j++) {
 				if (nearestForPosition.add(terms[j])) {
 					Term t1 = terms[j];
+					if (termToSkip(t1))
+						continue;
 					List<Term> key = Arrays.asList(terms[i], terms[j]);
 					map.putIfAbsent(key, 0.0);
 					double oldval = map.get(key);
-					oldval += idf(t1) / Math.pow(Math.abs(i - j), z) * 
+					oldval += 1 / Math.pow(Math.abs(i - j), z) * 
 							(t.equals(t1) ? 0.25 : 1.0);
 					map.put(key, oldval);
 				}
 			}
 		}
 	}
-	
-	public double qualifiedPhrase(Term[] phrase) {
-		double res = 0;
+
+	public void qualifiedPhrase(Phrase p) {
+		Term[] phrase = p.content;
+		double res = 0, cooc = 0;
 		for (Term t : phrase) {
 			for (Term t1 : phrase) {
 				List<Term> key = Arrays.asList(t, t1);
-				res += map.containsKey(key) ? map.get(key) * idf(t) : 0;
+				res += map.containsKey(key) ? map.get(key) * idf(t) * idf(t1): 0;
+				cooc += map.containsKey(key) ? map.get(key) : 0;
 			}
 		}
-		return Math.log(1 + res);
+		p.coocSum = cooc;
+		p.hhFeature = Math.log(1 + res);
 	}
-	
-	int incCounter(int[] cnt, int base) {
-		int add = 1;
-		for (int i = 0; i < cnt.length; i++) {
-			cnt[i] += add;
-			add = 0;
-			if (cnt[i] == base) {
-				cnt[i] = 0;
-				add = 1;
+
+	void incCounter(int[] cnt, int windowSize, int maxVal) {
+		for (int j = cnt.length - 1; j >= 0; j--) {
+			if (cnt[j] - cnt[0] < windowSize + j - cnt.length && cnt[j] < maxVal + j - cnt.length + 1) {
+				cnt[j]++;
+				for (int i = j + 1; i < cnt.length; i++) {
+					cnt[i] = cnt[j] + i - j;
+				}
+				return;
 			}
 		}
-		return add;
 	}
-	
-	public Map<Double, Term[]> bestNGrams(int n, int limit) {
+
+	public Set<Phrase> bestNGrams(int n, int windowSize, int limit) {
 		int[] idxs = new int[n];
-		Map<Double, Term[]> res = new TreeMap<>();
-		while (incCounter(idxs, terms.length) == 0) {
+		for (int i = 0; i < n; i++)
+			idxs[i] = i;
+
+		Set<Phrase> res = new TreeSet<>((p1, p2) -> Double.compare(p1.hhFeature, p2.hhFeature));
+		while (idxs[0] < terms.length - n) {
 			Term[] val = new Term[n];
 			for (int i = 0; i < n; i++) {
 				val[i] = terms[idxs[i]];
 			}
-			res.put(qualifiedPhrase(val), val);
-			res.keySet().removeIf(d -> res.size() > limit);
+			incCounter(idxs, windowSize, terms.length - 1);
+			Phrase p = new Phrase(val);
+			qualifiedPhrase(p);
+			res.add(p);
+			res.removeIf(d -> res.size() > limit);
 		}
 		return res;
 	}
-	
+
 	Index index;
-	public void processPhrases() throws JsonParseException, JsonMappingException, IOException, URISyntaxException {
+
+	public HHPhrases() throws IOException {
 		ObjectMapper objectMapper = new ObjectMapper();
-	    Config config = objectMapper.readValue(Paths.get("./config.json").toFile(), ConfigImpl.class);
+		Config config = objectMapper.readValue(Paths.get("./config.json").toFile(), ConfigImpl.class);
 
 		index = new PlainIndex(config);
-    	Page p = index.page(new URI("https://ru.wikipedia.org/wiki/Москва"));
-    	CharSequence content = p.content();
-    	System.out.println("Content length " + content.length());
+	}
+
+	public void processPhrases(String pageName) {
+
+		Page p = null;
+		try {
+			p = index.page(new URI(pageName));
+		} catch (URISyntaxException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		CharSequence content = p.fullContent();
+		System.out.println("Content length " + content.length());
 		terms = index.parse(content)
 				//.map(t -> t.lemma())
 				.toArray(Term[]::new);
-		
-		countSums(map, terms);
-		bestNGrams(2, 20).forEach((d, tr) -> {
-			for (Term t : tr) {
+		System.out.println("terms length: " + terms.length);
+		countSums(map, 20);
+		bestNGrams(2, 10, 20).forEach(phrase -> {
+			for (Term t : phrase.content) {
 				System.out.print(t.text() + " ");
 			}
-			System.out.println(d);
+			System.out.format("%.3f %.3f\n", phrase.hhFeature, phrase.coocSum);
 		});
 	}
-	
+
 	public static void main(String[] args) throws IOException, URISyntaxException {
+		List<String> pageURLs = Arrays.asList(
+				"https://ru.wikipedia.org/wiki/Москва",
+				"https://ru.wikipedia.org/wiki/Миронов,_Андрей_Александрович");
 		HHPhrases phrases = new HHPhrases();
-		phrases.processPhrases();
+		pageURLs.forEach(u -> {
+			System.out.println(u);
+			phrases.processPhrases(u);
+		});
 	}
 }
