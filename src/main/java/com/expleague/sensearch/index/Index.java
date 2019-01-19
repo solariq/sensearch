@@ -2,7 +2,6 @@ package com.expleague.sensearch.index;
 
 import com.expleague.commons.math.vectors.Vec;
 import com.expleague.sensearch.Page;
-import com.expleague.sensearch.Page.Link;
 import com.expleague.sensearch.core.Term;
 import com.expleague.sensearch.query.Query;
 import com.expleague.sensearch.web.suggest.SuggestInformationLoader;
@@ -13,6 +12,8 @@ import org.jetbrains.annotations.Nullable;
 
 public interface Index {
   Stream<Page> fetchDocuments(Query query);
+
+  Stream<Page> allDocuments();
 
   @Nullable
   Term term(CharSequence seq);

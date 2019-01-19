@@ -23,6 +23,7 @@ import com.expleague.sensearch.protobuf.index.IndexUnits.TermStatistics;
 import com.expleague.sensearch.protobuf.index.IndexUnits.TermStatistics.TermFrequency;
 import com.expleague.sensearch.query.Query;
 import com.expleague.sensearch.web.suggest.SuggestInformationLoader;
+import com.google.common.collect.Streams;
 import com.google.common.primitives.Longs;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -55,7 +56,7 @@ import org.iq80.leveldb.ReadOptions;
 @Singleton
 public class PlainIndex implements Index {
 
-  public static final int VERSION = 9;
+  public static final int VERSION = 10;
 
   private static final long DEFAULT_CACHE_SIZE = 128 * (1 << 20); // 128 MB
 
@@ -302,6 +303,15 @@ public class PlainIndex implements Index {
         .limit(FILTERED_DOC_NUMBER)
         .mapToObj(id -> PlainPage.create(id, this));
   }
+
+  @Override
+  public Stream<Page> allDocuments() {
+    DBIterator iterator = pageBase.iterator();
+    iterator.seekToFirst();
+    return Streams.stream(iterator)
+        .map(entry -> PlainPage.create(Longs.fromByteArray(entry.getKey()), this));
+  }
+
 
   @Override
   public Term term(CharSequence seq) {

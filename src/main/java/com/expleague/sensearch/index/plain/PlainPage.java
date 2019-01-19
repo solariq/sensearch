@@ -130,6 +130,7 @@ public class PlainPage implements IndexedPage {
   }
 
   @Override
+  // TODO FIX IT
   public long parentId() {
     if (protoPage.hasParentId()) {
       return protoPage.getParentId();
@@ -141,6 +142,9 @@ public class PlainPage implements IndexedPage {
   public LongStream subpagesIds() {
     if (protoPage.getSubpagesIdsCount() == 0) {
       return LongStream.empty();
+    }
+    if (protoPage.getSubpagesIdsList().contains(id)) {
+      System.out.println(id);
     }
 
     return protoPage.getSubpagesIdsList().stream().mapToLong(Number::longValue);
