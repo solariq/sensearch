@@ -9,17 +9,18 @@ import org.jetbrains.annotations.Nullable;
 
 public interface Page {
 
+  enum SegmentType {
+    TITLE, //All titles
+    BODY,  //Full body
+    SUB_TITLE,
+    SUB_BODY
+  }
+
   @NotNull
   URI uri();
 
   @NotNull
-  CharSequence title();
-
-  @NotNull
-  CharSequence fullContent();
-
-  @NotNull
-  CharSequence content();
+  CharSequence content(SegmentType... types);
 
   @NotNull
   List<CharSequence> categories();
@@ -35,7 +36,7 @@ public interface Page {
 
   Stream<Page> subpages();
 
-  Stream<CharSequence> sentences();
+  Stream<CharSequence> sentences(SegmentType type);
   Stream<Term> parse(CharSequence sequence);
 
   interface Link {

@@ -1,6 +1,7 @@
 package com.expleague.sensearch.metrics;
 
 import com.expleague.sensearch.Page;
+import com.expleague.sensearch.Page.SegmentType;
 import com.expleague.sensearch.SenSeArch.ResultItem;
 import com.expleague.sensearch.core.Annotations;
 import java.io.BufferedWriter;
@@ -29,7 +30,7 @@ public class Metric {
 
     List<String> ourTitles = new ArrayList<>();
     for (Page r : resultItems) {
-      ourTitles.add(r.title().toString());
+      ourTitles.add(r.content(SegmentType.SUB_TITLE).toString());
     }
     Path tmpPath = pathToMetrics.resolve(query);
     List<ResultItem> googleResults;

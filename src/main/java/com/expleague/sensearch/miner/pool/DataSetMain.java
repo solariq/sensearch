@@ -7,6 +7,7 @@ import com.expleague.ml.meta.DataSetMeta;
 import com.expleague.ml.meta.impl.JsonDataSetMeta;
 import com.expleague.sensearch.AppModule;
 import com.expleague.sensearch.Page;
+import com.expleague.sensearch.Page.SegmentType;
 import com.expleague.sensearch.SenSeArch.ResultItem;
 import com.expleague.sensearch.core.impl.ResultItemImpl;
 import com.expleague.sensearch.index.Index;
@@ -66,10 +67,10 @@ public class DataSetMain {
           }
 
           Stream<Page> sensearchResult = index.fetchDocuments(query)
-              .filter(page -> !uniqQURL.contains(page.title().toString())).limit(100);
+              .filter(page -> !uniqQURL.contains(page.content(SegmentType.SUB_TITLE).toString())).limit(100);
           sensearchResult.forEach(page -> {
-            if (!uniqQURL.contains(page.title().toString())) {
-              uniqQURL.add(page.title().toString());
+            if (!uniqQURL.contains(page.content(SegmentType.SUB_TITLE).toString())) {
+              uniqQURL.add(page.content(SegmentType.SUB_TITLE).toString());
               poolBuilder.accept(new QURLItem(page, query));
               poolBuilder.advance();
             }

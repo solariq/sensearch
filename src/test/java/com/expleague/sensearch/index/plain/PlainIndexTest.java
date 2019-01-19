@@ -8,6 +8,7 @@ import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 
 import com.expleague.sensearch.Page;
+import com.expleague.sensearch.Page.SegmentType;
 import com.expleague.sensearch.core.PartOfSpeech;
 import com.expleague.sensearch.core.Term;
 import com.expleague.sensearch.utils.IndexBasedTestCase;
@@ -167,7 +168,7 @@ public class PlainIndexTest extends IndexBasedTestCase {
     Page page = index().page(uri);
 
     assertEquals(content, page.content());
-    assertEquals(content, page.fullContent());
+    assertEquals(content, page.content(SegmentType.BODY));
   }
 
   @Ignore("Wiki dump is not formatted correctly")
@@ -187,7 +188,7 @@ public class PlainIndexTest extends IndexBasedTestCase {
     Page page = index().page(uri);
 
     assertEquals(content, page.content());
-    assertEquals(fullContent, page.fullContent());
+    assertEquals(fullContent, page.content(SegmentType.BODY));
   }
 
   @Test

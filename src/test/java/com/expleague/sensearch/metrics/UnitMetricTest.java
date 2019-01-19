@@ -238,13 +238,8 @@ public class UnitMetricTest {
     }
 
     @Override
-    public CharSequence title() {
+    public CharSequence content(SegmentType... types) {
       return title;
-    }
-
-    @Override
-    public CharSequence content() {
-      return null;
     }
 
     @Override
@@ -273,7 +268,7 @@ public class UnitMetricTest {
     }
 
     @Override
-    public Stream<CharSequence> sentences() {
+    public Stream<CharSequence> sentences(SegmentType type) {
       return null;
     }
 
@@ -282,9 +277,5 @@ public class UnitMetricTest {
       return null;
     }
 
-    @Override
-    public CharSequence fullContent() {
-      return null;
-    }
   }
 }

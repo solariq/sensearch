@@ -2,6 +2,7 @@ package com.expleague.sensearch.snippet;
 
 import com.expleague.commons.seq.CharSeqTools;
 import com.expleague.sensearch.Page;
+import com.expleague.sensearch.Page.SegmentType;
 import com.expleague.sensearch.core.PartOfSpeech;
 import com.expleague.sensearch.core.Term;
 import com.expleague.sensearch.query.Query;
@@ -41,7 +42,7 @@ public class SnippetsCreator {
 
 
   public Snippet getSnippet(Page document, Query query) {
-    CharSequence title = document.title();
+    CharSequence title = document.content(SegmentType.SUB_TITLE);
     CharSequence content = document.content();
 /*
     document
@@ -49,7 +50,7 @@ public class SnippetsCreator {
         .forEach(System.out::println);
 */
     List<Passage> passages = document
-        .sentences()
+        .sentences(SegmentType.SUB_BODY)
         .map(x -> new Passage(x, document.parse(x)))
         .collect(Collectors.toList());
 

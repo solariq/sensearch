@@ -5,6 +5,7 @@ import com.expleague.ml.data.tools.FeatureSet;
 import com.expleague.ml.meta.FeatureMeta;
 import com.expleague.ml.meta.FeatureMeta.ValueType;
 import com.expleague.sensearch.Page;
+import com.expleague.sensearch.Page.SegmentType;
 import com.expleague.sensearch.core.PartOfSpeech;
 import com.expleague.sensearch.core.Term;
 
@@ -38,9 +39,9 @@ public class DocBasedFeatureSet extends FeatureSet.Stub<QURLItem> {
 
   @Override
   public Vec advance() {
-    long sentences = page.sentences().count();
+    long sentences = page.sentences(SegmentType.BODY).count();
     set(PASSAGES_COUNT, (double) sentences);
-    set(SENTENCE_LEVEL, sentences == 0 ? 0.0 : (double) page.sentences().filter(s -> !isInterrogative(s)).count() / sentences);
+    set(SENTENCE_LEVEL, sentences == 0 ? 0.0 : (double) page.sentences(SegmentType.BODY).filter(s -> !isInterrogative(s)).count() / sentences);
     set(NOUN_COUNT, terms == 0 ? 0 : (double) nouns / terms);
     return super.advance();
   }

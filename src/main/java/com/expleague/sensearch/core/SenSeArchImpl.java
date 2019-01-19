@@ -1,6 +1,7 @@
 package com.expleague.sensearch.core;
 
 import com.expleague.commons.util.Pair;
+import com.expleague.sensearch.Page.SegmentType;
 import com.expleague.sensearch.SenSeArch;
 import com.expleague.sensearch.core.impl.ResultItemImpl;
 import com.expleague.sensearch.core.impl.ResultPageImpl;
@@ -96,7 +97,7 @@ public class SenSeArchImpl implements SenSeArch {
       results[i] =
           new ResultItemImpl(
               pages[i].uri(),
-              pages[i].title(),
+              pages[i].content(SegmentType.SUB_TITLE),
               Arrays.asList(Pair.create(snippets[i].getContent(), snippets[i].getSelection())),
               0);
     }

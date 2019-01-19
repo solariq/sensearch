@@ -5,6 +5,7 @@ import com.expleague.commons.math.vectors.Vec;
 import com.expleague.ml.data.tools.FeatureSet;
 import com.expleague.ml.meta.FeatureMeta;
 import com.expleague.sensearch.Page;
+import com.expleague.sensearch.Page.SegmentType;
 import com.expleague.sensearch.core.Term;
 import com.expleague.sensearch.index.Index;
 import com.expleague.sensearch.miner.impl.TextFeatureSet.Segment;
@@ -35,8 +36,8 @@ public class AccumulatorFeatureSet extends FeatureSet.Stub<QURLItem> {
     final Page page = item.pageCache();
     { // Text features processing
 
-      final int titleLength = (int) index.parse(page.title()).count();
-      final int contentLength = (int) index.parse(page.fullContent()).count();
+      final int titleLength = (int) index.parse(page.content(SegmentType.SUB_TITLE)).count();
+      final int contentLength = (int) index.parse(page.content(SegmentType.BODY)).count();
       final int totalLength = titleLength + contentLength;
 
       features.components()
@@ -50,8 +51,8 @@ public class AccumulatorFeatureSet extends FeatureSet.Stub<QURLItem> {
         //features.components().map(Functions.cast(TextFeatureSet.class)).filter(Objects::nonNull)
         //    .forEach(fs -> fs.withSegment(TextFeatureSet.Segment.TITLE, titleLength));
         TermConsumer termConsumer = new TermConsumer();
-        index.parse(page.title()).forEach(termConsumer);
-        index.parse(page.title()).forEach(term -> {
+        index.parse(page.content(SegmentType.SUB_TITLE)).forEach(termConsumer);
+        index.parse(page.content(SegmentType.SUB_TITLE)).forEach(term -> {
           features.components()
               .map(Functions.cast(TextFeatureSet.class))
               .filter(Objects::nonNull)
@@ -62,14 +63,14 @@ public class AccumulatorFeatureSet extends FeatureSet.Stub<QURLItem> {
         //features.components().map(Functions.cast(TextFeatureSet.class)).filter(Objects::nonNull)
         //    .forEach(fs -> fs.withSegment(TextFeatureSet.Segment.BODY, contentLength));
         TermConsumer termConsumer = new TermConsumer();
-        index.parse(page.fullContent()).forEach(termConsumer);
-        index.parse(page.fullContent()).forEach(term -> {
+        index.parse(page.content(SegmentType.BODY)).forEach(termConsumer);
+        index.parse(page.content(SegmentType.BODY)).forEach(term -> {
           features.components()
               .map(Functions.cast(TextFeatureSet.class))
               .filter(Objects::nonNull)
               .forEach(fs -> fs.withSegment(Segment.BODY, term));
         });
-        index.parse(page.fullContent()).forEach(term -> {
+        index.parse(page.content(SegmentType.BODY)).forEach(term -> {
           features.components()
               .map(Functions.cast(DocBasedFeatureSet.class))
               .filter(Objects::nonNull)
@@ -82,14 +83,14 @@ public class AccumulatorFeatureSet extends FeatureSet.Stub<QURLItem> {
     }
     { //Cos-Dist processing
       Vec queryVec = index.vecByTerms(item.queryCache().terms());
-      Vec titleVec = index.vecByTerms(index.parse(item.pageCache().title()).collect(Collectors.toList()));
+      Vec titleVec = index.vecByTerms(index.parse(item.pageCache().content(SegmentType.SUB_TITLE)).collect(Collectors.toList()));
 
       features.components()
           .map(Functions.cast(CosDistanceFeatureSet.class))
           .filter(Objects::nonNull)
           .forEach(fs -> fs.withStats(queryVec, titleVec));
 
-      item.pageCache().sentences().forEach(sent -> {
+      item.pageCache().sentences(SegmentType.BODY).forEach(sent -> {
         Vec passageVec = index.vecByTerms(index.parse(sent).collect(Collectors.toList()));
         features.components()
             .map(Functions.cast(CosDistanceFeatureSet.class))
@@ -98,7 +99,7 @@ public class AccumulatorFeatureSet extends FeatureSet.Stub<QURLItem> {
       });
     }
     { //Quotation
-      item.pageCache().sentences().forEach(sentence -> {
+      item.pageCache().sentences(SegmentType.BODY).forEach(sentence -> {
         features.components()
             .map(Functions.cast(QuotationFeatureSet.class))
             .filter(Objects::nonNull)

@@ -8,6 +8,7 @@ import com.expleague.ml.meta.FeatureMeta;
 import com.expleague.ml.meta.FeatureMeta.ValueType;
 import com.expleague.ml.meta.TargetMeta;
 import com.expleague.sensearch.Page;
+import com.expleague.sensearch.Page.SegmentType;
 import com.expleague.sensearch.SenSeArch.ResultItem;
 import com.expleague.sensearch.core.impl.ResultItemImpl;
 import com.expleague.sensearch.query.Query;
@@ -45,7 +46,7 @@ public class TargetFeatureSet extends FeatureSet.Stub<QURLItem> {
       List<ResultItem> res = Arrays.asList(objectMapper.readValue(reader, ResultItemImpl[].class));
       ResultItem resultItem = res
           .stream()
-          .filter(item -> item.title().equals(page.title()))
+          .filter(item -> item.title().equals(page.content(SegmentType.SUB_TITLE)))
           .findFirst().orElse(null);
       if (resultItem != null) {
         vec = res.indexOf(resultItem) + 1;

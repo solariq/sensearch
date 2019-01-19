@@ -60,12 +60,7 @@ public class SamplesTest extends SensearchTestCase {
                         }
 
                         @Override
-                        public CharSequence title() {
-                          return null;
-                        }
-
-                        @Override
-                        public CharSequence content() {
+                        public CharSequence content(SegmentType... types) {
                           return content;
                         }
 
@@ -85,11 +80,6 @@ public class SamplesTest extends SensearchTestCase {
                         }
 
                         @Override
-                        public CharSequence fullContent() {
-                          return null;
-                        }
-
-                        @Override
                         public Page parent() {
                           return null;
                         }
@@ -100,7 +90,7 @@ public class SamplesTest extends SensearchTestCase {
                         }
 
                         @Override
-                        public Stream<CharSequence> sentences() {
+                        public Stream<CharSequence> sentences(SegmentType type) {
                           return null;
                         }
 

@@ -1,6 +1,5 @@
 package com.expleague.sensearch.index.plain;
 
-import com.expleague.commons.seq.CharSeq;
 import com.expleague.commons.seq.CharSeqTools;
 import com.expleague.sensearch.Page;
 import com.expleague.sensearch.core.Term;
@@ -8,6 +7,7 @@ import com.expleague.sensearch.index.IndexedPage;
 import com.expleague.sensearch.protobuf.index.IndexUnits;
 import com.google.protobuf.InvalidProtocolBufferException;
 import java.net.URI;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -23,6 +23,7 @@ public class PlainPage implements IndexedPage {
   public static final IndexedPage EMPTY_PAGE = new IndexedPage() {
     private final URI DEFAULT_URI = URI.create("https://www.wikipedia.org/");
     private static final String EMPTY_STRING = "";
+
     @Override
     public long id() {
       throw new NotSupportedException("Id is not determined for an EmptyPage");
@@ -44,17 +45,7 @@ public class PlainPage implements IndexedPage {
     }
 
     @Override
-    public CharSequence title() {
-      return EMPTY_STRING;
-    }
-
-    @Override
-    public CharSequence fullContent() {
-      return EMPTY_STRING;
-    }
-
-    @Override
-    public CharSequence content() {
+    public CharSequence content(SegmentType... types) {
       return EMPTY_STRING;
     }
 
@@ -84,7 +75,7 @@ public class PlainPage implements IndexedPage {
     }
 
     @Override
-    public Stream<CharSequence> sentences() {
+    public Stream<CharSequence> sentences(SegmentType t) {
       return Stream.empty();
     }
 
@@ -160,15 +151,34 @@ public class PlainPage implements IndexedPage {
     return uri;
   }
 
-  @Override
-  public CharSequence content() {
-    return protoPage.getContent();
+  private CharSequence content(SegmentType type) {
+    switch (type) {
+      case BODY:
+        return CharSeqTools.concat(content(SegmentType.SUB_BODY), "\n",
+            subpages().map(p -> p.content(SegmentType.BODY)).collect(Collectors.joining("\n")));
+      case TITLE:
+        Page p = this;
+        CharSequence res = "";
+        while (p.parent() != p) {
+          res = CharSeqTools.concat(p.parent().content(SegmentType.SUB_TITLE), "#", res);
+          p = p.parent();
+        }
+        res = CharSeqTools.concat(res, content(SegmentType.SUB_TITLE));
+        return res;
+      case SUB_BODY:
+        return protoPage.getContent();
+      case SUB_TITLE:
+        return protoPage.getTitle();
+      default:
+        return "";
+    }
   }
 
   @Override
-  public CharSequence fullContent() {
-    return CharSeqTools.concat(content(), "\n", subpages().map(Page::fullContent).collect(Collectors.joining("\n")));
+  public CharSequence content(SegmentType... types) {
+    return Arrays.stream(types).map(this::content).collect(Collectors.joining("\n"));
   }
+
 
   @Override
   public List<CharSequence> categories() {
@@ -203,7 +213,7 @@ public class PlainPage implements IndexedPage {
   @Override
   public Page parent() {
     if (protoPage.hasParentId()) {
-      PlainPage.create(protoPage.getParentId(), this.index);
+      return PlainPage.create(protoPage.getParentId(), this.index);
     }
 
     return this;
@@ -217,18 +227,13 @@ public class PlainPage implements IndexedPage {
   }
 
   @Override
-  public Stream<CharSequence> sentences() {
-    return index.sentences(fullContent());
+  public Stream<CharSequence> sentences(SegmentType type) {
+    return index.sentences(content(type));
   }
 
   @Override
   public Stream<Term> parse(CharSequence sequence) {
     return index.parse(sequence);
-  }
-
-  @Override
-  public CharSequence title() {
-    return protoPage.getTitle();
   }
 
 
@@ -300,7 +305,7 @@ public class PlainPage implements IndexedPage {
       if (targetPage == null) {
         return "";
       }
-      return targetPage.title();
+      return targetPage.content(SegmentType.TITLE);
     }
 
     @Override
