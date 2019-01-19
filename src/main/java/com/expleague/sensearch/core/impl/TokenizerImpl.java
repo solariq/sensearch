@@ -2,6 +2,7 @@ package com.expleague.sensearch.core.impl;
 
 import com.expleague.commons.seq.CharSeqTools;
 import com.expleague.sensearch.core.Tokenizer;
+import java.util.Arrays;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
@@ -22,6 +23,11 @@ public class TokenizerImpl implements Tokenizer {
             CharSeqTools.replace(sentence, String.valueOf((char) 769), "")))
         .map(s -> (CharSequence) s.toString().trim())
         .filter(s -> s.length() > 0);
+  }
+
+  @Override
+  public Stream<CharSequence> toParagraphs(CharSequence text) {
+    return Arrays.stream(text.toString().split("\n")).map(String::trim);
   }
 
   @Override
