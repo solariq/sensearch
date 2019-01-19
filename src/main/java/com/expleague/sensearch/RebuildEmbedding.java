@@ -3,6 +3,7 @@ package com.expleague.sensearch;
 import com.expleague.commons.seq.CharSeq;
 import com.expleague.ml.embedding.Embedding;
 import com.expleague.ml.embedding.impl.EmbeddingImpl;
+import com.expleague.sensearch.Page.SegmentType;
 import com.expleague.sensearch.core.impl.TokenizerImpl;
 import com.expleague.sensearch.donkey.plain.EmbeddingBuilder;
 import com.expleague.sensearch.donkey.plain.IdGenerator;
@@ -42,8 +43,8 @@ public class RebuildEmbedding {
     index.allDocuments().map(doc -> (IndexedPage) doc).forEach(doc -> {
       embeddingBuilder.startPage(doc.id());
 
-      embeddingBuilder.add(doc.title().toString());
-      embeddingBuilder.add(doc.fullContent().toString());
+      embeddingBuilder.add(doc.content(SegmentType.TITLE).toString());
+      embeddingBuilder.add(doc.content(SegmentType.BODY).toString());
     });
   }
 }
