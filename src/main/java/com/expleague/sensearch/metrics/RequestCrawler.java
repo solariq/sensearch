@@ -4,6 +4,7 @@ import com.expleague.commons.util.Pair;
 import com.expleague.sensearch.SenSeArch.ResultItem;
 import com.expleague.sensearch.core.impl.ResultItemImpl;
 import com.expleague.sensearch.index.Index;
+import com.expleague.sensearch.index.plain.PlainPage;
 import com.google.inject.Inject;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -184,7 +185,7 @@ public class RequestCrawler implements WebCrawler {
               e.printStackTrace();
               return;
             }
-            if (index.page(uri) == null) {
+            if (index.page(uri) == PlainPage.EMPTY_PAGE) {
               return;
             }
             results.add(
