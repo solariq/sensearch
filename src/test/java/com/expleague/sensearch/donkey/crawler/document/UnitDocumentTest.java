@@ -69,10 +69,7 @@ public class UnitDocumentTest extends SensearchTestCase {
     List<Section> sections = page.sections().collect(Collectors.toList());
     assertEquals(page.id(), 6676369);
     assertEquals(page.title(), "Мужун Вэй");
-    assertEquals(sections.size(), 6);
-
-    assertEquals(sections.get(2).title(), Collections.singletonList("test"));
-    assertEquals(sections.get(2).text().toString(), "");
+    assertEquals(7, sections.size());
 
     assertEquals(sections.get(0).title(), Collections.singletonList("Мужун Вэй"));
     assertEquals(
