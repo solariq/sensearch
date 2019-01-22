@@ -12,7 +12,9 @@ import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
@@ -59,6 +61,8 @@ public class XMLParser {
       }
       page.setId(xmlPage.id);
 
+      Set<URI> uriSet = new HashSet<>();
+
       List<Section> sections;
       sections =
           xmlPage
@@ -104,7 +108,15 @@ public class XMLParser {
                             .replaceAll("\\p{Zs}", "_")
                             .replaceAll("\\p{javaWhitespace}", "_")
                             .replace("%", "%25");
+
                     URI subPageURI = createUri(pageUri, section);
+                    int uriIdx = 1;
+                    // Several subsections can have the same title but they URIs must be different
+                    while (uriSet.contains(subPageURI)) {
+                      uriIdx++;
+                      subPageURI = createUri(pageUri, section + "_" + Integer.toString(uriIdx));
+                    }
+                    uriSet.add(subPageURI);
 
                     /*
                     try {
@@ -134,29 +146,29 @@ public class XMLParser {
         }
       }
       for (int i = 0; i < sections.size(); i++) {
-        newSections.add(sections.get(i));
-        if (i != sections.size() - 1) {
-          int diff = sections.get(i + 1).title().size() - sections.get(i).title().size();
-          if (diff > 1) {
-            LOG.warn(
-                "Missing sections for page "
-                    + page.title()
-                    + " between "
-                    + String.join("|", sections.get(i).title())
-                    + " and "
-                    + String.join("|", sections.get(i + 1).title())
-                    + ", adding missing sections...");
-          }
+        Section curSection = sections.get(i);
+        newSections.add(curSection);
 
-          for (int j = 0; j < diff - 1; j++) {
-            int lastId = sections.get(i).title().size() + j;
-            newSections.add(
-                new WikiSection(
-                    "",
-                    sections.get(i + 1).title().subList(0, lastId + 1),
-                    Collections.emptyList(),
-                    createUri(pageUri, sections.get(i + 1).title().get(lastId))));
+        if (i == sections.size() - 1) {
+          continue;
+        }
+        List<CharSequence> curSectionTitle = curSection.title();
+        List<CharSequence> newSectionTitle = sections.get(i + 1).title();
+
+        int commonSections = 0;
+        for (int j = 0; j < Math.min(curSectionTitle.size(), newSectionTitle.size()); j++) {
+          if (curSectionTitle.get(j).equals(newSectionTitle.get(j))) {
+            commonSections++;
           }
+        }
+
+        for (int j = commonSections; j < newSectionTitle.size() - 1; j++) {
+          newSections.add(
+              new WikiSection(
+                  "",
+                  newSectionTitle.subList(0, j + 1),
+                  Collections.emptyList(),
+                  createUri(pageUri, newSectionTitle.get(j))));
         }
       }
       page.setSections(newSections);
