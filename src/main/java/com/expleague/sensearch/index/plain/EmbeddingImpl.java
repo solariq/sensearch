@@ -125,7 +125,7 @@ public class EmbeddingImpl implements Embedding {
     nearestIndexes(nearestIndexes, index, pos + 1, remaining - 1);
   }
 
-  private long[] lshNearest(Vec mainVec) {
+  private long[] lshNearest(Vec mainVec, LongPredicate predicate) {
     long[] indexes = new long[hashFuncs.length];
     for (int i = 0; i < hashFuncs.length; i++) {
       indexes[i] = hashFuncs[i].applyAsLong(mainVec);
@@ -151,12 +151,12 @@ public class EmbeddingImpl implements Embedding {
         }
       }
     }
-    return lshNeighbors.toArray();
+    return LongStream.of(lshNeighbors.toArray()).filter(predicate).toArray();
   }
 
   @Override
   public LongStream nearest(Vec mainVec, int numberOfNeighbors, LongPredicate predicate) {
-    final long[] order = LongStream.of(lshNearest(mainVec)).filter(predicate).toArray();
+    final long[] order = lshNearest(mainVec, predicate);
     if (order.length <= numberOfNeighbors) {
       return LongStream.of(order);
     }
@@ -164,7 +164,7 @@ public class EmbeddingImpl implements Embedding {
     final double[] dist = LongStream.of(order)
             .mapToObj(this::vec)
             .filter(Objects::nonNull)
-            .mapToDouble(v -> 1 - VecTools.multiply(mainVec, v))
+            .mapToDouble(v -> 1. - VecTools.multiply(mainVec, v))
             .toArray();
     ArrayTools.parallelSort(dist, order);
     return Arrays.stream(order, 0, numberOfNeighbors);
@@ -176,7 +176,7 @@ public class EmbeddingImpl implements Embedding {
     if (queryNorm == 0)
       return LongStream.empty();
 
-    final long[] order = LongStream.of(lshNearest(mainVec)).filter(predicate).toArray();
+    final long[] order = lshNearest(mainVec, predicate);
     final double[] dist = LongStream.of(order)
         .mapToObj(this::vec)
         .filter(Objects::nonNull)
@@ -191,7 +191,7 @@ public class EmbeddingImpl implements Embedding {
 
   private double distance(Vec mainVec, double queryNorm, Vec v) {
     double norm = VecTools.norm(v);
-    return norm == 0 ? Double.POSITIVE_INFINITY : (1 - VecTools.multiply(mainVec, v)/ norm / queryNorm) / 2;
+    return norm == 0 ? Double.POSITIVE_INFINITY : (1. - VecTools.multiply(mainVec, v)/ norm / queryNorm) / 2.;
   }
 
   @Override
