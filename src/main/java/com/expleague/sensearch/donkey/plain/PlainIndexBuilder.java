@@ -11,7 +11,6 @@ import com.expleague.sensearch.core.Tokenizer;
 import com.expleague.sensearch.core.impl.TokenizerImpl;
 import com.expleague.sensearch.donkey.IndexBuilder;
 import com.expleague.sensearch.donkey.crawler.Crawler;
-import com.expleague.sensearch.donkey.crawler.document.CrawlerDocument;
 import com.expleague.sensearch.donkey.plain.TermBuilder.TermAndLemmaIdPair;
 import com.expleague.sensearch.index.plain.PlainIndex;
 import com.google.inject.Inject;
@@ -329,14 +328,5 @@ public class PlainIndexBuilder implements IndexBuilder {
       }
     }
     LOG.info("Index built!");
-  }
-
-  private void withDocument(
-      PlainPageBuilder plainPageBuilder,
-      StatisticsBuilder statisticsBuilder,
-      CrawlerDocument document,
-      Runnable runnable) {
-
-    runnable.run();
   }
 }

@@ -19,6 +19,7 @@ public class IndexMetaBuilder {
 
   private final int version;
   private final TLongSet termIds = new TLongHashSet();
+  private final TLongSet pageIds = new TLongHashSet();
   private final TObjectLongMap<String> pageUri = new TObjectLongHashMap<>();
   private int totalTokenCount = 0;
   private boolean isProcessingPage = false;
@@ -33,6 +34,9 @@ public class IndexMetaBuilder {
     }
     isProcessingPage = true;
 
+    if (pageIds.contains(pageId)) {
+      throw new IllegalStateException("Page with id [" + pageId + "] is already in IndexMeta");
+    }
     if (pageUri.containsKey(pageUri)) {
       throw new IllegalStateException("Uri " + uri + " is already in IndexMeta");
     }
@@ -43,6 +47,7 @@ public class IndexMetaBuilder {
       LOG.warn(e);
     }
     pageUri.put(uriDecoded, pageId);
+    pageIds.add(pageId);
   }
 
   public void acceptTermId(long termId) {
@@ -67,8 +72,8 @@ public class IndexMetaBuilder {
 
     return IndexMeta.newBuilder()
         .setVersion(version)
-        .setAveragePageSize(1.0 * pageUri.size() / totalTokenCount)
-        .setPagesCount(pageUri.size())
+        .setAveragePageSize(1.0 * pageIds.size() / totalTokenCount)
+        .setPagesCount(pageIds.size())
         .setVocabularySize(termIds.size())
         .addAllUriPageMappings(mappings)
         .build();

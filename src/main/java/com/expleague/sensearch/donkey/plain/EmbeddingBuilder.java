@@ -39,6 +39,8 @@ public class EmbeddingBuilder implements AutoCloseable {
   private final Tokenizer tokenizer;
   private final Embedding<CharSeq> jmllEmbedding;
   private final IdGenerator idGenerator;
+  private final TLongSet termIdsInDb = new TLongHashSet();
+
   // .snapshot(false);
 
   private DB vecDB;
@@ -172,6 +174,7 @@ public class EmbeddingBuilder implements AutoCloseable {
     tokenizer
         .toParagraphs(text)
         .map(this::toVector)
+        .filter(Objects::nonNull)
         .forEach(
             vec -> {
               addToTables(curPageId, vec);
@@ -180,6 +183,9 @@ public class EmbeddingBuilder implements AutoCloseable {
 
     tokenizer.toWords(text).map(word -> word.toString().toLowerCase()).forEach(word -> {
       long id = idGenerator.termId(word);
+      if (termIdsInDb.contains(id)) {
+        return;
+      }
 
       Vec vec = jmllEmbedding.apply(CharSeq.compact(word));
       if (vec != null) {
@@ -189,6 +195,7 @@ public class EmbeddingBuilder implements AutoCloseable {
         addToTables(id, vec);
       }
 
+      termIdsInDb.add(id);
     });
   }
 
@@ -211,13 +218,14 @@ public class EmbeddingBuilder implements AutoCloseable {
     Vec[] vectors =
         tokenizer
             .parseTextToWords(text)
+            .map(word -> word.toString().toLowerCase())
             .map(CharSeq::intern)
             .map(jmllEmbedding)
             .filter(Objects::nonNull)
             .toArray(Vec[]::new);
 
     if (vectors.length == 0) {
-      return new ArrayVec(DEFAULT_VEC_SIZE);
+      return null;
     }
 
     ArrayVec mean = new ArrayVec(DEFAULT_VEC_SIZE);

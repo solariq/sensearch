@@ -2,7 +2,6 @@ package com.expleague.sensearch.miner.FeatureTest;
 
 import com.expleague.commons.math.vectors.Vec;
 import com.expleague.sensearch.Page;
-import com.expleague.sensearch.core.Term;
 import com.expleague.sensearch.miner.impl.BM25FeatureSet;
 import com.expleague.sensearch.miner.impl.QURLItem;
 import com.expleague.sensearch.miner.impl.TextFeatureSet;
@@ -102,17 +101,17 @@ public class BM25Test extends IndexBasedTestCase {
     }
 
     @Override
+    public boolean hasParent() {
+      return false;
+    }
+
+    @Override
     public Stream<Page> subpages() {
       return null;
     }
 
     @Override
     public Stream<CharSequence> sentences(SegmentType type) {
-      return null;
-    }
-
-    @Override
-    public Stream<Term> parse(CharSequence sequence) {
       return null;
     }
   }

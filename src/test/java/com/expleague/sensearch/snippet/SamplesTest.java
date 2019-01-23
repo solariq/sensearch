@@ -3,12 +3,8 @@ package com.expleague.sensearch.snippet;
 import com.expleague.commons.text.lemmer.MyStem;
 import com.expleague.sensearch.Page;
 import com.expleague.sensearch.core.Lemmer;
-import com.expleague.sensearch.core.Term;
-import com.expleague.sensearch.core.Tokenizer;
-import com.expleague.sensearch.core.impl.TokenizerImpl;
-import com.expleague.sensearch.query.BaseQuery;
 import com.expleague.sensearch.query.Query;
-import com.expleague.sensearch.utils.SensearchTestCase;
+import com.expleague.sensearch.utils.IndexBasedTestCase;
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
@@ -24,9 +20,9 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TestName;
 
-public class SamplesTest extends SensearchTestCase {
+public class SamplesTest extends IndexBasedTestCase {
 
-  private SnippetsCreator sc = new SnippetsCreator();
+  private SnippetsCreator sc = new SnippetsCreator(index());
 
   private Lemmer lemmer;
 
@@ -85,17 +81,17 @@ public class SamplesTest extends SensearchTestCase {
                         }
 
                         @Override
+                        public boolean hasParent() {
+                          return false;
+                        }
+
+                        @Override
                         public Stream<Page> subpages() {
                           return null;
                         }
 
                         @Override
                         public Stream<CharSequence> sentences(SegmentType type) {
-                          return null;
-                        }
-
-                        @Override
-                        public Stream<Term> parse(CharSequence sequence) {
                           return null;
                         }
                       });

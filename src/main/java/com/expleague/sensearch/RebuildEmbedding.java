@@ -15,12 +15,14 @@ import com.expleague.sensearch.index.Index;
 import com.expleague.sensearch.index.IndexedPage;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
+import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Properties;
+import org.apache.commons.io.FileUtils;
 import org.apache.log4j.PropertyConfigurator;
 import org.fusesource.leveldbjni.JniDBFactory;
 import org.iq80.leveldb.Options;
@@ -42,21 +44,21 @@ public class RebuildEmbedding {
 
     final Path indexRoot = config.getTemporaryIndex();
 
-    Files.createDirectory(indexRoot.resolve(EMBEDDING_ROOT + "_tmp"));
+    if (!Files.exists(indexRoot.resolve(EMBEDDING_ROOT + "_tmp"))) {
+      Files.createDirectory(indexRoot.resolve(EMBEDDING_ROOT + "_tmp"));
+    }
+
+    File vecTmpDir = indexRoot.resolve(EMBEDDING_ROOT + "_tmp").resolve(VECS_ROOT).toFile();
+    File lshTmpDir = indexRoot.resolve(EMBEDDING_ROOT + "_tmp").resolve(LSH_ROOT).toFile();
 
     try (final EmbeddingBuilder embeddingBuilder =
         new EmbeddingBuilder(
-            JniDBFactory.factory.open(
-                indexRoot.resolve(EMBEDDING_ROOT + "_tmp").resolve(VECS_ROOT).toFile(),
-                new Options()),
-            JniDBFactory.factory.open(
-                indexRoot.resolve(EMBEDDING_ROOT + "_tmp").resolve(LSH_ROOT).toFile(),
-                new Options()),
+            JniDBFactory.factory.open(vecTmpDir, new Options()),
+            JniDBFactory.factory.open(lshTmpDir, new Options()),
             indexRoot.resolve(EMBEDDING_ROOT),
             jmllEmbedding,
             new TokenizerImpl(),
             new IdGenerator())) {
-
       index
           .allDocuments()
           .map(doc -> (IndexedPage) doc)
@@ -71,9 +73,14 @@ public class RebuildEmbedding {
               });
     }
 
-    Files.move(indexRoot.resolve(EMBEDDING_ROOT + "_tmp").resolve(VECS_ROOT),
-        indexRoot.resolve(EMBEDDING_ROOT).resolve(VECS_ROOT));
-    Files.move(indexRoot.resolve(EMBEDDING_ROOT + "_tmp").resolve(LSH_ROOT),
-        indexRoot.resolve(EMBEDDING_ROOT).resolve(LSH_ROOT));
+    File vecDbDir = indexRoot.resolve(EMBEDDING_ROOT).resolve(VECS_ROOT).toFile();
+    FileUtils.deleteDirectory(vecDbDir);
+    FileUtils.moveDirectory(vecTmpDir, vecDbDir);
+    FileUtils.deleteDirectory(vecTmpDir);
+
+    File lshDbDir = indexRoot.resolve(EMBEDDING_ROOT).resolve(LSH_ROOT).toFile();
+    FileUtils.deleteDirectory(lshDbDir);
+    FileUtils.moveDirectory(lshTmpDir, lshDbDir);
+    FileUtils.deleteDirectory(lshTmpDir);
   }
 }

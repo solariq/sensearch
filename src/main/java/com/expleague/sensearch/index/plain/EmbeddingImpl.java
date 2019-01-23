@@ -24,7 +24,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.function.BiFunction;
 import java.util.function.LongPredicate;
 import java.util.function.ToLongFunction;
@@ -144,12 +143,12 @@ public class EmbeddingImpl implements Embedding {
       return LongStream.of(order);
     }
     final double[] dist = LongStream.of(order)
-        .mapToObj(this::vec)
-        .filter(Objects::nonNull)
+        .mapToObj(this::allVecs)
+        .flatMap(List::stream)
         .mapToDouble(v -> -VecTools.multiply(mainVec, v))
         .toArray();
     ArrayTools.parallelSort(dist, order);
-    return Arrays.stream(order, 0, numberOfNeighbors);
+    return Arrays.stream(order).distinct().limit(numberOfNeighbors);
   }
 
   @Override
@@ -157,17 +156,25 @@ public class EmbeddingImpl implements Embedding {
     final double queryNorm = VecTools.norm(mainVec);
     if (queryNorm == 0)
       return LongStream.empty();
-    final long[] order = LongStream.of(allIds).filter(predicate).toArray();
-    final double[] dist = LongStream.of(order)
-        .mapToObj(this::vec)
-        .filter(Objects::nonNull)
+    TLongList orderList = new TLongArrayList();
+    final double[] dist = LongStream.of(allIds).filter(predicate)
+        .mapToObj(id -> {
+          List<Vec> vecs = allVecs(id);
+          for (int i = 0; i < vecs.size(); i++) {
+            orderList.add(id);
+          }
+
+          return vecs;
+        })
+        .flatMap(List::stream)
         .mapToDouble(v -> distance(mainVec, queryNorm, v))
         .toArray();
+    final long[] order = orderList.toArray();
     ArrayTools.parallelSort(dist, order);
     int end = Arrays.binarySearch(dist, maxDistance);
     if (end < 0)
       end = -end - 1;
-    return Arrays.stream(order, 0, end);
+    return Arrays.stream(order).distinct().limit(end);
   }
 
   private double distance(Vec mainVec, double queryNorm, Vec v) {

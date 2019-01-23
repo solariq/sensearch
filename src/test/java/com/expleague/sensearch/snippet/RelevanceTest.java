@@ -3,8 +3,7 @@ package com.expleague.sensearch.snippet;
 import com.expleague.commons.text.lemmer.MyStem;
 import com.expleague.sensearch.Page;
 import com.expleague.sensearch.core.Lemmer;
-import com.expleague.sensearch.core.Term;
-import com.expleague.sensearch.utils.SensearchTestCase;
+import com.expleague.sensearch.utils.IndexBasedTestCase;
 import java.net.URI;
 import java.util.List;
 import java.util.stream.Stream;
@@ -12,9 +11,9 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.rules.TestName;
 
-public class RelevanceTest extends SensearchTestCase {
+public class RelevanceTest extends IndexBasedTestCase {
 
-  private SnippetsCreator sc = new SnippetsCreator();
+  private SnippetsCreator sc = new SnippetsCreator(index());
 
   private Lemmer lemmer;
   private Page d1, d2, d3;
@@ -60,17 +59,17 @@ public class RelevanceTest extends SensearchTestCase {
     }
 
     @Override
+    public boolean hasParent() {
+      return false;
+    }
+
+    @Override
     public Stream<Page> subpages() {
       return null;
     }
 
     @Override
     public Stream<CharSequence> sentences(SegmentType type) {
-      return null;
-    }
-
-    @Override
-    public Stream<Term> parse(CharSequence sequence) {
       return null;
     }
   }

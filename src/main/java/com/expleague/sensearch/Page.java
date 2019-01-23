@@ -1,11 +1,9 @@
 package com.expleague.sensearch;
 
-import com.expleague.sensearch.core.Term;
 import java.net.URI;
 import java.util.List;
 import java.util.stream.Stream;
 import javax.validation.constraints.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 public interface Page {
 
@@ -34,10 +32,11 @@ public interface Page {
   @NotNull
   Page parent();
 
+  boolean hasParent();
+
   Stream<Page> subpages();
 
   Stream<CharSequence> sentences(SegmentType type);
-  Stream<Term> parse(CharSequence sequence);
 
   interface Link {
 

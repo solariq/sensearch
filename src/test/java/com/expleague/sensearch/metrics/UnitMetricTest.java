@@ -3,7 +3,6 @@ package com.expleague.sensearch.metrics;
 import com.expleague.commons.util.Pair;
 import com.expleague.sensearch.Page;
 import com.expleague.sensearch.SenSeArch.ResultItem;
-import com.expleague.sensearch.core.Term;
 import com.expleague.sensearch.snippet.Segment;
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -263,6 +262,11 @@ public class UnitMetricTest {
     }
 
     @Override
+    public boolean hasParent() {
+      return false;
+    }
+
+    @Override
     public Stream<Page> subpages() {
       return null;
     }
@@ -271,11 +275,5 @@ public class UnitMetricTest {
     public Stream<CharSequence> sentences(SegmentType type) {
       return null;
     }
-
-    @Override
-    public Stream<Term> parse(CharSequence sequence) {
-      return null;
-    }
-
   }
 }

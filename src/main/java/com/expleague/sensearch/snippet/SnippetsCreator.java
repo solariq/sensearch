@@ -5,17 +5,18 @@ import com.expleague.sensearch.Page;
 import com.expleague.sensearch.Page.SegmentType;
 import com.expleague.sensearch.core.PartOfSpeech;
 import com.expleague.sensearch.core.Term;
+import com.expleague.sensearch.index.Index;
 import com.expleague.sensearch.query.Query;
 import com.expleague.sensearch.snippet.docbased_snippet.DocBasedSnippet;
 import com.expleague.sensearch.snippet.docbased_snippet.KeyWord;
 import com.expleague.sensearch.snippet.passage.Passage;
+import com.google.inject.Inject;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * Created by Maxim on 06.10.2018. Email: alvinmax@mail.ru
@@ -27,6 +28,13 @@ public class SnippetsCreator {
   private static final int OPTIMAL_LENGTH_OF_PASSAGE = 150;
   private static final double QUESTION_COEFFICIENT = .77;
   private static final double ALPHA = .4;
+
+  private final Index index;
+
+  @Inject
+  public SnippetsCreator(Index index) {
+    this.index = index;
+  }
 
   private boolean containsWithLemma(Passage passage, Term term) {
     return passage
@@ -51,7 +59,7 @@ public class SnippetsCreator {
 */
     List<Passage> passages = document
         .sentences(SegmentType.SUB_BODY)
-        .map(x -> new Passage(x, document.parse(x)))
+        .map(x -> new Passage(x, index.parse(x)))
         .collect(Collectors.toList());
 
     for (int i = 0; i < passages.size(); i++) {

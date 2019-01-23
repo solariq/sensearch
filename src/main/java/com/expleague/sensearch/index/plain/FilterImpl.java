@@ -47,7 +47,7 @@ public class FilterImpl implements Filter {
     return Arrays.stream(result.subList(0, Math.min(number, result.size())).toArray());
   }
 
-  public LongStream filtrate(Vec mainVec, double maxDistance, LongPredicate predicate) {
+  public LongStream filtrate(@NotNull Vec mainVec, double maxDistance, LongPredicate predicate) {
     return embedding.nearest(mainVec, maxDistance, predicate);
   }
 }
