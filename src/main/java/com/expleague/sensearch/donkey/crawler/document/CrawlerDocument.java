@@ -83,7 +83,9 @@ public interface CrawlerDocument {
      */
     long targetId();
 
-    /** @return Where this link starts in its section content */
+    /**
+     * @return Number of characters from section start to link beginning
+     */
     int textOffset();
   }
 }

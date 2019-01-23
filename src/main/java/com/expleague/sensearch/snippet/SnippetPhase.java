@@ -1,7 +1,6 @@
 package com.expleague.sensearch.snippet;
 
 import com.expleague.sensearch.Page;
-import com.expleague.sensearch.core.Lemmer;
 import com.expleague.sensearch.core.SearchPhase;
 import com.expleague.sensearch.core.Whiteboard;
 import com.google.inject.Inject;
@@ -15,11 +14,12 @@ public class SnippetPhase implements SearchPhase {
 
   private static final Logger LOG = Logger.getLogger(SnippetPhase.class.getName());
 
-  private final SnippetsCreator snippetsCreator = new SnippetsCreator();
+  private final SnippetsCreator snippetsCreator;
   private final int phaseId;
 
   @Inject
-  public SnippetPhase(@Assisted int phaseId) {
+  public SnippetPhase(SnippetsCreator snippetsCreator, @Assisted int phaseId) {
+    this.snippetsCreator = snippetsCreator;
     this.phaseId = phaseId;
   }
 

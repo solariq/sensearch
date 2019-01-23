@@ -1,6 +1,9 @@
 package com.expleague.sensearch.donkey.plain;
 
 import com.expleague.sensearch.Config;
+import com.expleague.sensearch.core.Lemmer;
+import com.expleague.sensearch.donkey.IndexBuilder;
+import com.expleague.sensearch.donkey.crawler.CrawlerXML;
 import com.expleague.sensearch.utils.SensearchTestCase;
 import com.expleague.sensearch.utils.TestConfigImpl;
 import org.junit.Before;
@@ -22,7 +25,12 @@ public class PlainIndexBuilderTest extends SensearchTestCase {
 
   @Test
   public void completeBuildTest() throws Exception {
-//    IndexBuilder indexBuilder = new PlainIndexBuilder(new CrawlerXML(config), config, lemmer);
-//    indexBuilder.buildIndex(new CrawlerXML(config), config, lemmer);
+    IndexBuilder indexBuilder =
+        new PlainIndexBuilder(
+            new CrawlerXML(config),
+            config,
+            new Lemmer(myStemForTest("PlainIndexBuilderTest", "completeBuildTest")),
+            new IdGenerator());
+    indexBuilder.buildIndex();
   }
 }

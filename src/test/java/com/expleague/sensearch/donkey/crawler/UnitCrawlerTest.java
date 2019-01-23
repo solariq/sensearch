@@ -18,6 +18,8 @@ public class UnitCrawlerTest extends SensearchTestCase {
 
   private Crawler crawler;
 
+  // TODO test sections when some intermediate sections are missing
+
   @Test
   public void goodZIPTest() throws IOException, XMLStreamException {
     TestConfigImpl config = sensearchConfig()

@@ -1,5 +1,7 @@
 package com.expleague.sensearch.index.plain;
 
+import static com.expleague.sensearch.donkey.plain.EmbeddingBuilder.TUPLE_SIZE;
+
 import com.expleague.commons.math.vectors.Vec;
 import com.expleague.commons.math.vectors.VecTools;
 import com.expleague.commons.math.vectors.impl.vectors.ArrayVec;
@@ -12,25 +14,24 @@ import com.expleague.sensearch.index.Embedding;
 import com.google.common.primitives.Longs;
 import gnu.trove.list.TLongList;
 import gnu.trove.list.array.TLongArrayList;
-import gnu.trove.set.TLongSet;
-import gnu.trove.set.hash.TLongHashSet;
-import org.fusesource.leveldbjni.JniDBFactory;
-import org.iq80.leveldb.DB;
-import org.iq80.leveldb.DBIterator;
-import org.iq80.leveldb.Options;
-
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.nio.file.Path;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 import java.util.function.BiFunction;
 import java.util.function.LongPredicate;
 import java.util.function.ToLongFunction;
 import java.util.stream.LongStream;
-
-import static com.expleague.sensearch.donkey.plain.EmbeddingBuilder.TUPLE_SIZE;
+import org.fusesource.leveldbjni.JniDBFactory;
+import org.iq80.leveldb.DB;
+import org.iq80.leveldb.DBIterator;
+import org.iq80.leveldb.Options;
 
 public class EmbeddingImpl implements Embedding {
   private static final long CACHE_SIZE = 16 * (1 << 20);
@@ -46,11 +47,11 @@ public class EmbeddingImpl implements Embedding {
   public EmbeddingImpl(Path embeddingPath) throws IOException {
     vecDB =
             JniDBFactory.factory.open(
-                    embeddingPath.resolve(EmbeddingBuilder.VECS_ROOT).toFile(), DB_OPTIONS);
+                embeddingPath.resolve(PlainIndexBuilder.VECS_ROOT).toFile(), DB_OPTIONS);
 
     tablesDB =
             JniDBFactory.factory.open(
-                    embeddingPath.resolve(EmbeddingBuilder.LSH_ROOT).toFile(), DB_OPTIONS);
+                embeddingPath.resolve(PlainIndexBuilder.LSH_ROOT).toFile(), DB_OPTIONS);
 
     List<Vec> randVecs = new ArrayList<>();
     try (Reader input =
@@ -107,9 +108,19 @@ public class EmbeddingImpl implements Embedding {
   public Vec vec(long id) {
     byte[] bytes = vecDB.get(Longs.toByteArray(id));
     if (bytes != null) {
-      return ByteTools.toVec(bytes);
+      List<Vec> vecs = ByteTools.toVecs(bytes);
+      return vecs.size() == 0 ? null : vecs.get(0);
     }
     return null;
+  }
+
+  @Override
+  public List<Vec> allVecs(long id) {
+    byte[] bytes = vecDB.get(Longs.toByteArray(id));
+    if (bytes != null) {
+      return ByteTools.toVecs(bytes);
+    }
+    return Collections.emptyList();
   }
 
   private static void nearestIndexes(TLongList nearestIndexes, long index, int pos, int remaining) {
@@ -125,49 +136,19 @@ public class EmbeddingImpl implements Embedding {
     nearestIndexes(nearestIndexes, index, pos + 1, remaining - 1);
   }
 
-  private long[] lshNearest(Vec mainVec, LongPredicate predicate) {
-    long[] indexes = new long[hashFuncs.length];
-    for (int i = 0; i < hashFuncs.length; i++) {
-      indexes[i] = hashFuncs[i].applyAsLong(mainVec);
-    }
-
-    final TLongSet lshNeighbors = new TLongHashSet();
-    TLongList nearestIndexes = new TLongArrayList();
-    for (int diffBitsN = 0; diffBitsN <= MAX_DIFFERENT_BITS; diffBitsN++) {
-      for (long index : indexes) {
-        nearestIndexes.clear();
-        nearestIndexes(nearestIndexes, index, 0, diffBitsN);
-        for (int i = 0; i < nearestIndexes.size(); i++) {
-          byte[] bytes = tablesDB.get(
-                  Longs.toByteArray(
-                          nearestIndexes.get(i)
-                  )
-          );
-          if (bytes != null) {
-            LongStream.of(
-                    ByteTools.toLongArray(bytes)
-            ).forEach(lshNeighbors::add);
-          }
-        }
-      }
-    }
-    return LongStream.of(lshNeighbors.toArray()).filter(predicate).toArray();
-  }
-
   @Override
   public LongStream nearest(Vec mainVec, int numberOfNeighbors, LongPredicate predicate) {
-    final long[] order = lshNearest(mainVec, predicate);
+    final long[] order = LongStream.of(allIds).filter(predicate).toArray();
     if (order.length <= numberOfNeighbors) {
       return LongStream.of(order);
     }
-
     final double[] dist = LongStream.of(order)
-            .mapToObj(this::vec)
-            .filter(Objects::nonNull)
-            .mapToDouble(v -> 1. - VecTools.multiply(mainVec, v))
-            .toArray();
+        .mapToObj(this::allVecs)
+        .flatMap(List::stream)
+        .mapToDouble(v -> -VecTools.multiply(mainVec, v))
+        .toArray();
     ArrayTools.parallelSort(dist, order);
-    return Arrays.stream(order, 0, numberOfNeighbors);
+    return Arrays.stream(order).distinct().limit(numberOfNeighbors);
   }
 
   @Override
@@ -175,23 +156,30 @@ public class EmbeddingImpl implements Embedding {
     final double queryNorm = VecTools.norm(mainVec);
     if (queryNorm == 0)
       return LongStream.empty();
+    TLongList orderList = new TLongArrayList();
+    final double[] dist = LongStream.of(allIds).filter(predicate)
+        .mapToObj(id -> {
+          List<Vec> vecs = allVecs(id);
+          for (int i = 0; i < vecs.size(); i++) {
+            orderList.add(id);
+          }
 
-    final long[] order = lshNearest(mainVec, predicate);
-    final double[] dist = LongStream.of(order)
-        .mapToObj(this::vec)
-        .filter(Objects::nonNull)
+          return vecs;
+        })
+        .flatMap(List::stream)
         .mapToDouble(v -> distance(mainVec, queryNorm, v))
         .toArray();
+    final long[] order = orderList.toArray();
     ArrayTools.parallelSort(dist, order);
     int end = Arrays.binarySearch(dist, maxDistance);
     if (end < 0)
       end = -end - 1;
-    return Arrays.stream(order, 0, end);
+    return Arrays.stream(order).distinct().limit(end);
   }
 
   private double distance(Vec mainVec, double queryNorm, Vec v) {
     double norm = VecTools.norm(v);
-    return norm == 0 ? Double.POSITIVE_INFINITY : (1. - VecTools.multiply(mainVec, v)/ norm / queryNorm) / 2.;
+    return norm == 0 ? Double.POSITIVE_INFINITY : (1 - VecTools.multiply(mainVec, v)/ norm / queryNorm) / 2;
   }
 
   @Override

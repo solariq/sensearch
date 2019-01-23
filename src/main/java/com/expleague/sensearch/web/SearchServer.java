@@ -39,7 +39,11 @@ public class SearchServer {
 
     if (config.getBuildIndexFlag()) {
       IndexBuilder indexBuilder = injector.getInstance(IndexBuilder.class);
-      indexBuilder.buildIndex();
+      if (config.getTrainEmbeddingFlag()) {
+        indexBuilder.buildIndex();
+      } else {
+        indexBuilder.buildIndex(Paths.get(config.getEmbeddingVectors()));
+      }
     }
 
     ServletContextHandler context = new ServletContextHandler(ServletContextHandler.SESSIONS);

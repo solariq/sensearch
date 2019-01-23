@@ -2,7 +2,6 @@ package com.expleague.sensearch.index.plain;
 
 import com.expleague.commons.seq.CharSeqTools;
 import com.expleague.sensearch.Page;
-import com.expleague.sensearch.core.Term;
 import com.expleague.sensearch.index.IndexedPage;
 import com.expleague.sensearch.protobuf.index.IndexUnits;
 import com.google.protobuf.InvalidProtocolBufferException;
@@ -70,17 +69,17 @@ public class PlainPage implements IndexedPage {
     }
 
     @Override
+    public boolean hasParent() {
+      return false;
+    }
+
+    @Override
     public Stream<Page> subpages() {
       return Stream.empty();
     }
 
     @Override
     public Stream<CharSequence> sentences(SegmentType t) {
-      return Stream.empty();
-    }
-
-    @Override
-    public Stream<Term> parse(CharSequence sequence) {
       return Stream.empty();
     }
   };
@@ -134,7 +133,12 @@ public class PlainPage implements IndexedPage {
     if (protoPage.hasParentId()) {
       return protoPage.getParentId();
     }
-    return protoPage.getParentId();
+    return 0;
+  }
+
+  @Override
+  public boolean hasParent() {
+    return protoPage.hasParentId();
   }
 
   @Override
@@ -142,7 +146,6 @@ public class PlainPage implements IndexedPage {
     if (protoPage.getSubpagesIdsCount() == 0) {
       return LongStream.empty();
     }
-
     return protoPage.getSubpagesIdsList().stream().mapToLong(Number::longValue);
   }
 
@@ -230,12 +233,6 @@ public class PlainPage implements IndexedPage {
   public Stream<CharSequence> sentences(SegmentType type) {
     return index.sentences(content(type));
   }
-
-  @Override
-  public Stream<Term> parse(CharSequence sequence) {
-    return index.parse(sequence);
-  }
-
 
   @Override
   public boolean equals(Object other) {

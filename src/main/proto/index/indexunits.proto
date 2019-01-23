@@ -54,15 +54,16 @@ message TermStatistics {
   }
 
   optional int64 term_id = 1;
-  optional int32 docuement_frequency = 2;
-  optional int64 term_frequency = 3;
+  optional int32 document_frequency = 2;
+  optional int32 document_lemma_frequency = 3;
+  optional int64 term_frequency = 4;
 
-  repeated TermFrequency bigram_frequency = 4;
+  repeated TermFrequency bigram_frequency = 5;
 }
 
 message Term {
   optional int64 id = 1;
-  // Will be missing if lemma can not be extracted or lemma equals to this term
+  // Equals to -1 if lemma can not be extracted or lemma equals to this term
   optional int64 lemma_id = 2;
 
   optional string text = 3;

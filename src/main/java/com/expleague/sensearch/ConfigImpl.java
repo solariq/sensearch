@@ -6,22 +6,15 @@ import java.nio.file.Paths;
 public class ConfigImpl implements Config {
 
   private String temporaryDocuments;
-
   private String temporaryIndex;
-
   private String webRoot;
-
   private String embeddingVectors;
-
   private String myStem;
-
   private String pathToZIP;
-
   private String pathToMetrics;
-
   private int pageSize = 10;
-
   private boolean buildIndexFlag;
+  private boolean trainEmbeddingFlag;
 
   @Override
   public int getPageSize() {
@@ -32,12 +25,22 @@ public class ConfigImpl implements Config {
     this.pageSize = pageSize;
   }
 
+  @Override
   public boolean getBuildIndexFlag() {
     return buildIndexFlag;
   }
 
   private void setBuildIndexFlag(boolean buildIndexFlag) {
     this.buildIndexFlag = buildIndexFlag;
+  }
+
+  private void setTrainEmbeddingFlag(boolean trainEmbeddingFlag) {
+    this.trainEmbeddingFlag = trainEmbeddingFlag;
+  }
+
+  @Override
+  public boolean getTrainEmbeddingFlag() {
+    return trainEmbeddingFlag;
   }
 
   @Override

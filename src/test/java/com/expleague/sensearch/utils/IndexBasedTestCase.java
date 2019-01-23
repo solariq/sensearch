@@ -3,6 +3,7 @@ package com.expleague.sensearch.utils;
 import com.expleague.commons.text.lemmer.MyStem;
 import com.expleague.sensearch.ConfigImpl;
 import com.expleague.sensearch.core.Lemmer;
+import com.expleague.sensearch.donkey.plain.IdGenerator;
 import com.expleague.sensearch.donkey.plain.PlainIndexBuilder;
 import com.expleague.sensearch.index.Index;
 import com.expleague.sensearch.index.plain.PlainIndex;
@@ -42,13 +43,9 @@ public abstract class IndexBasedTestCase extends CrawlerBasedTestCase {
 
   private static void buildIndex() throws IOException {
     LOG.info("Rebuilding index...");
-    long startTime = System.currentTimeMillis();
-
-    Path indexDataRoot = testDataRoot().resolve(INDEX_DATA_ROOT);
-    Path logsBasedMyStemRoot = indexDataRoot.resolve(LOG_BASED_LEMMER_ROOT);
-    MyStem myStem = new LogBasedMyStem(logsBasedMyStemRoot);
-//    MyStem myStem = new RecordingMyStem(Paths.get("./resources/mystem"), logsBasedMyStemRoot);
-    new PlainIndexBuilder(crawler(), indexConfig, new Lemmer(myStem)).buildIndex();
+    MyStem myStem = myStemForTest("IndexBasedTestCase", "initIndex");
+    new PlainIndexBuilder(crawler(), indexConfig, new Lemmer(myStem), new IdGenerator())
+        .buildIndex();
   }
 
   protected static TestConfigImpl indexConfig() {

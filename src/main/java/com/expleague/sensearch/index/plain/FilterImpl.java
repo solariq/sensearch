@@ -9,6 +9,7 @@ import java.util.Arrays;
 import java.util.function.LongPredicate;
 import java.util.stream.LongStream;
 import org.apache.log4j.Logger;
+import org.jetbrains.annotations.NotNull;
 
 public class FilterImpl implements Filter {
 
@@ -26,7 +27,7 @@ public class FilterImpl implements Filter {
   @Override
   // TODO: move filtrate method to Index and delete FilterImpl?
   // NO, GOD, PLS NO!!
-  public LongStream filtrate(Vec mainVec, int number, LongPredicate predicate) {
+  public LongStream filtrate(@NotNull Vec mainVec, int number, LongPredicate predicate) {
     long startTime = System.nanoTime();
     LOG.info("Filtering started");
 
@@ -46,7 +47,7 @@ public class FilterImpl implements Filter {
     return Arrays.stream(result.subList(0, Math.min(number, result.size())).toArray());
   }
 
-  public LongStream filtrate(Vec mainVec, double maxDistance, LongPredicate predicate) {
+  public LongStream filtrate(@NotNull Vec mainVec, double maxDistance, LongPredicate predicate) {
     return embedding.nearest(mainVec, maxDistance, predicate);
   }
 }

@@ -20,6 +20,13 @@ public interface Tokenizer {
   Stream<CharSequence> toSentences(CharSequence text);
 
   /**
+   * Splits text to paragraphs.
+   *
+   * @param text Text to be splitted
+   * @return Sentences of the content
+   */
+  Stream<CharSequence> toParagraphs(CharSequence text);
+  /**
    * Splits content into words, removing all punctuation and special characters
    *
    * @param text Text to be split

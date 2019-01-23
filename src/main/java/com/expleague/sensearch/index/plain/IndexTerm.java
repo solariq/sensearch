@@ -43,6 +43,11 @@ public class IndexTerm implements Term {
   }
 
   @Override
+  public int documentLemmaFreq() {
+    return owner.documentLemmaFrequency(this);
+  }
+
+  @Override
   public int freq() {
     return owner.termFrequency(this);
   }
