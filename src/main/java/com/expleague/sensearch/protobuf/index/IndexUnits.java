@@ -4530,34 +4530,44 @@ public final class IndexUnits {
     int getDocumentFrequency();
 
     /**
-     * <code>optional int64 term_frequency = 3;</code>
+     * <code>optional int32 document_lemma_frequency = 3;</code>
+     */
+    boolean hasDocumentLemmaFrequency();
+
+    /**
+     * <code>optional int32 document_lemma_frequency = 3;</code>
+     */
+    int getDocumentLemmaFrequency();
+
+    /**
+     * <code>optional int64 term_frequency = 4;</code>
      */
     boolean hasTermFrequency();
     /**
-     * <code>optional int64 term_frequency = 3;</code>
+     * <code>optional int64 term_frequency = 4;</code>
      */
     long getTermFrequency();
 
     /**
-     * <code>repeated .index.TermStatistics.TermFrequency bigram_frequency = 4;</code>
+     * <code>repeated .index.TermStatistics.TermFrequency bigram_frequency = 5;</code>
      */
     java.util.List<com.expleague.sensearch.protobuf.index.IndexUnits.TermStatistics.TermFrequency> 
         getBigramFrequencyList();
     /**
-     * <code>repeated .index.TermStatistics.TermFrequency bigram_frequency = 4;</code>
+     * <code>repeated .index.TermStatistics.TermFrequency bigram_frequency = 5;</code>
      */
     com.expleague.sensearch.protobuf.index.IndexUnits.TermStatistics.TermFrequency getBigramFrequency(int index);
     /**
-     * <code>repeated .index.TermStatistics.TermFrequency bigram_frequency = 4;</code>
+     * <code>repeated .index.TermStatistics.TermFrequency bigram_frequency = 5;</code>
      */
     int getBigramFrequencyCount();
     /**
-     * <code>repeated .index.TermStatistics.TermFrequency bigram_frequency = 4;</code>
+     * <code>repeated .index.TermStatistics.TermFrequency bigram_frequency = 5;</code>
      */
     java.util.List<? extends com.expleague.sensearch.protobuf.index.IndexUnits.TermStatistics.TermFrequencyOrBuilder> 
         getBigramFrequencyOrBuilderList();
     /**
-     * <code>repeated .index.TermStatistics.TermFrequency bigram_frequency = 4;</code>
+     * <code>repeated .index.TermStatistics.TermFrequency bigram_frequency = 5;</code>
      */
     com.expleague.sensearch.protobuf.index.IndexUnits.TermStatistics.TermFrequencyOrBuilder getBigramFrequencyOrBuilder(
         int index);
@@ -4626,13 +4636,18 @@ public final class IndexUnits {
             }
             case 24: {
               bitField0_ |= 0x00000004;
+              documentLemmaFrequency_ = input.readInt32();
+              break;
+            }
+            case 32: {
+              bitField0_ |= 0x00000008;
               termFrequency_ = input.readInt64();
               break;
             }
-            case 34: {
-              if (!((mutable_bitField0_ & 0x00000008) == 0x00000008)) {
+            case 42: {
+              if (!((mutable_bitField0_ & 0x00000010) == 0x00000010)) {
                 bigramFrequency_ = new java.util.ArrayList<com.expleague.sensearch.protobuf.index.IndexUnits.TermStatistics.TermFrequency>();
-                mutable_bitField0_ |= 0x00000008;
+                mutable_bitField0_ |= 0x00000010;
               }
               bigramFrequency_.add(input.readMessage(com.expleague.sensearch.protobuf.index.IndexUnits.TermStatistics.TermFrequency.PARSER, extensionRegistry));
               break;
@@ -4645,7 +4660,7 @@ public final class IndexUnits {
         throw new com.google.protobuf.InvalidProtocolBufferException(
             e.getMessage()).setUnfinishedMessage(this);
       } finally {
-        if (((mutable_bitField0_ & 0x00000008) == 0x00000008)) {
+        if (((mutable_bitField0_ & 0x00000010) == 0x00000010)) {
           bigramFrequency_ = java.util.Collections.unmodifiableList(bigramFrequency_);
         }
         this.unknownFields = unknownFields.build();
@@ -5185,50 +5200,67 @@ public final class IndexUnits {
       return documentFrequency_;
     }
 
-    public static final int TERM_FREQUENCY_FIELD_NUMBER = 3;
-    private long termFrequency_;
+    public static final int DOCUMENT_LEMMA_FREQUENCY_FIELD_NUMBER = 3;
+    private int documentLemmaFrequency_;
+
     /**
-     * <code>optional int64 term_frequency = 3;</code>
+     * <code>optional int32 document_lemma_frequency = 3;</code>
      */
-    public boolean hasTermFrequency() {
+    public boolean hasDocumentLemmaFrequency() {
       return ((bitField0_ & 0x00000004) == 0x00000004);
     }
+
     /**
-     * <code>optional int64 term_frequency = 3;</code>
+     * <code>optional int32 document_lemma_frequency = 3;</code>
+     */
+    public int getDocumentLemmaFrequency() {
+      return documentLemmaFrequency_;
+    }
+
+    public static final int TERM_FREQUENCY_FIELD_NUMBER = 4;
+    private long termFrequency_;
+    /**
+     * <code>optional int64 term_frequency = 4;</code>
+     */
+    public boolean hasTermFrequency() {
+      return ((bitField0_ & 0x00000008) == 0x00000008);
+    }
+    /**
+     * <code>optional int64 term_frequency = 4;</code>
      */
     public long getTermFrequency() {
       return termFrequency_;
     }
 
-    public static final int BIGRAM_FREQUENCY_FIELD_NUMBER = 4;
+    public static final int BIGRAM_FREQUENCY_FIELD_NUMBER = 5;
     private java.util.List<com.expleague.sensearch.protobuf.index.IndexUnits.TermStatistics.TermFrequency> bigramFrequency_;
     /**
-     * <code>repeated .index.TermStatistics.TermFrequency bigram_frequency = 4;</code>
+     * <code>repeated .index.TermStatistics.TermFrequency bigram_frequency = 5;</code>
      */
     public java.util.List<com.expleague.sensearch.protobuf.index.IndexUnits.TermStatistics.TermFrequency> getBigramFrequencyList() {
       return bigramFrequency_;
     }
     /**
-     * <code>repeated .index.TermStatistics.TermFrequency bigram_frequency = 4;</code>
+     * <code>repeated .index.TermStatistics.TermFrequency bigram_frequency = 5;</code>
      */
     public java.util.List<? extends com.expleague.sensearch.protobuf.index.IndexUnits.TermStatistics.TermFrequencyOrBuilder> 
         getBigramFrequencyOrBuilderList() {
       return bigramFrequency_;
     }
     /**
-     * <code>repeated .index.TermStatistics.TermFrequency bigram_frequency = 4;</code>
+     * <code>repeated .index.TermStatistics.TermFrequency bigram_frequency = 5;</code>
      */
     public int getBigramFrequencyCount() {
       return bigramFrequency_.size();
     }
     /**
-     * <code>repeated .index.TermStatistics.TermFrequency bigram_frequency = 4;</code>
+     * <code>repeated .index.TermStatistics.TermFrequency bigram_frequency = 5;</code>
      */
     public com.expleague.sensearch.protobuf.index.IndexUnits.TermStatistics.TermFrequency getBigramFrequency(int index) {
       return bigramFrequency_.get(index);
     }
     /**
-     * <code>repeated .index.TermStatistics.TermFrequency bigram_frequency = 4;</code>
+     * <code>repeated .index.TermStatistics.TermFrequency bigram_frequency = 5;</code>
      */
     public com.expleague.sensearch.protobuf.index.IndexUnits.TermStatistics.TermFrequencyOrBuilder getBigramFrequencyOrBuilder(
         int index) {
@@ -5238,6 +5270,7 @@ public final class IndexUnits {
     private void initFields() {
       termId_ = 0L;
       documentFrequency_ = 0;
+      documentLemmaFrequency_ = 0;
       termFrequency_ = 0L;
       bigramFrequency_ = java.util.Collections.emptyList();
     }
@@ -5261,10 +5294,13 @@ public final class IndexUnits {
         output.writeInt32(2, documentFrequency_);
       }
       if (((bitField0_ & 0x00000004) == 0x00000004)) {
-        output.writeInt64(3, termFrequency_);
+        output.writeInt32(3, documentLemmaFrequency_);
+      }
+      if (((bitField0_ & 0x00000008) == 0x00000008)) {
+        output.writeInt64(4, termFrequency_);
       }
       for (int i = 0; i < bigramFrequency_.size(); i++) {
-        output.writeMessage(4, bigramFrequency_.get(i));
+        output.writeMessage(5, bigramFrequency_.get(i));
       }
       getUnknownFields().writeTo(output);
     }
@@ -5285,11 +5321,15 @@ public final class IndexUnits {
       }
       if (((bitField0_ & 0x00000004) == 0x00000004)) {
         size += com.google.protobuf.CodedOutputStream
-          .computeInt64Size(3, termFrequency_);
+            .computeInt32Size(3, documentLemmaFrequency_);
+      }
+      if (((bitField0_ & 0x00000008) == 0x00000008)) {
+        size += com.google.protobuf.CodedOutputStream
+            .computeInt64Size(4, termFrequency_);
       }
       for (int i = 0; i < bigramFrequency_.size(); i++) {
         size += com.google.protobuf.CodedOutputStream
-          .computeMessageSize(4, bigramFrequency_.get(i));
+            .computeMessageSize(5, bigramFrequency_.get(i));
       }
       size += getUnknownFields().getSerializedSize();
       memoizedSerializedSize = size;
@@ -5413,11 +5453,13 @@ public final class IndexUnits {
         bitField0_ = (bitField0_ & ~0x00000001);
         documentFrequency_ = 0;
         bitField0_ = (bitField0_ & ~0x00000002);
-        termFrequency_ = 0L;
+        documentLemmaFrequency_ = 0;
         bitField0_ = (bitField0_ & ~0x00000004);
+        termFrequency_ = 0L;
+        bitField0_ = (bitField0_ & ~0x00000008);
         if (bigramFrequencyBuilder_ == null) {
           bigramFrequency_ = java.util.Collections.emptyList();
-          bitField0_ = (bitField0_ & ~0x00000008);
+          bitField0_ = (bitField0_ & ~0x00000010);
         } else {
           bigramFrequencyBuilder_.clear();
         }
@@ -5460,11 +5502,15 @@ public final class IndexUnits {
         if (((from_bitField0_ & 0x00000004) == 0x00000004)) {
           to_bitField0_ |= 0x00000004;
         }
+        result.documentLemmaFrequency_ = documentLemmaFrequency_;
+        if (((from_bitField0_ & 0x00000008) == 0x00000008)) {
+          to_bitField0_ |= 0x00000008;
+        }
         result.termFrequency_ = termFrequency_;
         if (bigramFrequencyBuilder_ == null) {
-          if (((bitField0_ & 0x00000008) == 0x00000008)) {
+          if (((bitField0_ & 0x00000010) == 0x00000010)) {
             bigramFrequency_ = java.util.Collections.unmodifiableList(bigramFrequency_);
-            bitField0_ = (bitField0_ & ~0x00000008);
+            bitField0_ = (bitField0_ & ~0x00000010);
           }
           result.bigramFrequency_ = bigramFrequency_;
         } else {
@@ -5492,6 +5538,9 @@ public final class IndexUnits {
         if (other.hasDocumentFrequency()) {
           setDocumentFrequency(other.getDocumentFrequency());
         }
+        if (other.hasDocumentLemmaFrequency()) {
+          setDocumentLemmaFrequency(other.getDocumentLemmaFrequency());
+        }
         if (other.hasTermFrequency()) {
           setTermFrequency(other.getTermFrequency());
         }
@@ -5499,7 +5548,7 @@ public final class IndexUnits {
           if (!other.bigramFrequency_.isEmpty()) {
             if (bigramFrequency_.isEmpty()) {
               bigramFrequency_ = other.bigramFrequency_;
-              bitField0_ = (bitField0_ & ~0x00000008);
+              bitField0_ = (bitField0_ & ~0x00000010);
             } else {
               ensureBigramFrequencyIsMutable();
               bigramFrequency_.addAll(other.bigramFrequency_);
@@ -5512,7 +5561,7 @@ public final class IndexUnits {
               bigramFrequencyBuilder_.dispose();
               bigramFrequencyBuilder_ = null;
               bigramFrequency_ = other.bigramFrequency_;
-              bitField0_ = (bitField0_ & ~0x00000008);
+              bitField0_ = (bitField0_ & ~0x00000010);
               bigramFrequencyBuilder_ = 
                 com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders ?
                    getBigramFrequencyFieldBuilder() : null;
@@ -5612,33 +5661,69 @@ public final class IndexUnits {
         return this;
       }
 
-      private long termFrequency_ ;
+      private int documentLemmaFrequency_;
+
       /**
-       * <code>optional int64 term_frequency = 3;</code>
+       * <code>optional int32 document_lemma_frequency = 3;</code>
        */
-      public boolean hasTermFrequency() {
+      public boolean hasDocumentLemmaFrequency() {
         return ((bitField0_ & 0x00000004) == 0x00000004);
       }
+
       /**
-       * <code>optional int64 term_frequency = 3;</code>
+       * <code>optional int32 document_lemma_frequency = 3;</code>
+       */
+      public int getDocumentLemmaFrequency() {
+        return documentLemmaFrequency_;
+      }
+
+      /**
+       * <code>optional int32 document_lemma_frequency = 3;</code>
+       */
+      public Builder setDocumentLemmaFrequency(int value) {
+        bitField0_ |= 0x00000004;
+        documentLemmaFrequency_ = value;
+        onChanged();
+        return this;
+      }
+
+      /**
+       * <code>optional int32 document_lemma_frequency = 3;</code>
+       */
+      public Builder clearDocumentLemmaFrequency() {
+        bitField0_ = (bitField0_ & ~0x00000004);
+        documentLemmaFrequency_ = 0;
+        onChanged();
+        return this;
+      }
+
+      private long termFrequency_ ;
+      /**
+       * <code>optional int64 term_frequency = 4;</code>
+       */
+      public boolean hasTermFrequency() {
+        return ((bitField0_ & 0x00000008) == 0x00000008);
+      }
+      /**
+       * <code>optional int64 term_frequency = 4;</code>
        */
       public long getTermFrequency() {
         return termFrequency_;
       }
       /**
-       * <code>optional int64 term_frequency = 3;</code>
+       * <code>optional int64 term_frequency = 4;</code>
        */
       public Builder setTermFrequency(long value) {
-        bitField0_ |= 0x00000004;
+        bitField0_ |= 0x00000008;
         termFrequency_ = value;
         onChanged();
         return this;
       }
       /**
-       * <code>optional int64 term_frequency = 3;</code>
+       * <code>optional int64 term_frequency = 4;</code>
        */
       public Builder clearTermFrequency() {
-        bitField0_ = (bitField0_ & ~0x00000004);
+        bitField0_ = (bitField0_ & ~0x00000008);
         termFrequency_ = 0L;
         onChanged();
         return this;
@@ -5647,9 +5732,9 @@ public final class IndexUnits {
       private java.util.List<com.expleague.sensearch.protobuf.index.IndexUnits.TermStatistics.TermFrequency> bigramFrequency_ =
         java.util.Collections.emptyList();
       private void ensureBigramFrequencyIsMutable() {
-        if (!((bitField0_ & 0x00000008) == 0x00000008)) {
+        if (!((bitField0_ & 0x00000010) == 0x00000010)) {
           bigramFrequency_ = new java.util.ArrayList<com.expleague.sensearch.protobuf.index.IndexUnits.TermStatistics.TermFrequency>(bigramFrequency_);
-          bitField0_ |= 0x00000008;
+          bitField0_ |= 0x00000010;
          }
       }
 
@@ -5657,7 +5742,7 @@ public final class IndexUnits {
           com.expleague.sensearch.protobuf.index.IndexUnits.TermStatistics.TermFrequency, com.expleague.sensearch.protobuf.index.IndexUnits.TermStatistics.TermFrequency.Builder, com.expleague.sensearch.protobuf.index.IndexUnits.TermStatistics.TermFrequencyOrBuilder> bigramFrequencyBuilder_;
 
       /**
-       * <code>repeated .index.TermStatistics.TermFrequency bigram_frequency = 4;</code>
+       * <code>repeated .index.TermStatistics.TermFrequency bigram_frequency = 5;</code>
        */
       public java.util.List<com.expleague.sensearch.protobuf.index.IndexUnits.TermStatistics.TermFrequency> getBigramFrequencyList() {
         if (bigramFrequencyBuilder_ == null) {
@@ -5667,7 +5752,7 @@ public final class IndexUnits {
         }
       }
       /**
-       * <code>repeated .index.TermStatistics.TermFrequency bigram_frequency = 4;</code>
+       * <code>repeated .index.TermStatistics.TermFrequency bigram_frequency = 5;</code>
        */
       public int getBigramFrequencyCount() {
         if (bigramFrequencyBuilder_ == null) {
@@ -5677,7 +5762,7 @@ public final class IndexUnits {
         }
       }
       /**
-       * <code>repeated .index.TermStatistics.TermFrequency bigram_frequency = 4;</code>
+       * <code>repeated .index.TermStatistics.TermFrequency bigram_frequency = 5;</code>
        */
       public com.expleague.sensearch.protobuf.index.IndexUnits.TermStatistics.TermFrequency getBigramFrequency(int index) {
         if (bigramFrequencyBuilder_ == null) {
@@ -5687,7 +5772,7 @@ public final class IndexUnits {
         }
       }
       /**
-       * <code>repeated .index.TermStatistics.TermFrequency bigram_frequency = 4;</code>
+       * <code>repeated .index.TermStatistics.TermFrequency bigram_frequency = 5;</code>
        */
       public Builder setBigramFrequency(
           int index, com.expleague.sensearch.protobuf.index.IndexUnits.TermStatistics.TermFrequency value) {
@@ -5704,7 +5789,7 @@ public final class IndexUnits {
         return this;
       }
       /**
-       * <code>repeated .index.TermStatistics.TermFrequency bigram_frequency = 4;</code>
+       * <code>repeated .index.TermStatistics.TermFrequency bigram_frequency = 5;</code>
        */
       public Builder setBigramFrequency(
           int index, com.expleague.sensearch.protobuf.index.IndexUnits.TermStatistics.TermFrequency.Builder builderForValue) {
@@ -5718,7 +5803,7 @@ public final class IndexUnits {
         return this;
       }
       /**
-       * <code>repeated .index.TermStatistics.TermFrequency bigram_frequency = 4;</code>
+       * <code>repeated .index.TermStatistics.TermFrequency bigram_frequency = 5;</code>
        */
       public Builder addBigramFrequency(com.expleague.sensearch.protobuf.index.IndexUnits.TermStatistics.TermFrequency value) {
         if (bigramFrequencyBuilder_ == null) {
@@ -5734,7 +5819,7 @@ public final class IndexUnits {
         return this;
       }
       /**
-       * <code>repeated .index.TermStatistics.TermFrequency bigram_frequency = 4;</code>
+       * <code>repeated .index.TermStatistics.TermFrequency bigram_frequency = 5;</code>
        */
       public Builder addBigramFrequency(
           int index, com.expleague.sensearch.protobuf.index.IndexUnits.TermStatistics.TermFrequency value) {
@@ -5751,7 +5836,7 @@ public final class IndexUnits {
         return this;
       }
       /**
-       * <code>repeated .index.TermStatistics.TermFrequency bigram_frequency = 4;</code>
+       * <code>repeated .index.TermStatistics.TermFrequency bigram_frequency = 5;</code>
        */
       public Builder addBigramFrequency(
           com.expleague.sensearch.protobuf.index.IndexUnits.TermStatistics.TermFrequency.Builder builderForValue) {
@@ -5765,7 +5850,7 @@ public final class IndexUnits {
         return this;
       }
       /**
-       * <code>repeated .index.TermStatistics.TermFrequency bigram_frequency = 4;</code>
+       * <code>repeated .index.TermStatistics.TermFrequency bigram_frequency = 5;</code>
        */
       public Builder addBigramFrequency(
           int index, com.expleague.sensearch.protobuf.index.IndexUnits.TermStatistics.TermFrequency.Builder builderForValue) {
@@ -5779,7 +5864,7 @@ public final class IndexUnits {
         return this;
       }
       /**
-       * <code>repeated .index.TermStatistics.TermFrequency bigram_frequency = 4;</code>
+       * <code>repeated .index.TermStatistics.TermFrequency bigram_frequency = 5;</code>
        */
       public Builder addAllBigramFrequency(
           java.lang.Iterable<? extends com.expleague.sensearch.protobuf.index.IndexUnits.TermStatistics.TermFrequency> values) {
@@ -5794,12 +5879,12 @@ public final class IndexUnits {
         return this;
       }
       /**
-       * <code>repeated .index.TermStatistics.TermFrequency bigram_frequency = 4;</code>
+       * <code>repeated .index.TermStatistics.TermFrequency bigram_frequency = 5;</code>
        */
       public Builder clearBigramFrequency() {
         if (bigramFrequencyBuilder_ == null) {
           bigramFrequency_ = java.util.Collections.emptyList();
-          bitField0_ = (bitField0_ & ~0x00000008);
+          bitField0_ = (bitField0_ & ~0x00000010);
           onChanged();
         } else {
           bigramFrequencyBuilder_.clear();
@@ -5807,7 +5892,7 @@ public final class IndexUnits {
         return this;
       }
       /**
-       * <code>repeated .index.TermStatistics.TermFrequency bigram_frequency = 4;</code>
+       * <code>repeated .index.TermStatistics.TermFrequency bigram_frequency = 5;</code>
        */
       public Builder removeBigramFrequency(int index) {
         if (bigramFrequencyBuilder_ == null) {
@@ -5820,14 +5905,14 @@ public final class IndexUnits {
         return this;
       }
       /**
-       * <code>repeated .index.TermStatistics.TermFrequency bigram_frequency = 4;</code>
+       * <code>repeated .index.TermStatistics.TermFrequency bigram_frequency = 5;</code>
        */
       public com.expleague.sensearch.protobuf.index.IndexUnits.TermStatistics.TermFrequency.Builder getBigramFrequencyBuilder(
           int index) {
         return getBigramFrequencyFieldBuilder().getBuilder(index);
       }
       /**
-       * <code>repeated .index.TermStatistics.TermFrequency bigram_frequency = 4;</code>
+       * <code>repeated .index.TermStatistics.TermFrequency bigram_frequency = 5;</code>
        */
       public com.expleague.sensearch.protobuf.index.IndexUnits.TermStatistics.TermFrequencyOrBuilder getBigramFrequencyOrBuilder(
           int index) {
@@ -5837,7 +5922,7 @@ public final class IndexUnits {
         }
       }
       /**
-       * <code>repeated .index.TermStatistics.TermFrequency bigram_frequency = 4;</code>
+       * <code>repeated .index.TermStatistics.TermFrequency bigram_frequency = 5;</code>
        */
       public java.util.List<? extends com.expleague.sensearch.protobuf.index.IndexUnits.TermStatistics.TermFrequencyOrBuilder> 
            getBigramFrequencyOrBuilderList() {
@@ -5848,14 +5933,14 @@ public final class IndexUnits {
         }
       }
       /**
-       * <code>repeated .index.TermStatistics.TermFrequency bigram_frequency = 4;</code>
+       * <code>repeated .index.TermStatistics.TermFrequency bigram_frequency = 5;</code>
        */
       public com.expleague.sensearch.protobuf.index.IndexUnits.TermStatistics.TermFrequency.Builder addBigramFrequencyBuilder() {
         return getBigramFrequencyFieldBuilder().addBuilder(
             com.expleague.sensearch.protobuf.index.IndexUnits.TermStatistics.TermFrequency.getDefaultInstance());
       }
       /**
-       * <code>repeated .index.TermStatistics.TermFrequency bigram_frequency = 4;</code>
+       * <code>repeated .index.TermStatistics.TermFrequency bigram_frequency = 5;</code>
        */
       public com.expleague.sensearch.protobuf.index.IndexUnits.TermStatistics.TermFrequency.Builder addBigramFrequencyBuilder(
           int index) {
@@ -5863,7 +5948,7 @@ public final class IndexUnits {
             index, com.expleague.sensearch.protobuf.index.IndexUnits.TermStatistics.TermFrequency.getDefaultInstance());
       }
       /**
-       * <code>repeated .index.TermStatistics.TermFrequency bigram_frequency = 4;</code>
+       * <code>repeated .index.TermStatistics.TermFrequency bigram_frequency = 5;</code>
        */
       public java.util.List<com.expleague.sensearch.protobuf.index.IndexUnits.TermStatistics.TermFrequency.Builder> 
            getBigramFrequencyBuilderList() {
@@ -5876,7 +5961,7 @@ public final class IndexUnits {
           bigramFrequencyBuilder_ = new com.google.protobuf.RepeatedFieldBuilder<
               com.expleague.sensearch.protobuf.index.IndexUnits.TermStatistics.TermFrequency, com.expleague.sensearch.protobuf.index.IndexUnits.TermStatistics.TermFrequency.Builder, com.expleague.sensearch.protobuf.index.IndexUnits.TermStatistics.TermFrequencyOrBuilder>(
                   bigramFrequency_,
-                  ((bitField0_ & 0x00000008) == 0x00000008),
+              ((bitField0_ & 0x00000010) == 0x00000010),
                   getParentForChildren(),
                   isClean());
           bigramFrequency_ = null;
@@ -7854,27 +7939,28 @@ public final class IndexUnits {
       "gories\030\t \003(\t\022\021\n\tparent_id\030\007 \001(\003\022\024\n\014subpa" +
       "ges_ids\030\010 \003(\003\032V\n\004Link\022\014\n\004text\030\001 \001(\t\022\026\n\016t" +
       "arget_page_id\030\002 \001(\003\022\020\n\010position\030\003 \001(\003\022\026\n" +
-          "\016source_page_id\030\004 \001(\003\"\316\001\n\016TermStatistics" +
+          "\016source_page_id\030\004 \001(\003\"\360\001\n\016TermStatistics" +
           "\022\017\n\007term_id\030\001 \001(\003\022\032\n\022document_frequency\030" +
-          "\002 \001(\005\022\026\n\016term_frequency\030\003 \001(\003\022=\n\020bigram_" +
-          "frequency\030\004 \003(\0132#.index.TermStatistics.T" +
-          "ermFrequency\0328\n\rTermFrequency\022\017\n\007term_id" +
-          "\030\001 \001(\003\022\026\n\016term_frequency\030\002 \001(\005\"\202\002\n\004Term\022"
-          +
-          "\n\n\002id\030\001 \001(\003\022\020\n\010lemma_id\030\002 \001(\003\022\014\n\004text\030\003 ",
-        "\001(\t\0220\n\016part_of_speech\030\004 \001(\0162\030.index.Term" +
-            ".PartOfSpeech\"\233\001\n\014PartOfSpeech\022\013\n\007UNKNOW" +
-            "N\020\000\022\005\n\001A\020\001\022\007\n\003ADV\020\002\022\n\n\006ADVPRO\020\003\022\010\n\004ANUM\020"
+          "\002 \001(\005\022 \n\030document_lemma_frequency\030\003 \001(\005\022" +
+          "\026\n\016term_frequency\030\004 \001(\003\022=\n\020bigram_freque" +
+          "ncy\030\005 \003(\0132#.index.TermStatistics.TermFre" +
+          "quency\0328\n\rTermFrequency\022\017\n\007term_id\030\001 \001(\003" +
+          "\022\026\n\016term_frequency\030\002 \001(\005\"\202\002\n\004Term\022\n\n\002id\030",
+        "\001 \001(\003\022\020\n\010lemma_id\030\002 \001(\003\022\014\n\004text\030\003 \001(\t\0220\n"
             +
-            "\004\022\010\n\004APRO\020\005\022\007\n\003COM\020\006\022\010\n\004CONJ\020\007\022\010\n\004INTJ\020\010"
+            "\016part_of_speech\030\004 \001(\0162\030.index.Term.PartO" +
+            "fSpeech\"\233\001\n\014PartOfSpeech\022\013\n\007UNKNOWN\020\000\022\005\n" +
+            "\001A\020\001\022\007\n\003ADV\020\002\022\n\n\006ADVPRO\020\003\022\010\n\004ANUM\020\004\022\010\n\004A"
             +
-            "\022\007\n\003NUM\020\t\022\010\n\004PART\020\n\022\006\n\002PR\020\013\022\005\n\001S\020\014\022\010\n\004SP"
+            "PRO\020\005\022\007\n\003COM\020\006\022\010\n\004CONJ\020\007\022\010\n\004INTJ\020\010\022\007\n\003NU"
             +
-            "RO\020\r\022\005\n\001V\020\016\"\034\n\010TermList\022\020\n\010termList\030\001 \003("
+            "M\020\t\022\010\n\004PART\020\n\022\006\n\002PR\020\013\022\005\n\001S\020\014\022\010\n\004SPRO\020\r\022\005"
             +
-            "\003\"\036\n\013IntegerList\022\017\n\007intList\030\001 \003(\005B4\n&com" +
-            ".expleague.sensearch.protobuf.indexB\nInd" +
-            "exUnits"
+            "\n\001V\020\016\"\034\n\010TermList\022\020\n\010termList\030\001 \003(\003\"\036\n\013I"
+            +
+            "ntegerList\022\017\n\007intList\030\001 \003(\005B4\n&com.exple" +
+            "ague.sensearch.protobuf.indexB\nIndexUnit" +
+            "s"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
         new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
@@ -7917,7 +8003,8 @@ public final class IndexUnits {
     internal_static_index_TermStatistics_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessage.FieldAccessorTable(
         internal_static_index_TermStatistics_descriptor,
-        new java.lang.String[]{"TermId", "DocumentFrequency", "TermFrequency", "BigramFrequency",});
+        new java.lang.String[]{"TermId", "DocumentFrequency", "DocumentLemmaFrequency",
+            "TermFrequency", "BigramFrequency",});
     internal_static_index_TermStatistics_TermFrequency_descriptor =
       internal_static_index_TermStatistics_descriptor.getNestedTypes().get(0);
     internal_static_index_TermStatistics_TermFrequency_fieldAccessorTable = new

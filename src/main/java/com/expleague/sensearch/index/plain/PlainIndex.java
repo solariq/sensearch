@@ -88,7 +88,7 @@ public class PlainIndex implements Index {
   private final DB suggest_inverted_index_DB;
 
   private final double averagePageSize;
-  //TODO save at database
+  // TODO save at database
   private double averageTitleSize = 0;
   private int titleCnt = 0;
   private double averageLinkSize = 0;
@@ -214,20 +214,22 @@ public class PlainIndex implements Index {
 
     DBIterator pageIterator = pageBase.iterator();
     pageIterator.seekToFirst();
-    pageIterator.forEachRemaining(page -> {
-      try {
-        IndexUnits.Page protoPage = IndexUnits.Page.parseFrom(page.getValue());
-        averageTitleSize += parse(protoPage.getTitle()).count();
-        titleCnt++;
-        for (int i = 0; i < protoPage.getIncomingLinksCount(); i++) {
-          linkCnt++;
-          averageLinkSize += parse(
-              protoPageLoad(protoPage.getIncomingLinks(i).getTargetPageId()).getTitle()).count();
-        }
-      } catch (InvalidProtocolBufferException e) {
-        e.printStackTrace();
-      }
-    });
+    pageIterator.forEachRemaining(
+        page -> {
+          try {
+            IndexUnits.Page protoPage = IndexUnits.Page.parseFrom(page.getValue());
+            averageTitleSize += parse(protoPage.getTitle()).count();
+            titleCnt++;
+            for (int i = 0; i < protoPage.getIncomingLinksCount(); i++) {
+              linkCnt++;
+              averageLinkSize +=
+                  parse(protoPageLoad(protoPage.getIncomingLinks(i).getTargetPageId()).getTitle())
+                      .count();
+            }
+          } catch (InvalidProtocolBufferException e) {
+            e.printStackTrace();
+          }
+        });
 
     averageTitleSize = averageTitleSize / titleCnt;
     averageLinkSize = averageLinkSize / linkCnt;
@@ -309,9 +311,9 @@ public class PlainIndex implements Index {
     DBIterator iterator = pageBase.iterator();
     iterator.seekToFirst();
     return Streams.stream(iterator)
-        .map(entry -> PlainPage.create(Longs.fromByteArray(entry.getKey()), this));
+        .map(entry -> (Page) PlainPage.create(Longs.fromByteArray(entry.getKey()), this))
+        .filter(page -> !page.hasParent());
   }
-
 
   @Override
   public Term term(CharSequence seq) {
@@ -349,14 +351,13 @@ public class PlainIndex implements Index {
     return averageLinkSize;
   }
 
-
   @Override
   public int vocabularySize() {
     return vocabularySize;
   }
 
   Stream<Term> synonyms(Term term) {
-//    System.out.println("Synonyms for " + term.text());
+    //    System.out.println("Synonyms for " + term.text());
     Vec termVec = embedding.vec(((IndexTerm) term).id());
     if (termVec == null) {
       return Stream.empty();
@@ -372,9 +373,7 @@ public class PlainIndex implements Index {
 
     LOG.info("LSHSynonymsMetric: " + result);
 
-    return filter
-        .filtrate(termVec, SYNONYMS_COUNT, PlainIndex::isWordId)
-        .mapToObj(idToTerm::get);
+    return filter.filtrate(termVec, SYNONYMS_COUNT, PlainIndex::isWordId).mapToObj(idToTerm::get);
   }
 
   int documentFrequency(Term term) {
@@ -387,6 +386,18 @@ public class PlainIndex implements Index {
       return 0;
     }
   }
+
+  int documentLemmaFrequency(IndexTerm term) {
+    try {
+      return termStatistics((term).id()).getDocumentLemmaFrequency();
+    } catch (DBException | NoSuchElementException | NullPointerException e) {
+      return 0;
+    } catch (InvalidProtocolBufferException e) {
+      LOG.fatal("Encountered invalid protobuf in Term Statistics Base!");
+      return 0;
+    }
+  }
+
 
   int termFrequency(Term term) {
     try {
@@ -408,7 +419,7 @@ public class PlainIndex implements Index {
     return lastTermStatistics;
   }
 
-  //однопоточно
+  // однопоточно
   @Override
   public SuggestInformationLoader getSuggestInformation() {
     if (suggestLoader == null) {

@@ -13,6 +13,7 @@ import gnu.trove.map.TLongObjectMap;
 import gnu.trove.map.hash.TLongIntHashMap;
 import gnu.trove.map.hash.TLongLongHashMap;
 import gnu.trove.map.hash.TLongObjectHashMap;
+import gnu.trove.set.hash.TLongHashSet;
 import java.io.IOException;
 import java.util.Comparator;
 import java.util.LinkedList;
@@ -30,7 +31,9 @@ public class StatisticsBuilder implements AutoCloseable {
 
   private final TLongLongMap wordFrequencyMap = new TLongLongHashMap();
   private final TLongIntMap documentFrequencyMap = new TLongIntHashMap();
+  private final TLongIntMap documentFrequencyByLemmaMap = new TLongIntHashMap();
   private final TLongObjectMap<TLongIntMap> largeBigramsMap = new TLongObjectHashMap<>();
+  private final TLongLongMap termToLemma = new TLongLongHashMap();
 
   private final DB statisticsDb;
   private boolean isProcessingPage = false;
@@ -70,6 +73,7 @@ public class StatisticsBuilder implements AutoCloseable {
   }
 
   private final TLongList pageTokens = new TLongArrayList();
+  private final TLongList pageLemmas = new TLongArrayList();
 
   public void startPage() {
     if (isProcessingPage) {
@@ -118,14 +122,30 @@ public class StatisticsBuilder implements AutoCloseable {
           return true;
         });
 
+    TLongHashSet lemmaSet = new TLongHashSet(pageLemmas);
+    lemmaSet.forEach(
+        lemmaId -> {
+          documentFrequencyByLemmaMap.adjustOrPutValue(lemmaId, 1, 1);
+          return true;
+        });
+
     pageTokens.clear();
+    pageLemmas.clear();
   }
 
   // TODO: save lemma statistics
   void enrich(long termId, long lemmaId) {
     pageTokens.add(termId);
-  }
+    pageLemmas.add(lemmaId);
 
+    if (termToLemma.containsKey(termId) && termToLemma.get(termId) != lemmaId) {
+      throw new IllegalArgumentException(
+          String.format(
+              "Cannot add term [%d] with lemma [%d] to statistics: term already has lemma [%d]",
+              termId, lemmaId, termToLemma.get(termId)));
+    }
+    termToLemma.put(termId, lemmaId);
+  }
 
   @Override
   public void close() throws IOException {
@@ -139,6 +159,7 @@ public class StatisticsBuilder implements AutoCloseable {
                   .setTermId(k)
                   .setTermFrequency(wordFrequencyMap.get(k))
                   .setDocumentFrequency(documentFrequencyMap.get(k))
+                  .setDocumentLemmaFrequency(documentFrequencyByLemmaMap.get(termToLemma.get(k)))
                   .addAllBigramFrequency(
                       mostFrequentBigrams(largeBigramsMap.get(k), MOST_FREQUENT_BIGRAMS_COUNT))
                   .build()

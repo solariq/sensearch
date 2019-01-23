@@ -52,14 +52,23 @@ public class StatisticsBuilderTest extends SensearchTestCase {
             JniDBFactory.factory.open(STATS_DB_PATH.toFile(), new Options().errorIfExists(true)))) {
 
       statisticsBuilder.startPage();
-      for (long id : new long[]{1, 3, 2, 4, 3, 3, 2, 3, 1, 5}) {
-        statisticsBuilder.enrich(id, -1);
+
+      // term -> lemma
+      // 3 -> 2
+      // 6 -> 1
+      // 4 -> 2
+      // 8 -> 5
+      for (long[] ids :
+          new long[][]{
+              {1, 1}, {3, 2}, {2, 2}, {4, 2}, {3, 2}, {3, 2}, {2, 2}, {3, 2}, {1, 1}, {5, 5}
+          }) {
+        statisticsBuilder.enrich(ids[0], ids[1]);
       }
       statisticsBuilder.endPage();
 
       statisticsBuilder.startPage();
-      for (long id : new long[]{6, 7, 8, 8, 2, 7, 3}) {
-        statisticsBuilder.enrich(id, -1);
+      for (long[] ids : new long[][]{{6, 1}, {7, 7}, {8, 5}, {8, 5}, {2, 2}, {7, 7}, {3, 2}}) {
+        statisticsBuilder.enrich(ids[0], ids[1]);
       }
       statisticsBuilder.endPage();
     }
@@ -85,48 +94,56 @@ public class StatisticsBuilderTest extends SensearchTestCase {
     assertEquals(1, term1.getTermId());
     assertEquals(2, term1.getTermFrequency());
     assertEquals(1, term1.getDocumentFrequency());
+    assertEquals(2, term1.getDocumentLemmaFrequency());
     checkTermFreqs(Arrays.asList(0, 0, 1, 0, 1, 0, 0, 0), term1.getBigramFrequencyList());
 
     TermStatistics term2 = termStatistics.get(2L);
     assertEquals(2, term2.getTermId());
     assertEquals(3, term2.getTermFrequency());
     assertEquals(2, term2.getDocumentFrequency());
+    assertEquals(2, term2.getDocumentLemmaFrequency());
     checkTermFreqs(Arrays.asList(0, 0, 1, 1, 0, 0, 1, 0), term2.getBigramFrequencyList());
 
     TermStatistics term3 = termStatistics.get(3L);
     assertEquals(3, term3.getTermId());
     assertEquals(5, term3.getTermFrequency());
     assertEquals(2, term3.getDocumentFrequency());
+    assertEquals(2, term3.getDocumentLemmaFrequency());
     checkTermFreqs(Arrays.asList(1, 2, 1, 0, 0, 0, 0, 0), term3.getBigramFrequencyList());
 
     TermStatistics term4 = termStatistics.get(4L);
     assertEquals(4, term4.getTermId());
     assertEquals(1, term4.getTermFrequency());
     assertEquals(1, term4.getDocumentFrequency());
+    assertEquals(2, term4.getDocumentLemmaFrequency());
     checkTermFreqs(Arrays.asList(0, 0, 1, 0, 0, 0, 0, 0), term4.getBigramFrequencyList());
 
     TermStatistics term5 = termStatistics.get(5L);
     assertEquals(5, term5.getTermId());
     assertEquals(1, term5.getTermFrequency());
     assertEquals(1, term5.getDocumentFrequency());
+    assertEquals(2, term5.getDocumentLemmaFrequency());
     checkTermFreqs(Arrays.asList(0, 0, 0, 0, 0, 0, 0, 0), term5.getBigramFrequencyList());
 
     TermStatistics term6 = termStatistics.get(6L);
     assertEquals(6, term6.getTermId());
     assertEquals(1, term6.getTermFrequency());
     assertEquals(1, term6.getDocumentFrequency());
+    assertEquals(2, term6.getDocumentLemmaFrequency());
     checkTermFreqs(Arrays.asList(0, 0, 0, 0, 0, 0, 1, 0), term6.getBigramFrequencyList());
 
     TermStatistics term7 = termStatistics.get(7L);
     assertEquals(7, term7.getTermId());
     assertEquals(2, term7.getTermFrequency());
     assertEquals(1, term7.getDocumentFrequency());
+    assertEquals(1, term7.getDocumentLemmaFrequency());
     checkTermFreqs(Arrays.asList(0, 0, 1, 0, 0, 0, 0, 1), term7.getBigramFrequencyList());
 
     TermStatistics term8 = termStatistics.get(8L);
     assertEquals(8, term8.getTermId());
     assertEquals(2, term8.getTermFrequency());
     assertEquals(1, term8.getDocumentFrequency());
+    assertEquals(2, term8.getDocumentLemmaFrequency());
     checkTermFreqs(Arrays.asList(0, 1, 0, 0, 0, 0, 0, 1), term8.getBigramFrequencyList());
   }
 
@@ -138,8 +155,10 @@ public class StatisticsBuilderTest extends SensearchTestCase {
                 bigrams.get((int) termFreq.getTermId() - 1).intValue(),
                 termFreq.getTermFrequency()));
 
-    Map<Long, Integer> freqMap = bigramFrequencyList.stream()
-        .collect(Collectors.toMap(TermFrequency::getTermId, TermFrequency::getTermFrequency));
+    Map<Long, Integer> freqMap =
+        bigramFrequencyList
+            .stream()
+            .collect(Collectors.toMap(TermFrequency::getTermId, TermFrequency::getTermFrequency));
 
     // Check that there are no extra bigrams
     for (int i = 0; i < bigrams.size(); i++) {
