@@ -160,7 +160,7 @@ public class PlainPage implements IndexedPage {
         Page p = this;
         CharSequence res = "";
         while (p.parent() != p) {
-          res = CharSeqTools.concat(p.parent().content(SegmentType.SUB_TITLE), "#", res);
+          res = CharSeqTools.concat(p.parent().content(SegmentType.SUB_TITLE), " # ", res);
           p = p.parent();
         }
         res = CharSeqTools.concat(res, content(SegmentType.SUB_TITLE));

@@ -8,6 +8,7 @@ import com.expleague.sensearch.miner.impl.QURLItem;
 import com.expleague.sensearch.miner.impl.TextFeatureSet;
 import com.expleague.sensearch.miner.impl.TextFeatureSet.Segment;
 import com.expleague.sensearch.query.BaseQuery;
+import com.expleague.sensearch.query.Query;
 import com.expleague.sensearch.utils.IndexBasedTestCase;
 import java.net.URI;
 import java.util.List;
@@ -37,35 +38,56 @@ public class BM25Test extends IndexBasedTestCase {
           + " По этим же причинам понятие «правитель» является более точным и верным, нежели слово «царь», в обозначении титулов монархов древности."
           + " Правитель — лицо, которое правит государством, страной.";
 
-  @Test
-  public void testPage1() {
-    testBM25 = new BM25FeatureSet();
-    QURLItem item = new QURLItem(new TestPage(), BaseQuery.create("Суффет", index()));
-    testBM25.accept(item);
+  private void init(String title, String page) {
+    int titLen = (int) index().parse(title).count();
+    int pagLen = (int) index().parse(page).count();
+    int totLen = titLen + pagLen;
 
-    testBM25.withStats(38,
+    testBM25.withStats(totLen,
         (38 + 63) / 2.,
-        1,
+        titLen,
         1.,
-        37,
+        pagLen,
         (37 + 62) / 2.,
         2);
-    index().parse(title1).forEach(t -> {
+    index().parse(title).forEach(t -> {
       testBM25.withSegment(Segment.TITLE, t);
       testBM25.withTerm(t, 0);
     });
-    index().parse(page1).forEach(t -> {
+    index().parse(page).forEach(t -> {
       testBM25.withSegment(Segment.BODY, t);
       testBM25.withTerm(t, 0);
     });
+  }
+
+  @Test
+  public void testPage1() {
+    testBM25 = new BM25FeatureSet();
+    Query query = BaseQuery.create("Суффет", index());
+    QURLItem item = new QURLItem(new TestPage(), query);
+    testBM25.accept(item);
+    init(title1, page1);
 
     Vec resBM25 = testBM25.advance();
-    System.err.println(resBM25);
+    double scoreBM25 = Math.log(2.0 / query.terms().get(0).documentFreq()) * 2 / (2 + K * (1 - B + B * 38. / (38 + 63) * 2));
+    double scoreBM25L = Math.log(2.0 / query.terms().get(0).documentFreq()) * 2 / (2 + K * (1 - B + B * 38. / (38 + 63) * 2));
+    System.err.println("Query: Суффет   Vec: " + resBM25);
+    Assert.assertEquals(0, Double.compare(resBM25.get(0), scoreBM25));
+    Assert.assertEquals(0, Double.compare(resBM25.get(1), scoreBM25L));
 
-    final double score = Math.log(2.0 / 1) * 2 / (2 + K * (1 - B + B * 38. / (38 + 63) * 2));
 
-    System.err.println(score);
-    Assert.assertEquals(0, Double.compare(resBM25.get(0), score));
+    query = BaseQuery.create("Военные предводители", index());
+    item = new QURLItem(new TestPage(), query);
+    testBM25.accept(item);
+    init(title1, page1);
+
+    resBM25 = testBM25.advance();
+    scoreBM25 = 0 + 0;
+    scoreBM25L = Math.log(2.0 / query.terms().get(0).lemma().documentFreq()) * 2 / (2 + K * (1 - B + B * 38. / (38 + 63) * 2))
+        + Math.log(2.0 / query.terms().get(1).lemma().documentFreq()) * 1 / (1 + K * (1 - B + B * 38. / (38 + 63) * 2));
+    System.err.println("Query: Военные предводители   Vec: " + resBM25);
+    Assert.assertEquals(0, Double.compare(resBM25.get(0), scoreBM25));
+    Assert.assertEquals(0, Double.compare(resBM25.get(1), scoreBM25L));
 
   }
 

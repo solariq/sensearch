@@ -47,6 +47,7 @@ public abstract class IndexBasedTestCase extends CrawlerBasedTestCase {
     Path indexDataRoot = testDataRoot().resolve(INDEX_DATA_ROOT);
     Path logsBasedMyStemRoot = indexDataRoot.resolve(LOG_BASED_LEMMER_ROOT);
     MyStem myStem = new LogBasedMyStem(logsBasedMyStemRoot);
+//    MyStem myStem = new RecordingMyStem(Paths.get("./resources/mystem"), logsBasedMyStemRoot);
     new PlainIndexBuilder(crawler(), indexConfig, new Lemmer(myStem)).buildIndex();
   }
 

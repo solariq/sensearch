@@ -60,7 +60,7 @@ public class BM25FeatureSet extends FeatureSet.Stub<QURLItem> implements TextFea
     this.query = query;
     queryTerms = new HashSet<>(query.terms());
     queryLemmas = query.terms().stream().map(Term::lemma).collect(Collectors.toSet());
-    querySyn = query.synonyms().values().stream().flatMap(List::stream).collect(Collectors.toSet());
+    querySyn = query.synonyms().values().stream().flatMap(List::stream).map(Term::lemma).collect(Collectors.toSet());
     contains = new BitSet(query.terms().size());
   }
 
@@ -105,14 +105,14 @@ public class BM25FeatureSet extends FeatureSet.Stub<QURLItem> implements TextFea
       int termIndex = query.terms().indexOf(term);
       contains.set(termIndex);
       bm25.accept(term);
-      bm25l.accept(term);
-      bm25s.accept(term);
+      bm25l.accept(term.lemma());
+      bm25s.accept(term.lemma());
     } else {
-      if (queryLemmas.contains(term)) {
-        bm25l.accept(term);
+      if (queryLemmas.contains(term.lemma())) {
+        bm25l.accept(term.lemma());
       }
-      if (querySyn.contains(term)) {
-        bm25s.accept(term);
+      if (querySyn.contains(term.lemma())) {
+        bm25s.accept(term.lemma());
       }
     }
   }
