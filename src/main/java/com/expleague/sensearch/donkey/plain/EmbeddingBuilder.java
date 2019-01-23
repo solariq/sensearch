@@ -33,7 +33,7 @@ public class EmbeddingBuilder {
   private static final Options DB_OPTIONS =
           new Options()
                   .createIfMissing(true)
-                  .errorIfExists(true)
+                  /*.errorIfExists(true)*/
                   .compressionType(CompressionType.SNAPPY);
 
   private static final WriteOptions WRITE_OPTIONS = new WriteOptions().sync(true);

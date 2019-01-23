@@ -125,8 +125,7 @@ public class EmbeddingImpl implements Embedding {
     nearestIndexes(nearestIndexes, index, pos + 1, remaining - 1);
   }
 
-  @Override
-  public LongStream nearest(Vec mainVec, int numberOfNeighbors, LongPredicate predicate) {
+  private long[] lshNearest(Vec mainVec) {
     long[] indexes = new long[hashFuncs.length];
     for (int i = 0; i < hashFuncs.length; i++) {
       indexes[i] = hashFuncs[i].applyAsLong(mainVec);
@@ -151,19 +150,21 @@ public class EmbeddingImpl implements Embedding {
           }
         }
       }
-      if (lshNeighbors.size() >= numberOfNeighbors) {
-        break;
-      }
     }
+    return lshNeighbors.toArray();
+  }
 
-    final long[] order = LongStream.of(lshNeighbors.toArray()).filter(predicate).toArray();
+  @Override
+  public LongStream nearest(Vec mainVec, int numberOfNeighbors, LongPredicate predicate) {
+    final long[] order = LongStream.of(lshNearest(mainVec)).filter(predicate).toArray();
     if (order.length <= numberOfNeighbors) {
       return LongStream.of(order);
     }
 
     final double[] dist = LongStream.of(order)
             .mapToObj(this::vec)
-            .mapToDouble(v -> -VecTools.cosine(mainVec, v))
+            .filter(Objects::nonNull)
+            .mapToDouble(v -> 1 - VecTools.multiply(mainVec, v))
             .toArray();
     ArrayTools.parallelSort(dist, order);
     return Arrays.stream(order, 0, numberOfNeighbors);
@@ -174,7 +175,8 @@ public class EmbeddingImpl implements Embedding {
     final double queryNorm = VecTools.norm(mainVec);
     if (queryNorm == 0)
       return LongStream.empty();
-    final long[] order = LongStream.of(allIds).filter(predicate).toArray();
+
+    final long[] order = LongStream.of(lshNearest(mainVec)).filter(predicate).toArray();
     final double[] dist = LongStream.of(order)
         .mapToObj(this::vec)
         .filter(Objects::nonNull)
