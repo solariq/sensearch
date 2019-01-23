@@ -13,14 +13,11 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.nio.file.Path;
+import java.util.Map;
 import java.util.Random;
 import java.util.function.ToLongFunction;
 import org.fusesource.leveldbjni.JniDBFactory;
-import org.iq80.leveldb.CompressionType;
-import org.iq80.leveldb.DB;
-import org.iq80.leveldb.Options;
-import org.iq80.leveldb.WriteBatch;
-import org.iq80.leveldb.WriteOptions;
+import org.iq80.leveldb.*;
 
 public class EmbeddingBuilder {
 
@@ -49,6 +46,8 @@ public class EmbeddingBuilder {
   private TLongObjectMap<TLongList> tables = new TLongObjectHashMap<>();
   private DB tablesDB;
   private ToLongFunction<Vec>[] hashFuncs;
+
+  private final Path embeddingPath;
 
   public EmbeddingBuilder(Path embeddingPath) throws IOException {
     vecDB = JniDBFactory.factory.open(embeddingPath.resolve(VECS_ROOT).toFile(), DB_OPTIONS);
@@ -91,6 +90,7 @@ public class EmbeddingBuilder {
                 };
       }
     }
+    this.embeddingPath = embeddingPath;
   }
 
   private void addToTables(long id, Vec vec) {
@@ -155,5 +155,20 @@ public class EmbeddingBuilder {
       batch = null;
     }
     tablesDB.close();
+  }
+
+  public void rebuild() throws IOException {
+    tablesDB.close();
+    JniDBFactory.factory.destroy(embeddingPath.resolve(LSH_ROOT).toFile(), DB_OPTIONS);
+    tablesDB = JniDBFactory.factory.open(embeddingPath.resolve(LSH_ROOT).toFile(), DB_OPTIONS);
+    DBIterator iterator = vecDB.iterator();
+    iterator.seekToFirst();
+    while (iterator.hasNext()) {
+      Map.Entry<byte[], byte[]> next = iterator.next();
+      long id = Longs.fromByteArray(next.getKey());
+      Vec vec = ByteTools.toVec(next.getValue());
+      addToTables(id, vec);
+    }
+    build();
   }
 }
