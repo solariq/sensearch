@@ -12,6 +12,8 @@ import com.expleague.sensearch.index.Embedding;
 import com.google.common.primitives.Longs;
 import gnu.trove.list.TLongList;
 import gnu.trove.list.array.TLongArrayList;
+import gnu.trove.set.TLongSet;
+import gnu.trove.set.hash.TLongHashSet;
 import org.fusesource.leveldbjni.JniDBFactory;
 import org.iq80.leveldb.DB;
 import org.iq80.leveldb.DBIterator;
@@ -125,15 +127,44 @@ public class EmbeddingImpl implements Embedding {
 
   @Override
   public LongStream nearest(Vec mainVec, int numberOfNeighbors, LongPredicate predicate) {
-    final long[] order = LongStream.of(allIds).filter(predicate).toArray();
+    long[] indexes = new long[hashFuncs.length];
+    for (int i = 0; i < hashFuncs.length; i++) {
+      indexes[i] = hashFuncs[i].applyAsLong(mainVec);
+    }
+
+    final TLongSet lshNeighbors = new TLongHashSet();
+    TLongList nearestIndexes = new TLongArrayList();
+    for (int diffBitsN = 0; diffBitsN <= MAX_DIFFERENT_BITS; diffBitsN++) {
+      for (long index : indexes) {
+        nearestIndexes.clear();
+        nearestIndexes(nearestIndexes, index, 0, diffBitsN);
+        for (int i = 0; i < nearestIndexes.size(); i++) {
+          byte[] bytes = tablesDB.get(
+                  Longs.toByteArray(
+                          nearestIndexes.get(i)
+                  )
+          );
+          if (bytes != null) {
+            LongStream.of(
+                    ByteTools.toLongArray(bytes)
+            ).forEach(lshNeighbors::add);
+          }
+        }
+      }
+      if (lshNeighbors.size() >= numberOfNeighbors) {
+        break;
+      }
+    }
+
+    final long[] order = LongStream.of(lshNeighbors.toArray()).filter(predicate).toArray();
     if (order.length <= numberOfNeighbors) {
       return LongStream.of(order);
     }
+
     final double[] dist = LongStream.of(order)
-        .mapToObj(this::vec)
-        .filter(Objects::nonNull)
-        .mapToDouble(v -> -VecTools.multiply(mainVec, v))
-        .toArray();
+            .mapToObj(this::vec)
+            .mapToDouble(v -> -VecTools.cosine(mainVec, v))
+            .toArray();
     ArrayTools.parallelSort(dist, order);
     return Arrays.stream(order, 0, numberOfNeighbors);
   }
