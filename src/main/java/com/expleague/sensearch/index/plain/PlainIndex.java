@@ -284,13 +284,16 @@ public class PlainIndex implements Index {
 
   @Override
   public Vec vecByTerms(List<Term> terms) {
-    final Vec answerVec = new ArrayVec(embedding.dim());
-    terms
+    final ArrayVec answerVec = new ArrayVec(embedding.dim());
+    long cnt = terms
         .stream()
         .mapToLong(t -> ((IndexTerm) t).id())
         .mapToObj(embedding::vec)
         .filter(Objects::nonNull)
-        .forEach(v -> VecTools.append(answerVec, v));
+        .peek(v -> VecTools.append(answerVec, v)).count();
+    if (cnt > 0) {
+      answerVec.scale(1. / ((double) cnt));
+    }
     return answerVec;
   }
 
