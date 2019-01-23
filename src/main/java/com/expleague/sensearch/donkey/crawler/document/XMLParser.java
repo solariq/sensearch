@@ -101,23 +101,6 @@ public class XMLParser {
 
                     String sectionTitle = xmlSection.title == null ? "" : xmlSection.title;
                     List<CharSequence> titles = Arrays.asList(sectionTitle.split("\\|@\\|"));
-                    String section =
-                        titles
-                            .get(titles.size() - 1)
-                            .toString()
-                            .replaceAll("\\p{Zs}", "_")
-                            .replaceAll("\\p{javaWhitespace}", "_")
-                            .replace("%", "%25");
-
-                    URI subPageURI = createUri(pageUri, section);
-                    int uriIdx = 1;
-                    // Several subsections can have the same title but they URIs must be different
-                    while (uriSet.contains(subPageURI)) {
-                      uriIdx++;
-                      subPageURI = createUri(pageUri, section + "_" + Integer.toString(uriIdx));
-                    }
-                    uriSet.add(subPageURI);
-
                     /*
                     try {
                       subPageURI = URI.create(
@@ -129,7 +112,7 @@ public class XMLParser {
                     }
                     System.err.println(subPageURI.toString());//*/
 
-                    return new WikiSection(text, titles, links, subPageURI);
+                    return new WikiSection(text, titles, links, null);
                   })
               .collect(Collectors.toList());
 
@@ -142,12 +125,17 @@ public class XMLParser {
                   "",
                   title.subList(0, i),
                   Collections.emptyList(),
-                  createUri(pageUri, title.get(i))));
+                  createUri(pageUri, title.get(i), uriSet)));
         }
       }
       for (int i = 0; i < sections.size(); i++) {
         Section curSection = sections.get(i);
-        newSections.add(curSection);
+        newSections.add(
+            new WikiSection(
+                curSection.text(),
+                curSection.title(),
+                curSection.links(),
+                createUri(pageUri, curSection.title().get(curSection.title().size() - 1), uriSet)));
 
         if (i == sections.size() - 1) {
           continue;
@@ -168,7 +156,7 @@ public class XMLParser {
                   "",
                   newSectionTitle.subList(0, j + 1),
                   Collections.emptyList(),
-                  createUri(pageUri, newSectionTitle.get(j))));
+                  createUri(pageUri, newSectionTitle.get(j), uriSet)));
         }
       }
       page.setSections(newSections);
@@ -179,13 +167,32 @@ public class XMLParser {
     return page;
   }
 
-  private URI createUri(String pageURI, CharSequence sectionTitle) {
+  private URI createUri(String pageUri, CharSequence sectionTitle, Set<URI> uriSet) {
+    URI subPageURI = createUriInternal(pageUri, sectionTitle);
+    int uriIdx = 1;
+    // Several subsections can have the same title but they URIs must be different
+    while (uriSet.contains(subPageURI)) {
+      uriIdx++;
+      subPageURI = createUriInternal(pageUri, sectionTitle + "_" + Integer.toString(uriIdx));
+    }
+    uriSet.add(subPageURI);
+
+    return subPageURI;
+  }
+
+  private URI createUriInternal(String pageURI, CharSequence sectionTitle) {
     try {
       return URI.create(
           "https://ru.wikipedia.org/wiki/"
               + pageURI
               + "#"
-              + URLEncoder.encode(sectionTitle.toString(), "UTF-8"));
+              + URLEncoder.encode(
+              sectionTitle
+                  .toString()
+                  .replaceAll("\\p{Zs}", "_")
+                  .replaceAll("\\p{javaWhitespace}", "_")
+                  .replace("%", "%25"),
+              "UTF-8"));
     } catch (UnsupportedEncodingException e) {
       LOG.error(e);
       return null;
