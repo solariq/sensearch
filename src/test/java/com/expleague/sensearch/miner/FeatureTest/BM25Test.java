@@ -69,7 +69,7 @@ public class BM25Test extends IndexBasedTestCase {
 
     Vec resBM25 = testBM25.advance();
     double scoreBM25 = Math.log(2.0 / query.terms().get(0).documentFreq()) * 2 / (2 + K * (1 - B + B * 38. / (38 + 63) * 2));
-    double scoreBM25L = Math.log(2.0 / query.terms().get(0).documentFreq()) * 2 / (2 + K * (1 - B + B * 38. / (38 + 63) * 2));
+    double scoreBM25L = Math.log(2.0 / query.terms().get(0).documentLemmaFreq()) * 2 / (2 + K * (1 - B + B * 38. / (38 + 63) * 2));
     System.err.println("Query: Суффет   Vec: " + resBM25);
     Assert.assertEquals(0, Double.compare(resBM25.get(0), scoreBM25));
     Assert.assertEquals(0, Double.compare(resBM25.get(1), scoreBM25L));
@@ -82,8 +82,12 @@ public class BM25Test extends IndexBasedTestCase {
 
     resBM25 = testBM25.advance();
     scoreBM25 = 0 + 0;
-    scoreBM25L = Math.log(2.0 / query.terms().get(0).lemma().documentFreq()) * 2 / (2 + K * (1 - B + B * 38. / (38 + 63) * 2))
-        + Math.log(2.0 / query.terms().get(1).lemma().documentFreq()) * 1 / (1 + K * (1 - B + B * 38. / (38 + 63) * 2));
+    scoreBM25L = Math.log(2.0 / query.terms().get(0).documentLemmaFreq()) * 2 / (2 + K * (1 - B + B * 38. / (38 + 63) * 2))
+        + Math.log(2.0 / query.terms().get(1).documentLemmaFreq()) * 1 / (1 + K * (1 - B + B * 38. / (38 + 63) * 2));
+
+    System.err.println(query.terms().get(0).text() + " " + query.terms().get(0).documentLemmaFreq());
+    System.err.println(query.terms().get(1).text() + " " + query.terms().get(1).documentLemmaFreq());
+
     System.err.println("Query: Военные предводители   Vec: " + resBM25);
     Assert.assertEquals(0, Double.compare(resBM25.get(0), scoreBM25));
     Assert.assertEquals(0, Double.compare(resBM25.get(1), scoreBM25L));

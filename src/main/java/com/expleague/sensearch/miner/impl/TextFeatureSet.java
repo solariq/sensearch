@@ -17,8 +17,13 @@ public interface TextFeatureSet extends FeatureSet<QURLItem> {
     BODY
   }
 
+  enum TermType {
+    LEMMA,
+    TERM
+  }
+
   interface   TextFeatureAccumulator {
     void accept(Term term);
-    double value();
+    double value(TermType type);
   }
 }

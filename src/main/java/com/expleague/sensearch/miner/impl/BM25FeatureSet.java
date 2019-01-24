@@ -26,7 +26,8 @@ public class BM25FeatureSet extends FeatureSet.Stub<QURLItem> implements TextFea
   public final static FeatureMeta BM25F = FeatureMeta
       .create("bm25f", "field-dependent bm25", ValueType.VEC);
   public final static FeatureMeta WORDS_SHARE = FeatureMeta
-      .create("words-share", "Document contained words idf sum normalized by total idf", ValueType.VEC);
+      .create("words-share", "Document contained words idf sum normalized by total idf",
+          ValueType.VEC);
   public final static FeatureMeta WORDS_COUNT = FeatureMeta
       .create("words-count", "Words in query", ValueType.VEC);
   public final static FeatureMeta QUERY_LENGTH = FeatureMeta
@@ -60,22 +61,29 @@ public class BM25FeatureSet extends FeatureSet.Stub<QURLItem> implements TextFea
     this.query = query;
     queryTerms = new HashSet<>(query.terms());
     queryLemmas = query.terms().stream().map(Term::lemma).collect(Collectors.toSet());
-    querySyn = query.synonyms().values().stream().flatMap(List::stream).map(Term::lemma).collect(Collectors.toSet());
+    querySyn = query.synonyms().values().stream().flatMap(List::stream).map(Term::lemma)
+        .collect(Collectors.toSet());
     contains = new BitSet(query.terms().size());
   }
 
   @Override
   public Vec advance() {
-    set(BM25, bm25.value());
-    set(BM25L, bm25l.value());
-    set(BM25S, bm25s.value());
-    set(BM25F, bm25f.value());
+    set(BM25, bm25.value(TermType.TERM));
+    ((BM25Accumulator) bm25l).freq.forEachEntry((term, cnt) -> {
+      System.err.println(term.text() + " : " + cnt + " DF: " + term.documentLemmaFreq());
+      return true;
+    });
+    set(BM25L, bm25l.value(TermType.LEMMA));
+    set(BM25S, bm25s.value(TermType.LEMMA));
+    set(BM25F, bm25f.value(TermType.TERM));
     {
-      final double totalIdf = query.terms().stream().mapToDouble(term -> idf(term.documentFreq())).sum() + 1;
+      final double totalIdf =
+          query.terms().stream().mapToDouble(term -> idf(term, TermType.TERM)).sum() + 1;
       set(IDF_TOTAL, totalIdf);
       set(WORDS_COUNT, query.terms().size());
       set(QUERY_LENGTH, query.text().trim().length());
-      set(WORDS_SHARE, contains.stream().mapToObj(query.terms()::get).mapToDouble(term -> idf(term.documentFreq())).sum() / totalIdf);
+      set(WORDS_SHARE, contains.stream().mapToObj(query.terms()::get)
+          .mapToDouble(term -> idf(term, TermType.TERM)).sum() / totalIdf);
     }
     return super.advance();
   }
@@ -89,7 +97,8 @@ public class BM25FeatureSet extends FeatureSet.Stub<QURLItem> implements TextFea
     bm25 = new BM25Accumulator(totalLength, averageTotalLength);
     bm25l = new BM25Accumulator(totalLength, averageTotalLength);
     bm25s = new BM25Accumulator(totalLength, averageTotalLength);
-    bm25f = new BM25FAccumulator(contentLength, averageContentLength, titleLength, averageTitleLength);
+    bm25f = new BM25FAccumulator(contentLength, averageContentLength, titleLength,
+        averageTitleLength);
   }
 
   @Override
@@ -132,10 +141,10 @@ public class BM25FeatureSet extends FeatureSet.Stub<QURLItem> implements TextFea
     }
 
     @Override
-    public double value() {
+    public double value(TermType type) {
       double[] result = new double[]{0};
       freq.forEachEntry((term, freq) -> {
-        result[0] += idf(term.documentFreq()) * freq / (freq + normalizer);
+        result[0] += idf(term, type) * freq / (freq + normalizer);
         return true;
       });
       return result[0];
@@ -166,12 +175,11 @@ public class BM25FeatureSet extends FeatureSet.Stub<QURLItem> implements TextFea
       }
     }
 
-    public double value() {
+    public double value(TermType type) {
       double[] result = new double[]{0};
 
       terms.forEach(term -> {
-        final int df = term.documentFreq();
-        final double idf = idf(df);
+        final double idf = idf(term, type);
 
         double tf = 0;
         tf += freqTITLE.get(term) / normalizerTITLE;
@@ -183,7 +191,16 @@ public class BM25FeatureSet extends FeatureSet.Stub<QURLItem> implements TextFea
     }
   }
 
-  private double idf(int df) {
-    return df == 0 ? 0 : Math.log((double) collectionSize / df);
+  private double idf(Term term, TermType type) {
+    switch (type) {
+      case TERM:
+        return term.documentFreq() == 0 ? 0
+            : Math.log((double) collectionSize / term.documentFreq());
+      case LEMMA:
+        return term.documentLemmaFreq() == 0 ? 0
+            : Math.log((double) collectionSize / term.documentLemmaFreq());
+      default:
+        return 0;
+    }
   }
 }
