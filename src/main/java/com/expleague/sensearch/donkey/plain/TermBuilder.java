@@ -53,9 +53,8 @@ public class TermBuilder implements AutoCloseable {
   }
 
   /**
-   * Adds term to the builder and returns its id as well as its lemma id. If lemma can not be parsed
-   * for this word or if lemma is the same word, lemmaId equals to -1. In all other cases, ids are
-   * strictly greater than 0
+   * Adds term to the builder and returns its id as well as its lemma id.
+   * Lemma id will be equal to term id if lemma equals to term or lemma cannot be parsed
    */
   // TODO: do not store terms in memory as we have only write access to them
   @NotNull
@@ -83,7 +82,7 @@ public class TermBuilder implements AutoCloseable {
           wordId,
           new ParsedTerm(
               wordId, -1, lemma == null ? null : PartOfSpeech.valueOf(lemma.pos().name())));
-      return new TermAndLemmaIdPair(wordId, -1);
+      return new TermAndLemmaIdPair(wordId, wordId);
     }
 
     long lemmaId;

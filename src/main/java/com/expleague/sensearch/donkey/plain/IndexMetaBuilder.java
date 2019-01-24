@@ -47,6 +47,7 @@ public class IndexMetaBuilder {
       LOG.warn(e);
     }
     pageUri.put(uriDecoded, pageId);
+    pageUri.put(uri.toString(), pageId);
     pageIds.add(pageId);
   }
 
