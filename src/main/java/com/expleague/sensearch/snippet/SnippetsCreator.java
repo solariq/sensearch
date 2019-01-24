@@ -50,7 +50,7 @@ public class SnippetsCreator {
 
 
   public Snippet getSnippet(Page document, Query query) {
-    CharSequence title = document.content(SegmentType.SUB_TITLE);
+    CharSequence title = document.content(SegmentType.SECTION_TITLE);
     CharSequence content = document.content();
 /*
     document

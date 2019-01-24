@@ -9,7 +9,6 @@ import com.expleague.sensearch.Page.SegmentType;
 import com.expleague.sensearch.core.Term;
 import com.expleague.sensearch.index.Index;
 import com.expleague.sensearch.miner.impl.TextFeatureSet.Segment;
-
 import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
@@ -36,7 +35,7 @@ public class AccumulatorFeatureSet extends FeatureSet.Stub<QURLItem> {
     final Page page = item.pageCache();
     { // Text features processing
 
-      final int titleLength = (int) index.parse(page.content(SegmentType.SUB_TITLE)).count();
+      final int titleLength = (int) index.parse(page.content(SegmentType.SECTION_TITLE)).count();
       final int contentLength = (int) index.parse(page.content(SegmentType.BODY)).count();
       final int totalLength = titleLength + contentLength;
 
@@ -49,10 +48,10 @@ public class AccumulatorFeatureSet extends FeatureSet.Stub<QURLItem> {
               index.size()));
       { // Title processing
         //features.components().map(Functions.cast(TextFeatureSet.class)).filter(Objects::nonNull)
-        //    .forEach(fs -> fs.withSegment(TextFeatureSet.Segment.TITLE, titleLength));
+        //    .forEach(fs -> fs.withSegment(TextFeatureSet.Segment.FULL_TITLE, titleLength));
         TermConsumer termConsumer = new TermConsumer();
-        index.parse(page.content(SegmentType.SUB_TITLE)).forEach(termConsumer);
-        index.parse(page.content(SegmentType.SUB_TITLE)).forEach(term -> {
+        index.parse(page.content(SegmentType.SECTION_TITLE)).forEach(termConsumer);
+        index.parse(page.content(SegmentType.SECTION_TITLE)).forEach(term -> {
           features.components()
               .map(Functions.cast(TextFeatureSet.class))
               .filter(Objects::nonNull)
@@ -83,7 +82,9 @@ public class AccumulatorFeatureSet extends FeatureSet.Stub<QURLItem> {
     }
     { //Cos-Dist processing
       Vec queryVec = index.vecByTerms(item.queryCache().terms());
-      Vec titleVec = index.vecByTerms(index.parse(item.pageCache().content(SegmentType.SUB_TITLE)).collect(Collectors.toList()));
+      Vec titleVec = index.vecByTerms(
+          index.parse(item.pageCache().content(SegmentType.SECTION_TITLE))
+              .collect(Collectors.toList()));
 
       features.components()
           .map(Functions.cast(CosDistanceFeatureSet.class))

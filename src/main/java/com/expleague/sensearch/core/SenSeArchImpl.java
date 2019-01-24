@@ -97,7 +97,7 @@ public class SenSeArchImpl implements SenSeArch {
       results[i] =
           new ResultItemImpl(
               pages[i].uri(),
-              pages[i].content(SegmentType.SUB_TITLE),
+              pages[i].content(SegmentType.SECTION_TITLE),
               Arrays.asList(Pair.create(snippets[i].getContent(), snippets[i].getSelection())),
               0);
     }

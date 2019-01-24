@@ -67,10 +67,12 @@ public class DataSetMain {
           }
 
           Stream<Page> sensearchResult = index.fetchDocuments(query)
-              .filter(page -> !uniqQURL.contains(page.content(SegmentType.SUB_TITLE).toString())).limit(100);
+              .filter(
+                  page -> !uniqQURL.contains(page.content(SegmentType.SECTION_TITLE).toString()))
+              .limit(100);
           sensearchResult.forEach(page -> {
-            if (!uniqQURL.contains(page.content(SegmentType.SUB_TITLE).toString())) {
-              uniqQURL.add(page.content(SegmentType.SUB_TITLE).toString());
+            if (!uniqQURL.contains(page.content(SegmentType.SECTION_TITLE).toString())) {
+              uniqQURL.add(page.content(SegmentType.SECTION_TITLE).toString());
               poolBuilder.accept(new QURLItem(page, query));
               poolBuilder.advance();
             }

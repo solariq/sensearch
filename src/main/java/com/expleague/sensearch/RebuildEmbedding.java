@@ -66,7 +66,7 @@ public class RebuildEmbedding {
               doc -> {
                 embeddingBuilder.startPage(doc.id());
 
-                embeddingBuilder.add(doc.content(SegmentType.TITLE).toString());
+                embeddingBuilder.add(doc.content(SegmentType.FULL_TITLE).toString());
                 embeddingBuilder.add(doc.content(SegmentType.BODY).toString());
 
                 embeddingBuilder.endPage();

@@ -19,70 +19,76 @@ import org.slf4j.LoggerFactory;
 
 public class PlainPage implements IndexedPage {
 
-  public static final IndexedPage EMPTY_PAGE = new IndexedPage() {
-    private final URI DEFAULT_URI = URI.create("https://www.wikipedia.org/");
-    private static final String EMPTY_STRING = "";
+  public static final IndexedPage EMPTY_PAGE =
+      new IndexedPage() {
+        private final URI DEFAULT_URI = URI.create("https://www.wikipedia.org/");
+        private static final String EMPTY_STRING = "";
 
-    @Override
-    public long id() {
-      throw new NotSupportedException("Id is not determined for an EmptyPage");
-    }
+        @Override
+        public long id() {
+          throw new NotSupportedException("Id is not determined for an EmptyPage");
+        }
 
-    @Override
-    public long parentId() {
-      throw new NotSupportedException("Parent id is not determined for an EmptyPage");
-    }
+        @Override
+        public long parentId() {
+          throw new NotSupportedException("Parent id is not determined for an EmptyPage");
+        }
 
-    @Override
-    public LongStream subpagesIds() {
-      return LongStream.empty();
-    }
+        @Override
+        public LongStream subpagesIds() {
+          return LongStream.empty();
+        }
 
-    @Override
-    public URI uri() {
-      return DEFAULT_URI;
-    }
+        @Override
+        public URI uri() {
+          return DEFAULT_URI;
+        }
 
-    @Override
-    public CharSequence content(SegmentType... types) {
-      return EMPTY_STRING;
-    }
+        @Override
+        public CharSequence content(SegmentType... types) {
+          return EMPTY_STRING;
+        }
 
-    @Override
-    public List<CharSequence> categories() {
-      return Collections.emptyList();
-    }
+        @Override
+        public List<CharSequence> categories() {
+          return Collections.emptyList();
+        }
 
-    @Override
-    public Stream<Link> outgoingLinks() {
-      return Stream.empty();
-    }
+        @Override
+        public Stream<Link> outgoingLinks(LinkType type) {
+          return Stream.empty();
+        }
 
-    @Override
-    public Stream<Link> incomingLinks() {
-      return Stream.empty();
-    }
+        @Override
+        public Stream<Link> incomingLinks(LinkType type) {
+          return Stream.empty();
+        }
 
-    @Override
-    public Page parent() {
-      return this;
-    }
+        @Override
+        public Page parent() {
+          return this;
+        }
 
-    @Override
-    public boolean hasParent() {
-      return false;
-    }
+        @Override
+        public Page root() {
+          return this;
+        }
 
-    @Override
-    public Stream<Page> subpages() {
-      return Stream.empty();
-    }
+        @Override
+        public boolean isRoot() {
+          return true;
+        }
 
-    @Override
-    public Stream<CharSequence> sentences(SegmentType t) {
-      return Stream.empty();
-    }
-  };
+        @Override
+        public Stream<Page> subpages() {
+          return Stream.empty();
+        }
+
+        @Override
+        public Stream<CharSequence> sentences(SegmentType t) {
+          return Stream.empty();
+        }
+      };
 
   private static final Logger LOG = LoggerFactory.getLogger(PlainPage.class);
 
@@ -109,13 +115,16 @@ public class PlainPage implements IndexedPage {
       IndexUnits.Page protoPage = plainIndex.protoPageLoad(id);
       return new PlainPage(protoPage, plainIndex);
     } catch (NoSuchElementException e) {
-      LOG.warn(String.format("No page was found in the index by given id [ %d ]."
-          + " Returned empty page", id));
+      LOG.warn(
+          String.format(
+              "No page was found in the index by given id [ %d ]." + " Returned empty page", id));
       return EMPTY_PAGE;
     } catch (InvalidProtocolBufferException e) {
-      LOG.warn(String.format("Encountered invalid protobuf for the page with id [ %d ]."
-          + " Empty page is returned. Cause: %s", id, e.toString())
-      );
+      LOG.warn(
+          String.format(
+              "Encountered invalid protobuf for the page with id [ %d ]."
+                  + " Empty page is returned. Cause: %s",
+              id, e.toString()));
       return EMPTY_PAGE;
     }
   }
@@ -137,8 +146,8 @@ public class PlainPage implements IndexedPage {
   }
 
   @Override
-  public boolean hasParent() {
-    return protoPage.hasParentId();
+  public boolean isRoot() {
+    return !protoPage.hasParentId();
   }
 
   @Override
@@ -157,20 +166,26 @@ public class PlainPage implements IndexedPage {
   private CharSequence content(SegmentType type) {
     switch (type) {
       case BODY:
-        return CharSeqTools.concat(content(SegmentType.SUB_BODY), "\n",
-            subpages().map(p -> p.content(SegmentType.BODY)).collect(Collectors.joining("\n")));
-      case TITLE:
+        String subpagesContent =
+            subpages().map(p -> p.content(SegmentType.BODY)).collect(Collectors.joining("\n"));
+        if (subpagesContent.isEmpty()) {
+          return content(SegmentType.SUB_BODY);
+        }
+        return CharSeqTools.concat(content(SegmentType.SUB_BODY), "\n", subpagesContent);
+      case FULL_TITLE:
         Page p = this;
         CharSequence res = "";
         while (p.parent() != p) {
-          res = CharSeqTools.concat(p.parent().content(SegmentType.SUB_TITLE), " # ", res);
+          res =
+              CharSeqTools.concat(
+                  p.parent().content(SegmentType.SECTION_TITLE), TITLE_DELIMETER, res);
           p = p.parent();
         }
-        res = CharSeqTools.concat(res, content(SegmentType.SUB_TITLE));
+        res = CharSeqTools.concat(res, content(SegmentType.SECTION_TITLE));
         return res;
       case SUB_BODY:
         return protoPage.getContent();
-      case SUB_TITLE:
+      case SECTION_TITLE:
         return protoPage.getTitle();
       default:
         return "";
@@ -182,35 +197,66 @@ public class PlainPage implements IndexedPage {
     return Arrays.stream(types).map(this::content).collect(Collectors.joining("\n"));
   }
 
-
   @Override
   public List<CharSequence> categories() {
-    return protoPage.getCategoriesList()
+    return protoPage
+        .getCategoriesList()
         .stream()
         .map(CharSequence.class::cast)
         .collect(Collectors.toList());
   }
 
   @Override
-  public Stream<Link> outgoingLinks() {
-    if (protoPage.getOutgoingLinksCount() == 0) {
-      return Stream.empty();
-    }
+  public Stream<Link> outgoingLinks(LinkType type) {
+    switch (type) {
+      case SECTION_LINKS:
+        return outgoingLinks(LinkType.SECTION_INCLUDING_SELF_LINKS)
+            .filter(l -> !l.targetPage().root().equals(root()));
 
-    return protoPage.getOutgoingLinksList()
-        .stream()
-        .map(l -> PlainLink.withSource(l, index, this));
+      case SECTION_INCLUDING_SELF_LINKS:
+        return protoPage
+            .getOutgoingLinksList()
+            .stream()
+            .map(l -> PlainLink.withSource(l, index, this));
+
+      case ALL_LINKS:
+        return outgoingLinks(LinkType.ALL_INCLUDING_SELF_LINKS)
+            .filter(l -> !l.targetPage().root().equals(root()));
+
+      case ALL_INCLUDING_SELF_LINKS:
+        return Stream.concat(
+            protoPage
+                .getOutgoingLinksList()
+                .stream()
+                .map(l -> PlainLink.withSource(l, index, this)),
+            subpages().flatMap(page -> page.outgoingLinks(LinkType.ALL_INCLUDING_SELF_LINKS)));
+      default:
+        return Stream.empty();
+    }
   }
 
   @Override
-  public Stream<Link> incomingLinks() {
-    if (protoPage.getIncomingLinksCount() == 0) {
-      return Stream.empty();
-    }
+  public Stream<Link> incomingLinks(LinkType type) {
+    switch (type) {
+      case SECTION_LINKS:
+        return incomingLinks(LinkType.SECTION_INCLUDING_SELF_LINKS)
+            .filter(l -> !l.sourcePage().root().equals(root()));
 
-    return protoPage.getIncomingLinksList()
-        .stream()
-        .map(l -> PlainLink.withTarget(l, index, this));
+      case SECTION_INCLUDING_SELF_LINKS:
+        return protoPage
+            .getIncomingLinksList()
+            .stream()
+            .map(l -> PlainLink.withTarget(l, index, this));
+
+      case ALL_LINKS:
+        return root().incomingLinks(LinkType.SECTION_LINKS);
+
+      case ALL_INCLUDING_SELF_LINKS:
+        return root().incomingLinks(LinkType.SECTION_INCLUDING_SELF_LINKS);
+
+      default:
+        return Stream.empty();
+    }
   }
 
   @Override
@@ -223,10 +269,17 @@ public class PlainPage implements IndexedPage {
   }
 
   @Override
+  public Page root() {
+    Page cur = this;
+    while (!cur.isRoot()) {
+      cur = cur.parent();
+    }
+    return cur;
+  }
+
+  @Override
   public Stream<Page> subpages() {
-    return this
-        .subpagesIds()
-        .mapToObj(id -> PlainPage.create(id, this.index));
+    return this.subpagesIds().mapToObj(id -> PlainPage.create(id, this.index));
   }
 
   @Override
@@ -245,64 +298,52 @@ public class PlainPage implements IndexedPage {
   }
 
   static class PlainLink implements Page.Link {
-
-    private static final Logger LOG = LoggerFactory.getLogger(PlainLink.class);
-
-    private final PlainIndex index;
     private final IndexUnits.Page.Link protoLink;
     private final IndexedPage sourcePage;
     private final IndexedPage targetPage;
 
-    PlainLink(IndexUnits.Page.Link protoLink, PlainIndex index, IndexedPage sourcePage,
-        IndexedPage targetPage) {
+    PlainLink(IndexUnits.Page.Link protoLink, IndexedPage sourcePage, IndexedPage targetPage) {
       this.protoLink = protoLink;
-      this.index = index;
       this.sourcePage = sourcePage;
       this.targetPage = targetPage;
     }
 
-    static PlainLink withTarget(IndexUnits.Page.Link protoLink, PlainIndex index,
-        PlainPage targetPage) {
+    static PlainLink withTarget(
+        IndexUnits.Page.Link protoLink, PlainIndex index, PlainPage targetPage) {
       return new PlainLink(
-          protoLink,
-          index,
-          PlainPage.create(protoLink.getSourcePageId(), index),
-          targetPage
-      );
+          protoLink, PlainPage.create(protoLink.getSourcePageId(), index), targetPage);
     }
 
-    static PlainLink withSource(IndexUnits.Page.Link protoLink, PlainIndex index,
-        PlainPage sourcePage) {
+    static PlainLink withSource(
+        IndexUnits.Page.Link protoLink, PlainIndex index, PlainPage sourcePage) {
       return new PlainLink(
           protoLink,
-          index,
           sourcePage,
-          protoLink.hasTargetPageId() ? PlainPage.create(protoLink.getTargetPageId(), index) :
-              PlainPage.EMPTY_PAGE
-      );
+          protoLink.hasTargetPageId()
+              ? PlainPage.create(protoLink.getTargetPageId(), index)
+              : PlainPage.EMPTY_PAGE);
     }
 
     static PlainLink fromProtoLinkOnly(IndexUnits.Page.Link protoLink, PlainIndex index) {
       return new PlainLink(
           protoLink,
-          index,
           PlainPage.create(protoLink.getSourcePageId(), index),
-          protoLink.hasTargetPageId() ? PlainPage.create(protoLink.getTargetPageId(), index) :
-              PlainPage.EMPTY_PAGE
-      );
+          protoLink.hasTargetPageId()
+              ? PlainPage.create(protoLink.getTargetPageId(), index)
+              : PlainPage.EMPTY_PAGE);
     }
 
     @Override
-    public boolean hasTarget() {
-      return protoLink.hasTargetPageId();
+    public boolean targetExists() {
+      return targetPage != EMPTY_PAGE;
     }
 
     @Override
-    public CharSequence content() {
-      if (targetPage == null) {
+    public CharSequence targetTitle() {
+      if (targetPage == EMPTY_PAGE) {
         return "";
       }
-      return targetPage.content(SegmentType.TITLE);
+      return targetPage.content(SegmentType.SECTION_TITLE);
     }
 
     @Override
@@ -325,5 +366,4 @@ public class PlainPage implements IndexedPage {
       return protoLink.getPosition();
     }
   }
-
 }

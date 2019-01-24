@@ -2,9 +2,7 @@ package com.expleague.sensearch.miner.impl;
 
 import com.expleague.commons.math.vectors.Vec;
 import com.expleague.commons.math.vectors.impl.vectors.ArrayVec;
-import com.expleague.commons.math.vectors.impl.vectors.VecBuilder;
 import com.expleague.ml.data.tools.FeatureSet;
-import com.expleague.ml.meta.FeatureMeta;
 import com.expleague.ml.meta.FeatureMeta.ValueType;
 import com.expleague.ml.meta.TargetMeta;
 import com.expleague.sensearch.Page;
@@ -46,7 +44,7 @@ public class TargetFeatureSet extends FeatureSet.Stub<QURLItem> {
       List<ResultItem> res = Arrays.asList(objectMapper.readValue(reader, ResultItemImpl[].class));
       ResultItem resultItem = res
           .stream()
-          .filter(item -> item.title().equals(page.content(SegmentType.SUB_TITLE)))
+          .filter(item -> item.title().equals(page.content(SegmentType.SECTION_TITLE)))
           .findFirst().orElse(null);
       if (resultItem != null) {
         vec = res.indexOf(resultItem) + 1;

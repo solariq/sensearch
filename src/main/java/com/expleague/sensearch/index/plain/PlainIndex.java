@@ -316,7 +316,7 @@ public class PlainIndex implements Index {
     iterator.seekToFirst();
     return Streams.stream(iterator)
         .map(entry -> (Page) PlainPage.create(Longs.fromByteArray(entry.getKey()), this))
-        .filter(page -> !page.hasParent());
+        .filter(page -> !page.isRoot());
   }
 
   @Override

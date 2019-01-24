@@ -40,13 +40,12 @@ public class IndexMetaBuilder {
     if (pageUri.containsKey(pageUri)) {
       throw new IllegalStateException("Uri " + uri + " is already in IndexMeta");
     }
-    String uriDecoded = null;
     try {
-      uriDecoded = URLDecoder.decode(uri.toString(), "UTF-8");
+      String uriDecoded = URLDecoder.decode(uri.toString(), "UTF-8");
+      pageUri.put(uriDecoded, pageId);
     } catch (UnsupportedEncodingException e) {
       LOG.warn(e);
     }
-    pageUri.put(uriDecoded, pageId);
     pageUri.put(uri.toString(), pageId);
     pageIds.add(pageId);
   }
@@ -81,6 +80,12 @@ public class IndexMetaBuilder {
   }
 
   public void addSection(URI sectionUri, long sectionId) {
+    try {
+      String uriDecoded = URLDecoder.decode(sectionUri.toString(), "UTF-8");
+      pageUri.put(uriDecoded, sectionId);
+    } catch (UnsupportedEncodingException e) {
+      LOG.warn(e);
+    }
     pageUri.put(sectionUri.toString(), sectionId);
   }
 }

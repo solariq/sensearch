@@ -5,6 +5,7 @@ import com.expleague.ml.data.tools.FeatureSet;
 import com.expleague.ml.meta.FeatureMeta;
 import com.expleague.ml.meta.FeatureMeta.ValueType;
 import com.expleague.sensearch.Page;
+import com.expleague.sensearch.Page.LinkType;
 
 public class LinkFeatureSet extends FeatureSet.Stub<QURLItem> {
   public final static FeatureMeta INCOMING_LINK = FeatureMeta
@@ -21,8 +22,8 @@ public class LinkFeatureSet extends FeatureSet.Stub<QURLItem> {
 
   @Override
   public Vec advance() {
-    set(INCOMING_LINK, page.incomingLinks().count());
-    set(OUTGOING_LINK, page.outgoingLinks().count());
+    set(INCOMING_LINK, page.incomingLinks(LinkType.ALL_LINKS).count());
+    set(OUTGOING_LINK, page.outgoingLinks(LinkType.ALL_LINKS).count());
     return super.advance();
   }
 }

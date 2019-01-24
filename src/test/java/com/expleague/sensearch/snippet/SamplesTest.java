@@ -66,12 +66,12 @@ public class SamplesTest extends IndexBasedTestCase {
                         }
 
                         @Override
-                        public Stream<Link> outgoingLinks() {
+                        public Stream<Link> outgoingLinks(LinkType type) {
                           return null;
                         }
 
                         @Override
-                        public Stream<Link> incomingLinks() {
+                        public Stream<Link> incomingLinks(LinkType type) {
                           return null;
                         }
 
@@ -81,8 +81,13 @@ public class SamplesTest extends IndexBasedTestCase {
                         }
 
                         @Override
-                        public boolean hasParent() {
-                          return false;
+                        public Page root() {
+                          return this;
+                        }
+
+                        @Override
+                        public boolean isRoot() {
+                          return true;
                         }
 
                         @Override
