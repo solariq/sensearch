@@ -37,7 +37,7 @@ public class IndexMetaBuilder {
     if (pageIds.contains(pageId)) {
       throw new IllegalStateException("Page with id [" + pageId + "] is already in IndexMeta");
     }
-    if (pageUri.containsKey(pageUri)) {
+    if (pageUri.containsKey(uri)) {
       throw new IllegalStateException("Uri " + uri + " is already in IndexMeta");
     }
     try {
