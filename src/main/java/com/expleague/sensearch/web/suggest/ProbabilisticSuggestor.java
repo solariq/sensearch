@@ -100,13 +100,14 @@ public class ProbabilisticSuggestor implements Suggestor {
 		String qt = terms.get(terms.size() - 1).text().toString();
 		List<Term> qc = terms.subList(0, terms.size() - 1);
 
-		List<Integer> qcDocs = getDocsSetsIntersection(qc.stream().toArray(Term[]::new));
+		//List<Integer> qcDocs = getDocsSetsIntersection(qc.stream().toArray(Term[]::new));
 		//List<Integer> qcDocs = Arrays.asList();
 		
 		phraseProb.clear();
 
 		for (Term[] p : multigramFreqNorm.keySet()) {
-			phraseProb.put(p, getPpQt(p, qt) * getPQcp(qcDocs, p));
+			//phraseProb.put(p, getPpQt(p, qt) * getPQcp(qcDocs, p));
+			phraseProb.put(p, getPpQt(p, qt));
 		}
 
 		String qcText = qc
