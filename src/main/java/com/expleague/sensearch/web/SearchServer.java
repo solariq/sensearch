@@ -61,6 +61,7 @@ public class SearchServer {
     ResourceConfig resourceConfig = new ResourceConfig();
     resourceConfig.packages("com.expleague.sensearch.web");
     resourceConfig.register(new HK2ToGuiceModule(injector));
+    resourceConfig.register(new DebugExceptionMapper());
 
     Server server = new Server(8081);
 

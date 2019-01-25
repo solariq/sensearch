@@ -62,7 +62,7 @@ export class SearchPageComponent implements OnInit {
       },
       error => {
         this.isSearchActive = false;
-        this.error = error.statusText;
+        this.error = error.statusText + "\n\n" + error.error;
         this.searchResults = undefined;
       });
   }
