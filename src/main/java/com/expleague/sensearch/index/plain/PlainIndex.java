@@ -34,6 +34,7 @@ import gnu.trove.map.hash.TLongObjectHashMap;
 import gnu.trove.map.hash.TObjectLongHashMap;
 import java.io.IOException;
 import java.net.URI;
+import java.net.URLEncoder;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
@@ -236,7 +237,14 @@ public class PlainIndex implements Index {
     averageLinkSize = averageLinkSize / linkCnt;
 
     for (UriPageMapping mapping : indexMeta.getUriPageMappingsList()) {
-      uriToPageIdMap.put(URI.create(mapping.getUri()), mapping.getPageId());
+      URI key;
+      try {
+        key = URI.create(mapping.getUri());
+      }
+      catch (IllegalArgumentException iae) {
+        key = URI.create(URLEncoder.encode(mapping.getUri(), "UTF-8"));
+      }
+      uriToPageIdMap.put(key, mapping.getPageId());
     }
 
     LOG.info(
