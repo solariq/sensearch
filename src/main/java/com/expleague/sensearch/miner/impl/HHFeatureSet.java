@@ -1,16 +1,16 @@
 package com.expleague.sensearch.miner.impl;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeSet;
 import com.expleague.commons.math.vectors.Vec;
 import com.expleague.ml.data.tools.FeatureSet;
 import com.expleague.ml.meta.FeatureMeta;
 import com.expleague.ml.meta.FeatureMeta.ValueType;
 import com.expleague.sensearch.core.Term;
 import com.expleague.sensearch.query.Query;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
 
 public class HHFeatureSet extends FeatureSet.Stub<QURLItem> implements TextFeatureSet {
 
@@ -133,11 +133,11 @@ public class HHFeatureSet extends FeatureSet.Stub<QURLItem> implements TextFeatu
   private double hhProximty(TermType type) {
     double sum = 0;
     switch (type) {
-      case LEMMA:
+      case TERM:
         for (Term t : queryTerms) {
           sum += atc(t, type) * idf.get(t);
         }
-      case TERM:
+      case LEMMA:
         for (Term t : queryTerms) {
           sum += atc(t.lemma(), type) * idfLemma.get(t.lemma());
         }
