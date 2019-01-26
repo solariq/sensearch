@@ -54,10 +54,10 @@ public class ResultItemDeserializer extends StdDeserializer<ResultItem> {
                 passages.add(new Pair<>(text, highlights));
               });
 
-      int score = node.get("score").intValue();
-      ResultItemDebugInfo debugInfo =
-          codec.treeToValue(node.get("debugInfo"), ResultItemDebugInfo.class);
-      return new ResultItemImpl(reference, title, passages, score, debugInfo);
+//      int score = node.get("score").intValue();
+//      ResultItemDebugInfo debugInfo =
+//          codec.treeToValue(node.get("debugInfo"), ResultItemDebugInfo.class);
+      return new ResultItemImpl(reference, title, passages, 0, null);
     } catch (URISyntaxException e) {
       e.printStackTrace();
     }

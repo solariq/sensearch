@@ -124,6 +124,11 @@ public class AccumulatorFeatureSet extends FeatureSet.Stub<QURLItem> {
     return features.meta(ind);
   }
 
+  @Override
+  public int index(FeatureMeta meta) {
+    return features.index(meta);
+  }
+
   private class TermConsumer implements Consumer<Term> {
 
     int index = 0;
