@@ -22,3 +22,11 @@
 .google-result {
   grid-column: 2;
 }
+
+.search-check-param {
+  margin: 0 10px;
+}
+
+.search-param-section {
+  display: flex;
+}

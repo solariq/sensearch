@@ -25,6 +25,8 @@ export class SearchPageComponent implements OnInit {
 
   isSearchActive: boolean;
   autocompleteControl = new FormControl();
+  debug: boolean = false;
+  metric: boolean = false;
 
   constructor(
     private searchService: SearchService,
@@ -54,7 +56,7 @@ export class SearchPageComponent implements OnInit {
     this.isSearchActive = true;
     this.triggerAutocompleteInput.closePanel();
 
-    this.searchService.getResults$(this.autocompleteControl.value, 0).subscribe(
+    this.searchService.getResults$(this.autocompleteControl.value, 0, this.debug, this.metric).subscribe(
       results => {
         this.isSearchActive = false;
         this.error = undefined;

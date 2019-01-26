@@ -1,12 +1,20 @@
 <link href="https://fonts.googleapis.com/icon?family=Material+Icons"
       rel="stylesheet">
-<mat-progress-bar *ngIf="isSearchActive" mode="indeterminate" class="search-progress-bar"></mat-progress-bar>
+<mat-progress-bar *ngIf="isSearchActive" mode="indeterminate"
+                  class="search-progress-bar"></mat-progress-bar>
+
+<section class="search-param-section">
+  <mat-checkbox class="search-check-param" [(ngModel)]="debug">Debug</mat-checkbox>
+  <mat-checkbox class="search-check-param" [(ngModel)]="metric">Calculate metric</mat-checkbox>
+</section>
 
 <form class="search-box-form">
   <mat-form-field class="search-box" appearance="outline">
-    <input #autocompleteInput type="text" matInput placeholder="Поиск" [formControl]="autocompleteControl" [matAutocomplete]="autocomplete">
+    <input #autocompleteInput type="text" matInput placeholder="Поиск"
+           [formControl]="autocompleteControl" [matAutocomplete]="autocomplete">
 
-    <button matSuffix mat-icon-button class="search-button" (click)="search(); $event.stopPropagation(); ">
+    <button matSuffix mat-icon-button class="search-button"
+            (click)="search(); $event.stopPropagation(); ">
       <mat-icon>search</mat-icon>
     </button>
     <mat-autocomplete #autocomplete="matAutocomplete">
@@ -25,7 +33,8 @@
     </app-search-result>
   </ng-container>
   <ng-container *ngFor="let item of searchResults.googleResults; let i = index">
-    <app-search-result class="google-result" *ngIf="item" [searchItem]="item" [style.grid-row]="i + 1">
+    <app-search-result class="google-result" *ngIf="item" [searchItem]="item"
+                       [style.grid-row]="i + 1">
     </app-search-result>
   </ng-container>
 </div>

@@ -9,14 +9,22 @@ import {SearchResultPageModel} from "../models/search-result-item.model";
 })
 export class SearchService {
 
-  constructor(private http: HttpClient) { }
+  constructor(private http: HttpClient) {
+  }
 
   getSuggestions$(query: string): Observable<string[]> {
     return this.http.get(`${environment.backendUrl}/suggest`, {params: {query: query}}) as Observable<string[]>
   }
 
-  getResults$(query: string, page: number): Observable<SearchResultPageModel> {
-    let response = this.http.get(`${environment.backendUrl}/search`, {params: {query: query, page: page.toString()}});
+  getResults$(query: string, page: number, debug: boolean, metric: boolean): Observable<SearchResultPageModel> {
+    let response = this.http.get(`${environment.backendUrl}/search`, {
+      params: {
+        query: query,
+        page: page.toString(),
+        debug: debug.toString(),
+        metric: metric.toString(),
+      }
+    });
     return response as Observable<SearchResultPageModel>
   }
 }

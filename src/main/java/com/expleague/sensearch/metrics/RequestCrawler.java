@@ -34,6 +34,8 @@ public class RequestCrawler implements WebCrawler {
   private Map<String, Map<String, String>> cookies = new HashMap<>();
 
   private final Index index;
+  private final Map<String, List<ResultItem>> requestCache = new HashMap<>();
+
   private static final List<String> agentsList = new ArrayList<>();
   private static final List<String> dummyRequests = new ArrayList<>();
 
@@ -131,6 +133,10 @@ public class RequestCrawler implements WebCrawler {
 
   @Override
   public List<ResultItem> getGoogleResults(Integer size, String query) throws IOException {
+    if (requestCache.containsKey(query)) {
+      return requestCache.get(query);
+    }
+
     String userAgent = agentsList.get(random.nextInt(agentsList.size()));
     if (cookies.get(userAgent) == null) {
       //      cookies.put(userAgent, new HashMap<>());
@@ -193,7 +199,7 @@ public class RequestCrawler implements WebCrawler {
                     uri,
                     title,
                     Collections.singletonList(new Pair<>(snippet, new ArrayList<>())),
-                    0));
+                    0, null));
           });
 
       request = "https://google.ru" + document.select("a.pn[id=pnnext]").attr("href");
@@ -203,6 +209,8 @@ public class RequestCrawler implements WebCrawler {
         e.printStackTrace();
       }
     }
+
+    requestCache.put(query, results);
     return results;
   }
 

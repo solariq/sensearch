@@ -7,10 +7,11 @@ import {SearchResultComponent} from "./components/search-result/search-result.co
 import {
   MatAutocompleteModule,
   MatButtonModule,
+  MatCheckboxModule,
   MatFormFieldModule,
   MatIconModule,
   MatInputModule,
-  MatProgressBarModule
+  MatProgressBarModule,
 } from "@angular/material";
 import {FormsModule, ReactiveFormsModule} from "@angular/forms";
 import {HttpClientModule} from "@angular/common/http";
@@ -31,6 +32,7 @@ import {RouterModule} from "@angular/router";
     HttpClientModule,
     MatAutocompleteModule,
     MatButtonModule,
+    MatCheckboxModule,
     MatFormFieldModule,
     MatIconModule,
     MatInputModule,
