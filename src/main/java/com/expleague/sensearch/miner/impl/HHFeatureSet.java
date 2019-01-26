@@ -41,7 +41,7 @@ public class HHFeatureSet extends FeatureSet.Stub<QURLItem> implements TextFeatu
 		termPositions.clear();
 		queryTerms.forEach(term -> {
 			final int df = term.documentFreq();
-			final double idf = df == 0 ? 0 : Math.log((indexLength - df + 0.5) / (df + 0.5));
+			final double idf = df == 0 ? 0 : Math.log((double) indexLength / df);
 			this.idf.put(term, idf);
 		});
 	}

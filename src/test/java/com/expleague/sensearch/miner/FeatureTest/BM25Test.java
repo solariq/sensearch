@@ -94,6 +94,13 @@ public class BM25Test extends IndexBasedTestCase {
 
   }
 
+  @Test
+  public void testPage2() {
+    index().parse(page1).forEach(t -> {
+      System.err.println(t.text());
+    });
+  }
+
   private class TestPage implements Page {
 
     @Override

@@ -69,13 +69,9 @@ public class BM25FeatureSet extends FeatureSet.Stub<QURLItem> implements TextFea
   @Override
   public Vec advance() {
     set(BM25, bm25.value(TermType.TERM));
-    ((BM25Accumulator) bm25l).freq.forEachEntry((term, cnt) -> {
-      System.err.println(term.text() + " : " + cnt + " DF: " + term.documentLemmaFreq());
-      return true;
-    });
     set(BM25L, bm25l.value(TermType.LEMMA));
     set(BM25S, bm25s.value(TermType.LEMMA));
-    set(BM25F, bm25f.value(TermType.TERM));
+    set(BM25F, bm25f.value(TermType.LEMMA));
     {
       final double totalIdf =
           query.terms().stream().mapToDouble(term -> idf(term, TermType.TERM)).sum() + 1;
