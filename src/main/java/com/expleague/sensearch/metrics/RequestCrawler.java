@@ -199,7 +199,7 @@ public class RequestCrawler implements WebCrawler {
                     uri,
                     title,
                     Collections.singletonList(new Pair<>(snippet, new ArrayList<>())),
-                    0, null));
+                    0));
           });
 
       request = "https://google.ru" + document.select("a.pn[id=pnnext]").attr("href");
