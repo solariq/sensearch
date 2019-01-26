@@ -9,6 +9,7 @@ import {Passage, SearchResultItemModel} from "../../models/search-result-item.mo
 export class SearchResultComponent implements OnInit {
 
   @Input() searchItem: SearchResultItemModel;
+  @Input() debug: boolean;
 
   constructor() { }
 

@@ -1,10 +1,10 @@
 <h3 class="search-result-item"><a href="{{searchItem.reference}}">{{searchItem.title}}</a></h3>
 
-<div class="result-item-debug" *ngIf="searchItem.debugInfo">
-  <div>Rank: {{searchItem.debugInfo.rank}}</div>
+<div class="result-item-debug" *ngIf="debug">
+  <div *ngIf="searchItem.debugInfo">Rank: {{searchItem.debugInfo.rank}}</div>
   <div>Score: {{searchItem.score | number: '1.4-4'}}</div>
 
-  <div *ngIf="searchItem.debugInfo.features" class="result-item-debug-features">
+  <div *ngIf="searchItem.debugInfo" class="result-item-debug-features">
     <div
       *ngFor="let featureId of searchItem.debugInfo.featureIds; let i = index">
       {{featureId}}: {{searchItem.debugInfo.features[i] | number : '1.3-3'}}
