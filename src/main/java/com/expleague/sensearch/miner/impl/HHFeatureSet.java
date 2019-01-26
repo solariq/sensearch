@@ -14,100 +14,135 @@ import com.expleague.sensearch.query.Query;
 
 public class HHFeatureSet extends FeatureSet.Stub<QURLItem> implements TextFeatureSet {
 
-	public final static FeatureMeta HHP = FeatureMeta
-			.create("hhp", "Title + text hhp", ValueType.VEC);
+  public final static FeatureMeta HHP = FeatureMeta
+      .create("hhp", "Title + text hhp", ValueType.VEC);
 
-	private Query query;
-	private Set<Term> queryTerms;
-	private Map<Term, TreeSet<Integer>> termPositions = new HashMap<>();
-	private Map<Term, Double> idf = new HashMap<>();
+  public final static FeatureMeta HHPL = FeatureMeta
+      .create("lemma-hhp", "Title + text hhp by lemma", ValueType.VEC);
 
-	@Override
-	public void accept(QURLItem item) {
-		final Query query = item.queryCache();
-		if (query.equals(this.query))
-			return;
+  private Query query;
+  private Set<Term> queryTerms;
+  private Map<Term, TreeSet<Integer>> termPositions = new HashMap<>();
+  private Map<Term, Double> idf = new HashMap<>();
+  private Map<Term, Double> idfLemma = new HashMap<>();
 
-		this.query = query;
-		queryTerms = new HashSet<>(query.terms());
+  @Override
+  public void accept(QURLItem item) {
+    final Query query = item.queryCache();
+    if (query.equals(this.query)) {
+      return;
+    }
 
-	}
+    this.query = query;
+    queryTerms = new HashSet<>(query.terms());
 
-	@Override
-	public void withStats(int totalLength, double averageTotalLength, int titleLength,
-			double averageTitleLength, int contentLength,
-			double averageContentLength,
-			int indexLength) {
-		termPositions.clear();
-		queryTerms.forEach(term -> {
-			final int df = term.documentFreq();
-			final double idf = df == 0 ? 0 : Math.log((double) indexLength / df);
-			this.idf.put(term, idf);
-		});
-	}
+  }
 
-	@Override
-	public void withSegment(Segment type, Term t) {
-		// TODO Auto-generated method stub
-	}
+  @Override
+  public void withStats(int totalLength, double averageTotalLength, int titleLength,
+      double averageTitleLength, int contentLength,
+      double averageContentLength,
+      int indexLength) {
+    termPositions.clear();
+    queryTerms.forEach(term -> {
+      final int df = term.documentFreq();
+      final double idf = df == 0 ? 0 : Math.log((double) indexLength / df);
+      this.idf.put(term, idf);
 
-	@Override
-	public void withTerm(Term t, int offset) {
-		termPositions.putIfAbsent(t, new TreeSet<>());
-		termPositions.get(t).add(offset);
-	}
+      final int dfL = term.documentLemmaFreq();
+      final double idfL = dfL == 0 ? 0 : Math.log((double) indexLength / dfL);
+      this.idfLemma.put(term.lemma(), idfL);
+    });
+  }
 
-	@Override
-	public Vec advance() {
-		set(HHP, hhProximty());
-		return super.advance();
-	}
+  @Override
+  public void withSegment(Segment type, Term t) {
+    // TODO Auto-generated method stub
+  }
 
-	private final double z = 1.75;
-	private double frac(Term term, Integer neighPos, int center) {
+  @Override
+  public void withTerm(Term t, int offset) {
+    termPositions.putIfAbsent(t, new TreeSet<>());
+    termPositions.get(t).add(offset);
 
-		if (neighPos == null) {
-			return 0;
-		}
+    termPositions.putIfAbsent(t.lemma(), new TreeSet<>());
+    termPositions.get(t.lemma()).add(offset);
 
-		return idf.get(term) / Math.pow(Math.abs(neighPos - center), z);
-	}
+  }
 
-	private double tc(Term t, int p) {
-		double res = 0;
+  @Override
+  public Vec advance() {
+    set(HHP, hhProximty(TermType.TERM));
+    set(HHPL, hhProximty(TermType.LEMMA));
+    return super.advance();
+  }
 
-		for (Term term : queryTerms) {
-			TreeSet<Integer> positions = termPositions.get(term);
-			if (positions == null)
-				continue;
-			
-			res += (frac(term, positions.lower(p), p) +
-					frac(term, positions.higher(p), p))
-					* (t.equals(term) ? 0.25 : 1);
-		}
+  private final double z = 1.75;
 
-		return res;
-	}
+  private double frac(Term term, Integer neighPos, int center,
+      TermType type) {
 
-	private double atc(Term t) {
-		double res = 0;
-		
-		if (!termPositions.containsKey(t))
-			return res;
-		
-		for (Integer p : termPositions.get(t)) {
-			res += tc(t, p);
-		}
+    if (neighPos == null) {
+      return 0;
+    }
 
-		return res;
-	}
+    double termIDF = 0;
 
-	private double hhProximty() {
-		double sum = 0;
-		for (Term t : queryTerms) {
-			sum += atc(t) * idf.get(t);
-		}
+    switch (type) {
+      case TERM:
+        termIDF = idf.get(term);
+        break;
+      case LEMMA:
+        termIDF = idfLemma.get(term) ;
+    }
 
-		return Math.log(1 + sum);
-	}
+    return termIDF / Math.pow(Math.abs(neighPos - center), z);
+  }
+
+  private double tc(Term t, int p, TermType type) {
+    double res = 0;
+
+    for (Term term : queryTerms) {
+      TreeSet<Integer> positions = termPositions.get(term);
+      if (positions == null) {
+        continue;
+      }
+
+      res += (frac(term, positions.lower(p), p, type) +
+          frac(term, positions.higher(p), p, type))
+          * (t.equals(term) ? 0.25 : 1);
+    }
+
+    return res;
+  }
+
+  private double atc(Term t, TermType type) {
+    double res = 0;
+
+    if (!termPositions.containsKey(t)) {
+      return res;
+    }
+
+    for (Integer p : termPositions.get(t)) {
+      res += tc(t, p, type);
+    }
+
+    return res;
+  }
+
+  private double hhProximty(TermType type) {
+    double sum = 0;
+    switch (type) {
+      case LEMMA:
+        for (Term t : queryTerms) {
+          sum += atc(t, type) * idf.get(t);
+        }
+      case TERM:
+        for (Term t : queryTerms) {
+          sum += atc(t.lemma(), type) * idfLemma.get(t.lemma());
+        }
+    }
+
+    return Math.log(1 + sum);
+  }
 }
