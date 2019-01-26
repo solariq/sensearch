@@ -5,6 +5,8 @@ import com.expleague.commons.math.vectors.VecTools;
 import com.expleague.ml.data.tools.FeatureSet;
 import com.expleague.ml.meta.FeatureMeta;
 import com.expleague.ml.meta.FeatureMeta.ValueType;
+import com.expleague.sensearch.Page;
+import com.expleague.sensearch.index.plain.PlainPage;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -17,12 +19,14 @@ public class CosDistanceFeatureSet extends FeatureSet.Stub<QURLItem> {
 
 
 
+  private Page page;
   private Vec queryVec;
   private Vec titleVec;
   private List<Vec> passages = new ArrayList<>();
 
   @Override
   public void accept(QURLItem item) {
+    this.page = item.pageCache();
     super.accept(item);
     passages.clear();
   }
@@ -38,6 +42,11 @@ public class CosDistanceFeatureSet extends FeatureSet.Stub<QURLItem> {
 
   @Override
   public Vec advance() {
+    if (page == PlainPage.EMPTY_PAGE) {
+      set(COS_TITLE, 1);
+      set(COS_MIN_PASSAGE, 1);
+      return super.advance();
+    }
     set(COS_TITLE, (1 - VecTools.cosine(queryVec, titleVec)) / 2);
 
     double maxCos = -1.0;
