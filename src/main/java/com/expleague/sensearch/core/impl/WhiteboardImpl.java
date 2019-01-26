@@ -6,7 +6,6 @@ import com.expleague.sensearch.core.Whiteboard;
 import com.expleague.sensearch.miner.Features;
 import com.expleague.sensearch.query.Query;
 import com.expleague.sensearch.snippet.Snippet;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -23,6 +22,7 @@ public class WhiteboardImpl implements Whiteboard {
   private List<Query> queries;
   private List<Map<Page, Features>> textFeatures = new ArrayList<>(queriesNumber);
   private ResultItem[] googleResults;
+  private Map<Page, Double> pageScores;
 
   public WhiteboardImpl(String input, int page) {
     this.input = input;
@@ -47,6 +47,17 @@ public class WhiteboardImpl implements Whiteboard {
   @Override
   public synchronized void putTextFeatures(Map<Page, Features> textFeatures, int index) {
       this.textFeatures.set(index, textFeatures);
+  }
+
+  @Nullable
+  @Override
+  public synchronized Map<Page, Double> pageScores() {
+    return pageScores;
+  }
+
+  @Override
+  public synchronized void putPageScores(Map<Page, Double> scores) {
+    this.pageScores = scores;
   }
 
   @Nullable

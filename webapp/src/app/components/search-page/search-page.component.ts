@@ -15,7 +15,7 @@ import {ActivatedRoute, Router} from "@angular/router";
 export class SearchPageComponent implements OnInit {
   private DEBOUNCE_TIME = 10;
 
-  @ViewChild('autocompleteInput', { read: MatAutocompleteTrigger }) triggerAutocompleteInput: MatAutocompleteTrigger;
+  @ViewChild('autocompleteInput', {read: MatAutocompleteTrigger}) triggerAutocompleteInput: MatAutocompleteTrigger;
 
   suggestions: Observable<string[]>;
 
@@ -31,7 +31,8 @@ export class SearchPageComponent implements OnInit {
   constructor(
     private searchService: SearchService,
     private router: Router,
-    private route: ActivatedRoute) { }
+    private route: ActivatedRoute) {
+  }
 
   ngOnInit() {
     this.suggestions = this.autocompleteControl.valueChanges.pipe(
@@ -51,7 +52,13 @@ export class SearchPageComponent implements OnInit {
   }
 
   search() {
-    this.router.navigate(['.'], {queryParams: {search: this.autocompleteControl.value}});
+    this.router.navigate(['.'], {
+      queryParams: {
+        search: this.autocompleteControl.value,
+        debug: this.debug,
+        metric: this.metric
+      }
+    });
     console.log(this.autocompleteControl.value);
     this.isSearchActive = true;
     this.triggerAutocompleteInput.closePanel();

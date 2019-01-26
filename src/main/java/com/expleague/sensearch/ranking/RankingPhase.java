@@ -1,6 +1,5 @@
 package com.expleague.sensearch.ranking;
 
-import com.expleague.commons.math.Func;
 import com.expleague.commons.math.Trans;
 import com.expleague.commons.math.vectors.Vec;
 import com.expleague.ml.data.tools.DataTools;
@@ -10,13 +9,11 @@ import com.expleague.sensearch.core.SearchPhase;
 import com.expleague.sensearch.core.Whiteboard;
 import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
-
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.Comparator;
+import java.util.Map.Entry;
 import java.util.Objects;
-
+import java.util.stream.Collectors;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.log4j.Logger;
 
@@ -33,11 +30,14 @@ public class RankingPhase implements SearchPhase {
   private final int phaseId;
 
   private static Trans model;
+
   static {
     try {
-      model = DataTools.readModel(Objects.requireNonNull(RankingPhase.class.getClassLoader().getResourceAsStream("models/ranking.model")));
-    }
-    catch (IOException | ClassNotFoundException e) {
+      model =
+          DataTools.readModel(
+              Objects.requireNonNull(
+                  RankingPhase.class.getClassLoader().getResourceAsStream("models/ranking.model")));
+    } catch (IOException | ClassNotFoundException e) {
       throw new RuntimeException(e);
     }
   }
@@ -50,7 +50,9 @@ public class RankingPhase implements SearchPhase {
 
   @Override
   public boolean test(Whiteboard whiteboard) {
-    return whiteboard.textFeatures() != null && whiteboard.textFeatures().size() != 0 && whiteboard.textFeatures().get(phaseId) != null;
+    return whiteboard.textFeatures() != null
+        && whiteboard.textFeatures().size() != 0
+        && whiteboard.textFeatures().get(phaseId) != null;
   }
 
   @Override
@@ -59,9 +61,20 @@ public class RankingPhase implements SearchPhase {
     long startTime = System.nanoTime();
 
     final int pageNo = whiteboard.pageNo();
+
+    // TODO: make it in one stream(?)
+    whiteboard.putPageScores(
+        whiteboard
+            .textFeatures()
+            .get(phaseId)
+            .entrySet()
+            .stream()
+            .collect(Collectors.toMap(Entry::getKey, p -> rank(p.getValue().features()))));
+
     whiteboard.putSubResult(
         whiteboard
-            .textFeatures().get(phaseId)
+            .textFeatures()
+            .get(phaseId)
             .entrySet()
             .stream()
             .map(p -> Pair.of(p.getKey(), rank(p.getValue().features())))
@@ -69,7 +82,8 @@ public class RankingPhase implements SearchPhase {
             .map(Pair::getLeft)
             .skip(pageNo * pageSize)
             .limit(pageSize)
-            .toArray(Page[]::new), phaseId);
+            .toArray(Page[]::new),
+        phaseId);
 
     LOG.info(
         String.format(

@@ -1,3 +1,10 @@
 .search-result-item {
   max-width: 700px;
 }
+
+.result-item-debug-features {
+  margin-top: 15px;
+  display: grid;
+  grid-template-columns: max-content max-content max-content max-content;
+  grid-column-gap: 10px;
+}

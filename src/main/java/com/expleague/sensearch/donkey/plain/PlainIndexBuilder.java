@@ -211,6 +211,12 @@ public class PlainIndexBuilder implements IndexBuilder {
   }
 
   private void buildIndex(Embedding<CharSeq> jmllEmbedding) throws IOException {
+    long startTime = System.nanoTime();
+    buildIndexInternal(jmllEmbedding);
+    LOG.info(String.format("Index build in [%.3f] seconds", (System.nanoTime() - startTime) / 1e9));
+  }
+
+  private void buildIndexInternal(Embedding<CharSeq> jmllEmbedding) throws IOException {
     LOG.info("Creating database files...");
     final Path indexRoot = config.getTemporaryIndex();
     Files.createDirectories(indexRoot.resolve(PAGE_ROOT));

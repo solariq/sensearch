@@ -2,6 +2,7 @@ package com.expleague.sensearch.core.impl;
 
 import com.expleague.commons.util.Pair;
 import com.expleague.sensearch.SenSeArch.ResultItem;
+import com.expleague.sensearch.SenSeArch.ResultItemDebugInfo;
 import com.expleague.sensearch.snippet.Segment;
 import java.net.URI;
 import java.util.List;
@@ -12,16 +13,19 @@ public class ResultItemImpl implements ResultItem {
   private final CharSequence title;
   private final List<Pair<CharSequence, List<Segment>>> passages;
   private final double score;
+  private final ResultItemDebugInfo debugInfo;
 
   public ResultItemImpl(
       URI reference,
       CharSequence title,
       List<Pair<CharSequence, List<Segment>>> passages,
-      double score) {
+      double score,
+      ResultItemDebugInfo debugInfo) {
     this.reference = reference;
     this.title = title;
     this.passages = passages;
     this.score = score;
+    this.debugInfo = debugInfo;
   }
 
   @Override
@@ -42,5 +46,10 @@ public class ResultItemImpl implements ResultItem {
   @Override
   public double score() {
     return score;
+  }
+
+  @Override
+  public ResultItemDebugInfo debugInfo() {
+    return debugInfo;
   }
 }

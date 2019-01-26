@@ -3,6 +3,7 @@ package com.expleague.sensearch.metrics;
 import com.expleague.commons.util.Pair;
 import com.expleague.sensearch.Page;
 import com.expleague.sensearch.SenSeArch.ResultItem;
+import com.expleague.sensearch.SenSeArch.ResultItemDebugInfo;
 import com.expleague.sensearch.snippet.Segment;
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -220,6 +221,11 @@ public class UnitMetricTest {
     @Override
     public double score() {
       return 0;
+    }
+
+    @Override
+    public ResultItemDebugInfo debugInfo() {
+      return null;
     }
   }
 

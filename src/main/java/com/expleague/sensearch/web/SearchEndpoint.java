@@ -40,9 +40,11 @@ public class SearchEndpoint {
   @Produces(MediaType.APPLICATION_JSON)
   public String search(
       @DefaultValue("") @QueryParam("query") String query,
-      @DefaultValue("0") @QueryParam("page") int pageNumber)
+      @DefaultValue("0") @QueryParam("page") int pageNumber,
+      @DefaultValue("false") @QueryParam("debug") boolean debug,
+      @DefaultValue("false") @QueryParam("metric") boolean metric)
       throws JsonProcessingException {
-    return mapper.writeValueAsString(search.search(query, pageNumber));
+    return mapper.writeValueAsString(search.search(query, pageNumber, debug, metric));
   }
 
   //  @GET

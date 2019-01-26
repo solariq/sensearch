@@ -12,6 +12,7 @@ import com.expleague.sensearch.Page.Link;
 import com.expleague.sensearch.Page.LinkType;
 import com.expleague.sensearch.Page.SegmentType;
 import com.expleague.sensearch.utils.IndexBasedTestCase;
+import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URLDecoder;
 import java.util.Arrays;
@@ -86,8 +87,8 @@ public class PlainPageTest extends IndexBasedTestCase {
   }
 
   @Test
-  public void testUri() {
-    assertEquals(SECTION_URI_1.toString(), URLDecoder.decode(rootPage.uri().toString()));
+  public void testUri() throws UnsupportedEncodingException {
+    assertEquals(SECTION_URI_1.toString(), URLDecoder.decode(rootPage.uri().toString(), "UTF-8"));
   }
 
   @Test

@@ -26,7 +26,7 @@ public class RebaseMetrics {
       String line;
       ObjectMapper objectMapper = new ObjectMapper();
       while ((line = reader.readLine()) != null) {
-        ResultPage page = searcher.search(line, 0);
+        ResultPage page = searcher.search(line, 0, false, true);
         if (page.googleResults().length < 10) {
           System.out.println(
               "Too few google results for query "
