@@ -11,12 +11,18 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.Properties;
 import javax.xml.stream.XMLStreamException;
 import org.apache.commons.io.FileUtils;
+import org.apache.log4j.PropertyConfigurator;
 
 public class RebaseMetrics {
 
   public static void main(String[] args) throws IOException, XMLStreamException {
+    Properties logProperties = new Properties();
+    logProperties.load(Files.newInputStream(Paths.get("log4j.properties")));
+    PropertyConfigurator.configure(logProperties);
+
     Injector injector = Guice.createInjector(new AppModule());
     Config config = injector.getInstance(Config.class);
     SenSeArch searcher = injector.getInstance(SenSeArch.class);

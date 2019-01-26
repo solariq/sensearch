@@ -103,14 +103,22 @@ public class HHFeatureSet extends FeatureSet.Stub<QURLItem> implements TextFeatu
     double res = 0;
 
     for (Term term : queryTerms) {
-      TreeSet<Integer> positions = termPositions.get(term);
+      Term tmpTerm = null;
+      switch (type) {
+        case TERM:
+          tmpTerm = term;
+          break;
+        case LEMMA:
+          tmpTerm = term.lemma();
+      }
+      TreeSet<Integer> positions = termPositions.get(tmpTerm);
       if (positions == null) {
         continue;
       }
 
-      res += (frac(term, positions.lower(p), p, type) +
-          frac(term, positions.higher(p), p, type))
-          * (t.equals(term) ? 0.25 : 1);
+      res += (frac(tmpTerm, positions.lower(p), p, type) +
+          frac(tmpTerm, positions.higher(p), p, type))
+          * (t.equals(tmpTerm) ? 0.25 : 1);
     }
 
     return res;
