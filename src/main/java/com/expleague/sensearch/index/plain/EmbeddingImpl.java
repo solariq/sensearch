@@ -78,7 +78,7 @@ public class EmbeddingImpl implements Embedding {
       this.allIds = allIds.toArray();
     }
 
-
+    // noinspection unchecked
     hashFuncs = new ToLongFunction[EmbeddingBuilder.TABLES_NUMBER];
     for (int i = 0; i < hashFuncs.length; i++) {
 

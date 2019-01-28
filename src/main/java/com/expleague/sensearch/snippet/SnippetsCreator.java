@@ -37,30 +37,26 @@ public class SnippetsCreator {
   }
 
   private boolean containsWithLemma(Passage passage, Term term) {
-    return passage
-        .words()
-        .anyMatch(x -> x.lemma() == term.lemma());
+    return passage.words().anyMatch(x -> x.lemma() == term.lemma());
   }
 
   private boolean contains(Passage passage, Term term) {
-    return passage
-        .words()
-        .anyMatch(x -> x == term);
+    return passage.words().anyMatch(x -> x == term);
   }
-
 
   public Snippet getSnippet(Page document, Query query) {
     CharSequence title = document.content(SegmentType.SECTION_TITLE);
     CharSequence content = document.content();
-/*
-    document
-        .sentences()
-        .forEach(System.out::println);
-*/
-    List<Passage> passages = document
-        .sentences(SegmentType.SUB_BODY)
-        .map(x -> new Passage(x, index.parse(x)))
-        .collect(Collectors.toList());
+    /*
+        document
+            .sentences()
+            .forEach(System.out::println);
+    */
+    List<Passage> passages =
+        document
+            .sentences(SegmentType.SUB_BODY)
+            .map(x -> new Passage(x, index.parse(x)))
+            .collect(Collectors.toList());
 
     for (int i = 0; i < passages.size(); i++) {
       passages.get(i).setId(i);
@@ -69,32 +65,20 @@ public class SnippetsCreator {
     Set<KeyWord> uniqueWords =
         passages
             .stream()
-            .flatMap(
-                passage ->
-                    passage
-                        .words()
-                        .map(KeyWord::new))
+            .flatMap(passage -> passage.words().map(KeyWord::new))
             .collect(Collectors.toCollection(HashSet::new));
 
     Predicate<Passage> queryRelevant =
-        passage -> query.terms().stream()
-            .anyMatch(term -> containsWithLemma(passage, term));
+        passage -> query.terms().stream().anyMatch(term -> containsWithLemma(passage, term));
 
     Predicate<Passage> notQueryRelevant =
-        passage -> query.terms().stream()
-            .noneMatch(term -> containsWithLemma(passage, term));
+        passage -> query.terms().stream().noneMatch(term -> containsWithLemma(passage, term));
 
     List<Passage> passagesWithQueryWords =
-        passages
-            .stream()
-            .filter(queryRelevant)
-            .collect(Collectors.toList());
+        passages.stream().filter(queryRelevant).collect(Collectors.toList());
 
     List<Passage> passagesWithoutQueryWords =
-        passages
-            .stream()
-            .filter(notQueryRelevant)
-            .collect(Collectors.toList());
+        passages.stream().filter(notQueryRelevant).collect(Collectors.toList());
 
     List<KeyWord> keyWords =
         uniqueWords
@@ -107,20 +91,14 @@ public class SnippetsCreator {
                           .stream()
                           .filter(passage -> containsWithLemma(passage, x.word()))
                           .count();
-                  long R =
-                      passagesWithQueryWords
-                          .stream()
-                          .count();
+                  long R = passagesWithQueryWords.size();
                   long s =
                       passagesWithoutQueryWords
                           .stream()
                           .filter(passage -> containsWithLemma(passage, x.word()))
                           .count();
-                  long S =
-                      passagesWithoutQueryWords
-                          .stream()
-                          .count();
-                  //System.out.println(x.word().text() + " " + r + " " + R + " " + s + " " + S);
+                  long S = passagesWithoutQueryWords.size();
+                  // System.out.println(x.word().text() + " " + r + " " + R + " " + s + " " + S);
                   double w = Math.log((r + 0.5) * (S - s + 0.5) / ((R - r + 0.5) * (s + 0.5)));
                   x.setRank(w);
                 })
@@ -146,15 +124,16 @@ public class SnippetsCreator {
     double best = passages.stream().mapToDouble(Passage::getRating).max().orElse(1);
 
     for (Passage passage : passages) {
-      double newRating = (passage.getRating() / best)
-          * lengthEvaluation(passage)
-          //* positionEvaluation(passage, passages.size())
-          * questionEvaluation(passage)
-          //* queryEvaluation(passage, query)
-          //* queryEvaluationWithLemma(passage, query)
+      double newRating =
+          (passage.getRating() / best)
+              * lengthEvaluation(passage)
+              // * positionEvaluation(passage, passages.size())
+              * questionEvaluation(passage)
+          // * queryEvaluation(passage, query)
+          // * queryEvaluationWithLemma(passage, query)
           ;
 
-      //System.out.println(newRating + " " + passage.getSentence());
+      // System.out.println(newRating + " " + passage.getSentence());
 
       passage.setRating(newRating);
     }
@@ -171,23 +150,19 @@ public class SnippetsCreator {
   }
 
   private double queryEvaluation(Passage passage, Query query) {
-    return (query.terms().stream().filter(x -> contains(passage, x)).count() + .0) / (
-        query.terms().size() + .0);
+    return (query.terms().stream().filter(x -> contains(passage, x)).count() + .0)
+        / (query.terms().size() + .0);
   }
 
   private double queryEvaluationWithLemma(Passage passage, Query query) {
-    return (query.terms().stream().filter(x -> containsWithLemma(passage, x)).count() + .0) / (
-        query.terms().size() + .0);
+    return (query.terms().stream().filter(x -> containsWithLemma(passage, x)).count() + .0)
+        / (query.terms().size() + .0);
   }
 
   private double lengthEvaluation(Passage passage) {
     return Math.pow(
         Math.exp(1),
-        Math.pow(
-            (passage.getSentence().length() - OPTIMAL_LENGTH_OF_PASSAGE) / 300.,
-            2
-        )
-    );
+        Math.pow((passage.getSentence().length() - OPTIMAL_LENGTH_OF_PASSAGE) / 300., 2));
   }
 
   private double questionEvaluation(Passage passage) {
@@ -197,6 +172,4 @@ public class SnippetsCreator {
   private double positionEvaluation(Passage passage, int n) {
     return 1. - (passage.getId() + .0) / (n + .0);
   }
-
-
 }

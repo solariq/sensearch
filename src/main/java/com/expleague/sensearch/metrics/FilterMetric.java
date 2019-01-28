@@ -3,7 +3,6 @@ package com.expleague.sensearch.metrics;
 import com.expleague.sensearch.SenSeArch.ResultItem;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
 import java.io.IOException;
 import java.net.URI;
 import java.nio.file.Files;
@@ -13,9 +12,10 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 public class FilterMetric {
-    private static String BEGIN_OF_ROOT = "wordstat/query_";
 
-    private ObjectMapper objectMapper = new ObjectMapper();
+    private static final String BEGIN_OF_ROOT = "wordstat/query_";
+
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     public double calc(String queryStr, Set<URI> filterURIs) {
         List<ResultItem> googleResults;

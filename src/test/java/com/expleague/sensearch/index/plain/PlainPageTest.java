@@ -146,33 +146,32 @@ public class PlainPageTest extends IndexBasedTestCase {
     assertEquals(categories, page4.categories());
   }
 
-  // TODO: add another test page with links to this test page
   @Test
   public void testIncomingLinks() {
-    assertEquals(0, rootPage.incomingLinks(LinkType.SECTION_LINKS).count());
-    assertEquals(0, rootPage.incomingLinks(LinkType.ALL_LINKS).count());
-    assertEquals(1, rootPage.incomingLinks(LinkType.SECTION_INCLUDING_SELF_LINKS).count());
-    assertEquals(1, rootPage.incomingLinks(LinkType.ALL_INCLUDING_SELF_LINKS).count());
+    assertEquals(2, rootPage.incomingLinks(LinkType.SECTION_LINKS).count());
+    assertEquals(2, rootPage.incomingLinks(LinkType.ALL_LINKS).count());
+    assertEquals(3, rootPage.incomingLinks(LinkType.SECTION_INCLUDING_SELF_LINKS).count());
+    assertEquals(3, rootPage.incomingLinks(LinkType.ALL_INCLUDING_SELF_LINKS).count());
 
-    assertEquals(0, page1.incomingLinks(LinkType.SECTION_LINKS).count());
-    assertEquals(0, page1.incomingLinks(LinkType.ALL_LINKS).count());
-    assertEquals(1, page1.incomingLinks(LinkType.SECTION_INCLUDING_SELF_LINKS).count());
-    assertEquals(1, page1.incomingLinks(LinkType.ALL_INCLUDING_SELF_LINKS).count());
+    assertEquals(2, page1.incomingLinks(LinkType.SECTION_LINKS).count());
+    assertEquals(2, page1.incomingLinks(LinkType.ALL_LINKS).count());
+    assertEquals(3, page1.incomingLinks(LinkType.SECTION_INCLUDING_SELF_LINKS).count());
+    assertEquals(3, page1.incomingLinks(LinkType.ALL_INCLUDING_SELF_LINKS).count());
 
     assertEquals(0, page2.incomingLinks(LinkType.SECTION_LINKS).count());
-    assertEquals(0, page2.incomingLinks(LinkType.ALL_LINKS).count());
+    assertEquals(2, page2.incomingLinks(LinkType.ALL_LINKS).count());
     assertEquals(0, page2.incomingLinks(LinkType.SECTION_INCLUDING_SELF_LINKS).count());
-    assertEquals(1, page2.incomingLinks(LinkType.ALL_INCLUDING_SELF_LINKS).count());
+    assertEquals(3, page2.incomingLinks(LinkType.ALL_INCLUDING_SELF_LINKS).count());
 
     assertEquals(0, page3.incomingLinks(LinkType.SECTION_LINKS).count());
-    assertEquals(0, page3.incomingLinks(LinkType.ALL_LINKS).count());
+    assertEquals(2, page3.incomingLinks(LinkType.ALL_LINKS).count());
     assertEquals(0, page3.incomingLinks(LinkType.SECTION_INCLUDING_SELF_LINKS).count());
-    assertEquals(1, page3.incomingLinks(LinkType.ALL_INCLUDING_SELF_LINKS).count());
+    assertEquals(3, page3.incomingLinks(LinkType.ALL_INCLUDING_SELF_LINKS).count());
 
     assertEquals(0, page4.incomingLinks(LinkType.SECTION_LINKS).count());
-    assertEquals(0, page4.incomingLinks(LinkType.ALL_LINKS).count());
+    assertEquals(2, page4.incomingLinks(LinkType.ALL_LINKS).count());
     assertEquals(0, page4.incomingLinks(LinkType.SECTION_INCLUDING_SELF_LINKS).count());
-    assertEquals(1, page4.incomingLinks(LinkType.ALL_INCLUDING_SELF_LINKS).count());
+    assertEquals(3, page4.incomingLinks(LinkType.ALL_INCLUDING_SELF_LINKS).count());
 
     Link link =
         rootPage.incomingLinks(LinkType.SECTION_INCLUDING_SELF_LINKS).findFirst().orElse(null);

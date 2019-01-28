@@ -75,8 +75,6 @@ public class PlainIndex implements Index {
   private static final int FILTERED_DOC_NUMBER = 500;
   private static final int SYNONYMS_COUNT = 50;
 
-  private final Path indexRoot;
-
   private final Map<CharSeq, Term> wordToTerms = new HashMap<>();
   private final TLongObjectMap<Term> idToTerm = new TLongObjectHashMap<>();
   private final TObjectLongMap<URI> uriToPageIdMap = new TObjectLongHashMap<>();
@@ -115,7 +113,7 @@ public class PlainIndex implements Index {
     LOG.info("Loading PlainIndex...");
     long startTime = System.nanoTime();
 
-    indexRoot = config.getTemporaryIndex();
+    Path indexRoot = config.getTemporaryIndex();
 
     Path embeddingPath = indexRoot.resolve(PlainIndexBuilder.EMBEDDING_ROOT);
     embedding = new EmbeddingImpl(embeddingPath);

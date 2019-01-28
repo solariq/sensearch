@@ -8,10 +8,10 @@ import com.expleague.sensearch.Page;
 import com.expleague.sensearch.Page.LinkType;
 
 public class LinkFeatureSet extends FeatureSet.Stub<QURLItem> {
-  public final static FeatureMeta INCOMING_LINK = FeatureMeta
-      .create("incoming-links", "incoming wiki-links", ValueType.VEC);
 
-  public final static FeatureMeta OUTGOING_LINK = FeatureMeta
+  private final static FeatureMeta INCOMING_LINK = FeatureMeta
+      .create("incoming-links", "incoming wiki-links", ValueType.VEC);
+  private final static FeatureMeta OUTGOING_LINK = FeatureMeta
       .create("outgoing-links", "outgoing wiki-links", ValueType.VEC);
 
   private Page page;

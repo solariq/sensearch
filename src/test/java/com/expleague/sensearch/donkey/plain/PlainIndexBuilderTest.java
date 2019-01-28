@@ -11,8 +11,8 @@ import org.junit.Test;
 
 public class PlainIndexBuilderTest extends SensearchTestCase {
 
-  private static String INDEX_ROOT_NAME = "index";
-  private static String TEMP_DOC_PATH = "tempDoc";
+  private static final String INDEX_ROOT_NAME = "index";
+  private static final String TEMP_DOC_PATH = "tempDoc";
 
   private Config config;
 

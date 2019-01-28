@@ -11,7 +11,7 @@ import org.junit.Test;
 
 public class IdGeneratorTest {
 
-  private IdGenerator idGenerator = new IdGenerator();
+  private final IdGenerator idGenerator = new IdGenerator();
 
   @Test
   public void testTermIds() {

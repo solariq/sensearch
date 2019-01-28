@@ -12,7 +12,7 @@ import com.expleague.sensearch.miner.Features;
 import com.expleague.sensearch.snippet.Snippet;
 import com.google.inject.Inject;
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
@@ -107,7 +107,7 @@ public class SenSeArchImpl implements SenSeArch {
         ResultItem res = googleResults[i];
 
         Page page =
-            wb.pageScores()
+            Objects.requireNonNull(wb.pageScores())
                 .keySet()
                 .stream()
                 .filter(p -> p.content(SegmentType.SECTION_TITLE).equals(res.title()))
@@ -118,13 +118,13 @@ public class SenSeArchImpl implements SenSeArch {
                 res.reference(),
                 res.title(),
                 res.passages(),
-                page == null ? -1 : wb.pageScores().get(page),
+                page == null ? -1 : Objects.requireNonNull(wb.pageScores()).get(page),
                 null);
       }
     }
 
     for (int i = 0; i < snippets.length; i++) {
-      Features features = wb.textFeatures().get(0).get(pages[i]);
+      Features features = Objects.requireNonNull(wb.textFeatures()).get(0).get(pages[i]);
       ResultItemDebugInfo debugInfo =
           debug
               ? new ResultItemDebugInfoImpl(
@@ -139,8 +139,9 @@ public class SenSeArchImpl implements SenSeArch {
           new ResultItemImpl(
               pages[i].uri(),
               pages[i].content(SegmentType.SECTION_TITLE),
-              Arrays.asList(Pair.create(snippets[i].getContent(), snippets[i].getSelection())),
-              wb.pageScores().get(pages[i]),
+              Collections.singletonList(
+                  Pair.create(snippets[i].getContent(), snippets[i].getSelection())),
+              Objects.requireNonNull(wb.pageScores()).get(pages[i]),
               debugInfo);
     }
 

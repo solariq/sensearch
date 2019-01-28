@@ -15,15 +15,14 @@ import javax.inject.Inject;
 
 public class Metric {
 
-  private final String METRIC_FILE = "METRIC";
-  private WebCrawler crawler;
-  private Path pathToMetrics;
+  private static final String METRIC_FILE = "METRIC";
+  private final WebCrawler crawler;
+  private final Path pathToMetrics;
 
   @Inject
   public Metric(WebCrawler requestCrawler, @Annotations.MetricPath Path path) {
     crawler = requestCrawler;
     pathToMetrics = path;
-    requestCrawler.setPath(path);
   }
 
   public ResultItem[] calculate(String query, Page[] resultItems) {

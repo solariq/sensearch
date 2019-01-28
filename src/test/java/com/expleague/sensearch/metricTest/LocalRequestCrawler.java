@@ -11,7 +11,7 @@ import java.util.List;
 
 public class LocalRequestCrawler implements WebCrawler {
 
-  private final String MAP_FILE = "PAGE.json";
+  private static final String MAP_FILE = "PAGE.json";
   String query;
   private Path pathToMetric;
 

@@ -94,12 +94,9 @@ public class PlainPage implements IndexedPage {
 
   private final long id;
   private final PlainIndex index;
-
-  private IndexUnits.Page protoPage;
-
-  private URI uri;
-
-  private boolean isEmpty;
+  private final IndexUnits.Page protoPage;
+  private final URI uri;
+  private final boolean isEmpty;
 
   private PlainPage(IndexUnits.Page protoPage, PlainIndex index) {
     this.index = index;

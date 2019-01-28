@@ -20,8 +20,6 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import org.apache.log4j.Logger;
 
-;
-
 /**
  * Point-wise ranker
  */
@@ -32,8 +30,8 @@ public class RankingPhase implements SearchPhase {
   private final int pageSize;
   private final int phaseId;
 
-  private static Trans model;
-  private static FeatureMeta[] featuresInModel;
+  private static final Trans model;
+  private static final FeatureMeta[] featuresInModel;
 
   static {
     Pair<Function, FeatureMeta[]> pair = DataTools.readModel(
@@ -54,8 +52,8 @@ public class RankingPhase implements SearchPhase {
   @Override
   public boolean test(Whiteboard whiteboard) {
     return whiteboard.textFeatures() != null
-        && whiteboard.textFeatures().size() != 0
-        && whiteboard.textFeatures().get(phaseId) != null;
+        && Objects.requireNonNull(whiteboard.textFeatures()).size() != 0
+        && Objects.requireNonNull(whiteboard.textFeatures()).get(phaseId) != null;
   }
 
   @Override
@@ -67,16 +65,16 @@ public class RankingPhase implements SearchPhase {
 
     // TODO: make it in one stream(?)
     whiteboard.putPageScores(
-        whiteboard
-            .textFeatures()
+        Objects.requireNonNull(whiteboard
+            .textFeatures())
             .get(phaseId)
             .entrySet()
             .stream()
             .collect(Collectors.toMap(Entry::getKey, p -> rank(p.getValue().features(featuresInModel)))));
 
     whiteboard.putSubResult(
-        whiteboard
-            .textFeatures()
+        Objects.requireNonNull(whiteboard
+            .textFeatures())
             .get(phaseId)
             .entrySet()
             .stream()

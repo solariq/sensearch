@@ -6,6 +6,7 @@ import com.expleague.sensearch.core.Whiteboard;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import org.apache.log4j.Logger;
 
 public class MergePhase implements SearchPhase {
@@ -25,7 +26,7 @@ public class MergePhase implements SearchPhase {
 
     boolean result = true;
 
-    for (Page[] subResult : whiteboard.subResults()) {
+    for (Page[] subResult : Objects.requireNonNull(whiteboard.subResults())) {
       if (subResult == null) {
         result = false;
       }
@@ -41,7 +42,7 @@ public class MergePhase implements SearchPhase {
 
     final List<Page> results = new ArrayList<>();
 
-    for (Page[] subResult : whiteboard.subResults()) {
+    for (Page[] subResult : Objects.requireNonNull(whiteboard.subResults())) {
       Collections.addAll(results, subResult);
     }
 

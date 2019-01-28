@@ -24,7 +24,7 @@ import org.apache.commons.io.FileUtils;
 public class CrawlerXML implements Crawler {
 
   private final Config config;
-  private Path path;
+  private final Path path;
 
   @Inject
   public CrawlerXML(Config config) {
@@ -43,20 +43,13 @@ public class CrawlerXML implements Crawler {
 
   class DocumentIterator implements Iterator<CrawlerDocument> {
 
-    private Path path;
-    private Path pathTmp;
+    private final Path pathTmp;
+    private final XMLParser parser = new XMLParser();
     private ZipInputStream zipInputStream;
     private ZipEntry zipEntry;
-    private XMLParser parser = new XMLParser();
 
     DocumentIterator(Path path, Path tmpPath) throws IOException {
-      this.path = path;
-      pathTmp = tmpPath;
-      init();
-    }
-
-    private void init() throws IOException {
-      pathTmp = path.getParent().resolve(pathTmp);
+      pathTmp = path.getParent().resolve(tmpPath);
       Files.createDirectories(pathTmp);
       zipInputStream = new ZipInputStream(new FileInputStream(path.toString()));
       try {

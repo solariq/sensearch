@@ -13,7 +13,6 @@ import com.expleague.sensearch.index.Index;
 import com.expleague.sensearch.index.plain.PlainIndex;
 import com.expleague.sensearch.metrics.RequestCrawler;
 import com.expleague.sensearch.metrics.WebCrawler;
-import com.expleague.sensearch.web.suggest.BigramsBasedSuggestor;
 import com.expleague.sensearch.web.suggest.ProbabilisticSuggestor;
 import com.expleague.sensearch.web.suggest.Suggestor;
 import com.fasterxml.jackson.databind.ObjectMapper;

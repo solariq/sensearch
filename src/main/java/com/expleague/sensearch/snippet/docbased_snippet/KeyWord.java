@@ -1,13 +1,12 @@
 package com.expleague.sensearch.snippet.docbased_snippet;
 
-import com.expleague.commons.text.lemmer.LemmaInfo;
-import com.expleague.commons.text.lemmer.WordInfo;
 import com.expleague.sensearch.core.Term;
 import java.util.Objects;
 
 public class KeyWord {
-  private Term word;
-  private double rank = 0;
+
+  private final Term word;
+  private double rank;
 
   public KeyWord(Term word) {
     this.word = word;

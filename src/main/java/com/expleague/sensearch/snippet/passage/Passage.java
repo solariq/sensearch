@@ -1,7 +1,6 @@
 package com.expleague.sensearch.snippet.passage;
 
 import com.expleague.sensearch.core.Term;
-import com.expleague.sensearch.index.Index;
 import com.expleague.sensearch.snippet.Segment;
 import java.util.ArrayList;
 import java.util.List;
@@ -13,9 +12,9 @@ import java.util.stream.Stream;
  */
 public class Passage {
 
-  private CharSequence sentence;
-  private List<Term> words;
-  private List<Segment> selection = new ArrayList<>();
+  private final CharSequence sentence;
+  private final List<Term> words;
+  private final List<Segment> selection = new ArrayList<>();
   private double rating;
   private long id;
 

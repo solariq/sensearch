@@ -51,30 +51,24 @@ public class AccumulatorFeatureSet extends FeatureSet.Stub<QURLItem> {
         //    .forEach(fs -> fs.withSegment(TextFeatureSet.Segment.FULL_TITLE, titleLength));
         TermConsumer termConsumer = new TermConsumer();
         index.parse(page.content(SegmentType.SECTION_TITLE)).forEach(termConsumer);
-        index.parse(page.content(SegmentType.SECTION_TITLE)).forEach(term -> {
-          features.components()
-              .map(Functions.cast(TextFeatureSet.class))
-              .filter(Objects::nonNull)
-              .forEach(fs -> fs.withSegment(Segment.TITLE, term));
-        });
+        index.parse(page.content(SegmentType.SECTION_TITLE)).forEach(term -> features.components()
+            .map(Functions.cast(TextFeatureSet.class))
+            .filter(Objects::nonNull)
+            .forEach(fs -> fs.withSegment(Segment.TITLE, term)));
       }
       { // Content processing
         //features.components().map(Functions.cast(TextFeatureSet.class)).filter(Objects::nonNull)
         //    .forEach(fs -> fs.withSegment(TextFeatureSet.Segment.BODY, contentLength));
         TermConsumer termConsumer = new TermConsumer();
         index.parse(page.content(SegmentType.BODY)).forEach(termConsumer);
-        index.parse(page.content(SegmentType.BODY)).forEach(term -> {
-          features.components()
-              .map(Functions.cast(TextFeatureSet.class))
-              .filter(Objects::nonNull)
-              .forEach(fs -> fs.withSegment(Segment.BODY, term));
-        });
-        index.parse(page.content(SegmentType.BODY)).forEach(term -> {
-          features.components()
-              .map(Functions.cast(DocBasedFeatureSet.class))
-              .filter(Objects::nonNull)
-              .forEach(fs -> fs.withTerm(term));
-        });
+        index.parse(page.content(SegmentType.BODY)).forEach(term -> features.components()
+            .map(Functions.cast(TextFeatureSet.class))
+            .filter(Objects::nonNull)
+            .forEach(fs -> fs.withSegment(Segment.BODY, term)));
+        index.parse(page.content(SegmentType.BODY)).forEach(term -> features.components()
+            .map(Functions.cast(DocBasedFeatureSet.class))
+            .filter(Objects::nonNull)
+            .forEach(fs -> fs.withTerm(term)));
 
       }
     }
@@ -100,12 +94,10 @@ public class AccumulatorFeatureSet extends FeatureSet.Stub<QURLItem> {
       });
     }
     { //Quotation
-      item.pageCache().sentences(SegmentType.BODY).forEach(sentence -> {
-        features.components()
-            .map(Functions.cast(QuotationFeatureSet.class))
-            .filter(Objects::nonNull)
-            .forEach(fs -> fs.withPassage(index.parse(sentence).collect(Collectors.toList())));
-      });
+      item.pageCache().sentences(SegmentType.BODY).forEach(sentence -> features.components()
+          .map(Functions.cast(QuotationFeatureSet.class))
+          .filter(Objects::nonNull)
+          .forEach(fs -> fs.withPassage(index.parse(sentence).collect(Collectors.toList()))));
     }
   }
 

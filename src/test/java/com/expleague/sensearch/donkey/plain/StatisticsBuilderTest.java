@@ -172,7 +172,7 @@ public class StatisticsBuilderTest extends SensearchTestCase {
   }
 
   @Test
-  public void mostFrequentBigramsTest() throws IOException {
+  public void mostFrequentBigramsTest() {
     TLongIntMap neighboursFreq = new TLongIntHashMap();
     neighboursFreq.put(1, 1);
     neighboursFreq.put(2, 3);

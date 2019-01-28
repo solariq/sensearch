@@ -1,7 +1,6 @@
 package com.expleague.sensearch.metricTest;
 
 import com.expleague.sensearch.AppModule;
-import com.expleague.sensearch.Config;
 import com.expleague.sensearch.SenSeArch;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
@@ -10,18 +9,16 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import javax.xml.stream.XMLStreamException;
 import org.junit.Before;
 import org.junit.Test;
 
 public class MetricTest {
 
-  private Config config;
   private SenSeArch searcher;
-  private LocalRequestCrawler webCrawler = new LocalRequestCrawler();
+  private final LocalRequestCrawler webCrawler = new LocalRequestCrawler();
 
   @Before
-  public void initSearch() throws IOException, XMLStreamException {
+  public void initSearch() {
     Injector injector = Guice.createInjector(new AppModule());
     searcher = injector.getInstance(SenSeArch.class);
   }

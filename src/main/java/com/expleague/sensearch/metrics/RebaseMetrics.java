@@ -12,13 +12,12 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Properties;
-import javax.xml.stream.XMLStreamException;
 import org.apache.commons.io.FileUtils;
 import org.apache.log4j.PropertyConfigurator;
 
 public class RebaseMetrics {
 
-  public static void main(String[] args) throws IOException, XMLStreamException {
+  public static void main(String[] args) throws IOException {
     Properties logProperties = new Properties();
     logProperties.load(Files.newInputStream(Paths.get("log4j.properties")));
     PropertyConfigurator.configure(logProperties);

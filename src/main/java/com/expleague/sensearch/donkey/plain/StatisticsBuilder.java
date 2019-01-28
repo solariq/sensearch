@@ -175,8 +175,8 @@ public class StatisticsBuilder implements AutoCloseable {
 
   private static class IdFrequencyPair {
 
-    long termId;
-    int frequency;
+    final long termId;
+    final int frequency;
 
     IdFrequencyPair(long termId, int frequency) {
       this.termId = termId;

@@ -40,16 +40,14 @@ public class EmbeddingBuilder implements AutoCloseable {
   private final Embedding<CharSeq> jmllEmbedding;
   private final IdGenerator idGenerator;
   private final TLongSet termIdsInDb = new TLongHashSet();
+  private final DB vecDB;
 
-  // .snapshot(false);
-
-  private DB vecDB;
   private WriteBatch batch = null;
   private int batchSize = 0;
 
-  private TLongObjectMap<TLongSet> tables = new TLongObjectHashMap<>();
-  private DB tablesDB;
-  private ToLongFunction<Vec>[] hashFuncs;
+  private final TLongObjectMap<TLongSet> tables = new TLongObjectHashMap<>();
+  private final DB tablesDB;
+  private final ToLongFunction<Vec>[] hashFuncs;
 
   public EmbeddingBuilder(
       DB vecDb,
@@ -65,6 +63,7 @@ public class EmbeddingBuilder implements AutoCloseable {
     this.vecDB = vecDb;
     this.tablesDB = tablesD;
 
+    // noinspection unchecked
     hashFuncs = new ToLongFunction[TABLES_NUMBER];
 
     try (Writer output =

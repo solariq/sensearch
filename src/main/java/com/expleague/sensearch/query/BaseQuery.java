@@ -9,8 +9,8 @@ import org.apache.commons.lang3.tuple.Pair;
 
 public class BaseQuery implements Query {
   private final Map<Term, List<Term>> synonyms;
-  private List<Term> terms;
-  private String text;
+  private final List<Term> terms;
+  private final String text;
 
   private BaseQuery(String input, List<Term> terms) {
     this.terms = terms;

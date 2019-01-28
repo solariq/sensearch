@@ -63,14 +63,14 @@ public class Passages {
       }
     }
 
-    boolean ok = false;
     int j, bound = 0;
     for (int i = 0; i <= n - m; i += suffixShift[j + 1]) {
-      for (j = m - 1; j >= bound && compareChars(t.charAt(j), s.charAt(i + j)); j--) {
-        ;
+      j = m - 1;
+      while (j >= bound && compareChars(t.charAt(j), s.charAt(i + j))) {
+        j--;
       }
+
       if (j < bound) {
-        ok = true;
         if ((i == 0 || !Character.isAlphabetic(s.charAt(i - 1)))
             && (i + m == n || !Character.isAlphabetic(s.charAt(i + m)))) {
           selection.add(new Segment(i, i + m));

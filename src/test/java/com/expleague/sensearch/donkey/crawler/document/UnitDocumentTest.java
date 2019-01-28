@@ -25,14 +25,11 @@ public class UnitDocumentTest extends SensearchTestCase {
 
   @Test
   public void smallXMLTest() {
-    page =
-        parser.parseXML(RESOURCES_ROOT.resolve("smallXML").toFile());
+    page = parser.parseXML(RESOURCES_ROOT.resolve("smallXML").toFile());
     List<Section> sections = page.sections().collect(Collectors.toList());
     assertEquals(page.id(), 6673504);
     assertEquals(page.title(), "Тэмусин (Когурё)»");
-    assertEquals(sections
-            .get(0)
-            .title(), Collections.singletonList("Тэмусин (Когурё)»"));
+    assertEquals(sections.get(0).title(), Collections.singletonList("Тэмусин (Когурё)»"));
     assertEquals(sections.size(), 1);
     assertEquals(sections.get(0).links().size(), 0);
     assertEquals(
@@ -49,9 +46,8 @@ public class UnitDocumentTest extends SensearchTestCase {
 
   @Test
   public void xMLWithEmptyLinksTest() {
-    page =
-        parser.parseXML(RESOURCES_ROOT.resolve("XMLwithEmptyLink").toFile());
-    List<Section> sections = page.sections().collect(Collectors.toList());;
+    page = parser.parseXML(RESOURCES_ROOT.resolve("XMLwithEmptyLink").toFile());
+    List<Section> sections = page.sections().collect(Collectors.toList());
     assertEquals(page.id(), 3666303);
     assertEquals(sections.get(0).links().size(), 0);
     assertEquals(sections.get(1).links().size(), 1);
@@ -87,8 +83,7 @@ public class UnitDocumentTest extends SensearchTestCase {
     assertEquals(page.title(), "Ги V (виконт Лиможа)");
     assertEquals(sections.size(), 2);
 
-    assertEquals(
-        sections.get(0).title(), Collections.singletonList("Ги V (виконт Лиможа)"));
+    assertEquals(sections.get(0).title(), Collections.singletonList("Ги V (виконт Лиможа)"));
     List<CharSequence> test = new ArrayList<>();
     test.add("Ги V (виконт Лиможа)");
     test.add("Ссылки");
@@ -128,12 +123,11 @@ public class UnitDocumentTest extends SensearchTestCase {
 
     List<Section> sections = page.sections().collect(Collectors.toList());
     assertEquals(5, sections.size());
-    assertEquals(Arrays.asList("Ссылки"), sections.get(0).title());
+    assertEquals(Collections.singletonList("Ссылки"), sections.get(0).title());
     assertEquals(Arrays.asList("Ссылки", "Ссылка1"), sections.get(1).title());
     assertEquals(Arrays.asList("Ссылки", "Ссылка2"), sections.get(2).title());
-    assertEquals(
-        Arrays.asList("Ссылки", "Ссылка2", "Подссылка"), sections.get(3).title());
-    assertEquals(Arrays.asList("Не Ссылки"), sections.get(4).title());
+    assertEquals(Arrays.asList("Ссылки", "Ссылка2", "Подссылка"), sections.get(3).title());
+    assertEquals(Collections.singletonList("Не Ссылки"), sections.get(4).title());
   }
 
   @Test

@@ -1,6 +1,5 @@
 package com.expleague.sensearch.metrics;
 
-import com.expleague.sensearch.SenSeArch.ResultItem;
 import com.expleague.sensearch.core.SearchPhase;
 import com.expleague.sensearch.core.Whiteboard;
 import com.google.inject.Inject;

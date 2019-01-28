@@ -3,9 +3,9 @@ package com.expleague.sensearch.web.suggest;
 import com.expleague.sensearch.core.Term;
 import com.expleague.sensearch.index.Index;
 import com.google.inject.Inject;
-
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -13,11 +13,10 @@ import java.util.stream.Collectors;
 
 public class ProbabilisticSuggestor implements Suggestor {
 
-	private Map<Term, Double> unigramCoeff;
-	private Map<Term[], Double> multigramFreqNorm;
-	private Map<Term, int[]> invertedIndex = new HashMap<>();
-
-	private Map<Term[], Double> phraseProb = new HashMap<>();
+	private final Map<Term, Double> unigramCoeff;
+	private final Map<Term[], Double> multigramFreqNorm;
+	private final Map<Term, int[]> invertedIndex;
+	private final Map<Term[], Double> phraseProb = new HashMap<>();
 
 	private Index index;
 	
@@ -59,16 +58,12 @@ public class ProbabilisticSuggestor implements Suggestor {
 
 	private List<Integer> getDocumentList(Term t) {
 		if (!invertedIndex.containsKey(t)) {
-			return Arrays.asList();
+			return Collections.emptyList();
 		}
-		List<Integer> res = Arrays.stream(invertedIndex.get(t))
+
+		return Arrays.stream(invertedIndex.get(t))
 				.boxed()
 				.collect(Collectors.toList());
-
-		if (res == null) {
-			return new ArrayList<>();
-		}
-		return res;
 	}
 
 	private List<Integer> getDocsSetsIntersection(List<Integer> init, Term[] terms) {
@@ -94,7 +89,7 @@ public class ProbabilisticSuggestor implements Suggestor {
 	private List<String> getSuggestions(List<Term> terms) {
 		
 		if (terms.isEmpty()) {
-			return Arrays.asList();
+			return Collections.emptyList();
 		}
 		
 		String qt = terms.get(terms.size() - 1).text().toString();
@@ -112,14 +107,14 @@ public class ProbabilisticSuggestor implements Suggestor {
 
 		String qcText = qc
 				.stream()
-				.map(t -> t.text())
+				.map(Term::text)
 				.collect(Collectors.joining(" "));
 
 		return phraseProb.entrySet().stream()
 				.sorted((e1, e2) -> -Double.compare(e1.getValue(), e2.getValue()))
 				.limit(10)
 				.map(e -> qcText + " " + Arrays.stream(e.getKey())
-				.map(t -> t.text())
+						.map(Term::text)
 				.collect(Collectors.joining(" ")))
 				.collect(Collectors.toList());
 	}

@@ -1,17 +1,14 @@
 package com.expleague.sensearch.web.suggest;
 
-import java.util.HashMap;
-import java.util.Map;
-
-import org.iq80.leveldb.DB;
-import org.iq80.leveldb.DBIterator;
-
 import com.expleague.sensearch.core.Term;
 import com.expleague.sensearch.protobuf.index.IndexUnits;
 import com.google.common.primitives.Longs;
 import com.google.protobuf.InvalidProtocolBufferException;
-
 import gnu.trove.map.TLongObjectMap;
+import java.util.HashMap;
+import java.util.Map;
+import org.iq80.leveldb.DB;
+import org.iq80.leveldb.DBIterator;
 
 public class SuggestInformationLoader {
 	Map<Term, Double> unigramCoeff = new HashMap<>();
@@ -39,12 +36,10 @@ public class SuggestInformationLoader {
 		{
 			DBIterator iter = unigramCoeffDB.iterator();
 			iter.seekToFirst();
-			iter.forEachRemaining(item -> {
-				unigramCoeff.put(
-						idToTerm.get(Longs.fromByteArray(item.getKey())),
-						Double.longBitsToDouble(Longs.fromByteArray(item.getValue()))
-						);
-			});
+			iter.forEachRemaining(item -> unigramCoeff.put(
+					idToTerm.get(Longs.fromByteArray(item.getKey())),
+					Double.longBitsToDouble(Longs.fromByteArray(item.getValue()))
+			));
 		}
 
 		{
@@ -55,7 +50,7 @@ public class SuggestInformationLoader {
 				try {
 					terms = IndexUnits.TermList.parseFrom(item.getKey())
 							.getTermListList().stream()
-							.map(l -> idToTerm.get(l))
+							.map(idToTerm::get)
 							.toArray(Term[]::new);
 				} catch (InvalidProtocolBufferException e) {
 					// TODO Auto-generated catch block

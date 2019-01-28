@@ -2,25 +2,18 @@ package com.expleague.sensearch.donkey.plain;
 
 import com.expleague.sensearch.donkey.crawler.document.CrawlerDocument;
 import com.expleague.sensearch.donkey.crawler.document.CrawlerDocument.Link;
-import com.expleague.sensearch.donkey.crawler.document.CrawlerDocument.Section;
-import com.expleague.sensearch.donkey.plain.PlainPageBuilderMethodsTest.SectionMock.LinkMock;
 import com.expleague.sensearch.protobuf.index.IndexUnits;
 import com.expleague.sensearch.protobuf.index.IndexUnits.Page;
 import com.expleague.sensearch.utils.SensearchTestCase;
 import com.google.common.collect.Lists;
 import gnu.trove.map.TLongLongMap;
 import gnu.trove.map.TLongObjectMap;
-import gnu.trove.map.TObjectLongMap;
 import gnu.trove.map.hash.TLongLongHashMap;
 import gnu.trove.map.hash.TLongObjectHashMap;
-import gnu.trove.map.hash.TObjectLongHashMap;
 import java.net.URI;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import org.junit.Assert;
-import org.junit.Ignore;
 import org.junit.Test;
 
 public class PlainPageBuilderMethodsTest extends SensearchTestCase {
@@ -30,7 +23,7 @@ public class PlainPageBuilderMethodsTest extends SensearchTestCase {
   static class SectionMock implements CrawlerDocument.Section {
 
     private String text = "";
-    private List<Link> links = new ArrayList<>();
+    private final List<Link> links = new ArrayList<>();
     private List<CharSequence> title = new ArrayList<>();
 
     SectionMock() {

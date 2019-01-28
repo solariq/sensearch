@@ -28,10 +28,9 @@ import org.jsoup.select.Elements;
 
 public class RequestCrawler implements WebCrawler {
 
-  private final String googleRequest = "https://www.google.ru/search?q=site:ru.wikipedia.org%20";
+  private static final String GOOGLE_REQUEST_PRFIX = "https://www.google.ru/search?q=site:ru.wikipedia.org%20";
   private final Random random = new Random();
-  private Path pathToMetric;
-  private Map<String, Map<String, String>> cookies = new HashMap<>();
+  private final Map<String, Map<String, String>> cookies = new HashMap<>();
 
   private final Index index;
   private final Map<String, List<ResultItem>> requestCache = new HashMap<>();
@@ -124,9 +123,8 @@ public class RequestCrawler implements WebCrawler {
   }
 
   private String normalizeTitle(String title) {
-    String ans = title;
-    if (ans.endsWith(" — Википедия")) {
-      return ans.replace(" — Википедия", "");
+    if (title.endsWith(" — Википедия")) {
+      return title.replace(" — Википедия", "");
     }
     return null;
   }
@@ -156,7 +154,7 @@ public class RequestCrawler implements WebCrawler {
     int page = 0;
     final int[] article = {0};
 
-    String request = googleRequest + query.replace(" ", "%20");
+    String request = GOOGLE_REQUEST_PRFIX + query.replace(" ", "%20");
     while (results.size() < size && page < 5) {
       // Sometimes make a random request not related to Wiki
       if (random.nextInt(3) == 0) {
@@ -216,6 +214,5 @@ public class RequestCrawler implements WebCrawler {
 
   @Override
   public void setPath(Path pathToMetric) {
-    this.pathToMetric = pathToMetric;
   }
 }

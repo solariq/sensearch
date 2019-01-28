@@ -8,7 +8,7 @@ import org.languagetool.rules.RuleMatch;
 
 public class SpellChecker {
 
-  private static JLanguageTool jLanguageTool = new JLanguageTool(new Russian());
+  private static final JLanguageTool jLanguageTool = new JLanguageTool(new Russian());
 
   public CharSequence correct(CharSequence uncorrected) throws IOException {
     List<RuleMatch> rules = jLanguageTool.check(uncorrected.toString());

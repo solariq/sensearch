@@ -78,10 +78,10 @@ public class WikiPage implements CrawlerDocument {
 
   public static class WikiSection implements Section {
 
-    private CharSequence text;
-    private List<CharSequence> title;
-    private List<Link> links;
-    private URI uri;
+    private final CharSequence text;
+    private final List<CharSequence> title;
+    private final List<Link> links;
+    private final URI uri;
 
     public WikiSection(CharSequence text, List<CharSequence> title, List<Link> links, URI uri) {
       this.text = text;
@@ -113,10 +113,10 @@ public class WikiPage implements CrawlerDocument {
 
   public static class WikiLink implements Link {
 
-    private CharSequence text;
-    private CharSequence targetTitle;
-    private long targetId;
-    private int textOffset;
+    private final CharSequence text;
+    private final CharSequence targetTitle;
+    private final long targetId;
+    private final int textOffset;
 
     public WikiLink(CharSequence text, CharSequence targetTitle, long targetId, int textOffset) {
       this.text = text;

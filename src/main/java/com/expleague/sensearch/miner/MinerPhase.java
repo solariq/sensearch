@@ -14,6 +14,7 @@ import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Stream;
 import org.apache.log4j.Logger;
 
@@ -37,8 +38,8 @@ public class MinerPhase implements SearchPhase {
   @Override
   public boolean test(Whiteboard whiteboard) {
     return whiteboard.query() != null &&
-        whiteboard.query().size() >= phaseId &&
-        whiteboard.query().get(phaseId) != null;
+        Objects.requireNonNull(whiteboard.query()).size() >= phaseId &&
+        Objects.requireNonNull(whiteboard.query()).get(phaseId) != null;
   }
 
   @Override
@@ -47,7 +48,7 @@ public class MinerPhase implements SearchPhase {
     long startTime = System.nanoTime();
 
     final Map<Page, Features> documentsFeatures = new HashMap<>();
-    Query query = whiteboard.query().get(phaseId);
+    Query query = Objects.requireNonNull(whiteboard.query()).get(phaseId);
     index
         .fetchDocuments(query)
         .forEach(

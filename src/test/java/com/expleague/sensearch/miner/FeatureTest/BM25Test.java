@@ -22,14 +22,14 @@ public class BM25Test extends IndexBasedTestCase {
 
   private TextFeatureSet testBM25;
 
-  private final String title1 = "Суффет"; //1
-  private final String page1 = //37
+  private static final String TITLE_1 = "Суффет"; //1
+  private static final String PAGE_1 = //37
       "Суффет — название двух главных должностных лиц (магистратов) в Тире, а также в северной Африке, на территории Карфагенской республики."
       + " Обычно они были верховными судьями. Во время военных действий часто — главнокомандующими."
       + " В древнем Израиле так называли военных предводителей и судей.";
 
-  private final String title2 = "Правитель"; //1
-  private final String page2 = //62
+  private static final String TITLE_2 = "Правитель"; //1
+  private static final String PAGE_2 = //62
       "Прави́тель, Прави́тельница — глава государства, страны или иной обособленной территории.\n"
           + "\n"
           + "Слово «правитель» не имеет иноязычного происхождения, а потому является приемлемым для обозначения главы государства любого политического устройства, формы правления или культуры."
@@ -65,7 +65,7 @@ public class BM25Test extends IndexBasedTestCase {
     Query query = BaseQuery.create("Суффет", index());
     QURLItem item = new QURLItem(new TestPage(), query);
     testBM25.accept(item);
-    init(title1, page1);
+    init(TITLE_1, PAGE_1);
 
     Vec resBM25 = testBM25.advance();
     double scoreBM25 = Math.log(2.0 / query.terms().get(0).documentFreq()) * 2 / (2 + K * (1 - B + B * 38. / (38 + 63) * 2));
@@ -78,7 +78,7 @@ public class BM25Test extends IndexBasedTestCase {
     query = BaseQuery.create("Военные предводители", index());
     item = new QURLItem(new TestPage(), query);
     testBM25.accept(item);
-    init(title1, page1);
+    init(TITLE_1, PAGE_1);
 
     resBM25 = testBM25.advance();
     scoreBM25 = 0 + 0;
@@ -96,9 +96,7 @@ public class BM25Test extends IndexBasedTestCase {
 
   @Test
   public void testPage2() {
-    index().parse(page1).forEach(t -> {
-      System.err.println(t.text());
-    });
+    index().parse(PAGE_1).forEach(t -> System.err.println(t.text()));
   }
 
   private class TestPage implements Page {

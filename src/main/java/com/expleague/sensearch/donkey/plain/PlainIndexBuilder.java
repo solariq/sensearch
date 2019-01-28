@@ -32,7 +32,6 @@ import java.util.Random;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.stream.Stream;
-import javax.xml.stream.XMLStreamException;
 import org.apache.log4j.Logger;
 import org.fusesource.leveldbjni.JniDBFactory;
 import org.iq80.leveldb.CompressionType;
@@ -41,9 +40,9 @@ import org.iq80.leveldb.Options;
 
 public class PlainIndexBuilder implements IndexBuilder {
 
-  public static final int STATISTICS_BLOCK_SIZE = 1 << 10;
-  public static final int PLAIN_PAGE_BLOCK_SIZE = 1 << 20;
-  public static final int PLAIN_TERM_BLOCK_SIZE = 1 << 20;
+  private static final int STATISTICS_BLOCK_SIZE = 1 << 10;
+  private static final int PLAIN_PAGE_BLOCK_SIZE = 1 << 20;
+  private static final int PLAIN_TERM_BLOCK_SIZE = 1 << 20;
 
   public static final String TERM_STATISTICS_ROOT = "stats";
   public static final String PAGE_ROOT = "page";
@@ -190,16 +189,10 @@ public class PlainIndexBuilder implements IndexBuilder {
     final Path indexRoot = config.getTemporaryIndex();
     LOG.info("Building JMLL embedding...");
     EmbeddingImpl<CharSeq> jmllEmbedding;
-    try {
-      jmllEmbedding =
-          (EmbeddingImpl<CharSeq>)
-              new JmllEmbeddingBuilder(DEFAULT_VEC_SIZE, indexRoot.resolve(TEMP_EMBEDDING_ROOT))
-                  .build(crawler.makeStream());
-    } catch (XMLStreamException e) {
-      LOG.error(e);
-      throw new RuntimeException(e);
-    }
-
+    jmllEmbedding =
+        (EmbeddingImpl<CharSeq>)
+            new JmllEmbeddingBuilder(DEFAULT_VEC_SIZE, indexRoot.resolve(TEMP_EMBEDDING_ROOT))
+                .build(crawler.makeStream());
     jmllEmbedding.write(new FileWriter(config.getEmbeddingVectors()));
     buildIndex(jmllEmbedding);
   }

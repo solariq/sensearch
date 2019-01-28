@@ -1,12 +1,11 @@
 package com.expleague.sensearch.query;
 
-import com.expleague.sensearch.Page;
 import com.expleague.sensearch.core.SearchPhase;
 import com.expleague.sensearch.core.Whiteboard;
-import java.util.ArrayList;
-import java.util.List;
 import com.expleague.sensearch.index.Index;
 import com.google.inject.Inject;
+import java.util.ArrayList;
+import java.util.List;
 import org.apache.log4j.Logger;
 
 

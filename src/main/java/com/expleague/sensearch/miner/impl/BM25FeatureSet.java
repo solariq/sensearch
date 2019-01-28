@@ -7,7 +7,6 @@ import com.expleague.ml.meta.FeatureMeta.ValueType;
 import com.expleague.sensearch.core.Term;
 import com.expleague.sensearch.query.Query;
 import gnu.trove.map.hash.TObjectIntHashMap;
-
 import java.util.BitSet;
 import java.util.HashSet;
 import java.util.List;
@@ -17,22 +16,22 @@ import java.util.stream.Collectors;
 
 public class BM25FeatureSet extends FeatureSet.Stub<QURLItem> implements TextFeatureSet {
 
-  public final static FeatureMeta BM25 = FeatureMeta
+  private final static FeatureMeta BM25 = FeatureMeta
       .create("bm25", "Title + text bm25", ValueType.VEC);
-  public final static FeatureMeta BM25L = FeatureMeta
+  private final static FeatureMeta BM25L = FeatureMeta
       .create("bm25l", "Title + text bm25 by lemmas", ValueType.VEC);
-  public final static FeatureMeta BM25S = FeatureMeta
+  private final static FeatureMeta BM25S = FeatureMeta
       .create("bm25s", "Title + text bm25 by synonyms", ValueType.VEC);
-  public final static FeatureMeta BM25F = FeatureMeta
+  private final static FeatureMeta BM25F = FeatureMeta
       .create("bm25f", "field-dependent bm25", ValueType.VEC);
-  public final static FeatureMeta WORDS_SHARE = FeatureMeta
+  private final static FeatureMeta WORDS_SHARE = FeatureMeta
       .create("words-share", "Document contained words idf sum normalized by total idf",
           ValueType.VEC);
-  public final static FeatureMeta WORDS_COUNT = FeatureMeta
+  private final static FeatureMeta WORDS_COUNT = FeatureMeta
       .create("words-count", "Words in query", ValueType.VEC);
-  public final static FeatureMeta QUERY_LENGTH = FeatureMeta
+  private final static FeatureMeta QUERY_LENGTH = FeatureMeta
       .create("query-length", "Query text length in characters", ValueType.VEC);
-  public final static FeatureMeta IDF_TOTAL = FeatureMeta
+  private final static FeatureMeta IDF_TOTAL = FeatureMeta
       .create("idf-total", "Total idf sum of query words", ValueType.VEC);
 
   private static final double K = 1.2;
@@ -125,7 +124,7 @@ public class BM25FeatureSet extends FeatureSet.Stub<QURLItem> implements TextFea
   private class BM25Accumulator implements TextFeatureAccumulator {
 
     private final TObjectIntHashMap<Term> freq = new TObjectIntHashMap<>();
-    private double normalizer;
+    private final double normalizer;
 
     BM25Accumulator(int pageLen, double avgLen) {
       normalizer = K * (1 - B + B * pageLen / avgLen);
@@ -153,12 +152,12 @@ public class BM25FeatureSet extends FeatureSet.Stub<QURLItem> implements TextFea
     private final TObjectIntHashMap<Term> freqTITLE = new TObjectIntHashMap<>();
     private final TObjectIntHashMap<Term> freqBODY = new TObjectIntHashMap<>();
 
-    private double normalizerTITLE;
-    private double normalizerBODY;
+    private final double normalizerTitle;
+    private final double normalizerBody;
 
     BM25FAccumulator(int pageLen, double avgLen, int titleLen, double avgTitle) {
-      normalizerTITLE = (1 + B * (titleLen / avgTitle - 1));
-      normalizerBODY = (1 + B * (pageLen / avgLen - 1));
+      normalizerTitle = (1 + B * (titleLen / avgTitle - 1));
+      normalizerBody = (1 + B * (pageLen / avgLen - 1));
     }
 
     public void accept(Segment type, Term term) {
@@ -178,8 +177,8 @@ public class BM25FeatureSet extends FeatureSet.Stub<QURLItem> implements TextFea
         final double idf = idf(term, type);
 
         double tf = 0;
-        tf += freqTITLE.get(term) / normalizerTITLE;
-        tf += freqBODY.get(term) / normalizerBODY;
+        tf += freqTITLE.get(term) / normalizerTitle;
+        tf += freqBODY.get(term) / normalizerBody;
         result[0] += tf / (K + tf) * idf;
       });
 

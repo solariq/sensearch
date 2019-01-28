@@ -21,7 +21,8 @@ import java.util.Set;
 import java.util.TreeSet;
 
 class Phrase {
-	Term[] content;
+
+	final Term[] content;
 	double hhFeature;
 	double coocSum;
 
@@ -177,7 +178,7 @@ public class HHPhrases {
 		});
 	}
 
-	public static void main(String[] args) throws IOException, URISyntaxException {
+	public static void main(String[] args) throws IOException {
 		List<String> pageURLs = Arrays.asList(
 				"https://ru.wikipedia.org/wiki/Москва",
 				"https://ru.wikipedia.org/wiki/Миронов,_Андрей_Александрович");

@@ -22,7 +22,7 @@ import java.util.Map;
  */
 public class LogBasedMyStem implements MyStem {
 
-  private Map<CharSequence, List<WordInfo>> requests = new HashMap<>();
+  private final Map<CharSequence, List<WordInfo>> requests = new HashMap<>();
 
   public LogBasedMyStem(Path logPath) {
     try (InputStream fromMyStem = Files.newInputStream(Paths.get(logPath + "_from"));

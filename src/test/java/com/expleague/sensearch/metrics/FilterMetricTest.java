@@ -1,17 +1,17 @@
 package com.expleague.sensearch.metrics;
 
-import org.junit.Assert;
-import org.junit.Test;
-
 import java.net.URI;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Set;
 import java.util.function.DoublePredicate;
 import java.util.stream.Collectors;
+import org.junit.Assert;
+import org.junit.Test;
 
 public class FilterMetricTest {
-    private FilterMetric filterMetric = new FilterMetric();
+
+    private final FilterMetric filterMetric = new FilterMetric();
 
     private void testTemplate(String queryStr, Set<URI> URIs, DoublePredicate predicate) {
         Assert.assertTrue(

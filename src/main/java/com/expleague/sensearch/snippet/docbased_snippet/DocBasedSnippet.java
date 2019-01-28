@@ -1,6 +1,5 @@
 package com.expleague.sensearch.snippet.docbased_snippet;
 
-import com.expleague.commons.seq.CharSeqTools;
 import com.expleague.sensearch.core.Term;
 import com.expleague.sensearch.query.Query;
 import com.expleague.sensearch.snippet.Segment;
@@ -16,9 +15,9 @@ public class DocBasedSnippet implements Snippet {
 
   private static final int MAX_LENGTH = 300; // 🚜🚜🚜
 
-  private CharSequence title;
-  private CharSequence content;
-  private List<Segment> selection = new ArrayList<>();
+  private final CharSequence title;
+  private final CharSequence content;
+  private final List<Segment> selection = new ArrayList<>();
 
   public DocBasedSnippet(CharSequence title, List<Passage> passages, Query query) {
     this.title = title;

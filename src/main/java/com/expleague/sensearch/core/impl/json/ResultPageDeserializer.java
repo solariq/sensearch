@@ -4,7 +4,6 @@ import com.expleague.sensearch.SenSeArch.ResultItem;
 import com.expleague.sensearch.SenSeArch.ResultPage;
 import com.expleague.sensearch.core.impl.ResultPageImpl;
 import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.ObjectCodec;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -25,11 +24,10 @@ public class ResultPageDeserializer extends StdDeserializer<ResultPage> {
 
   @Override
   public ResultPage deserialize(
-      JsonParser jsonParser, DeserializationContext deserializationContext)
-      throws IOException, JsonProcessingException {
+      JsonParser jsonParser, DeserializationContext deserializationContext) throws IOException {
     ObjectCodec codec = jsonParser.getCodec();
     JsonNode node = codec.readTree(jsonParser);
-    ResultItemDeserializer resultItemDeserializer = new ResultItemDeserializer();
+
     List<ResultItem> results = new ArrayList<>();
     List<ResultItem> googleResults = new ArrayList<>();
 

@@ -22,8 +22,8 @@ public final class ByteTools {
 
     ByteBuffer byteBuf = ByteBuffer.allocate(Double.BYTES * vecs.get(0).length() * vecs.size());
     DoubleBuffer doubleBuf = byteBuf.asDoubleBuffer();
-    for (int i = 0; i < vecs.size(); i++) {
-      double[] coords = vecs.get(i).toArray();
+    for (Vec vec : vecs) {
+      double[] coords = vec.toArray();
       doubleBuf.put(coords);
     }
     return byteBuf.array();

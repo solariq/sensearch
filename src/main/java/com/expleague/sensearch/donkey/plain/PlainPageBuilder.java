@@ -21,6 +21,7 @@ import java.util.Collections;
 import java.util.Deque;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 import org.apache.commons.io.FileUtils;
 import org.iq80.leveldb.DB;
@@ -47,13 +48,13 @@ class PlainPageBuilder implements AutoCloseable {
   private OutputStream temporaryIndexOs;
 
   // accumulates for all pages
-  private List<Page.Link.Builder> linkBuilders = new ArrayList<>();
-  private TLongLongMap wikiIdToIndexId = new TLongLongHashMap();
+  private final List<Page.Link.Builder> linkBuilders = new ArrayList<>();
+  private final TLongLongMap wikiIdToIndexId = new TLongLongHashMap();
 
   // accumulates for single page then clears when next page is received
   private List<String> categories = Collections.emptyList();
-  private Deque<IndexUnits.Page.Builder> parentPagesStack = new LinkedList<>();
-  private List<Page> builtPages = new ArrayList<>();
+  private final Deque<IndexUnits.Page.Builder> parentPagesStack = new LinkedList<>();
+  private final List<Page> builtPages = new ArrayList<>();
 
   private boolean isProcessingPage = false;
   // Flag that indicates if there as at least one section added for current page
@@ -185,7 +186,7 @@ class PlainPageBuilder implements AutoCloseable {
 
     // section depth is always greater than 1
     while (parentPagesStack.size() >= sectionDepth) {
-      builtPages.add(parentPagesStack.pollLast().build());
+      builtPages.add(Objects.requireNonNull(parentPagesStack.pollLast()).build());
     }
 
     CharSequence sectionTitle = sectionTitleSeq.get(sectionDepth - 1);
@@ -218,7 +219,7 @@ class PlainPageBuilder implements AutoCloseable {
     isProcessingPage = false;
 
     while (!parentPagesStack.isEmpty()) {
-      builtPages.add(parentPagesStack.pollLast().build());
+      builtPages.add(Objects.requireNonNull(parentPagesStack.pollLast()).build());
     }
 
     builtPages.forEach(

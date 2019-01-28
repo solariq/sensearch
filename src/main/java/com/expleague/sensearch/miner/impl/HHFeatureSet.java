@@ -14,17 +14,18 @@ import java.util.TreeSet;
 
 public class HHFeatureSet extends FeatureSet.Stub<QURLItem> implements TextFeatureSet {
 
-  public final static FeatureMeta HHP = FeatureMeta
+  private static final FeatureMeta HHP = FeatureMeta
       .create("hhp", "Title + text hhp", ValueType.VEC);
-
-  public final static FeatureMeta HHPL = FeatureMeta
+  private static final FeatureMeta HHPL = FeatureMeta
       .create("lemma-hhp", "Title + text hhp by lemma", ValueType.VEC);
+
+  private static final double Z = 1.75;
 
   private Query query;
   private Set<Term> queryTerms;
-  private Map<Term, TreeSet<Integer>> termPositions = new HashMap<>();
-  private Map<Term, Double> idf = new HashMap<>();
-  private Map<Term, Double> idfLemma = new HashMap<>();
+  private final Map<Term, TreeSet<Integer>> termPositions = new HashMap<>();
+  private final Map<Term, Double> idf = new HashMap<>();
+  private final Map<Term, Double> idfLemma = new HashMap<>();
 
   @Override
   public void accept(QURLItem item) {
@@ -77,8 +78,6 @@ public class HHFeatureSet extends FeatureSet.Stub<QURLItem> implements TextFeatu
     return super.advance();
   }
 
-  private final double z = 1.75;
-
   private double frac(Term term, Integer neighPos, int center,
       TermType type) {
 
@@ -96,7 +95,7 @@ public class HHFeatureSet extends FeatureSet.Stub<QURLItem> implements TextFeatu
         termIDF = idfLemma.get(term) ;
     }
 
-    return termIDF / Math.pow(Math.abs(neighPos - center), z);
+    return termIDF / Math.pow(Math.abs(neighPos - center), Z);
   }
 
   private double tc(Term t, int p, TermType type) {

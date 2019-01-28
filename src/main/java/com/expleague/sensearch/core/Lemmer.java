@@ -9,7 +9,7 @@ import java.nio.file.Path;
 @Singleton
 public class Lemmer {
 
-  public MyStem myStem;
+  public final MyStem myStem;
 
   public Lemmer(Path myStemPath) {
     this.myStem = new MyStemImpl(myStemPath);

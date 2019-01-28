@@ -18,7 +18,7 @@ public class FilterImpl implements Filter {
   private static final int START_MULTIPLIER = 2;
   private static final int MAX_NUMBER = 2_000_000;
 
-  private Embedding embedding;
+  private final Embedding embedding;
 
   public FilterImpl(Embedding embedding) {
     this.embedding = embedding;

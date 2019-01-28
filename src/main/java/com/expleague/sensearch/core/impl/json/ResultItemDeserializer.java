@@ -2,11 +2,9 @@ package com.expleague.sensearch.core.impl.json;
 
 import com.expleague.commons.util.Pair;
 import com.expleague.sensearch.SenSeArch.ResultItem;
-import com.expleague.sensearch.SenSeArch.ResultItemDebugInfo;
 import com.expleague.sensearch.core.impl.ResultItemImpl;
 import com.expleague.sensearch.snippet.Segment;
 import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.ObjectCodec;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -29,8 +27,7 @@ public class ResultItemDeserializer extends StdDeserializer<ResultItem> {
 
   @Override
   public ResultItem deserialize(
-      JsonParser jsonParser, DeserializationContext deserializationContext)
-      throws IOException, JsonProcessingException {
+      JsonParser jsonParser, DeserializationContext deserializationContext) throws IOException {
     ObjectCodec codec = jsonParser.getCodec();
     JsonNode node = codec.readTree(jsonParser);
     try {
@@ -54,9 +51,9 @@ public class ResultItemDeserializer extends StdDeserializer<ResultItem> {
                 passages.add(new Pair<>(text, highlights));
               });
 
-//      int score = node.get("score").intValue();
-//      ResultItemDebugInfo debugInfo =
-//          codec.treeToValue(node.get("debugInfo"), ResultItemDebugInfo.class);
+      //      int score = node.get("score").intValue();
+      //      ResultItemDebugInfo debugInfo =
+      //          codec.treeToValue(node.get("debugInfo"), ResultItemDebugInfo.class);
       return new ResultItemImpl(reference, title, passages, 0, null);
     } catch (URISyntaxException e) {
       e.printStackTrace();

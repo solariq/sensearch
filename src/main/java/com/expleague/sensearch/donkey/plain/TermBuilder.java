@@ -77,6 +77,7 @@ public class TermBuilder implements AutoCloseable {
       wordId = idMapping.get(word);
     }
 
+    //noinspection EqualsBetweenInconvertibleTypes
     if (lemma == null || lemma.lemma().equals(word)) {
       terms.put(
           wordId,
@@ -150,8 +151,8 @@ public class TermBuilder implements AutoCloseable {
 
   public static class TermAndLemmaIdPair {
 
-    long termId;
-    long lemmaId;
+    final long termId;
+    final long lemmaId;
 
     public TermAndLemmaIdPair(long termId, long lemmaId) {
       this.termId = termId;
@@ -161,9 +162,9 @@ public class TermBuilder implements AutoCloseable {
 
   static class ParsedTerm {
 
-    long id;
-    long lemmaId;
-    PartOfSpeech partOfSpeech;
+    final long id;
+    final long lemmaId;
+    final PartOfSpeech partOfSpeech;
 
     public ParsedTerm(long id, long lemmaId, PartOfSpeech partOfSpeech) {
       this.id = id;
