@@ -15,7 +15,6 @@ import com.expleague.sensearch.donkey.plain.PlainIndexBuilder;
 import com.expleague.sensearch.index.Embedding;
 import com.expleague.sensearch.index.Filter;
 import com.expleague.sensearch.index.Index;
-import com.expleague.sensearch.metrics.FilterMetric;
 import com.expleague.sensearch.metrics.LSHSynonymsMetric;
 import com.expleague.sensearch.protobuf.index.IndexUnits;
 import com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta.UriPageMapping;
@@ -99,7 +98,6 @@ public class PlainIndex implements Index {
 
   private final Embedding embedding;
   private final Filter filter;
-  private final FilterMetric filterMetric = new FilterMetric();
   private final LSHSynonymsMetric lshSynonymsMetric;
   private final Tokenizer tokenizer;
 
@@ -108,18 +106,18 @@ public class PlainIndex implements Index {
   private SuggestInformationLoader suggestLoader;
 
   @Inject
-  public PlainIndex(Config config) throws IOException {
+  public PlainIndex(Config config, Embedding embedding, Filter filter) throws IOException {
+
+    this.embedding = embedding;
+    this.filter = filter;
 
     LOG.info("Loading PlainIndex...");
     long startTime = System.nanoTime();
 
     Path indexRoot = config.getTemporaryIndex();
-
     Path embeddingPath = indexRoot.resolve(PlainIndexBuilder.EMBEDDING_ROOT);
-    embedding = new EmbeddingImpl(embeddingPath);
     lshSynonymsMetric =
         new LSHSynonymsMetric(embeddingPath.resolve(PlainIndexBuilder.LSH_METRIC_ROOT));
-    filter = new FilterImpl(embedding);
 
     termStatisticsBase =
         JniDBFactory.factory.open(

@@ -10,5 +10,6 @@
 
   "pathToMetrics": "./resources/Metrics",
   "buildIndexFlag": "false",
-  "trainEmbeddingFlag": "false"
+  "trainEmbeddingFlag": "false",
+  "maxFilterItems": "10"
 }

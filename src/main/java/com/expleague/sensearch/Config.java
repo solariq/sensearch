@@ -27,4 +27,6 @@ public interface Config {
   default boolean getTrainEmbeddingFlag() {
     return false;
   }
+
+  int maxFilterItems();
 }

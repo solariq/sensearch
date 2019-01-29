@@ -1,24 +1,26 @@
 package com.expleague.sensearch.web.suggest.hh_phrases;
 
-import com.expleague.sensearch.Config;
-import com.expleague.sensearch.ConfigImpl;
+import com.expleague.sensearch.AppModule;
 import com.expleague.sensearch.Page;
 import com.expleague.sensearch.Page.SegmentType;
 import com.expleague.sensearch.core.Term;
 import com.expleague.sensearch.index.Index;
-import com.expleague.sensearch.index.plain.PlainIndex;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.inject.Guice;
+import com.google.inject.Injector;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.Set;
 import java.util.TreeSet;
+import org.apache.log4j.PropertyConfigurator;
 
 class Phrase {
 
@@ -148,10 +150,12 @@ public class HHPhrases {
 	Index index;
 
 	public HHPhrases() throws IOException {
-		ObjectMapper objectMapper = new ObjectMapper();
-		Config config = objectMapper.readValue(Paths.get("./config.json").toFile(), ConfigImpl.class);
+		Properties logProperties = new Properties();
+		logProperties.load(Files.newInputStream(Paths.get("log4j.properties")));
+		PropertyConfigurator.configure(logProperties);
 
-		index = new PlainIndex(config);
+		Injector injector = Guice.createInjector(new AppModule());
+		index = injector.getInstance(Index.class);
 	}
 
 	public void processPhrases(String pageName) {

@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-public class FilterMetric {
+public class MeasureFilterQuality {
 
     private static final String BEGIN_OF_ROOT = "wordstat/query_";
 

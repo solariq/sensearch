@@ -13,6 +13,7 @@ public class ConfigImpl implements Config {
   private String pathToZIP;
   private String pathToMetrics;
   private int pageSize = 10;
+  private int maxFilterItems;
   private boolean buildIndexFlag;
   private boolean trainEmbeddingFlag;
 
@@ -41,6 +42,15 @@ public class ConfigImpl implements Config {
   @Override
   public boolean getTrainEmbeddingFlag() {
     return trainEmbeddingFlag;
+  }
+
+  @Override
+  public int maxFilterItems() {
+    return maxFilterItems;
+  }
+
+  private void setMaxFilterItems(int maxFilterItems) {
+    this.maxFilterItems = maxFilterItems;
   }
 
   @Override

@@ -11,7 +11,7 @@ import org.junit.Test;
 
 public class FilterMetricTest {
 
-    private final FilterMetric filterMetric = new FilterMetric();
+    private final MeasureFilterQuality filterMetric = new MeasureFilterQuality();
 
     private void testTemplate(String queryStr, Set<URI> URIs, DoublePredicate predicate) {
         Assert.assertTrue(

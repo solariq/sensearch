@@ -1,8 +1,10 @@
 package com.expleague.sensearch.index.plain;
 
 import com.expleague.commons.math.vectors.Vec;
+import com.expleague.sensearch.core.Annotations.FilterMaxItems;
 import com.expleague.sensearch.index.Embedding;
 import com.expleague.sensearch.index.Filter;
+import com.google.inject.Inject;
 import gnu.trove.list.TLongList;
 import gnu.trove.list.array.TLongArrayList;
 import java.util.Arrays;
@@ -16,12 +18,14 @@ public class FilterImpl implements Filter {
   private static final Logger LOG = Logger.getLogger(FilterImpl.class.getName());
 
   private static final int START_MULTIPLIER = 2;
-  private static final int MAX_NUMBER = 2_000_000;
 
   private final Embedding embedding;
+  private final int maxItems;
 
-  public FilterImpl(Embedding embedding) {
+  @Inject
+  public FilterImpl(Embedding embedding, @FilterMaxItems int maxItems) {
     this.embedding = embedding;
+    this.maxItems = maxItems;
   }
 
   @Override
@@ -33,7 +37,7 @@ public class FilterImpl implements Filter {
 
     int embNumber = number * START_MULTIPLIER;
     TLongList result = new TLongArrayList();
-    while (embNumber < MAX_NUMBER) {
+    while (embNumber < maxItems) {
       result.clear();
       embedding.nearest(mainVec, embNumber, predicate).forEach(result::add);
       if (result.size() >= number) {

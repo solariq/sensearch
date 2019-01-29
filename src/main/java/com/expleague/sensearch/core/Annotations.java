@@ -21,4 +21,32 @@ public class Annotations {
   public @interface PageSize {
 
   }
+
+  @Retention(RetentionPolicy.RUNTIME)
+  @Target({ElementType.FIELD, ElementType.PARAMETER})
+  @BindingAnnotation
+  public @interface FilterMaxItems {
+
+  }
+
+  @Retention(RetentionPolicy.RUNTIME)
+  @Target({ElementType.FIELD, ElementType.PARAMETER})
+  @BindingAnnotation
+  public @interface EmbeddingVecsDb {
+
+  }
+
+  @Retention(RetentionPolicy.RUNTIME)
+  @Target({ElementType.FIELD, ElementType.PARAMETER})
+  @BindingAnnotation
+  public @interface EmbeddingLshTablesDb {
+
+  }
+
+  @Retention(RetentionPolicy.RUNTIME)
+  @Target({ElementType.FIELD, ElementType.PARAMETER})
+  @BindingAnnotation
+  public @interface EmbeddingPath {
+
+  }
 }
