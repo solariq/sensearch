@@ -28,5 +28,9 @@ public interface Config {
     return false;
   }
 
+  default boolean getLshNearestFlag() {
+    return true;
+  }
+
   int maxFilterItems();
 }

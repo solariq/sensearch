@@ -11,5 +11,6 @@
   "pathToMetrics": "./resources/Metrics",
   "buildIndexFlag": "false",
   "trainEmbeddingFlag": "false",
+  "lshNearestFlag": "true",
   "maxFilterItems": "10"
 }

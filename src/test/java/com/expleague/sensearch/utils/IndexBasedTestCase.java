@@ -52,6 +52,7 @@ public abstract class IndexBasedTestCase extends CrawlerBasedTestCase {
     Path embeddingPath = indexConfig.getTemporaryIndex().resolve(PlainIndexBuilder.EMBEDDING_ROOT);
     embedding =
         new EmbeddingImpl(
+                indexConfig,
             JniDBFactory.factory.open(
                 embeddingPath.resolve(PlainIndexBuilder.VECS_ROOT).toFile(), DB_OPTIONS),
             JniDBFactory.factory.open(

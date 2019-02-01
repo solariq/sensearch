@@ -7,6 +7,7 @@ import com.expleague.commons.math.vectors.VecTools;
 import com.expleague.commons.math.vectors.impl.vectors.ArrayVec;
 import com.expleague.commons.seq.CharSeqTools;
 import com.expleague.commons.util.ArrayTools;
+import com.expleague.sensearch.Config;
 import com.expleague.sensearch.core.Annotations.EmbeddingLshTablesDb;
 import com.expleague.sensearch.core.Annotations.EmbeddingPath;
 import com.expleague.sensearch.core.Annotations.EmbeddingVecsDb;
@@ -28,45 +29,71 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.function.BiFunction;
 import java.util.function.LongPredicate;
 import java.util.function.ToLongFunction;
 import java.util.stream.LongStream;
+
+import gnu.trove.set.TLongSet;
+import gnu.trove.set.hash.TLongHashSet;
 import org.iq80.leveldb.DB;
 import org.iq80.leveldb.DBIterator;
 
 public class EmbeddingImpl implements Embedding {
   private static final int MAX_DIFFERENT_BITS = 5;
-  private final long[] allIds;
-
-  private BiFunction<Vec, Vec, Double> nearestMeasure = VecTools::distanceAV;
+  private long[] allIds;
 
   private DB vecDB, tablesDB;
+  private final boolean lshFlag;
   private ToLongFunction<Vec>[] hashFuncs;
 
   @Inject
   public EmbeddingImpl(
+      Config config,
       @EmbeddingVecsDb DB vecsDb,
       @EmbeddingLshTablesDb DB tablesDB,
       @EmbeddingPath Path embeddingPath)
       throws IOException {
+    lshFlag = config.getLshNearestFlag();
     this.vecDB = vecsDb;
     this.tablesDB = tablesDB;
 
-    List<Vec> randVecs = new ArrayList<>();
-    try (Reader input =
-        new InputStreamReader(
-            new FileInputStream(embeddingPath.resolve(EmbeddingBuilder.RAND_VECS).toFile()))) {
-      CharSeqTools.lines(input)
-          .forEach(
-              line -> {
-                CharSequence[] parts = CharSeqTools.split(line, ' ');
-                randVecs.add(
-                    new ArrayVec(
-                        Arrays.stream(parts).mapToDouble(CharSeqTools::parseDouble).toArray()));
-              });
-    }
-    {
+    if (lshFlag) {
+      List<Vec> randVecs = new ArrayList<>();
+      try (Reader input =
+                   new InputStreamReader(
+                           new FileInputStream(embeddingPath.resolve(EmbeddingBuilder.RAND_VECS).toFile()))) {
+        CharSeqTools.lines(input)
+                .forEach(
+                        line -> {
+                          CharSequence[] parts = CharSeqTools.split(line, ' ');
+                          randVecs.add(
+                                  new ArrayVec(
+                                          Arrays.stream(parts).mapToDouble(CharSeqTools::parseDouble).toArray()));
+                        });
+      }
+
+      hashFuncs = new ToLongFunction[EmbeddingBuilder.TABLES_NUMBER];
+      for (int i = 0; i < hashFuncs.length; i++) {
+
+        final int hashNum = i;
+        hashFuncs[i] =
+                (vec) -> {
+                  boolean[] mask = new boolean[TUPLE_SIZE];
+                  for (int j = 0; j < mask.length; j++) {
+                    mask[j] = VecTools.multiply(vec, randVecs.get(TUPLE_SIZE * hashNum + j)) >= 0;
+                  }
+
+                  long hash = ((long) hashNum) << ((long) TUPLE_SIZE);
+                  for (int j = 0; j < mask.length; j++) {
+                    if (mask[j]) {
+                      hash += 1L << ((long) j);
+                    }
+                  }
+
+                  return hash;
+                };
+      }
+    } else {
       TLongArrayList allIds = new TLongArrayList();
       DBIterator iterator = vecDB.iterator();
       iterator.seekToFirst();
@@ -76,29 +103,6 @@ public class EmbeddingImpl implements Embedding {
         allIds.add(id);
       }
       this.allIds = allIds.toArray();
-    }
-
-    // noinspection unchecked
-    hashFuncs = new ToLongFunction[EmbeddingBuilder.TABLES_NUMBER];
-    for (int i = 0; i < hashFuncs.length; i++) {
-
-      final int hashNum = i;
-      hashFuncs[i] =
-          (vec) -> {
-            boolean[] mask = new boolean[TUPLE_SIZE];
-            for (int j = 0; j < mask.length; j++) {
-              mask[j] = VecTools.multiply(vec, randVecs.get(TUPLE_SIZE * hashNum + j)) >= 0;
-            }
-
-            long hash = ((long) hashNum) << ((long) TUPLE_SIZE);
-            for (int j = 0; j < mask.length; j++) {
-              if (mask[j]) {
-                hash += 1L << ((long) j);
-              }
-            }
-
-            return hash;
-          };
     }
   }
 
@@ -134,25 +138,39 @@ public class EmbeddingImpl implements Embedding {
     nearestIndexes(nearestIndexes, index, pos + 1, remaining - 1);
   }
 
-  @Override
-  public LongStream nearest(Vec mainVec, int numberOfNeighbors, LongPredicate predicate) {
-    final double queryNorm = VecTools.norm(mainVec);
-    if (queryNorm == 0) {
-      return LongStream.empty();
+  private long[] lshNearest(Vec mainVec) {
+    long[] indexes = new long[hashFuncs.length];
+    for (int i = 0; i < hashFuncs.length; i++) {
+      indexes[i] = hashFuncs[i].applyAsLong(mainVec);
     }
 
-    TLongList orderList = new TLongArrayList();
-    final double[] dist = getDists(mainVec, predicate, queryNorm, orderList);
-    final long[] order = orderList.toArray();
-    ArrayTools.parallelSort(dist, order);
-
-    return Arrays.stream(order).distinct().limit(numberOfNeighbors);
+    final TLongSet lshNeighbors = new TLongHashSet();
+    TLongList nearestIndexes = new TLongArrayList();
+    for (int diffBitsN = 0; diffBitsN <= MAX_DIFFERENT_BITS; diffBitsN++) {
+      for (long index : indexes) {
+        nearestIndexes.clear();
+        nearestIndexes(nearestIndexes, index, 0, diffBitsN);
+        for (int i = 0; i < nearestIndexes.size(); i++) {
+          byte[] bytes = tablesDB.get(
+                  Longs.toByteArray(
+                          nearestIndexes.get(i)
+                  )
+          );
+          if (bytes != null) {
+            LongStream.of(
+                    ByteTools.toLongArray(bytes)
+            ).forEach(lshNeighbors::add);
+          }
+        }
+      }
+    }
+    return lshNeighbors.toArray();
   }
 
   private double[] getDists(
       Vec mainVec, LongPredicate predicate, double queryNorm, TLongList orderList) {
-    // TODO: allIds -> LSH
-    return LongStream.of(allIds)
+    long[] ids = lshFlag ? lshNearest(mainVec) : allIds;
+    return LongStream.of(ids)
         .filter(predicate)
         .mapToObj(
             id -> {
@@ -166,6 +184,21 @@ public class EmbeddingImpl implements Embedding {
         .flatMap(List::stream)
         .mapToDouble(v -> distance(mainVec, queryNorm, v))
         .toArray();
+  }
+
+  @Override
+  public LongStream nearest(Vec mainVec, int numberOfNeighbors, LongPredicate predicate) {
+    final double queryNorm = VecTools.norm(mainVec);
+    if (queryNorm == 0) {
+      return LongStream.empty();
+    }
+
+    TLongList orderList = new TLongArrayList();
+    final double[] dist = getDists(mainVec, predicate, queryNorm, orderList);
+    final long[] order = orderList.toArray();
+    ArrayTools.parallelSort(dist, order);
+
+    return Arrays.stream(order).distinct().limit(numberOfNeighbors);
   }
 
   @Override

@@ -16,6 +16,7 @@ public class ConfigImpl implements Config {
   private int maxFilterItems;
   private boolean buildIndexFlag;
   private boolean trainEmbeddingFlag;
+  private boolean lshNearestFlag;
 
   @Override
   public int getPageSize() {
@@ -42,6 +43,15 @@ public class ConfigImpl implements Config {
   @Override
   public boolean getTrainEmbeddingFlag() {
     return trainEmbeddingFlag;
+  }
+
+  private void setLshNearestFlag(boolean lshNearestFlag) {
+    this.lshNearestFlag = lshNearestFlag;
+  }
+
+  @Override
+  public boolean getLshNearestFlag() {
+    return lshNearestFlag;
   }
 
   @Override
