@@ -125,10 +125,10 @@ public class LSHPerformanceTest {
     public void test() throws IOException {
         Path embeddingPath = Paths.get("../WikiDocs/IndexTmp/embedding");
 
-        long CACHE_SIZE = 16 * (1 << 20);
-        Options DB_OPTIONS = new Options().cacheSize(CACHE_SIZE);
-        DB vecDB = JniDBFactory.factory.open(embeddingPath.resolve("vecs").toFile(), DB_OPTIONS);
-        DB tablesDB = JniDBFactory.factory.open(embeddingPath.resolve("lsh").toFile(), DB_OPTIONS);
+        long cacheSize = 16 * (1 << 20);
+        Options dbOptions = new Options().cacheSize(cacheSize);
+        DB vecDB = JniDBFactory.factory.open(embeddingPath.resolve("vecs").toFile(), dbOptions);
+        DB tablesDB = JniDBFactory.factory.open(embeddingPath.resolve("lsh").toFile(), dbOptions);
 
         Embedding embedding = new EmbeddingImpl(new TestConfigImpl(), vecDB, tablesDB, embeddingPath);
         baseTest(embedding);
