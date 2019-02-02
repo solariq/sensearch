@@ -26,8 +26,15 @@ public interface Embedding {
    */
   List<Vec> allVecs(long id);
 
+  LongStream nearest(Vec mainVec, LongPredicate predicate);
   LongStream nearest(Vec mainVec, int numberOfNeighbors, LongPredicate predicate);
   LongStream nearest(Vec mainVec, double maxDistance, LongPredicate predicate);
+
+  void setLSHFlag(boolean value);
+
+  int tupleSize();
+  int tablesNumber();
+  int maxDiffBits();
 
   int dim();
 }
