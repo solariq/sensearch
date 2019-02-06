@@ -49,6 +49,9 @@ public class Metric {
 
     double DCG = 0.0;
     double perfDCG = 0.0;
+    for (int ind = 1; ind <= 10; ind++) {
+      perfDCG += 1.0 / ind / (Math.log(1 + ind) / Math.log(2));
+    }
     int ind = 0;
     for (String title : ourTitles) {
       ResultItem googleResult =
@@ -64,7 +67,6 @@ public class Metric {
       double numDouble = googleResults.indexOf(googleResult) + 1;
       numDouble = 1.0 / numDouble;
       DCG += numDouble / (Math.log(1 + ind) / Math.log(2));
-      perfDCG += 1.0 / ind / (Math.log(1 + ind) / Math.log(2));
     }
 
     System.err.println("Query: " + query + " DCG: " + DCG);
