@@ -68,7 +68,7 @@ public class Metric {
     }
 
     System.err.println("Query: " + query + " DCG: " + DCG);
-    System.err.println("Perfect DCG: " + perfDCG);
+    System.err.println("Perfect DCG: " + perfDCG + " relative DCG: " + (DCG / perfDCG) * 100 + "%");
     try (BufferedWriter DCGWriter =
         new BufferedWriter(
             new OutputStreamWriter(Files.newOutputStream(tmpPath.resolve(METRIC_FILE))))) {
