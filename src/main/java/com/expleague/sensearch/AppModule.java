@@ -25,6 +25,8 @@ import com.expleague.sensearch.web.suggest.ProbabilisticSuggestor;
 import com.expleague.sensearch.web.suggest.Suggestor;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.AbstractModule;
+import com.google.inject.Provides;
+import com.google.inject.Singleton;
 import com.google.inject.assistedinject.FactoryModuleBuilder;
 import java.io.IOException;
 import java.nio.file.Path;
@@ -39,11 +41,13 @@ public class AppModule extends AbstractModule {
   private static final Options DB_OPTIONS = new Options().cacheSize(CACHE_SIZE);
 
   private final ObjectMapper objectMapper = new ObjectMapper();
+  private Path embeddingPath;
 
   @Override
   protected void configure() {
     try {
       Config config = objectMapper.readValue(Paths.get("./config.json").toFile(), ConfigImpl.class);
+      embeddingPath = config.getTemporaryIndex().resolve(PlainIndexBuilder.EMBEDDING_ROOT);
       Lemmer lemmer = new Lemmer(config.getMyStem());
 
       bind(Embedding.class).to(EmbeddingImpl.class);
@@ -53,20 +57,7 @@ public class AppModule extends AbstractModule {
       bindConstant().annotatedWith(PageSize.class).to(config.getPageSize());
       bind(Path.class).annotatedWith(MetricPath.class).toInstance(config.getPathToMetrics());
 
-      Path embeddingPath = config.getTemporaryIndex().resolve(PlainIndexBuilder.EMBEDDING_ROOT);
       bind(Path.class).annotatedWith(EmbeddingPath.class).toInstance(embeddingPath);
-
-      bind(DB.class)
-          .annotatedWith(EmbeddingVecsDb.class)
-          .toInstance(
-              JniDBFactory.factory.open(
-                  embeddingPath.resolve(PlainIndexBuilder.VECS_ROOT).toFile(), DB_OPTIONS));
-
-      bind(DB.class)
-          .annotatedWith(EmbeddingLshTablesDb.class)
-          .toInstance(
-              JniDBFactory.factory.open(
-                  embeddingPath.resolve(PlainIndexBuilder.LSH_ROOT).toFile(), DB_OPTIONS));
 
       bind(Config.class).toInstance(config);
       bind(Lemmer.class).toInstance(lemmer);
@@ -87,4 +78,21 @@ public class AppModule extends AbstractModule {
       e.printStackTrace();
     }
   }
+
+  @Provides
+  @Singleton
+  @EmbeddingVecsDb
+  DB getEmbeddingDb() throws IOException {
+    return JniDBFactory.factory.open(
+        embeddingPath.resolve(PlainIndexBuilder.VECS_ROOT).toFile(), DB_OPTIONS);
+  }
+
+  @Provides
+  @Singleton
+  @EmbeddingLshTablesDb
+  DB getLshDb() throws IOException {
+    return JniDBFactory.factory.open(
+        embeddingPath.resolve(PlainIndexBuilder.LSH_ROOT).toFile(), DB_OPTIONS);
+  }
+
 }

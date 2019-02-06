@@ -30,14 +30,14 @@ public class Annotations {
   }
 
   @Retention(RetentionPolicy.RUNTIME)
-  @Target({ElementType.FIELD, ElementType.PARAMETER})
+  @Target({ElementType.FIELD, ElementType.PARAMETER, ElementType.METHOD})
   @BindingAnnotation
   public @interface EmbeddingVecsDb {
 
   }
 
   @Retention(RetentionPolicy.RUNTIME)
-  @Target({ElementType.FIELD, ElementType.PARAMETER})
+  @Target({ElementType.FIELD, ElementType.PARAMETER, ElementType.METHOD})
   @BindingAnnotation
   public @interface EmbeddingLshTablesDb {
 
