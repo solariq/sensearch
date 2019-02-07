@@ -1,10 +1,8 @@
 package com.expleague.sensearch.index.plain;
 
-import static com.expleague.sensearch.donkey.plain.EmbeddingBuilder.TABLES_NUMBER;
-import static com.expleague.sensearch.donkey.plain.EmbeddingBuilder.TUPLE_SIZE;
-
 import com.expleague.commons.math.vectors.Vec;
 import com.expleague.commons.math.vectors.VecTools;
+import com.expleague.commons.math.vectors.impl.nn.NearestNeighbourIndex;
 import com.expleague.commons.math.vectors.impl.vectors.ArrayVec;
 import com.expleague.commons.seq.CharSeqTools;
 import com.expleague.commons.util.ArrayTools;
@@ -40,68 +38,22 @@ import gnu.trove.set.hash.TLongHashSet;
 import org.iq80.leveldb.DB;
 import org.iq80.leveldb.DBIterator;
 
+//TODO: remove many vecs for 1 id
 public class EmbeddingImpl implements Embedding {
-    private static final int MAX_DIFFERENT_BITS = 4;
     private long[] allIds;
 
-    private DB vecDB, tablesDB;
+    private DB vecDB;
     private boolean lshFlag;
-    private ToLongFunction<Vec>[] hashFuncs;
+
+    private NearestNeighbourIndex nnIdx;
 
     @Inject
     public EmbeddingImpl(
             Config config,
-            @EmbeddingVecsDb DB vecsDb,
-            @EmbeddingLshTablesDb DB tablesDB,
-            @EmbeddingPath Path embeddingPath)
-            throws IOException {
+            @EmbeddingVecsDb DB vecDb) {
         lshFlag = config.getLshNearestFlag();
-        this.vecDB = vecsDb;
-        this.tablesDB = tablesDB;
-
-        List<Vec> randVecs = new ArrayList<>();
-        try (Reader input =
-                     new InputStreamReader(
-                             new FileInputStream(embeddingPath.resolve(EmbeddingBuilder.RAND_VECS).toFile()))) {
-            CharSeqTools.lines(input)
-                    .forEach(
-                            line -> {
-                                CharSequence[] parts = CharSeqTools.split(line, ' ');
-                                randVecs.add(
-                                        new ArrayVec(
-                                                Arrays.stream(parts).mapToDouble(CharSeqTools::parseDouble).toArray()));
-                            });
-        }
-
-        hashFuncs = new ToLongFunction[EmbeddingBuilder.TABLES_NUMBER];
-        for (int i = 0; i < hashFuncs.length; i++) {
-            final int hashNum = i;
-            hashFuncs[i] = (vec) -> {
-                boolean[] mask = new boolean[TUPLE_SIZE];
-                for (int j = 0; j < mask.length; j++) {
-                    mask[j] = VecTools.multiply(vec, randVecs.get(TUPLE_SIZE * hashNum + j)) >= 0;
-                }
-
-                long hash = ((long) hashNum) << ((long) TUPLE_SIZE);
-                for (int j = 0; j < mask.length; j++) {
-                    if (mask[j]) {
-                        hash += 1L << ((long) j);
-                    }
-                }
-
-                return hash;
-            };
-        }
-
-        TLongArrayList allIds = new TLongArrayList();
-        DBIterator iterator = vecDB.iterator();
-        iterator.seekToFirst();
-        while (iterator.hasNext()) {
-            Map.Entry<byte[], byte[]> next = iterator.next();
-            long id = Longs.fromByteArray(next.getKey());
-            allIds.add(id);
-        }
-        this.allIds = allIds.toArray();
+        this.vecDB = vecDb;
+        nnIdx = QuantLSHCosIndexDB.load(vecDb);
     }
 
     @Override
@@ -123,46 +75,8 @@ public class EmbeddingImpl implements Embedding {
         return Collections.emptyList();
     }
 
-    private static void nearestIndexes(TLongList nearestIndexes, long index, int pos, int remaining) {
-        if (remaining == 0) {
-            nearestIndexes.add(index);
-            return;
-        }
-        if (remaining > TUPLE_SIZE - pos) {
-            return;
-        }
-        nearestIndexes(nearestIndexes, index, pos + 1, remaining);
-        index = index ^ (1L << ((long) pos));
-        nearestIndexes(nearestIndexes, index, pos + 1, remaining - 1);
-    }
-
     private long[] lshNearest(Vec mainVec) {
-        long[] indexes = new long[hashFuncs.length];
-        for (int i = 0; i < hashFuncs.length; i++) {
-            indexes[i] = hashFuncs[i].applyAsLong(mainVec);
-        }
-
-        final TLongSet lshNeighbors = new TLongHashSet();
-        TLongList nearestIndexes = new TLongArrayList();
-        for (int diffBitsN = 0; diffBitsN <= MAX_DIFFERENT_BITS; diffBitsN++) {
-            for (long index : indexes) {
-                nearestIndexes.clear();
-                nearestIndexes(nearestIndexes, index, 0, diffBitsN);
-                for (int i = 0; i < nearestIndexes.size(); i++) {
-                    byte[] bytes = tablesDB.get(
-                            Longs.toByteArray(
-                                    nearestIndexes.get(i)
-                            )
-                    );
-                    if (bytes != null) {
-                        LongStream.of(
-                                ByteTools.toLongArray(bytes)
-                        ).forEach(lshNeighbors::add);
-                    }
-                }
-            }
-        }
-        return lshNeighbors.toArray();
+        return nnIdx.nearest(mainVec).mapToLong(NearestNeighbourIndex.Entry::id).toArray();
     }
 
     private double[] getDists(
@@ -227,21 +141,6 @@ public class EmbeddingImpl implements Embedding {
             end = -end - 1;
         }
         return Arrays.stream(order).distinct().limit(end);
-    }
-
-    @Override
-    public int tupleSize() {
-        return TUPLE_SIZE;
-    }
-
-    @Override
-    public int tablesNumber() {
-        return TABLES_NUMBER;
-    }
-
-    @Override
-    public int maxDiffBits() {
-        return MAX_DIFFERENT_BITS;
     }
 
     private double distance(Vec mainVec, double queryNorm, Vec v) {

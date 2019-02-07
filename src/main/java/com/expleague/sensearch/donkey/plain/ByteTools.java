@@ -4,11 +4,14 @@ import com.expleague.commons.math.vectors.Vec;
 import com.expleague.commons.math.vectors.impl.vectors.ArrayVec;
 import java.nio.ByteBuffer;
 import java.nio.DoubleBuffer;
+import java.nio.IntBuffer;
 import java.nio.LongBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.IntStream;
+import java.util.stream.LongStream;
 
 public final class ByteTools {
 
@@ -30,11 +33,7 @@ public final class ByteTools {
   }
 
   public static byte[] toBytes(Vec vec) {
-    double[] coords = vec.toArray();
-    ByteBuffer byteBuf = ByteBuffer.allocate(Double.BYTES * coords.length);
-    DoubleBuffer doubleBuf = byteBuf.asDoubleBuffer();
-    doubleBuf.put(coords);
-    return byteBuf.array();
+    return toBytes(vec.toArray());
   }
 
   public static Vec toVec(byte[] bytes) {
@@ -51,11 +50,39 @@ public final class ByteTools {
     return byteBuf.array();
   }
 
+  public static byte[] toBytes(int[] ints) {
+    ByteBuffer byteBuf = ByteBuffer.allocate(Integer.BYTES * ints.length);
+    IntBuffer intBuf = byteBuf.asIntBuffer();
+    intBuf.put(ints);
+    return byteBuf.array();
+  }
+
+  public static byte[] toBytes(double[] doubles) {
+    ByteBuffer byteBuf = ByteBuffer.allocate(Double.BYTES * doubles.length);
+    DoubleBuffer doubleBuf = byteBuf.asDoubleBuffer();
+    doubleBuf.put(doubles);
+    return byteBuf.array();
+  }
+
   public static long[] toLongArray(byte[] bytes) {
     LongBuffer longBuf = ByteBuffer.wrap(bytes).asLongBuffer();
     long[] longs = new long[longBuf.remaining()];
     longBuf.get(longs);
     return longs;
+  }
+
+  public static int[] toIntArray(byte[] bytes) {
+    IntBuffer intBuf = ByteBuffer.wrap(bytes).asIntBuffer();
+    int[] ints = new int[intBuf.remaining()];
+    intBuf.get(ints);
+    return ints;
+  }
+
+  public static double[] toDoubleArray(byte[] bytes) {
+    DoubleBuffer doubleBuf = ByteBuffer.wrap(bytes).asDoubleBuffer();
+    double[] doubles = new double[doubleBuf.remaining()];
+    doubleBuf.get(doubles);
+    return doubles;
   }
 
   public static List<Vec> toVecs(byte[] bytes) {

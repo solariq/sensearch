@@ -1,7 +1,7 @@
 package com.expleague.sensearch;
 
 import static com.expleague.sensearch.donkey.plain.PlainIndexBuilder.EMBEDDING_ROOT;
-import static com.expleague.sensearch.donkey.plain.PlainIndexBuilder.LSH_ROOT;
+//import static com.expleague.sensearch.donkey.plain.PlainIndexBuilder.LSH_ROOT;
 import static com.expleague.sensearch.donkey.plain.PlainIndexBuilder.VECS_ROOT;
 
 import com.expleague.commons.seq.CharSeq;
@@ -49,13 +49,13 @@ public class RebuildEmbedding {
     }
 
     File vecTmpDir = indexRoot.resolve(EMBEDDING_ROOT + "_tmp").resolve(VECS_ROOT).toFile();
-    File lshTmpDir = indexRoot.resolve(EMBEDDING_ROOT + "_tmp").resolve(LSH_ROOT).toFile();
+    //File lshTmpDir = indexRoot.resolve(EMBEDDING_ROOT + "_tmp").resolve(LSH_ROOT).toFile();
 
     try (final EmbeddingBuilder embeddingBuilder =
         new EmbeddingBuilder(
             JniDBFactory.factory.open(vecTmpDir, new Options()),
-            JniDBFactory.factory.open(lshTmpDir, new Options()),
-            indexRoot.resolve(EMBEDDING_ROOT),
+            /*JniDBFactory.factory.open(lshTmpDir, new Options()),
+            indexRoot.resolve(EMBEDDING_ROOT),*/
             jmllEmbedding,
             new TokenizerImpl(),
             new IdGenerator())) {
@@ -66,8 +66,8 @@ public class RebuildEmbedding {
               doc -> {
                 embeddingBuilder.startPage(doc.id());
 
-                embeddingBuilder.add(doc.content(SegmentType.FULL_TITLE).toString());
-                embeddingBuilder.add(doc.content(SegmentType.BODY).toString());
+                embeddingBuilder.addTitle(doc.content(SegmentType.FULL_TITLE).toString());
+                embeddingBuilder.addText(doc.content(SegmentType.BODY).toString());
 
                 embeddingBuilder.endPage();
               });
@@ -78,9 +78,9 @@ public class RebuildEmbedding {
     FileUtils.moveDirectory(vecTmpDir, vecDbDir);
     FileUtils.deleteDirectory(vecTmpDir);
 
-    File lshDbDir = indexRoot.resolve(EMBEDDING_ROOT).resolve(LSH_ROOT).toFile();
+    /*File lshDbDir = indexRoot.resolve(EMBEDDING_ROOT).resolve(LSH_ROOT).toFile();
     FileUtils.deleteDirectory(lshDbDir);
     FileUtils.moveDirectory(lshTmpDir, lshDbDir);
-    FileUtils.deleteDirectory(lshTmpDir);
+    FileUtils.deleteDirectory(lshTmpDir);*/
   }
 }

@@ -32,9 +32,5 @@ public interface Embedding {
 
   void setLSHFlag(boolean value);
 
-  int tupleSize();
-  int tablesNumber();
-  int maxDiffBits();
-
   int dim();
 }

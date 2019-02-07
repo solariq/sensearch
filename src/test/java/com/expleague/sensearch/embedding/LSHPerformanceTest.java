@@ -1,3 +1,4 @@
+/*
 package com.expleague.sensearch.embedding;
 
 import com.expleague.commons.math.vectors.Vec;
@@ -134,3 +135,4 @@ public class LSHPerformanceTest {
         baseTest(embedding);
     }
 }
+*/

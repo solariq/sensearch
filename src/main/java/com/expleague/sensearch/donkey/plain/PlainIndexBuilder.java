@@ -236,10 +236,10 @@ public class PlainIndexBuilder implements IndexBuilder {
                 JniDBFactory.factory.open(
                     indexRoot.resolve(EMBEDDING_ROOT).resolve(VECS_ROOT).toFile(),
                     EMBEDDING_DB_OPTIONS),
-                JniDBFactory.factory.open(
+                /*JniDBFactory.factory.open(
                     indexRoot.resolve(EMBEDDING_ROOT).resolve(LSH_ROOT).toFile(),
                     EMBEDDING_DB_OPTIONS),
-                indexRoot.resolve(EMBEDDING_ROOT),
+                indexRoot.resolve(EMBEDDING_ROOT),*/
                 jmllEmbedding,
                 tokenizer,
                 idGenerator);
@@ -295,8 +295,8 @@ public class PlainIndexBuilder implements IndexBuilder {
                                           termLemmaId.termId, termLemmaId.lemmaId);
                                     });
                           });
-                  embeddingBuilder.add(doc.title());
-                  embeddingBuilder.add(doc.content().toString());
+                  embeddingBuilder.addTitle(doc.title());
+                  embeddingBuilder.addText(doc.content().toString());
 
                   suggestBuilder.accept(toTermIds(doc.title(), termBuilder));
 

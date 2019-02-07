@@ -54,10 +54,10 @@ public abstract class IndexBasedTestCase extends CrawlerBasedTestCase {
         new EmbeddingImpl(
                 indexConfig,
             JniDBFactory.factory.open(
-                embeddingPath.resolve(PlainIndexBuilder.VECS_ROOT).toFile(), DB_OPTIONS),
-            JniDBFactory.factory.open(
-                embeddingPath.resolve(PlainIndexBuilder.LSH_ROOT).toFile(), DB_OPTIONS),
-            embeddingPath);
+                embeddingPath.resolve(PlainIndexBuilder.VECS_ROOT).toFile(), DB_OPTIONS)//,
+            /*JniDBFactory.factory.open(
+                embeddingPath.resolve(PlainIndexBuilder.LSH_ROOT).toFile(), DB_OPTIONS),*/
+            /*embeddingPath*/);
     miniIndex =
         new PlainIndex(
             indexConfig, embedding, new FilterImpl(embedding, indexConfig().maxFilterItems()));
