@@ -3,6 +3,7 @@ package com.expleague.sensearch.donkey.plain;
 import com.expleague.commons.math.vectors.Vec;
 import com.expleague.commons.math.vectors.VecTools;
 import com.expleague.commons.seq.CharSeq;
+import com.expleague.commons.seq.CharSeqTools;
 import com.expleague.ml.embedding.Embedding;
 import com.expleague.ml.embedding.impl.EmbeddingImpl;
 import com.expleague.sensearch.Config;
@@ -11,7 +12,6 @@ import com.expleague.sensearch.core.Tokenizer;
 import com.expleague.sensearch.core.impl.TokenizerImpl;
 import com.expleague.sensearch.donkey.IndexBuilder;
 import com.expleague.sensearch.donkey.crawler.Crawler;
-import com.expleague.sensearch.donkey.plain.TermBuilder.TermAndLemmaIdPair;
 import com.expleague.sensearch.index.plain.PlainIndex;
 import com.google.inject.Inject;
 import gnu.trove.map.TLongObjectMap;
@@ -120,7 +120,7 @@ public class PlainIndexBuilder implements IndexBuilder {
     return tokenizer
         .parseTextToWords(text)
         .map(s -> s.toString().toLowerCase())
-        .map(word -> termBuilder.addTerm(word).termId)
+        .map(word -> termBuilder.addTerm(word).id)
         .mapToLong(i -> i)
         .toArray();
   }
@@ -267,8 +267,7 @@ public class PlainIndexBuilder implements IndexBuilder {
             .makeStream()
             .forEach(
                 doc -> {
-                  long rootPageId =
-                      plainPageBuilder.startPage(doc.id(), doc.categories(), doc.uri());
+                  long rootPageId = plainPageBuilder.startPage(doc.id(), doc.categories(), doc.uri());
                   statisticsBuilder.startPage();
                   indexMetaBuilder.startPage(rootPageId, doc.uri());
                   embeddingBuilder.startPage(rootPageId);
@@ -285,14 +284,13 @@ public class PlainIndexBuilder implements IndexBuilder {
 
                             Stream.concat(
                                 tokenizer.parseTextToWords(sectionTitle),
-                                tokenizer.parseTextToWords(s.text().toString()))
-                                .map(word -> word.toString().toLowerCase())
+                                tokenizer.parseTextToWords(s.text()))
+                                .map(CharSeqTools::toLowerCase)
                                 .forEach(
                                     word -> {
-                                      TermAndLemmaIdPair termLemmaId = termBuilder.addTerm(word);
-                                      indexMetaBuilder.acceptTermId(termLemmaId.termId);
-                                      statisticsBuilder.enrich(
-                                          termLemmaId.termId, termLemmaId.lemmaId);
+                                      TermBuilder.ParsedTerm termLemmaId = termBuilder.addTerm(word);
+                                      indexMetaBuilder.acceptTermId(termLemmaId.id);
+                                      statisticsBuilder.enrich(termLemmaId.id, termLemmaId.lemmaId);
                                     });
                           });
                   embeddingBuilder.addTitle(doc.title());

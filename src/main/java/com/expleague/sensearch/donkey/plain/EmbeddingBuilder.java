@@ -1,34 +1,21 @@
 package com.expleague.sensearch.donkey.plain;
 
-import static com.expleague.sensearch.donkey.plain.PlainIndexBuilder.DEFAULT_VEC_SIZE;
-
 import com.expleague.commons.math.vectors.Vec;
 import com.expleague.commons.math.vectors.VecTools;
-import com.expleague.commons.math.vectors.impl.nn.NearestNeighbourIndex;
 import com.expleague.commons.math.vectors.impl.vectors.ArrayVec;
 import com.expleague.commons.random.FastRandom;
 import com.expleague.commons.seq.CharSeq;
 import com.expleague.ml.embedding.Embedding;
 import com.expleague.sensearch.core.Tokenizer;
 import com.expleague.sensearch.index.plain.QuantLSHCosIndexDB;
-import com.google.common.primitives.Longs;
-import gnu.trove.map.TLongObjectMap;
-import gnu.trove.map.hash.TLongObjectHashMap;
 import gnu.trove.set.TLongSet;
 import gnu.trove.set.hash.TLongHashSet;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStreamWriter;
-import java.io.Writer;
-import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Random;
-import java.util.function.ToLongFunction;
 import org.iq80.leveldb.DB;
-import org.iq80.leveldb.WriteBatch;
-import org.iq80.leveldb.WriteOptions;
+
+import java.io.IOException;
+import java.util.Objects;
+
+import static com.expleague.sensearch.donkey.plain.PlainIndexBuilder.DEFAULT_VEC_SIZE;
 
 public class EmbeddingBuilder implements AutoCloseable {
   private static final int QUANT_DIM = 10;

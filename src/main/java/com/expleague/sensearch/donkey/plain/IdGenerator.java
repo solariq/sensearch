@@ -2,13 +2,17 @@ package com.expleague.sensearch.donkey.plain;
 
 import com.google.common.primitives.Longs;
 import java.net.URI;
+import java.nio.ByteBuffer;
+import java.nio.CharBuffer;
+import java.nio.charset.CharsetEncoder;
+import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
 public class IdGenerator {
 
   public long termId(CharSequence term) {
-    long md5HighBytes = getMd5HighBytes(term.toString());
+    long md5HighBytes = getMd5HighBytes(term);
     if (md5HighBytes == 0 || md5HighBytes == Long.MIN_VALUE) {
       return 1;
     }
@@ -23,16 +27,19 @@ public class IdGenerator {
     return idFromUri(sectionUri);
   }
 
-  private long getMd5HighBytes(String string) {
-    MessageDigest md5;
-
+  private final ThreadLocal<MessageDigest> md5 = ThreadLocal.withInitial(() -> {
     try {
-      md5 = MessageDigest.getInstance("MD5");
-    } catch (NoSuchAlgorithmException e) {
+      return MessageDigest.getInstance("MD5");
+    }
+    catch (NoSuchAlgorithmException e) {
       throw new RuntimeException(e);
     }
+  });
 
-    md5.update(string.getBytes());
+  private long getMd5HighBytes(CharSequence string) {
+    final MessageDigest md5 = this.md5.get();
+    md5.reset();
+    md5.update(StandardCharsets.UTF_8.encode(CharBuffer.wrap(string)));
     byte[] digest = md5.digest();
     return Longs.fromByteArray(digest);
   }

@@ -16,6 +16,7 @@ import gnu.trove.map.TObjectLongMap;
 import gnu.trove.map.hash.TLongObjectHashMap;
 import gnu.trove.map.hash.TObjectLongHashMap;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -36,12 +37,13 @@ public class TermBuilder implements AutoCloseable {
   private static final WriteOptions DEFAULT_TERM_WRITE_OPTIONS =
       new WriteOptions().sync(true).snapshot(false);
 
-  private final TObjectLongMap<String> idMapping = new TObjectLongHashMap<>();
+  private final TObjectLongMap<CharSeq> idMapping = new TObjectLongHashMap<>();
   private final DB termDb;
   private final MyStem myStem;
   private final TLongObjectMap<ParsedTerm> terms = new TLongObjectHashMap<>();
+  private final Map<CharSeq, ParsedTerm> termsCache = new HashMap<>();
   private final IdGenerator idGenerator;
-  private final Map<String, LemmaInfo> cachedLemmas = new LinkedHashMap<String, LemmaInfo>() {
+  private final Map<CharSeq, LemmaInfo> cachedLemmas = new LinkedHashMap<CharSeq, LemmaInfo>() {
     @Override
     protected boolean removeEldestEntry(Entry entry) {
       return size() > CACHE_LEMMAS_NUM;
@@ -60,52 +62,53 @@ public class TermBuilder implements AutoCloseable {
    */
   // TODO: do not store terms in memory as we have only write access to them
   @NotNull
-  public TermAndLemmaIdPair addTerm(String word) {
-    LemmaInfo lemma;
-    if (cachedLemmas.containsKey(word)) {
-      lemma = cachedLemmas.get(word);
-    } else {
+  public ParsedTerm addTerm(CharSequence wordcs) {
+    CharSeq word = CharSeq.create(wordcs);
+    ParsedTerm parsedTerm = termsCache.get(CharSeq.create(word));
+    if (parsedTerm != null)
+      return parsedTerm;
+
+    word = CharSeq.intern(word);
+    LemmaInfo lemma = cachedLemmas.get(word);
+    if (lemma == null) {
       /*final List<WordInfo> parse = myStem.parse(word);
       lemma = parse.size() > 0 ? parse.get(0).lemma() : null;*/
       lemma = new LemmaInfo(CharSeq.create(Stemmer.getInstance().stem(word)), 0, com.expleague.commons.text.lemmer.PartOfSpeech.S);
-      cachedLemmas.put(word, lemma);
+      cachedLemmas.put(CharSeq.intern(word), lemma);
     }
 
-    long wordId;
-    if (!idMapping.containsKey(word)) {
+    long wordId = idMapping.get(word);
+    if (wordId == idMapping.getNoEntryValue()) {
       // Ids start from 1
       wordId = idGenerator.termId(word);
       idMapping.put(word, wordId);
-    } else {
-      wordId = idMapping.get(word);
     }
 
     //noinspection EqualsBetweenInconvertibleTypes
     if (lemma == null || lemma.lemma().equals(word)) {
-      terms.put(
-          wordId,
-          new ParsedTerm(
-              wordId, -1, lemma == null ? null : PartOfSpeech.valueOf(lemma.pos().name())));
-      return new TermAndLemmaIdPair(wordId, wordId);
+      final ParsedTerm value = new ParsedTerm(wordId, -1, lemma == null ? null : PartOfSpeech.valueOf(lemma.pos().name()));
+      termsCache.put(word, value);
+      terms.put(wordId, value);
+      return value;
     }
 
-    long lemmaId;
-
-    String lemmaStr = lemma.lemma().toString();
-    if (idMapping.containsKey(lemmaStr)) {
-      lemmaId = idMapping.get(lemmaStr);
-    } else {
+    long lemmaId = idMapping.get(lemma.lemma());
+    if (lemmaId == idMapping.getNoEntryValue()) {
       // Ids start from 1
-      lemmaId = idGenerator.termId(lemmaStr);
-      idMapping.put(lemma.lemma().toString(), lemmaId);
+      lemmaId = idGenerator.termId(lemma.lemma());
+      idMapping.put(lemma.lemma(), lemmaId);
     }
 
-    terms.put(wordId, new ParsedTerm(wordId, lemmaId, PartOfSpeech.valueOf(lemma.pos().name())));
+    parsedTerm = new ParsedTerm(wordId, lemmaId, PartOfSpeech.valueOf(lemma.pos().name()));
+    terms.put(wordId, parsedTerm);
+    termsCache.put(word, parsedTerm);
     if (!terms.containsKey(lemmaId)) {
-      terms.put(lemmaId, new ParsedTerm(lemmaId, -1, PartOfSpeech.valueOf(lemma.pos().name())));
+      final ParsedTerm lemmaParsed = new ParsedTerm(lemmaId, -1, PartOfSpeech.valueOf(lemma.pos().name()));
+      terms.put(lemmaId, lemmaParsed);
+      termsCache.put(lemma.lemma(), lemmaParsed);
     }
 
-    return new TermAndLemmaIdPair(wordId, lemmaId);
+    return parsedTerm;
   }
 
   @Override
@@ -117,7 +120,7 @@ public class TermBuilder implements AutoCloseable {
 
     idMapping.forEachEntry(
         (word, id) -> {
-          Builder termBuilder = Term.newBuilder().setId(id).setText(word);
+          Builder termBuilder = Term.newBuilder().setId(id).setText(word.toString());
 
           ParsedTerm term = terms.get(id);
           if (term != null) {
@@ -152,18 +155,7 @@ public class TermBuilder implements AutoCloseable {
     termDb.close();
   }
 
-  public static class TermAndLemmaIdPair {
-
-    final long termId;
-    final long lemmaId;
-
-    public TermAndLemmaIdPair(long termId, long lemmaId) {
-      this.termId = termId;
-      this.lemmaId = lemmaId;
-    }
-  }
-
-  static class ParsedTerm {
+  public static class ParsedTerm {
 
     final long id;
     final long lemmaId;

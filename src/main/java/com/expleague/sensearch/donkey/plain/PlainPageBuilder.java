@@ -101,9 +101,9 @@ class PlainPageBuilder implements AutoCloseable {
     for (Page.Link.Builder link : links) {
       long wikiTargetId = link.getTargetPageId();
       if (!wikiIdToIndexIdMappings.containsKey(wikiTargetId)) {
-        LOG.warn(
-            String.format(
-                "Mappings to index id for WikiPage with id [ %d ] was not found!", wikiTargetId));
+//        LOG.warn(
+//            String.format(
+//                "Mappings to index id for WikiPage with id [ %d ] was not found!", wikiTargetId));
         link.clearTargetPageId();
       } else {
         long targetIndexId = wikiIdToIndexIdMappings.get(wikiTargetId);

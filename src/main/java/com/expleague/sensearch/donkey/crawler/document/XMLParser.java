@@ -4,11 +4,12 @@ import com.expleague.sensearch.donkey.crawler.document.CrawlerDocument.Link;
 import com.expleague.sensearch.donkey.crawler.document.CrawlerDocument.Section;
 import com.expleague.sensearch.donkey.crawler.document.WikiPage.WikiLink;
 import com.expleague.sensearch.donkey.crawler.document.WikiPage.WikiSection;
-import java.io.File;
-import java.io.Serializable;
-import java.io.UnsupportedEncodingException;
+
+import java.io.*;
 import java.net.URI;
 import java.net.URLEncoder;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -43,6 +44,24 @@ public class XMLParser {
   }
 
   public WikiPage parseXML(File file) {
+    try (final FileInputStream fis = new FileInputStream(file)) {
+      return parseXML(fis);
+    }
+    catch (IOException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  public WikiPage parseXML(Path file) {
+    try (final InputStream fis = Files.newInputStream(file)) {
+      return parseXML(fis);
+    }
+    catch (IOException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  public WikiPage parseXML(InputStream file) {
     WikiPage page = new WikiPage();
     try {
       Unmarshaller um = context.createUnmarshaller();

@@ -10,7 +10,6 @@ import com.expleague.commons.text.lemmer.MyStem;
 import com.expleague.commons.text.lemmer.PartOfSpeech;
 import com.expleague.commons.text.lemmer.WordInfo;
 import com.expleague.sensearch.core.Lemmer;
-import com.expleague.sensearch.donkey.plain.TermBuilder.TermAndLemmaIdPair;
 import com.expleague.sensearch.protobuf.index.IndexUnits;
 import com.expleague.sensearch.protobuf.index.IndexUnits.Term;
 import com.google.common.primitives.Longs;
@@ -99,8 +98,8 @@ public class TermBuilderTest {
             new Lemmer(fakeMyStem), new IdGenerator())) {
 
       for (String word : words) {
-        TermAndLemmaIdPair termAndLemmaIdPair = termBuilder.addTerm(word);
-        wordToReturnedTermId.put(word, termAndLemmaIdPair.termId);
+        TermBuilder.ParsedTerm termAndLemmaIdPair = termBuilder.addTerm(word);
+        wordToReturnedTermId.put(word, termAndLemmaIdPair.id);
         wordToReturnedLemmaId.put(word, termAndLemmaIdPair.lemmaId);
       }
     }

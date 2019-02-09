@@ -5,9 +5,8 @@ import com.expleague.sensearch.donkey.crawler.document.CrawlerDocument;
 import com.expleague.sensearch.donkey.crawler.document.WikiPage;
 import com.expleague.sensearch.donkey.crawler.document.XMLParser;
 import com.google.inject.Inject;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
+
+import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -36,73 +35,59 @@ public class CrawlerXML implements Crawler {
   public Stream<CrawlerDocument> makeStream() throws IOException {
     return StreamSupport.stream(
         Spliterators.spliteratorUnknownSize(
-            new DocumentIterator(path, config.getTemporaryDocuments()),
+            new DocumentIterator(path),
             Spliterator.ORDERED | Spliterator.SORTED),
         false);
   }
 
   class DocumentIterator implements Iterator<CrawlerDocument> {
-
-    private final Path pathTmp;
     private final XMLParser parser = new XMLParser();
     private ZipInputStream zipInputStream;
     private ZipEntry zipEntry;
 
-    DocumentIterator(Path path, Path tmpPath) throws IOException {
-      pathTmp = path.getParent().resolve(tmpPath);
-      Files.createDirectories(pathTmp);
+    DocumentIterator(Path path) throws IOException {
       zipInputStream = new ZipInputStream(new FileInputStream(path.toString()));
-      try {
-        zipEntry = zipInputStream.getNextEntry();
-      } catch (IOException e) {
-        e.printStackTrace();
-      }
     }
 
     @Override
     public boolean hasNext() {
       if (this.zipEntry == null) {
         try {
-          FileUtils.deleteDirectory(pathTmp.toFile());
-        } catch (IOException e) {
-          e.printStackTrace();
+          zipEntry = zipInputStream.getNextEntry();
+          while (zipEntry != null && zipEntry.isDirectory()) {
+            zipEntry = zipInputStream.getNextEntry();
+          }
+        }
+        catch (IOException e) {
+          throw new RuntimeException(e);
         }
       }
       return this.zipEntry != null;
     }
 
+    ByteArrayOutputStream temp = new ByteArrayOutputStream();
+    final byte[] buffer = new byte[4096];
+
     @Override
     public CrawlerDocument next() {
-      String name = "";
       try {
-        while (zipEntry.isDirectory()) {
-          zipEntry = zipInputStream.getNextEntry();
+        if (!hasNext())
+          return null;
+        temp.reset();
+        while (zipInputStream.available() > 0) {
+          final int read = zipInputStream.read(buffer);
+          if (read < 0)
+            break;
+          temp.write(buffer, 0, read);
         }
-        name = zipEntry.getName();
-        Path filePath = pathTmp.resolve(Paths.get(zipEntry.getName()).getFileName());
-
-        Files.copy(zipInputStream, filePath, StandardCopyOption.REPLACE_EXISTING);
-        File file = new File(filePath.toString());
-
-        CrawlerDocument result = parser.parseXML(file);
-
-        if (!file.delete()) {
-          System.err.println("File " + result.id() + ".xml isn't deleted");
-        }
-
+        final WikiPage result = parser.parseXML(new ByteArrayInputStream(temp.toByteArray()));
+        zipInputStream.closeEntry();
+        zipEntry = null;
         return result;
-      } catch (IllegalArgumentException e) {
-        System.err.println("File " + name + " is broken");
-      } catch (IOException e) {
-        e.printStackTrace();
-      } finally {
-        try {
-          zipEntry = zipInputStream.getNextEntry();
-        } catch (IOException e) {
-          e.printStackTrace();
-        }
       }
-      return null;
+      catch (IOException ioe) {
+        throw new RuntimeException(ioe);
+      }
     }
   }
 
