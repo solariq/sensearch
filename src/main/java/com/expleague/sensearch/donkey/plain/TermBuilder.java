@@ -1,8 +1,10 @@
 package com.expleague.sensearch.donkey.plain;
 
+import com.expleague.commons.seq.CharSeq;
 import com.expleague.commons.text.lemmer.LemmaInfo;
 import com.expleague.commons.text.lemmer.MyStem;
 import com.expleague.commons.text.lemmer.WordInfo;
+import com.expleague.commons.text.stem.Stemmer;
 import com.expleague.sensearch.core.Lemmer;
 import com.expleague.sensearch.core.PartOfSpeech;
 import com.expleague.sensearch.protobuf.index.IndexUnits;
@@ -63,8 +65,9 @@ public class TermBuilder implements AutoCloseable {
     if (cachedLemmas.containsKey(word)) {
       lemma = cachedLemmas.get(word);
     } else {
-      final List<WordInfo> parse = myStem.parse(word);
-      lemma = parse.size() > 0 ? parse.get(0).lemma() : null;
+      /*final List<WordInfo> parse = myStem.parse(word);
+      lemma = parse.size() > 0 ? parse.get(0).lemma() : null;*/
+      lemma = new LemmaInfo(CharSeq.create(Stemmer.getInstance().stem(word)), 0, com.expleague.commons.text.lemmer.PartOfSpeech.S);
       cachedLemmas.put(word, lemma);
     }
 
