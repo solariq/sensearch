@@ -12,7 +12,6 @@ import org.junit.Test;
 public class PlainIndexBuilderTest extends SensearchTestCase {
 
   private static final String INDEX_ROOT_NAME = "index";
-  private static final String TEMP_DOC_PATH = "tempDoc";
 
   private Config config;
 
@@ -20,7 +19,6 @@ public class PlainIndexBuilderTest extends SensearchTestCase {
   public void initConfigPaths() {
     this.config = config();
     ((TestConfigImpl) config).setTemporaryIndex(testOutputRoot().resolve(INDEX_ROOT_NAME));
-    ((TestConfigImpl) config).setTemporaryDocuments(testOutputRoot().resolve(TEMP_DOC_PATH));
   }
 
   @Test

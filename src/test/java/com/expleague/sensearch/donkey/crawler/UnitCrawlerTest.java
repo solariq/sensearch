@@ -3,7 +3,6 @@ package com.expleague.sensearch.donkey.crawler;
 import com.expleague.sensearch.utils.SensearchTestCase;
 import com.expleague.sensearch.utils.TestConfigImpl;
 import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashSet;
 import java.util.Set;
@@ -23,8 +22,7 @@ public class UnitCrawlerTest extends SensearchTestCase {
   @Test
   public void goodZIPTest() throws IOException, XMLStreamException {
     TestConfigImpl config = sensearchConfig()
-        .setPathToZIP(RESOURCES_ROOT.resolve("Mini_Wiki.zip"))
-        .setTemporaryDocuments(Files.createTempDirectory(testOutputRoot(), "tmpDocs"));
+        .setPathToZIP(RESOURCES_ROOT.resolve("Mini_Wiki.zip"));
     crawler = new CrawlerXML(config);
 
     Assert.assertEquals(crawler.makeStream().count(), 10);
@@ -55,8 +53,7 @@ public class UnitCrawlerTest extends SensearchTestCase {
   @Test
   public void badZIPTest() throws IOException, XMLStreamException {
     TestConfigImpl config = sensearchConfig()
-        .setPathToZIP(RESOURCES_ROOT.resolve("Mini_Wiki_broken.zip"))
-        .setTemporaryDocuments(Files.createTempDirectory(testOutputRoot(), "tmpDocs"));
+        .setPathToZIP(RESOURCES_ROOT.resolve("Mini_Wiki_broken.zip"));
     crawler = new CrawlerXML(config);
 
     Assert.assertEquals(crawler.makeStream().count(), 10);

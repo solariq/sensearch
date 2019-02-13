@@ -116,6 +116,7 @@ public class SenSearchDCG {
       }
     }
   }
+
   private static double rank(Vec features) {
     /*double vec = 0;
     for (int ind = 0;  ind < features.dim(); ind++) {

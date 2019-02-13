@@ -5,8 +5,11 @@ import com.expleague.sensearch.donkey.crawler.document.CrawlerDocument;
 import com.expleague.sensearch.donkey.crawler.document.WikiPage;
 import com.expleague.sensearch.donkey.crawler.document.XMLParser;
 import com.google.inject.Inject;
-
-import java.io.*;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -18,17 +21,16 @@ import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
-import org.apache.commons.io.FileUtils;
+import org.apache.log4j.Logger;
 
 public class CrawlerXML implements Crawler {
 
-  private final Config config;
+  private static final Logger LOG = Logger.getLogger(Crawler.class.getName());
   private final Path path;
 
   @Inject
   public CrawlerXML(Config config) {
     this.path = config.getPathToZIP();
-    this.config = config;
   }
 
   @Override
@@ -80,7 +82,12 @@ public class CrawlerXML implements Crawler {
             break;
           temp.write(buffer, 0, read);
         }
-        final WikiPage result = parser.parseXML(new ByteArrayInputStream(temp.toByteArray()));
+        WikiPage result = null;
+        try {
+          result = parser.parseXML(new ByteArrayInputStream(temp.toByteArray()));
+        } catch (IllegalArgumentException ignored) {
+          LOG.info(zipEntry.getName() + " wrong format");
+        }
         zipInputStream.closeEntry();
         zipEntry = null;
         return result;

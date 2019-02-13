@@ -27,8 +27,6 @@ public abstract class CrawlerBasedTestCase extends SensearchTestCase {
       // TODO: Fail with exception? Probably tests taht require crawler should be skipped in that matter...
       return;
     }
-    crawlerConfig = sensearchConfig()
-        .setTemporaryDocuments(testOutputRoot().resolve("CrawlerTempDocs"));
     miniCrawler = new CrawlerXML(crawlerConfig);
   }
 

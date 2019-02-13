@@ -169,7 +169,7 @@ public class UnitDocumentTest extends SensearchTestCase {
     page = parser.parseXML(RESOURCES_ROOT.resolve("uriXML").toFile());
     Set<URI> sectionUris = page.sections().map(Section::uri).collect(Collectors.toSet());
 
-    assertEquals(8, sectionUris.size());
+    assertEquals(10, sectionUris.size());
     assertFalse(sectionUris.contains(page.uri()));
   }
 

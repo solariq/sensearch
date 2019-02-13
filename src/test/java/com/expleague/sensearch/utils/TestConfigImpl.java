@@ -9,7 +9,6 @@ public class TestConfigImpl extends ConfigImpl {
   private Path miniWikiPath;
   private Path indexRoot;
   private Path gloveVectorsPath;
-  private Path tempDocumentsPath;
 
   // TODO: copy constructor!
   public TestConfigImpl() {
@@ -19,17 +18,8 @@ public class TestConfigImpl extends ConfigImpl {
     this.miniWikiPath = other.miniWikiPath;
     this.indexRoot = other.indexRoot;
     this.gloveVectorsPath = other.gloveVectorsPath;
-    this.tempDocumentsPath = other.tempDocumentsPath;
   }
 
-  @Override
-  public Path getTemporaryDocuments() {
-    if (tempDocumentsPath == null) {
-      throw new UnsupportedOperationException("Path to temporary documents is not set!");
-    }
-
-    return tempDocumentsPath;
-  }
 
   @Override
   public Path getTemporaryIndex() {
@@ -80,8 +70,4 @@ public class TestConfigImpl extends ConfigImpl {
     return this;
   }
 
-  public TestConfigImpl setTemporaryDocuments(Path tempDocumentsPath) {
-    this.tempDocumentsPath = tempDocumentsPath;
-    return this;
-  }
 }

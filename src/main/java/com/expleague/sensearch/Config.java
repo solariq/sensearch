@@ -4,8 +4,6 @@ import java.nio.file.Path;
 
 public interface Config {
 
-  Path getTemporaryDocuments();
-
   Path getTemporaryIndex();
 
   String getWebRoot();

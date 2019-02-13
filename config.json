@@ -1,5 +1,4 @@
 {
-  "temporaryDocuments": "PagesTmp",
   "temporaryIndex": "../WikiDocs/IndexTmp",
 
   "webRoot": "webapp/dist/webapp",

@@ -5,7 +5,6 @@ import java.nio.file.Paths;
 
 public class ConfigImpl implements Config {
 
-  private String temporaryDocuments;
   private String temporaryIndex;
   private String webRoot;
   private String embeddingVectors;
@@ -61,15 +60,6 @@ public class ConfigImpl implements Config {
 
   private void setMaxFilterItems(int maxFilterItems) {
     this.maxFilterItems = maxFilterItems;
-  }
-
-  @Override
-  public Path getTemporaryDocuments() {
-    return Paths.get(temporaryDocuments);
-  }
-
-  private void setTemporaryDocuments(String temporaryDocuments) {
-    this.temporaryDocuments = temporaryDocuments;
   }
 
   @Override

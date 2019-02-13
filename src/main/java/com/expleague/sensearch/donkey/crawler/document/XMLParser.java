@@ -166,6 +166,8 @@ public class XMLParser {
         for (int j = 0; j < Math.min(curSectionTitle.size(), newSectionTitle.size()); j++) {
           if (curSectionTitle.get(j).equals(newSectionTitle.get(j))) {
             commonSections++;
+          } else {
+            break;
           }
         }
 
@@ -192,7 +194,7 @@ public class XMLParser {
     // Several subsections can have the same title but they URIs must be different
     while (uriSet.contains(subPageURI)) {
       uriIdx++;
-      subPageURI = createUriInternal(pageUri, sectionTitle + "_" + Integer.toString(uriIdx));
+      subPageURI = createUriInternal(pageUri, sectionTitle + "_" + uriIdx);
     }
     uriSet.add(subPageURI);
 
