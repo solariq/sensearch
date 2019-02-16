@@ -163,7 +163,7 @@ class PlainPageBuilder implements AutoCloseable {
       linkBuilders.add(linkBuilder);
     }
 
-    List<? extends CharSequence> sectionTitleSeq = section.title();
+    List<? extends CharSequence> sectionTitleSeq = section.titles();
     int sectionDepth = sectionTitleSeq.size();
 
     if (sectionDepth - parentPagesStack.size() > 1) {

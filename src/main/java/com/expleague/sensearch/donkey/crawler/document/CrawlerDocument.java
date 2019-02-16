@@ -14,7 +14,7 @@ public interface CrawlerDocument {
   CharSequence content();
 
   /**
-   * @return Page title or "" if page has no title
+   * @return Page titles or "" if page has no titles
    */
   @NotNull
   String title();
@@ -38,7 +38,7 @@ public interface CrawlerDocument {
   long id();
 
   /**
-   * @return Page URI constructed by Page.title
+   * @return Page URI constructed by Page.titles
    */
   @NotNull
   URI uri();
@@ -59,7 +59,13 @@ public interface CrawlerDocument {
      *     it will return [A, B, C]
      */
     @NotNull
-    List<CharSequence> title();
+    List<CharSequence> titles();
+
+    /**
+     * @return Title of this section.
+     */
+    @NotNull
+    CharSequence title();
 
     /** @return {@link Link}s that are contained in this section */
     @NotNull

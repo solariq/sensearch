@@ -29,7 +29,7 @@ public class UnitDocumentTest extends SensearchTestCase {
     List<Section> sections = page.sections().collect(Collectors.toList());
     assertEquals(page.id(), 6673504);
     assertEquals(page.title(), "Тэмусин (Когурё)»");
-    assertEquals(sections.get(0).title(), Collections.singletonList("Тэмусин (Когурё)»"));
+    assertEquals(sections.get(0).titles(), Collections.singletonList("Тэмусин (Когурё)»"));
     assertEquals(sections.size(), 1);
     assertEquals(sections.get(0).links().size(), 0);
     assertEquals(
@@ -67,7 +67,7 @@ public class UnitDocumentTest extends SensearchTestCase {
     assertEquals(page.title(), "Мужун Вэй");
     assertEquals(7, sections.size());
 
-    assertEquals(sections.get(0).title(), Collections.singletonList("Мужун Вэй"));
+    assertEquals(sections.get(0).titles(), Collections.singletonList("Мужун Вэй"));
     assertEquals(
         "Мужун Вэй (, 350—385), взрослое имя Цзинмао (景茂) — сяньби йский вождь, последний император государства Ранняя Янь . От императора Южной Янь Мужун Дэ , который был его дядей, впоследствии получил посмертное имя Ю-ди (幽帝).",
         sections.get(0).text().toString());
@@ -83,11 +83,11 @@ public class UnitDocumentTest extends SensearchTestCase {
     assertEquals(page.title(), "Ги V (виконт Лиможа)");
     assertEquals(sections.size(), 2);
 
-    assertEquals(sections.get(0).title(), Collections.singletonList("Ги V (виконт Лиможа)"));
+    assertEquals(sections.get(0).titles(), Collections.singletonList("Ги V (виконт Лиможа)"));
     List<CharSequence> test = new ArrayList<>();
     test.add("Ги V (виконт Лиможа)");
     test.add("Ссылки");
-    assertEquals(sections.get(1).title(), test);
+    assertEquals(sections.get(1).titles(), test);
   }
 
   @Test
@@ -99,7 +99,7 @@ public class UnitDocumentTest extends SensearchTestCase {
     assertEquals(page.title(), "Тэсо (Тонбуё)");
     assertEquals(sections.size(), 1);
 
-    assertEquals(sections.get(0).title(), Collections.singletonList("Тэсо (Тонбуё)"));
+    assertEquals(sections.get(0).titles(), Collections.singletonList("Тэсо (Тонбуё)"));
   }
 
   @Test
@@ -114,7 +114,7 @@ public class UnitDocumentTest extends SensearchTestCase {
     List<Section> sections = page.sections().collect(Collectors.toList());
     assertEquals(sections.size(), 3);
     assertEquals(page.categories(), test);
-    assertEquals(sections.get(0).title(), Collections.singletonList("Ши Чжи"));
+    assertEquals(sections.get(0).titles(), Collections.singletonList("Ши Чжи"));
   }
 
   @Test
@@ -123,11 +123,11 @@ public class UnitDocumentTest extends SensearchTestCase {
 
     List<Section> sections = page.sections().collect(Collectors.toList());
     assertEquals(5, sections.size());
-    assertEquals(Collections.singletonList("Ссылки"), sections.get(0).title());
-    assertEquals(Arrays.asList("Ссылки", "Ссылка1"), sections.get(1).title());
-    assertEquals(Arrays.asList("Ссылки", "Ссылка2"), sections.get(2).title());
-    assertEquals(Arrays.asList("Ссылки", "Ссылка2", "Подссылка"), sections.get(3).title());
-    assertEquals(Collections.singletonList("Не Ссылки"), sections.get(4).title());
+    assertEquals(Collections.singletonList("Ссылки"), sections.get(0).titles());
+    assertEquals(Arrays.asList("Ссылки", "Ссылка1"), sections.get(1).titles());
+    assertEquals(Arrays.asList("Ссылки", "Ссылка2"), sections.get(2).titles());
+    assertEquals(Arrays.asList("Ссылки", "Ссылка2", "Подссылка"), sections.get(3).titles());
+    assertEquals(Collections.singletonList("Не Ссылки"), sections.get(4).titles());
   }
 
   @Test
@@ -192,7 +192,7 @@ public class UnitDocumentTest extends SensearchTestCase {
   }
 
   private String getTitle(List<Section> sections, int i) {
-    List<CharSequence> title = sections.get(i).title();
+    List<CharSequence> title = sections.get(i).titles();
     return String.join("|", title);
   }
 }

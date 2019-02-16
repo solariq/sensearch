@@ -121,11 +121,11 @@
 //
 //  private static class PageStub implements IndexedPage {
 //
-//    private final String title;
+//    private final String titles;
 //    private final String content;
 //
-//    PageStub(String title, String content) {
-//      this.title = title;
+//    PageStub(String titles, String content) {
+//      this.titles = titles;
 //      this.content = content;
 //    }
 //
@@ -135,8 +135,8 @@
 //    }
 //
 //    @Override
-//    public CharSequence title() {
-//      return title;
+//    public CharSequence titles() {
+//      return titles;
 //    }
 //
 //    @Override

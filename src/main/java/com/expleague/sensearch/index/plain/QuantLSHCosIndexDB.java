@@ -10,6 +10,7 @@ import com.google.common.primitives.Longs;
 import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.list.array.TLongArrayList;
 import org.iq80.leveldb.DB;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -54,6 +55,16 @@ public class QuantLSHCosIndexDB extends BaseQuantLSHCosIndex {
     public synchronized void remove(long id) {
         baseRemove(id);
         vecDB.delete(Longs.toByteArray(id));
+    }
+
+    @Nullable
+    public Vec get(long id) {
+        byte[] bytes = vecDB.get(Longs.toByteArray(id));
+        if (bytes != null) {
+            List<Vec> vecs = ByteTools.toVecs(bytes);
+            return vecs.size() == 0 ? null : vecs.get(0);
+        }
+        return null;
     }
 
     public void save() throws IOException {

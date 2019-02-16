@@ -124,7 +124,7 @@ public class XMLParser {
                     try {
                       subPageURI = URI.create(
                           "https://ru.wikipedia.org/wiki/"
-                              + page.title().replace(" ", "_").replace("%", "%25")
+                              + page.titles().replace(" ", "_").replace("%", "%25")
                               + "#" + URLEncoder.encode(section));
                     } catch (IllegalArgumentException e) {
                       System.err.println(e.getMessage());
@@ -136,8 +136,8 @@ public class XMLParser {
               .collect(Collectors.toList());
 
       List<Section> newSections = new ArrayList<>();
-      if (sections.size() > 0 && sections.get(0).title().size() > 1) {
-        List<CharSequence> title = sections.get(0).title();
+      if (sections.size() > 0 && sections.get(0).titles().size() > 1) {
+        List<CharSequence> title = sections.get(0).titles();
         for (int i = 1; i < title.size(); i++) {
           newSections.add(
               new WikiSection(
@@ -152,15 +152,15 @@ public class XMLParser {
         newSections.add(
             new WikiSection(
                 curSection.text(),
-                curSection.title(),
+                curSection.titles(),
                 curSection.links(),
-                createUri(pageUri, curSection.title().get(curSection.title().size() - 1), uriSet)));
+                createUri(pageUri, curSection.titles().get(curSection.titles().size() - 1), uriSet)));
 
         if (i == sections.size() - 1) {
           continue;
         }
-        List<CharSequence> curSectionTitle = curSection.title();
-        List<CharSequence> newSectionTitle = sections.get(i + 1).title();
+        List<CharSequence> curSectionTitle = curSection.titles();
+        List<CharSequence> newSectionTitle = sections.get(i + 1).titles();
 
         int commonSections = 0;
         for (int j = 0; j < Math.min(curSectionTitle.size(), newSectionTitle.size()); j++) {
@@ -191,7 +191,7 @@ public class XMLParser {
   private URI createUri(String pageUri, CharSequence sectionTitle, Set<URI> uriSet) {
     URI subPageURI = createUriInternal(pageUri, sectionTitle);
     int uriIdx = 1;
-    // Several subsections can have the same title but they URIs must be different
+    // Several subsections can have the same titles but they URIs must be different
     while (uriSet.contains(subPageURI)) {
       uriIdx++;
       subPageURI = createUriInternal(pageUri, sectionTitle + "_" + uriIdx);
@@ -233,7 +233,7 @@ public class XMLParser {
     @XmlAttribute(name = "id")
     long id;
 
-    @XmlAttribute(name = "title")
+    @XmlAttribute(name = "titles")
     String title;
 
     @XmlAttribute(name = "categories")
@@ -248,7 +248,7 @@ public class XMLParser {
   @XmlRootElement(name = "section")
   private static class XmlSection {
 
-    @XmlAttribute(name = "title")
+    @XmlAttribute(name = "titles")
     String title;
 
     @SuppressWarnings("MismatchedQueryAndUpdateOfCollection")
@@ -287,7 +287,7 @@ public class XMLParser {
 
           xmlStreamWriter.writeStartElement(startElement);
           xmlStreamWriter.writeAttribute("id", Long.toString(page.id()));
-          xmlStreamWriter.writeAttribute("title", page.title());
+          xmlStreamWriter.writeAttribute("titles", page.titles());
           xmlStreamWriter.writeAttribute("revision", page.revision);
           xmlStreamWriter.writeAttribute("type", page.type);
           xmlStreamWriter.writeAttribute("ns-id", page.nsId);

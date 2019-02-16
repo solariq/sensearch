@@ -42,7 +42,7 @@ public class ComponentsInteractionTest {
   //    }
   //
   //    @Override
-  //    public CharSequence title() {
+  //    public CharSequence titles() {
   //      throw new UnsupportedOperationException("Class does not implement 'getTitlte()' method!");
   //    }
   //

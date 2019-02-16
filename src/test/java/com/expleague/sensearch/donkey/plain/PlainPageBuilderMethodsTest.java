@@ -75,7 +75,7 @@ public class PlainPageBuilderMethodsTest extends SensearchTestCase {
     }
 
     @Override
-    public List<CharSequence> title() {
+    public List<CharSequence> titles() {
       return title;
     }
 

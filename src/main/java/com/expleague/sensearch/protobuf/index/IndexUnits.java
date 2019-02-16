@@ -1581,26 +1581,26 @@ public final class IndexUnits {
         getUriBytes();
 
     /**
-     * <code>optional string title = 3;</code>
+     * <code>optional string titles = 3;</code>
      *
      * <pre>
-     * only section title
+     * only section titles
      * </pre>
      */
     boolean hasTitle();
     /**
-     * <code>optional string title = 3;</code>
+     * <code>optional string titles = 3;</code>
      *
      * <pre>
-     * only section title
+     * only section titles
      * </pre>
      */
     java.lang.String getTitle();
     /**
-     * <code>optional string title = 3;</code>
+     * <code>optional string titles = 3;</code>
      *
      * <pre>
-     * only section title
+     * only section titles
      * </pre>
      */
     com.google.protobuf.ByteString
@@ -2727,20 +2727,20 @@ public final class IndexUnits {
     public static final int TITLE_FIELD_NUMBER = 3;
     private java.lang.Object title_;
     /**
-     * <code>optional string title = 3;</code>
+     * <code>optional string titles = 3;</code>
      *
      * <pre>
-     * only section title
+     * only section titles
      * </pre>
      */
     public boolean hasTitle() {
       return ((bitField0_ & 0x00000004) == 0x00000004);
     }
     /**
-     * <code>optional string title = 3;</code>
+     * <code>optional string titles = 3;</code>
      *
      * <pre>
-     * only section title
+     * only section titles
      * </pre>
      */
     public java.lang.String getTitle() {
@@ -2758,10 +2758,10 @@ public final class IndexUnits {
       }
     }
     /**
-     * <code>optional string title = 3;</code>
+     * <code>optional string titles = 3;</code>
      *
      * <pre>
-     * only section title
+     * only section titles
      * </pre>
      */
     public com.google.protobuf.ByteString
@@ -3559,20 +3559,20 @@ public final class IndexUnits {
 
       private java.lang.Object title_ = "";
       /**
-       * <code>optional string title = 3;</code>
+       * <code>optional string titles = 3;</code>
        *
        * <pre>
-       * only section title
+       * only section titles
        * </pre>
        */
       public boolean hasTitle() {
         return ((bitField0_ & 0x00000004) == 0x00000004);
       }
       /**
-       * <code>optional string title = 3;</code>
+       * <code>optional string titles = 3;</code>
        *
        * <pre>
-       * only section title
+       * only section titles
        * </pre>
        */
       public java.lang.String getTitle() {
@@ -3590,10 +3590,10 @@ public final class IndexUnits {
         }
       }
       /**
-       * <code>optional string title = 3;</code>
+       * <code>optional string titles = 3;</code>
        *
        * <pre>
-       * only section title
+       * only section titles
        * </pre>
        */
       public com.google.protobuf.ByteString
@@ -3610,10 +3610,10 @@ public final class IndexUnits {
         }
       }
       /**
-       * <code>optional string title = 3;</code>
+       * <code>optional string titles = 3;</code>
        *
        * <pre>
-       * only section title
+       * only section titles
        * </pre>
        */
       public Builder setTitle(
@@ -3627,10 +3627,10 @@ public final class IndexUnits {
         return this;
       }
       /**
-       * <code>optional string title = 3;</code>
+       * <code>optional string titles = 3;</code>
        *
        * <pre>
-       * only section title
+       * only section titles
        * </pre>
        */
       public Builder clearTitle() {
@@ -3640,10 +3640,10 @@ public final class IndexUnits {
         return this;
       }
       /**
-       * <code>optional string title = 3;</code>
+       * <code>optional string titles = 3;</code>
        *
        * <pre>
-       * only section title
+       * only section titles
        * </pre>
        */
       public Builder setTitleBytes(
@@ -7933,7 +7933,7 @@ public final class IndexUnits {
       "ndex.IndexMeta.UriPageMapping\032.\n\016UriPage" +
       "Mapping\022\013\n\003uri\030\001 \001(\t\022\017\n\007page_id\030\002 \001(\003\"\255\002" +
       "\n\004Page\022\017\n\007page_id\030\001 \001(\003\022\013\n\003uri\030\002 \001(\t\022\r\n\005" +
-      "title\030\003 \001(\t\022\017\n\007content\030\004 \001(\t\022(\n\016outgoing" +
+      "titles\030\003 \001(\t\022\017\n\007content\030\004 \001(\t\022(\n\016outgoing" +
       "_links\030\005 \003(\0132\020.index.Page.Link\022(\n\016incomi" +
       "ng_links\030\006 \003(\0132\020.index.Page.Link\022\022\n\ncate",
       "gories\030\t \003(\t\022\021\n\tparent_id\030\007 \001(\003\022\024\n\014subpa" +
