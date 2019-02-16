@@ -12,6 +12,18 @@ public class IdUtils {
 
     private IdUtils() {}
 
+    public static long toStartSecTitleId(long pageId) {
+        return pageId + IdUtils.START_SEC_TITLE_PREFIX;
+    }
+
+    public static long toStartSecTextId(long pageId) {
+        return pageId + IdUtils.START_SEC_TEXT_PREFIX;
+    }
+
+    public static long toStartLinkId(long pageId) {
+        return pageId + IdUtils.START_LINK_PREFIX;
+    }
+
     public static long toPageId(long id) {
         return id & toPageMask;
     }
