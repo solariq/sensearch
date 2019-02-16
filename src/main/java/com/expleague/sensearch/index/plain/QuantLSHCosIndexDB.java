@@ -9,6 +9,9 @@ import com.expleague.sensearch.donkey.plain.ByteTools;
 import com.google.common.primitives.Longs;
 import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.list.array.TLongArrayList;
+import org.iq80.leveldb.DB;
+import org.jetbrains.annotations.Nullable;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -16,7 +19,6 @@ import java.util.List;
 import java.util.stream.DoubleStream;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
-import org.iq80.leveldb.DB;
 
 public class QuantLSHCosIndexDB extends BaseQuantLSHCosIndex implements AutoCloseable {
     private static final long SPECIAL_ID_1 = Long.MAX_VALUE - 3;
@@ -53,6 +55,16 @@ public class QuantLSHCosIndexDB extends BaseQuantLSHCosIndex implements AutoClos
     public synchronized void remove(long id) {
         baseRemove(id);
         vecDB.delete(Longs.toByteArray(id));
+    }
+
+    @Nullable
+    public Vec get(long id) {
+        byte[] bytes = vecDB.get(Longs.toByteArray(id));
+        if (bytes != null) {
+            List<Vec> vecs = ByteTools.toVecs(bytes);
+            return vecs.size() == 0 ? null : vecs.get(0);
+        }
+        return null;
     }
 
     public void save() throws IOException {

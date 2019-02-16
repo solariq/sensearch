@@ -63,7 +63,7 @@ public class PlainPageBuilderTest extends CrawlerBasedTestCase {
           pageBuilder.addSection(
               new WikiSection(
                   "Some text for first page",
-                  Collections.singletonList("First title"),
+                  Collections.singletonList("First titles"),
                   Collections.emptyList(),
                   URI.create("someuri#root"))));
 
@@ -72,7 +72,7 @@ public class PlainPageBuilderTest extends CrawlerBasedTestCase {
           pageBuilder.addSection(
               new WikiSection(
                   "First page subsection",
-                  Arrays.asList("First title", "Subtitle"),
+                  Arrays.asList("First titles", "Subtitle"),
                   Collections.emptyList(),
                   URI.create("suburi"))));
 
@@ -81,7 +81,7 @@ public class PlainPageBuilderTest extends CrawlerBasedTestCase {
           pageBuilder.addSection(
               new WikiSection(
                   "Another first page subsection",
-                  Arrays.asList("First title", "Subtitle2"),
+                  Arrays.asList("First titles", "Subtitle2"),
                   Collections.emptyList(),
                   URI.create("suburi2"))));
 
@@ -90,7 +90,7 @@ public class PlainPageBuilderTest extends CrawlerBasedTestCase {
           pageBuilder.addSection(
               new WikiSection(
                   "Deeper",
-                  Arrays.asList("First title", "Subtitle2", "Going deeper"),
+                  Arrays.asList("First titles", "Subtitle2", "Going deeper"),
                   Collections.emptyList(),
                   URI.create("deeper"))));
 
@@ -99,7 +99,7 @@ public class PlainPageBuilderTest extends CrawlerBasedTestCase {
           pageBuilder.addSection(
               new WikiSection(
                   "text text text",
-                  Arrays.asList("First title", "Subtitle2", "Going deeper", "Even more"),
+                  Arrays.asList("First titles", "Subtitle2", "Going deeper", "Even more"),
                   Collections.emptyList(),
                   URI.create("evenmore"))));
 
@@ -108,7 +108,7 @@ public class PlainPageBuilderTest extends CrawlerBasedTestCase {
           pageBuilder.addSection(
               new WikiSection(
                   "Almost on the top",
-                  Arrays.asList("First title", "Title"),
+                  Arrays.asList("First titles", "Title"),
                   Collections.emptyList(),
                   URI.create("almosttop"))));
 
@@ -146,7 +146,7 @@ public class PlainPageBuilderTest extends CrawlerBasedTestCase {
         0, pages.values().stream().filter(page -> page.getOutgoingLinksCount() > 0).count());
 
     // Check titles
-    assertEquals("First title", pageByUri.get("someuri#root").getTitle());
+    assertEquals("First titles", pageByUri.get("someuri#root").getTitle());
     assertEquals("Subtitle", pageByUri.get("suburi").getTitle());
     assertEquals("Subtitle2", pageByUri.get("suburi2").getTitle());
     assertEquals("Going deeper", pageByUri.get("deeper").getTitle());
@@ -180,7 +180,7 @@ public class PlainPageBuilderTest extends CrawlerBasedTestCase {
       pageBuilder.addSection(
           new WikiSection(
               "Some text",
-              Collections.singletonList("Some title"),
+              Collections.singletonList("Some titles"),
               Collections.emptyList(),
               URI.create("Page1#root")));
       pageBuilder.endPage();
@@ -193,13 +193,13 @@ public class PlainPageBuilderTest extends CrawlerBasedTestCase {
       pageBuilder.addSection(
           new WikiSection(
               "second text",
-              Collections.singletonList("Second title"),
+              Collections.singletonList("Second titles"),
               Collections.emptyList(),
               URI.create("Page2#root")));
       pageBuilder.addSection(
           new WikiSection(
               "second text in subsection",
-              Arrays.asList("Second title", "Second subtitle"),
+              Arrays.asList("Second titles", "Second subtitle"),
               Collections.emptyList(),
               URI.create("Page2subsection")));
       pageBuilder.endPage();
@@ -208,7 +208,7 @@ public class PlainPageBuilderTest extends CrawlerBasedTestCase {
       pageBuilder.addSection(
           new WikiSection(
               "third text",
-              Collections.singletonList("Third title"),
+              Collections.singletonList("Third titles"),
               Collections.emptyList(),
               URI.create("Page3#root")));
       pageBuilder.endPage();
@@ -251,24 +251,24 @@ public class PlainPageBuilderTest extends CrawlerBasedTestCase {
       pageBuilder.addSection(
           new WikiSection(
               "Some text for first page",
-              Collections.singletonList("First title"),
-              Collections.singletonList(new WikiLink("text", "First title", 1, 5)),
+              Collections.singletonList("First titles"),
+              Collections.singletonList(new WikiLink("text", "First titles", 1, 5)),
               URI.create("Page1#root")));
 
       pageBuilder.addSection(
           new WikiSection(
               "First page subsection",
-              Arrays.asList("First title", "Subtitle"),
-              Collections.singletonList(new WikiLink("page", "Third title", 3, 6)),
+              Arrays.asList("First titles", "Subtitle"),
+              Collections.singletonList(new WikiLink("page", "Third titles", 3, 6)),
               URI.create("suburi")));
 
       pageBuilder.addSection(
           new WikiSection(
               "Another first page subsection",
-              Arrays.asList("First title", "Subtitle2"),
+              Arrays.asList("First titles", "Subtitle2"),
               Arrays.asList(
-                  new WikiLink("Another", "Second title", 2, 0),
-                  new WikiLink("subsection", "First title", 1, 19)),
+                  new WikiLink("Another", "Second titles", 2, 0),
+                  new WikiLink("subsection", "First titles", 1, 19)),
               URI.create("suburi2")));
 
       pageBuilder.endPage();

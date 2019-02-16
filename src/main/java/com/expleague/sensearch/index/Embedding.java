@@ -18,14 +18,6 @@ public interface Embedding extends AutoCloseable {
   @Nullable
   Vec vec(long id);
 
-  /**
-   * Returns all vectors for an indexed item with given {@param id}.
-   *
-   * @param id indexed item id
-   * @return vectors for this item
-   */
-  List<Vec> allVecs(long id);
-
   LongStream nearest(Vec mainVec, LongPredicate predicate);
   LongStream nearest(Vec mainVec, int numberOfNeighbors, LongPredicate predicate);
   LongStream nearest(Vec mainVec, double maxDistance, LongPredicate predicate);

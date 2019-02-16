@@ -285,7 +285,7 @@ public class PlainIndexBuilder implements IndexBuilder {
                             indexMetaBuilder.addSection(s.uri(), pageIdGenerator(s.uri()).next(knownPageIds));
                             embeddingBuilder.addSection(s);
 
-                            List<CharSequence> sectionTitles = s.title();
+                            List<CharSequence> sectionTitles = s.titles();
                             String sectionTitle =
                                 sectionTitles.get(sectionTitles.size() - 1).toString();
 

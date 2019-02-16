@@ -24,7 +24,6 @@ import org.iq80.leveldb.DB;
 public class EmbeddingImpl implements Embedding {
     private long[] allIds;
 
-    private DB vecDB;
     private boolean lshFlag;
 
     private QuantLSHCosIndexDB nnIdx;
@@ -34,49 +33,24 @@ public class EmbeddingImpl implements Embedding {
             Config config,
             @EmbeddingVecsDb DB vecDb) {
         lshFlag = config.getLshNearestFlag();
-        this.vecDB = vecDb;
         nnIdx = QuantLSHCosIndexDB.load(vecDb);
     }
 
     @Override
     public Vec vec(long id) {
-        byte[] bytes = vecDB.get(Longs.toByteArray(id));
-        if (bytes != null) {
-            List<Vec> vecs = ByteTools.toVecs(bytes);
-            return vecs.size() == 0 ? null : vecs.get(0);
-        }
-        return null;
-    }
-
-    @Override
-    public List<Vec> allVecs(long id) {
-        byte[] bytes = vecDB.get(Longs.toByteArray(id));
-        if (bytes != null) {
-            return ByteTools.toVecs(bytes);
-        }
-        return Collections.emptyList();
+        return nnIdx.get(id);
     }
 
     private long[] lshNearest(Vec mainVec) {
         return nnIdx.nearest(mainVec).mapToLong(NearestNeighbourIndex.Entry::id).toArray();
     }
 
-    private double[] getDists(
-            Vec mainVec, LongPredicate predicate, double queryNorm, TLongList orderList) {
+    private double[] getDists(Vec mainVec, LongPredicate predicate, double queryNorm, TLongList orderList) {
         long[] ids = lshFlag ? lshNearest(mainVec) : allIds;
+        orderList.addAll(ids);
         return LongStream.of(ids)
                 .filter(predicate)
-                .mapToObj(
-                        id -> {
-                            List<Vec> vecs = allVecs(id);
-                            for (int i = 0; i < vecs.size(); i++) {
-                                orderList.add(id);
-                            }
-
-                            return vecs;
-                        })
-                .flatMap(List::stream)
-                .mapToDouble(v -> distance(mainVec, queryNorm, v))
+                .mapToDouble(id -> distance(mainVec, queryNorm, vec(id)))
                 .toArray();
     }
 

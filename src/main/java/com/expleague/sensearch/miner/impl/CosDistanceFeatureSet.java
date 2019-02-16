@@ -13,7 +13,7 @@ import java.util.List;
 public class CosDistanceFeatureSet extends FeatureSet.Stub<QURLItem> {
 
   private final static FeatureMeta COS_TITLE = FeatureMeta
-      .create("cos-title", "cos distance between Query and Title", ValueType.VEC);
+      .create("cos-titles", "cos distance between Query and Title", ValueType.VEC);
   private final static FeatureMeta COS_MIN_PASSAGE = FeatureMeta
       .create("cos-min-passage", "cos distance between Query and Body", ValueType.VEC);
 

@@ -34,8 +34,8 @@
 //    }
 //  }
 //
-//  static void flushBigrams(String title, Map<String, Integer> map) {
-//    String t = title.toLowerCase();
+//  static void flushBigrams(String titles, Map<String, Integer> map) {
+//    String t = titles.toLowerCase();
 //    String[] words = t.split("[^a-zA-Zа-яА-ЯЁё]+");
 //    for (int i = 0; i < words.length - 1; i++) {
 //      if (words[i].isEmpty()) {
