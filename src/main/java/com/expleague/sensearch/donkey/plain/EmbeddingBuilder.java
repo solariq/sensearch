@@ -52,7 +52,12 @@ public class EmbeddingBuilder implements AutoCloseable {
       if (wikiIdToIndexIdMap.containsKey(wikiId)) {
         long pageId = wikiIdToIndexIdMap.get(wikiId);
         curLinkId[0] = IdUtils.toStartLinkId(pageId);
-        linkTexts.forEach(text -> nnIdx.append(curLinkId[0]++, toVector(text)));
+        linkTexts.forEach(text -> {
+          Vec textVec = toVector(text);
+          if (textVec != null) {
+            nnIdx.append(curLinkId[0]++, textVec);
+          }
+        });
       }
       return true;
     });
@@ -69,8 +74,16 @@ public class EmbeddingBuilder implements AutoCloseable {
   }
 
   public void addSection(CrawlerDocument.Section section) {
-    nnIdx.append(curSecTitleId++, toVector(section.title()));
-    nnIdx.append(curSecTextId++, toVector(section.text()));
+    Vec titleVec = toVector(section.title());
+    if (titleVec != null) {
+      nnIdx.append(curSecTitleId++, titleVec);
+    }
+
+    Vec textVec = toVector(section.text());
+    if (textVec != null) {
+      nnIdx.append(curSecTextId++, textVec);
+    }
+
     section.links().forEach(link -> {
       long wikiId = link.targetId();
       if (!wikiIdToLinkTexts.containsKey(wikiId)) {
