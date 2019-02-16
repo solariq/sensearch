@@ -14,7 +14,6 @@ public abstract class CrawlerBasedTestCase extends SensearchTestCase {
 
   private static Crawler miniCrawler;
 
-  private static TestConfigImpl crawlerConfig;
 
   @BeforeClass
   public static void initCrawler() {
@@ -27,11 +26,11 @@ public abstract class CrawlerBasedTestCase extends SensearchTestCase {
       // TODO: Fail with exception? Probably tests taht require crawler should be skipped in that matter...
       return;
     }
-    miniCrawler = new CrawlerXML(crawlerConfig);
+    miniCrawler = new CrawlerXML(sensearchConfig());
   }
 
   protected static TestConfigImpl crawlerConfig() {
-    return new TestConfigImpl(crawlerConfig);
+    return sensearchConfig();
   }
 
   protected static Crawler crawler() {
@@ -39,6 +38,6 @@ public abstract class CrawlerBasedTestCase extends SensearchTestCase {
   }
 
   protected ConfigImpl config() {
-    return new TestConfigImpl(crawlerConfig);
+    return sensearchConfig();
   }
 }
