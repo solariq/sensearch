@@ -29,8 +29,8 @@ public class EmbeddingBuilder implements AutoCloseable {
   private final Embedding<CharSeq> jmllEmbedding;
   private final TLongSet termIdsInDb = new TLongHashSet();
   private final QuantLSHCosIndexDB nnIdx;
-  private final TLongLongMap map = new TLongLongHashMap();
-  private final TLongLongMap mapOneMore = new TLongLongHashMap();
+  private final TLongLongMap wikiIdToIndexIdMap = new TLongLongHashMap();
+  private final TLongLongMap linkIdToWikiId = new TLongLongHashMap();
 
   public EmbeddingBuilder(
       DB vecDb,
@@ -43,9 +43,9 @@ public class EmbeddingBuilder implements AutoCloseable {
 
   @Override
   public void close() throws IOException {
-    mapOneMore.forEachEntry((linkId, targetId) -> {
-      if (map.containsKey(targetId)) {
-        nnIdx.append(linkId, nnIdx.get(map.get(targetId)));
+    linkIdToWikiId.forEachEntry((linkId, targetId) -> {
+      if (wikiIdToIndexIdMap.containsKey(targetId)) {
+        nnIdx.append(linkId, nnIdx.get(wikiIdToIndexIdMap.get(targetId)));
       }
       return true;
     });
@@ -60,13 +60,13 @@ public class EmbeddingBuilder implements AutoCloseable {
     curSecTitleId = pageId + IdUtils.START_SEC_TITLE_PREFIX;
     curSecTextId = pageId + IdUtils.START_SEC_TEXT_PREFIX;
     curLinkId = pageId + IdUtils.START_LINK_PREFIX;
-    map.put(originalId, pageId);
+    wikiIdToIndexIdMap.put(originalId, pageId);
   }
 
   public void addSection(CrawlerDocument.Section section) {
     nnIdx.append(curSecTitleId++, toVector(section.title()));
     nnIdx.append(curSecTextId++, toVector(section.text()));
-    section.links().forEach(link -> mapOneMore.put(curLinkId++, link.targetId()));
+    section.links().forEach(link -> linkIdToWikiId.put(curLinkId++, link.targetId()));
 
     tokenizer.toWords(section.text()).map(word -> word.toString().toLowerCase()).forEach(word -> {
       long id = termIdGenerator(word).next();
