@@ -65,16 +65,29 @@ public interface Page {
 
   interface Link {
 
+    /**
+     * @return Title of Target {@code Page}.
+     */
     CharSequence targetTitle();
 
+    /**
+     * @return Text which is displayed for this link.
+     */
     CharSequence text();
 
+    /**
+     * @return {@code true} if Target {@code Page} exists;
+     * {@code false} if Target {@code Page} dose not exist.
+     */
     boolean targetExists();
 
     Page targetPage();
 
     Page sourcePage();
 
+    /**
+     * @return offset by symbols
+     */
     long position();
   }
 }

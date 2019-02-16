@@ -7,15 +7,17 @@ import java.util.Set;
 import java.util.function.DoublePredicate;
 import java.util.stream.Collectors;
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 
+@Ignore
 public class FilterMetricTest {
 
     private final MeasureFilterQuality filterMetric = new MeasureFilterQuality();
 
     private void testTemplate(String queryStr, Set<URI> URIs, DoublePredicate predicate) {
         Assert.assertTrue(
-                predicate.test(filterMetric.calc(queryStr, URIs))
+            predicate.test(filterMetric.calc(queryStr, URIs))
         );
     }
 
@@ -31,9 +33,9 @@ public class FilterMetricTest {
     public void positiveValueTest() {
         String queryStr = "александр";
         String[] URIStrs = new String[] {
-                "https://ru.wikipedia.org/wiki/Александр_Македонский",
-                "https://ru.wikipedia.org/wiki/Носик,_Александр_Валерьевич",
-                "https://ru.wikipedia.org/wiki/Петров,_Александр_Андреевич_(актёр)"
+            "https://ru.wikipedia.org/wiki/Александр_Македонский",
+            "https://ru.wikipedia.org/wiki/Носик,_Александр_Валерьевич",
+            "https://ru.wikipedia.org/wiki/Петров,_Александр_Андреевич_(актёр)"
 
         };
         Set<URI> URIs = Arrays.stream(URIStrs).map(URI::create).collect(Collectors.toSet());

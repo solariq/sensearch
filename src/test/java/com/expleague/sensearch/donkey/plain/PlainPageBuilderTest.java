@@ -97,7 +97,7 @@ public class PlainPageBuilderTest extends CrawlerBasedTestCase {
               URI.create("deeper")), ++pageId);
       idsFromPageBuilder.put(
           "deeper", pageId
-          );
+      );
 
       pageBuilder.addSection(
           new WikiSection(

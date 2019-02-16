@@ -2,6 +2,7 @@ package com.expleague.sensearch.utils;
 
 import com.expleague.commons.text.lemmer.MyStem;
 import com.expleague.sensearch.ConfigImpl;
+import com.expleague.sensearch.core.Stemmer;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -136,10 +137,11 @@ public abstract class SensearchTestCase {
   }
 
   protected static MyStem myStemForTest(String testClassName, String testName) {
-    Path pathToSpecificStem =
-        myStemLogsRoot.resolve(String.format("%s_%s", testClassName, testName));
-    return new RecordingMyStem(Paths.get("./resources/mystem"), pathToSpecificStem);
+//    Path pathToSpecificStem =
+//        myStemLogsRoot.resolve(String.format("%s_%s", testClassName, testName));
+//    return new RecordingMyStem(Paths.get("./resources/mystem"), pathToSpecificStem);
 //    return new LogBasedMyStem(pathToSpecificStem);
+    return new Stemmer();
   }
 
   protected static void clearOutputRoot() {
