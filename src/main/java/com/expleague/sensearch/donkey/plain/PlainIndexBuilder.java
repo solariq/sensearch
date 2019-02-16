@@ -275,7 +275,7 @@ public class PlainIndexBuilder implements IndexBuilder {
                   plainPageBuilder.startPage(doc.id(), pageId, doc.categories(), doc.uri());
                   statisticsBuilder.startPage();
                   indexMetaBuilder.startPage(pageId, doc.uri());
-                  embeddingBuilder.startPage(pageId);
+                  embeddingBuilder.startPage(doc.id(), pageId);
 
                   doc.sections()
                       .forEachOrdered(
@@ -283,6 +283,7 @@ public class PlainIndexBuilder implements IndexBuilder {
                             long sectionId = pageIdGenerator(s.uri()).next(knownPageIds);
                             plainPageBuilder.addSection(s, sectionId);
                             indexMetaBuilder.addSection(s.uri(), pageIdGenerator(s.uri()).next(knownPageIds));
+                            embeddingBuilder.addSection(s);
 
                             List<CharSequence> sectionTitles = s.title();
                             String sectionTitle =
@@ -299,8 +300,6 @@ public class PlainIndexBuilder implements IndexBuilder {
                                       statisticsBuilder.enrich(termLemmaId.id, termLemmaId.lemmaId);
                                     });
                           });
-                  embeddingBuilder.addTitle(doc.title());
-                  embeddingBuilder.addText(doc.content().toString());
 
                   suggestBuilder.accept(toTermIds(doc.title(), termBuilder));
 
