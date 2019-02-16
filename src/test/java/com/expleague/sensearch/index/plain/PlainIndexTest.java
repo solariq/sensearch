@@ -74,6 +74,15 @@ public class PlainIndexTest extends IndexBasedTestCase {
   }
 
   @Test
+  public void testTerm_lemmaFreq() {
+    String word = "смерти";
+    Term term = index().term(word);
+
+    assertEquals(term.documentLemmaFreq(), term.lemma().documentLemmaFreq());
+
+  }
+
+  @Test
   public void testTerm_lemma() {
     // Crawler xml with id 20558
     String word = "смерти";
