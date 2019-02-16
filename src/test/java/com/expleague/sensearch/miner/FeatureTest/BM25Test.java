@@ -108,6 +108,23 @@ public class BM25Test extends IndexBasedTestCase {
 
   @Test
   public void testPage2() {
+    testBM25 = new BM25FeatureSet();
+    Query query = BaseQuery.create("Правитель", index());
+    QURLItem item = new QURLItem(new TestPage(), query);
+//    index().parse(PAGE_2).forEach(t -> System.err.println(t.lemma().text()));
+    testBM25.accept(item);
+    init(TITLE_2, PAGE_2);
+
+    int titLen = (int) index().parse(TITLE_2).count();
+    int pagLen = (int) index().parse(PAGE_2).count();
+    int totLen = titLen + pagLen;
+
+    Vec resBM25 = testBM25.advance();
+    double scoreBM25 = Math.log((double) TMP_INDEX_SIZE / query.terms().get(0).documentFreq()) * 4 / (4 + K * (1 - B + B * totLen / averageTotalLen));
+    double scoreBM25L = Math.log((double) TMP_INDEX_SIZE / query.terms().get(0).documentLemmaFreq()) * 4 / (4 + K * (1 - B + B * totLen / averageTotalLen));
+    System.err.println("Query: Правитель   Vec: " + resBM25);
+    Assert.assertEquals(0, Double.compare(resBM25.get(0), scoreBM25));
+    Assert.assertEquals(0, Double.compare(resBM25.get(1), scoreBM25L));
 
   }
 
