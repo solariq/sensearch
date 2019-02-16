@@ -45,26 +45,26 @@ public class EmbeddingBuilder implements AutoCloseable {
     nnIdx = new QuantLSHCosIndexDB(new FastRandom(), QUANT_DIM, DEFAULT_VEC_SIZE, MIN_DIST, vecDb);
   }
 
-  private long cutLinkId;
   @Override
   public void close() throws IOException {
+    long[] curLinkId = new long[1];
     wikiIdToLinkTexts.forEachEntry((wikiId, linkTexts) -> {
       if (wikiIdToIndexIdMap.containsKey(wikiId)) {
         long pageId = wikiIdToIndexIdMap.get(wikiId);
-        cutLinkId = pageId + IdUtils.START_LINK_PREFIX;
-        linkTexts.forEach(text -> nnIdx.append(cutLinkId++, toVector(text)));
+        curLinkId[0] = IdUtils.toStartLinkId(pageId);
+        linkTexts.forEach(text -> nnIdx.append(curLinkId[0]++, toVector(text)));
       }
       return true;
     });
     nnIdx.save();
   }
 
-  private long curSecTitleId = 0;
-  private long curSecTextId = 0;
+  private long curSecTitleId;
+  private long curSecTextId;
 
   public void startPage(long originalId, long pageId) {
-    curSecTitleId = pageId + IdUtils.START_SEC_TITLE_PREFIX;
-    curSecTextId = pageId + IdUtils.START_SEC_TEXT_PREFIX;
+    curSecTitleId = IdUtils.toStartSecTitleId(pageId);
+    curSecTextId = IdUtils.toStartSecTextId(pageId);
     wikiIdToIndexIdMap.put(originalId, pageId);
   }
 
