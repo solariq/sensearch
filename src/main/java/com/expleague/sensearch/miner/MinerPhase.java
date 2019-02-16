@@ -1,8 +1,6 @@
 package com.expleague.sensearch.miner;
 
 import com.expleague.commons.math.vectors.Vec;
-import com.expleague.commons.math.vectors.impl.vectors.ArrayVec;
-import com.expleague.ml.meta.FeatureMeta;
 import com.expleague.sensearch.Page;
 import com.expleague.sensearch.core.SearchPhase;
 import com.expleague.sensearch.core.Whiteboard;
@@ -15,7 +13,6 @@ import com.google.inject.assistedinject.Assisted;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
-import java.util.stream.Stream;
 import org.apache.log4j.Logger;
 
 /**
@@ -57,31 +54,7 @@ public class MinerPhase implements SearchPhase {
               Vec all = features.advance();
               documentsFeatures.put(
                   page,
-                  new Features() {
-                    @Override
-                    public Vec features() {
-                      return all;
-                    }
-
-                    @Override
-                    public Vec features(FeatureMeta... metas) {
-                      return new ArrayVec(
-                          Stream.of(metas)
-                              .mapToInt(features::index)
-                              .mapToDouble(all::get)
-                              .toArray());
-                    }
-
-                    @Override
-                    public FeatureMeta meta(int index) {
-                      return features.meta(index);
-                    }
-
-                    @Override
-                    public int dim() {
-                      return features.dim();
-                    }
-                  });
+                  new FeaturesImpl(features, all));
             });
 
     whiteboard.putTextFeatures(documentsFeatures, phaseId);

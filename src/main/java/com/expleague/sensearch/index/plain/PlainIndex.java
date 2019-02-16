@@ -5,6 +5,7 @@ import com.expleague.commons.math.vectors.VecTools;
 import com.expleague.commons.math.vectors.impl.vectors.ArrayVec;
 import com.expleague.commons.seq.CharSeq;
 import com.expleague.commons.seq.CharSeqTools;
+import com.expleague.commons.util.Pair;
 import com.expleague.sensearch.Config;
 import com.expleague.sensearch.Page;
 import com.expleague.sensearch.core.PartOfSpeech;
@@ -19,6 +20,7 @@ import com.expleague.sensearch.index.Index;
 import com.expleague.sensearch.index.plain.features.FilterFeatures;
 import com.expleague.sensearch.metrics.LSHSynonymsMetric;
 import com.expleague.sensearch.miner.Features;
+import com.expleague.sensearch.miner.FeaturesImpl;
 import com.expleague.sensearch.miner.impl.QURLItem;
 import com.expleague.sensearch.protobuf.index.IndexUnits;
 import com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta.UriPageMapping;
@@ -40,8 +42,13 @@ import java.net.URI;
 import java.net.URLEncoder;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.NoSuchElementException;
+import java.util.Objects;
 import java.util.stream.Stream;
 import org.apache.log4j.Logger;
 import org.fusesource.leveldbjni.JniDBFactory;
@@ -332,7 +339,8 @@ public class PlainIndex implements Index {
     });
     Map<Page, Features> allFilterFeatures = new HashMap<>();
     pageIdToCandidatesMap.forEachEntry((pageId, candidates) -> {
-      filterFeatures.accept(new QURLItem(PlainPage.create(pageId, this), query));
+      Page page = PlainPage.create(pageId, this);
+      filterFeatures.accept(new QURLItem(page, query));
       candidates.forEach(candidate -> {
         long id = candidate.getId();
         if (IdUtils.isSecTitleId(id)) {
@@ -344,8 +352,19 @@ public class PlainIndex implements Index {
         }
       });
       Vec vec = filterFeatures.advance();
+      allFilterFeatures.put(page, new FeaturesImpl(filterFeatures, vec));
       return true;
     });
+    return allFilterFeatures.entrySet()
+        .stream()
+        .map(p -> Pair.create(p.getKey(), rank(p.getValue().features())))
+        .sorted(Comparator.<Pair<Page, Double>>comparingDouble(Pair::getSecond).reversed())
+        .map(Pair::getFirst)
+        .limit(FILTERED_DOC_NUMBER);
+  }
+
+  private double rank(Vec features) {
+    return features.get(0);
   }
 
   @Override
@@ -405,7 +424,7 @@ public class PlainIndex implements Index {
       return Stream.empty();
     }
 
-    Set<Long> LSHIds =
+    /*Set<Long> LSHIds =
         filter
             .filtrate(termVec, SYNONYMS_COUNT, PlainIndex::isWordId)
             .boxed()
@@ -413,9 +432,9 @@ public class PlainIndex implements Index {
 
     double result = lshSynonymsMetric.calc(((IndexTerm) term).id(), LSHIds);
 
-    LOG.info("LSHSynonymsMetric: " + result);
+    LOG.info("LSHSynonymsMetric: " + result);*/
 
-    return filter.filtrate(termVec, SYNONYMS_COUNT, PlainIndex::isWordId).mapToObj(idToTerm::get);
+    return filter.filtrate(termVec, SYNONYMS_COUNT, PlainIndex::isWordId).map(c -> idToTerm.get(c.getId()));
   }
 
   int documentFrequency(Term term) {
