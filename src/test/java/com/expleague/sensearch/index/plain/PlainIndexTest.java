@@ -171,29 +171,28 @@ public class PlainIndexTest extends IndexBasedTestCase {
     assertEquals(content, page.content(SegmentType.BODY));
   }
 
-  @Ignore("Wiki dump is not formatted correctly")
   @Test
   public void testPage_content() {
     String content =
-        "Суффет — название двух главных должностных лиц (магистратов) в Тире, а также в северной Африке, на территории Карфагенской республики. Обычно они были верховными судьями. Во время военных действий часто — главнокомандующими. В древнем Израиле так называли военных предводителей и судей.\n";
+        "Суффет — название двух главных должностных лиц ( магистратов ) в Тире , а также в северной Африке, на территории Карфагенской республики . Обычно они были верховными судьями. Во время военных действий часто — главнокомандующими. В древнем Израиле так называли военных предводителей и судей.";
 
     String fullContent =
         content
-            + "«судья», , родительный падеж sufetis.\n"
+            + "\n«судья», , родительный падеж sufetis.\n"
             + "Суффеты существовали с V век до н. э. Они избирались ежегодно на народных собраниях.\n"
-            + "Эпоха Судей\n"
+            + "Эпоха Судей \n"
             + ", Исследования и публикации по истории античного мира. Под редакцией профессора Э. Д. Фролова. Выпуск 3. Санкт-Петербург, 2004.";
 
     URI uri = URI.create("https://ru.wikipedia.org/wiki/Суффет");
     Page page = index().page(uri);
 
-    assertEquals(content, page.content());
+    assertEquals(content, page.content(SegmentType.SUB_BODY));
     assertEquals(fullContent, page.content(SegmentType.BODY));
   }
 
   @Test
   public void testSize() {
-    assertEquals(30, index().size());
+    assertEquals(32, index().size());
   }
 
   @Test
