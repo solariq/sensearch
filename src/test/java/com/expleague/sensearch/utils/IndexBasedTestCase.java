@@ -3,7 +3,6 @@ package com.expleague.sensearch.utils;
 import com.expleague.commons.text.lemmer.MyStem;
 import com.expleague.sensearch.ConfigImpl;
 import com.expleague.sensearch.core.Lemmer;
-import com.expleague.sensearch.donkey.plain.IdGenerator;
 import com.expleague.sensearch.donkey.plain.PlainIndexBuilder;
 import com.expleague.sensearch.index.Embedding;
 import com.expleague.sensearch.index.Index;

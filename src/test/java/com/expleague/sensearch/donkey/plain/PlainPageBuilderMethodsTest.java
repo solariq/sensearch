@@ -30,6 +30,11 @@ public class PlainPageBuilderMethodsTest extends SensearchTestCase {
 
     }
 
+    @Override
+    public CharSequence title() {
+      return "";
+    }
+
     static class LinkMock implements CrawlerDocument.Link {
 
       private String text = "";

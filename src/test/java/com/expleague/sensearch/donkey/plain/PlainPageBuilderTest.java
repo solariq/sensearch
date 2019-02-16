@@ -47,70 +47,77 @@ public class PlainPageBuilderTest extends CrawlerBasedTestCase {
   public void testPageWithSubsections() throws IOException {
 
     Map<String, Long> idsFromPageBuilder = new HashMap<>();
-    long rootPageId;
+    long pageId = 0;
 
     try (PlainPageBuilder pageBuilder =
         new PlainPageBuilder(
             JniDBFactory.factory.open(PAGE_DB_PATH.toFile(), new Options().errorIfExists(true)),
-            TEMP_FILES_ROOT,
-            new IdGenerator())) {
-      rootPageId =
+            TEMP_FILES_ROOT)) {
           pageBuilder.startPage(
-              1, Arrays.asList("Category1", "Category2"), URI.create("http://someuri"));
+              1, ++pageId, Arrays.asList("Category1", "Category2"), URI.create("http://someuri"));
+
+      pageBuilder.addSection(
+          new WikiSection(
+              "Some text for first page",
+              Collections.singletonList("First titles"),
+              Collections.emptyList(),
+              URI.create("someuri#root")), ++pageId);
 
       idsFromPageBuilder.put(
           "someuri#root",
-          pageBuilder.addSection(
-              new WikiSection(
-                  "Some text for first page",
-                  Collections.singletonList("First titles"),
-                  Collections.emptyList(),
-                  URI.create("someuri#root"))));
+          pageId
+      );
 
+      pageBuilder.addSection(
+          new WikiSection(
+              "First page subsection",
+              Arrays.asList("First titles", "Subtitle"),
+              Collections.emptyList(),
+              URI.create("suburi")), ++pageId);
       idsFromPageBuilder.put(
           "suburi",
-          pageBuilder.addSection(
-              new WikiSection(
-                  "First page subsection",
-                  Arrays.asList("First titles", "Subtitle"),
-                  Collections.emptyList(),
-                  URI.create("suburi"))));
+          pageId
+      );
+      pageBuilder.addSection(
+          new WikiSection(
+              "Another first page subsection",
+              Arrays.asList("First titles", "Subtitle2"),
+              Collections.emptyList(),
+              URI.create("suburi2")), ++pageId);
 
       idsFromPageBuilder.put(
-          "suburi2",
-          pageBuilder.addSection(
-              new WikiSection(
-                  "Another first page subsection",
-                  Arrays.asList("First titles", "Subtitle2"),
-                  Collections.emptyList(),
-                  URI.create("suburi2"))));
+          "suburi2", pageId
+      );
 
+      pageBuilder.addSection(
+          new WikiSection(
+              "Deeper",
+              Arrays.asList("First titles", "Subtitle2", "Going deeper"),
+              Collections.emptyList(),
+              URI.create("deeper")), ++pageId);
       idsFromPageBuilder.put(
-          "deeper",
-          pageBuilder.addSection(
-              new WikiSection(
-                  "Deeper",
-                  Arrays.asList("First titles", "Subtitle2", "Going deeper"),
-                  Collections.emptyList(),
-                  URI.create("deeper"))));
+          "deeper", pageId
+          );
 
+      pageBuilder.addSection(
+          new WikiSection(
+              "text text text",
+              Arrays.asList("First titles", "Subtitle2", "Going deeper", "Even more"),
+              Collections.emptyList(),
+              URI.create("evenmore")), ++pageId);
       idsFromPageBuilder.put(
-          "evenmore",
-          pageBuilder.addSection(
-              new WikiSection(
-                  "text text text",
-                  Arrays.asList("First titles", "Subtitle2", "Going deeper", "Even more"),
-                  Collections.emptyList(),
-                  URI.create("evenmore"))));
+          "evenmore", pageId
+      );
 
+      pageBuilder.addSection(
+          new WikiSection(
+              "Almost on the top",
+              Arrays.asList("First titles", "Title"),
+              Collections.emptyList(),
+              URI.create("almosttop")), ++pageId);
       idsFromPageBuilder.put(
-          "almosttop",
-          pageBuilder.addSection(
-              new WikiSection(
-                  "Almost on the top",
-                  Arrays.asList("First titles", "Title"),
-                  Collections.emptyList(),
-                  URI.create("almosttop"))));
+          "almosttop", pageId
+      );
 
       pageBuilder.endPage();
     }
@@ -125,7 +132,7 @@ public class PlainPageBuilderTest extends CrawlerBasedTestCase {
     // Check ids that return builder's methods
     idsFromPageBuilder.forEach(
         (uri, id) -> assertEquals(id.longValue(), pageByUri.get(uri).getPageId()));
-    assertEquals(rootPageId, pageByUri.get("someuri#root").getPageId());
+    assertEquals(1, pageByUri.get("someuri#root").getPageId());
 
     assertEquals(6, pages.size());
     // Only root page doesn't have parent
@@ -168,49 +175,47 @@ public class PlainPageBuilderTest extends CrawlerBasedTestCase {
 
   @Test
   public void testMultiplePages() throws IOException {
-    long page1Id, page2Id, page3Id;
-
+    long page1Id = 1, page2Id = 2, page3Id = 3, emptyPage1Id = 4;
     try (PlainPageBuilder pageBuilder =
         new PlainPageBuilder(
             JniDBFactory.factory.open(PAGE_DB_PATH.toFile(), new Options().errorIfExists(true)),
-            TEMP_FILES_ROOT,
-            new IdGenerator())) {
-      page1Id =
-          pageBuilder.startPage(1, Arrays.asList("Category 1", "Category 2"), URI.create("Page1"));
+            TEMP_FILES_ROOT)) {
+      pageBuilder.startPage(1, page1Id, Arrays.asList("Category 1", "Category 2"), URI.create("Page1"));
+
       pageBuilder.addSection(
           new WikiSection(
               "Some text",
               Collections.singletonList("Some titles"),
               Collections.emptyList(),
-              URI.create("Page1#root")));
+              URI.create("Page1#root")), page1Id * 10);
       pageBuilder.endPage();
 
       // Page without sections should not be inserted
-      pageBuilder.startPage(239, Arrays.asList("1", "2"), URI.create("Page239"));
+      pageBuilder.startPage(239, emptyPage1Id, Arrays.asList("1", "2"), URI.create("Page239"));
       pageBuilder.endPage();
 
-      page2Id = pageBuilder.startPage(2, Arrays.asList("Category 1", "2"), URI.create("Page2"));
+      pageBuilder.startPage(2, page2Id, Arrays.asList("Category 1", "2"), URI.create("Page2"));
       pageBuilder.addSection(
           new WikiSection(
               "second text",
               Collections.singletonList("Second titles"),
               Collections.emptyList(),
-              URI.create("Page2#root")));
+              URI.create("Page2#root")), page2Id * 10);
       pageBuilder.addSection(
           new WikiSection(
               "second text in subsection",
               Arrays.asList("Second titles", "Second subtitle"),
               Collections.emptyList(),
-              URI.create("Page2subsection")));
+              URI.create("Page2subsection")), page2Id * 10 + 1);
       pageBuilder.endPage();
 
-      page3Id = pageBuilder.startPage(3, Arrays.asList("Category 1", "222"), URI.create("Page3"));
+      pageBuilder.startPage(3, page3Id, Arrays.asList("Category 1", "222"), URI.create("Page3"));
       pageBuilder.addSection(
           new WikiSection(
               "third text",
               Collections.singletonList("Third titles"),
               Collections.emptyList(),
-              URI.create("Page3#root")));
+              URI.create("Page3#root")), page3Id * 10);
       pageBuilder.endPage();
     }
 
@@ -241,26 +246,28 @@ public class PlainPageBuilderTest extends CrawlerBasedTestCase {
 
   @Test
   public void testLinks() throws IOException {
+
+    long pageId = 1;
     try (PlainPageBuilder pageBuilder =
         new PlainPageBuilder(
             JniDBFactory.factory.open(PAGE_DB_PATH.toFile(), new Options().errorIfExists(true)),
-            TEMP_FILES_ROOT,
-            new IdGenerator())) {
-      pageBuilder.startPage(1, Arrays.asList("Category1", "Category2"), URI.create("Page1"));
+            TEMP_FILES_ROOT)) {
+
+      pageBuilder.startPage(1, pageId++, Arrays.asList("Category1", "Category2"), URI.create("Page1"));
 
       pageBuilder.addSection(
           new WikiSection(
               "Some text for first page",
               Collections.singletonList("First titles"),
               Collections.singletonList(new WikiLink("text", "First titles", 1, 5)),
-              URI.create("Page1#root")));
+              URI.create("Page1#root")), pageId++);
 
       pageBuilder.addSection(
           new WikiSection(
               "First page subsection",
               Arrays.asList("First titles", "Subtitle"),
               Collections.singletonList(new WikiLink("page", "Third titles", 3, 6)),
-              URI.create("suburi")));
+              URI.create("suburi")), pageId++);
 
       pageBuilder.addSection(
           new WikiSection(
@@ -269,18 +276,18 @@ public class PlainPageBuilderTest extends CrawlerBasedTestCase {
               Arrays.asList(
                   new WikiLink("Another", "Second titles", 2, 0),
                   new WikiLink("subsection", "First titles", 1, 19)),
-              URI.create("suburi2")));
+              URI.create("suburi2")), pageId++);
 
       pageBuilder.endPage();
 
-      pageBuilder.startPage(2, Collections.singletonList("Category 1"), URI.create("Page2"));
+      pageBuilder.startPage(2, pageId++, Collections.singletonList("Category 1"), URI.create("Page2"));
 
       pageBuilder.addSection(
           new WikiSection(
               "Second page section text",
               Collections.singletonList("Second page"),
               Collections.emptyList(),
-              URI.create("Page2#root")));
+              URI.create("Page2#root")), pageId++);
 
       pageBuilder.addSection(
           new WikiSection(
@@ -289,11 +296,11 @@ public class PlainPageBuilderTest extends CrawlerBasedTestCase {
               Arrays.asList(
                   new WikiLink("Second", "Second page", 2, 0),
                   new WikiLink("page", "First page", 1, 6)),
-              URI.create("Page2subpage")));
+              URI.create("Page2subpage")), pageId++);
 
       pageBuilder.endPage();
 
-      pageBuilder.startPage(3, Collections.emptyList(), URI.create("Page3"));
+      pageBuilder.startPage(3, pageId++, Collections.emptyList(), URI.create("Page3"));
 
       pageBuilder.addSection(
           new WikiSection(
@@ -302,7 +309,7 @@ public class PlainPageBuilderTest extends CrawlerBasedTestCase {
               Arrays.asList(
                   new WikiLink("Third", "Third page", 3, 0),
                   new WikiLink("page", "Unexisting page", -1, 7)),
-              URI.create("Page3#root")));
+              URI.create("Page3#root")), pageId++);
       pageBuilder.endPage();
     }
 
