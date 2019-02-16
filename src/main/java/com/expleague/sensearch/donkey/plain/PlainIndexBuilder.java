@@ -104,14 +104,12 @@ public class PlainIndexBuilder implements IndexBuilder {
   private final Config config;
   private final Lemmer lemmer;
   private final Tokenizer tokenizer = new TokenizerImpl();
-  private final IdGenerator idGenerator;
 
   @Inject
-  public PlainIndexBuilder(Crawler crawler, Config config, Lemmer lemmer, IdGenerator idGenerator) {
+  public PlainIndexBuilder(Crawler crawler, Config config, Lemmer lemmer) {
     this.crawler = crawler;
     this.config = config;
     this.lemmer = lemmer;
-    this.idGenerator = idGenerator;
   }
 
   /**
@@ -244,8 +242,7 @@ public class PlainIndexBuilder implements IndexBuilder {
                     EMBEDDING_DB_OPTIONS),
                 indexRoot.resolve(EMBEDDING_ROOT),*/
                 jmllEmbedding,
-                tokenizer,
-                idGenerator);
+                tokenizer);
         final DB suggest_unigram_DB =
             JniDBFactory.factory.open(
                 indexRoot.resolve(SUGGEST_UNIGRAM_ROOT).toFile(), STATS_DB_OPTIONS);
