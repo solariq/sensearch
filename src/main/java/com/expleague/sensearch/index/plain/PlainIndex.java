@@ -105,6 +105,17 @@ public class PlainIndex implements Index {
 
   private SuggestInformationLoader suggestLoader;
 
+  @Override
+  public void close() throws Exception {
+    embedding.close();
+    pageBase.close();
+    termBase.close();
+    termStatisticsBase.close();
+    suggest_unigram_DB.close();
+    suggest_inverted_index_DB.close();
+    suggest_multigram_DB.close();
+  }
+
   @Inject
   public PlainIndex(Config config, Embedding embedding, Filter filter) throws IOException {
 

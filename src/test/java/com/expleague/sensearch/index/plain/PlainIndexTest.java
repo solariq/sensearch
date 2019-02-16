@@ -7,6 +7,7 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 
+import com.expleague.commons.seq.CharSeq;
 import com.expleague.sensearch.Page;
 import com.expleague.sensearch.Page.SegmentType;
 import com.expleague.sensearch.core.PartOfSpeech;
@@ -45,12 +46,14 @@ public class PlainIndexTest extends IndexBasedTestCase {
     Term term = index().term(word);
     assertNotNull(term);
     assertEquals("ведущий", term.text().toString());
-    // Lemma of "ведущий" is "ведущий"
-    assertSame(term, term.lemma());
+
+    assertEquals(CharSeq.create("ведущ"), term.lemma().text());
     // This term occurs at least once
     assertTrue(term.documentFreq() > 0);
     assertTrue(term.freq() > 0);
-    assertEquals(PartOfSpeech.A, term.partOfSpeech());
+
+    // TODO: currently pos are disabled
+//    assertEquals(PartOfSpeech.A, term.partOfSpeech());
   }
 
   @Test
@@ -62,11 +65,12 @@ public class PlainIndexTest extends IndexBasedTestCase {
     assertNotNull(term);
     assertEquals("ведущий", term.text().toString());
     // Lemma of "ведущий" is "ведущий"
-    assertSame(term, term.lemma());
+    assertEquals(CharSeq.create("ведущ"), term.lemma().text());
     // This term occurs at least once
     assertTrue(term.documentFreq() > 0);
     assertTrue(term.freq() > 0);
-    assertEquals(PartOfSpeech.A, term.partOfSpeech());
+    // TODO
+//    assertEquals(PartOfSpeech.A, term.partOfSpeech());
   }
 
   @Test
@@ -75,7 +79,7 @@ public class PlainIndexTest extends IndexBasedTestCase {
     String word = "смерти";
     Term term = index().term(word);
 
-    String lemma = "смерть";
+    String lemma = "смерт";
     Term lemmaTerm = index().term(lemma);
 
     assertNotNull(term);

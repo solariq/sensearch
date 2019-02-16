@@ -13,8 +13,10 @@ import com.expleague.sensearch.index.plain.PlainIndex;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import org.apache.commons.io.FileUtils;
 import org.fusesource.leveldbjni.JniDBFactory;
 import org.iq80.leveldb.Options;
+import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -61,6 +63,12 @@ public abstract class IndexBasedTestCase extends CrawlerBasedTestCase {
     miniIndex =
         new PlainIndex(
             indexConfig, embedding, new FilterImpl(embedding, indexConfig().maxFilterItems()));
+  }
+
+  @AfterClass
+  public static void removeIndex() throws Exception {
+    miniIndex.close();
+    FileUtils.deleteDirectory(testDataRoot().resolve(MINI_INDEX_ROOT).toFile());
   }
 
   private static void buildIndex() throws IOException {

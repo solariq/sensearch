@@ -9,8 +9,6 @@ import com.expleague.sensearch.donkey.plain.ByteTools;
 import com.google.common.primitives.Longs;
 import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.list.array.TLongArrayList;
-import org.iq80.leveldb.DB;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -18,8 +16,9 @@ import java.util.List;
 import java.util.stream.DoubleStream;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
+import org.iq80.leveldb.DB;
 
-public class QuantLSHCosIndexDB extends BaseQuantLSHCosIndex {
+public class QuantLSHCosIndexDB extends BaseQuantLSHCosIndex implements AutoCloseable {
     private static final long SPECIAL_ID_1 = Long.MAX_VALUE - 3;
     private static final long SPECIAL_ID_2 = Long.MAX_VALUE - 2;
     private static final long SPECIAL_ID_3 = Long.MAX_VALUE - 1;
@@ -123,5 +122,10 @@ public class QuantLSHCosIndexDB extends BaseQuantLSHCosIndex {
             }
         }
         return new QuantLSHCosIndexDB(dim, minDist, ids, sketches, hashes, vecDB);
+    }
+
+    @Override
+    public void close() throws Exception {
+        vecDB.close();
     }
 }

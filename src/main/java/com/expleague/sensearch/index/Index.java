@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.stream.Stream;
 import org.jetbrains.annotations.Nullable;
 
-public interface Index {
+public interface Index extends AutoCloseable {
   Stream<Page> fetchDocuments(Query query);
 
   Stream<Page> allDocuments();

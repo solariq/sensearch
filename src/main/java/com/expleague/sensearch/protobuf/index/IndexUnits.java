@@ -4533,7 +4533,6 @@ public final class IndexUnits {
      * <code>optional int32 document_lemma_frequency = 3;</code>
      */
     boolean hasDocumentLemmaFrequency();
-
     /**
      * <code>optional int32 document_lemma_frequency = 3;</code>
      */
@@ -5202,14 +5201,12 @@ public final class IndexUnits {
 
     public static final int DOCUMENT_LEMMA_FREQUENCY_FIELD_NUMBER = 3;
     private int documentLemmaFrequency_;
-
     /**
      * <code>optional int32 document_lemma_frequency = 3;</code>
      */
     public boolean hasDocumentLemmaFrequency() {
       return ((bitField0_ & 0x00000004) == 0x00000004);
     }
-
     /**
      * <code>optional int32 document_lemma_frequency = 3;</code>
      */
@@ -5662,21 +5659,18 @@ public final class IndexUnits {
       }
 
       private int documentLemmaFrequency_;
-
       /**
        * <code>optional int32 document_lemma_frequency = 3;</code>
        */
       public boolean hasDocumentLemmaFrequency() {
         return ((bitField0_ & 0x00000004) == 0x00000004);
       }
-
       /**
        * <code>optional int32 document_lemma_frequency = 3;</code>
        */
       public int getDocumentLemmaFrequency() {
         return documentLemmaFrequency_;
       }
-
       /**
        * <code>optional int32 document_lemma_frequency = 3;</code>
        */
@@ -5686,7 +5680,6 @@ public final class IndexUnits {
         onChanged();
         return this;
       }
-
       /**
        * <code>optional int32 document_lemma_frequency = 3;</code>
        */
