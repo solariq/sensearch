@@ -7,6 +7,7 @@ import com.expleague.commons.random.FastRandom;
 import com.expleague.commons.seq.CharSeq;
 import com.expleague.ml.embedding.Embedding;
 import com.expleague.sensearch.core.Tokenizer;
+import com.expleague.sensearch.donkey.crawler.document.CrawlerDocument;
 import com.expleague.sensearch.index.plain.QuantLSHCosIndexDB;
 import gnu.trove.set.TLongSet;
 import gnu.trove.set.hash.TLongHashSet;
@@ -46,12 +47,33 @@ public class EmbeddingBuilder implements AutoCloseable {
   private long curPageId = 0;
   private Vec curPageVec = null;
 
-  public void startPage(long pageId) {
+  //TODO: impl
+  public void startPage(long originalId, long pageId) {
     if (curPageId != 0) {
       throw new IllegalStateException(
           "Invalid call to startPage(): already processing page [" + curPageId + "]");
     }
     curPageId = pageId;
+  }
+
+  //TODO: impl
+  public void addTitle(String title) {
+    curPageVec = toVector(title);
+    addText(title);
+  }
+
+  //TODO: impl
+  public void addSection(CrawlerDocument.Section section) {
+
+  }
+
+  //TODO: impl
+  public void endPage() {
+    if (curPageVec != null) {
+      nnIdx.append(curPageId, curPageVec);
+    }
+    curPageId = 0;
+    curPageVec = null;
   }
 
   public void addText(String text) {
@@ -67,19 +89,6 @@ public class EmbeddingBuilder implements AutoCloseable {
       }
       termIdsInDb.add(id);
     });
-  }
-
-  public void addTitle(String text) {
-    curPageVec = toVector(text);
-    addText(text);
-  }
-
-  public void endPage() {
-    if (curPageVec != null) {
-      nnIdx.append(curPageId, curPageVec);
-    }
-    curPageId = 0;
-    curPageVec = null;
   }
 
   private Vec toVector(CharSequence text) {
