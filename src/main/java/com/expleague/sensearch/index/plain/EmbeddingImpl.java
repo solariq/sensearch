@@ -11,9 +11,18 @@ import com.expleague.sensearch.index.Embedding;
 import com.google.inject.Inject;
 import gnu.trove.list.TLongList;
 import gnu.trove.list.array.TLongArrayList;
+
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.function.LongPredicate;
 import java.util.stream.LongStream;
+
+import java.util.stream.Stream;
+
+import gnu.trove.set.TLongSet;
+import gnu.trove.set.hash.TLongHashSet;
+
 import org.iq80.leveldb.DB;
 
 public class EmbeddingImpl implements Embedding {
@@ -40,12 +49,12 @@ public class EmbeddingImpl implements Embedding {
         return nnIdx.nearest(mainVec).mapToLong(NearestNeighbourIndex.Entry::id).toArray();
     }
 
-    private double[] getDists(Vec mainVec, LongPredicate predicate, double queryNorm, TLongList orderList) {
-        long[] ids = lshFlag ? lshNearest(mainVec) : allIds;
+    private double[] getDists(Vec qVec, LongPredicate predicate, double qNorm, TLongList idList) {
+        long[] ids = lshFlag ? lshNearest(qVec) : allIds;
         return LongStream.of(ids)
                 .filter(predicate)
-                .peek(orderList::add)
-                .mapToDouble(id -> distance(mainVec, queryNorm, vec(id)))
+                .peek(idList::add)
+                .mapToDouble(id -> distance(qVec, qNorm, vec(id)))
                 .toArray();
     }
 
@@ -54,51 +63,75 @@ public class EmbeddingImpl implements Embedding {
         lshFlag = value;
     }
 
+    //TODO: remove copypaste
     @Override
-    public LongStream nearest(Vec mainVec, LongPredicate predicate) {
-        long[] ids = lshFlag ? lshNearest(mainVec) : allIds;
-        return LongStream.of(ids).filter(predicate);
+    public Stream<Candidate> nearest(Vec qVec, LongPredicate predicate) {
+        final double qNorm = VecTools.norm(qVec);
+        if (qNorm == 0) {
+            return Stream.empty();
+        }
+        TLongList idList = new TLongArrayList();
+        double[] dists = getDists(qVec, predicate, qNorm, idList);
+        long[] ids = idList.toArray();
+
+        List<Candidate> candidates = new ArrayList<>();
+        for (int i = 0; i < ids.length; i++) {
+            candidates.add(new Candidate(ids[i], dists[i]));
+        }
+        return candidates.stream();
     }
 
+    //TODO: remove copypaste
     @Override
-    public LongStream nearest(Vec mainVec, int numberOfNeighbors, LongPredicate predicate) {
-        final double queryNorm = VecTools.norm(mainVec);
-        if (queryNorm == 0) {
-            return LongStream.empty();
+    public Stream<Candidate> nearest(Vec qVec, int numberOfNeighbors, LongPredicate predicate) {
+        final double qNorm = VecTools.norm(qVec);
+        if (qNorm == 0) {
+            return Stream.empty();
         }
 
-        TLongList orderList = new TLongArrayList();
-        final double[] dist = getDists(mainVec, predicate, queryNorm, orderList);
-        final long[] order = orderList.toArray();
-        ArrayTools.parallelSort(dist, order);
+        TLongList idList = new TLongArrayList();
+        final double[] dists = getDists(qVec, predicate, qNorm, idList);
+        final long[] ids = idList.toArray();
+        ArrayTools.parallelSort(dists, ids);
 
-        return Arrays.stream(order).distinct().limit(numberOfNeighbors);
+        List<Candidate> candidates = new ArrayList<>();
+        for (int i = 0; i < numberOfNeighbors; i++) {
+            candidates.add(new Candidate(ids[i], dists[i]));
+        }
+
+        return candidates.stream();
     }
 
+    //TODO: remove copypaste
     @Override
-    public LongStream nearest(Vec mainVec, double maxDistance, LongPredicate predicate) {
-        final double queryNorm = VecTools.norm(mainVec);
-        if (queryNorm == 0) {
-            return LongStream.empty();
+    public Stream<Candidate> nearest(Vec qVec, double maxDistance, LongPredicate predicate) {
+        final double qNorm = VecTools.norm(qVec);
+        if (qNorm == 0) {
+            return Stream.empty();
         }
 
-        TLongList orderList = new TLongArrayList();
-        final double[] dist = getDists(mainVec, predicate, queryNorm, orderList);
-        final long[] order = orderList.toArray();
-        ArrayTools.parallelSort(dist, order);
+        TLongList idList = new TLongArrayList();
+        final double[] dists = getDists(qVec, predicate, qNorm, idList);
+        final long[] ids = idList.toArray();
+        ArrayTools.parallelSort(dists, ids);
 
-        int end = Arrays.binarySearch(dist, maxDistance);
+        int end = Arrays.binarySearch(dists, maxDistance);
         if (end < 0) {
             end = -end - 1;
         }
-        return Arrays.stream(order).distinct().limit(end);
+
+        List<Candidate> candidates = new ArrayList<>();
+        for (int i = 0; i < end; i++) {
+            candidates.add(new Candidate(ids[i], dists[i]));
+        }
+        return candidates.stream();
     }
 
-    private double distance(Vec mainVec, double queryNorm, Vec v) {
+    private double distance(Vec qVec, double qNorm, Vec v) {
         double norm = VecTools.norm(v);
         return norm == 0
                 ? Double.POSITIVE_INFINITY
-                : (1 - VecTools.multiply(mainVec, v) / norm / queryNorm) / 2;
+                : (1 - VecTools.multiply(qVec, v) / norm / qNorm) / 2;
     }
 
     @Override

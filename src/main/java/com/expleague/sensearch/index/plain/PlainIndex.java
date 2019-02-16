@@ -11,11 +11,15 @@ import com.expleague.sensearch.core.PartOfSpeech;
 import com.expleague.sensearch.core.Term;
 import com.expleague.sensearch.core.Tokenizer;
 import com.expleague.sensearch.core.impl.TokenizerImpl;
+import com.expleague.sensearch.donkey.plain.IdUtils;
 import com.expleague.sensearch.donkey.plain.PlainIndexBuilder;
 import com.expleague.sensearch.index.Embedding;
 import com.expleague.sensearch.index.Filter;
 import com.expleague.sensearch.index.Index;
+import com.expleague.sensearch.index.plain.features.FilterFeatures;
 import com.expleague.sensearch.metrics.LSHSynonymsMetric;
+import com.expleague.sensearch.miner.Features;
+import com.expleague.sensearch.miner.impl.QURLItem;
 import com.expleague.sensearch.protobuf.index.IndexUnits;
 import com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta.UriPageMapping;
 import com.expleague.sensearch.protobuf.index.IndexUnits.TermStatistics;
@@ -36,12 +40,7 @@ import java.net.URI;
 import java.net.URLEncoder;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.NoSuchElementException;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.apache.log4j.Logger;
@@ -98,6 +97,7 @@ public class PlainIndex implements Index {
 
   private final Embedding embedding;
   private final Filter filter;
+  private final FilterFeatures filterFeatures = new FilterFeatures();
   private final LSHSynonymsMetric lshSynonymsMetric;
   private final Tokenizer tokenizer;
 
@@ -318,11 +318,34 @@ public class PlainIndex implements Index {
 
   @Override
   public Stream<Page> fetchDocuments(Query query) {
-    final Vec mainVec = vecByTerms(query.terms());
-    return filter
-        .filtrate(mainVec, 0.5, PlainIndex::isPageId)
-        .limit(FILTERED_DOC_NUMBER)
-        .mapToObj(id -> PlainPage.create(id, this));
+    final Vec qVec = vecByTerms(query.terms());
+    TLongObjectMap<List<Candidate>> pageIdToCandidatesMap = new TLongObjectHashMap<>();
+    filter
+      .filtrate(qVec, 0.5, PlainIndex::isPageId)
+      .limit(FILTERED_DOC_NUMBER)
+      .forEach(candidate -> {
+        long pageId = candidate.getPageId();
+        if (!pageIdToCandidatesMap.containsKey(pageId)) {
+          pageIdToCandidatesMap.put(pageId, new ArrayList<>());
+        }
+        pageIdToCandidatesMap.get(pageId).add(candidate);
+    });
+    Map<Page, Features> allFilterFeatures = new HashMap<>();
+    pageIdToCandidatesMap.forEachEntry((pageId, candidates) -> {
+      filterFeatures.accept(new QURLItem(PlainPage.create(pageId, this), query));
+      candidates.forEach(candidate -> {
+        long id = candidate.getId();
+        if (IdUtils.isSecTitleId(id)) {
+          filterFeatures.withTitle(candidate.getDist());
+        } else if (IdUtils.isSecTextId(id)) {
+          filterFeatures.withBody(candidate.getDist());
+        } else if (IdUtils.isLinkId(id)) {
+          filterFeatures.withLink(candidate.getDist());
+        }
+      });
+      Vec vec = filterFeatures.advance();
+      return true;
+    });
   }
 
   @Override

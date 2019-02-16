@@ -4,6 +4,9 @@ import com.expleague.commons.math.vectors.Vec;
 import java.util.List;
 import java.util.function.LongPredicate;
 import java.util.stream.LongStream;
+import java.util.stream.Stream;
+
+import com.expleague.sensearch.index.plain.Candidate;
 import org.jetbrains.annotations.Nullable;
 
 public interface Embedding extends AutoCloseable {
@@ -18,9 +21,9 @@ public interface Embedding extends AutoCloseable {
   @Nullable
   Vec vec(long id);
 
-  LongStream nearest(Vec mainVec, LongPredicate predicate);
-  LongStream nearest(Vec mainVec, int numberOfNeighbors, LongPredicate predicate);
-  LongStream nearest(Vec mainVec, double maxDistance, LongPredicate predicate);
+  Stream<Candidate> nearest(Vec qVec, LongPredicate predicate);
+  Stream<Candidate> nearest(Vec qVec, int numberOfNeighbors, LongPredicate predicate);
+  Stream<Candidate> nearest(Vec qVec, double maxDistance, LongPredicate predicate);
 
   void setLSHFlag(boolean value);
 
