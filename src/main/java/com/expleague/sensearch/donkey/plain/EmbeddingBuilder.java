@@ -10,12 +10,16 @@ import com.expleague.sensearch.core.Tokenizer;
 import com.expleague.sensearch.donkey.crawler.document.CrawlerDocument;
 import com.expleague.sensearch.index.plain.QuantLSHCosIndexDB;
 import gnu.trove.map.TLongLongMap;
+import gnu.trove.map.TLongObjectMap;
 import gnu.trove.map.hash.TLongLongHashMap;
+import gnu.trove.map.hash.TLongObjectHashMap;
 import gnu.trove.set.TLongSet;
 import gnu.trove.set.hash.TLongHashSet;
 import org.iq80.leveldb.DB;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 import static com.expleague.sensearch.donkey.plain.PlainIndexBuilder.DEFAULT_VEC_SIZE;
@@ -30,7 +34,7 @@ public class EmbeddingBuilder implements AutoCloseable {
   private final TLongSet termIdsInDb = new TLongHashSet();
   private final QuantLSHCosIndexDB nnIdx;
   private final TLongLongMap wikiIdToIndexIdMap = new TLongLongHashMap();
-  private final TLongLongMap linkIdToWikiId = new TLongLongHashMap();
+  private final TLongObjectMap<List<CharSequence>> wikiIdToLinkTexts = new TLongObjectHashMap<>();
 
   public EmbeddingBuilder(
       DB vecDb,
@@ -41,11 +45,14 @@ public class EmbeddingBuilder implements AutoCloseable {
     nnIdx = new QuantLSHCosIndexDB(new FastRandom(), QUANT_DIM, DEFAULT_VEC_SIZE, MIN_DIST, vecDb);
   }
 
+  private long cutLinkId;
   @Override
   public void close() throws IOException {
-    linkIdToWikiId.forEachEntry((linkId, targetId) -> {
-      if (wikiIdToIndexIdMap.containsKey(targetId)) {
-        nnIdx.append(linkId, nnIdx.get(wikiIdToIndexIdMap.get(targetId)));
+    wikiIdToLinkTexts.forEachEntry((wikiId, linkTexts) -> {
+      if (wikiIdToIndexIdMap.containsKey(wikiId)) {
+        long pageId = wikiIdToIndexIdMap.get(wikiId);
+        cutLinkId = pageId + IdUtils.START_LINK_PREFIX;
+        linkTexts.forEach(text -> nnIdx.append(cutLinkId++, toVector(text)));
       }
       return true;
     });
@@ -54,19 +61,23 @@ public class EmbeddingBuilder implements AutoCloseable {
 
   private long curSecTitleId = 0;
   private long curSecTextId = 0;
-  private long curLinkId = 0;
 
   public void startPage(long originalId, long pageId) {
     curSecTitleId = pageId + IdUtils.START_SEC_TITLE_PREFIX;
     curSecTextId = pageId + IdUtils.START_SEC_TEXT_PREFIX;
-    curLinkId = pageId + IdUtils.START_LINK_PREFIX;
     wikiIdToIndexIdMap.put(originalId, pageId);
   }
 
   public void addSection(CrawlerDocument.Section section) {
     nnIdx.append(curSecTitleId++, toVector(section.title()));
     nnIdx.append(curSecTextId++, toVector(section.text()));
-    section.links().forEach(link -> linkIdToWikiId.put(curLinkId++, link.targetId()));
+    section.links().forEach(link -> {
+      long wikiId = link.targetId();
+      if (!wikiIdToLinkTexts.containsKey(wikiId)) {
+        wikiIdToLinkTexts.put(wikiId, new ArrayList<>());
+      }
+      wikiIdToLinkTexts.get(wikiId).add(link.text());
+    });
 
     tokenizer.toWords(section.text()).map(word -> word.toString().toLowerCase()).forEach(word -> {
       long id = termIdGenerator(word).next();
@@ -82,8 +93,7 @@ public class EmbeddingBuilder implements AutoCloseable {
     });
   }
 
-  public void endPage() {
-  }
+  public void endPage() {}
 
   private Vec toVector(CharSequence text) {
     Vec[] vectors =
