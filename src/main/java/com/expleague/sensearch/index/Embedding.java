@@ -6,7 +6,7 @@ import java.util.function.LongPredicate;
 import java.util.stream.LongStream;
 import org.jetbrains.annotations.Nullable;
 
-public interface Embedding {
+public interface Embedding extends AutoCloseable {
 
   /**
    * Returns vector for an indexed item with given {@param id}. If this item does not have any

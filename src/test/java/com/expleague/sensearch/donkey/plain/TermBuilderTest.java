@@ -95,7 +95,7 @@ public class TermBuilderTest {
     try (TermBuilder termBuilder =
         new TermBuilder(
             JniDBFactory.factory.open(TERM_DB_PATH.toFile(), new Options().errorIfExists(true)),
-            new Lemmer(fakeMyStem), new IdGenerator())) {
+            new Lemmer(fakeMyStem))) {
 
       for (String word : words) {
         TermBuilder.ParsedTerm termAndLemmaIdPair = termBuilder.addTerm(word);

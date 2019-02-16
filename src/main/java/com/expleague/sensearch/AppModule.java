@@ -9,6 +9,7 @@ import com.expleague.sensearch.core.Annotations.PageSize;
 import com.expleague.sensearch.core.Lemmer;
 import com.expleague.sensearch.core.SearchPhaseFactory;
 import com.expleague.sensearch.core.SenSeArchImpl;
+import com.expleague.sensearch.core.Stemmer;
 import com.expleague.sensearch.donkey.IndexBuilder;
 import com.expleague.sensearch.donkey.crawler.Crawler;
 import com.expleague.sensearch.donkey.crawler.CrawlerXML;
@@ -48,7 +49,7 @@ public class AppModule extends AbstractModule {
     try {
       Config config = objectMapper.readValue(Paths.get("./config.json").toFile(), ConfigImpl.class);
       embeddingPath = config.getTemporaryIndex().resolve(PlainIndexBuilder.EMBEDDING_ROOT);
-      Lemmer lemmer = new Lemmer(config.getMyStem());
+      Lemmer lemmer = new Lemmer(new Stemmer());
 
       bind(Embedding.class).to(EmbeddingImpl.class);
       bind(Filter.class).to(FilterImpl.class);

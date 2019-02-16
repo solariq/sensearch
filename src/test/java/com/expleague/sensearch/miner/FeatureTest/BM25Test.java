@@ -22,14 +22,14 @@ public class BM25Test extends IndexBasedTestCase {
 
   private TextFeatureSet testBM25;
 
-  private static final String TITLE_1 = "Суффет"; //1
-  private static final String PAGE_1 = //37
+  private static final String TITLE_1 = "Суффет";
+  private static final String PAGE_1 =
       "Суффет — название двух главных должностных лиц (магистратов) в Тире, а также в северной Африке, на территории Карфагенской республики."
       + " Обычно они были верховными судьями. Во время военных действий часто — главнокомандующими."
       + " В древнем Израиле так называли военных предводителей и судей.";
 
-  private static final String TITLE_2 = "Правитель"; //1
-  private static final String PAGE_2 = //62
+  private static final String TITLE_2 = "Правитель";
+  private static final String PAGE_2 =
       "Прави́тель, Прави́тельница — глава государства, страны или иной обособленной территории.\n"
           + "\n"
           + "Слово «правитель» не имеет иноязычного происхождения, а потому является приемлемым для обозначения главы государства любого политического устройства, формы правления или культуры."
@@ -37,18 +37,25 @@ public class BM25Test extends IndexBasedTestCase {
           + " По этим же причинам понятие «правитель» является более точным и верным, нежели слово «царь», в обозначении титулов монархов древности."
           + " Правитель — лицо, которое правит государством, страной.";
 
+  private static final double averageTitleLen = (((int) index().parse(TITLE_1).count())
+      + ((int) index().parse(TITLE_2).count())) / 2.0;
+  private static final double averageContentLen = (((int) index().parse(PAGE_1).count())
+      + ((int) index().parse(PAGE_2).count())) / 2.0;
+  private static final double averageTotalLen = averageContentLen + averageTitleLen;
+  private static final int TMP_INDEX_SIZE = 2;
+
   private void init(String title, String page) {
     int titLen = (int) index().parse(title).count();
     int pagLen = (int) index().parse(page).count();
     int totLen = titLen + pagLen;
 
     testBM25.withStats(totLen,
-        (38 + 63) / 2.,
+        averageTotalLen,
         titLen,
-        1.,
+        averageTitleLen,
         pagLen,
-        (37 + 62) / 2.,
-        2);
+        averageContentLen,
+        TMP_INDEX_SIZE);
     index().parse(title).forEach(t -> {
       testBM25.withSegment(Segment.TITLE, t);
       testBM25.withTerm(t, 0);
@@ -66,10 +73,13 @@ public class BM25Test extends IndexBasedTestCase {
     QURLItem item = new QURLItem(new TestPage(), query);
     testBM25.accept(item);
     init(TITLE_1, PAGE_1);
+    int titLen = (int) index().parse(TITLE_1).count();
+    int pagLen = (int) index().parse(PAGE_1).count();
+    int totLen = titLen + pagLen;
 
     Vec resBM25 = testBM25.advance();
-    double scoreBM25 = Math.log(2.0 / query.terms().get(0).documentFreq()) * 2 / (2 + K * (1 - B + B * 38. / (38 + 63) * 2));
-    double scoreBM25L = Math.log(2.0 / query.terms().get(0).documentLemmaFreq()) * 2 / (2 + K * (1 - B + B * 38. / (38 + 63) * 2));
+    double scoreBM25 = Math.log((double) TMP_INDEX_SIZE / query.terms().get(0).documentFreq()) * 2 / (2 + K * (1 - B + B * totLen / averageTotalLen));
+    double scoreBM25L = Math.log((double) TMP_INDEX_SIZE / query.terms().get(0).documentLemmaFreq()) * 2 / (2 + K * (1 - B + B * totLen / averageTotalLen));
     System.err.println("Query: Суффет   Vec: " + resBM25);
     Assert.assertEquals(0, Double.compare(resBM25.get(0), scoreBM25));
     Assert.assertEquals(0, Double.compare(resBM25.get(1), scoreBM25L));
@@ -82,13 +92,15 @@ public class BM25Test extends IndexBasedTestCase {
 
     resBM25 = testBM25.advance();
     scoreBM25 = 0 + 0;
-    scoreBM25L = Math.log(2.0 / query.terms().get(0).documentLemmaFreq()) * 2 / (2 + K * (1 - B + B * 38. / (38 + 63) * 2))
-        + Math.log(2.0 / query.terms().get(1).documentLemmaFreq()) * 1 / (1 + K * (1 - B + B * 38. / (38 + 63) * 2));
-
-    System.err.println(query.terms().get(0).text() + " " + query.terms().get(0).documentLemmaFreq());
-    System.err.println(query.terms().get(1).text() + " " + query.terms().get(1).documentLemmaFreq());
+    scoreBM25L = Math.log((double) TMP_INDEX_SIZE / query.terms().get(0).documentLemmaFreq()) * 2 / (2 + K * (1 - B + B * totLen / averageTotalLen))
+        + Math.log((double) TMP_INDEX_SIZE / query.terms().get(1).documentLemmaFreq()) * 1 / (1 + K * (1 - B + B * totLen / averageTotalLen));
 
     System.err.println("Query: Военные предводители   Vec: " + resBM25);
+//    System.err.println(query.terms().get(0).lemma().documentLemmaFreq());
+//    System.err.println(query.terms().get(1).lemma().documentLemmaFreq());
+//    System.err.println();
+//    index().parse(PAGE_1).forEach(t -> System.err.println(t.lemma().text()));
+
     Assert.assertEquals(0, Double.compare(resBM25.get(0), scoreBM25));
     Assert.assertEquals(0, Double.compare(resBM25.get(1), scoreBM25L));
 
@@ -96,6 +108,23 @@ public class BM25Test extends IndexBasedTestCase {
 
   @Test
   public void testPage2() {
+    testBM25 = new BM25FeatureSet();
+    Query query = BaseQuery.create("Правитель", index());
+    QURLItem item = new QURLItem(new TestPage(), query);
+//    index().parse(PAGE_2).forEach(t -> System.err.println(t.lemma().text()));
+    testBM25.accept(item);
+    init(TITLE_2, PAGE_2);
+
+    int titLen = (int) index().parse(TITLE_2).count();
+    int pagLen = (int) index().parse(PAGE_2).count();
+    int totLen = titLen + pagLen;
+
+    Vec resBM25 = testBM25.advance();
+    double scoreBM25 = Math.log((double) TMP_INDEX_SIZE / query.terms().get(0).documentFreq()) * 4 / (4 + K * (1 - B + B * totLen / averageTotalLen));
+    double scoreBM25L = Math.log((double) TMP_INDEX_SIZE / query.terms().get(0).documentLemmaFreq()) * 4 / (4 + K * (1 - B + B * totLen / averageTotalLen));
+    System.err.println("Query: Правитель   Vec: " + resBM25);
+    Assert.assertEquals(0, Double.compare(resBM25.get(0), scoreBM25));
+    Assert.assertEquals(0, Double.compare(resBM25.get(1), scoreBM25L));
 
   }
 

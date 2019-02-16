@@ -37,9 +37,9 @@ public class EmbeddingBuilder implements AutoCloseable {
   private final TLongObjectMap<List<CharSequence>> wikiIdToLinkTexts = new TLongObjectHashMap<>();
 
   public EmbeddingBuilder(
-      DB vecDb,
-      Embedding<CharSeq> jmllEmbedding,
-      Tokenizer tokenizer) {
+          DB vecDb,
+          Embedding<CharSeq> jmllEmbedding,
+          Tokenizer tokenizer) {
     this.jmllEmbedding = jmllEmbedding;
     this.tokenizer = tokenizer;
     nnIdx = new QuantLSHCosIndexDB(new FastRandom(), QUANT_DIM, DEFAULT_VEC_SIZE, MIN_DIST, vecDb);
@@ -74,6 +74,7 @@ public class EmbeddingBuilder implements AutoCloseable {
   }
 
   public void addSection(CrawlerDocument.Section section) {
+
     Vec titleVec = toVector(section.title());
     if (titleVec != null) {
       nnIdx.append(curSecTitleId++, titleVec);
@@ -110,13 +111,13 @@ public class EmbeddingBuilder implements AutoCloseable {
 
   private Vec toVector(CharSequence text) {
     Vec[] vectors =
-        tokenizer
-            .parseTextToWords(text)
-            .map(word -> word.toString().toLowerCase())
-            .map(CharSeq::intern)
-            .map(jmllEmbedding)
-            .filter(Objects::nonNull)
-            .toArray(Vec[]::new);
+            tokenizer
+                    .parseTextToWords(text)
+                    .map(word -> word.toString().toLowerCase())
+                    .map(CharSeq::intern)
+                    .map(jmllEmbedding)
+                    .filter(Objects::nonNull)
+                    .toArray(Vec[]::new);
 
     if (vectors.length == 0) {
       return null;
