@@ -27,8 +27,7 @@ public class PlainIndexBuilderTest extends SensearchTestCase {
         new PlainIndexBuilder(
             new CrawlerXML(config),
             config,
-            new Lemmer(myStemForTest("PlainIndexBuilderTest", "completeBuildTest")),
-            new IdGenerator());
+            new Lemmer(myStemForTest("PlainIndexBuilderTest", "completeBuildTest")));
     indexBuilder.buildIndex();
   }
 }

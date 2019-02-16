@@ -66,7 +66,7 @@ public abstract class IndexBasedTestCase extends CrawlerBasedTestCase {
   private static void buildIndex() throws IOException {
     LOG.info("Rebuilding index...");
     MyStem myStem = myStemForTest("IndexBasedTestCase", "initIndex");
-    new PlainIndexBuilder(crawler(), indexConfig, new Lemmer(myStem), new IdGenerator())
+    new PlainIndexBuilder(crawler(), indexConfig, new Lemmer(myStem))
         .buildIndex();
   }
 
