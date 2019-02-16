@@ -17,6 +17,7 @@ import java.io.IOException;
 import java.util.Objects;
 
 import static com.expleague.sensearch.donkey.plain.PlainIndexBuilder.DEFAULT_VEC_SIZE;
+import static com.expleague.sensearch.donkey.utils.BrandNewIdGenerator.termIdGenerator;
 
 public class EmbeddingBuilder implements AutoCloseable {
   private static final int QUANT_DIM = 10;
@@ -24,18 +25,15 @@ public class EmbeddingBuilder implements AutoCloseable {
 
   private final Tokenizer tokenizer;
   private final Embedding<CharSeq> jmllEmbedding;
-  private final IdGenerator idGenerator;
   private final TLongSet termIdsInDb = new TLongHashSet();
   private QuantLSHCosIndexDB nnIdx;
 
   public EmbeddingBuilder(
       DB vecDb,
       Embedding<CharSeq> jmllEmbedding,
-      Tokenizer tokenizer,
-      IdGenerator idGenerator) {
+      Tokenizer tokenizer) {
     this.jmllEmbedding = jmllEmbedding;
     this.tokenizer = tokenizer;
-    this.idGenerator = idGenerator;
     nnIdx = new QuantLSHCosIndexDB(new FastRandom(), QUANT_DIM, DEFAULT_VEC_SIZE, MIN_DIST, vecDb);
   }
 
@@ -78,7 +76,7 @@ public class EmbeddingBuilder implements AutoCloseable {
 
   public void addText(String text) {
     tokenizer.toWords(text).map(word -> word.toString().toLowerCase()).forEach(word -> {
-      long id = idGenerator.termId(word);
+      long id = termIdGenerator(word).next();
       if (termIdsInDb.contains(id)) {
         return;
       }
