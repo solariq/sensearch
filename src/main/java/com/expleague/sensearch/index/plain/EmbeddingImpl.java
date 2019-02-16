@@ -38,7 +38,6 @@ import gnu.trove.set.hash.TLongHashSet;
 import org.iq80.leveldb.DB;
 import org.iq80.leveldb.DBIterator;
 
-//TODO: remove many vecs for 1 id
 public class EmbeddingImpl implements Embedding {
     private long[] allIds;
 
@@ -65,9 +64,9 @@ public class EmbeddingImpl implements Embedding {
 
     private double[] getDists(Vec mainVec, LongPredicate predicate, double queryNorm, TLongList orderList) {
         long[] ids = lshFlag ? lshNearest(mainVec) : allIds;
-        orderList.addAll(ids);
         return LongStream.of(ids)
                 .filter(predicate)
+                .peek(orderList::add)
                 .mapToDouble(id -> distance(mainVec, queryNorm, vec(id)))
                 .toArray();
     }
