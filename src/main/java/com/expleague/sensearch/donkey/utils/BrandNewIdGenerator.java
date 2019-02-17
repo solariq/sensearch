@@ -40,7 +40,7 @@ public class BrandNewIdGenerator {
       this.iteration = 0;
     }
 
-    // TODO: check if hash whithin bound
+    // TODO: check if hash within bound
     public long next() {
       return seed + increment * iteration++;
     }

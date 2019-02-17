@@ -282,6 +282,7 @@ public class PlainIndexBuilder implements IndexBuilder {
                             // We want root section id to be the same as page id
                             long sectionId = isFirstSection[0] ? pageId
                                 : pageIdGenerator(s.uri()).next(knownPageIds);
+                            knownPageIds.add(sectionId);
                             isFirstSection[0] = false;
 
                             plainPageBuilder.addSection(s, sectionId);
