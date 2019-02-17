@@ -1,5 +1,8 @@
 package com.expleague.sensearch.donkey.plain;
 
+import static com.expleague.sensearch.donkey.plain.PlainIndexBuilder.DEFAULT_VEC_SIZE;
+import static com.expleague.sensearch.donkey.utils.BrandNewIdGenerator.termIdGenerator;
+
 import com.expleague.commons.math.vectors.Vec;
 import com.expleague.commons.math.vectors.VecTools;
 import com.expleague.commons.math.vectors.impl.vectors.ArrayVec;
@@ -15,15 +18,11 @@ import gnu.trove.map.hash.TLongLongHashMap;
 import gnu.trove.map.hash.TLongObjectHashMap;
 import gnu.trove.set.TLongSet;
 import gnu.trove.set.hash.TLongHashSet;
-import org.iq80.leveldb.DB;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-
-import static com.expleague.sensearch.donkey.plain.PlainIndexBuilder.DEFAULT_VEC_SIZE;
-import static com.expleague.sensearch.donkey.utils.BrandNewIdGenerator.termIdGenerator;
+import org.iq80.leveldb.DB;
 
 public class EmbeddingBuilder implements AutoCloseable {
   private static final int QUANT_DIM = 10;
@@ -47,6 +46,7 @@ public class EmbeddingBuilder implements AutoCloseable {
 
   @Override
   public void close() throws IOException {
+
     long[] curLinkId = new long[1];
     wikiIdToLinkTexts.forEachEntry((wikiId, linkTexts) -> {
       if (wikiIdToIndexIdMap.containsKey(wikiId)) {
@@ -68,12 +68,12 @@ public class EmbeddingBuilder implements AutoCloseable {
   private long curSecTextId;
 
   public void startPage(long originalId, long pageId) {
-    curSecTitleId = IdUtils.toStartSecTitleId(pageId);
-    curSecTextId = IdUtils.toStartSecTextId(pageId);
     wikiIdToIndexIdMap.put(originalId, pageId);
   }
 
-  public void addSection(CrawlerDocument.Section section) {
+  public void addSection(CrawlerDocument.Section section, long sectionId) {
+    curSecTitleId = IdUtils.toStartSecTitleId(sectionId);
+    curSecTextId = IdUtils.toStartSecTextId(sectionId);
 
     Vec titleVec = toVector(section.title());
     if (titleVec != null) {

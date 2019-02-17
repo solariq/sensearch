@@ -1,5 +1,7 @@
 package com.expleague.sensearch.donkey.utils;
 
+import static com.expleague.sensearch.donkey.plain.IdUtils.BITS_FOR_FEATURES;
+
 import com.google.common.base.Charsets;
 import com.google.common.hash.HashFunction;
 import com.google.common.hash.Hashing;
@@ -18,7 +20,7 @@ public class BrandNewIdGenerator {
       hash = -hash;
     }
 
-    return new GenericIdGenerator(hash << 20, 1L << 20);
+    return new GenericIdGenerator(hash << BITS_FOR_FEATURES, 1L << BITS_FOR_FEATURES);
   }
 
   public static GenericIdGenerator termIdGenerator(CharSequence term) {

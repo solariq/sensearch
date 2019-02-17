@@ -4,8 +4,12 @@ import com.expleague.sensearch.donkey.crawler.document.CrawlerDocument.Link;
 import com.expleague.sensearch.donkey.crawler.document.CrawlerDocument.Section;
 import com.expleague.sensearch.donkey.crawler.document.WikiPage.WikiLink;
 import com.expleague.sensearch.donkey.crawler.document.WikiPage.WikiSection;
-
-import java.io.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.Serializable;
+import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URLEncoder;
 import java.nio.file.Files;
@@ -233,7 +237,7 @@ public class XMLParser {
     @XmlAttribute(name = "id")
     long id;
 
-    @XmlAttribute(name = "titles")
+    @XmlAttribute(name = "title")
     String title;
 
     @XmlAttribute(name = "categories")
@@ -248,7 +252,7 @@ public class XMLParser {
   @XmlRootElement(name = "section")
   private static class XmlSection {
 
-    @XmlAttribute(name = "titles")
+    @XmlAttribute(name = "title")
     String title;
 
     @SuppressWarnings("MismatchedQueryAndUpdateOfCollection")
@@ -287,7 +291,7 @@ public class XMLParser {
 
           xmlStreamWriter.writeStartElement(startElement);
           xmlStreamWriter.writeAttribute("id", Long.toString(page.id()));
-          xmlStreamWriter.writeAttribute("titles", page.titles());
+          xmlStreamWriter.writeAttribute("title", page.titles());
           xmlStreamWriter.writeAttribute("revision", page.revision);
           xmlStreamWriter.writeAttribute("type", page.type);
           xmlStreamWriter.writeAttribute("ns-id", page.nsId);

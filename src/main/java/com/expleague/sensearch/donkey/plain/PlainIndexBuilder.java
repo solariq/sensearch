@@ -1,5 +1,7 @@
 package com.expleague.sensearch.donkey.plain;
 
+import static com.expleague.sensearch.donkey.utils.BrandNewIdGenerator.pageIdGenerator;
+
 import com.expleague.commons.math.vectors.Vec;
 import com.expleague.commons.math.vectors.VecTools;
 import com.expleague.commons.seq.CharSeq;
@@ -39,8 +41,6 @@ import org.fusesource.leveldbjni.JniDBFactory;
 import org.iq80.leveldb.CompressionType;
 import org.iq80.leveldb.DB;
 import org.iq80.leveldb.Options;
-
-import static com.expleague.sensearch.donkey.utils.BrandNewIdGenerator.pageIdGenerator;
 
 public class PlainIndexBuilder implements IndexBuilder {
 
@@ -274,13 +274,19 @@ public class PlainIndexBuilder implements IndexBuilder {
                   indexMetaBuilder.startPage(pageId, doc.uri());
                   embeddingBuilder.startPage(doc.id(), pageId);
 
+                  boolean[] isFirstSection = {true};
                   doc.sections()
                       .forEachOrdered(
                           s -> {
-                            long sectionId = pageIdGenerator(s.uri()).next(knownPageIds);
+                            // TODO this is a dirty hack
+                            // We want root section id to be the same as page id
+                            long sectionId = isFirstSection[0] ? pageId
+                                : pageIdGenerator(s.uri()).next(knownPageIds);
+                            isFirstSection[0] = false;
+
                             plainPageBuilder.addSection(s, sectionId);
-                            indexMetaBuilder.addSection(s.uri(), pageIdGenerator(s.uri()).next(knownPageIds));
-                            embeddingBuilder.addSection(s);
+                            indexMetaBuilder.addSection(s.uri(), sectionId);
+                            embeddingBuilder.addSection(s, sectionId);
 
                             List<CharSequence> sectionTitles = s.titles();
                             String sectionTitle =
