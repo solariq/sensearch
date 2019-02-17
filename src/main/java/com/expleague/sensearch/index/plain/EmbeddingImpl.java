@@ -8,10 +8,12 @@ import com.expleague.sensearch.Config;
 import com.expleague.sensearch.core.Annotations.EmbeddingVecsDb;
 import com.expleague.sensearch.donkey.plain.PlainIndexBuilder;
 import com.expleague.sensearch.index.Embedding;
+import com.google.common.primitives.Longs;
 import com.google.inject.Inject;
 import gnu.trove.list.TLongList;
 import gnu.trove.list.array.TLongArrayList;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -24,12 +26,11 @@ import gnu.trove.set.TLongSet;
 import gnu.trove.set.hash.TLongHashSet;
 
 import org.iq80.leveldb.DB;
+import org.iq80.leveldb.DBIterator;
 
 public class EmbeddingImpl implements Embedding {
-    private long[] allIds;
-
+    public long[] allIds;
     private boolean lshFlag;
-
     private QuantLSHCosIndexDB nnIdx;
 
     @Inject
@@ -38,6 +39,20 @@ public class EmbeddingImpl implements Embedding {
             @EmbeddingVecsDb DB vecDb) {
         lshFlag = config.getLshNearestFlag();
         nnIdx = QuantLSHCosIndexDB.load(vecDb);
+
+        TLongList idList = new TLongArrayList();
+        try (DBIterator iterator = vecDb.iterator();) {
+            for(iterator.seekToFirst(); iterator.hasNext(); iterator.next()) {
+                byte[] key = iterator.peekNext().getKey();
+                long id = Longs.fromByteArray(key);
+                if (id < Long.MAX_VALUE - 3) {
+                    idList.add(id);
+                }
+            }
+        } catch (IOException e){
+            throw new RuntimeException(e);
+        }
+        allIds = idList.toArray();
     }
 
     @Override
@@ -45,8 +60,8 @@ public class EmbeddingImpl implements Embedding {
         return nnIdx.get(id);
     }
 
-    private long[] lshNearest(Vec mainVec) {
-        return nnIdx.nearest(mainVec).mapToLong(NearestNeighbourIndex.Entry::id).toArray();
+    private long[] lshNearest(Vec qVec) {
+        return nnIdx.nearest(qVec).mapToLong(NearestNeighbourIndex.Entry::id).toArray();
     }
 
     private double[] getDists(Vec qVec, LongPredicate predicate, double qNorm, TLongList idList) {
