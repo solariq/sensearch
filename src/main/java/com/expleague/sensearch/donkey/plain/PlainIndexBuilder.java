@@ -280,8 +280,10 @@ public class PlainIndexBuilder implements IndexBuilder {
                           s -> {
                             // TODO this is a dirty hack
                             // We want root section id to be the same as page id
-                            long sectionId = isFirstSection[0] ? pageId
-                                : pageIdGenerator(s.uri()).next(knownPageIds);
+                            long sectionId =
+                                isFirstSection[0]
+                                    ? pageId
+                                    : pageIdGenerator(s.uri()).next(knownPageIds);
                             knownPageIds.add(sectionId);
                             isFirstSection[0] = false;
 
@@ -299,9 +301,24 @@ public class PlainIndexBuilder implements IndexBuilder {
                                 .map(CharSeqTools::toLowerCase)
                                 .forEach(
                                     word -> {
-                                      TermBuilder.ParsedTerm termLemmaId = termBuilder.addTerm(word);
+                                      if (word.equals("правитель")) {
+                                        System.out.println("");
+                                      }
+                                      if (word.equals("правител")) {
+                                        System.out.println("");
+                                      }
+                                      TermBuilder.ParsedTerm termLemmaId =
+                                          termBuilder.addTerm(word);
+                                      if (termLemmaId.id == 4108811293488751052L) {
+                                        System.out.println("");
+                                      }
                                       indexMetaBuilder.acceptTermId(termLemmaId.id);
-                                      statisticsBuilder.enrich(termLemmaId.id, termLemmaId.lemmaId);
+
+                                      long lemmaId =
+                                          termLemmaId.lemmaId == -1
+                                              ? termLemmaId.id
+                                              : termLemmaId.lemmaId;
+                                      statisticsBuilder.enrich(termLemmaId.id, lemmaId);
                                     });
                           });
 
