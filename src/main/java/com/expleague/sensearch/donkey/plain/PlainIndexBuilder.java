@@ -6,7 +6,8 @@ import com.expleague.commons.seq.CharSeq;
 import com.expleague.commons.seq.CharSeqTools;
 import com.expleague.ml.embedding.Embedding;
 import com.expleague.ml.embedding.impl.EmbeddingImpl;
-import com.expleague.sensearch.Config;
+import com.expleague.sensearch.core.Annotations.EmbeddingVectorsPath;
+import com.expleague.sensearch.core.Annotations.IndexRoot;
 import com.expleague.sensearch.core.Lemmer;
 import com.expleague.sensearch.core.Tokenizer;
 import com.expleague.sensearch.core.impl.TokenizerImpl;
@@ -97,15 +98,23 @@ public class PlainIndexBuilder implements IndexBuilder {
 
   private static final Logger LOG = Logger.getLogger(PlainIndexBuilder.class);
   private final Crawler crawler;
-  private final Config config;
   private final Lemmer lemmer;
   private final Tokenizer tokenizer = new TokenizerImpl();
   private final IdGenerator idGenerator;
+  private final Path indexRoot;
+  private final Path embeddingVectorsPath;
 
   @Inject
-  public PlainIndexBuilder(Crawler crawler, Config config, Lemmer lemmer, IdGenerator idGenerator) {
+  public PlainIndexBuilder(
+      Crawler crawler,
+      @IndexRoot Path indexRoot,
+      @EmbeddingVectorsPath Path embeddingVectorsPath,
+      Lemmer lemmer,
+      IdGenerator idGenerator) {
     this.crawler = crawler;
-    this.config = config;
+    this.indexRoot = indexRoot;
+    this.embeddingVectorsPath = embeddingVectorsPath;
+
     this.lemmer = lemmer;
     this.idGenerator = idGenerator;
   }
@@ -185,22 +194,21 @@ public class PlainIndexBuilder implements IndexBuilder {
   }
 
   @Override
-  public void buildIndex() throws IOException {
-    final Path indexRoot = config.getTemporaryIndex();
+  public void buildIndexAndEmbedding() throws IOException {
     LOG.info("Building JMLL embedding...");
     EmbeddingImpl<CharSeq> jmllEmbedding;
     jmllEmbedding =
         (EmbeddingImpl<CharSeq>)
             new JmllEmbeddingBuilder(DEFAULT_VEC_SIZE, indexRoot.resolve(TEMP_EMBEDDING_ROOT))
                 .build(crawler.makeStream());
-    jmllEmbedding.write(new FileWriter(config.getEmbeddingVectors()));
+    jmllEmbedding.write(new FileWriter(embeddingVectorsPath.toFile()));
     buildIndex(jmllEmbedding);
   }
 
   // TODO: Make it more readable, add possibility of incomplete rebuilding
   @Override
-  public void buildIndex(Path embeddingPath) throws IOException {
-    buildIndex(EmbeddingImpl.read(new FileReader(embeddingPath.toFile()), CharSeq.class));
+  public void buildIndex() throws IOException {
+    buildIndex(EmbeddingImpl.read(new FileReader(embeddingVectorsPath.toFile()), CharSeq.class));
   }
 
   private void buildIndex(Embedding<CharSeq> jmllEmbedding) throws IOException {
@@ -211,7 +219,6 @@ public class PlainIndexBuilder implements IndexBuilder {
 
   private void buildIndexInternal(Embedding<CharSeq> jmllEmbedding) throws IOException {
     LOG.info("Creating database files...");
-    final Path indexRoot = config.getTemporaryIndex();
     Files.createDirectories(indexRoot.resolve(PAGE_ROOT));
     Files.createDirectories(indexRoot.resolve(TERM_STATISTICS_ROOT));
     Files.createDirectories(indexRoot.resolve(EMBEDDING_ROOT));
@@ -267,7 +274,8 @@ public class PlainIndexBuilder implements IndexBuilder {
             .makeStream()
             .forEach(
                 doc -> {
-                  long rootPageId = plainPageBuilder.startPage(doc.id(), doc.categories(), doc.uri());
+                  long rootPageId =
+                      plainPageBuilder.startPage(doc.id(), doc.categories(), doc.uri());
                   statisticsBuilder.startPage();
                   indexMetaBuilder.startPage(rootPageId, doc.uri());
                   embeddingBuilder.startPage(rootPageId);
@@ -288,7 +296,8 @@ public class PlainIndexBuilder implements IndexBuilder {
                                 .map(CharSeqTools::toLowerCase)
                                 .forEach(
                                     word -> {
-                                      TermBuilder.ParsedTerm termLemmaId = termBuilder.addTerm(word);
+                                      TermBuilder.ParsedTerm termLemmaId =
+                                          termBuilder.addTerm(word);
                                       indexMetaBuilder.acceptTermId(termLemmaId.id);
                                       statisticsBuilder.enrich(termLemmaId.id, termLemmaId.lemmaId);
                                     });

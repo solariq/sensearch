@@ -4,8 +4,8 @@ import com.expleague.commons.math.vectors.Vec;
 import com.expleague.commons.math.vectors.VecTools;
 import com.expleague.commons.math.vectors.impl.nn.NearestNeighbourIndex;
 import com.expleague.commons.util.ArrayTools;
-import com.expleague.sensearch.Config;
 import com.expleague.sensearch.core.Annotations.EmbeddingVecsDb;
+import com.expleague.sensearch.core.Annotations.UseLshFlag;
 import com.expleague.sensearch.donkey.plain.ByteTools;
 import com.expleague.sensearch.donkey.plain.PlainIndexBuilder;
 import com.expleague.sensearch.index.Embedding;
@@ -20,8 +20,9 @@ import java.util.function.LongPredicate;
 import java.util.stream.LongStream;
 import org.iq80.leveldb.DB;
 
-//TODO: remove many vecs for 1 id
+// TODO: remove many vecs for 1 id
 public class EmbeddingImpl implements Embedding {
+
     private long[] allIds;
 
     private DB vecDB;
@@ -30,10 +31,8 @@ public class EmbeddingImpl implements Embedding {
     private QuantLSHCosIndexDB nnIdx;
 
     @Inject
-    public EmbeddingImpl(
-            Config config,
-            @EmbeddingVecsDb DB vecDb) {
-        lshFlag = config.getLshNearestFlag();
+    public EmbeddingImpl(@UseLshFlag boolean useLshFlag, @EmbeddingVecsDb DB vecDb) {
+        lshFlag = useLshFlag;
         this.vecDB = vecDb;
         nnIdx = QuantLSHCosIndexDB.load(vecDb);
     }
@@ -62,22 +61,22 @@ public class EmbeddingImpl implements Embedding {
     }
 
     private double[] getDists(
-            Vec mainVec, LongPredicate predicate, double queryNorm, TLongList orderList) {
+        Vec mainVec, LongPredicate predicate, double queryNorm, TLongList orderList) {
         long[] ids = lshFlag ? lshNearest(mainVec) : allIds;
         return LongStream.of(ids)
-                .filter(predicate)
-                .mapToObj(
-                        id -> {
-                            List<Vec> vecs = allVecs(id);
-                            for (int i = 0; i < vecs.size(); i++) {
-                                orderList.add(id);
-                            }
+            .filter(predicate)
+            .mapToObj(
+                id -> {
+                    List<Vec> vecs = allVecs(id);
+                    for (int i = 0; i < vecs.size(); i++) {
+                        orderList.add(id);
+                    }
 
-                            return vecs;
-                        })
-                .flatMap(List::stream)
-                .mapToDouble(v -> distance(mainVec, queryNorm, v))
-                .toArray();
+                    return vecs;
+                })
+            .flatMap(List::stream)
+            .mapToDouble(v -> distance(mainVec, queryNorm, v))
+            .toArray();
     }
 
     @Override
@@ -128,8 +127,8 @@ public class EmbeddingImpl implements Embedding {
     private double distance(Vec mainVec, double queryNorm, Vec v) {
         double norm = VecTools.norm(v);
         return norm == 0
-                ? Double.POSITIVE_INFINITY
-                : (1 - VecTools.multiply(mainVec, v) / norm / queryNorm) / 2;
+            ? Double.POSITIVE_INFINITY
+            : (1 - VecTools.multiply(mainVec, v) / norm / queryNorm) / 2;
     }
 
     @Override

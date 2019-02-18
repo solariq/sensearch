@@ -1,10 +1,13 @@
 package com.expleague.sensearch.web.suggest.hh_phrases;
 
 import com.expleague.sensearch.AppModule;
+import com.expleague.sensearch.Config;
+import com.expleague.sensearch.ConfigImpl;
 import com.expleague.sensearch.Page;
 import com.expleague.sensearch.Page.SegmentType;
 import com.expleague.sensearch.core.Term;
 import com.expleague.sensearch.index.Index;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import java.io.IOException;
@@ -154,7 +157,9 @@ public class HHPhrases {
 		logProperties.load(Files.newInputStream(Paths.get("log4j.properties")));
 		PropertyConfigurator.configure(logProperties);
 
-		Injector injector = Guice.createInjector(new AppModule());
+		Config config =
+				new ObjectMapper().readValue(Paths.get("./config.json").toFile(), ConfigImpl.class);
+		Injector injector = Guice.createInjector(new AppModule(config));
 		index = injector.getInstance(Index.class);
 	}
 

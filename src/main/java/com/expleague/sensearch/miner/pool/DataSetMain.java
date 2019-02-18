@@ -6,6 +6,8 @@ import com.expleague.ml.data.tools.Pool;
 import com.expleague.ml.meta.DataSetMeta;
 import com.expleague.ml.meta.impl.JsonDataSetMeta;
 import com.expleague.sensearch.AppModule;
+import com.expleague.sensearch.Config;
+import com.expleague.sensearch.ConfigImpl;
 import com.expleague.sensearch.Page;
 import com.expleague.sensearch.Page.SegmentType;
 import com.expleague.sensearch.SenSeArch.ResultItem;
@@ -33,7 +35,9 @@ public class DataSetMain {
   public static void main(String[] args) {
 
     try (BufferedReader reader = Files.newBufferedReader(Paths.get("./wordstat/queries.txt"))) {
-      Injector injector = Guice.createInjector(new AppModule());
+      Config config =
+          new ObjectMapper().readValue(Paths.get("./config.json").toFile(), ConfigImpl.class);
+      Injector injector = Guice.createInjector(new AppModule(config));
       Index index = injector.getInstance(Index.class);
       FastRandom rand = new FastRandom();
       DataSetMeta meta = new JsonDataSetMeta(

@@ -46,7 +46,28 @@ public class Annotations {
   @Retention(RetentionPolicy.RUNTIME)
   @Target({ElementType.FIELD, ElementType.PARAMETER})
   @BindingAnnotation
-  public @interface EmbeddingPath {
+  public @interface EmbeddingVectorsPath {
+
+  }
+
+  @Retention(RetentionPolicy.RUNTIME)
+  @Target({ElementType.FIELD, ElementType.PARAMETER})
+  @BindingAnnotation
+  public @interface DataZipPath {
+
+  }
+
+  @Retention(RetentionPolicy.RUNTIME)
+  @Target({ElementType.FIELD, ElementType.PARAMETER})
+  @BindingAnnotation
+  public @interface IndexRoot {
+
+  }
+
+  @Retention(RetentionPolicy.RUNTIME)
+  @Target({ElementType.FIELD, ElementType.PARAMETER})
+  @BindingAnnotation
+  public @interface UseLshFlag {
 
   }
 }

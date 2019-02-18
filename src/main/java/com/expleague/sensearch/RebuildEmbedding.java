@@ -1,7 +1,6 @@
 package com.expleague.sensearch;
 
 import static com.expleague.sensearch.donkey.plain.PlainIndexBuilder.EMBEDDING_ROOT;
-//import static com.expleague.sensearch.donkey.plain.PlainIndexBuilder.LSH_ROOT;
 import static com.expleague.sensearch.donkey.plain.PlainIndexBuilder.VECS_ROOT;
 
 import com.expleague.commons.seq.CharSeq;
@@ -13,6 +12,7 @@ import com.expleague.sensearch.donkey.plain.EmbeddingBuilder;
 import com.expleague.sensearch.donkey.plain.IdGenerator;
 import com.expleague.sensearch.index.Index;
 import com.expleague.sensearch.index.IndexedPage;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import java.io.File;
@@ -27,6 +27,8 @@ import org.apache.log4j.PropertyConfigurator;
 import org.fusesource.leveldbjni.JniDBFactory;
 import org.iq80.leveldb.Options;
 
+// import static com.expleague.sensearch.donkey.plain.PlainIndexBuilder.LSH_ROOT;
+
 public class RebuildEmbedding {
 
   public static void main(String[] args) throws IOException {
@@ -34,22 +36,22 @@ public class RebuildEmbedding {
     logProperties.load(Files.newInputStream(Paths.get("log4j.properties")));
     PropertyConfigurator.configure(logProperties);
 
-    Injector injector = Guice.createInjector(new AppModule());
-    Config config = injector.getInstance(Config.class);
+    Config config =
+        new ObjectMapper().readValue(Paths.get("./config.json").toFile(), ConfigImpl.class);
+    Injector injector = Guice.createInjector(new AppModule(config));
     Index index = injector.getInstance(Index.class);
 
     Embedding<CharSeq> jmllEmbedding =
-        EmbeddingImpl.read(
-            new FileReader(Paths.get(config.getEmbeddingVectors()).toFile()), CharSeq.class);
+        EmbeddingImpl.read(new FileReader(config.getEmbeddingVectors().toFile()), CharSeq.class);
 
-    final Path indexRoot = config.getTemporaryIndex();
+    final Path indexRoot = config.getIndexRoot();
 
     if (!Files.exists(indexRoot.resolve(EMBEDDING_ROOT + "_tmp"))) {
       Files.createDirectory(indexRoot.resolve(EMBEDDING_ROOT + "_tmp"));
     }
 
     File vecTmpDir = indexRoot.resolve(EMBEDDING_ROOT + "_tmp").resolve(VECS_ROOT).toFile();
-    //File lshTmpDir = indexRoot.resolve(EMBEDDING_ROOT + "_tmp").resolve(LSH_ROOT).toFile();
+    // File lshTmpDir = indexRoot.resolve(EMBEDDING_ROOT + "_tmp").resolve(LSH_ROOT).toFile();
 
     try (final EmbeddingBuilder embeddingBuilder =
         new EmbeddingBuilder(

@@ -63,7 +63,7 @@ public class ConfigImpl implements Config {
   }
 
   @Override
-  public Path getTemporaryIndex() {
+  public Path getIndexRoot() {
     return Paths.get(".").resolve(temporaryIndex);
   }
 
@@ -99,8 +99,8 @@ public class ConfigImpl implements Config {
   }
 
   @Override
-  public String getEmbeddingVectors() {
-    return embeddingVectors;
+  public Path getEmbeddingVectors() {
+    return Paths.get(embeddingVectors);
   }
 
   private void setEmbeddingVectors(String embeddingVectors) {

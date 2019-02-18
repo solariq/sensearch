@@ -27,7 +27,9 @@ public class CrawlWordstatData {
     logProperties.load(Files.newInputStream(Paths.get("log4j.properties")));
     PropertyConfigurator.configure(logProperties);
 
-    Injector injector = Guice.createInjector(new AppModule());
+    Config config =
+        new ObjectMapper().readValue(Paths.get("./config.json").toFile(), ConfigImpl.class);
+    Injector injector = Guice.createInjector(new AppModule(config));
 
     RequestCrawler crawler = injector.getInstance(RequestCrawler.class);
     ObjectMapper mapper = new ObjectMapper();

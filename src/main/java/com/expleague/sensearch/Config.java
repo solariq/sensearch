@@ -4,7 +4,7 @@ import java.nio.file.Path;
 
 public interface Config {
 
-  Path getTemporaryIndex();
+  Path getIndexRoot();
 
   String getWebRoot();
 
@@ -12,7 +12,7 @@ public interface Config {
 
   Path getPathToZIP();
 
-  String getEmbeddingVectors();
+  Path getEmbeddingVectors();
 
   Path getPathToMetrics();
 

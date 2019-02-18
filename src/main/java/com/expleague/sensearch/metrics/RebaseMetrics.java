@@ -2,6 +2,7 @@ package com.expleague.sensearch.metrics;
 
 import com.expleague.sensearch.AppModule;
 import com.expleague.sensearch.Config;
+import com.expleague.sensearch.ConfigImpl;
 import com.expleague.sensearch.SenSeArch;
 import com.expleague.sensearch.SenSeArch.ResultPage;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -22,8 +23,9 @@ public class RebaseMetrics {
     logProperties.load(Files.newInputStream(Paths.get("log4j.properties")));
     PropertyConfigurator.configure(logProperties);
 
-    Injector injector = Guice.createInjector(new AppModule());
-    Config config = injector.getInstance(Config.class);
+    Config config =
+        new ObjectMapper().readValue(Paths.get("./config.json").toFile(), ConfigImpl.class);
+    Injector injector = Guice.createInjector(new AppModule(config));
     SenSeArch searcher = injector.getInstance(SenSeArch.class);
 
     FileUtils.deleteDirectory(Paths.get("./resources/Metrics").toFile());

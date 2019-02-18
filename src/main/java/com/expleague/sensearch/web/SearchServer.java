@@ -2,8 +2,10 @@ package com.expleague.sensearch.web;
 
 import com.expleague.sensearch.AppModule;
 import com.expleague.sensearch.Config;
+import com.expleague.sensearch.ConfigImpl;
 import com.expleague.sensearch.donkey.IndexBuilder;
 import com.expleague.sensearch.index.Index;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import java.nio.file.Files;
@@ -34,15 +36,16 @@ public class SearchServer {
     logProperties.load(Files.newInputStream(Paths.get("log4j.properties")));
     PropertyConfigurator.configure(logProperties);
 
-    Injector injector = Guice.createInjector(new AppModule());
-    Config config = injector.getInstance(Config.class);
+    Config config =
+        new ObjectMapper().readValue(Paths.get("./config.json").toFile(), ConfigImpl.class);
+    Injector injector = Guice.createInjector(new AppModule(config));
 
     if (config.getBuildIndexFlag()) {
       IndexBuilder indexBuilder = injector.getInstance(IndexBuilder.class);
       if (config.getTrainEmbeddingFlag()) {
-        indexBuilder.buildIndex();
+        indexBuilder.buildIndexAndEmbedding();
       } else {
-        indexBuilder.buildIndex(Paths.get(config.getEmbeddingVectors()));
+        indexBuilder.buildIndex();
       }
     }
 
