@@ -104,7 +104,6 @@ public class PlainIndexBuilder implements IndexBuilder {
   private final Crawler crawler;
   private final Lemmer lemmer;
   private final Tokenizer tokenizer = new TokenizerImpl();
-  private final IdGenerator idGenerator;
   private final Path indexRoot;
   private final Path embeddingVectorsPath;
 
@@ -113,15 +112,12 @@ public class PlainIndexBuilder implements IndexBuilder {
       Crawler crawler,
       @IndexRoot Path indexRoot,
       @EmbeddingVectorsPath Path embeddingVectorsPath,
-      Lemmer lemmer,
-      IdGenerator idGenerator) {
-  public PlainIndexBuilder(Crawler crawler, Config config, Lemmer lemmer) {
+      Lemmer lemmer) {
     this.crawler = crawler;
     this.indexRoot = indexRoot;
     this.embeddingVectorsPath = embeddingVectorsPath;
 
     this.lemmer = lemmer;
-    this.idGenerator = idGenerator;
   }
 
   /**

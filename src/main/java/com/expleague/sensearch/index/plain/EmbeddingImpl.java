@@ -6,30 +6,24 @@ import com.expleague.commons.math.vectors.impl.nn.NearestNeighbourIndex;
 import com.expleague.commons.util.ArrayTools;
 import com.expleague.sensearch.core.Annotations.EmbeddingVecsDb;
 import com.expleague.sensearch.core.Annotations.UseLshFlag;
-import com.expleague.sensearch.donkey.plain.ByteTools;
 import com.expleague.sensearch.donkey.plain.PlainIndexBuilder;
 import com.expleague.sensearch.index.Embedding;
 import com.google.common.primitives.Longs;
 import com.google.inject.Inject;
 import gnu.trove.list.TLongList;
 import gnu.trove.list.array.TLongArrayList;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.function.LongPredicate;
 import java.util.stream.LongStream;
-
 import java.util.stream.Stream;
-
-import gnu.trove.set.TLongSet;
-import gnu.trove.set.hash.TLongHashSet;
-
 import org.iq80.leveldb.DB;
 import org.iq80.leveldb.DBIterator;
 
 public class EmbeddingImpl implements Embedding {
+
     public long[] allIds;
     private boolean lshFlag;
     private QuantLSHCosIndexDB nnIdx;
@@ -37,7 +31,6 @@ public class EmbeddingImpl implements Embedding {
     @Inject
     public EmbeddingImpl(@UseLshFlag boolean useLshFlag, @EmbeddingVecsDb DB vecDb) {
         lshFlag = useLshFlag;
-        this.vecDB = vecDb;
         nnIdx = QuantLSHCosIndexDB.load(vecDb);
 
         TLongList idList = new TLongArrayList();
