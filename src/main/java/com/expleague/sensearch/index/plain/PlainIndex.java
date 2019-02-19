@@ -8,6 +8,7 @@ import com.expleague.commons.seq.CharSeqTools;
 import com.expleague.commons.util.Pair;
 import com.expleague.sensearch.Config;
 import com.expleague.sensearch.Page;
+import com.expleague.sensearch.core.Annotations.IndexRoot;
 import com.expleague.sensearch.core.PartOfSpeech;
 import com.expleague.sensearch.core.Term;
 import com.expleague.sensearch.core.Tokenizer;
@@ -124,7 +125,8 @@ public class PlainIndex implements Index {
   }
 
   @Inject
-  public PlainIndex(Config config, Embedding embedding, Filter filter) throws IOException {
+  public PlainIndex(@IndexRoot Path indexRoot, Embedding embedding, Filter filter)
+      throws IOException {
 
     this.embedding = embedding;
     this.filter = filter;
@@ -132,7 +134,6 @@ public class PlainIndex implements Index {
     LOG.info("Loading PlainIndex...");
     long startTime = System.nanoTime();
 
-    Path indexRoot = config.getTemporaryIndex();
     Path embeddingPath = indexRoot.resolve(PlainIndexBuilder.EMBEDDING_ROOT);
     lshSynonymsMetric =
         new LSHSynonymsMetric(embeddingPath.resolve(PlainIndexBuilder.LSH_METRIC_ROOT));

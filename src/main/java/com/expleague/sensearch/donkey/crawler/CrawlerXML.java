@@ -1,6 +1,6 @@
 package com.expleague.sensearch.donkey.crawler;
 
-import com.expleague.sensearch.Config;
+import com.expleague.sensearch.core.Annotations.DataZipPath;
 import com.expleague.sensearch.donkey.crawler.document.CrawlerDocument;
 import com.expleague.sensearch.donkey.crawler.document.WikiPage;
 import com.expleague.sensearch.donkey.crawler.document.XMLParser;
@@ -29,8 +29,8 @@ public class CrawlerXML implements Crawler {
   private final Path path;
 
   @Inject
-  public CrawlerXML(Config config) {
-    this.path = config.getPathToZIP();
+  public CrawlerXML(@DataZipPath Path zipPath) {
+    this.path = zipPath;
   }
 
   @Override

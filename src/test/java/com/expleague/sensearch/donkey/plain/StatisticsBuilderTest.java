@@ -31,6 +31,8 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+
+// TODO: add test where lemmaId is not present in termIds
 public class StatisticsBuilderTest extends SensearchTestCase {
 
   private static final Path STATS_DB_PATH = Paths.get("testStatsDbPath");

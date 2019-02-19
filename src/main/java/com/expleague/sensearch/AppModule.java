@@ -1,11 +1,18 @@
 package com.expleague.sensearch;
 
+import com.expleague.commons.util.Pair;
+import com.expleague.ml.data.tools.DataTools;
+import com.expleague.ml.meta.FeatureMeta;
+import com.expleague.sensearch.core.Annotations.DataZipPath;
 import com.expleague.sensearch.core.Annotations.EmbeddingLshTablesDb;
-import com.expleague.sensearch.core.Annotations.EmbeddingPath;
 import com.expleague.sensearch.core.Annotations.EmbeddingVecsDb;
+import com.expleague.sensearch.core.Annotations.EmbeddingVectorsPath;
 import com.expleague.sensearch.core.Annotations.FilterMaxItems;
+import com.expleague.sensearch.core.Annotations.IndexRoot;
 import com.expleague.sensearch.core.Annotations.MetricPath;
 import com.expleague.sensearch.core.Annotations.PageSize;
+import com.expleague.sensearch.core.Annotations.RankModel;
+import com.expleague.sensearch.core.Annotations.UseLshFlag;
 import com.expleague.sensearch.core.Lemmer;
 import com.expleague.sensearch.core.SearchPhaseFactory;
 import com.expleague.sensearch.core.SenSeArchImpl;
@@ -30,8 +37,12 @@ import com.google.inject.Provides;
 import com.google.inject.Singleton;
 import com.google.inject.assistedinject.FactoryModuleBuilder;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.function.Function;
 import org.fusesource.leveldbjni.JniDBFactory;
 import org.iq80.leveldb.DB;
 import org.iq80.leveldb.Options;
@@ -41,43 +52,49 @@ public class AppModule extends AbstractModule {
   private static final long CACHE_SIZE = 16 * (1 << 20);
   private static final Options DB_OPTIONS = new Options().cacheSize(CACHE_SIZE);
 
-  private final ObjectMapper objectMapper = new ObjectMapper();
-  private Path embeddingPath;
+  private final Config config;
+
+  public AppModule() throws IOException {
+    this.config =
+        new ObjectMapper().readValue(Paths.get("./config.json").toFile(), ConfigImpl.class);
+  }
+
+  public AppModule(Config config) {
+    this.config = config;
+  }
 
   @Override
   protected void configure() {
-    try {
-      Config config = objectMapper.readValue(Paths.get("./config.json").toFile(), ConfigImpl.class);
-      embeddingPath = config.getTemporaryIndex().resolve(PlainIndexBuilder.EMBEDDING_ROOT);
-      Lemmer lemmer = new Lemmer(new Stemmer());
+    Lemmer lemmer = new Lemmer(new Stemmer());
 
-      bind(Embedding.class).to(EmbeddingImpl.class);
-      bind(Filter.class).to(FilterImpl.class);
+    bind(Embedding.class).to(EmbeddingImpl.class);
+    bind(Filter.class).to(FilterImpl.class);
 
-      bindConstant().annotatedWith(FilterMaxItems.class).to(config.maxFilterItems());
-      bindConstant().annotatedWith(PageSize.class).to(config.getPageSize());
-      bind(Path.class).annotatedWith(MetricPath.class).toInstance(config.getPathToMetrics());
+    bindConstant().annotatedWith(FilterMaxItems.class).to(config.maxFilterItems());
+    bindConstant().annotatedWith(PageSize.class).to(config.getPageSize());
+    bind(Path.class).annotatedWith(MetricPath.class).toInstance(config.getPathToMetrics());
 
-      bind(Path.class).annotatedWith(EmbeddingPath.class).toInstance(embeddingPath);
+    bind(Path.class)
+        .annotatedWith(EmbeddingVectorsPath.class)
+        .toInstance(config.getEmbeddingVectors());
+    bind(Path.class).annotatedWith(DataZipPath.class).toInstance(config.getPathToZIP());
+    bind(Path.class).annotatedWith(IndexRoot.class).toInstance(config.getIndexRoot());
+    bindConstant().annotatedWith(UseLshFlag.class).to(config.getLshNearestFlag());
 
-      bind(Config.class).toInstance(config);
-      bind(Lemmer.class).toInstance(lemmer);
+    bind(Lemmer.class).toInstance(lemmer);
 
-      bind(Index.class).to(PlainIndex.class);
-      // bind(Suggestor.class).to(BigramsBasedSuggestor.class);
-      bind(Suggestor.class).to(ProbabilisticSuggestor.class);
-      bind(SenSeArch.class).to(SenSeArchImpl.class);
-      bind(IndexBuilder.class).to(PlainIndexBuilder.class);
-      bind(Crawler.class).to(CrawlerXML.class);
-      bind(WebCrawler.class).to(RequestCrawler.class);
+    bind(Index.class).to(PlainIndex.class);
+    // bind(Suggestor.class).to(BigramsBasedSuggestor.class);
+    bind(Suggestor.class).to(ProbabilisticSuggestor.class);
+    bind(SenSeArch.class).to(SenSeArchImpl.class);
+    bind(IndexBuilder.class).to(PlainIndexBuilder.class);
+    bind(Crawler.class).to(CrawlerXML.class);
+    bind(WebCrawler.class).to(RequestCrawler.class);
 
-      install(new FactoryModuleBuilder().build(SearchPhaseFactory.class));
-      //      bind(SearchPhaseFactory.class)
-      //          .toProvider(FactoryProvider.newFactory(SearchPhaseFactory.class,
-      // QueryPhase.class));
-    } catch (IOException e) {
-      e.printStackTrace();
-    }
+    install(new FactoryModuleBuilder().build(SearchPhaseFactory.class));
+    //      bind(SearchPhaseFactory.class)
+    //          .toProvider(FactoryProvider.newFactory(SearchPhaseFactory.class,
+    // QueryPhase.class));
   }
 
   @Provides
@@ -85,7 +102,12 @@ public class AppModule extends AbstractModule {
   @EmbeddingVecsDb
   DB getEmbeddingDb() throws IOException {
     return JniDBFactory.factory.open(
-        embeddingPath.resolve(PlainIndexBuilder.VECS_ROOT).toFile(), DB_OPTIONS);
+        config
+            .getIndexRoot()
+            .resolve(PlainIndexBuilder.EMBEDDING_ROOT)
+            .resolve(PlainIndexBuilder.VECS_ROOT)
+            .toFile(),
+        DB_OPTIONS);
   }
 
   @Provides
@@ -93,7 +115,19 @@ public class AppModule extends AbstractModule {
   @EmbeddingLshTablesDb
   DB getLshDb() throws IOException {
     return JniDBFactory.factory.open(
-        embeddingPath.resolve(PlainIndexBuilder.LSH_ROOT).toFile(), DB_OPTIONS);
+        config
+            .getIndexRoot()
+            .resolve(PlainIndexBuilder.EMBEDDING_ROOT)
+            .resolve(PlainIndexBuilder.LSH_ROOT)
+            .toFile(),
+        DB_OPTIONS);
   }
 
+  @Provides
+  @Singleton
+  @RankModel
+  Pair<Function, FeatureMeta[]> getRankModel() throws IOException {
+    return DataTools.readModel(
+        new InputStreamReader(Files.newInputStream(config.getModelPath()), StandardCharsets.UTF_8));
+  }
 }

@@ -25,9 +25,10 @@ public class PlainIndexBuilderTest extends SensearchTestCase {
   public void completeBuildTest() throws Exception {
     IndexBuilder indexBuilder =
         new PlainIndexBuilder(
-            new CrawlerXML(config),
-            config,
+            new CrawlerXML(config.getPathToZIP()),
+            config.getIndexRoot(),
+            config.getEmbeddingVectors(),
             new Lemmer(myStemForTest("PlainIndexBuilderTest", "completeBuildTest")));
-    indexBuilder.buildIndex();
+    indexBuilder.buildIndexAndEmbedding();
   }
 }

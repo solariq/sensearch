@@ -4,8 +4,9 @@ import com.expleague.commons.math.vectors.Vec;
 import com.expleague.commons.math.vectors.VecTools;
 import com.expleague.commons.math.vectors.impl.nn.NearestNeighbourIndex;
 import com.expleague.commons.util.ArrayTools;
-import com.expleague.sensearch.Config;
 import com.expleague.sensearch.core.Annotations.EmbeddingVecsDb;
+import com.expleague.sensearch.core.Annotations.UseLshFlag;
+import com.expleague.sensearch.donkey.plain.ByteTools;
 import com.expleague.sensearch.donkey.plain.PlainIndexBuilder;
 import com.expleague.sensearch.index.Embedding;
 import com.google.common.primitives.Longs;
@@ -34,10 +35,9 @@ public class EmbeddingImpl implements Embedding {
     private QuantLSHCosIndexDB nnIdx;
 
     @Inject
-    public EmbeddingImpl(
-            Config config,
-            @EmbeddingVecsDb DB vecDb) {
-        lshFlag = config.getLshNearestFlag();
+    public EmbeddingImpl(@UseLshFlag boolean useLshFlag, @EmbeddingVecsDb DB vecDb) {
+        lshFlag = useLshFlag;
+        this.vecDB = vecDb;
         nnIdx = QuantLSHCosIndexDB.load(vecDb);
 
         TLongList idList = new TLongArrayList();

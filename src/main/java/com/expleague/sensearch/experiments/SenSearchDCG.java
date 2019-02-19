@@ -8,6 +8,7 @@ import com.expleague.ml.data.tools.DataTools;
 import com.expleague.ml.meta.FeatureMeta;
 import com.expleague.sensearch.AppModule;
 import com.expleague.sensearch.Config;
+import com.expleague.sensearch.ConfigImpl;
 import com.expleague.sensearch.Page;
 import com.expleague.sensearch.index.Index;
 import com.expleague.sensearch.metrics.Metric;
@@ -17,6 +18,7 @@ import com.expleague.sensearch.miner.impl.QURLItem;
 import com.expleague.sensearch.query.BaseQuery;
 import com.expleague.sensearch.query.Query;
 import com.expleague.sensearch.ranking.RankingPhase;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import java.io.BufferedReader;
@@ -40,22 +42,30 @@ public class SenSearchDCG {
   private static final FeatureMeta[] featuresInModel;
 
   static {
-    Pair<Function, FeatureMeta[]> pair = DataTools.readModel(
-        new InputStreamReader(Objects.requireNonNull(
-            RankingPhase.class.getClassLoader().getResourceAsStream("models/ranking.model")
-        ), StandardCharsets.UTF_8)
-    );
+    Pair<Function, FeatureMeta[]> pair =
+        DataTools.readModel(
+            new InputStreamReader(
+                Objects.requireNonNull(
+                    RankingPhase.class
+                        .getClassLoader()
+                        .getResourceAsStream("models/ranking.model")),
+                StandardCharsets.UTF_8));
     model = (Trans) pair.getFirst();
     featuresInModel = pair.getSecond();
   }
 
   public static void main(String[] args) throws IOException {
-    try (BufferedReader reader = Files.newBufferedReader(Paths.get(
-        "./src/main/java/com/expleague/sensearch/experiments/queries_for_lucene_experiment"))) {
-      Injector injector = Guice.createInjector(new AppModule());
+    try (BufferedReader reader =
+        Files.newBufferedReader(
+            Paths.get(
+                "./src/main/java/com/expleague/sensearch/experiments/queries_for_lucene_experiment"))) {
+      Config config =
+          new ObjectMapper().readValue(Paths.get("./config.json").toFile(), ConfigImpl.class);
+      Injector injector = Guice.createInjector(new AppModule(config));
       Index index = injector.getInstance(Index.class);
-      Metric metric = new Metric(new LocalRequestCrawler(),
-          injector.getInstance(Config.class).getPathToMetrics());
+      Metric metric =
+          new Metric(
+              new LocalRequestCrawler(), injector.getInstance(Config.class).getPathToMetrics());
       final AccumulatorFeatureSet features = new AccumulatorFeatureSet(index);
 
       String line;
@@ -98,20 +108,22 @@ public class SenSearchDCG {
                       });
                 });
 
+        Map<Page, Double> mp =
+            documentsFeatures
+                .entrySet()
+                .stream()
+                .collect(
+                    Collectors.toMap(
+                        Entry::getKey, p -> rank(p.getValue().features(featuresInModel))));
 
-        Map<Page, Double> mp = documentsFeatures
-            .entrySet()
-            .stream()
-            .collect(Collectors.toMap(Entry::getKey, p -> rank(p.getValue().features(featuresInModel))));
-
-        Page[] pages = mp
-            .entrySet()
-            .stream()
-            .map(p -> Pair.create(p.getKey(), p.getValue()))
-            .sorted(Comparator.<Pair<Page, Double>>comparingDouble(Pair::getSecond).reversed())
-            .map(Pair::getFirst)
-            .limit(10)
-            .toArray(Page[]::new);
+        Page[] pages =
+            mp.entrySet()
+                .stream()
+                .map(p -> Pair.create(p.getKey(), p.getValue()))
+                .sorted(Comparator.<Pair<Page, Double>>comparingDouble(Pair::getSecond).reversed())
+                .map(Pair::getFirst)
+                .limit(10)
+                .toArray(Page[]::new);
         metric.calculate(line, pages);
       }
     }

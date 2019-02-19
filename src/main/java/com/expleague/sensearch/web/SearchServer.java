@@ -2,9 +2,12 @@ package com.expleague.sensearch.web;
 
 import com.expleague.sensearch.AppModule;
 import com.expleague.sensearch.Config;
+import com.expleague.sensearch.ConfigImpl;
 import com.expleague.sensearch.donkey.IndexBuilder;
 import com.expleague.sensearch.index.Index;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Guice;
+import com.google.inject.Inject;
 import com.google.inject.Injector;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -21,31 +24,43 @@ import org.eclipse.jetty.servlet.FilterHolder;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.eclipse.jetty.servlets.CrossOriginFilter;
-import org.eclipse.jetty.util.resource.Resource;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.servlet.ServletContainer;
 
 public class SearchServer {
 
   private static final Logger LOG = Logger.getLogger(SearchServer.class.getName());
+  private final Index index;
+
+  @Inject
+  // Index is marked as a dependency so it will be loaded before server starts
+  public SearchServer(Index index) {
+    this.index = index;
+  }
 
   public static void main(String[] args) throws Exception {
     Properties logProperties = new Properties();
     logProperties.load(Files.newInputStream(Paths.get("log4j.properties")));
     PropertyConfigurator.configure(logProperties);
 
-    Injector injector = Guice.createInjector(new AppModule());
-    Config config = injector.getInstance(Config.class);
+    Config config =
+        new ObjectMapper().readValue(Paths.get("./config.json").toFile(), ConfigImpl.class);
+    Injector injector = Guice.createInjector(new AppModule(config));
 
     if (config.getBuildIndexFlag()) {
       IndexBuilder indexBuilder = injector.getInstance(IndexBuilder.class);
       if (config.getTrainEmbeddingFlag()) {
-        indexBuilder.buildIndex();
+        indexBuilder.buildIndexAndEmbedding();
       } else {
-        indexBuilder.buildIndex(Paths.get(config.getEmbeddingVectors()));
+        indexBuilder.buildIndex();
       }
     }
 
+    injector.getInstance(SearchServer.class).start(injector);
+  }
+
+  // TODO: strange method signature, should move this injector logic out of it
+  public void start(Injector injector) throws Exception {
     ServletContextHandler context = new ServletContextHandler(ServletContextHandler.SESSIONS);
     context.setContextPath("/api");
 
@@ -66,7 +81,7 @@ public class SearchServer {
     Server server = new Server(8081);
 
     ResourceHandler resHandler = new ResourceHandler();
-    resHandler.setBaseResource(Resource.newResource(Paths.get(config.getWebRoot()).toFile()));
+//    resHandler.setBaseResource(Resource.newResource(Paths.get(config.getWebRoot()).toFile()));
 
     HandlerCollection handlerCollection = new HandlerCollection();
     handlerCollection.setHandlers(new Handler[]{context, resHandler});
@@ -79,8 +94,6 @@ public class SearchServer {
     context.addServlet(jerseyServlet, "/*");
 
     server.start();
-
-    injector.getInstance(Index.class);
 
     LOG.info("Server started!");
 

@@ -22,7 +22,7 @@ public class TestConfigImpl extends ConfigImpl {
 
 
   @Override
-  public Path getTemporaryIndex() {
+  public Path getIndexRoot() {
     if (indexRoot == null) {
       throw new UnsupportedOperationException("Path to index root is not set!");
     }
@@ -46,8 +46,8 @@ public class TestConfigImpl extends ConfigImpl {
   }
 
   @Override
-  public String getEmbeddingVectors() {
-    return gloveVectorsPath.toString();
+  public Path getEmbeddingVectors() {
+    return gloveVectorsPath;
   }
 
   @Override

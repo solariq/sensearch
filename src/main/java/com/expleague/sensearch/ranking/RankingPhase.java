@@ -3,16 +3,14 @@ package com.expleague.sensearch.ranking;
 import com.expleague.commons.math.Trans;
 import com.expleague.commons.math.vectors.Vec;
 import com.expleague.commons.util.Pair;
-import com.expleague.ml.data.tools.DataTools;
 import com.expleague.ml.meta.FeatureMeta;
 import com.expleague.sensearch.Page;
 import com.expleague.sensearch.core.Annotations.PageSize;
+import com.expleague.sensearch.core.Annotations.RankModel;
 import com.expleague.sensearch.core.SearchPhase;
 import com.expleague.sensearch.core.Whiteboard;
 import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
-import java.io.InputStreamReader;
-import java.nio.charset.StandardCharsets;
 import java.util.Comparator;
 import java.util.Map.Entry;
 import java.util.Objects;
@@ -30,23 +28,16 @@ public class RankingPhase implements SearchPhase {
   private final int pageSize;
   private final int phaseId;
 
-  private static final Trans model;
-  private static final FeatureMeta[] featuresInModel;
-
-  static {
-    Pair<Function, FeatureMeta[]> pair = DataTools.readModel(
-        new InputStreamReader(Objects.requireNonNull(
-            RankingPhase.class.getClassLoader().getResourceAsStream("models/ranking.model")
-        ), StandardCharsets.UTF_8)
-    );
-    model = (Trans)pair.getFirst();
-    featuresInModel = pair.getSecond();
-  }
+  private final Trans model;
+  private final FeatureMeta[] featuresInModel;
 
   @Inject
-  public RankingPhase(@PageSize int pageSize, @Assisted int phaseId) {
+  public RankingPhase(@PageSize int pageSize, @Assisted int phaseId,
+      @RankModel Pair<Function, FeatureMeta[]> rankModel) {
     this.pageSize = pageSize;
     this.phaseId = phaseId;
+    this.model = (Trans) rankModel.getFirst();
+    this.featuresInModel = rankModel.getSecond();
   }
 
   @Override

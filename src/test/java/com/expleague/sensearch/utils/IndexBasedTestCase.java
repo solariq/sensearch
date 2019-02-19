@@ -50,10 +50,10 @@ public abstract class IndexBasedTestCase extends CrawlerBasedTestCase {
       buildIndex();
     }
 
-    Path embeddingPath = indexConfig.getTemporaryIndex().resolve(PlainIndexBuilder.EMBEDDING_ROOT);
+    Path embeddingPath = indexConfig.getIndexRoot().resolve(PlainIndexBuilder.EMBEDDING_ROOT);
     embedding =
         new EmbeddingImpl(
-                indexConfig,
+            indexConfig.getLshNearestFlag(),
             JniDBFactory.factory.open(
                 embeddingPath.resolve(PlainIndexBuilder.VECS_ROOT).toFile(), DB_OPTIONS)//,
             /*JniDBFactory.factory.open(
@@ -61,7 +61,8 @@ public abstract class IndexBasedTestCase extends CrawlerBasedTestCase {
             /*embeddingPath*/);
     miniIndex =
         new PlainIndex(
-            indexConfig, embedding, new FilterImpl(embedding, indexConfig().maxFilterItems()));
+            indexConfig.getIndexRoot(), embedding,
+            new FilterImpl(embedding, indexConfig().maxFilterItems()));
   }
 
   @AfterClass
@@ -73,8 +74,9 @@ public abstract class IndexBasedTestCase extends CrawlerBasedTestCase {
   private static void buildIndex() throws IOException {
     LOG.info("Rebuilding index...");
     MyStem myStem = myStemForTest("IndexBasedTestCase", "initIndex");
-    new PlainIndexBuilder(crawler(), indexConfig, new Lemmer(myStem))
-        .buildIndex();
+    new PlainIndexBuilder(crawler(), indexConfig.getIndexRoot(), indexConfig.getEmbeddingVectors(),
+        new Lemmer(myStem))
+        .buildIndexAndEmbedding();
   }
 
   protected static TestConfigImpl indexConfig() {
