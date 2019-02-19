@@ -1,7 +1,10 @@
 package com.expleague.sensearch.metricTest;
 
 import com.expleague.sensearch.AppModule;
+import com.expleague.sensearch.Config;
+import com.expleague.sensearch.ConfigImpl;
 import com.expleague.sensearch.SenSeArch;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import java.io.BufferedReader;
@@ -20,8 +23,10 @@ public class MetricTest {
   private final LocalRequestCrawler webCrawler = new LocalRequestCrawler();
 
   @Before
-  public void initSearch() {
-    Injector injector = Guice.createInjector(new AppModule());
+  public void initSearch() throws IOException {
+    Config config =
+        new ObjectMapper().readValue(Paths.get("./config.json").toFile(), ConfigImpl.class);
+    Injector injector = Guice.createInjector(new AppModule(config));
     searcher = injector.getInstance(SenSeArch.class);
   }
 

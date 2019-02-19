@@ -23,7 +23,7 @@ public class UnitCrawlerTest extends SensearchTestCase {
   public void goodZIPTest() throws IOException, XMLStreamException {
     TestConfigImpl config = sensearchConfig()
         .setPathToZIP(RESOURCES_ROOT.resolve("Mini_Wiki.zip"));
-    crawler = new CrawlerXML(config);
+    crawler = new CrawlerXML(config.getPathToZIP());
 
     Assert.assertEquals(crawler.makeStream().count(), 10);
 
@@ -54,7 +54,7 @@ public class UnitCrawlerTest extends SensearchTestCase {
   public void badZIPTest() throws IOException, XMLStreamException {
     TestConfigImpl config = sensearchConfig()
         .setPathToZIP(RESOURCES_ROOT.resolve("Mini_Wiki_broken.zip"));
-    crawler = new CrawlerXML(config);
+    crawler = new CrawlerXML(config.getPathToZIP());
 
     Assert.assertEquals(crawler.makeStream().count(), 10);
 

@@ -5,17 +5,18 @@ import java.nio.file.Paths;
 
 public class ConfigImpl implements Config {
 
-  private String temporaryIndex;
+  private String temporaryIndex = "Index";
   private String webRoot;
-  private String embeddingVectors;
-  private String myStem;
-  private String pathToZIP;
-  private String pathToMetrics;
+  private String embeddingVectors = "vectors.decomp";
+  private String myStem = "mystem";
+  private String pathToZIP = "data.gzip";
+  private String pathToMetrics = "Metrics";
+  private String modelPath = "model";
   private int pageSize = 10;
   private int maxFilterItems;
-  private boolean buildIndexFlag;
-  private boolean trainEmbeddingFlag;
-  private boolean lshNearestFlag;
+  private boolean buildIndexFlag = false;
+  private boolean trainEmbeddingFlag = false;
+  private boolean lshNearestFlag = true;
 
   @Override
   public int getPageSize() {
@@ -44,7 +45,7 @@ public class ConfigImpl implements Config {
     return trainEmbeddingFlag;
   }
 
-  private void setLshNearestFlag(boolean lshNearestFlag) {
+  public void setLshNearestFlag(boolean lshNearestFlag) {
     this.lshNearestFlag = lshNearestFlag;
   }
 
@@ -58,7 +59,16 @@ public class ConfigImpl implements Config {
     return maxFilterItems;
   }
 
-  private void setMaxFilterItems(int maxFilterItems) {
+  @Override
+  public Path getModelPath() {
+    return Paths.get(modelPath);
+  }
+
+  public void setModelPath(String path) {
+    this.modelPath = path;
+  }
+
+  public void setMaxFilterItems(int maxFilterItems) {
     this.maxFilterItems = maxFilterItems;
   }
 
@@ -67,7 +77,7 @@ public class ConfigImpl implements Config {
     return Paths.get(".").resolve(temporaryIndex);
   }
 
-  private void setTemporaryIndex(String temporaryIndex) {
+  public void setTemporaryIndex(String temporaryIndex) {
     this.temporaryIndex = temporaryIndex;
   }
 
@@ -94,7 +104,7 @@ public class ConfigImpl implements Config {
     return Paths.get(pathToZIP);
   }
 
-  private void setPathToZIP(String pathToZIP) {
+  public void setPathToZIP(String pathToZIP) {
     this.pathToZIP = pathToZIP;
   }
 
@@ -103,7 +113,7 @@ public class ConfigImpl implements Config {
     return Paths.get(embeddingVectors);
   }
 
-  private void setEmbeddingVectors(String embeddingVectors) {
+  public void setEmbeddingVectors(String embeddingVectors) {
     this.embeddingVectors = embeddingVectors;
   }
 

@@ -70,4 +70,11 @@ public class Annotations {
   public @interface UseLshFlag {
 
   }
+
+  @Retention(RetentionPolicy.RUNTIME)
+  @Target({ElementType.FIELD, ElementType.PARAMETER, ElementType.METHOD})
+  @BindingAnnotation
+  public @interface RankModel {
+
+  }
 }

@@ -6,8 +6,6 @@ import com.expleague.ml.data.tools.Pool;
 import com.expleague.ml.meta.DataSetMeta;
 import com.expleague.ml.meta.impl.JsonDataSetMeta;
 import com.expleague.sensearch.AppModule;
-import com.expleague.sensearch.Config;
-import com.expleague.sensearch.ConfigImpl;
 import com.expleague.sensearch.Page;
 import com.expleague.sensearch.Page.SegmentType;
 import com.expleague.sensearch.SenSeArch.ResultItem;
@@ -20,33 +18,38 @@ import com.expleague.sensearch.query.BaseQuery;
 import com.expleague.sensearch.query.Query;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Guice;
+import com.google.inject.Inject;
 import com.google.inject.Injector;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Stream;
 
-public class DataSetMain {
+public class RankingPoolBuilder {
 
-  public static void main(String[] args) {
+  private final Index index;
 
+  @Inject
+  public RankingPoolBuilder(Index index) {
+    this.index = index;
+  }
+
+  public static void main(String[] args) throws IOException {
+    Injector injector = Guice.createInjector(new AppModule());
+    injector.getInstance(RankingPoolBuilder.class).build(Paths.get("test.pool"));
+  }
+
+  public void build(Path poolPath) {
     try (BufferedReader reader = Files.newBufferedReader(Paths.get("./wordstat/queries.txt"))) {
-      Config config =
-          new ObjectMapper().readValue(Paths.get("./config.json").toFile(), ConfigImpl.class);
-      Injector injector = Guice.createInjector(new AppModule(config));
-      Index index = injector.getInstance(Index.class);
       FastRandom rand = new FastRandom();
-      DataSetMeta meta = new JsonDataSetMeta(
-          "Google",
-          "sensearch",
-          new Date(),
-          QURLItem.class,
-          rand.nextBase64String(32)
-      );
+      DataSetMeta meta =
+          new JsonDataSetMeta(
+              "Google", "sensearch", new Date(), QURLItem.class, rand.nextBase64String(32));
       AccumulatorFeatureSet features = new AccumulatorFeatureSet(index);
       TargetFeatureSet googleTarget = new TargetFeatureSet();
 
@@ -58,8 +61,8 @@ public class DataSetMain {
           Query query = BaseQuery.create(line, index);
           Set<String> uniqQURL = new HashSet<>();
 
-          try (BufferedReader queryReader = Files
-              .newBufferedReader(Paths.get("./wordstat").resolve("query_" + query.text()))) {
+          try (BufferedReader queryReader =
+              Files.newBufferedReader(Paths.get("./wordstat").resolve("query_" + query.text()))) {
             ObjectMapper objectMapper = new ObjectMapper();
             ResultItem[] res = objectMapper.readValue(queryReader, ResultItemImpl[].class);
             for (ResultItem page : res) {
@@ -70,24 +73,27 @@ public class DataSetMain {
           } catch (IOException ignored) {
           }
 
-          Stream<Page> sensearchResult = index.fetchDocuments(query)
-              .filter(
-                  page -> !uniqQURL.contains(page.content(SegmentType.SECTION_TITLE).toString()))
-              .limit(100);
-          sensearchResult.forEach(page -> {
-            if (!uniqQURL.contains(page.content(SegmentType.SECTION_TITLE).toString())) {
-              uniqQURL.add(page.content(SegmentType.SECTION_TITLE).toString());
-              poolBuilder.accept(new QURLItem(page, query));
-              poolBuilder.advance();
-            }
-          });
+          Stream<Page> sensearchResult =
+              index
+                  .fetchDocuments(query)
+                  .filter(
+                      page ->
+                          !uniqQURL.contains(page.content(SegmentType.SECTION_TITLE).toString()))
+                  .limit(100);
+          sensearchResult.forEach(
+              page -> {
+                if (!uniqQURL.contains(page.content(SegmentType.SECTION_TITLE).toString())) {
+                  uniqQURL.add(page.content(SegmentType.SECTION_TITLE).toString());
+                  poolBuilder.accept(new QURLItem(page, query));
+                  poolBuilder.advance();
+                }
+              });
         }
       }
       Pool<QURLItem> pool = poolBuilder.create();
-      DataTools.writePoolTo(pool, Files.newBufferedWriter(Paths.get("test.pool")));
+      DataTools.writePoolTo(pool, Files.newBufferedWriter(poolPath));
     } catch (IOException e) {
       e.printStackTrace();
     }
   }
-
 }
