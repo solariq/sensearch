@@ -19,14 +19,15 @@ public class PassageBasedFeatureSet extends FeatureSet.Stub<QPASItem> {
 
   @Override
   public void accept(QPASItem item) {
+    super.accept(item);
     passage = item.passageCache();
   }
 
   @Override
   public Vec advance() {
     set(WORDS_COUNT, passage.words().count());
-    set(AFFIRMATIVE, isInterrogative(passage.getSentence()) ? 0 : 1);
-    set(POSITION, passage.getId());
+    set(AFFIRMATIVE, isInterrogative(passage.sentence()) ? 0 : 1);
+    set(POSITION, passage.id());
     return super.advance();
   }
 

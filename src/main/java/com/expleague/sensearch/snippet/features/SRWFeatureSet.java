@@ -7,6 +7,7 @@ import com.expleague.ml.meta.FeatureMeta.ValueType;
 import com.expleague.sensearch.core.Term;
 import com.expleague.sensearch.snippet.docbased_snippet.KeyWord;
 import com.expleague.sensearch.snippet.passage.Passage;
+import java.util.ArrayList;
 import java.util.List;
 
 public class SRWFeatureSet extends FeatureSet.Stub<QPASItem> {
@@ -15,16 +16,16 @@ public class SRWFeatureSet extends FeatureSet.Stub<QPASItem> {
       .create("sr-weight", "Statistical Relevance Weight", ValueType.VEC);
 
   private Passage passage;
-  private List<KeyWord> keywords;
+  private final List<KeyWord> keywords = new ArrayList<>();
 
   @Override
   public void accept(QPASItem item) {
-    this.passage = item.passageCache();
     super.accept(item);
+    this.passage = item.passageCache();
   }
 
-  public void withKeyWords(List<KeyWord> keyWords) {
-    this.keywords = keyWords;
+  public void withKeyWords(KeyWord keyWord) {
+    this.keywords.add(keyWord);
   }
 
   private static boolean containsWithLemma(Passage passage, Term term) {
