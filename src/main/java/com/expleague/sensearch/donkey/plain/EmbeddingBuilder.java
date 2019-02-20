@@ -64,25 +64,25 @@ public class EmbeddingBuilder implements AutoCloseable {
     nnIdx.save();
   }
 
-  private long curSecTitleId;
-  private long curSecTextId;
+  private long curPageTitleId;
+  private long curPageTextId;
 
   public void startPage(long originalId, long pageId) {
     wikiIdToIndexIdMap.put(originalId, pageId);
+    curPageTitleId = IdUtils.toStartSecTitleId(pageId);
+    curPageTextId = IdUtils.toStartSecTextId(pageId);
   }
 
   public void addSection(CrawlerDocument.Section section, long sectionId) {
-    curSecTitleId = IdUtils.toStartSecTitleId(sectionId);
-    curSecTextId = IdUtils.toStartSecTextId(sectionId);
 
     Vec titleVec = toVector(section.title());
     if (titleVec != null) {
-      nnIdx.append(curSecTitleId++, titleVec);
+      nnIdx.append(curPageTitleId++, titleVec);
     }
 
     Vec textVec = toVector(section.text());
     if (textVec != null) {
-      nnIdx.append(curSecTextId++, textVec);
+      nnIdx.append(curPageTextId++, textVec);
     }
 
     section.links().forEach(link -> {

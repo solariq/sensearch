@@ -274,24 +274,19 @@ public class PlainIndexBuilder implements IndexBuilder {
             .forEach(
                 doc -> {
                   long pageId = pageIdGenerator(doc.uri()).next(knownPageIds);
-                  knownPageIds.add(pageId);
+                  // We don't add pageId to the knownPageIds as we need first section to have the
+                  // same Id
+                  // knownPageIds.add(pageId);
                   plainPageBuilder.startPage(doc.id(), pageId, doc.categories(), doc.uri());
                   statisticsBuilder.startPage();
                   indexMetaBuilder.startPage(pageId, doc.uri());
                   embeddingBuilder.startPage(doc.id(), pageId);
 
-                  boolean[] isFirstSection = {true};
                   doc.sections()
                       .forEachOrdered(
                           s -> {
-                            // TODO this is a dirty hack
-                            // We want root section id to be the same as page id
-                            long sectionId =
-                                isFirstSection[0]
-                                    ? pageId
-                                    : pageIdGenerator(s.uri()).next(knownPageIds);
+                            long sectionId = pageIdGenerator(s.uri()).next(knownPageIds);
                             knownPageIds.add(sectionId);
-                            isFirstSection[0] = false;
 
                             plainPageBuilder.addSection(s, sectionId);
                             indexMetaBuilder.addSection(s.uri(), sectionId);

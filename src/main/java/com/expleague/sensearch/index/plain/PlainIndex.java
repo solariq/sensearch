@@ -265,7 +265,7 @@ public class PlainIndex implements Index {
         String.format("PlainIndex loaded in %.3f seconds", (System.nanoTime() - startTime) / 1e9));
   }
 
-  static boolean isPageId(long id) {
+  static boolean isSectionId(long id) {
     return id <= 0;
   }
 
@@ -328,7 +328,7 @@ public class PlainIndex implements Index {
     final Vec qVec = vecByTerms(query.terms());
     TLongObjectMap<List<Candidate>> pageIdToCandidatesMap = new TLongObjectHashMap<>();
     filter
-      .filtrate(qVec, PlainIndex::isPageId, 0.5)
+        .filtrate(qVec, PlainIndex::isSectionId, 0.5)
       .limit(FILTERED_DOC_NUMBER)
       .forEach(candidate -> {
         long pageId = candidate.getPageId();
