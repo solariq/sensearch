@@ -6,7 +6,6 @@ import com.expleague.commons.math.vectors.impl.vectors.ArrayVec;
 import com.expleague.commons.seq.CharSeq;
 import com.expleague.commons.seq.CharSeqTools;
 import com.expleague.commons.util.Pair;
-import com.expleague.sensearch.Config;
 import com.expleague.sensearch.Page;
 import com.expleague.sensearch.core.Annotations.IndexRoot;
 import com.expleague.sensearch.core.PartOfSpeech;
