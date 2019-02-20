@@ -54,6 +54,7 @@ public class SenSearchDCG {
     featuresInModel = pair.getSecond();
   }
 
+  // TODO: this is a copypaste from RankingPhase
   public static void main(String[] args) throws IOException {
     try (BufferedReader reader =
         Files.newBufferedReader(
@@ -65,7 +66,7 @@ public class SenSearchDCG {
       Index index = injector.getInstance(Index.class);
       Metric metric =
           new Metric(
-              new LocalRequestCrawler(), injector.getInstance(Config.class).getPathToMetrics());
+              new LocalRequestCrawler(), config.getPathToMetrics());
       final AccumulatorFeatureSet features = new AccumulatorFeatureSet(index);
 
       String line;
