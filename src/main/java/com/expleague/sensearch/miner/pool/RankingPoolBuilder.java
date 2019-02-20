@@ -41,7 +41,7 @@ public class RankingPoolBuilder {
 
   public static void main(String[] args) throws IOException {
     Injector injector = Guice.createInjector(new AppModule());
-    injector.getInstance(RankingPoolBuilder.class).build(Paths.get("test.pool"));
+    injector.getInstance(RankingPoolBuilder.class).build(Paths.get("ranking.pool"));
   }
 
   public void build(Path poolPath) {

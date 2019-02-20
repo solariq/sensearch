@@ -5,9 +5,11 @@ import com.expleague.commons.math.vectors.impl.vectors.ArrayVec;
 import com.expleague.ml.data.tools.FeatureSet;
 import com.expleague.ml.meta.FeatureMeta;
 import java.util.stream.Stream;
+import org.apache.log4j.Logger;
 
 public class FeaturesImpl implements Features {
 
+  private static final Logger LOG = Logger.getLogger(Features.class.getName());
   private Vec all;
   private FeatureSet features;
 
@@ -25,9 +27,16 @@ public class FeaturesImpl implements Features {
   public Vec features(FeatureMeta... metas) {
     return new ArrayVec(
         Stream.of(metas)
-          .mapToInt(features::index)
-          .mapToDouble(all::get)
-          .toArray());
+            .map(meta -> {
+              int res = features.index(meta);
+              if (res == -1) {
+                LOG.info(meta.description() + " not found!!!");
+              }
+              return res;
+            })
+            .filter(i -> i != -1)
+            .mapToDouble(all::get)
+            .toArray());
   }
 
   @Override
