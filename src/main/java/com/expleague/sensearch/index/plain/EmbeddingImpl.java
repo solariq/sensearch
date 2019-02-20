@@ -10,22 +10,20 @@ import com.expleague.sensearch.donkey.plain.PlainIndexBuilder;
 import com.expleague.sensearch.index.Embedding;
 import com.google.common.primitives.Longs;
 import com.google.inject.Inject;
-import gnu.trove.list.TDoubleList;
 import gnu.trove.list.TLongList;
-import gnu.trove.list.array.TDoubleArrayList;
 import gnu.trove.list.array.TLongArrayList;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.function.LongPredicate;
-import java.util.stream.LongStream;
-import java.util.stream.Stream;
 import org.iq80.leveldb.DB;
 import org.iq80.leveldb.DBIterator;
 
-public class EmbeddingImpl implements Embedding {
+import java.io.IOException;
+import java.util.*;
+import java.util.function.Consumer;
+import java.util.function.LongPredicate;
+import java.util.stream.LongStream;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
+public class EmbeddingImpl implements Embedding {
     public long[] allIds;
     private boolean lshFlag;
     private QuantLSHCosIndexDB nnIdx;
@@ -55,10 +53,6 @@ public class EmbeddingImpl implements Embedding {
         return nnIdx.get(id);
     }
 
-    private long[] lshNearest(Vec qVec) {
-        return nnIdx.nearest(qVec).mapToLong(NearestNeighbourIndex.Entry::id).toArray();
-    }
-
     @Override
     public void setLSHFlag(boolean value) {
         lshFlag = value;
@@ -85,31 +79,46 @@ public class EmbeddingImpl implements Embedding {
         if (qNorm == 0) {
             return Stream.empty();
         }
+        final int num = either instanceof Integer ? (int)either : Integer.MAX_VALUE;
+        final double distance = either instanceof Double ? (double)either : Double.POSITIVE_INFINITY;
 
-        final long[] ids = LongStream.of(lshFlag ? lshNearest(qVec) : allIds)
+        if (!lshFlag) {
+            final long[] ids = LongStream.of(allIds)
                 .filter(predicate)
                 .distinct()
                 .toArray();
-        final double[] dists = LongStream.of(ids)
+            final double[] dists = LongStream.of(ids)
                 .mapToDouble(id -> distance(qVec, qNorm, vec(id)))
                 .toArray();
-        ArrayTools.parallelSort(dists, ids);
+            ArrayTools.parallelSort(dists, ids);
+            int count = Math.min(ids.length, num < ids.length ? num : Arrays.binarySearch(dists, distance));
 
-        int num;
-        if (either instanceof Double) {
-            num = Arrays.binarySearch(dists, (double) either);
-            if (num < 0) {
-                num = -num - 1;
+            List<Candidate> candidates = new ArrayList<>();
+            for (int i = 0; i < count; i++) {
+                candidates.add(new Candidate(ids[i], dists[i]));
             }
-        } else {
-            num = (int) either;
+            return candidates.stream();
         }
+        final Spliterator<NearestNeighbourIndex.Entry> spliterator = nnIdx.nearest(qVec).spliterator();
+        return StreamSupport.stream(new Spliterators.AbstractSpliterator<Candidate>(num, Spliterator.IMMUTABLE | Spliterator.NONNULL) {
+            boolean eos = false;
+            int count = 0;
+            @Override
+            public boolean tryAdvance(Consumer<? super Candidate> action) {
+                if (eos)
+                    return false;
+                spliterator.tryAdvance(entry -> {
+                    if (++count > num)
+                        eos = true;
+                    if (entry.distance() > distance)
+                        eos = true;
+                    if (!eos)
+                        action.accept(new Candidate(entry.id(), entry.distance()));
+                });
+                return !eos;
+            }
+        }, false);
 
-        List<Candidate> candidates = new ArrayList<>();
-        for (int i = 0; i < Math.min(ids.length, num); i++) {
-            candidates.add(new Candidate(ids[i], dists[i]));
-        }
-        return candidates.stream();
     }
 
     private double distance(Vec qVec, double qNorm, Vec v) {

@@ -29,32 +29,43 @@ public class LSHPerformanceTest {
         long[] ids = Arrays.stream(embedding.allIds).filter(id -> id > 0).toArray();
 
         double result = 0;
-        double time = 0;
+        double timeLSH = 0;
+        double timeNaive = 0;
         LongPredicate p = id -> id > 0;
         Random random = new Random();
         for (int i = 0; i < attempts; i++) {
             long id = ids[random.nextInt(ids.length)];
             embedding.setLSHFlag(true);
-            long start = System.currentTimeMillis();
-            Stream<Candidate> candidates = embedding.nearest(embedding.vec(id), p, num);
-            long end = System.currentTimeMillis();
-            time += (end - start) / 1e3;
-            TLongSet lshResult = new TLongHashSet(candidates.mapToLong(Candidate::getId).toArray());
+            TLongSet lshResult;
+            {
+                long start = System.currentTimeMillis();
+                Stream<Candidate> candidates = embedding.nearest(embedding.vec(id), p, num);
+                long end = System.currentTimeMillis();
+                timeLSH += (end - start) / 1e3;
+                lshResult = new TLongHashSet(candidates.mapToLong(Candidate::getId).toArray());
+            }
 
             embedding.setLSHFlag(false);
-            TLongSet trueResult = new TLongHashSet(embedding.nearest(embedding.vec(id), p, num).mapToLong(Candidate::getId).toArray());
+            TLongSet trueResult;
+            {
+                long start = System.currentTimeMillis();
+                trueResult = new TLongHashSet(embedding.nearest(embedding.vec(id), p, num).mapToLong(Candidate::getId).toArray());
+                long end = System.currentTimeMillis();
+                timeNaive += (end - start) / 1e3;
+            }
             lshResult.retainAll(trueResult);
 
             result += lshResult.size() / ((double) trueResult.size());
         }
         result /= attempts;
-        time /= attempts;
-        System.out.println("Average result: " + result + "\nAverage time: " + time);
+        timeLSH /= attempts;
+        timeNaive /= attempts;
+        System.out.println("Average result: " + result + "\nAverage time LSH: " + timeLSH + "\nAverage time naive: " + timeNaive);
     }
 
     @Test
     public void test() throws IOException {
-        Path embeddingPath = Paths.get("../WikiDocs/IndexTmp/embedding");
+        Path embeddingPath = Paths.get("/Users/solar/data/search/WikiDocs/IndexTmp/embedding");
 
         long cacheSize = 16 * (1 << 20);
         Options dbOptions = new Options().cacheSize(cacheSize);

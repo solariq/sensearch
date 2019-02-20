@@ -26,7 +26,7 @@ import org.iq80.leveldb.DB;
 
 public class EmbeddingBuilder implements AutoCloseable {
   private static final int QUANT_DIM = 10;
-  private static final int MIN_DIST = 130;
+  private static final int MIN_DIST = 200;
 
   private final Tokenizer tokenizer;
   private final Embedding<CharSeq> jmllEmbedding;

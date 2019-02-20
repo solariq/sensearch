@@ -1,6 +1,7 @@
 package com.expleague.sensearch.index.plain;
 
 import com.expleague.commons.math.vectors.Vec;
+import com.expleague.commons.math.vectors.VecTools;
 import com.expleague.commons.math.vectors.impl.nn.lsh.BaseQuantLSHCosIndex;
 import com.expleague.commons.math.vectors.impl.nn.lsh.CosDistanceHashFunction;
 import com.expleague.commons.math.vectors.impl.vectors.ArrayVec;
@@ -41,7 +42,7 @@ public class QuantLSHCosIndexDB extends BaseQuantLSHCosIndex implements AutoClos
     public Stream<Entry> nearest(Vec query) {
         return baseNearest(query, idx -> {
             long id = ids.getQuick(idx);
-            return ByteTools.toVec(vecDB.get(Longs.toByteArray(id)));
+            return VecTools.normalizeL2(ByteTools.toVec(vecDB.get(Longs.toByteArray(id))));
         });
     }
 
@@ -122,9 +123,8 @@ public class QuantLSHCosIndexDB extends BaseQuantLSHCosIndex implements AutoClos
             final int currentDim = Math.min(quantDim, dim - i);
             for (int b = 0; b < SKETCH_BITS_PER_QUANT; b++) {
                 int index = i / quantDim * SKETCH_BITS_PER_QUANT + b;
-                hashes[index] = new CosDistanceHashFunction(
-                        new ArrayVec(Arrays.copyOfRange(allCoords, index * currentDim, (index + 1) * currentDim))
-                ) { // quant sketch
+                final Vec w = new ArrayVec(Arrays.copyOfRange(allCoords, i * SKETCH_BITS_PER_QUANT + b * currentDim, i * SKETCH_BITS_PER_QUANT + (b + 1) * currentDim));
+                hashes[index] = new CosDistanceHashFunction(w) { // quant sketch
                     @Override
                     public int hash(Vec v) {
                         return super.hash(v.sub(finalI, currentDim));
