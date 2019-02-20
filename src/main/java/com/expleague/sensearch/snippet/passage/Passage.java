@@ -1,5 +1,6 @@
 package com.expleague.sensearch.snippet.passage;
 
+import com.expleague.sensearch.Page;
 import com.expleague.sensearch.core.Term;
 import com.expleague.sensearch.snippet.Segment;
 import java.util.ArrayList;
@@ -12,19 +13,20 @@ import java.util.stream.Stream;
  */
 public class Passage {
 
+  private final Page owner;
   private final CharSequence sentence;
   private final List<Term> words;
-  private final List<Segment> selection = new ArrayList<>();
   private double rating;
-  private long id;
+  private int id;
 
-  public Passage(CharSequence sentence, Stream<Term> terms) {
+  public Passage(Page page, CharSequence sentence, List<Term> terms) {
+    this.owner = page;
     this.sentence = sentence;
-    this.words = terms.collect(Collectors.toList());
+    this.words = terms;
     this.rating = 0;
   }
 
-  public double getRating() {
+  public double rating() {
     return rating;
   }
 
@@ -32,23 +34,23 @@ public class Passage {
     this.rating = rating;
   }
 
-  public long getId() {
+  public int id() {
     return id;
   }
 
-  public void setId(long id) {
+  public void setId(int id) {
     this.id = id;
   }
 
-  public CharSequence getSentence() {
+  public CharSequence sentence() {
     return sentence;
-  }
-
-  public List<Segment> getSelection() {
-    return selection;
   }
 
   public Stream<Term> words() {
     return words.stream();
+  }
+
+  public Page owner() {
+    return owner;
   }
 }

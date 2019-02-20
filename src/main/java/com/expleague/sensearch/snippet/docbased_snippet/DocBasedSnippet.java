@@ -22,23 +22,23 @@ public class DocBasedSnippet implements Snippet {
   public DocBasedSnippet(CharSequence title, List<Passage> passages, Query query) {
     this.title = title;
 
-    double bestPassage = passages.stream().mapToDouble(Passage::getRating).max().orElse(1);
+    double bestPassage = passages.stream().mapToDouble(Passage::rating).max().orElse(1);
 
     List<Passage> bestPassages =
         passages
             .stream()
-            .filter(passage -> passage.getRating() * 2 >= bestPassage)
-            .sorted(Comparator.comparingLong(Passage::getId))
+            .filter(passage -> passage.rating() * 2 >= bestPassage)
+            .sorted(Comparator.comparingLong(Passage::id))
             .collect(Collectors.toList());
 
     StringBuilder sb = new StringBuilder();
     for (int i = 0; i < bestPassages.size(); ++i) {
-      CharSequence sentence = bestPassages.get(i).getSentence();
+      CharSequence sentence = bestPassages.get(i).sentence();
       if (sb.length() + sentence.length() > MAX_LENGTH) {
         sb.append(sentence.subSequence(0, Math.min(MAX_LENGTH, sentence.length()))).append("...");
         break;
       }
-      if (i > 0 && bestPassages.get(i - 1).getId() + 1 < bestPassages.get(i).getId()) {
+      if (i > 0 && bestPassages.get(i - 1).id() + 1 < bestPassages.get(i).id()) {
         sb.append(" ... ");
       }
       sb.append(sentence);
