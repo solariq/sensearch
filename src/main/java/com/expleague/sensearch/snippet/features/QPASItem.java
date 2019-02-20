@@ -22,9 +22,9 @@ public class QPASItem extends DSItem.Stub {
     this.passage = passage;
   }
 
-  public QPASItem (Passage passage, Query query) {
+  public QPASItem(Query query, Passage passage) {
     this.query = query.text();
-    this.passage = passage.getSentence();
+    this.passage = passage.sentence();
     queryCache = query;
     passageCache = passage;
   }
