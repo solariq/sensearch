@@ -37,7 +37,7 @@ public class FilterImpl implements Filter {
 
   @Override
   // TODO: uncomment and fix
-  public Stream<Candidate> filtrate(@NotNull Vec qVec, int number, LongPredicate predicate) {
+  public Stream<Candidate> filtrate(@NotNull Vec qVec, LongPredicate predicate, int number) {
     /*long startTime = System.nanoTime();
     LOG.info("Filtering started");
 
@@ -55,11 +55,11 @@ public class FilterImpl implements Filter {
       embNumber *= 2;
     }
     return Arrays.stream(result.subList(0, Math.min(number, result.size())).toArray());*/
-    return embedding.nearest(qVec, number, predicate);
+    return embedding.nearest(qVec, predicate, number);
   }
 
   @Override
-  public Stream<Candidate> filtrate(@NotNull Vec qVec, double maxDistance, LongPredicate predicate) {
-    return embedding.nearest(qVec, maxDistance, predicate);
+  public Stream<Candidate> filtrate(@NotNull Vec qVec, LongPredicate predicate, double maxDistance) {
+    return embedding.nearest(qVec, predicate, maxDistance);
   }
 }

@@ -10,7 +10,9 @@ import com.expleague.sensearch.donkey.plain.PlainIndexBuilder;
 import com.expleague.sensearch.index.Embedding;
 import com.google.common.primitives.Longs;
 import com.google.inject.Inject;
+import gnu.trove.list.TDoubleList;
 import gnu.trove.list.TLongList;
+import gnu.trove.list.array.TDoubleArrayList;
 import gnu.trove.list.array.TLongArrayList;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -57,79 +59,54 @@ public class EmbeddingImpl implements Embedding {
         return nnIdx.nearest(qVec).mapToLong(NearestNeighbourIndex.Entry::id).toArray();
     }
 
-    private double[] getDists(Vec qVec, LongPredicate predicate, double qNorm, TLongList idList) {
-        long[] ids = lshFlag ? lshNearest(qVec) : allIds;
-        return LongStream.of(ids)
-                .filter(predicate)
-                .peek(idList::add)
-                .mapToDouble(id -> distance(qVec, qNorm, vec(id)))
-                .toArray();
-    }
-
     @Override
     public void setLSHFlag(boolean value) {
         lshFlag = value;
     }
 
-    //TODO: remove copypaste
     @Override
     public Stream<Candidate> nearest(Vec qVec, LongPredicate predicate) {
-        final double qNorm = VecTools.norm(qVec);
-        if (qNorm == 0) {
-            return Stream.empty();
-        }
-        TLongList idList = new TLongArrayList();
-        double[] dists = getDists(qVec, predicate, qNorm, idList);
-        long[] ids = idList.toArray();
-
-        List<Candidate> candidates = new ArrayList<>();
-        for (int i = 0; i < ids.length; i++) {
-            candidates.add(new Candidate(ids[i], dists[i]));
-        }
-        return candidates.stream();
+        return baseNearest(qVec, predicate, Integer.MAX_VALUE);
     }
 
-    //TODO: remove copypaste
     @Override
-    public Stream<Candidate> nearest(Vec qVec, int numberOfNeighbors, LongPredicate predicate) {
-        final double qNorm = VecTools.norm(qVec);
-        if (qNorm == 0) {
-            return Stream.empty();
-        }
-
-        TLongList idList = new TLongArrayList();
-        final double[] dists = getDists(qVec, predicate, qNorm, idList);
-        final long[] ids = idList.toArray();
-        ArrayTools.parallelSort(dists, ids);
-
-        List<Candidate> candidates = new ArrayList<>();
-        for (int i = 0; i < numberOfNeighbors; i++) {
-            candidates.add(new Candidate(ids[i], dists[i]));
-        }
-
-        return candidates.stream();
+    public Stream<Candidate> nearest(Vec qVec, LongPredicate predicate, int numberOfNeighbors) {
+        return baseNearest(qVec, predicate, numberOfNeighbors);
     }
 
-    //TODO: remove copypaste
     @Override
-    public Stream<Candidate> nearest(Vec qVec, double maxDistance, LongPredicate predicate) {
+    public Stream<Candidate> nearest(Vec qVec, LongPredicate predicate, double maxDistance) {
+        return baseNearest(qVec, predicate, maxDistance);
+    }
+
+    //todo: replace object either
+    private Stream<Candidate> baseNearest(Vec qVec, LongPredicate predicate, Object either) {
         final double qNorm = VecTools.norm(qVec);
         if (qNorm == 0) {
             return Stream.empty();
         }
 
-        TLongList idList = new TLongArrayList();
-        final double[] dists = getDists(qVec, predicate, qNorm, idList);
-        final long[] ids = idList.toArray();
+        final long[] ids = LongStream.of(lshFlag ? lshNearest(qVec) : allIds)
+                .filter(predicate)
+                .distinct()
+                .toArray();
+        final double[] dists = LongStream.of(ids)
+                .mapToDouble(id -> distance(qVec, qNorm, vec(id)))
+                .toArray();
         ArrayTools.parallelSort(dists, ids);
 
-        int end = Arrays.binarySearch(dists, maxDistance);
-        if (end < 0) {
-            end = -end - 1;
+        int num;
+        if (either instanceof Double) {
+            num = Arrays.binarySearch(dists, (double) either);
+            if (num < 0) {
+                num = -num - 1;
+            }
+        } else {
+            num = (int) either;
         }
 
         List<Candidate> candidates = new ArrayList<>();
-        for (int i = 0; i < end; i++) {
+        for (int i = 0; i < Math.min(ids.length, num); i++) {
             candidates.add(new Candidate(ids[i], dists[i]));
         }
         return candidates.stream();

@@ -11,6 +11,6 @@ import org.jetbrains.annotations.NotNull;
 public interface Filter {
 
   Stream<Candidate> filtrate(@NotNull Vec qVec, LongPredicate predicate);
-  Stream<Candidate> filtrate(@NotNull Vec qVec, int number, LongPredicate predicate);
-  Stream<Candidate> filtrate(@NotNull Vec qVec, double maxDistance, LongPredicate predicate);
+  Stream<Candidate> filtrate(@NotNull Vec qVec, LongPredicate predicate, int number);
+  Stream<Candidate> filtrate(@NotNull Vec qVec, LongPredicate predicate, double maxDistance);
 }

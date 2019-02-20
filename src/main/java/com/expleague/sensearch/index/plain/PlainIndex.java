@@ -329,7 +329,7 @@ public class PlainIndex implements Index {
     final Vec qVec = vecByTerms(query.terms());
     TLongObjectMap<List<Candidate>> pageIdToCandidatesMap = new TLongObjectHashMap<>();
     filter
-      .filtrate(qVec, 0.5, PlainIndex::isPageId)
+      .filtrate(qVec, PlainIndex::isPageId, 0.5)
       .limit(FILTERED_DOC_NUMBER)
       .forEach(candidate -> {
         long pageId = candidate.getPageId();
@@ -435,7 +435,7 @@ public class PlainIndex implements Index {
 
     LOG.info("LSHSynonymsMetric: " + result);*/
 
-    return filter.filtrate(termVec, SYNONYMS_COUNT, PlainIndex::isWordId).map(c -> idToTerm.get(c.getId()));
+    return filter.filtrate(termVec, PlainIndex::isWordId, SYNONYMS_COUNT).map(c -> idToTerm.get(c.getId()));
   }
 
   int documentFrequency(Term term) {
