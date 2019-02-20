@@ -32,7 +32,7 @@ public class ResultItemDeserializer extends StdDeserializer<ResultItem> {
     JsonNode node = codec.readTree(jsonParser);
     try {
       URI reference = new URI(node.get("reference").asText());
-      String title = node.get("titles").asText();
+      String title = node.get("title").asText();
       List<Pair<CharSequence, List<Segment>>> passages = new ArrayList<>();
       node.get("passages")
           .elements()
