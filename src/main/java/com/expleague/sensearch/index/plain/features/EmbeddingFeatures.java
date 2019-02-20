@@ -1,7 +1,7 @@
 package com.expleague.sensearch.index.plain.features;
 
 import com.expleague.ml.data.tools.FeatureSet;
-import com.expleague.sensearch.miner.impl.QURLItem;
+import com.expleague.sensearch.miner.features.QURLItem;
 
 public interface EmbeddingFeatures extends FeatureSet<QURLItem> {
 

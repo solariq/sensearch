@@ -21,7 +21,7 @@ import com.expleague.sensearch.index.plain.features.FilterFeatures;
 import com.expleague.sensearch.metrics.LSHSynonymsMetric;
 import com.expleague.sensearch.miner.Features;
 import com.expleague.sensearch.miner.FeaturesImpl;
-import com.expleague.sensearch.miner.impl.QURLItem;
+import com.expleague.sensearch.miner.features.QURLItem;
 import com.expleague.sensearch.protobuf.index.IndexUnits;
 import com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta.UriPageMapping;
 import com.expleague.sensearch.protobuf.index.IndexUnits.TermStatistics;

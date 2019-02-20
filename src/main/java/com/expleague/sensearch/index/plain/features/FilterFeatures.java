@@ -3,7 +3,7 @@ package com.expleague.sensearch.index.plain.features;
 import com.expleague.commons.math.vectors.Vec;
 import com.expleague.ml.data.tools.FeatureSet;
 import com.expleague.ml.meta.FeatureMeta;
-import com.expleague.sensearch.miner.impl.QURLItem;
+import com.expleague.sensearch.miner.features.QURLItem;
 
 public class FilterFeatures extends FeatureSet.Stub<QURLItem> implements EmbeddingFeatures {
     private final static FeatureMeta TITLE = FeatureMeta
