@@ -24,6 +24,7 @@ import org.eclipse.jetty.servlet.FilterHolder;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.eclipse.jetty.servlets.CrossOriginFilter;
+import org.eclipse.jetty.util.resource.Resource;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.servlet.ServletContainer;
 
@@ -81,7 +82,7 @@ public class SearchServer {
     Server server = new Server(8081);
 
     ResourceHandler resHandler = new ResourceHandler();
-//    resHandler.setBaseResource(Resource.newResource(Paths.get(config.getWebRoot()).toFile()));
+    resHandler.setBaseResource(Resource.newResource(Paths.get("webapp/dist/webapp").toFile()));
 
     HandlerCollection handlerCollection = new HandlerCollection();
     handlerCollection.setHandlers(new Handler[]{context, resHandler});
