@@ -12,16 +12,19 @@ import com.google.common.primitives.Longs;
 import com.google.inject.Inject;
 import gnu.trove.list.TLongList;
 import gnu.trove.list.array.TLongArrayList;
-import org.iq80.leveldb.DB;
-import org.iq80.leveldb.DBIterator;
-
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Spliterator;
+import java.util.Spliterators;
 import java.util.function.Consumer;
 import java.util.function.LongPredicate;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
+import org.iq80.leveldb.DB;
+import org.iq80.leveldb.DBIterator;
 
 public class EmbeddingImpl implements Embedding {
     public long[] allIds;
@@ -108,6 +111,9 @@ public class EmbeddingImpl implements Embedding {
                 if (eos)
                     return false;
                 spliterator.tryAdvance(entry -> {
+                  if (!predicate.test(entry.id())) {
+                    return;
+                  }
                     if (++count > num)
                         eos = true;
                     if (entry.distance() > distance)
