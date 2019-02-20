@@ -75,7 +75,7 @@ public class QuantLSHCosIndexDB extends BaseQuantLSHCosIndex implements AutoClos
         vecDB.put(
                 Longs.toByteArray(SPECIAL_ID_2),
                 ByteTools.toBytes(
-                        IntStream.of(quantDim, dim, minDist, sketches.size()).toArray()
+                        IntStream.of(quantDim, dim, batchSize, sketches.size()).toArray()
                 )
         );
         vecDB.put(
@@ -93,6 +93,7 @@ public class QuantLSHCosIndexDB extends BaseQuantLSHCosIndex implements AutoClos
         );
         vecDB.close();
     }
+
 
     public static QuantLSHCosIndexDB load(DB vecDB) {
         TLongArrayList ids = new TLongArrayList(
@@ -132,7 +133,7 @@ public class QuantLSHCosIndexDB extends BaseQuantLSHCosIndex implements AutoClos
                 };
             }
         }
-        return new QuantLSHCosIndexDB(dim, minDist, ids, sketches, hashes, vecDB);
+        return new QuantLSHCosIndexDB(dim, 2000, ids, sketches, hashes, vecDB);
     }
 
     @Override
