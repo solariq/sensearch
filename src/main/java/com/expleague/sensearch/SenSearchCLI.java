@@ -28,6 +28,7 @@ public class SenSearchCLI {
 
   private static final String DATA_PATH_OPTION = "data";
   private static final String INDEX_PATH_OPTION = "index";
+  // TODO: handle corpus
   private static final String CORPUS_PATH_OPTION = "corpus";
   private static final String EMBEDDING_PATH_OPTION = "embedding";
   private static final String DO_NOT_USE_LSH_OPTION = "nolsh";

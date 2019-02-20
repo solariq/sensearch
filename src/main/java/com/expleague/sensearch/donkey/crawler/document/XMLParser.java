@@ -4,8 +4,12 @@ import com.expleague.sensearch.donkey.crawler.document.CrawlerDocument.Link;
 import com.expleague.sensearch.donkey.crawler.document.CrawlerDocument.Section;
 import com.expleague.sensearch.donkey.crawler.document.WikiPage.WikiLink;
 import com.expleague.sensearch.donkey.crawler.document.WikiPage.WikiSection;
-
-import java.io.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.Serializable;
+import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URLEncoder;
 import java.nio.file.Files;
@@ -27,6 +31,7 @@ import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlMixed;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlValue;
+import javax.xml.stream.XMLStreamReader;
 import org.apache.log4j.Logger;
 
 public class XMLParser {
@@ -62,64 +67,81 @@ public class XMLParser {
   }
 
   public WikiPage parseXML(InputStream file) {
-    WikiPage page = new WikiPage();
     try {
       Unmarshaller um = context.createUnmarshaller();
       XmlPageRootElement element = (XmlPageRootElement) um.unmarshal(file);
       XmlPage xmlPage = element.page;
 
-      page.setTitle(xmlPage.title == null ? "" : xmlPage.title);
-      String pageUri =
-          URLEncoder.encode(page.title().replace(" ", "_").replace("%", "%25"), "UTF-8");
+      return parsePage(xmlPage);
+    } catch (JAXBException | UnsupportedEncodingException e) {
+      throw new IllegalArgumentException(e);
+    }
+  }
 
-      page.setUri(URI.create("https://ru.wikipedia.org/wiki/" + pageUri));
-      if (xmlPage.categories == null) {
-        page.setCategories(new ArrayList<>());
-      } else {
-        page.setCategories(Arrays.asList(xmlPage.categories.split("@")));
-      }
-      page.setId(xmlPage.id);
+  public CrawlerDocument parseXML(XMLStreamReader reader) {
+    try {
+      Unmarshaller um = context.createUnmarshaller();
+      return parsePage(um.unmarshal(reader, XmlPage.class).getValue());
+    } catch (JAXBException | UnsupportedEncodingException e) {
+      throw new IllegalArgumentException(e);
+    }
+  }
 
-      Set<URI> uriSet = new HashSet<>();
+  private WikiPage parsePage(XmlPage xmlPage) throws UnsupportedEncodingException {
+    WikiPage page = new WikiPage();
 
-      List<Section> sections;
-      sections =
-          xmlPage
-              .sections
-              .stream()
-              .map(
-                  xmlSection -> {
-                    List<Link> links = new ArrayList<>();
-                    StringBuilder text = new StringBuilder();
+    page.setTitle(xmlPage.title == null ? "" : xmlPage.title);
+    String pageUri =
+        URLEncoder.encode(page.title().replace(" ", "_").replace("%", "%25"), "UTF-8");
 
-                    if (xmlSection.content != null) {
-                      for (Serializable serializable : xmlSection.content) {
-                        if (serializable instanceof String) {
-                          text.append(((String) serializable).trim());
-                        } else if (serializable instanceof XmlSectionLink) {
-                          XmlSectionLink link = (XmlSectionLink) serializable;
+    page.setUri(URI.create("https://ru.wikipedia.org/wiki/" + pageUri));
+    if (xmlPage.categories == null) {
+      page.setCategories(new ArrayList<>());
+    } else {
+      page.setCategories(Arrays.asList(xmlPage.categories.split("@")));
+    }
+    page.setId(xmlPage.id);
 
-                          if (link.targetId == 0) {
-                            link.targetId = -1;
-                          }
-                          if (link.targetTitle == null) {
-                            link.targetTitle = "";
-                          }
+    Set<URI> uriSet = new HashSet<>();
 
-                          if (text.length() > 0 && text.charAt(text.length() - 1) != ' ') {
-                            text.append(" ");
-                          }
-                          links.add(
-                              new WikiLink(
-                                  link.text, link.targetTitle, link.targetId, text.length()));
-                          text.append(link.text.trim());
+    List<Section> sections;
+    sections =
+        xmlPage
+            .sections
+            .stream()
+            .map(
+                xmlSection -> {
+                  List<Link> links = new ArrayList<>();
+                  StringBuilder text = new StringBuilder();
+
+                  if (xmlSection.content != null) {
+                    for (Serializable serializable : xmlSection.content) {
+                      if (serializable instanceof String) {
+                        text.append(((String) serializable).trim());
+                      } else if (serializable instanceof XmlSectionLink) {
+                        XmlSectionLink link = (XmlSectionLink) serializable;
+
+                        if (link.targetId == 0) {
+                          link.targetId = -1;
+                        }
+                        if (link.targetTitle == null) {
+                          link.targetTitle = "";
+                        }
+
+                        if (text.length() > 0 && text.charAt(text.length() - 1) != ' ') {
                           text.append(" ");
                         }
+                        links.add(
+                            new WikiLink(
+                                link.text, link.targetTitle, link.targetId, text.length()));
+                        text.append(link.text.trim());
+                        text.append(" ");
                       }
                     }
+                  }
 
-                    String sectionTitle = xmlSection.title == null ? "" : xmlSection.title;
-                    List<CharSequence> titles = Arrays.asList(sectionTitle.split("\\|@\\|"));
+                  String sectionTitle = xmlSection.title == null ? "" : xmlSection.title;
+                  List<CharSequence> titles = Arrays.asList(sectionTitle.split("\\|@\\|"));
                     /*
                     try {
                       subPageURI = URI.create(
@@ -131,60 +153,56 @@ public class XMLParser {
                     }
                     System.err.println(subPageURI.toString());//*/
 
-                    return new WikiSection(text, titles, links, null);
-                  })
-              .collect(Collectors.toList());
+                  return new WikiSection(text, titles, links, null);
+                })
+            .collect(Collectors.toList());
 
-      List<Section> newSections = new ArrayList<>();
-      if (sections.size() > 0 && sections.get(0).title().size() > 1) {
-        List<CharSequence> title = sections.get(0).title();
-        for (int i = 1; i < title.size(); i++) {
-          newSections.add(
-              new WikiSection(
-                  "",
-                  title.subList(0, i),
-                  Collections.emptyList(),
-                  createUri(pageUri, title.get(i), uriSet)));
-        }
-      }
-      for (int i = 0; i < sections.size(); i++) {
-        Section curSection = sections.get(i);
+    List<Section> newSections = new ArrayList<>();
+    if (sections.size() > 0 && sections.get(0).title().size() > 1) {
+      List<CharSequence> title = sections.get(0).title();
+      for (int i = 1; i < title.size(); i++) {
         newSections.add(
             new WikiSection(
-                curSection.text(),
-                curSection.title(),
-                curSection.links(),
-                createUri(pageUri, curSection.title().get(curSection.title().size() - 1), uriSet)));
+                "",
+                title.subList(0, i),
+                Collections.emptyList(),
+                createUri(pageUri, title.get(i), uriSet)));
+      }
+    }
+    for (int i = 0; i < sections.size(); i++) {
+      Section curSection = sections.get(i);
+      newSections.add(
+          new WikiSection(
+              curSection.text(),
+              curSection.title(),
+              curSection.links(),
+              createUri(pageUri, curSection.title().get(curSection.title().size() - 1), uriSet)));
 
-        if (i == sections.size() - 1) {
-          continue;
-        }
-        List<CharSequence> curSectionTitle = curSection.title();
-        List<CharSequence> newSectionTitle = sections.get(i + 1).title();
+      if (i == sections.size() - 1) {
+        continue;
+      }
+      List<CharSequence> curSectionTitle = curSection.title();
+      List<CharSequence> newSectionTitle = sections.get(i + 1).title();
 
-        int commonSections = 0;
-        for (int j = 0; j < Math.min(curSectionTitle.size(), newSectionTitle.size()); j++) {
-          if (curSectionTitle.get(j).equals(newSectionTitle.get(j))) {
-            commonSections++;
-          } else {
-            break;
-          }
-        }
-
-        for (int j = commonSections; j < newSectionTitle.size() - 1; j++) {
-          newSections.add(
-              new WikiSection(
-                  "",
-                  newSectionTitle.subList(0, j + 1),
-                  Collections.emptyList(),
-                  createUri(pageUri, newSectionTitle.get(j), uriSet)));
+      int commonSections = 0;
+      for (int j = 0; j < Math.min(curSectionTitle.size(), newSectionTitle.size()); j++) {
+        if (curSectionTitle.get(j).equals(newSectionTitle.get(j))) {
+          commonSections++;
+        } else {
+          break;
         }
       }
-      page.setSections(newSections);
-    } catch (JAXBException | UnsupportedEncodingException e) {
-      throw new IllegalArgumentException(e);
-    }
 
+      for (int j = commonSections; j < newSectionTitle.size() - 1; j++) {
+        newSections.add(
+            new WikiSection(
+                "",
+                newSectionTitle.subList(0, j + 1),
+                Collections.emptyList(),
+                createUri(pageUri, newSectionTitle.get(j), uriSet)));
+      }
+    }
+    page.setSections(newSections);
     return page;
   }
 

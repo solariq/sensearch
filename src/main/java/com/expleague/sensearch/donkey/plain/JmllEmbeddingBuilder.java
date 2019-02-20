@@ -36,23 +36,23 @@ public class JmllEmbeddingBuilder {
 
     LOG.info("Creating corpus for embedding...");
     try (Writer to = new OutputStreamWriter(new FileOutputStream(corpus.toFile()))) {
-      documents.forEach(doc -> {
-        try {
-          String title = doc.title();
-          for (char c : title.toCharArray()) {
-            to.write(filtrateChar(c));
-          }
-          to.write(' ');
-          CharSequence content = doc.content();
-          for (int i = 0; i < content.length(); i++) {
-            to.write(filtrateChar(content.charAt(i)));
-          }
-          to.write('\n');
-        } catch (IOException e) {
-          LOG.warn(e);
-        }
-
-      });
+      documents.forEach(
+          doc -> {
+            try {
+              String title = doc.title();
+              for (char c : title.toCharArray()) {
+                to.write(filtrateChar(c));
+              }
+              to.write(' ');
+              CharSequence content = doc.content();
+              for (int i = 0; i < content.length(); i++) {
+                to.write(filtrateChar(content.charAt(i)));
+              }
+              to.write('\n');
+            } catch (IOException e) {
+              LOG.warn(e);
+            }
+          });
     }
 
     LOG.info("Training embedding...");
@@ -72,5 +72,4 @@ public class JmllEmbeddingBuilder {
     }
     return ' ';
   }
-
 }
