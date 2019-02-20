@@ -40,6 +40,36 @@ public class PlainPage implements IndexedPage {
         }
 
         @Override
+        public double getTitleDist() {
+          return MAX_DIST;
+        }
+
+        @Override
+        public double getBodyDist() {
+          return MAX_DIST;
+        }
+
+        @Override
+        public double getLinkDist() {
+          return MAX_DIST;
+        }
+
+        @Override
+        public void setTitleDist(double d) {
+
+        }
+
+        @Override
+        public void setBodyDist(double d) {
+
+        }
+
+        @Override
+        public void setLinkDist(double d) {
+
+        }
+
+        @Override
         public URI uri() {
           return DEFAULT_URI;
         }
@@ -92,11 +122,15 @@ public class PlainPage implements IndexedPage {
 
   private static final Logger LOG = LoggerFactory.getLogger(PlainPage.class);
 
+  private static final double MAX_DIST = -1;
   private final long id;
   private final PlainIndex index;
   private final IndexUnits.Page protoPage;
   private final URI uri;
   private final boolean isEmpty;
+  private double titleDist;
+  private double bodyDist;
+  private double linkDist;
 
   private PlainPage(IndexUnits.Page protoPage, PlainIndex index) {
     this.index = index;
@@ -153,6 +187,36 @@ public class PlainPage implements IndexedPage {
       return LongStream.empty();
     }
     return protoPage.getSubpagesIdsList().stream().mapToLong(Number::longValue);
+  }
+
+  @Override
+  public double getTitleDist() {
+    return titleDist;
+  }
+
+  @Override
+  public double getBodyDist() {
+    return bodyDist;
+  }
+
+  @Override
+  public double getLinkDist() {
+    return linkDist;
+  }
+
+  @Override
+  public void setTitleDist(double d) {
+    titleDist = d;
+  }
+
+  @Override
+  public void setBodyDist(double d) {
+    bodyDist = d;
+  }
+
+  @Override
+  public void setLinkDist(double d) {
+    linkDist = d;
   }
 
   @Override
