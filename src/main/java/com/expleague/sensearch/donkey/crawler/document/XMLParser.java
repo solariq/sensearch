@@ -51,8 +51,7 @@ public class XMLParser {
   public WikiPage parseXML(File file) {
     try (final FileInputStream fis = new FileInputStream(file)) {
       return parseXML(fis);
-    }
-    catch (IOException e) {
+    } catch (IOException e) {
       throw new RuntimeException(e);
     }
   }
@@ -60,8 +59,7 @@ public class XMLParser {
   public WikiPage parseXML(Path file) {
     try (final InputStream fis = Files.newInputStream(file)) {
       return parseXML(fis);
-    }
-    catch (IOException e) {
+    } catch (IOException e) {
       throw new RuntimeException(e);
     }
   }
@@ -91,8 +89,7 @@ public class XMLParser {
     WikiPage page = new WikiPage();
 
     page.setTitle(xmlPage.title == null ? "" : xmlPage.title);
-    String pageUri =
-        URLEncoder.encode(page.title().replace(" ", "_").replace("%", "%25"), "UTF-8");
+    String pageUri = URLEncoder.encode(page.title().replace(" ", "_").replace("%", "%25"), "UTF-8");
 
     page.setUri(URI.create("https://ru.wikipedia.org/wiki/" + pageUri));
     if (xmlPage.categories == null) {
@@ -142,24 +139,24 @@ public class XMLParser {
 
                   String sectionTitle = xmlSection.title == null ? "" : xmlSection.title;
                   List<CharSequence> titles = Arrays.asList(sectionTitle.split("\\|@\\|"));
-                    /*
-                    try {
-                      subPageURI = URI.create(
-                          "https://ru.wikipedia.org/wiki/"
-                              + page.title().replace(" ", "_").replace("%", "%25")
-                              + "#" + URLEncoder.encode(section));
-                    } catch (IllegalArgumentException e) {
-                      System.err.println(e.getMessage());
-                    }
-                    System.err.println(subPageURI.toString());//*/
+                  /*
+                  try {
+                    subPageURI = URI.create(
+                        "https://ru.wikipedia.org/wiki/"
+                            + page.title().replace(" ", "_").replace("%", "%25")
+                            + "#" + URLEncoder.encode(section));
+                  } catch (IllegalArgumentException e) {
+                    System.err.println(e.getMessage());
+                  }
+                  System.err.println(subPageURI.toString());//*/
 
                   return new WikiSection(text, titles, links, null);
                 })
             .collect(Collectors.toList());
 
     List<Section> newSections = new ArrayList<>();
-    if (sections.size() > 0 && sections.get(0).title().size() > 1) {
-      List<CharSequence> title = sections.get(0).title();
+    if (sections.size() > 0 && sections.get(0).titles().size() > 1) {
+      List<CharSequence> title = sections.get(0).titles();
       for (int i = 1; i < title.size(); i++) {
         newSections.add(
             new WikiSection(
@@ -174,15 +171,15 @@ public class XMLParser {
       newSections.add(
           new WikiSection(
               curSection.text(),
-              curSection.title(),
+              curSection.titles(),
               curSection.links(),
-              createUri(pageUri, curSection.title().get(curSection.title().size() - 1), uriSet)));
+              createUri(pageUri, curSection.titles().get(curSection.titles().size() - 1), uriSet)));
 
       if (i == sections.size() - 1) {
         continue;
       }
-      List<CharSequence> curSectionTitle = curSection.title();
-      List<CharSequence> newSectionTitle = sections.get(i + 1).title();
+      List<CharSequence> curSectionTitle = curSection.titles();
+      List<CharSequence> newSectionTitle = sections.get(i + 1).titles();
 
       int commonSections = 0;
       for (int j = 0; j < Math.min(curSectionTitle.size(), newSectionTitle.size()); j++) {
@@ -205,9 +202,13 @@ public class XMLParser {
 
     if (newSections.size() > 0) {
       Section section = newSections.get(0);
-      newSections.set(0,
-          new WikiSection(section.text(), Collections.singletonList(section.title()),
-              section.links(), page.uri()));
+      newSections.set(
+          0,
+          new WikiSection(
+              section.text(),
+              Collections.singletonList(section.title()),
+              section.links(),
+              page.uri()));
     }
     page.setSections(newSections);
 

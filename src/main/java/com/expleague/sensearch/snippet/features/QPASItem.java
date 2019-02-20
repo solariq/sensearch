@@ -24,7 +24,7 @@ public class QPASItem extends DSItem.Stub {
 
   public QPASItem (Passage passage, Query query) {
     this.query = query.text();
-    this.passage = passage.sentence();
+    this.passage = passage.getSentence();
     queryCache = query;
     passageCache = passage;
   }
