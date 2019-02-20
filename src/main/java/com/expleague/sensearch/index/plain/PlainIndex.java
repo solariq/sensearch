@@ -91,7 +91,6 @@ public class PlainIndex implements Index {
 
   private final DB suggest_unigram_DB;
   private final DB suggest_multigram_DB;
-  private final DB suggest_inverted_index_DB;
 
   private final double averagePageSize;
   // TODO save at database
@@ -120,7 +119,6 @@ public class PlainIndex implements Index {
     termBase.close();
     termStatisticsBase.close();
     suggest_unigram_DB.close();
-    suggest_inverted_index_DB.close();
     suggest_multigram_DB.close();
   }
 
@@ -157,11 +155,6 @@ public class PlainIndex implements Index {
     suggest_multigram_DB =
         JniDBFactory.factory.open(
             indexRoot.resolve(PlainIndexBuilder.SUGGEST_MULTIGRAMS_ROOT).toFile(),
-            DEFAULT_DB_OPTIONS);
-
-    suggest_inverted_index_DB =
-        JniDBFactory.factory.open(
-            indexRoot.resolve(PlainIndexBuilder.SUGGEST_INVERTED_INDEX_ROOT).toFile(),
             DEFAULT_DB_OPTIONS);
 
     tokenizer = new TokenizerImpl();
@@ -494,7 +487,7 @@ public class PlainIndex implements Index {
     if (suggestLoader == null) {
       suggestLoader =
           new SuggestInformationLoader(
-              suggest_unigram_DB, suggest_multigram_DB, suggest_inverted_index_DB, idToTerm);
+              suggest_unigram_DB, suggest_multigram_DB, idToTerm);
     }
     return suggestLoader;
   }

@@ -32,16 +32,13 @@ public class SuggestInformationBuilder {
   // Maps, that used in suggestor
   private final Map<Long, Double> unigramCoeff = new HashMap<>();
   private final Map<long[], Double> multigramFreqNorm = new HashMap<>();
-  private final Map<Long, List<Integer>> invertedIndex = new HashMap<>();
 
   private final DB unigramCoeffDB;
   private final DB multigramFreqNormDB;
-  private final DB invertedIndexDB;
 
   private <K> void addToMap(Map<K, Integer> m, K key, int inc) {
-    Integer oldVal = m.get(key);
-    int oVal = oldVal == null ? 0 : oldVal;
-    m.put(key, oVal + inc);
+	m.putIfAbsent(key, 0);
+    m.put(key, m.get(key) + inc);
   }
 
   public void build() {
@@ -81,36 +78,17 @@ public class SuggestInformationBuilder {
       multigramFreqNormDB.write(batch, DEFAULT_WRITE_OPTIONS);
     }
 
-    {
-      WriteBatch batch = invertedIndexDB.createWriteBatch();
-      invertedIndex.forEach(
-          (key, value) ->
-              batch.put(
-                  Longs.toByteArray(key),
-                  IndexUnits.IntegerList.newBuilder().addAllIntList(value).build().toByteArray()));
-      invertedIndexDB.write(batch, DEFAULT_WRITE_OPTIONS);
-    }
   }
 
   @Inject
-  public SuggestInformationBuilder(DB unigramCoeffDB, DB multigramFreqNormDB, DB invertedIndexDB) {
+  public SuggestInformationBuilder(DB unigramCoeffDB, DB multigramFreqNormDB) {
     this.unigramCoeffDB = unigramCoeffDB;
     this.multigramFreqNormDB = multigramFreqNormDB;
-    this.invertedIndexDB = invertedIndexDB;
   }
 
   private void computeUnigrams(long[] wordIds) {
-    int docNum = ndocs++;
     Arrays.stream(wordIds)
-        .peek(
-            s -> {
-              addToMap(unigramFreq, s, 1);
-              sumFreqNorm.put(s, 0.0);
-              if (!invertedIndex.containsKey(s)) {
-                invertedIndex.put(s, new ArrayList<>());
-              }
-              invertedIndex.get(s).add(docNum);
-            })
+        .peek(s -> addToMap(unigramFreq, s, 1))
         .distinct()
         .forEach(s -> addToMap(unigramDF, s, 1));
   }
@@ -142,19 +120,21 @@ public class SuggestInformationBuilder {
           avgOrderFreq[idx] += value;
         });
 
-    for (int i = 1; i < maxNgramsOrder; i++) {
-      avgOrderFreq[i] /= countOfOrder[i];
+    for (int i = 0; i < maxNgramsOrder; i++) {
+    	if (countOfOrder[i] > 0)
+    		avgOrderFreq[i] /= countOfOrder[i];
     }
   }
 
   private double freqNorm(long[] l) {
-    return multigramFreq.get(l) / Math.log(avgOrderFreq[l.length - 1]);
+    return multigramFreq.get(l) / Math.log(1 + avgOrderFreq[l.length - 1]);
   }
 
   private void computeFreqNorm() {
     for (long[] l : multigramFreq.keySet()) {
       double fNorm = freqNorm(l);
       for (long s : l) {
+    	sumFreqNorm.putIfAbsent(s, 0.0);
         sumFreqNorm.put(s, sumFreqNorm.get(s) + fNorm);
       }
     }

@@ -255,9 +255,7 @@ public class PlainIndexBuilder implements IndexBuilder {
         final DB suggest_multigram_DB =
             JniDBFactory.factory.open(
                 indexRoot.resolve(SUGGEST_MULTIGRAMS_ROOT).toFile(), STATS_DB_OPTIONS);
-        final DB suggest_inverted_index_DB =
-            JniDBFactory.factory.open(
-                indexRoot.resolve(SUGGEST_INVERTED_INDEX_ROOT).toFile(), STATS_DB_OPTIONS)) {
+    		) {
 
       IndexMetaBuilder indexMetaBuilder = new IndexMetaBuilder(PlainIndex.VERSION);
 
@@ -265,7 +263,7 @@ public class PlainIndexBuilder implements IndexBuilder {
 
       final SuggestInformationBuilder suggestBuilder =
           new SuggestInformationBuilder(
-              suggest_unigram_DB, suggest_multigram_DB, suggest_inverted_index_DB);
+              suggest_unigram_DB, suggest_multigram_DB);
 
       try {
         LOG.info("Parsing pages...");

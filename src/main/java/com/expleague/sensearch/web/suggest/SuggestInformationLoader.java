@@ -17,15 +17,13 @@ public class SuggestInformationLoader {
 
 	private final DB unigramCoeffDB;
 	private final DB multigramFreqNormDB;
-	private final DB invertedIndexDB;
 
 	private final TLongObjectMap<Term> idToTerm;
 
-	public SuggestInformationLoader(DB unigramCoeffDB, DB multigramDB, DB invertedIndexDB,
+	public SuggestInformationLoader(DB unigramCoeffDB, DB multigramDB,
 			TLongObjectMap<Term> idToTerm) {
 		this.unigramCoeffDB = unigramCoeffDB;
 		this.multigramFreqNormDB = multigramDB;
-		this.invertedIndexDB = invertedIndexDB;
 
 		this.idToTerm = idToTerm;
 
@@ -64,24 +62,5 @@ public class SuggestInformationLoader {
 			});
 		}
 
-		{
-			DBIterator iter = invertedIndexDB.iterator();
-			iter.seekToFirst();
-			iter.forEachRemaining(item -> {
-				int[] ints = null;
-				try {
-					ints = IndexUnits.IntegerList.parseFrom(item.getValue())
-							.getIntListList().stream()
-							.mapToInt(i -> i).toArray();
-				} catch (InvalidProtocolBufferException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-
-				invertedIndex.put(
-						idToTerm.get(Longs.fromByteArray(item.getKey())),
-						ints);
-			});
-		}
 	}
 }
