@@ -1,7 +1,6 @@
 package com.expleague.sensearch.miner.features;
 
 import com.expleague.commons.math.vectors.Vec;
-import com.expleague.commons.math.vectors.impl.vectors.ArrayVec;
 import com.expleague.ml.data.tools.FeatureSet;
 import com.expleague.ml.meta.FeatureMeta.ValueType;
 import com.expleague.ml.meta.TargetMeta;
@@ -20,7 +19,7 @@ import java.util.List;
 
 public class TargetFeatureSet extends FeatureSet.Stub<QURLItem> {
 
-  public final static TargetMeta TARGET_META = TargetMeta
+  private final static TargetMeta TARGET_META = TargetMeta
       .create("googleDCG", "1 / position at Google", ValueType.VEC);
 
   private Query query;
@@ -50,10 +49,12 @@ public class TargetFeatureSet extends FeatureSet.Stub<QURLItem> {
         vec = res.indexOf(resultItem) + 1;
         vec = 1 / vec;
       }
-      return new ArrayVec(vec);
+      set(TARGET_META, vec);
+      return super.advance();
     } catch (IOException e) {
       e.printStackTrace();
     }
-    return new ArrayVec(0.0);
+    set(TARGET_META, 0.0);
+    return super.advance();
   }
 }

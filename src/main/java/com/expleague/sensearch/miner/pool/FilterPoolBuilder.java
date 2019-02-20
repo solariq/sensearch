@@ -1,12 +1,19 @@
 package com.expleague.sensearch.miner.pool;
 
+import com.expleague.commons.func.Functions;
 import com.expleague.commons.random.FastRandom;
+import com.expleague.ml.data.tools.DataTools;
+import com.expleague.ml.data.tools.Pool;
 import com.expleague.ml.meta.DataSetMeta;
 import com.expleague.ml.meta.impl.JsonDataSetMeta;
 import com.expleague.sensearch.AppModule;
 import com.expleague.sensearch.index.Index;
+import com.expleague.sensearch.index.IndexedPage;
 import com.expleague.sensearch.index.plain.features.FilterFeatures;
+import com.expleague.sensearch.index.plain.features.TargetFeatureSet;
 import com.expleague.sensearch.miner.features.QURLItem;
+import com.expleague.sensearch.query.BaseQuery;
+import com.expleague.sensearch.query.Query;
 import com.google.inject.Guice;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
@@ -17,7 +24,10 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
+import java.util.Set;
 
 public class FilterPoolBuilder {
 
@@ -46,7 +56,33 @@ public class FilterPoolBuilder {
         queries.add(line);
       }
       FilterFeatures features = new FilterFeatures();
+      TargetFeatureSet targetFeatureSet = new TargetFeatureSet();
+
+      Pool.Builder<QURLItem> poolBuilder = Pool.builder(meta, features, targetFeatureSet);
+
+      for (int q = 0; q < queries.size(); q++) {
+        String queryString = queries.get(q);
+        if (Files.exists(Paths.get("./wordstat").resolve("query_" + queryString))) {
+          Query query = BaseQuery.create(queryString, index);
+          Set<String> uniqQURL = new HashSet<>();
+          index.fetchDocuments(query).map(p -> (IndexedPage) p)
+              .forEach(page -> {
+                poolBuilder.accept(new QURLItem(page, query));
+                poolBuilder.features().map(Functions.cast(FilterFeatures.class))
+                    .filter(Objects::nonNull)
+                    .forEach(fs -> {
+                      fs.
+                    });
+                poolBuilder.advance();
+              }
+          );
+        }
+      }
+      Pool<QURLItem> pool = poolBuilder.create();
+      DataTools.writePoolTo(pool, Files.newBufferedWriter(poolPath));
     } catch (IOException ignored) {
     }
   }
+
+
 }
