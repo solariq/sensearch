@@ -1,4 +1,4 @@
-package com.expleague.sensearch.miner.impl;
+package com.expleague.sensearch.miner.features;
 
 import com.expleague.commons.math.vectors.Vec;
 import com.expleague.commons.math.vectors.VecTools;

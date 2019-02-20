@@ -3,7 +3,7 @@ package com.expleague.sensearch.donkey.plain;
 import com.expleague.commons.seq.CharSeq;
 import com.expleague.commons.text.lemmer.LemmaInfo;
 import com.expleague.commons.text.lemmer.MyStem;
-import com.expleague.commons.text.lemmer.WordInfo;
+import com.expleague.commons.text.stem.Stemmer;
 import com.expleague.sensearch.core.Lemmer;
 import com.expleague.sensearch.core.PartOfSpeech;
 import com.expleague.sensearch.protobuf.index.IndexUnits;
@@ -14,10 +14,11 @@ import gnu.trove.map.TLongObjectMap;
 import gnu.trove.map.TObjectLongMap;
 import gnu.trove.map.hash.TLongObjectHashMap;
 import gnu.trove.map.hash.TObjectLongHashMap;
+import gnu.trove.set.TLongSet;
+import gnu.trove.set.hash.TLongHashSet;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import org.apache.log4j.Logger;
@@ -25,6 +26,8 @@ import org.iq80.leveldb.DB;
 import org.iq80.leveldb.WriteBatch;
 import org.iq80.leveldb.WriteOptions;
 import org.jetbrains.annotations.NotNull;
+
+import static com.expleague.sensearch.donkey.utils.BrandNewIdGenerator.termIdGenerator;
 
 public class TermBuilder implements AutoCloseable {
 
@@ -41,7 +44,6 @@ public class TermBuilder implements AutoCloseable {
   private final MyStem myStem;
   private final TLongObjectMap<ParsedTerm> terms = new TLongObjectHashMap<>();
   private final Map<CharSeq, ParsedTerm> termsCache = new HashMap<>();
-  private final IdGenerator idGenerator;
   private final Map<CharSeq, LemmaInfo> cachedLemmas = new LinkedHashMap<CharSeq, LemmaInfo>() {
     @Override
     protected boolean removeEldestEntry(Entry entry) {
@@ -49,10 +51,11 @@ public class TermBuilder implements AutoCloseable {
     }
   };
 
-  public TermBuilder(DB termDb, Lemmer lemmer, IdGenerator idGenerator) {
+  private final TLongSet knownTermIds = new TLongHashSet();
+
+  public TermBuilder(DB termDb, Lemmer lemmer) {
     this.termDb = termDb;
     this.myStem = lemmer.myStem;
-    this.idGenerator = idGenerator;
   }
 
   /**
@@ -70,15 +73,16 @@ public class TermBuilder implements AutoCloseable {
     word = CharSeq.intern(word);
     LemmaInfo lemma = cachedLemmas.get(word);
     if (lemma == null) {
-      final List<WordInfo> parse = myStem.parse(word);
-      lemma = parse.size() > 0 ? parse.get(0).lemma() : null;
+      /*final List<WordInfo> parse = myStem.parse(word);
+      lemma = parse.size() > 0 ? parse.get(0).lemma() : null;*/
+      lemma = new LemmaInfo(CharSeq.create(Stemmer.getInstance().stem(word)), 0, com.expleague.commons.text.lemmer.PartOfSpeech.S);
       cachedLemmas.put(CharSeq.intern(word), lemma);
     }
 
     long wordId = idMapping.get(word);
     if (wordId == idMapping.getNoEntryValue()) {
       // Ids start from 1
-      wordId = idGenerator.termId(word);
+      wordId = termIdGenerator(word).next(knownTermIds);
       idMapping.put(word, wordId);
     }
 
@@ -93,7 +97,7 @@ public class TermBuilder implements AutoCloseable {
     long lemmaId = idMapping.get(lemma.lemma());
     if (lemmaId == idMapping.getNoEntryValue()) {
       // Ids start from 1
-      lemmaId = idGenerator.termId(lemma.lemma());
+      lemmaId = termIdGenerator(lemma.lemma()).next(knownTermIds);
       idMapping.put(lemma.lemma(), lemmaId);
     }
 

@@ -43,7 +43,6 @@ class PlainPageBuilder implements AutoCloseable {
   private final DB plainDb;
 
   private final Path temporaryIndexRoot;
-  private final IdGenerator idGenerator;
 
   private OutputStream temporaryIndexOs;
 
@@ -71,10 +70,9 @@ class PlainPageBuilder implements AutoCloseable {
    *     not exist it will be created. It will be deleted after build() is called
    * @throws IOException if it is failed to create root directory
    */
-  PlainPageBuilder(DB plainDb, Path tempFilesRoot, IdGenerator idGenerator) throws IOException {
+  PlainPageBuilder(DB plainDb, Path tempFilesRoot) throws IOException {
     this.plainDb = plainDb;
     this.temporaryIndexRoot = tempFilesRoot;
-    this.idGenerator = idGenerator;
 
     Files.createDirectories(tempFilesRoot);
     temporaryIndexOs = Files.newOutputStream(tempFilesRoot.resolve(TEMP_INDEX_FILE));
@@ -131,10 +129,8 @@ class PlainPageBuilder implements AutoCloseable {
    *     when build() is called
    * @param categories the categories page belongs to
    * @param uri URI of the page. URIs must be unique among the collection
-   * @return id associated with this page. This id will be equal to the id of the root (first)
-   *     section
    */
-  long startPage(long originalPageId, List<? extends CharSequence> categories, URI uri) {
+    void startPage(long originalPageId, long pageId, List<? extends CharSequence> categories, URI uri) {
     if (isProcessingPage) {
       throw new IllegalStateException("Duplicate startPage call: page is already being processed");
     }
@@ -142,11 +138,10 @@ class PlainPageBuilder implements AutoCloseable {
     isProcessingPage = true;
     hasSection = false;
 
-    curPageId = idGenerator.pageId(uri);
+    curPageId = pageId;
     wikiIdToIndexId.put(originalPageId, curPageId);
     this.categories = categories.stream().map(CharSequence::toString).collect(Collectors.toList());
     parentPagesStack.clear();
-    return curPageId;
   }
 
   /**
@@ -154,11 +149,8 @@ class PlainPageBuilder implements AutoCloseable {
    * that is each page has links to its children and to its parent
    *
    * @param section section of a crawler document
-   * @return id of the section. Id of the root (first) section of the page equals to the id returned
-   *     by {@link #startPage}
    */
-  long addSection(CrawlerDocument.Section section) {
-    long sectionId = hasSection ? idGenerator.sectionId(section.uri()) : curPageId;
+  void addSection(CrawlerDocument.Section section, long sectionId) {
     hasSection = true;
 
     for (Link link : section.links()) {
@@ -171,7 +163,7 @@ class PlainPageBuilder implements AutoCloseable {
       linkBuilders.add(linkBuilder);
     }
 
-    List<? extends CharSequence> sectionTitleSeq = section.title();
+    List<? extends CharSequence> sectionTitleSeq = section.titles();
     int sectionDepth = sectionTitleSeq.size();
 
     if (sectionDepth - parentPagesStack.size() > 1) {
@@ -204,8 +196,6 @@ class PlainPageBuilder implements AutoCloseable {
     }
 
     parentPagesStack.addLast(pageBuilder);
-
-    return sectionId;
   }
 
   /**

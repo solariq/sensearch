@@ -202,7 +202,15 @@ public class XMLParser {
                 createUri(pageUri, newSectionTitle.get(j), uriSet)));
       }
     }
+
+    if (newSections.size() > 0) {
+      Section section = newSections.get(0);
+      newSections.set(0,
+          new WikiSection(section.text(), Collections.singletonList(section.title()),
+              section.links(), page.uri()));
+    }
     page.setSections(newSections);
+
     return page;
   }
 

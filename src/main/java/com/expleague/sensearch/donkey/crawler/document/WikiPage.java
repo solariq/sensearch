@@ -101,8 +101,13 @@ public class WikiPage implements CrawlerDocument {
     }
 
     @Override
-    public List<CharSequence> title() {
+    public List<CharSequence> titles() {
       return title;
+    }
+
+    @Override
+    public CharSequence title() {
+      return title.get(title.size() - 1);
     }
 
     @Override

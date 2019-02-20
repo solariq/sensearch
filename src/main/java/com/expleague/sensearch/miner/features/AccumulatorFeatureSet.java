@@ -1,4 +1,4 @@
-package com.expleague.sensearch.miner.impl;
+package com.expleague.sensearch.miner.features;
 
 import com.expleague.commons.func.Functions;
 import com.expleague.commons.math.vectors.Vec;
@@ -8,7 +8,7 @@ import com.expleague.sensearch.Page;
 import com.expleague.sensearch.Page.SegmentType;
 import com.expleague.sensearch.core.Term;
 import com.expleague.sensearch.index.Index;
-import com.expleague.sensearch.miner.impl.TextFeatureSet.Segment;
+import com.expleague.sensearch.miner.features.TextFeatureSet.Segment;
 import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;

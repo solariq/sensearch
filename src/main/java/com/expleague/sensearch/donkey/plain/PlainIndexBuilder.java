@@ -1,5 +1,7 @@
 package com.expleague.sensearch.donkey.plain;
 
+import static com.expleague.sensearch.donkey.utils.BrandNewIdGenerator.pageIdGenerator;
+
 import com.expleague.commons.math.vectors.Vec;
 import com.expleague.commons.math.vectors.VecTools;
 import com.expleague.commons.seq.CharSeq;
@@ -16,6 +18,8 @@ import com.expleague.sensearch.donkey.crawler.Crawler;
 import com.expleague.sensearch.index.plain.PlainIndex;
 import com.google.inject.Inject;
 import gnu.trove.map.TLongObjectMap;
+import gnu.trove.set.TLongSet;
+import gnu.trove.set.hash.TLongHashSet;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
@@ -100,7 +104,6 @@ public class PlainIndexBuilder implements IndexBuilder {
   private final Crawler crawler;
   private final Lemmer lemmer;
   private final Tokenizer tokenizer = new TokenizerImpl();
-  private final IdGenerator idGenerator;
   private final Path indexRoot;
   private final Path embeddingVectorsPath;
 
@@ -109,14 +112,12 @@ public class PlainIndexBuilder implements IndexBuilder {
       Crawler crawler,
       @IndexRoot Path indexRoot,
       @EmbeddingVectorsPath Path embeddingVectorsPath,
-      Lemmer lemmer,
-      IdGenerator idGenerator) {
+      Lemmer lemmer) {
     this.crawler = crawler;
     this.indexRoot = indexRoot;
     this.embeddingVectorsPath = embeddingVectorsPath;
 
     this.lemmer = lemmer;
-    this.idGenerator = idGenerator;
   }
 
   /**
@@ -224,16 +225,15 @@ public class PlainIndexBuilder implements IndexBuilder {
     Files.createDirectories(indexRoot.resolve(EMBEDDING_ROOT));
     Files.createDirectories(indexRoot.resolve(SUGGEST_UNIGRAM_ROOT));
 
+    final TLongSet knownPageIds = new TLongHashSet();
     try (final PlainPageBuilder plainPageBuilder =
         new PlainPageBuilder(
             JniDBFactory.factory.open(indexRoot.resolve(PAGE_ROOT).toFile(), PAGE_DB_OPTIONS),
-            indexRoot.resolve(PAGE_ROOT).resolve("TMP"),
-            idGenerator);
+            indexRoot.resolve(PAGE_ROOT).resolve("TMP"));
         final TermBuilder termBuilder =
             new TermBuilder(
                 JniDBFactory.factory.open(indexRoot.resolve(TERM_ROOT).toFile(), TERM_DB_OPTIONS),
-                lemmer,
-                idGenerator);
+                lemmer);
         final StatisticsBuilder statisticsBuilder =
             new StatisticsBuilder(
                 JniDBFactory.factory.open(
@@ -248,8 +248,7 @@ public class PlainIndexBuilder implements IndexBuilder {
                     EMBEDDING_DB_OPTIONS),
                 indexRoot.resolve(EMBEDDING_ROOT),*/
                 jmllEmbedding,
-                tokenizer,
-                idGenerator);
+                tokenizer);
         final DB suggest_unigram_DB =
             JniDBFactory.factory.open(
                 indexRoot.resolve(SUGGEST_UNIGRAM_ROOT).toFile(), STATS_DB_OPTIONS);
@@ -274,19 +273,26 @@ public class PlainIndexBuilder implements IndexBuilder {
             .makeStream()
             .forEach(
                 doc -> {
-                  long rootPageId =
-                      plainPageBuilder.startPage(doc.id(), doc.categories(), doc.uri());
+                  long pageId = pageIdGenerator(doc.uri()).next(knownPageIds);
+                  // We don't add pageId to the knownPageIds as we need first section to have the
+                  // same Id
+                  // knownPageIds.add(pageId);
+                  plainPageBuilder.startPage(doc.id(), pageId, doc.categories(), doc.uri());
                   statisticsBuilder.startPage();
-                  indexMetaBuilder.startPage(rootPageId, doc.uri());
-                  embeddingBuilder.startPage(rootPageId);
+                  indexMetaBuilder.startPage(pageId, doc.uri());
+                  embeddingBuilder.startPage(doc.id(), pageId);
 
                   doc.sections()
                       .forEachOrdered(
                           s -> {
-                            long sectionId = plainPageBuilder.addSection(s);
-                            indexMetaBuilder.addSection(s.uri(), sectionId);
+                            long sectionId = pageIdGenerator(s.uri()).next(knownPageIds);
+                            knownPageIds.add(sectionId);
 
-                            List<CharSequence> sectionTitles = s.title();
+                            plainPageBuilder.addSection(s, sectionId);
+                            indexMetaBuilder.addSection(s.uri(), sectionId);
+                            embeddingBuilder.addSection(s, sectionId);
+
+                            List<CharSequence> sectionTitles = s.titles();
                             String sectionTitle =
                                 sectionTitles.get(sectionTitles.size() - 1).toString();
 
@@ -299,11 +305,14 @@ public class PlainIndexBuilder implements IndexBuilder {
                                       TermBuilder.ParsedTerm termLemmaId =
                                           termBuilder.addTerm(word);
                                       indexMetaBuilder.acceptTermId(termLemmaId.id);
-                                      statisticsBuilder.enrich(termLemmaId.id, termLemmaId.lemmaId);
+
+                                      long lemmaId =
+                                          termLemmaId.lemmaId == -1
+                                              ? termLemmaId.id
+                                              : termLemmaId.lemmaId;
+                                      statisticsBuilder.enrich(termLemmaId.id, lemmaId);
                                     });
                           });
-                  embeddingBuilder.addTitle(doc.title());
-                  embeddingBuilder.addText(doc.content().toString());
 
                   suggestBuilder.accept(toTermIds(doc.title(), termBuilder));
 

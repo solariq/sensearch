@@ -26,9 +26,18 @@ public class Stemmer implements MyStem {
                     CharSeq.create(word),
                     Collections.singletonList(
                         new LemmaInfo(
-                            CharSeq.create(stemmer.stem(word)),
+                            CharSeq.create(doStem(word.toString())),
                             1,
                             com.expleague.commons.text.lemmer.PartOfSpeech.S))))
         .collect(Collectors.toList());
+  }
+
+  private String doStem(String word) {
+    String newWord = stemmer.stem(word).toString();
+    while (!newWord.equals(word)) {
+      word = newWord;
+      newWord = stemmer.stem(word).toString();
+    }
+    return newWord;
   }
 }

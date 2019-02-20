@@ -11,9 +11,9 @@ import com.expleague.sensearch.Page.SegmentType;
 import com.expleague.sensearch.SenSeArch.ResultItem;
 import com.expleague.sensearch.core.impl.ResultItemImpl;
 import com.expleague.sensearch.index.Index;
-import com.expleague.sensearch.miner.impl.AccumulatorFeatureSet;
-import com.expleague.sensearch.miner.impl.QURLItem;
-import com.expleague.sensearch.miner.impl.TargetFeatureSet;
+import com.expleague.sensearch.miner.features.AccumulatorFeatureSet;
+import com.expleague.sensearch.miner.features.QURLItem;
+import com.expleague.sensearch.miner.features.TargetFeatureSet;
 import com.expleague.sensearch.query.BaseQuery;
 import com.expleague.sensearch.query.Query;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -41,7 +41,7 @@ public class RankingPoolBuilder {
 
   public static void main(String[] args) throws IOException {
     Injector injector = Guice.createInjector(new AppModule());
-    injector.getInstance(RankingPoolBuilder.class).build(Paths.get("test.pool"));
+    injector.getInstance(RankingPoolBuilder.class).build(Paths.get("ranking.pool"));
   }
 
   public void build(Path poolPath) {

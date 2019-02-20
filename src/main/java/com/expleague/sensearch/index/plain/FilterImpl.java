@@ -10,6 +10,8 @@ import gnu.trove.list.array.TLongArrayList;
 import java.util.Arrays;
 import java.util.function.LongPredicate;
 import java.util.stream.LongStream;
+import java.util.stream.Stream;
+
 import org.apache.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 
@@ -29,17 +31,21 @@ public class FilterImpl implements Filter {
   }
 
   @Override
-  // TODO: move filtrate method to Index and delete FilterImpl?
-  // NO, GOD, PLS NO!!
-  public LongStream filtrate(@NotNull Vec mainVec, int number, LongPredicate predicate) {
-    long startTime = System.nanoTime();
+  public Stream<Candidate> filtrate(@NotNull Vec qVec, LongPredicate predicate) {
+    return embedding.nearest(qVec, predicate);
+  }
+
+  @Override
+  // TODO: uncomment and fix
+  public Stream<Candidate> filtrate(@NotNull Vec qVec, LongPredicate predicate, int number) {
+    /*long startTime = System.nanoTime();
     LOG.info("Filtering started");
 
     int embNumber = number * START_MULTIPLIER;
     TLongList result = new TLongArrayList();
     while (embNumber < maxItems) {
       result.clear();
-      embedding.nearest(mainVec, embNumber, predicate).forEach(result::add);
+      embedding.nearest(qVec, embNumber, predicate).forEach(result::add);
       if (result.size() >= number) {
         LOG.info(
             String.format(
@@ -48,10 +54,12 @@ public class FilterImpl implements Filter {
       }
       embNumber *= 2;
     }
-    return Arrays.stream(result.subList(0, Math.min(number, result.size())).toArray());
+    return Arrays.stream(result.subList(0, Math.min(number, result.size())).toArray());*/
+    return embedding.nearest(qVec, predicate, number);
   }
 
-  public LongStream filtrate(@NotNull Vec mainVec, double maxDistance, LongPredicate predicate) {
-    return embedding.nearest(mainVec, maxDistance, predicate);
+  @Override
+  public Stream<Candidate> filtrate(@NotNull Vec qVec, LongPredicate predicate, double maxDistance) {
+    return embedding.nearest(qVec, predicate, maxDistance);
   }
 }

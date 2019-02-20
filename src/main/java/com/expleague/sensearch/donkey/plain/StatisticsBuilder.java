@@ -153,15 +153,33 @@ public class StatisticsBuilder implements AutoCloseable {
     final TermStatistics.Builder tsBuilder = TermStatistics.newBuilder();
     wordFrequencyMap.forEachKey(
         k -> {
+          long lemmaId = termToLemma.get(k);
+
           writeBatch.put(
               Longs.toByteArray(k),
               tsBuilder
                   .setTermId(k)
                   .setTermFrequency(wordFrequencyMap.get(k))
                   .setDocumentFrequency(documentFrequencyMap.get(k))
-                  .setDocumentLemmaFrequency(documentFrequencyByLemmaMap.get(termToLemma.get(k)))
+                  .setDocumentLemmaFrequency(documentFrequencyByLemmaMap.get(lemmaId))
                   .addAllBigramFrequency(
                       mostFrequentBigrams(largeBigramsMap.get(k), MOST_FREQUENT_BIGRAMS_COUNT))
+                  .build()
+                  .toByteArray());
+
+          tsBuilder.clear();
+
+          // TODO: write lemma only once
+          writeBatch.put(
+              Longs.toByteArray(lemmaId),
+              tsBuilder
+                  .setTermId(lemmaId)
+                  .setTermFrequency(wordFrequencyMap.get(lemmaId))
+                  .setDocumentFrequency(documentFrequencyMap.get(lemmaId))
+                  .setDocumentLemmaFrequency(documentFrequencyByLemmaMap.get(lemmaId))
+                  .addAllBigramFrequency(
+                      mostFrequentBigrams(largeBigramsMap.get(lemmaId),
+                          MOST_FREQUENT_BIGRAMS_COUNT))
                   .build()
                   .toByteArray());
 

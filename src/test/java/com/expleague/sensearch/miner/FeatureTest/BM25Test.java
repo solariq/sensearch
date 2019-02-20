@@ -2,10 +2,10 @@ package com.expleague.sensearch.miner.FeatureTest;
 
 import com.expleague.commons.math.vectors.Vec;
 import com.expleague.sensearch.Page;
-import com.expleague.sensearch.miner.impl.BM25FeatureSet;
-import com.expleague.sensearch.miner.impl.QURLItem;
-import com.expleague.sensearch.miner.impl.TextFeatureSet;
-import com.expleague.sensearch.miner.impl.TextFeatureSet.Segment;
+import com.expleague.sensearch.miner.features.BM25FeatureSet;
+import com.expleague.sensearch.miner.features.QURLItem;
+import com.expleague.sensearch.miner.features.TextFeatureSet;
+import com.expleague.sensearch.miner.features.TextFeatureSet.Segment;
 import com.expleague.sensearch.query.BaseQuery;
 import com.expleague.sensearch.query.Query;
 import com.expleague.sensearch.utils.IndexBasedTestCase;
@@ -111,7 +111,7 @@ public class BM25Test extends IndexBasedTestCase {
     testBM25 = new BM25FeatureSet();
     Query query = BaseQuery.create("Правитель", index());
     QURLItem item = new QURLItem(new TestPage(), query);
-//    index().parse(PAGE_2).forEach(t -> System.err.println(t.lemma().text()));
+    //index().parse(PAGE_2).forEach(t -> System.err.println(t.lemma().text()));
     testBM25.accept(item);
     init(TITLE_2, PAGE_2);
 
@@ -121,7 +121,7 @@ public class BM25Test extends IndexBasedTestCase {
 
     Vec resBM25 = testBM25.advance();
     double scoreBM25 = Math.log((double) TMP_INDEX_SIZE / query.terms().get(0).documentFreq()) * 4 / (4 + K * (1 - B + B * totLen / averageTotalLen));
-    double scoreBM25L = Math.log((double) TMP_INDEX_SIZE / query.terms().get(0).documentLemmaFreq()) * 4 / (4 + K * (1 - B + B * totLen / averageTotalLen));
+    double scoreBM25L = Math.log((double) TMP_INDEX_SIZE / query.terms().get(0).documentLemmaFreq()) * 5 / (5 + K * (1 - B + B * totLen / averageTotalLen));
     System.err.println("Query: Правитель   Vec: " + resBM25);
     Assert.assertEquals(0, Double.compare(resBM25.get(0), scoreBM25));
     Assert.assertEquals(0, Double.compare(resBM25.get(1), scoreBM25L));

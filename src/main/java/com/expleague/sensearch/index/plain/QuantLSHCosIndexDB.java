@@ -1,6 +1,7 @@
 package com.expleague.sensearch.index.plain;
 
 import com.expleague.commons.math.vectors.Vec;
+import com.expleague.commons.math.vectors.VecTools;
 import com.expleague.commons.math.vectors.impl.nn.lsh.BaseQuantLSHCosIndex;
 import com.expleague.commons.math.vectors.impl.nn.lsh.CosDistanceHashFunction;
 import com.expleague.commons.math.vectors.impl.vectors.ArrayVec;
@@ -9,6 +10,9 @@ import com.expleague.sensearch.donkey.plain.ByteTools;
 import com.google.common.primitives.Longs;
 import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.list.array.TLongArrayList;
+import org.iq80.leveldb.DB;
+import org.jetbrains.annotations.Nullable;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -16,7 +20,6 @@ import java.util.List;
 import java.util.stream.DoubleStream;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
-import org.iq80.leveldb.DB;
 
 public class QuantLSHCosIndexDB extends BaseQuantLSHCosIndex implements AutoCloseable {
     private static final long SPECIAL_ID_1 = Long.MAX_VALUE - 3;
@@ -39,7 +42,7 @@ public class QuantLSHCosIndexDB extends BaseQuantLSHCosIndex implements AutoClos
     public Stream<Entry> nearest(Vec query) {
         return baseNearest(query, idx -> {
             long id = ids.getQuick(idx);
-            return ByteTools.toVec(vecDB.get(Longs.toByteArray(id)));
+            return VecTools.normalizeL2(ByteTools.toVec(vecDB.get(Longs.toByteArray(id))));
         });
     }
 
@@ -53,6 +56,15 @@ public class QuantLSHCosIndexDB extends BaseQuantLSHCosIndex implements AutoClos
     public synchronized void remove(long id) {
         baseRemove(id);
         vecDB.delete(Longs.toByteArray(id));
+    }
+
+    @Nullable
+    public Vec get(long id) {
+        byte[] bytes = vecDB.get(Longs.toByteArray(id));
+        if (bytes != null) {
+            return ByteTools.toVec(bytes);
+        }
+        return null;
     }
 
     public void save() throws IOException {
@@ -111,9 +123,8 @@ public class QuantLSHCosIndexDB extends BaseQuantLSHCosIndex implements AutoClos
             final int currentDim = Math.min(quantDim, dim - i);
             for (int b = 0; b < SKETCH_BITS_PER_QUANT; b++) {
                 int index = i / quantDim * SKETCH_BITS_PER_QUANT + b;
-                hashes[index] = new CosDistanceHashFunction(
-                        new ArrayVec(Arrays.copyOfRange(allCoords, index * currentDim, (index + 1) * currentDim))
-                ) { // quant sketch
+                final Vec w = new ArrayVec(Arrays.copyOfRange(allCoords, i * SKETCH_BITS_PER_QUANT + b * currentDim, i * SKETCH_BITS_PER_QUANT + (b + 1) * currentDim));
+                hashes[index] = new CosDistanceHashFunction(w) { // quant sketch
                     @Override
                     public int hash(Vec v) {
                         return super.hash(v.sub(finalI, currentDim));

@@ -46,7 +46,7 @@
 //      Query query = new QueryStub(entry.getKey());
 //      Stream<Page> pageStream = index.fetchDocuments(query);
 //      Assert.assertTrue(pageStream.anyMatch(
-//          p -> Arrays.stream(entry.getValue()).anyMatch(w -> p.title().toString().contains(w))));
+//          p -> Arrays.stream(entry.getValue()).anyMatch(w -> p.titles().toString().contains(w))));
 //    }
 //  }
 //
