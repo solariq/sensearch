@@ -7,7 +7,7 @@ import com.expleague.sensearch.miner.features.QURLItem;
 
 public class FilterFeatures extends FeatureSet.Stub<QURLItem> implements EmbeddingFeatures {
     private final static FeatureMeta TITLE = FeatureMeta
-            .create("dist-titles", "cos distance between Query and Title", FeatureMeta.ValueType.VEC);
+            .create("dist-title", "cos distance between Query and Title", FeatureMeta.ValueType.VEC);
     private final static FeatureMeta SECTION = FeatureMeta
             .create("dist-section", "cos distance between Query and Nearest Section Body", FeatureMeta.ValueType.VEC);
     private final static FeatureMeta LINK = FeatureMeta
