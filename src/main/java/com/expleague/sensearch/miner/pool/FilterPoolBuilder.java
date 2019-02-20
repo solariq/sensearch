@@ -71,7 +71,6 @@ public class FilterPoolBuilder {
                 poolBuilder.features().map(Functions.cast(FilterFeatures.class))
                     .filter(Objects::nonNull)
                     .forEach(fs -> {
-                      fs.
                     });
                 poolBuilder.advance();
               }
