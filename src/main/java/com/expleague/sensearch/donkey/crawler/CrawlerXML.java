@@ -46,7 +46,7 @@ public class CrawlerXML implements Crawler {
 
   @Override
   public Stream<CrawlerDocument> makeStream() throws IOException {
-    if (path.endsWith(".zip")) {
+    if (path.toString().endsWith(".zip")) {
       return StreamSupport.stream(
           Spliterators.spliteratorUnknownSize(
               new MultipleDocumentIterator(path), Spliterator.ORDERED | Spliterator.SORTED),
