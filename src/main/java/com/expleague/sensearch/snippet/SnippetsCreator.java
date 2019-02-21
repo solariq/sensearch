@@ -112,7 +112,7 @@ public class SnippetsCreator {
             .limit(NUMBER_OF_KEYWORDS)
             .collect(Collectors.toList());
 
-    /*passages =
+    passages =
         passages
             .stream()
             .peek(
@@ -132,9 +132,9 @@ public class SnippetsCreator {
     for (Passage passage : passages) {
       double newRating =
           (passage.rating() / best)
-              * lengthEvaluation(passage)
+              //* lengthEvaluation(passage)
               // * positionEvaluation(passage, passages.size())
-              * questionEvaluation(passage)
+              //* questionEvaluation(passage)
           // * queryEvaluation(passage, query)
           // * queryEvaluationWithLemma(passage, query)
           ;
@@ -148,11 +148,11 @@ public class SnippetsCreator {
         passages
             .stream()
             .sorted(Comparator.comparing(Passage::rating).reversed())
-            .limit(PASSAGES_IN_SNIPPET)
+            .limit(4)
             // .sorted(Comparator.comparingLong(Passage::getId))
             .collect(Collectors.toList());
-    */
 
+    /*
     final AccumulatorFeatureSet features = new AccumulatorFeatureSet(index);
     features.withKeyWords(keyWords);
 
@@ -165,7 +165,7 @@ public class SnippetsCreator {
       System.out.print(passage.sentence() + " : ");
       System.out.println(all);
 
-      /*passagesFeatures.put(
+      passagesFeatures.put(
           passage,
           new Features() {
             @Override
@@ -192,14 +192,11 @@ public class SnippetsCreator {
               return features.dim();
             }
           }
-      );*/
+      );
     });
+    */
 
-
-
-
-
-    return new DocBasedSnippet(title, new ArrayList<>(), query);
+    return new DocBasedSnippet(title, bestPassages, query);
   }
 
 }
