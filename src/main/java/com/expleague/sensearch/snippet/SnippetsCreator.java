@@ -11,6 +11,7 @@ import com.expleague.sensearch.core.PartOfSpeech;
 import com.expleague.sensearch.core.Term;
 import com.expleague.sensearch.index.Index;
 import com.expleague.sensearch.miner.Features;
+import com.expleague.sensearch.miner.FeaturesImpl;
 import com.expleague.sensearch.query.Query;
 import com.expleague.sensearch.snippet.docbased_snippet.DocBasedSnippet;
 import com.expleague.sensearch.snippet.docbased_snippet.KeyWord;
@@ -18,7 +19,6 @@ import com.expleague.sensearch.snippet.features.AccumulatorFeatureSet;
 import com.expleague.sensearch.snippet.features.QPASItem;
 import com.expleague.sensearch.snippet.passage.Passage;
 import com.google.inject.Inject;
-import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -119,32 +119,7 @@ public class SnippetsCreator {
       Vec all = features.advance();
 
       passagesFeatures.put(
-          passage,
-          new Features() {
-            @Override
-            public Vec features() {
-              return all;
-            }
-
-            @Override
-            public Vec features(FeatureMeta... metas) {
-              return new ArrayVec(
-                  Stream.of(metas)
-                      .mapToInt(features::index)
-                      .mapToDouble(all::get)
-                      .toArray());
-            }
-
-            @Override
-            public FeatureMeta meta(int index) {
-              return features.meta(index);
-            }
-
-            @Override
-            public int dim() {
-              return features.dim();
-            }
-          }
+          passage, new FeaturesImpl(features, all)
       );
     });
 
