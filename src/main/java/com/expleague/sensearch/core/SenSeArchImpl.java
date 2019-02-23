@@ -39,6 +39,8 @@ public class SenSeArchImpl implements SenSeArch {
     phases.add(searchPhaseFactory.createQueryPhase());
 
     for (int i = 0; i < wb.queriesNumber(); ++i) {
+      phases.add(searchPhaseFactory.createFilterMinerPhase(i));
+      phases.add(searchPhaseFactory.createFilterRankingPhase(i));
       phases.add(searchPhaseFactory.createMinerPhase(i));
       phases.add(searchPhaseFactory.createRankingPhase(i));
       phases.add(searchPhaseFactory.createSnippetPhase(i));

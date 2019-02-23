@@ -1,4 +1,4 @@
-package com.expleague.sensearch.index.plain.features;
+package com.expleague.sensearch.filter.features;
 
 import com.expleague.commons.math.vectors.Vec;
 import com.expleague.commons.seq.CharSeq;

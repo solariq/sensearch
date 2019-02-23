@@ -11,6 +11,7 @@ import com.expleague.sensearch.core.Annotations.FilterMaxItems;
 import com.expleague.sensearch.core.Annotations.IndexRoot;
 import com.expleague.sensearch.core.Annotations.MetricPath;
 import com.expleague.sensearch.core.Annotations.PageSize;
+import com.expleague.sensearch.core.Annotations.RankFilterModel;
 import com.expleague.sensearch.core.Annotations.RankModel;
 import com.expleague.sensearch.core.Annotations.UseLshFlag;
 import com.expleague.sensearch.core.Lemmer;
@@ -22,10 +23,10 @@ import com.expleague.sensearch.donkey.crawler.Crawler;
 import com.expleague.sensearch.donkey.crawler.CrawlerXML;
 import com.expleague.sensearch.donkey.plain.PlainIndexBuilder;
 import com.expleague.sensearch.index.Embedding;
-import com.expleague.sensearch.index.Filter;
+import com.expleague.sensearch.filter.Filter;
 import com.expleague.sensearch.index.Index;
 import com.expleague.sensearch.index.plain.EmbeddingImpl;
-import com.expleague.sensearch.index.plain.FilterImpl;
+import com.expleague.sensearch.filter.FilterImpl;
 import com.expleague.sensearch.index.plain.PlainIndex;
 import com.expleague.sensearch.metrics.RequestCrawler;
 import com.expleague.sensearch.metrics.WebCrawler;
@@ -129,5 +130,13 @@ public class AppModule extends AbstractModule {
   Pair<Function, FeatureMeta[]> getRankModel() throws IOException {
     return DataTools.readModel(
         new InputStreamReader(Files.newInputStream(config.getModelPath()), StandardCharsets.UTF_8));
+  }
+
+  @Provides
+  @Singleton
+  @RankFilterModel
+  Pair<Function, FeatureMeta[]> getRankFilterModel() throws IOException {
+    return DataTools.readModel(
+        new InputStreamReader(Files.newInputStream(config.getFilterModelPath()), StandardCharsets.UTF_8));
   }
 }

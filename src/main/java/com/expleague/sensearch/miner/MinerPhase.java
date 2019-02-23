@@ -10,6 +10,7 @@ import com.expleague.sensearch.miner.features.QURLItem;
 import com.expleague.sensearch.query.Query;
 import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -19,15 +20,14 @@ import org.apache.log4j.Logger;
  * Created by sandulmv on 02.11.18.
  */
 public class MinerPhase implements SearchPhase {
+
   private static final Logger LOG = Logger.getLogger(MinerPhase.class.getName());
 
-  private final Index index;
   private final AccumulatorFeatureSet features;
   private final int phaseId;
 
   @Inject
   public MinerPhase(Index index, @Assisted int phaseId) {
-    this.index = index;
     this.features = new AccumulatorFeatureSet(index);
     this.phaseId = phaseId;
   }
@@ -46,8 +46,7 @@ public class MinerPhase implements SearchPhase {
 
     final Map<Page, Features> documentsFeatures = new HashMap<>();
     Query query = Objects.requireNonNull(whiteboard.query()).get(phaseId);
-    index
-        .fetchDocuments(query)
+    Arrays.stream(whiteboard.subFilterResults().get(phaseId))
         .forEach(
             page -> {
               features.accept(new QURLItem(page, query));

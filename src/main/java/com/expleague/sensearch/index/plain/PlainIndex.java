@@ -5,7 +5,6 @@ import com.expleague.commons.math.vectors.VecTools;
 import com.expleague.commons.math.vectors.impl.vectors.ArrayVec;
 import com.expleague.commons.seq.CharSeq;
 import com.expleague.commons.seq.CharSeqTools;
-import com.expleague.commons.util.Pair;
 import com.expleague.sensearch.Page;
 import com.expleague.sensearch.core.Annotations.IndexRoot;
 import com.expleague.sensearch.core.PartOfSpeech;
@@ -14,11 +13,10 @@ import com.expleague.sensearch.core.Tokenizer;
 import com.expleague.sensearch.core.impl.TokenizerImpl;
 import com.expleague.sensearch.donkey.plain.IdUtils;
 import com.expleague.sensearch.donkey.plain.PlainIndexBuilder;
+import com.expleague.sensearch.filter.Filter;
+import com.expleague.sensearch.filter.features.FilterFeatures;
 import com.expleague.sensearch.index.Embedding;
-import com.expleague.sensearch.index.Filter;
 import com.expleague.sensearch.index.Index;
-import com.expleague.sensearch.index.IndexedPage;
-import com.expleague.sensearch.index.plain.features.FilterFeatures;
 import com.expleague.sensearch.metrics.LSHSynonymsMetric;
 import com.expleague.sensearch.miner.Features;
 import com.expleague.sensearch.miner.FeaturesImpl;
@@ -44,7 +42,6 @@ import java.net.URLEncoder;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -78,7 +75,6 @@ public class PlainIndex implements Index {
 
   private static final Logger LOG = Logger.getLogger(PlainIndex.class.getName());
 
-  private static final int FILTERED_DOC_NUMBER = 500;
   private static final int SYNONYMS_COUNT = 50;
 
   private final Map<CharSeq, Term> wordToTerms = new HashMap<>();
@@ -300,57 +296,6 @@ public class PlainIndex implements Index {
   }
 
   @Override
-  public Stream<Page> fetchDocuments(Query query) {
-    return fetchDocuments(query, FILTERED_DOC_NUMBER);
-  }
-
-  public Stream<Page> fetchDocuments(Query query, int num) {
-    final Vec qVec = vecByTerms(query.terms());
-    TLongObjectMap<List<Candidate>> pageIdToCandidatesMap = new TLongObjectHashMap<>();
-    filter
-            .filtrate(qVec, PlainIndex::isSectionId, 0.5)
-            .limit(num)
-            .forEach(candidate -> {
-              long pageId = candidate.getPageId();
-              if (!pageIdToCandidatesMap.containsKey(pageId)) {
-                pageIdToCandidatesMap.put(pageId, new ArrayList<>());
-              }
-              pageIdToCandidatesMap.get(pageId).add(candidate);
-            });
-    Map<Page, Features> allFilterFeatures = new HashMap<>();
-    pageIdToCandidatesMap.forEachEntry((pageId, candidates) -> {
-      IndexedPage page = PlainPage.create(pageId, this);
-      filterFeatures.accept(new QURLItem(page, query));
-      candidates.forEach(candidate -> {
-        long id = candidate.getId();
-        if (IdUtils.isSecTitleId(id)) {
-          filterFeatures.withTitle(candidate.getDist());
-        } else if (IdUtils.isSecTextId(id)) {
-          filterFeatures.withBody(candidate.getDist());
-        } else if (IdUtils.isLinkId(id)) {
-          filterFeatures.withLink(candidate.getDist());
-        }
-      });
-      Vec vec = filterFeatures.advance();
-      page.setTitleDist(vec.get(0));
-      page.setBodyDist(vec.get(1));
-      page.setLinkDist(vec.get(2));
-      allFilterFeatures.put(page, new FeaturesImpl(filterFeatures, vec));
-      return true;
-    });
-    return allFilterFeatures.entrySet()
-            .stream()
-            .map(p -> Pair.create(p.getKey(), rank(p.getValue().features())))
-            .sorted(Comparator.<Pair<Page, Double>>comparingDouble(Pair::getSecond).reversed())
-            .map(Pair::getFirst)
-            .limit(num);
-  }
-
-  private double rank(Vec features) {
-    return features.get(0);
-  }
-
-  @Override
   public Stream<Page> allDocuments() {
     DBIterator iterator = pageBase.iterator();
     iterator.seekToFirst();
@@ -418,6 +363,41 @@ public class PlainIndex implements Index {
     LOG.info("LSHSynonymsMetric: " + result);*/
 
     return filter.filtrate(termVec, PlainIndex::isWordId, SYNONYMS_COUNT).map(c -> idToTerm.get(c.getId()));
+  }
+
+  @Override
+  public Map<Page, Features> fetchDocuments(Query query, int num) {
+    final Vec qVec = vecByTerms(query.terms());
+    TLongObjectMap<List<Candidate>> pageIdToCandidatesMap = new TLongObjectHashMap<>();
+    filter
+        .filtrate(qVec, PlainIndex::isSectionId, 0.5)
+        .limit(num)
+        .forEach(candidate -> {
+          long pageId = candidate.getPageId();
+          if (!pageIdToCandidatesMap.containsKey(pageId)) {
+            pageIdToCandidatesMap.put(pageId, new ArrayList<>());
+          }
+          pageIdToCandidatesMap.get(pageId).add(candidate);
+        });
+    Map<Page, Features> allFilterFeatures = new HashMap<>();
+    pageIdToCandidatesMap.forEachEntry((pageId, candidates) -> {
+      Page page = PlainPage.create(pageId, this);
+      filterFeatures.accept(new QURLItem(page, query));
+      candidates.forEach(candidate -> {
+        long id = candidate.getId();
+        if (IdUtils.isSecTitleId(id)) {
+          filterFeatures.withTitle(candidate.getDist());
+        } else if (IdUtils.isSecTextId(id)) {
+          filterFeatures.withBody(candidate.getDist());
+        } else if (IdUtils.isLinkId(id)) {
+          filterFeatures.withLink(candidate.getDist());
+        }
+      });
+      Vec vec = filterFeatures.advance();
+      allFilterFeatures.put(page, new FeaturesImpl(filterFeatures, vec));
+      return true;
+    });
+    return allFilterFeatures;
   }
 
   int documentFrequency(Term term) {

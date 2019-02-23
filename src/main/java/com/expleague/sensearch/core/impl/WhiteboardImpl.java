@@ -18,11 +18,14 @@ public class WhiteboardImpl implements Whiteboard {
   private final int queriesNumber = 1;
   private Page[] results;
   private List<Page[]> subResults = new ArrayList<>(queriesNumber);
+  private List<Page[]> subFilterResults = new ArrayList<>(queriesNumber);
   private Snippet[] snippets;
   private List<Query> queries;
   private List<Map<Page, Features>> textFeatures = new ArrayList<>(queriesNumber);
+  private List<Map<Page, Features>> filterFeatures = new ArrayList<>(queriesNumber);
   private ResultItem[] googleResults;
   private Map<Page, Double> pageScores;
+  private Map<Page, Double> pageFilterScores;
 
   public WhiteboardImpl(String input, int page) {
     this.input = input;
@@ -40,13 +43,28 @@ public class WhiteboardImpl implements Whiteboard {
   }
 
   @Override
+  public synchronized List<Map<Page, Features>> filterFeatures() {
+    return filterFeatures;
+  }
+
+  @Override
   public synchronized void putTextFeatures(List<Map<Page, Features>> textFeatures) {
     this.textFeatures = textFeatures;
   }
 
   @Override
+  public void putFilterFeatures(List<Map<Page, Features>> filterFeatures) {
+    this.filterFeatures = filterFeatures;
+  }
+
+  @Override
   public synchronized void putTextFeatures(Map<Page, Features> textFeatures, int index) {
       this.textFeatures.set(index, textFeatures);
+  }
+
+  @Override
+  public void putFilterFeatures(Map<Page, Features> filterFeatures, int index) {
+    this.filterFeatures.set(index, filterFeatures);
   }
 
   @Nullable
@@ -56,8 +74,18 @@ public class WhiteboardImpl implements Whiteboard {
   }
 
   @Override
+  public Map<Page, Double> pageFilterScores() {
+    return pageFilterScores;
+  }
+
+  @Override
   public synchronized void putPageScores(Map<Page, Double> scores) {
     this.pageScores = scores;
+  }
+
+  @Override
+  public void putPageFilterScores(Map<Page, Double> scores) {
+    this.pageFilterScores = scores;
   }
 
   @Nullable
@@ -78,13 +106,28 @@ public class WhiteboardImpl implements Whiteboard {
   }
 
   @Override
+  public List<Page[]> subFilterResults() {
+    return subFilterResults;
+  }
+
+  @Override
   public synchronized void putSubResults(List<Page[]> subResults) {
     this.subResults = subResults;
   }
 
   @Override
+  public void putSubFilterResults(List<Page[]> subResults) {
+    subFilterResults = subResults;
+  }
+
+  @Override
   public synchronized void putSubResult(Page[] subResult, int index) {
     this.subResults.set(index, subResult);
+  }
+
+  @Override
+  public void putSubFilterResult(Page[] subResult, int index) {
+    subFilterResults.set(index, subResult);
   }
 
   @Override

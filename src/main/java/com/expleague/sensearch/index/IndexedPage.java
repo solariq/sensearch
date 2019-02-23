@@ -11,12 +11,4 @@ public interface IndexedPage extends Page {
   long id();
   long parentId();
   LongStream subpagesIds();
-
-  double getTitleDist();
-  double getBodyDist();
-  double getLinkDist();
-
-  void setTitleDist(double d);
-  void setBodyDist(double d);
-  void setLinkDist(double d);
 }

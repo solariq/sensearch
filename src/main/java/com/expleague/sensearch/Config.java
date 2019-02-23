@@ -33,4 +33,6 @@ public interface Config {
   int maxFilterItems();
 
   Path getModelPath();
+
+  Path getFilterModelPath();
 }

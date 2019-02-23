@@ -1,4 +1,4 @@
-package com.expleague.sensearch.index;
+package com.expleague.sensearch.filter;
 
 import com.expleague.commons.math.vectors.Vec;
 import java.util.function.LongPredicate;

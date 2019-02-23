@@ -1,15 +1,11 @@
-package com.expleague.sensearch.index.plain;
+package com.expleague.sensearch.filter;
 
 import com.expleague.commons.math.vectors.Vec;
 import com.expleague.sensearch.core.Annotations.FilterMaxItems;
 import com.expleague.sensearch.index.Embedding;
-import com.expleague.sensearch.index.Filter;
+import com.expleague.sensearch.index.plain.Candidate;
 import com.google.inject.Inject;
-import gnu.trove.list.TLongList;
-import gnu.trove.list.array.TLongArrayList;
-import java.util.Arrays;
 import java.util.function.LongPredicate;
-import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
 import org.apache.log4j.Logger;

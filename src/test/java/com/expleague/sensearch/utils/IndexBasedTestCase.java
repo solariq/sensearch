@@ -7,7 +7,7 @@ import com.expleague.sensearch.donkey.plain.PlainIndexBuilder;
 import com.expleague.sensearch.index.Embedding;
 import com.expleague.sensearch.index.Index;
 import com.expleague.sensearch.index.plain.EmbeddingImpl;
-import com.expleague.sensearch.index.plain.FilterImpl;
+import com.expleague.sensearch.filter.FilterImpl;
 import com.expleague.sensearch.index.plain.PlainIndex;
 import java.io.IOException;
 import java.nio.file.Files;

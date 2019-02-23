@@ -3,15 +3,17 @@ package com.expleague.sensearch.index;
 import com.expleague.commons.math.vectors.Vec;
 import com.expleague.sensearch.Page;
 import com.expleague.sensearch.core.Term;
+import com.expleague.sensearch.miner.Features;
 import com.expleague.sensearch.query.Query;
 import com.expleague.sensearch.web.suggest.SuggestInformationLoader;
 import java.net.URI;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Stream;
 import org.jetbrains.annotations.Nullable;
 
 public interface Index extends AutoCloseable {
-  Stream<Page> fetchDocuments(Query query);
+  Map<Page, Features> fetchDocuments(Query query, int cnt);
 
   Stream<Page> allDocuments();
 

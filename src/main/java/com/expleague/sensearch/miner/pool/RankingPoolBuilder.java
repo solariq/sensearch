@@ -3,6 +3,7 @@ package com.expleague.sensearch.miner.pool;
 import com.expleague.commons.random.FastRandom;
 import com.expleague.ml.data.tools.DataTools;
 import com.expleague.ml.data.tools.Pool;
+import com.expleague.ml.data.tools.Pool.Builder;
 import com.expleague.ml.meta.DataSetMeta;
 import com.expleague.ml.meta.impl.JsonDataSetMeta;
 import com.expleague.sensearch.AppModule;
@@ -37,6 +38,7 @@ public class RankingPoolBuilder {
   @Inject
   public RankingPoolBuilder(Index index) {
     this.index = index;
+
   }
 
   public static void main(String[] args) throws IOException {
@@ -53,7 +55,7 @@ public class RankingPoolBuilder {
       AccumulatorFeatureSet features = new AccumulatorFeatureSet(index);
       TargetFeatureSet googleTarget = new TargetFeatureSet();
 
-      Pool.Builder<QURLItem> poolBuilder = Pool.builder(meta, features, googleTarget);
+      Builder<QURLItem> poolBuilder = Pool.builder(meta, features, googleTarget);
 
       String line;
       while ((line = reader.readLine()) != null) {
@@ -75,7 +77,8 @@ public class RankingPoolBuilder {
 
           Stream<Page> sensearchResult =
               index
-                  .fetchDocuments(query)
+                  .fetchDocuments(query, 200)
+                  .keySet().stream()
                   .filter(
                       page ->
                           !uniqQURL.contains(page.content(SegmentType.SECTION_TITLE).toString()))

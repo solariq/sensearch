@@ -1,5 +1,7 @@
 package com.expleague.sensearch.core;
 
+import com.expleague.sensearch.filter.FilterMinerPhase;
+import com.expleague.sensearch.filter.FilterRankingPhase;
 import com.expleague.sensearch.metrics.MetricPhase;
 import com.expleague.sensearch.miner.MinerPhase;
 import com.expleague.sensearch.query.MergePhase;
@@ -20,4 +22,8 @@ public interface SearchPhaseFactory {
   MetricPhase createMetricPhase();
 
   MergePhase createMergePhase();
+
+  FilterMinerPhase createFilterMinerPhase(int id);
+
+  FilterRankingPhase createFilterRankingPhase(int id);
 }

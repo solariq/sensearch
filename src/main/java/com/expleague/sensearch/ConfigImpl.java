@@ -12,6 +12,7 @@ public class ConfigImpl implements Config {
   private String pathToZIP = "data.gzip";
   private String pathToMetrics = "Metrics";
   private String modelPath = "model";
+  private String modelFilterPath = "model";
   private int pageSize = 10;
   private int maxFilterItems;
   private boolean buildIndexFlag = false;
@@ -64,8 +65,16 @@ public class ConfigImpl implements Config {
     return Paths.get(modelPath);
   }
 
+  @Override
+  public Path getFilterModelPath() {
+    return Paths.get(modelFilterPath);
+  }
+
   public void setModelPath(String path) {
     this.modelPath = path;
+  }
+  public void setModelFilterPath(String path) {
+    this.modelFilterPath = path;
   }
 
   public void setMaxFilterItems(int maxFilterItems) {

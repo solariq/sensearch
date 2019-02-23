@@ -77,4 +77,12 @@ public class Annotations {
   public @interface RankModel {
 
   }
+
+  @Retention(RetentionPolicy.RUNTIME)
+  @Target({ElementType.FIELD, ElementType.PARAMETER, ElementType.METHOD})
+  @BindingAnnotation
+  public @interface RankFilterModel {
+
+  }
+
 }
