@@ -59,7 +59,7 @@ public class FilterPoolBuilder {
 
       Pool.Builder<QURLItem> poolBuilder = Pool.builder(meta, features, targetFeatureSet);
 
-      for (int q = 0; q < queries.size(); q++) {
+      for (int q = 0; q < 10; q++) {
         String queryString = queries.get(q);
         if (Files.exists(Paths.get("./wordstat").resolve("query_" + queryString))) {
           Query query = BaseQuery.create(queryString, index);
