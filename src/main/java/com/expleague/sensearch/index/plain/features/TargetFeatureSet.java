@@ -1,6 +1,7 @@
 package com.expleague.sensearch.index.plain.features;
 
 import com.expleague.commons.math.vectors.Vec;
+import com.expleague.commons.seq.CharSeq;
 import com.expleague.ml.data.tools.FeatureSet;
 import com.expleague.ml.meta.FeatureMeta.ValueType;
 import com.expleague.ml.meta.TargetMeta;
@@ -16,6 +17,8 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Arrays;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 public class TargetFeatureSet extends FeatureSet.Stub<QURLItem> {
 
@@ -24,6 +27,7 @@ public class TargetFeatureSet extends FeatureSet.Stub<QURLItem> {
 
   private Query query;
   private Page page;
+  private Set<CharSeq> validTitles;
 
   @Override
   public void accept(QURLItem item) {
@@ -32,24 +36,23 @@ public class TargetFeatureSet extends FeatureSet.Stub<QURLItem> {
     final Query query = item.queryCache();
     if (query.equals(this.query))
       return;
+
+    try (BufferedReader reader = Files.newBufferedReader(Paths.get("./wordstat").resolve("query_" + query.text()))) {
+      ObjectMapper objectMapper = new ObjectMapper();
+      validTitles = Arrays.stream(objectMapper.readValue(reader, ResultItemImpl[].class))
+          .map(ResultItemImpl::title)
+          .map(CharSeq::create)
+          .collect(Collectors.toSet());
+    } catch (IOException ignored) {
+    }
+
     this.query = query;
   }
 
 
   @Override
   public Vec advance() {
-    double vec = 0.0;
-    try (BufferedReader reader = Files.newBufferedReader(Paths.get("./wordstat").resolve("query_" + query.text()))) {
-      ObjectMapper objectMapper = new ObjectMapper();
-      ResultItem resultItem = Arrays.stream(objectMapper.readValue(reader, ResultItemImpl[].class))
-          .filter(item -> item.title().equals(page.content(SegmentType.SECTION_TITLE)))
-          .findFirst().orElse(null);
-      if (resultItem != null) {
-        vec = 1.0;
-      }
-    } catch (IOException ignored) {
-    }
-    set(TARGET_META, vec);
+    set(TARGET_META, validTitles.contains(CharSeq.create(page.content(SegmentType.SECTION_TITLE))) ? 1 : 0);
     return super.advance();
   }
 }
