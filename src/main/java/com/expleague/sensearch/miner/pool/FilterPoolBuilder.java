@@ -2,18 +2,25 @@ package com.expleague.sensearch.miner.pool;
 
 import com.expleague.commons.func.Functions;
 import com.expleague.commons.random.FastRandom;
+import com.expleague.commons.seq.CharSeq;
 import com.expleague.ml.data.tools.DataTools;
 import com.expleague.ml.data.tools.Pool;
 import com.expleague.ml.meta.DataSetMeta;
 import com.expleague.ml.meta.FeatureMeta;
 import com.expleague.ml.meta.impl.JsonDataSetMeta;
 import com.expleague.sensearch.AppModule;
+import com.expleague.sensearch.Page;
+import com.expleague.sensearch.Page.SegmentType;
+import com.expleague.sensearch.core.impl.ResultItemImpl;
+import com.expleague.sensearch.filter.FilterMinerPhase;
 import com.expleague.sensearch.filter.features.FilterFeatures;
 import com.expleague.sensearch.filter.features.TargetFeatureSet;
 import com.expleague.sensearch.index.Index;
+import com.expleague.sensearch.miner.Features;
 import com.expleague.sensearch.miner.features.QURLItem;
 import com.expleague.sensearch.query.BaseQuery;
 import com.expleague.sensearch.query.Query;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Guice;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
@@ -23,9 +30,13 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 public class FilterPoolBuilder {
 
@@ -69,23 +80,47 @@ public class FilterPoolBuilder {
         String queryString = queries.get(q);
         if (Files.exists(Paths.get("./wordstat").resolve("query_" + queryString))) {
           Query query = BaseQuery.create(queryString, index);
-          index.fetchDocuments(query, FILTER_SIZE)
-              .forEach((key, value) -> {
-                poolBuilder.accept(new QURLItem(key, query));
-                poolBuilder.features().map(Functions.cast(FilterFeatures.class))
-                    .filter(Objects::nonNull)
-                    .forEach(fs -> {
-                      fs.withBody(value.features(SECTION).get(0));
-                      fs.withLink(value.features(LINK).get(0));
-                      fs.withTitle(value.features(TITLE).get(0));
-                    });
-                poolBuilder.advance();
+          ObjectMapper objectMapper = new ObjectMapper();
+          Set<CharSeq> validTitles = Arrays.stream(objectMapper.readValue(reader, ResultItemImpl[].class))
+              .map(ResultItemImpl::title)
+              .map(CharSeq::create)
+              .collect(Collectors.toSet());
+          Map<Page, Features> allDocs = index.fetchDocuments(query, FilterMinerPhase.FILTERED_DOC_NUMBER);
+          allDocs
+              .forEach((page, feat) -> {
+                if (validTitles.contains(CharSeq.create(page.content(SegmentType.SECTION_TITLE)))) {
+                  accept(poolBuilder, page, query, feat);
+                }
+              });
+          final int[] cnt = {0};
+          allDocs
+              .forEach((page, feat) -> {
+                if (cnt[0] == FILTER_SIZE) {
+                  return;
+                }
+                if (!validTitles.contains(CharSeq.create(page.content(SegmentType.SECTION_TITLE)))) {
+                  accept(poolBuilder, page, query, feat);
+                  cnt[0]++;
+                }
               });
         }
       }
+
       Pool<QURLItem> pool = poolBuilder.create();
       DataTools.writePoolTo(pool, Files.newBufferedWriter(poolPath));
     } catch (IOException ignored) {
     }
+  }
+
+  private void accept (Pool.Builder<QURLItem> poolBuilder, Page page, Query query, Features feat) {
+    poolBuilder.accept(new QURLItem(page, query));
+    poolBuilder.features().map(Functions.cast(FilterFeatures.class))
+        .filter(Objects::nonNull)
+        .forEach(fs -> {
+          fs.withBody(feat.features(SECTION).get(0));
+          fs.withLink(feat.features(LINK).get(0));
+          fs.withTitle(feat.features(TITLE).get(0));
+        });
+    poolBuilder.advance();
   }
 }

@@ -10,7 +10,7 @@ import org.apache.log4j.Logger;
 
 public class FilterMinerPhase implements SearchPhase {
 
-  private static final int FILTERED_DOC_NUMBER = 5000;
+  public static final int FILTERED_DOC_NUMBER = 5000;
   private static final Logger LOG = Logger.getLogger(Filter.class.getName());
 
 

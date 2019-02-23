@@ -1,6 +1,7 @@
 package com.expleague.sensearch.miner.pool;
 
 import com.expleague.commons.random.FastRandom;
+import com.expleague.commons.seq.CharSeq;
 import com.expleague.ml.data.tools.DataTools;
 import com.expleague.ml.data.tools.Pool;
 import com.expleague.ml.data.tools.Pool.Builder;
@@ -11,6 +12,7 @@ import com.expleague.sensearch.Page;
 import com.expleague.sensearch.Page.SegmentType;
 import com.expleague.sensearch.SenSeArch.ResultItem;
 import com.expleague.sensearch.core.impl.ResultItemImpl;
+import com.expleague.sensearch.filter.FilterMinerPhase;
 import com.expleague.sensearch.index.Index;
 import com.expleague.sensearch.miner.features.AccumulatorFeatureSet;
 import com.expleague.sensearch.miner.features.QURLItem;
@@ -33,6 +35,7 @@ import java.util.stream.Stream;
 
 public class RankingPoolBuilder {
 
+  private static final int RANK_DOCUMENTS = 100;
   private final Index index;
 
   @Inject
@@ -61,14 +64,14 @@ public class RankingPoolBuilder {
       while ((line = reader.readLine()) != null) {
         if (Files.exists(Paths.get("./wordstat").resolve("query_" + line))) {
           Query query = BaseQuery.create(line, index);
-          Set<String> uniqQURL = new HashSet<>();
+          Set<CharSeq> uniqQURL = new HashSet<>();
 
           try (BufferedReader queryReader =
               Files.newBufferedReader(Paths.get("./wordstat").resolve("query_" + query.text()))) {
             ObjectMapper objectMapper = new ObjectMapper();
             ResultItem[] res = objectMapper.readValue(queryReader, ResultItemImpl[].class);
             for (ResultItem page : res) {
-              uniqQURL.add(page.title().toString());
+              uniqQURL.add(CharSeq.create(page.title()));
               poolBuilder.accept(new QURLItem(index.page(page.reference()), query));
               poolBuilder.advance();
             }
@@ -77,16 +80,16 @@ public class RankingPoolBuilder {
 
           Stream<Page> sensearchResult =
               index
-                  .fetchDocuments(query, 200)
+                  .fetchDocuments(query, FilterMinerPhase.FILTERED_DOC_NUMBER)
                   .keySet().stream()
                   .filter(
                       page ->
-                          !uniqQURL.contains(page.content(SegmentType.SECTION_TITLE).toString()))
-                  .limit(100);
+                          !uniqQURL.contains(CharSeq.create(page.content(SegmentType.SECTION_TITLE))))
+                  .limit(RANK_DOCUMENTS);
           sensearchResult.forEach(
               page -> {
-                if (!uniqQURL.contains(page.content(SegmentType.SECTION_TITLE).toString())) {
-                  uniqQURL.add(page.content(SegmentType.SECTION_TITLE).toString());
+                if (!uniqQURL.contains(CharSeq.create(page.content(SegmentType.SECTION_TITLE)))) {
+                  uniqQURL.add(CharSeq.create(page.content(SegmentType.SECTION_TITLE)));
                   poolBuilder.accept(new QURLItem(page, query));
                   poolBuilder.advance();
                 }
