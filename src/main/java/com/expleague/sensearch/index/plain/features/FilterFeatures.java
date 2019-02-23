@@ -13,9 +13,11 @@ public class FilterFeatures extends FeatureSet.Stub<QURLItem> implements Embeddi
     private final static FeatureMeta LINK = FeatureMeta
             .create("dist-link", "cos distance between Query and Nearest Incoming Link", FeatureMeta.ValueType.VEC);
 
-    private double minTitle = -1.0;
-    private double minBody = -1.0;
-    private double minLink = -1.0;
+    private double minTitle = 1.0;
+    private double minBody = 1.0;
+    private double minLink = 1.0;
+
+
 
     @Override
     public Vec advance() {
@@ -27,16 +29,18 @@ public class FilterFeatures extends FeatureSet.Stub<QURLItem> implements Embeddi
 
     @Override
     public void withTitle(double distance) {
-        minTitle = Math.max(minTitle, distance);
+        minTitle = Math.min(minTitle, distance);
     }
 
     @Override
     public void withBody(double distance) {
-        minBody = Math.max(minBody, distance);
+        minBody = Math.min(minBody, distance);
     }
 
     @Override
     public void withLink(double distance) {
-        minLink = Math.max(minLink, distance);
+        minLink = Math.min(minLink, distance);
     }
+
+
 }
