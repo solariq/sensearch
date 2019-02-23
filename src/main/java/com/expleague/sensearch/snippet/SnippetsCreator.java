@@ -3,6 +3,7 @@ package com.expleague.sensearch.snippet;
 import com.expleague.commons.math.vectors.Vec;
 import com.expleague.commons.math.vectors.impl.vectors.ArrayVec;
 import com.expleague.commons.seq.CharSeqTools;
+import com.expleague.commons.util.Pair;
 import com.expleague.ml.meta.FeatureMeta;
 import com.expleague.sensearch.Page;
 import com.expleague.sensearch.Page.SegmentType;
@@ -23,6 +24,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -52,12 +54,7 @@ public class SnippetsCreator {
 
   public Snippet getSnippet(Page page, Query query) {
     CharSequence title = page.content(SegmentType.SECTION_TITLE);
-    CharSequence content = page.content();
-    /*
-        document
-            .sentences()
-            .forEach(System.out::println);
-    */
+
     List<Passage> passages =
         page
             .sentences(SegmentType.SUB_BODY)
@@ -112,47 +109,6 @@ public class SnippetsCreator {
             .limit(NUMBER_OF_KEYWORDS)
             .collect(Collectors.toList());
 
-    passages =
-        passages
-            .stream()
-            .peek(
-                passage -> {
-                  double rank =
-                      keyWords
-                          .stream()
-                          .filter(keyWord -> containsWithLemma(passage, keyWord.word()))
-                          .mapToDouble(KeyWord::rank)
-                          .sum();
-                  passage.setRating(rank);
-                })
-            .collect(Collectors.toList());
-
-    double best = passages.stream().mapToDouble(Passage::rating).max().orElse(1);
-
-    for (Passage passage : passages) {
-      double newRating =
-          (passage.rating() / best)
-              //* lengthEvaluation(passage)
-              // * positionEvaluation(passage, passages.size())
-              //* questionEvaluation(passage)
-          // * queryEvaluation(passage, query)
-          // * queryEvaluationWithLemma(passage, query)
-          ;
-
-      // System.out.println(newRating + " " + passage.getSentence());
-
-      passage.setRating(newRating);
-    }
-
-    List<Passage> bestPassages =
-        passages
-            .stream()
-            .sorted(Comparator.comparing(Passage::rating).reversed())
-            .limit(4)
-            // .sorted(Comparator.comparingLong(Passage::getId))
-            .collect(Collectors.toList());
-
-    /*
     final AccumulatorFeatureSet features = new AccumulatorFeatureSet(index);
     features.withKeyWords(keyWords);
 
@@ -161,9 +117,6 @@ public class SnippetsCreator {
     passages.forEach(passage -> {
       features.accept(new QPASItem(query, passage));
       Vec all = features.advance();
-
-      System.out.print(passage.sentence() + " : ");
-      System.out.println(all);
 
       passagesFeatures.put(
           passage,
@@ -194,9 +147,27 @@ public class SnippetsCreator {
           }
       );
     });
-    */
+
+    Map<Passage, Double> mp = passagesFeatures
+        .entrySet()
+        .stream()
+        .collect(
+            Collectors.toMap(Entry::getKey, p -> rank(p.getValue().features())));
+
+    List<Passage> bestPassages = mp
+        .entrySet()
+        .stream()
+        .map(p -> Pair.create(p.getKey(), p.getValue()))
+        .sorted(Comparator.<Pair<Passage, Double>>comparingDouble(Pair::getSecond).reversed())
+        .map(Pair::getFirst)
+        .limit(4)
+        .collect(Collectors.toList());
 
     return new DocBasedSnippet(title, bestPassages, query);
+  }
+
+  private double rank(Vec features) {
+    return features.get(3);
   }
 
 }
