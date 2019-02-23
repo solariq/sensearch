@@ -13,6 +13,7 @@ import com.expleague.sensearch.Page;
 import com.expleague.sensearch.index.Index;
 import com.expleague.sensearch.metrics.Metric;
 import com.expleague.sensearch.miner.Features;
+import com.expleague.sensearch.miner.FeaturesImpl;
 import com.expleague.sensearch.miner.features.AccumulatorFeatureSet;
 import com.expleague.sensearch.miner.features.QURLItem;
 import com.expleague.sensearch.query.BaseQuery;
@@ -82,31 +83,8 @@ public class SenSearchDCG {
                   Vec all = features.advance();
                   documentsFeatures.put(
                       page,
-                      new Features() {
-                        @Override
-                        public Vec features() {
-                          return all;
-                        }
-
-                        @Override
-                        public Vec features(FeatureMeta... metas) {
-                          return new ArrayVec(
-                              Stream.of(metas)
-                                  .mapToInt(features::index)
-                                  .mapToDouble(all::get)
-                                  .toArray());
-                        }
-
-                        @Override
-                        public FeatureMeta meta(int index) {
-                          return features.meta(index);
-                        }
-
-                        @Override
-                        public int dim() {
-                          return features.dim();
-                        }
-                      });
+                      new FeaturesImpl(features, all)
+                  );
                 });
 
         Map<Page, Double> mp =
