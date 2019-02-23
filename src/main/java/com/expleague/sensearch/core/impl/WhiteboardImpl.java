@@ -34,6 +34,8 @@ public class WhiteboardImpl implements Whiteboard {
     for (int i = 0; i < queriesNumber; ++i) {
       subResults.add(null);
       textFeatures.add(null);
+      filterFeatures.add(null);
+      subFilterResults.add(null);
     }
   }
 

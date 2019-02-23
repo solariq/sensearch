@@ -110,7 +110,7 @@ __Инструкция по применению__
 
 ### Формула
 Чтобы потренировать формулу нужны следующие вещи: 
-* pool, который собирается `com.expleague.sensearch.miner.pool.DataSetMain`
+* pool, который собирается `com.expleague.sensearch.miner.pool.<*>PoolBuilder`
 * jmll в виде jar, который можно получить с помощью команды (запущеной в руте jmll):  
 `mvn -DskipTests=true package -P build-ml-jar,!publish`  результат работы этой штуки будет лежать в `ml/target/ml.jar`
 Фомула тренируется следующей командой:

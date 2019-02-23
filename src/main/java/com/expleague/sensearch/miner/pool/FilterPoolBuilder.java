@@ -88,6 +88,4 @@ public class FilterPoolBuilder {
     } catch (IOException ignored) {
     }
   }
-
-
 }

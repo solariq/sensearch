@@ -26,6 +26,7 @@ public class FilterMinerPhase implements SearchPhase {
   @Override
   public boolean test(Whiteboard whiteboard) {
     return whiteboard.query() != null &&
+        whiteboard.filterFeatures().size() > phaseId &&
         Objects.requireNonNull(whiteboard.query()).size() >= phaseId &&
         Objects.requireNonNull(whiteboard.query()).get(phaseId) != null;
   }
