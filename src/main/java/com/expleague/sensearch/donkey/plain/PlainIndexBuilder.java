@@ -249,21 +249,21 @@ public class PlainIndexBuilder implements IndexBuilder {
                 indexRoot.resolve(EMBEDDING_ROOT),*/
                 jmllEmbedding,
                 tokenizer);
-        final DB suggest_unigram_DB =
+        final DB suggestUnigramDb =
             JniDBFactory.factory.open(
                 indexRoot.resolve(SUGGEST_UNIGRAM_ROOT).toFile(), STATS_DB_OPTIONS);
-        final DB suggest_multigram_DB =
+        final DB suggestMultigramDb =
             JniDBFactory.factory.open(
                 indexRoot.resolve(SUGGEST_MULTIGRAMS_ROOT).toFile(), STATS_DB_OPTIONS);
     		) {
 
-      IndexMetaBuilder indexMetaBuilder = new IndexMetaBuilder(PlainIndex.VERSION);
+      IndexMetaBuilder indexMetaBuilder = new IndexMetaBuilder(PlainIndex.VERSION, tokenizer);
 
       LOG.info("Creating mappings from wiki ids to raw index ids...");
 
       final SuggestInformationBuilder suggestBuilder =
           new SuggestInformationBuilder(
-              suggest_unigram_DB, suggest_multigram_DB);
+              suggestUnigramDb, suggestMultigramDb);
 
       try {
         LOG.info("Parsing pages...");
@@ -277,7 +277,7 @@ public class PlainIndexBuilder implements IndexBuilder {
                   // knownPageIds.add(pageId);
                   plainPageBuilder.startPage(doc.id(), pageId, doc.categories(), doc.uri());
                   statisticsBuilder.startPage();
-                  indexMetaBuilder.startPage(pageId, doc.uri());
+                  indexMetaBuilder.startPage(doc.id(), pageId, doc.title(), doc.uri());
                   embeddingBuilder.startPage(doc.id(), pageId);
 
                   doc.sections()
@@ -287,8 +287,9 @@ public class PlainIndexBuilder implements IndexBuilder {
                             knownPageIds.add(sectionId);
 
                             plainPageBuilder.addSection(s, sectionId);
-                            indexMetaBuilder.addSection(s.uri(), sectionId);
+                            indexMetaBuilder.addSection(s, sectionId);
                             embeddingBuilder.addSection(s, sectionId);
+
 
                             List<CharSequence> sectionTitles = s.titles();
                             String sectionTitle =
@@ -302,7 +303,6 @@ public class PlainIndexBuilder implements IndexBuilder {
                                     word -> {
                                       TermBuilder.ParsedTerm termLemmaId =
                                           termBuilder.addTerm(word);
-                                      indexMetaBuilder.acceptTermId(termLemmaId.id);
 
                                       long lemmaId =
                                           termLemmaId.lemmaId == -1

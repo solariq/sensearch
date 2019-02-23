@@ -89,15 +89,14 @@ public class PlainIndex implements Index {
   private final DB pageBase;
   private final DB termBase;
 
-  private final DB suggest_unigram_DB;
-  private final DB suggest_multigram_DB;
+  private final DB suggestUnigramDb;
+  private final DB suggestMultigramDb;
 
   private final double averagePageSize;
-  // TODO save at database
   private double averageTitleSize = 0;
-  private int titleCnt = 0;
-  private double averageLinkSize = 0;
-  private int linkCnt = 0;
+  private int titlesCount = 0;
+  private double averageTargetTiltleSize = 0;
+  private int linksCount = 0;
 
   private final int indexSize;
   private final int vocabularySize;
@@ -118,8 +117,8 @@ public class PlainIndex implements Index {
     pageBase.close();
     termBase.close();
     termStatisticsBase.close();
-    suggest_unigram_DB.close();
-    suggest_multigram_DB.close();
+    suggestUnigramDb.close();
+    suggestMultigramDb.close();
   }
 
   @Inject
@@ -148,11 +147,11 @@ public class PlainIndex implements Index {
         JniDBFactory.factory.open(
             indexRoot.resolve(PlainIndexBuilder.TERM_ROOT).toFile(), DEFAULT_DB_OPTIONS);
 
-    suggest_unigram_DB =
+    suggestUnigramDb =
         JniDBFactory.factory.open(
             indexRoot.resolve(PlainIndexBuilder.SUGGEST_UNIGRAM_ROOT).toFile(), DEFAULT_DB_OPTIONS);
 
-    suggest_multigram_DB =
+    suggestMultigramDb =
         JniDBFactory.factory.open(
             indexRoot.resolve(PlainIndexBuilder.SUGGEST_MULTIGRAMS_ROOT).toFile(),
             DEFAULT_DB_OPTIONS);
@@ -171,9 +170,14 @@ public class PlainIndex implements Index {
       LOG.fatal(errorMessage);
       throw new IllegalArgumentException(errorMessage);
     }
+
     averagePageSize = indexMeta.getAveragePageSize();
     indexSize = indexMeta.getPagesCount();
     vocabularySize = indexMeta.getVocabularySize();
+    linksCount = indexMeta.getLinksCount();
+    averageTargetTiltleSize = indexMeta.getAverageTargetTitleSize();
+    titlesCount = indexMeta.getTitlesCount();
+    averageTitleSize = indexMeta.getAverageTitleSize();
 
     DBIterator termIterator = termBase.iterator();
     termIterator.seekToFirst();
@@ -221,28 +225,6 @@ public class PlainIndex implements Index {
             throw new RuntimeException(e);
           }
         });
-
-    DBIterator pageIterator = pageBase.iterator();
-    pageIterator.seekToFirst();
-    pageIterator.forEachRemaining(
-        page -> {
-          try {
-            IndexUnits.Page protoPage = IndexUnits.Page.parseFrom(page.getValue());
-            averageTitleSize += parse(protoPage.getTitle()).count();
-            titleCnt++;
-            for (int i = 0; i < protoPage.getIncomingLinksCount(); i++) {
-              linkCnt++;
-              averageLinkSize +=
-                  parse(protoPageLoad(protoPage.getIncomingLinks(i).getTargetPageId()).getTitle())
-                      .count();
-            }
-          } catch (InvalidProtocolBufferException e) {
-            e.printStackTrace();
-          }
-        });
-
-    averageTitleSize = averageTitleSize / titleCnt;
-    averageLinkSize = averageLinkSize / linkCnt;
 
     for (UriPageMapping mapping : indexMeta.getUriPageMappingsList()) {
       URI key;
@@ -409,8 +391,8 @@ public class PlainIndex implements Index {
   }
 
   @Override
-  public double averageLinkSize() {
-    return averageLinkSize;
+  public double averageTargetTitleSize() {
+    return averageTargetTiltleSize;
   }
 
   @Override
@@ -487,7 +469,7 @@ public class PlainIndex implements Index {
     if (suggestLoader == null) {
       suggestLoader =
           new SuggestInformationLoader(
-              suggest_unigram_DB, suggest_multigram_DB, idToTerm);
+              suggestUnigramDb, suggestMultigramDb, idToTerm);
     }
     return suggestLoader;
   }

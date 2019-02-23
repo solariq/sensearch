@@ -40,6 +40,58 @@ public final class IndexUnits {
     double getAveragePageSize();
 
     /**
+     * <code>optional int32 links_count = 6;</code>
+     *
+     * <pre>
+     * link statistics
+     * </pre>
+     */
+    boolean hasLinksCount();
+    /**
+     * <code>optional int32 links_count = 6;</code>
+     *
+     * <pre>
+     * link statistics
+     * </pre>
+     */
+    int getLinksCount();
+
+    /**
+     * <code>optional double average_target_title_size = 7;</code>
+     */
+    boolean hasAverageTargetTitleSize();
+    /**
+     * <code>optional double average_target_title_size = 7;</code>
+     */
+    double getAverageTargetTitleSize();
+
+    /**
+     * <code>optional int32 titles_count = 8;</code>
+     *
+     * <pre>
+     * ttiles statistics
+     * </pre>
+     */
+    boolean hasTitlesCount();
+    /**
+     * <code>optional int32 titles_count = 8;</code>
+     *
+     * <pre>
+     * ttiles statistics
+     * </pre>
+     */
+    int getTitlesCount();
+
+    /**
+     * <code>optional double average_title_size = 9;</code>
+     */
+    boolean hasAverageTitleSize();
+    /**
+     * <code>optional double average_title_size = 9;</code>
+     */
+    double getAverageTitleSize();
+
+    /**
      * <code>optional int32 vocabulary_size = 4;</code>
      */
     boolean hasVocabularySize();
@@ -140,16 +192,36 @@ public final class IndexUnits {
               break;
             }
             case 32: {
-              bitField0_ |= 0x00000008;
+              bitField0_ |= 0x00000080;
               vocabularySize_ = input.readInt32();
               break;
             }
             case 42: {
-              if (!((mutable_bitField0_ & 0x00000010) == 0x00000010)) {
+              if (!((mutable_bitField0_ & 0x00000100) == 0x00000100)) {
                 uriPageMappings_ = new java.util.ArrayList<com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta.UriPageMapping>();
-                mutable_bitField0_ |= 0x00000010;
+                mutable_bitField0_ |= 0x00000100;
               }
               uriPageMappings_.add(input.readMessage(com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta.UriPageMapping.PARSER, extensionRegistry));
+              break;
+            }
+            case 48: {
+              bitField0_ |= 0x00000008;
+              linksCount_ = input.readInt32();
+              break;
+            }
+            case 57: {
+              bitField0_ |= 0x00000010;
+              averageTargetTitleSize_ = input.readDouble();
+              break;
+            }
+            case 64: {
+              bitField0_ |= 0x00000020;
+              titlesCount_ = input.readInt32();
+              break;
+            }
+            case 73: {
+              bitField0_ |= 0x00000040;
+              averageTitleSize_ = input.readDouble();
               break;
             }
           }
@@ -160,7 +232,7 @@ public final class IndexUnits {
         throw new com.google.protobuf.InvalidProtocolBufferException(
             e.getMessage()).setUnfinishedMessage(this);
       } finally {
-        if (((mutable_bitField0_ & 0x00000010) == 0x00000010)) {
+        if (((mutable_bitField0_ & 0x00000100) == 0x00000100)) {
           uriPageMappings_ = java.util.Collections.unmodifiableList(uriPageMappings_);
         }
         this.unknownFields = unknownFields.build();
@@ -794,13 +866,89 @@ public final class IndexUnits {
       return averagePageSize_;
     }
 
+    public static final int LINKS_COUNT_FIELD_NUMBER = 6;
+    private int linksCount_;
+    /**
+     * <code>optional int32 links_count = 6;</code>
+     *
+     * <pre>
+     * link statistics
+     * </pre>
+     */
+    public boolean hasLinksCount() {
+      return ((bitField0_ & 0x00000008) == 0x00000008);
+    }
+    /**
+     * <code>optional int32 links_count = 6;</code>
+     *
+     * <pre>
+     * link statistics
+     * </pre>
+     */
+    public int getLinksCount() {
+      return linksCount_;
+    }
+
+    public static final int AVERAGE_TARGET_TITLE_SIZE_FIELD_NUMBER = 7;
+    private double averageTargetTitleSize_;
+    /**
+     * <code>optional double average_target_title_size = 7;</code>
+     */
+    public boolean hasAverageTargetTitleSize() {
+      return ((bitField0_ & 0x00000010) == 0x00000010);
+    }
+    /**
+     * <code>optional double average_target_title_size = 7;</code>
+     */
+    public double getAverageTargetTitleSize() {
+      return averageTargetTitleSize_;
+    }
+
+    public static final int TITLES_COUNT_FIELD_NUMBER = 8;
+    private int titlesCount_;
+    /**
+     * <code>optional int32 titles_count = 8;</code>
+     *
+     * <pre>
+     * ttiles statistics
+     * </pre>
+     */
+    public boolean hasTitlesCount() {
+      return ((bitField0_ & 0x00000020) == 0x00000020);
+    }
+    /**
+     * <code>optional int32 titles_count = 8;</code>
+     *
+     * <pre>
+     * ttiles statistics
+     * </pre>
+     */
+    public int getTitlesCount() {
+      return titlesCount_;
+    }
+
+    public static final int AVERAGE_TITLE_SIZE_FIELD_NUMBER = 9;
+    private double averageTitleSize_;
+    /**
+     * <code>optional double average_title_size = 9;</code>
+     */
+    public boolean hasAverageTitleSize() {
+      return ((bitField0_ & 0x00000040) == 0x00000040);
+    }
+    /**
+     * <code>optional double average_title_size = 9;</code>
+     */
+    public double getAverageTitleSize() {
+      return averageTitleSize_;
+    }
+
     public static final int VOCABULARY_SIZE_FIELD_NUMBER = 4;
     private int vocabularySize_;
     /**
      * <code>optional int32 vocabulary_size = 4;</code>
      */
     public boolean hasVocabularySize() {
-      return ((bitField0_ & 0x00000008) == 0x00000008);
+      return ((bitField0_ & 0x00000080) == 0x00000080);
     }
     /**
      * <code>optional int32 vocabulary_size = 4;</code>
@@ -848,6 +996,10 @@ public final class IndexUnits {
       version_ = 0;
       pagesCount_ = 0;
       averagePageSize_ = 0D;
+      linksCount_ = 0;
+      averageTargetTitleSize_ = 0D;
+      titlesCount_ = 0;
+      averageTitleSize_ = 0D;
       vocabularySize_ = 0;
       uriPageMappings_ = java.util.Collections.emptyList();
     }
@@ -873,11 +1025,23 @@ public final class IndexUnits {
       if (((bitField0_ & 0x00000004) == 0x00000004)) {
         output.writeDouble(3, averagePageSize_);
       }
-      if (((bitField0_ & 0x00000008) == 0x00000008)) {
+      if (((bitField0_ & 0x00000080) == 0x00000080)) {
         output.writeInt32(4, vocabularySize_);
       }
       for (int i = 0; i < uriPageMappings_.size(); i++) {
         output.writeMessage(5, uriPageMappings_.get(i));
+      }
+      if (((bitField0_ & 0x00000008) == 0x00000008)) {
+        output.writeInt32(6, linksCount_);
+      }
+      if (((bitField0_ & 0x00000010) == 0x00000010)) {
+        output.writeDouble(7, averageTargetTitleSize_);
+      }
+      if (((bitField0_ & 0x00000020) == 0x00000020)) {
+        output.writeInt32(8, titlesCount_);
+      }
+      if (((bitField0_ & 0x00000040) == 0x00000040)) {
+        output.writeDouble(9, averageTitleSize_);
       }
       getUnknownFields().writeTo(output);
     }
@@ -900,13 +1064,29 @@ public final class IndexUnits {
         size += com.google.protobuf.CodedOutputStream
           .computeDoubleSize(3, averagePageSize_);
       }
-      if (((bitField0_ & 0x00000008) == 0x00000008)) {
+      if (((bitField0_ & 0x00000080) == 0x00000080)) {
         size += com.google.protobuf.CodedOutputStream
           .computeInt32Size(4, vocabularySize_);
       }
       for (int i = 0; i < uriPageMappings_.size(); i++) {
         size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(5, uriPageMappings_.get(i));
+      }
+      if (((bitField0_ & 0x00000008) == 0x00000008)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt32Size(6, linksCount_);
+      }
+      if (((bitField0_ & 0x00000010) == 0x00000010)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeDoubleSize(7, averageTargetTitleSize_);
+      }
+      if (((bitField0_ & 0x00000020) == 0x00000020)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt32Size(8, titlesCount_);
+      }
+      if (((bitField0_ & 0x00000040) == 0x00000040)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeDoubleSize(9, averageTitleSize_);
       }
       size += getUnknownFields().getSerializedSize();
       memoizedSerializedSize = size;
@@ -1032,11 +1212,19 @@ public final class IndexUnits {
         bitField0_ = (bitField0_ & ~0x00000002);
         averagePageSize_ = 0D;
         bitField0_ = (bitField0_ & ~0x00000004);
-        vocabularySize_ = 0;
+        linksCount_ = 0;
         bitField0_ = (bitField0_ & ~0x00000008);
+        averageTargetTitleSize_ = 0D;
+        bitField0_ = (bitField0_ & ~0x00000010);
+        titlesCount_ = 0;
+        bitField0_ = (bitField0_ & ~0x00000020);
+        averageTitleSize_ = 0D;
+        bitField0_ = (bitField0_ & ~0x00000040);
+        vocabularySize_ = 0;
+        bitField0_ = (bitField0_ & ~0x00000080);
         if (uriPageMappingsBuilder_ == null) {
           uriPageMappings_ = java.util.Collections.emptyList();
-          bitField0_ = (bitField0_ & ~0x00000010);
+          bitField0_ = (bitField0_ & ~0x00000100);
         } else {
           uriPageMappingsBuilder_.clear();
         }
@@ -1083,11 +1271,27 @@ public final class IndexUnits {
         if (((from_bitField0_ & 0x00000008) == 0x00000008)) {
           to_bitField0_ |= 0x00000008;
         }
+        result.linksCount_ = linksCount_;
+        if (((from_bitField0_ & 0x00000010) == 0x00000010)) {
+          to_bitField0_ |= 0x00000010;
+        }
+        result.averageTargetTitleSize_ = averageTargetTitleSize_;
+        if (((from_bitField0_ & 0x00000020) == 0x00000020)) {
+          to_bitField0_ |= 0x00000020;
+        }
+        result.titlesCount_ = titlesCount_;
+        if (((from_bitField0_ & 0x00000040) == 0x00000040)) {
+          to_bitField0_ |= 0x00000040;
+        }
+        result.averageTitleSize_ = averageTitleSize_;
+        if (((from_bitField0_ & 0x00000080) == 0x00000080)) {
+          to_bitField0_ |= 0x00000080;
+        }
         result.vocabularySize_ = vocabularySize_;
         if (uriPageMappingsBuilder_ == null) {
-          if (((bitField0_ & 0x00000010) == 0x00000010)) {
+          if (((bitField0_ & 0x00000100) == 0x00000100)) {
             uriPageMappings_ = java.util.Collections.unmodifiableList(uriPageMappings_);
-            bitField0_ = (bitField0_ & ~0x00000010);
+            bitField0_ = (bitField0_ & ~0x00000100);
           }
           result.uriPageMappings_ = uriPageMappings_;
         } else {
@@ -1118,6 +1322,18 @@ public final class IndexUnits {
         if (other.hasAveragePageSize()) {
           setAveragePageSize(other.getAveragePageSize());
         }
+        if (other.hasLinksCount()) {
+          setLinksCount(other.getLinksCount());
+        }
+        if (other.hasAverageTargetTitleSize()) {
+          setAverageTargetTitleSize(other.getAverageTargetTitleSize());
+        }
+        if (other.hasTitlesCount()) {
+          setTitlesCount(other.getTitlesCount());
+        }
+        if (other.hasAverageTitleSize()) {
+          setAverageTitleSize(other.getAverageTitleSize());
+        }
         if (other.hasVocabularySize()) {
           setVocabularySize(other.getVocabularySize());
         }
@@ -1125,7 +1341,7 @@ public final class IndexUnits {
           if (!other.uriPageMappings_.isEmpty()) {
             if (uriPageMappings_.isEmpty()) {
               uriPageMappings_ = other.uriPageMappings_;
-              bitField0_ = (bitField0_ & ~0x00000010);
+              bitField0_ = (bitField0_ & ~0x00000100);
             } else {
               ensureUriPageMappingsIsMutable();
               uriPageMappings_.addAll(other.uriPageMappings_);
@@ -1138,7 +1354,7 @@ public final class IndexUnits {
               uriPageMappingsBuilder_.dispose();
               uriPageMappingsBuilder_ = null;
               uriPageMappings_ = other.uriPageMappings_;
-              bitField0_ = (bitField0_ & ~0x00000010);
+              bitField0_ = (bitField0_ & ~0x00000100);
               uriPageMappingsBuilder_ = 
                 com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders ?
                    getUriPageMappingsFieldBuilder() : null;
@@ -1270,12 +1486,172 @@ public final class IndexUnits {
         return this;
       }
 
+      private int linksCount_ ;
+      /**
+       * <code>optional int32 links_count = 6;</code>
+       *
+       * <pre>
+       * link statistics
+       * </pre>
+       */
+      public boolean hasLinksCount() {
+        return ((bitField0_ & 0x00000008) == 0x00000008);
+      }
+      /**
+       * <code>optional int32 links_count = 6;</code>
+       *
+       * <pre>
+       * link statistics
+       * </pre>
+       */
+      public int getLinksCount() {
+        return linksCount_;
+      }
+      /**
+       * <code>optional int32 links_count = 6;</code>
+       *
+       * <pre>
+       * link statistics
+       * </pre>
+       */
+      public Builder setLinksCount(int value) {
+        bitField0_ |= 0x00000008;
+        linksCount_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional int32 links_count = 6;</code>
+       *
+       * <pre>
+       * link statistics
+       * </pre>
+       */
+      public Builder clearLinksCount() {
+        bitField0_ = (bitField0_ & ~0x00000008);
+        linksCount_ = 0;
+        onChanged();
+        return this;
+      }
+
+      private double averageTargetTitleSize_ ;
+      /**
+       * <code>optional double average_target_title_size = 7;</code>
+       */
+      public boolean hasAverageTargetTitleSize() {
+        return ((bitField0_ & 0x00000010) == 0x00000010);
+      }
+      /**
+       * <code>optional double average_target_title_size = 7;</code>
+       */
+      public double getAverageTargetTitleSize() {
+        return averageTargetTitleSize_;
+      }
+      /**
+       * <code>optional double average_target_title_size = 7;</code>
+       */
+      public Builder setAverageTargetTitleSize(double value) {
+        bitField0_ |= 0x00000010;
+        averageTargetTitleSize_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional double average_target_title_size = 7;</code>
+       */
+      public Builder clearAverageTargetTitleSize() {
+        bitField0_ = (bitField0_ & ~0x00000010);
+        averageTargetTitleSize_ = 0D;
+        onChanged();
+        return this;
+      }
+
+      private int titlesCount_ ;
+      /**
+       * <code>optional int32 titles_count = 8;</code>
+       *
+       * <pre>
+       * ttiles statistics
+       * </pre>
+       */
+      public boolean hasTitlesCount() {
+        return ((bitField0_ & 0x00000020) == 0x00000020);
+      }
+      /**
+       * <code>optional int32 titles_count = 8;</code>
+       *
+       * <pre>
+       * ttiles statistics
+       * </pre>
+       */
+      public int getTitlesCount() {
+        return titlesCount_;
+      }
+      /**
+       * <code>optional int32 titles_count = 8;</code>
+       *
+       * <pre>
+       * ttiles statistics
+       * </pre>
+       */
+      public Builder setTitlesCount(int value) {
+        bitField0_ |= 0x00000020;
+        titlesCount_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional int32 titles_count = 8;</code>
+       *
+       * <pre>
+       * ttiles statistics
+       * </pre>
+       */
+      public Builder clearTitlesCount() {
+        bitField0_ = (bitField0_ & ~0x00000020);
+        titlesCount_ = 0;
+        onChanged();
+        return this;
+      }
+
+      private double averageTitleSize_ ;
+      /**
+       * <code>optional double average_title_size = 9;</code>
+       */
+      public boolean hasAverageTitleSize() {
+        return ((bitField0_ & 0x00000040) == 0x00000040);
+      }
+      /**
+       * <code>optional double average_title_size = 9;</code>
+       */
+      public double getAverageTitleSize() {
+        return averageTitleSize_;
+      }
+      /**
+       * <code>optional double average_title_size = 9;</code>
+       */
+      public Builder setAverageTitleSize(double value) {
+        bitField0_ |= 0x00000040;
+        averageTitleSize_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional double average_title_size = 9;</code>
+       */
+      public Builder clearAverageTitleSize() {
+        bitField0_ = (bitField0_ & ~0x00000040);
+        averageTitleSize_ = 0D;
+        onChanged();
+        return this;
+      }
+
       private int vocabularySize_ ;
       /**
        * <code>optional int32 vocabulary_size = 4;</code>
        */
       public boolean hasVocabularySize() {
-        return ((bitField0_ & 0x00000008) == 0x00000008);
+        return ((bitField0_ & 0x00000080) == 0x00000080);
       }
       /**
        * <code>optional int32 vocabulary_size = 4;</code>
@@ -1287,7 +1663,7 @@ public final class IndexUnits {
        * <code>optional int32 vocabulary_size = 4;</code>
        */
       public Builder setVocabularySize(int value) {
-        bitField0_ |= 0x00000008;
+        bitField0_ |= 0x00000080;
         vocabularySize_ = value;
         onChanged();
         return this;
@@ -1296,7 +1672,7 @@ public final class IndexUnits {
        * <code>optional int32 vocabulary_size = 4;</code>
        */
       public Builder clearVocabularySize() {
-        bitField0_ = (bitField0_ & ~0x00000008);
+        bitField0_ = (bitField0_ & ~0x00000080);
         vocabularySize_ = 0;
         onChanged();
         return this;
@@ -1305,9 +1681,9 @@ public final class IndexUnits {
       private java.util.List<com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta.UriPageMapping> uriPageMappings_ =
         java.util.Collections.emptyList();
       private void ensureUriPageMappingsIsMutable() {
-        if (!((bitField0_ & 0x00000010) == 0x00000010)) {
+        if (!((bitField0_ & 0x00000100) == 0x00000100)) {
           uriPageMappings_ = new java.util.ArrayList<com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta.UriPageMapping>(uriPageMappings_);
-          bitField0_ |= 0x00000010;
+          bitField0_ |= 0x00000100;
          }
       }
 
@@ -1457,7 +1833,7 @@ public final class IndexUnits {
       public Builder clearUriPageMappings() {
         if (uriPageMappingsBuilder_ == null) {
           uriPageMappings_ = java.util.Collections.emptyList();
-          bitField0_ = (bitField0_ & ~0x00000010);
+          bitField0_ = (bitField0_ & ~0x00000100);
           onChanged();
         } else {
           uriPageMappingsBuilder_.clear();
@@ -1534,7 +1910,7 @@ public final class IndexUnits {
           uriPageMappingsBuilder_ = new com.google.protobuf.RepeatedFieldBuilder<
               com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta.UriPageMapping, com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta.UriPageMapping.Builder, com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta.UriPageMappingOrBuilder>(
                   uriPageMappings_,
-                  ((bitField0_ & 0x00000010) == 0x00000010),
+                  ((bitField0_ & 0x00000100) == 0x00000100),
                   getParentForChildren(),
                   isClean());
           uriPageMappings_ = null;
@@ -1581,26 +1957,26 @@ public final class IndexUnits {
         getUriBytes();
 
     /**
-     * <code>optional string titles = 3;</code>
+     * <code>optional string title = 3;</code>
      *
      * <pre>
-     * only section titles
+     * only section title
      * </pre>
      */
     boolean hasTitle();
     /**
-     * <code>optional string titles = 3;</code>
+     * <code>optional string title = 3;</code>
      *
      * <pre>
-     * only section titles
+     * only section title
      * </pre>
      */
     java.lang.String getTitle();
     /**
-     * <code>optional string titles = 3;</code>
+     * <code>optional string title = 3;</code>
      *
      * <pre>
-     * only section titles
+     * only section title
      * </pre>
      */
     com.google.protobuf.ByteString
@@ -2727,20 +3103,20 @@ public final class IndexUnits {
     public static final int TITLE_FIELD_NUMBER = 3;
     private java.lang.Object title_;
     /**
-     * <code>optional string titles = 3;</code>
+     * <code>optional string title = 3;</code>
      *
      * <pre>
-     * only section titles
+     * only section title
      * </pre>
      */
     public boolean hasTitle() {
       return ((bitField0_ & 0x00000004) == 0x00000004);
     }
     /**
-     * <code>optional string titles = 3;</code>
+     * <code>optional string title = 3;</code>
      *
      * <pre>
-     * only section titles
+     * only section title
      * </pre>
      */
     public java.lang.String getTitle() {
@@ -2758,10 +3134,10 @@ public final class IndexUnits {
       }
     }
     /**
-     * <code>optional string titles = 3;</code>
+     * <code>optional string title = 3;</code>
      *
      * <pre>
-     * only section titles
+     * only section title
      * </pre>
      */
     public com.google.protobuf.ByteString
@@ -3559,20 +3935,20 @@ public final class IndexUnits {
 
       private java.lang.Object title_ = "";
       /**
-       * <code>optional string titles = 3;</code>
+       * <code>optional string title = 3;</code>
        *
        * <pre>
-       * only section titles
+       * only section title
        * </pre>
        */
       public boolean hasTitle() {
         return ((bitField0_ & 0x00000004) == 0x00000004);
       }
       /**
-       * <code>optional string titles = 3;</code>
+       * <code>optional string title = 3;</code>
        *
        * <pre>
-       * only section titles
+       * only section title
        * </pre>
        */
       public java.lang.String getTitle() {
@@ -3590,10 +3966,10 @@ public final class IndexUnits {
         }
       }
       /**
-       * <code>optional string titles = 3;</code>
+       * <code>optional string title = 3;</code>
        *
        * <pre>
-       * only section titles
+       * only section title
        * </pre>
        */
       public com.google.protobuf.ByteString
@@ -3610,10 +3986,10 @@ public final class IndexUnits {
         }
       }
       /**
-       * <code>optional string titles = 3;</code>
+       * <code>optional string title = 3;</code>
        *
        * <pre>
-       * only section titles
+       * only section title
        * </pre>
        */
       public Builder setTitle(
@@ -3627,10 +4003,10 @@ public final class IndexUnits {
         return this;
       }
       /**
-       * <code>optional string titles = 3;</code>
+       * <code>optional string title = 3;</code>
        *
        * <pre>
-       * only section titles
+       * only section title
        * </pre>
        */
       public Builder clearTitle() {
@@ -3640,10 +4016,10 @@ public final class IndexUnits {
         return this;
       }
       /**
-       * <code>optional string titles = 3;</code>
+       * <code>optional string title = 3;</code>
        *
        * <pre>
-       * only section titles
+       * only section title
        * </pre>
        */
       public Builder setTitleBytes(
@@ -5314,19 +5690,19 @@ public final class IndexUnits {
       }
       if (((bitField0_ & 0x00000002) == 0x00000002)) {
         size += com.google.protobuf.CodedOutputStream
-            .computeInt32Size(2, documentFrequency_);
+          .computeInt32Size(2, documentFrequency_);
       }
       if (((bitField0_ & 0x00000004) == 0x00000004)) {
         size += com.google.protobuf.CodedOutputStream
-            .computeInt32Size(3, documentLemmaFrequency_);
+          .computeInt32Size(3, documentLemmaFrequency_);
       }
       if (((bitField0_ & 0x00000008) == 0x00000008)) {
         size += com.google.protobuf.CodedOutputStream
-            .computeInt64Size(4, termFrequency_);
+          .computeInt64Size(4, termFrequency_);
       }
       for (int i = 0; i < bigramFrequency_.size(); i++) {
         size += com.google.protobuf.CodedOutputStream
-            .computeMessageSize(5, bigramFrequency_.get(i));
+          .computeMessageSize(5, bigramFrequency_.get(i));
       }
       size += getUnknownFields().getSerializedSize();
       memoizedSerializedSize = size;
@@ -5626,7 +6002,7 @@ public final class IndexUnits {
         return this;
       }
 
-      private int documentFrequency_;
+      private int documentFrequency_ ;
       /**
        * <code>optional int32 document_frequency = 2;</code>
        */
@@ -5658,7 +6034,7 @@ public final class IndexUnits {
         return this;
       }
 
-      private int documentLemmaFrequency_;
+      private int documentLemmaFrequency_ ;
       /**
        * <code>optional int32 document_lemma_frequency = 3;</code>
        */
@@ -5954,7 +6330,7 @@ public final class IndexUnits {
           bigramFrequencyBuilder_ = new com.google.protobuf.RepeatedFieldBuilder<
               com.expleague.sensearch.protobuf.index.IndexUnits.TermStatistics.TermFrequency, com.expleague.sensearch.protobuf.index.IndexUnits.TermStatistics.TermFrequency.Builder, com.expleague.sensearch.protobuf.index.IndexUnits.TermStatistics.TermFrequencyOrBuilder>(
                   bigramFrequency_,
-              ((bitField0_ & 0x00000010) == 0x00000010),
+                  ((bitField0_ & 0x00000010) == 0x00000010),
                   getParentForChildren(),
                   isClean());
           bigramFrequency_ = null;
@@ -7919,41 +8295,38 @@ public final class IndexUnits {
       descriptor;
   static {
     java.lang.String[] descriptorData = {
-      "\n\020indexunits.proto\022\005index\"\321\001\n\tIndexMeta\022" +
+      "\n\020indexunits.proto\022\005index\"\273\002\n\tIndexMeta\022" +
       "\017\n\007version\030\001 \001(\005\022\023\n\013pages_count\030\002 \001(\005\022\031\n" +
-      "\021average_page_size\030\003 \001(\001\022\027\n\017vocabulary_s" +
-      "ize\030\004 \001(\005\022:\n\021uri_page_mappings\030\005 \003(\0132\037.i" +
-      "ndex.IndexMeta.UriPageMapping\032.\n\016UriPage" +
-      "Mapping\022\013\n\003uri\030\001 \001(\t\022\017\n\007page_id\030\002 \001(\003\"\255\002" +
-      "\n\004Page\022\017\n\007page_id\030\001 \001(\003\022\013\n\003uri\030\002 \001(\t\022\r\n\005" +
-      "titles\030\003 \001(\t\022\017\n\007content\030\004 \001(\t\022(\n\016outgoing" +
-      "_links\030\005 \003(\0132\020.index.Page.Link\022(\n\016incomi" +
-      "ng_links\030\006 \003(\0132\020.index.Page.Link\022\022\n\ncate",
-      "gories\030\t \003(\t\022\021\n\tparent_id\030\007 \001(\003\022\024\n\014subpa" +
-      "ges_ids\030\010 \003(\003\032V\n\004Link\022\014\n\004text\030\001 \001(\t\022\026\n\016t" +
-      "arget_page_id\030\002 \001(\003\022\020\n\010position\030\003 \001(\003\022\026\n" +
-          "\016source_page_id\030\004 \001(\003\"\360\001\n\016TermStatistics" +
-          "\022\017\n\007term_id\030\001 \001(\003\022\032\n\022document_frequency\030" +
-          "\002 \001(\005\022 \n\030document_lemma_frequency\030\003 \001(\005\022" +
-          "\026\n\016term_frequency\030\004 \001(\003\022=\n\020bigram_freque" +
-          "ncy\030\005 \003(\0132#.index.TermStatistics.TermFre" +
-          "quency\0328\n\rTermFrequency\022\017\n\007term_id\030\001 \001(\003" +
-          "\022\026\n\016term_frequency\030\002 \001(\005\"\202\002\n\004Term\022\n\n\002id\030",
-        "\001 \001(\003\022\020\n\010lemma_id\030\002 \001(\003\022\014\n\004text\030\003 \001(\t\0220\n"
-            +
-            "\016part_of_speech\030\004 \001(\0162\030.index.Term.PartO" +
-            "fSpeech\"\233\001\n\014PartOfSpeech\022\013\n\007UNKNOWN\020\000\022\005\n" +
-            "\001A\020\001\022\007\n\003ADV\020\002\022\n\n\006ADVPRO\020\003\022\010\n\004ANUM\020\004\022\010\n\004A"
-            +
-            "PRO\020\005\022\007\n\003COM\020\006\022\010\n\004CONJ\020\007\022\010\n\004INTJ\020\010\022\007\n\003NU"
-            +
-            "M\020\t\022\010\n\004PART\020\n\022\006\n\002PR\020\013\022\005\n\001S\020\014\022\010\n\004SPRO\020\r\022\005"
-            +
-            "\n\001V\020\016\"\034\n\010TermList\022\020\n\010termList\030\001 \003(\003\"\036\n\013I"
-            +
-            "ntegerList\022\017\n\007intList\030\001 \003(\005B4\n&com.exple" +
-            "ague.sensearch.protobuf.indexB\nIndexUnit" +
-            "s"
+      "\021average_page_size\030\003 \001(\001\022\023\n\013links_count\030" +
+      "\006 \001(\005\022!\n\031average_target_title_size\030\007 \001(\001" +
+      "\022\024\n\014titles_count\030\010 \001(\005\022\032\n\022average_title_" +
+      "size\030\t \001(\001\022\027\n\017vocabulary_size\030\004 \001(\005\022:\n\021u" +
+      "ri_page_mappings\030\005 \003(\0132\037.index.IndexMeta" +
+      ".UriPageMapping\032.\n\016UriPageMapping\022\013\n\003uri" +
+      "\030\001 \001(\t\022\017\n\007page_id\030\002 \001(\003\"\255\002\n\004Page\022\017\n\007page" +
+      "_id\030\001 \001(\003\022\013\n\003uri\030\002 \001(\t\022\r\n\005title\030\003 \001(\t\022\017\n",
+      "\007content\030\004 \001(\t\022(\n\016outgoing_links\030\005 \003(\0132\020" +
+      ".index.Page.Link\022(\n\016incoming_links\030\006 \003(\013" +
+      "2\020.index.Page.Link\022\022\n\ncategories\030\t \003(\t\022\021" +
+      "\n\tparent_id\030\007 \001(\003\022\024\n\014subpages_ids\030\010 \003(\003\032" +
+      "V\n\004Link\022\014\n\004text\030\001 \001(\t\022\026\n\016target_page_id\030" +
+      "\002 \001(\003\022\020\n\010position\030\003 \001(\003\022\026\n\016source_page_i" +
+      "d\030\004 \001(\003\"\360\001\n\016TermStatistics\022\017\n\007term_id\030\001 " +
+      "\001(\003\022\032\n\022document_frequency\030\002 \001(\005\022 \n\030docum" +
+      "ent_lemma_frequency\030\003 \001(\005\022\026\n\016term_freque" +
+      "ncy\030\004 \001(\003\022=\n\020bigram_frequency\030\005 \003(\0132#.in",
+      "dex.TermStatistics.TermFrequency\0328\n\rTerm" +
+      "Frequency\022\017\n\007term_id\030\001 \001(\003\022\026\n\016term_frequ" +
+      "ency\030\002 \001(\005\"\202\002\n\004Term\022\n\n\002id\030\001 \001(\003\022\020\n\010lemma" +
+      "_id\030\002 \001(\003\022\014\n\004text\030\003 \001(\t\0220\n\016part_of_speec" +
+      "h\030\004 \001(\0162\030.index.Term.PartOfSpeech\"\233\001\n\014Pa" +
+      "rtOfSpeech\022\013\n\007UNKNOWN\020\000\022\005\n\001A\020\001\022\007\n\003ADV\020\002\022" +
+      "\n\n\006ADVPRO\020\003\022\010\n\004ANUM\020\004\022\010\n\004APRO\020\005\022\007\n\003COM\020\006" +
+      "\022\010\n\004CONJ\020\007\022\010\n\004INTJ\020\010\022\007\n\003NUM\020\t\022\010\n\004PART\020\n\022" +
+      "\006\n\002PR\020\013\022\005\n\001S\020\014\022\010\n\004SPRO\020\r\022\005\n\001V\020\016\"\034\n\010TermL" +
+      "ist\022\020\n\010termList\030\001 \003(\003\"\036\n\013IntegerList\022\017\n\007",
+      "intList\030\001 \003(\005B4\n&com.expleague.sensearch" +
+      ".protobuf.indexB\nIndexUnits"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
         new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
@@ -7972,7 +8345,7 @@ public final class IndexUnits {
     internal_static_index_IndexMeta_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessage.FieldAccessorTable(
         internal_static_index_IndexMeta_descriptor,
-        new java.lang.String[] { "Version", "PagesCount", "AveragePageSize", "VocabularySize", "UriPageMappings", });
+        new java.lang.String[] { "Version", "PagesCount", "AveragePageSize", "LinksCount", "AverageTargetTitleSize", "TitlesCount", "AverageTitleSize", "VocabularySize", "UriPageMappings", });
     internal_static_index_IndexMeta_UriPageMapping_descriptor =
       internal_static_index_IndexMeta_descriptor.getNestedTypes().get(0);
     internal_static_index_IndexMeta_UriPageMapping_fieldAccessorTable = new
@@ -7996,8 +8369,7 @@ public final class IndexUnits {
     internal_static_index_TermStatistics_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessage.FieldAccessorTable(
         internal_static_index_TermStatistics_descriptor,
-        new java.lang.String[]{"TermId", "DocumentFrequency", "DocumentLemmaFrequency",
-            "TermFrequency", "BigramFrequency",});
+        new java.lang.String[] { "TermId", "DocumentFrequency", "DocumentLemmaFrequency", "TermFrequency", "BigramFrequency", });
     internal_static_index_TermStatistics_TermFrequency_descriptor =
       internal_static_index_TermStatistics_descriptor.getNestedTypes().get(0);
     internal_static_index_TermStatistics_TermFrequency_fieldAccessorTable = new

@@ -15,6 +15,14 @@ message IndexMeta {
   optional int32 pages_count = 2;
   optional double average_page_size = 3;
 
+  // link statistics
+  optional int32 links_count = 6;
+  optional double average_target_title_size = 7;
+
+  // ttiles statistics
+  optional int32 titles_count = 8;
+  optional double average_title_size = 9;
+
   optional int32 vocabulary_size = 4;
 
   repeated UriPageMapping uri_page_mappings = 5;
