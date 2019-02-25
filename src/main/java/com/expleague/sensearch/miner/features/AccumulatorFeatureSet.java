@@ -42,8 +42,9 @@ public class AccumulatorFeatureSet extends FeatureSet.Stub<QURLItem> {
       features.components()
           .map(Functions.cast(TextFeatureSet.class))
           .filter(Objects::nonNull)
-          .forEach(fs -> fs.withStats(totalLength, index.averageTitleSize() + index.averagePageSize(),
-              titleLength, index.averageTitleSize(),
+          .forEach(fs -> fs
+              .withStats(totalLength, index.averageSectionTitleSize() + index.averagePageSize(),
+                  titleLength, index.averageSectionTitleSize(),
               contentLength, index.averagePageSize(),
               index.size()));
       { // Title processing

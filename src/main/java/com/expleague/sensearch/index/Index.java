@@ -29,8 +29,10 @@ public interface Index extends AutoCloseable {
   int size();
   int vocabularySize();
   double averagePageSize();
-  double averageTitleSize();
-  double averageTargetTitleSize();
+
+  double averageSectionTitleSize();
+
+  double averageLinkTargetTitleWordCount();
   
   SuggestInformationLoader getSuggestInformation();
 }

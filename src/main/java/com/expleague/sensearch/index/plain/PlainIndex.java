@@ -16,10 +16,7 @@ import com.expleague.sensearch.donkey.plain.PlainIndexBuilder;
 import com.expleague.sensearch.filter.Filter;
 import com.expleague.sensearch.filter.features.FilterFeatures;
 import com.expleague.sensearch.index.Embedding;
-import com.expleague.sensearch.index.Filter;
 import com.expleague.sensearch.index.Index;
-import com.expleague.sensearch.index.IndexedPage;
-import com.expleague.sensearch.index.plain.features.FilterFeatures;
 import com.expleague.sensearch.metrics.LSHSynonymsMetric;
 import com.expleague.sensearch.miner.Features;
 import com.expleague.sensearch.miner.FeaturesImpl;
@@ -35,12 +32,9 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.protobuf.InvalidProtocolBufferException;
 import gnu.trove.map.TLongObjectMap;
-import gnu.trove.map.TObjectLongMap;
 import gnu.trove.map.hash.TLongObjectHashMap;
-import gnu.trove.map.hash.TObjectLongHashMap;
 import java.io.IOException;
 import java.net.URI;
-import java.net.URLEncoder;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -62,7 +56,7 @@ import org.iq80.leveldb.ReadOptions;
 @Singleton
 public class PlainIndex implements Index {
 
-  //TODO: !index version!
+  // TODO: !index version!
   public static final int VERSION = 12;
 
   private static final long DEFAULT_CACHE_SIZE = 128 * (1 << 20); // 128 MB
@@ -92,10 +86,10 @@ public class PlainIndex implements Index {
   private final DB uriMappingDb;
 
   private final double averagePageSize;
-  private double averageTitleSize = 0;
-  private int titlesCount = 0;
-  private double averageTargetTiltleSize = 0;
-  private int linksCount = 0;
+  private double averageSectionTitleSize;
+  private int sectionTitlesCount;
+  private double averageLinkTargetTitleWordCount;
+  private int linksCount;
 
   private final int indexSize;
   private final int vocabularySize;
@@ -155,9 +149,9 @@ public class PlainIndex implements Index {
             indexRoot.resolve(PlainIndexBuilder.SUGGEST_MULTIGRAMS_ROOT).toFile(),
             DEFAULT_DB_OPTIONS);
 
-    uriMappingDb = JniDBFactory.factory.open(
-        indexRoot.resolve(PlainIndexBuilder.URI_MAPPING_ROOT).toFile(),
-        DEFAULT_DB_OPTIONS);
+    uriMappingDb =
+        JniDBFactory.factory.open(
+            indexRoot.resolve(PlainIndexBuilder.URI_MAPPING_ROOT).toFile(), DEFAULT_DB_OPTIONS);
 
     tokenizer = new TokenizerImpl();
 
@@ -178,9 +172,9 @@ public class PlainIndex implements Index {
     indexSize = indexMeta.getPagesCount();
     vocabularySize = indexMeta.getVocabularySize();
     linksCount = indexMeta.getLinksCount();
-    averageTargetTiltleSize = indexMeta.getAverageTargetTitleSize();
-    titlesCount = indexMeta.getTitlesCount();
-    averageTitleSize = indexMeta.getAverageTitleSize();
+    averageLinkTargetTitleWordCount = indexMeta.getAverageLinkTargetTitleWordCount();
+    sectionTitlesCount = indexMeta.getSectionTitlesCount();
+    averageSectionTitleSize = indexMeta.getAverageSectionTitleSize();
 
     DBIterator termIterator = termBase.iterator();
     termIterator.seekToFirst();
@@ -270,22 +264,30 @@ public class PlainIndex implements Index {
 
   @Override
   public Page page(URI uri) {
-
-    if (!uriToPageIdMap.containsKey(uri)) {
+    byte[] result = uriMappingDb.get(uri.toASCIIString().getBytes());
+    if (result == null) {
       return PlainPage.EMPTY_PAGE;
     }
-    return PlainPage.create(uriToPageIdMap.get(uri), this);
+
+    try {
+      return PlainPage.create(IndexUnits.UriPageMapping.parseFrom(result).getPageId(), this);
+    } catch (InvalidProtocolBufferException e) {
+      LOG.warn(e);
+      return PlainPage.EMPTY_PAGE;
+    }
   }
 
   @Override
   public Vec vecByTerms(List<Term> terms) {
     final ArrayVec answerVec = new ArrayVec(embedding.dim());
-    long cnt = terms
-        .stream()
-        .mapToLong(t -> ((IndexTerm) t).id())
-        .mapToObj(embedding::vec)
-        .filter(Objects::nonNull)
-        .peek(v -> VecTools.append(answerVec, v)).count();
+    long cnt =
+        terms
+            .stream()
+            .mapToLong(t -> ((IndexTerm) t).id())
+            .mapToObj(embedding::vec)
+            .filter(Objects::nonNull)
+            .peek(v -> VecTools.append(answerVec, v))
+            .count();
     if (cnt > 0) {
       answerVec.scale(1. / ((double) cnt));
     }
@@ -328,13 +330,13 @@ public class PlainIndex implements Index {
   }
 
   @Override
-  public double averageTitleSize() {
-    return averageTitleSize;
+  public double averageSectionTitleSize() {
+    return averageSectionTitleSize;
   }
 
   @Override
-  public double averageTargetTitleSize() {
-    return averageTargetTiltleSize;
+  public double averageLinkTargetTitleWordCount() {
+    return averageLinkTargetTitleWordCount;
   }
 
   @Override
@@ -359,7 +361,9 @@ public class PlainIndex implements Index {
 
     LOG.info("LSHSynonymsMetric: " + result);*/
 
-    return filter.filtrate(termVec, PlainIndex::isWordId, SYNONYMS_COUNT).map(c -> idToTerm.get(c.getId()));
+    return filter
+        .filtrate(termVec, PlainIndex::isWordId, SYNONYMS_COUNT)
+        .map(c -> idToTerm.get(c.getId()));
   }
 
   @Override
@@ -369,31 +373,34 @@ public class PlainIndex implements Index {
     filter
         .filtrate(qVec, PlainIndex::isSectionId, 0.5)
         .limit(num)
-        .forEach(candidate -> {
-          long pageId = candidate.getPageId();
-          if (!pageIdToCandidatesMap.containsKey(pageId)) {
-            pageIdToCandidatesMap.put(pageId, new ArrayList<>());
-          }
-          pageIdToCandidatesMap.get(pageId).add(candidate);
-        });
+        .forEach(
+            candidate -> {
+              long pageId = candidate.getPageId();
+              if (!pageIdToCandidatesMap.containsKey(pageId)) {
+                pageIdToCandidatesMap.put(pageId, new ArrayList<>());
+              }
+              pageIdToCandidatesMap.get(pageId).add(candidate);
+            });
     Map<Page, Features> allFilterFeatures = new HashMap<>();
-    pageIdToCandidatesMap.forEachEntry((pageId, candidates) -> {
-      Page page = PlainPage.create(pageId, this);
-      filterFeatures.accept(new QURLItem(page, query));
-      candidates.forEach(candidate -> {
-        long id = candidate.getId();
-        if (IdUtils.isSecTitleId(id)) {
-          filterFeatures.withTitle(candidate.getDist());
-        } else if (IdUtils.isSecTextId(id)) {
-          filterFeatures.withBody(candidate.getDist());
-        } else if (IdUtils.isLinkId(id)) {
-          filterFeatures.withLink(candidate.getDist());
-        }
-      });
-      Vec vec = filterFeatures.advance();
-      allFilterFeatures.put(page, new FeaturesImpl(filterFeatures, vec));
-      return true;
-    });
+    pageIdToCandidatesMap.forEachEntry(
+        (pageId, candidates) -> {
+          Page page = PlainPage.create(pageId, this);
+          filterFeatures.accept(new QURLItem(page, query));
+          candidates.forEach(
+              candidate -> {
+                long id = candidate.getId();
+                if (IdUtils.isSecTitleId(id)) {
+                  filterFeatures.withTitle(candidate.getDist());
+                } else if (IdUtils.isSecTextId(id)) {
+                  filterFeatures.withBody(candidate.getDist());
+                } else if (IdUtils.isLinkId(id)) {
+                  filterFeatures.withLink(candidate.getDist());
+                }
+              });
+          Vec vec = filterFeatures.advance();
+          allFilterFeatures.put(page, new FeaturesImpl(filterFeatures, vec));
+          return true;
+        });
     return allFilterFeatures;
   }
 
@@ -419,7 +426,6 @@ public class PlainIndex implements Index {
     }
   }
 
-
   int termFrequency(Term term) {
     try {
       return (int) termStatistics(((IndexTerm) term).id()).getTermFrequency();
@@ -444,9 +450,7 @@ public class PlainIndex implements Index {
   @Override
   public SuggestInformationLoader getSuggestInformation() {
     if (suggestLoader == null) {
-      suggestLoader =
-          new SuggestInformationLoader(
-              suggestUnigramDb, suggestMultigramDb, idToTerm);
+      suggestLoader = new SuggestInformationLoader(suggestUnigramDb, suggestMultigramDb, idToTerm);
     }
     return suggestLoader;
   }

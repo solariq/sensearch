@@ -15,6 +15,7 @@ import com.expleague.sensearch.core.Tokenizer;
 import com.expleague.sensearch.core.impl.TokenizerImpl;
 import com.expleague.sensearch.donkey.IndexBuilder;
 import com.expleague.sensearch.donkey.crawler.Crawler;
+import com.expleague.sensearch.donkey.plain.IndexMetaBuilder.TermSegment;
 import com.expleague.sensearch.index.plain.PlainIndex;
 import com.google.inject.Inject;
 import gnu.trove.map.TLongObjectMap;
@@ -94,6 +95,12 @@ public class PlainIndexBuilder implements IndexBuilder {
           .compressionType(CompressionType.SNAPPY);
 
   private static final Options EMBEDDING_DB_OPTIONS =
+      new Options()
+          .createIfMissing(true)
+          .errorIfExists(true)
+          .compressionType(CompressionType.SNAPPY);
+
+  private static final Options URI_DB_OPTIONS =
       new Options()
           .createIfMissing(true)
           .errorIfExists(true)
@@ -256,15 +263,17 @@ public class PlainIndexBuilder implements IndexBuilder {
         final DB suggestMultigramDb =
             JniDBFactory.factory.open(
                 indexRoot.resolve(SUGGEST_MULTIGRAMS_ROOT).toFile(), STATS_DB_OPTIONS);
-    		) {
+        final UriMappingBuilder uriMappingBuilder =
+            new UriMappingBuilder(
+                JniDBFactory.factory.open(
+                    indexRoot.resolve(URI_MAPPING_ROOT).toFile(), URI_DB_OPTIONS))) {
 
-      IndexMetaBuilder indexMetaBuilder = new IndexMetaBuilder(PlainIndex.VERSION, tokenizer);
+      IndexMetaBuilder indexMetaBuilder = new IndexMetaBuilder(PlainIndex.VERSION);
 
       LOG.info("Creating mappings from wiki ids to raw index ids...");
 
       final SuggestInformationBuilder suggestBuilder =
-          new SuggestInformationBuilder(
-              suggestUnigramDb, suggestMultigramDb);
+          new SuggestInformationBuilder(suggestUnigramDb, suggestMultigramDb);
 
       try {
         LOG.info("Parsing pages...");
@@ -278,7 +287,8 @@ public class PlainIndexBuilder implements IndexBuilder {
                   // knownPageIds.add(pageId);
                   plainPageBuilder.startPage(doc.id(), pageId, doc.categories(), doc.uri());
                   statisticsBuilder.startPage();
-                  indexMetaBuilder.startPage(doc.id(), pageId, doc.title(), doc.uri());
+                  indexMetaBuilder.startPage(
+                      doc.id(), pageId, (int) tokenizer.parseTextToWords(doc.title()).count());
                   embeddingBuilder.startPage(doc.id(), pageId);
 
                   doc.sections()
@@ -288,20 +298,28 @@ public class PlainIndexBuilder implements IndexBuilder {
                             knownPageIds.add(sectionId);
 
                             plainPageBuilder.addSection(s, sectionId);
-                            indexMetaBuilder.addSection(s, sectionId);
+                            indexMetaBuilder.addSection(sectionId);
                             embeddingBuilder.addSection(s, sectionId);
-
+                            uriMappingBuilder.addSection(s.uri(), sectionId);
 
                             List<CharSequence> sectionTitles = s.titles();
                             String sectionTitle =
                                 sectionTitles.get(sectionTitles.size() - 1).toString();
 
+                            final CharSequence TITLE_STOP = "@@@STOP_TITLE777@@@";
+                            boolean[] isTitle = {true};
                             Stream.concat(
-                                tokenizer.parseTextToWords(sectionTitle),
+                                Stream.concat(
+                                    tokenizer.parseTextToWords(sectionTitle),
+                                    Stream.of(TITLE_STOP)),
                                 tokenizer.parseTextToWords(s.text()))
                                 .map(CharSeqTools::toLowerCase)
                                 .forEach(
                                     word -> {
+                                      if (word == TITLE_STOP) {
+                                        isTitle[0] = false;
+                                      }
+
                                       TermBuilder.ParsedTerm termLemmaId =
                                           termBuilder.addTerm(word);
 
@@ -310,6 +328,11 @@ public class PlainIndexBuilder implements IndexBuilder {
                                               ? termLemmaId.id
                                               : termLemmaId.lemmaId;
                                       statisticsBuilder.enrich(termLemmaId.id, lemmaId);
+                                      indexMetaBuilder.addTerm(
+                                          termLemmaId.id,
+                                          isTitle[0]
+                                              ? TermSegment.SECTION_TITLE
+                                              : TermSegment.TEXT);
                                     });
                           });
 

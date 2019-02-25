@@ -1,15 +1,11 @@
 package com.expleague.sensearch.donkey.plain;
 
+import com.expleague.sensearch.donkey.crawler.document.CrawlerDocument.Link;
 import com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta;
-import gnu.trove.map.TObjectLongMap;
-import gnu.trove.map.hash.TObjectLongHashMap;
+import gnu.trove.map.TLongIntMap;
+import gnu.trove.map.hash.TLongIntHashMap;
 import gnu.trove.set.TLongSet;
 import gnu.trove.set.hash.TLongHashSet;
-import java.io.UnsupportedEncodingException;
-import java.net.URI;
-import java.net.URLDecoder;
-import java.util.ArrayList;
-import java.util.List;
 import org.apache.log4j.Logger;
 
 public class IndexMetaBuilder {
@@ -18,7 +14,13 @@ public class IndexMetaBuilder {
 
   private final int version;
   private final TLongSet termIds = new TLongHashSet();
-  private final TLongSet pageIds = new TLongHashSet();
+  private final TLongSet knownOriginalIds = new TLongHashSet();
+  private final TLongIntMap incomingLinksCounts = new TLongIntHashMap();
+
+  private final TLongIntMap wikiIdToTitleSize = new TLongIntHashMap();
+
+  private int titleTokensCount = 0;
+  private int titlesCount = 0;
   private int totalTokenCount = 0;
   private boolean isProcessingPage = false;
 
@@ -26,21 +28,37 @@ public class IndexMetaBuilder {
     this.version = version;
   }
 
-  public void startPage(long pageId, URI uri) {
+  public void startPage(long originalPageId, long indexPageId, int pageTitleWordCount) {
     if (isProcessingPage) {
       throw new IllegalStateException("Duplicate startPage call: page is already being processed");
     }
     isProcessingPage = true;
 
-    if (pageIds.contains(pageId)) {
-      throw new IllegalStateException("Page with id [" + pageId + "] is already in IndexMeta");
+    if (knownOriginalIds.contains(originalPageId)) {
+      throw new IllegalStateException(
+          String.format("Wiki id [ %d ] has been already received!", originalPageId));
     }
-    pageIds.add(pageId);
+    knownOriginalIds.add(originalPageId);
+    wikiIdToTitleSize.put(originalPageId, pageTitleWordCount);
   }
 
-  public void acceptTermId(long termId) {
-    totalTokenCount += 1;
+  public void addTerm(long termId, TermSegment termSegment) {
     termIds.add(termId);
+    switch (termSegment) {
+      case SECTION_TITLE:
+        totalTokenCount++;
+        titleTokensCount++;
+      case TEXT:
+        totalTokenCount++;
+    }
+  }
+
+  public void addSection(long sectionId) {
+    ++titlesCount;
+  }
+
+  public void addLink(Link link) {
+    incomingLinksCounts.adjustOrPutValue(link.targetId(), 1, 1);
   }
 
   public void endPage() {
@@ -51,14 +69,30 @@ public class IndexMetaBuilder {
   }
 
   public IndexMeta build() {
+
+    int[] linkTargetTitleTokensCount = new int[]{0};
+    int[] linksCount = new int[]{0};
+    knownOriginalIds.forEach(id -> {
+      int incomingLinksCount =
+          incomingLinksCounts.containsKey(id) ? incomingLinksCounts.get(id) : 0;
+      linkTargetTitleTokensCount[0] += wikiIdToTitleSize.get(id) * incomingLinksCount;
+      linksCount[0] += incomingLinksCount;
+      return true;
+    });
+
     return IndexMeta.newBuilder()
         .setVersion(version)
-        .setAveragePageSize(1.0 * pageIds.size() / totalTokenCount)
-        .setPagesCount(pageIds.size())
+        .setLinksCount(linksCount[0])
+        .setAverageLinkTargetTitleWordCount((double) linkTargetTitleTokensCount[0] / linksCount[0])
+        .setSectionTitlesCount(titlesCount)
+        .setAverageSectionTitleSize((double) titleTokensCount / titlesCount)
+        .setAveragePageSize((double) totalTokenCount / knownOriginalIds.size())
+        .setPagesCount(knownOriginalIds.size())
         .setVocabularySize(termIds.size())
         .build();
   }
 
-  public void addSection(URI sectionUri, long sectionId) {
+  public enum TermSegment {
+    SECTION_TITLE, TEXT
   }
 }

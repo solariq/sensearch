@@ -40,6 +40,62 @@ public final class IndexUnits {
     double getAveragePageSize();
 
     /**
+     * <code>optional int32 links_count = 6;</code>
+     *
+     * <pre>
+     * link statistics
+     * </pre>
+     */
+    boolean hasLinksCount();
+
+    /**
+     * <code>optional int32 links_count = 6;</code>
+     *
+     * <pre>
+     * link statistics
+     * </pre>
+     */
+    int getLinksCount();
+
+    /**
+     * <code>optional double average_link_target_title_word_count = 7;</code>
+     */
+    boolean hasAverageLinkTargetTitleWordCount();
+
+    /**
+     * <code>optional double average_link_target_title_word_count = 7;</code>
+     */
+    double getAverageLinkTargetTitleWordCount();
+
+    /**
+     * <code>optional int32 section_titles_count = 8;</code>
+     *
+     * <pre>
+     * ttiles statistics
+     * </pre>
+     */
+    boolean hasSectionTitlesCount();
+
+    /**
+     * <code>optional int32 section_titles_count = 8;</code>
+     *
+     * <pre>
+     * ttiles statistics
+     * </pre>
+     */
+    int getSectionTitlesCount();
+
+    /**
+     * <code>optional double average_section_title_size = 9;</code>
+     */
+    boolean hasAverageSectionTitleSize();
+
+    /**
+     * <code>optional double average_section_title_size = 9;</code>
+     */
+    double getAverageSectionTitleSize();
+
+    /**
      * <code>optional int32 vocabulary_size = 4;</code>
      */
     boolean hasVocabularySize();
@@ -116,8 +172,28 @@ public final class IndexUnits {
               break;
             }
             case 32: {
-              bitField0_ |= 0x00000008;
+              bitField0_ |= 0x00000080;
               vocabularySize_ = input.readInt32();
+              break;
+            }
+            case 48: {
+              bitField0_ |= 0x00000008;
+              linksCount_ = input.readInt32();
+              break;
+            }
+            case 57: {
+              bitField0_ |= 0x00000010;
+              averageLinkTargetTitleWordCount_ = input.readDouble();
+              break;
+            }
+            case 64: {
+              bitField0_ |= 0x00000020;
+              sectionTitlesCount_ = input.readInt32();
+              break;
+            }
+            case 73: {
+              bitField0_ |= 0x00000040;
+              averageSectionTitleSize_ = input.readDouble();
               break;
             }
           }
@@ -205,13 +281,97 @@ public final class IndexUnits {
       return averagePageSize_;
     }
 
+    public static final int LINKS_COUNT_FIELD_NUMBER = 6;
+    private int linksCount_;
+
+    /**
+     * <code>optional int32 links_count = 6;</code>
+     *
+     * <pre>
+     * link statistics
+     * </pre>
+     */
+    public boolean hasLinksCount() {
+      return ((bitField0_ & 0x00000008) == 0x00000008);
+    }
+
+    /**
+     * <code>optional int32 links_count = 6;</code>
+     *
+     * <pre>
+     * link statistics
+     * </pre>
+     */
+    public int getLinksCount() {
+      return linksCount_;
+    }
+
+    public static final int AVERAGE_LINK_TARGET_TITLE_WORD_COUNT_FIELD_NUMBER = 7;
+    private double averageLinkTargetTitleWordCount_;
+
+    /**
+     * <code>optional double average_link_target_title_word_count = 7;</code>
+     */
+    public boolean hasAverageLinkTargetTitleWordCount() {
+      return ((bitField0_ & 0x00000010) == 0x00000010);
+    }
+
+    /**
+     * <code>optional double average_link_target_title_word_count = 7;</code>
+     */
+    public double getAverageLinkTargetTitleWordCount() {
+      return averageLinkTargetTitleWordCount_;
+    }
+
+    public static final int SECTION_TITLES_COUNT_FIELD_NUMBER = 8;
+    private int sectionTitlesCount_;
+
+    /**
+     * <code>optional int32 section_titles_count = 8;</code>
+     *
+     * <pre>
+     * ttiles statistics
+     * </pre>
+     */
+    public boolean hasSectionTitlesCount() {
+      return ((bitField0_ & 0x00000020) == 0x00000020);
+    }
+
+    /**
+     * <code>optional int32 section_titles_count = 8;</code>
+     *
+     * <pre>
+     * ttiles statistics
+     * </pre>
+     */
+    public int getSectionTitlesCount() {
+      return sectionTitlesCount_;
+    }
+
+    public static final int AVERAGE_SECTION_TITLE_SIZE_FIELD_NUMBER = 9;
+    private double averageSectionTitleSize_;
+
+    /**
+     * <code>optional double average_section_title_size = 9;</code>
+     */
+    public boolean hasAverageSectionTitleSize() {
+      return ((bitField0_ & 0x00000040) == 0x00000040);
+    }
+
+    /**
+     * <code>optional double average_section_title_size = 9;</code>
+     */
+    public double getAverageSectionTitleSize() {
+      return averageSectionTitleSize_;
+    }
+
     public static final int VOCABULARY_SIZE_FIELD_NUMBER = 4;
     private int vocabularySize_;
     /**
      * <code>optional int32 vocabulary_size = 4;</code>
      */
     public boolean hasVocabularySize() {
-      return ((bitField0_ & 0x00000008) == 0x00000008);
+      return ((bitField0_ & 0x00000080) == 0x00000080);
     }
     /**
      * <code>optional int32 vocabulary_size = 4;</code>
@@ -224,6 +384,10 @@ public final class IndexUnits {
       version_ = 0;
       pagesCount_ = 0;
       averagePageSize_ = 0D;
+      linksCount_ = 0;
+      averageLinkTargetTitleWordCount_ = 0D;
+      sectionTitlesCount_ = 0;
+      averageSectionTitleSize_ = 0D;
       vocabularySize_ = 0;
     }
     private byte memoizedIsInitialized = -1;
@@ -248,8 +412,20 @@ public final class IndexUnits {
       if (((bitField0_ & 0x00000004) == 0x00000004)) {
         output.writeDouble(3, averagePageSize_);
       }
-      if (((bitField0_ & 0x00000008) == 0x00000008)) {
+      if (((bitField0_ & 0x00000080) == 0x00000080)) {
         output.writeInt32(4, vocabularySize_);
+      }
+      if (((bitField0_ & 0x00000008) == 0x00000008)) {
+        output.writeInt32(6, linksCount_);
+      }
+      if (((bitField0_ & 0x00000010) == 0x00000010)) {
+        output.writeDouble(7, averageLinkTargetTitleWordCount_);
+      }
+      if (((bitField0_ & 0x00000020) == 0x00000020)) {
+        output.writeInt32(8, sectionTitlesCount_);
+      }
+      if (((bitField0_ & 0x00000040) == 0x00000040)) {
+        output.writeDouble(9, averageSectionTitleSize_);
       }
       getUnknownFields().writeTo(output);
     }
@@ -272,9 +448,25 @@ public final class IndexUnits {
         size += com.google.protobuf.CodedOutputStream
           .computeDoubleSize(3, averagePageSize_);
       }
+      if (((bitField0_ & 0x00000080) == 0x00000080)) {
+        size += com.google.protobuf.CodedOutputStream
+            .computeInt32Size(4, vocabularySize_);
+      }
       if (((bitField0_ & 0x00000008) == 0x00000008)) {
         size += com.google.protobuf.CodedOutputStream
-          .computeInt32Size(4, vocabularySize_);
+            .computeInt32Size(6, linksCount_);
+      }
+      if (((bitField0_ & 0x00000010) == 0x00000010)) {
+        size += com.google.protobuf.CodedOutputStream
+            .computeDoubleSize(7, averageLinkTargetTitleWordCount_);
+      }
+      if (((bitField0_ & 0x00000020) == 0x00000020)) {
+        size += com.google.protobuf.CodedOutputStream
+            .computeInt32Size(8, sectionTitlesCount_);
+      }
+      if (((bitField0_ & 0x00000040) == 0x00000040)) {
+        size += com.google.protobuf.CodedOutputStream
+            .computeDoubleSize(9, averageSectionTitleSize_);
       }
       size += getUnknownFields().getSerializedSize();
       memoizedSerializedSize = size;
@@ -399,8 +591,16 @@ public final class IndexUnits {
         bitField0_ = (bitField0_ & ~0x00000002);
         averagePageSize_ = 0D;
         bitField0_ = (bitField0_ & ~0x00000004);
-        vocabularySize_ = 0;
+        linksCount_ = 0;
         bitField0_ = (bitField0_ & ~0x00000008);
+        averageLinkTargetTitleWordCount_ = 0D;
+        bitField0_ = (bitField0_ & ~0x00000010);
+        sectionTitlesCount_ = 0;
+        bitField0_ = (bitField0_ & ~0x00000020);
+        averageSectionTitleSize_ = 0D;
+        bitField0_ = (bitField0_ & ~0x00000040);
+        vocabularySize_ = 0;
+        bitField0_ = (bitField0_ & ~0x00000080);
         return this;
       }
 
@@ -444,6 +644,22 @@ public final class IndexUnits {
         if (((from_bitField0_ & 0x00000008) == 0x00000008)) {
           to_bitField0_ |= 0x00000008;
         }
+        result.linksCount_ = linksCount_;
+        if (((from_bitField0_ & 0x00000010) == 0x00000010)) {
+          to_bitField0_ |= 0x00000010;
+        }
+        result.averageLinkTargetTitleWordCount_ = averageLinkTargetTitleWordCount_;
+        if (((from_bitField0_ & 0x00000020) == 0x00000020)) {
+          to_bitField0_ |= 0x00000020;
+        }
+        result.sectionTitlesCount_ = sectionTitlesCount_;
+        if (((from_bitField0_ & 0x00000040) == 0x00000040)) {
+          to_bitField0_ |= 0x00000040;
+        }
+        result.averageSectionTitleSize_ = averageSectionTitleSize_;
+        if (((from_bitField0_ & 0x00000080) == 0x00000080)) {
+          to_bitField0_ |= 0x00000080;
+        }
         result.vocabularySize_ = vocabularySize_;
         result.bitField0_ = to_bitField0_;
         onBuilt();
@@ -469,6 +685,18 @@ public final class IndexUnits {
         }
         if (other.hasAveragePageSize()) {
           setAveragePageSize(other.getAveragePageSize());
+        }
+        if (other.hasLinksCount()) {
+          setLinksCount(other.getLinksCount());
+        }
+        if (other.hasAverageLinkTargetTitleWordCount()) {
+          setAverageLinkTargetTitleWordCount(other.getAverageLinkTargetTitleWordCount());
+        }
+        if (other.hasSectionTitlesCount()) {
+          setSectionTitlesCount(other.getSectionTitlesCount());
+        }
+        if (other.hasAverageSectionTitleSize()) {
+          setAverageSectionTitleSize(other.getAverageSectionTitleSize());
         }
         if (other.hasVocabularySize()) {
           setVocabularySize(other.getVocabularySize());
@@ -596,12 +824,188 @@ public final class IndexUnits {
         return this;
       }
 
+      private int linksCount_;
+
+      /**
+       * <code>optional int32 links_count = 6;</code>
+       *
+       * <pre>
+       * link statistics
+       * </pre>
+       */
+      public boolean hasLinksCount() {
+        return ((bitField0_ & 0x00000008) == 0x00000008);
+      }
+
+      /**
+       * <code>optional int32 links_count = 6;</code>
+       *
+       * <pre>
+       * link statistics
+       * </pre>
+       */
+      public int getLinksCount() {
+        return linksCount_;
+      }
+
+      /**
+       * <code>optional int32 links_count = 6;</code>
+       *
+       * <pre>
+       * link statistics
+       * </pre>
+       */
+      public Builder setLinksCount(int value) {
+        bitField0_ |= 0x00000008;
+        linksCount_ = value;
+        onChanged();
+        return this;
+      }
+
+      /**
+       * <code>optional int32 links_count = 6;</code>
+       *
+       * <pre>
+       * link statistics
+       * </pre>
+       */
+      public Builder clearLinksCount() {
+        bitField0_ = (bitField0_ & ~0x00000008);
+        linksCount_ = 0;
+        onChanged();
+        return this;
+      }
+
+      private double averageLinkTargetTitleWordCount_;
+
+      /**
+       * <code>optional double average_link_target_title_word_count = 7;</code>
+       */
+      public boolean hasAverageLinkTargetTitleWordCount() {
+        return ((bitField0_ & 0x00000010) == 0x00000010);
+      }
+
+      /**
+       * <code>optional double average_link_target_title_word_count = 7;</code>
+       */
+      public double getAverageLinkTargetTitleWordCount() {
+        return averageLinkTargetTitleWordCount_;
+      }
+
+      /**
+       * <code>optional double average_link_target_title_word_count = 7;</code>
+       */
+      public Builder setAverageLinkTargetTitleWordCount(double value) {
+        bitField0_ |= 0x00000010;
+        averageLinkTargetTitleWordCount_ = value;
+        onChanged();
+        return this;
+      }
+
+      /**
+       * <code>optional double average_link_target_title_word_count = 7;</code>
+       */
+      public Builder clearAverageLinkTargetTitleWordCount() {
+        bitField0_ = (bitField0_ & ~0x00000010);
+        averageLinkTargetTitleWordCount_ = 0D;
+        onChanged();
+        return this;
+      }
+
+      private int sectionTitlesCount_;
+
+      /**
+       * <code>optional int32 section_titles_count = 8;</code>
+       *
+       * <pre>
+       * ttiles statistics
+       * </pre>
+       */
+      public boolean hasSectionTitlesCount() {
+        return ((bitField0_ & 0x00000020) == 0x00000020);
+      }
+
+      /**
+       * <code>optional int32 section_titles_count = 8;</code>
+       *
+       * <pre>
+       * ttiles statistics
+       * </pre>
+       */
+      public int getSectionTitlesCount() {
+        return sectionTitlesCount_;
+      }
+
+      /**
+       * <code>optional int32 section_titles_count = 8;</code>
+       *
+       * <pre>
+       * ttiles statistics
+       * </pre>
+       */
+      public Builder setSectionTitlesCount(int value) {
+        bitField0_ |= 0x00000020;
+        sectionTitlesCount_ = value;
+        onChanged();
+        return this;
+      }
+
+      /**
+       * <code>optional int32 section_titles_count = 8;</code>
+       *
+       * <pre>
+       * ttiles statistics
+       * </pre>
+       */
+      public Builder clearSectionTitlesCount() {
+        bitField0_ = (bitField0_ & ~0x00000020);
+        sectionTitlesCount_ = 0;
+        onChanged();
+        return this;
+      }
+
+      private double averageSectionTitleSize_;
+
+      /**
+       * <code>optional double average_section_title_size = 9;</code>
+       */
+      public boolean hasAverageSectionTitleSize() {
+        return ((bitField0_ & 0x00000040) == 0x00000040);
+      }
+
+      /**
+       * <code>optional double average_section_title_size = 9;</code>
+       */
+      public double getAverageSectionTitleSize() {
+        return averageSectionTitleSize_;
+      }
+
+      /**
+       * <code>optional double average_section_title_size = 9;</code>
+       */
+      public Builder setAverageSectionTitleSize(double value) {
+        bitField0_ |= 0x00000040;
+        averageSectionTitleSize_ = value;
+        onChanged();
+        return this;
+      }
+
+      /**
+       * <code>optional double average_section_title_size = 9;</code>
+       */
+      public Builder clearAverageSectionTitleSize() {
+        bitField0_ = (bitField0_ & ~0x00000040);
+        averageSectionTitleSize_ = 0D;
+        onChanged();
+        return this;
+      }
+
       private int vocabularySize_ ;
       /**
        * <code>optional int32 vocabulary_size = 4;</code>
        */
       public boolean hasVocabularySize() {
-        return ((bitField0_ & 0x00000008) == 0x00000008);
+        return ((bitField0_ & 0x00000080) == 0x00000080);
       }
       /**
        * <code>optional int32 vocabulary_size = 4;</code>
@@ -613,7 +1017,7 @@ public final class IndexUnits {
        * <code>optional int32 vocabulary_size = 4;</code>
        */
       public Builder setVocabularySize(int value) {
-        bitField0_ |= 0x00000008;
+        bitField0_ |= 0x00000080;
         vocabularySize_ = value;
         onChanged();
         return this;
@@ -622,7 +1026,7 @@ public final class IndexUnits {
        * <code>optional int32 vocabulary_size = 4;</code>
        */
       public Builder clearVocabularySize() {
-        bitField0_ = (bitField0_ & ~0x00000008);
+        bitField0_ = (bitField0_ & ~0x00000080);
         vocabularySize_ = 0;
         onChanged();
         return this;
@@ -7559,34 +7963,44 @@ public final class IndexUnits {
       descriptor;
   static {
     java.lang.String[] descriptorData = {
-      "\n\020indexunits.proto\022\005index\"e\n\tIndexMeta\022\017" +
-      "\n\007version\030\001 \001(\005\022\023\n\013pages_count\030\002 \001(\005\022\031\n\021" +
-      "average_page_size\030\003 \001(\001\022\027\n\017vocabulary_si" +
-      "ze\030\004 \001(\005\"\255\002\n\004Page\022\017\n\007page_id\030\001 \001(\003\022\013\n\003ur" +
-      "i\030\002 \001(\t\022\r\n\005title\030\003 \001(\t\022\017\n\007content\030\004 \001(\t\022" +
-      "(\n\016outgoing_links\030\005 \003(\0132\020.index.Page.Lin" +
-      "k\022(\n\016incoming_links\030\006 \003(\0132\020.index.Page.L" +
-      "ink\022\022\n\ncategories\030\t \003(\t\022\021\n\tparent_id\030\007 \001" +
-      "(\003\022\024\n\014subpages_ids\030\010 \003(\003\032V\n\004Link\022\014\n\004text" +
-      "\030\001 \001(\t\022\026\n\016target_page_id\030\002 \001(\003\022\020\n\010positi",
-      "on\030\003 \001(\003\022\026\n\016source_page_id\030\004 \001(\003\"\360\001\n\016Ter" +
-      "mStatistics\022\017\n\007term_id\030\001 \001(\003\022\032\n\022document" +
-      "_frequency\030\002 \001(\005\022 \n\030document_lemma_frequ" +
-      "ency\030\003 \001(\005\022\026\n\016term_frequency\030\004 \001(\003\022=\n\020bi" +
-      "gram_frequency\030\005 \003(\0132#.index.TermStatist" +
-      "ics.TermFrequency\0328\n\rTermFrequency\022\017\n\007te" +
-      "rm_id\030\001 \001(\003\022\026\n\016term_frequency\030\002 \001(\005\"\202\002\n\004" +
-      "Term\022\n\n\002id\030\001 \001(\003\022\020\n\010lemma_id\030\002 \001(\003\022\014\n\004te" +
-      "xt\030\003 \001(\t\0220\n\016part_of_speech\030\004 \001(\0162\030.index" +
-      ".Term.PartOfSpeech\"\233\001\n\014PartOfSpeech\022\013\n\007U",
-      "NKNOWN\020\000\022\005\n\001A\020\001\022\007\n\003ADV\020\002\022\n\n\006ADVPRO\020\003\022\010\n\004" +
-      "ANUM\020\004\022\010\n\004APRO\020\005\022\007\n\003COM\020\006\022\010\n\004CONJ\020\007\022\010\n\004I" +
-      "NTJ\020\010\022\007\n\003NUM\020\t\022\010\n\004PART\020\n\022\006\n\002PR\020\013\022\005\n\001S\020\014\022" +
-      "\010\n\004SPRO\020\r\022\005\n\001V\020\016\"\034\n\010TermList\022\020\n\010termList" +
-      "\030\001 \003(\003\"\036\n\013IntegerList\022\017\n\007intList\030\001 \003(\005\"." +
-      "\n\016UriPageMapping\022\013\n\003uri\030\001 \001(\t\022\017\n\007page_id" +
-      "\030\002 \001(\003B4\n&com.expleague.sensearch.protob" +
-      "uf.indexB\nIndexUnits"
+        "\n\020indexunits.proto\022\005index\"\352\001\n\tIndexMeta\022" +
+            "\017\n\007version\030\001 \001(\005\022\023\n\013pages_count\030\002 \001(\005\022\031\n"
+            +
+            "\021average_page_size\030\003 \001(\001\022\023\n\013links_count\030" +
+            "\006 \001(\005\022,\n$average_link_target_title_word_" +
+            "count\030\007 \001(\001\022\034\n\024section_titles_count\030\010 \001(" +
+            "\005\022\"\n\032average_section_title_size\030\t \001(\001\022\027\n" +
+            "\017vocabulary_size\030\004 \001(\005\"\255\002\n\004Page\022\017\n\007page_" +
+            "id\030\001 \001(\003\022\013\n\003uri\030\002 \001(\t\022\r\n\005title\030\003 \001(\t\022\017\n\007"
+            +
+            "content\030\004 \001(\t\022(\n\016outgoing_links\030\005 \003(\0132\020." +
+            "index.Page.Link\022(\n\016incoming_links\030\006 \003(\0132",
+        "\020.index.Page.Link\022\022\n\ncategories\030\t \003(\t\022\021\n" +
+            "\tparent_id\030\007 \001(\003\022\024\n\014subpages_ids\030\010 \003(\003\032V" +
+            "\n\004Link\022\014\n\004text\030\001 \001(\t\022\026\n\016target_page_id\030\002" +
+            " \001(\003\022\020\n\010position\030\003 \001(\003\022\026\n\016source_page_id" +
+            "\030\004 \001(\003\"\360\001\n\016TermStatistics\022\017\n\007term_id\030\001 \001" +
+            "(\003\022\032\n\022document_frequency\030\002 \001(\005\022 \n\030docume" +
+            "nt_lemma_frequency\030\003 \001(\005\022\026\n\016term_frequen" +
+            "cy\030\004 \001(\003\022=\n\020bigram_frequency\030\005 \003(\0132#.ind" +
+            "ex.TermStatistics.TermFrequency\0328\n\rTermF" +
+            "requency\022\017\n\007term_id\030\001 \001(\003\022\026\n\016term_freque",
+        "ncy\030\002 \001(\005\"\202\002\n\004Term\022\n\n\002id\030\001 \001(\003\022\020\n\010lemma_"
+            +
+            "id\030\002 \001(\003\022\014\n\004text\030\003 \001(\t\0220\n\016part_of_speech" +
+            "\030\004 \001(\0162\030.index.Term.PartOfSpeech\"\233\001\n\014Par" +
+            "tOfSpeech\022\013\n\007UNKNOWN\020\000\022\005\n\001A\020\001\022\007\n\003ADV\020\002\022\n"
+            +
+            "\n\006ADVPRO\020\003\022\010\n\004ANUM\020\004\022\010\n\004APRO\020\005\022\007\n\003COM\020\006\022"
+            +
+            "\010\n\004CONJ\020\007\022\010\n\004INTJ\020\010\022\007\n\003NUM\020\t\022\010\n\004PART\020\n\022\006"
+            +
+            "\n\002PR\020\013\022\005\n\001S\020\014\022\010\n\004SPRO\020\r\022\005\n\001V\020\016\"\034\n\010TermLi"
+            +
+            "st\022\020\n\010termList\030\001 \003(\003\"\036\n\013IntegerList\022\017\n\007i" +
+            "ntList\030\001 \003(\005\".\n\016UriPageMapping\022\013\n\003uri\030\001 " +
+            "\001(\t\022\017\n\007page_id\030\002 \001(\003B4\n&com.expleague.se",
+        "nsearch.protobuf.indexB\nIndexUnits"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
         new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
@@ -7605,7 +8019,9 @@ public final class IndexUnits {
     internal_static_index_IndexMeta_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessage.FieldAccessorTable(
         internal_static_index_IndexMeta_descriptor,
-        new java.lang.String[] { "Version", "PagesCount", "AveragePageSize", "VocabularySize", });
+        new java.lang.String[]{"Version", "PagesCount", "AveragePageSize", "LinksCount",
+            "AverageLinkTargetTitleWordCount", "SectionTitlesCount", "AverageSectionTitleSize",
+            "VocabularySize",});
     internal_static_index_Page_descriptor =
       getDescriptor().getMessageTypes().get(1);
     internal_static_index_Page_fieldAccessorTable = new

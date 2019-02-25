@@ -1,13 +1,10 @@
 package com.expleague.sensearch.donkey.plain;
 
 import com.expleague.sensearch.protobuf.index.IndexUnits.UriPageMapping;
-import com.google.common.primitives.Longs;
 import gnu.trove.map.TObjectLongMap;
 import gnu.trove.map.hash.TObjectLongHashMap;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.net.URI;
-import java.net.URLDecoder;
 import org.apache.log4j.Logger;
 import org.iq80.leveldb.DB;
 import org.iq80.leveldb.WriteBatch;
@@ -22,31 +19,12 @@ public class UriMappingBuilder implements AutoCloseable {
     this.uriMappingDb = uriMappingDb;
   }
 
-  public void startPage(long pageId, URI uri) {
-    if (pageUri.containsKey(uri)) {
-      throw new IllegalStateException("Uri " + uri + " is already in IndexMeta");
-    }
-    try {
-      String uriDecoded = URLDecoder.decode(uri.toString(), "UTF-8");
-      pageUri.put(uriDecoded, pageId);
-    } catch (UnsupportedEncodingException e) {
-      LOG.warn(e);
-    }
-    pageUri.put(uri.toString(), pageId);
-  }
-
   public void addSection(URI sectionUri, long sectionId) {
-    try {
-      String uriDecoded = URLDecoder.decode(sectionUri.toString(), "UTF-8");
-      pageUri.put(uriDecoded, sectionId);
-    } catch (UnsupportedEncodingException e) {
-      LOG.warn(e);
-    }
-    pageUri.put(sectionUri.toString(), sectionId);
+    pageUri.put(sectionUri.toASCIIString(), sectionId);
   }
 
   @Override
-  public void close() throws Exception {
+  public void close() throws IOException {
     final WriteBatch[] writeBatch = new WriteBatch[] {uriMappingDb.createWriteBatch()};
     int maxPagesInBatch = 1000;
     int[] pagesInBatch = new int[1];
@@ -54,7 +32,7 @@ public class UriMappingBuilder implements AutoCloseable {
     pageUri.forEachEntry(
         (uri, id) -> {
           writeBatch[0].put(
-              Longs.toByteArray(id),
+              uri.getBytes(),
               UriPageMapping.newBuilder().setUri(uri).setPageId(id).build().toByteArray());
           pagesInBatch[0]++;
           if (pagesInBatch[0] >= maxPagesInBatch) {

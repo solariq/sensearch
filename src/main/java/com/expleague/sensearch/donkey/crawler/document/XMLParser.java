@@ -89,7 +89,7 @@ public class XMLParser {
     WikiPage page = new WikiPage();
 
     page.setTitle(xmlPage.title == null ? "" : xmlPage.title);
-    String pageUri = URLEncoder.encode(page.title().replace(" ", "_").replace("%", "%25"), "UTF-8");
+    String pageUri = page.title().replace(" ", "_").replace("%", "%25");
 
     page.setUri(URI.create("https://ru.wikipedia.org/wiki/" + pageUri));
     if (xmlPage.categories == null) {
