@@ -76,7 +76,7 @@ public class SenSearchCLI {
             .longOpt(CORPUS_PATH_OPTION)
             .desc("path to corpus for embedding")
             .hasArg()
-            .required()
+//            .required()
             .build();
     trainEmbeddingOptions.addOption(corpusPathOption);
 

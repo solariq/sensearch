@@ -16,9 +16,11 @@ import org.jetbrains.annotations.Nullable;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.BitSet;
 import java.util.List;
 import java.util.stream.DoubleStream;
 import java.util.stream.IntStream;
+import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
 public class QuantLSHCosIndexDB extends BaseQuantLSHCosIndex implements AutoCloseable {
@@ -81,7 +83,7 @@ public class QuantLSHCosIndexDB extends BaseQuantLSHCosIndex implements AutoClos
         vecDB.put(
                 Longs.toByteArray(SPECIAL_ID_3),
                 ByteTools.toBytes(
-                        sketches.stream().flatMapToInt(l -> IntStream.of(l.toArray())).toArray()
+                        sketches.stream().flatMapToLong(l -> LongStream.of(l.toArray())).toArray()
                 )
         );
         vecDB.put(

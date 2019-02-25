@@ -35,10 +35,7 @@ public class EmbeddingBuilder implements AutoCloseable {
   private final TLongLongMap wikiIdToIndexIdMap = new TLongLongHashMap();
   private final TLongObjectMap<List<CharSequence>> wikiIdToLinkTexts = new TLongObjectHashMap<>();
 
-  public EmbeddingBuilder(
-          DB vecDb,
-          Embedding<CharSeq> jmllEmbedding,
-          Tokenizer tokenizer) {
+  public EmbeddingBuilder(DB vecDb, Embedding<CharSeq> jmllEmbedding, Tokenizer tokenizer) {
     this.jmllEmbedding = jmllEmbedding;
     this.tokenizer = tokenizer;
     nnIdx = new QuantLSHCosIndexDB(new FastRandom(), QUANT_DIM, DEFAULT_VEC_SIZE, BATCH_SIZE, vecDb);
@@ -46,7 +43,6 @@ public class EmbeddingBuilder implements AutoCloseable {
 
   @Override
   public void close() throws IOException {
-
     long[] curLinkId = new long[1];
     wikiIdToLinkTexts.forEachEntry((wikiId, linkTexts) -> {
       if (wikiIdToIndexIdMap.containsKey(wikiId)) {
@@ -74,13 +70,12 @@ public class EmbeddingBuilder implements AutoCloseable {
   }
 
   public void addSection(CrawlerDocument.Section section, long sectionId) {
-
-    Vec titleVec = toVector(section.title());
+    final Vec titleVec = toVector(section.title());
     if (titleVec != null) {
       nnIdx.append(curPageTitleId++, titleVec);
     }
 
-    Vec textVec = toVector(section.text());
+    final Vec textVec = toVector(section.text());
     if (textVec != null) {
       nnIdx.append(curPageTextId++, textVec);
     }
@@ -99,7 +94,7 @@ public class EmbeddingBuilder implements AutoCloseable {
         return;
       }
 
-      Vec vec = jmllEmbedding.apply(CharSeq.compact(word));
+      final Vec vec = jmllEmbedding.apply(CharSeq.compact(word));
       if (vec != null) {
         nnIdx.append(id, vec);
       }
@@ -110,20 +105,18 @@ public class EmbeddingBuilder implements AutoCloseable {
   public void endPage() {}
 
   private Vec toVector(CharSequence text) {
-    Vec[] vectors =
-            tokenizer
-                    .parseTextToWords(text)
-                    .map(word -> word.toString().toLowerCase())
-                    .map(CharSeq::intern)
-                    .map(jmllEmbedding)
-                    .filter(Objects::nonNull)
-                    .toArray(Vec[]::new);
+    final Vec[] vectors = tokenizer.parseTextToWords(text)
+        .map(word -> word.toString().toLowerCase())
+        .map(CharSeq::intern)
+        .map(jmllEmbedding)
+        .filter(Objects::nonNull)
+        .toArray(Vec[]::new);
 
     if (vectors.length == 0) {
       return null;
     }
 
-    ArrayVec mean = new ArrayVec(DEFAULT_VEC_SIZE);
+    final Vec mean = new ArrayVec(DEFAULT_VEC_SIZE);
     for (Vec vec : vectors) {
       VecTools.append(mean, vec);
     }

@@ -9,6 +9,8 @@ import com.expleague.sensearch.Page.SegmentType;
 import com.expleague.sensearch.core.Term;
 import com.expleague.sensearch.index.Index;
 import com.expleague.sensearch.miner.features.TextFeatureSet.Segment;
+
+import java.util.List;
 import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
@@ -77,9 +79,10 @@ public class AccumulatorFeatureSet extends FeatureSet.Stub<QURLItem> {
     }
     { //Cos-Dist processing
       Vec queryVec = index.vecByTerms(item.queryCache().terms());
-      Vec titleVec = index.vecByTerms(
-          index.parse(item.pageCache().content(SegmentType.SECTION_TITLE))
-              .collect(Collectors.toList()));
+      final List<Term> titleTerms = index.parse(item.pageCache()
+          .content(SegmentType.SECTION_TITLE))
+          .collect(Collectors.toList());
+      Vec titleVec = index.vecByTerms(titleTerms);
 
       features.components()
           .map(Functions.cast(CosDistanceFeatureSet.class))

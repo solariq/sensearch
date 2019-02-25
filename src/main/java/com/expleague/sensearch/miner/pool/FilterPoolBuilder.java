@@ -79,9 +79,11 @@ public class FilterPoolBuilder {
       for (int q = 0; q < queries.size(); q++) {
         String queryString = queries.get(q);
         if (Files.exists(Paths.get("./wordstat").resolve("query_" + queryString))) {
+          BufferedReader readerFile = Files.newBufferedReader(Paths.get("./wordstat").resolve("query_" + queryString));
+
           Query query = BaseQuery.create(queryString, index);
           ObjectMapper objectMapper = new ObjectMapper();
-          Set<CharSeq> validTitles = Arrays.stream(objectMapper.readValue(reader, ResultItemImpl[].class))
+          Set<CharSeq> validTitles = Arrays.stream(objectMapper.readValue(readerFile, ResultItemImpl[].class))
               .map(ResultItemImpl::title)
               .map(CharSeq::create)
               .collect(Collectors.toSet());

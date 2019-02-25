@@ -272,77 +272,66 @@ public class PlainIndexBuilder implements IndexBuilder {
 
       LOG.info("Creating mappings from wiki ids to raw index ids...");
 
-      final SuggestInformationBuilder suggestBuilder =
-          new SuggestInformationBuilder(suggestUnigramDb, suggestMultigramDb);
+      final SuggestInformationBuilder suggestBuilder = new SuggestInformationBuilder(suggestUnigramDb, suggestMultigramDb);
 
       try {
         LOG.info("Parsing pages...");
-        crawler
-            .makeStream()
-            .forEach(
-                doc -> {
-                  long pageId = pageIdGenerator(doc.uri()).next(knownPageIds);
-                  // We don't add pageId to the knownPageIds as we need first section to have the
-                  // same Id
-                  // knownPageIds.add(pageId);
-                  plainPageBuilder.startPage(doc.id(), pageId, doc.categories(), doc.uri());
-                  statisticsBuilder.startPage();
-                  indexMetaBuilder.startPage(
+        crawler.makeStream().forEach(doc -> {
+          long pageId = pageIdGenerator(doc.uri()).next(knownPageIds);
+          // We don't add pageId to the knownPageIds as we need first section to have the
+          // same Id
+          // knownPageIds.add(pageId);
+          plainPageBuilder.startPage(doc.id(), pageId, doc.categories(), doc.uri());
+          statisticsBuilder.startPage();
+          indexMetaBuilder.startPage(
                       doc.id(), pageId, (int) tokenizer.parseTextToWords(doc.title()).count());
-                  embeddingBuilder.startPage(doc.id(), pageId);
+          embeddingBuilder.startPage(doc.id(), pageId);
 
-                  doc.sections()
-                      .forEachOrdered(
-                          s -> {
-                            long sectionId = pageIdGenerator(s.uri()).next(knownPageIds);
-                            knownPageIds.add(sectionId);
+          doc.sections().forEachOrdered(s -> {
+            long sectionId = pageIdGenerator(s.uri()).next(knownPageIds);
+            knownPageIds.add(sectionId);
 
-                            plainPageBuilder.addSection(s, sectionId);
-                            indexMetaBuilder.addSection(sectionId);
-                            embeddingBuilder.addSection(s, sectionId);
+            plainPageBuilder.addSection(s, sectionId);
+            indexMetaBuilder.addSection(sectionId);
+            embeddingBuilder.addSection(s, sectionId);
                             uriMappingBuilder.addSection(s.uri(), sectionId);
 
-                            List<CharSequence> sectionTitles = s.titles();
-                            String sectionTitle =
-                                sectionTitles.get(sectionTitles.size() - 1).toString();
+            List<CharSequence> sectionTitles = s.titles();
+            String sectionTitle =
+                sectionTitles.get(sectionTitles.size() - 1).toString();
 
-                            final CharSequence TITLE_STOP = "@@@STOP_TITLE777@@@";
+            final CharSequence TITLE_STOP = "@@@STOP_TITLE777@@@";
                             boolean[] isTitle = {true};
-                            Stream.concat(
-                                Stream.concat(
-                                    tokenizer.parseTextToWords(sectionTitle),
-                                    Stream.of(TITLE_STOP)),
-                                tokenizer.parseTextToWords(s.text()))
-                                .map(CharSeqTools::toLowerCase)
-                                .forEach(
-                                    word -> {
-                                      if (word == TITLE_STOP) {
+                            Stream.concat(Stream.concat(
+                tokenizer.parseTextToWords(sectionTitle),Stream.of(TITLE_STOP)),
+                tokenizer.parseTextToWords(s.text()))
+                .map(CharSeqTools::toLowerCase)
+                .forEach(
+                    word -> {if (word == TITLE_STOP) {
                                         isTitle[0] = false;
                                       }
+                      TermBuilder.ParsedTerm termLemmaId =
+                          termBuilder.addTerm(word);
 
-                                      TermBuilder.ParsedTerm termLemmaId =
-                                          termBuilder.addTerm(word);
-
-                                      long lemmaId =
-                                          termLemmaId.lemmaId == -1
-                                              ? termLemmaId.id
-                                              : termLemmaId.lemmaId;
-                                      statisticsBuilder.enrich(termLemmaId.id, lemmaId);
-                                      indexMetaBuilder.addTerm(
+                      long lemmaId =
+                          termLemmaId.lemmaId == -1
+                              ? termLemmaId.id
+                              : termLemmaId.lemmaId;
+                      statisticsBuilder.enrich(termLemmaId.id, lemmaId);
+                    indexMetaBuilder.addTerm(
                                           termLemmaId.id,
                                           isTitle[0]
                                               ? TermSegment.SECTION_TITLE
-                                              : TermSegment.TEXT);
-                                    });
-                          });
+                                              : TermSegment.TEXT);});
+          });
 
-                  suggestBuilder.accept(toTermIds(doc.title(), termBuilder));
+          suggestBuilder.accept(toTermIds(doc.title(), termBuilder));
 
-                  embeddingBuilder.endPage();
-                  indexMetaBuilder.endPage();
-                  statisticsBuilder.endPage();
-                  plainPageBuilder.endPage();
-                });
+          embeddingBuilder.endPage();
+          indexMetaBuilder.endPage();
+          statisticsBuilder.endPage();
+          plainPageBuilder.endPage();
+        });
 
         suggestBuilder.build();
 
