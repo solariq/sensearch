@@ -53,6 +53,7 @@ public class PlainIndexBuilder implements IndexBuilder {
   public static final String PAGE_ROOT = "page";
   public static final String TERM_ROOT = "term";
   public static final String EMBEDDING_ROOT = "embedding";
+  public static final String URI_MAPPING_ROOT = "uriMapping";
   public static final String LSH_METRIC_ROOT = "lsh_metric";
   public static final String LSH_ROOT = "lsh";
   public static final String TEMP_EMBEDDING_ROOT = "temp_embedding";

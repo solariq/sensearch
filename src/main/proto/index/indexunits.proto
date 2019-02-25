@@ -6,11 +6,6 @@ option java_package = "com.expleague.sensearch.protobuf.index";
 option java_outer_classname = "IndexUnits";
 
 message IndexMeta {
-  message UriPageMapping {
-    optional string uri = 1;
-    optional int64 page_id = 2;
-  }
-
   optional int32 version = 1;
   optional int32 pages_count = 2;
   optional double average_page_size = 3;
@@ -25,7 +20,6 @@ message IndexMeta {
 
   optional int32 vocabulary_size = 4;
 
-  repeated UriPageMapping uri_page_mappings = 5;
 }
 
 message Page {
@@ -102,4 +96,9 @@ message TermList {
 
 message IntegerList {
 	repeated int32 intList = 1;
+}
+
+message UriPageMapping {
+  optional string uri = 1;
+  optional int64 page_id = 2;
 }

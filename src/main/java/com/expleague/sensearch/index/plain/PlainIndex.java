@@ -16,13 +16,15 @@ import com.expleague.sensearch.donkey.plain.PlainIndexBuilder;
 import com.expleague.sensearch.filter.Filter;
 import com.expleague.sensearch.filter.features.FilterFeatures;
 import com.expleague.sensearch.index.Embedding;
+import com.expleague.sensearch.index.Filter;
 import com.expleague.sensearch.index.Index;
+import com.expleague.sensearch.index.IndexedPage;
+import com.expleague.sensearch.index.plain.features.FilterFeatures;
 import com.expleague.sensearch.metrics.LSHSynonymsMetric;
 import com.expleague.sensearch.miner.Features;
 import com.expleague.sensearch.miner.FeaturesImpl;
 import com.expleague.sensearch.miner.features.QURLItem;
 import com.expleague.sensearch.protobuf.index.IndexUnits;
-import com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta.UriPageMapping;
 import com.expleague.sensearch.protobuf.index.IndexUnits.TermStatistics;
 import com.expleague.sensearch.protobuf.index.IndexUnits.TermStatistics.TermFrequency;
 import com.expleague.sensearch.query.Query;
@@ -79,7 +81,6 @@ public class PlainIndex implements Index {
 
   private final Map<CharSeq, Term> wordToTerms = new HashMap<>();
   private final TLongObjectMap<Term> idToTerm = new TLongObjectHashMap<>();
-  private final TObjectLongMap<URI> uriToPageIdMap = new TObjectLongHashMap<>();
 
   private final DB termStatisticsBase;
   private final DB pageBase;
@@ -87,6 +88,8 @@ public class PlainIndex implements Index {
 
   private final DB suggestUnigramDb;
   private final DB suggestMultigramDb;
+
+  private final DB uriMappingDb;
 
   private final double averagePageSize;
   private double averageTitleSize = 0;
@@ -151,6 +154,10 @@ public class PlainIndex implements Index {
         JniDBFactory.factory.open(
             indexRoot.resolve(PlainIndexBuilder.SUGGEST_MULTIGRAMS_ROOT).toFile(),
             DEFAULT_DB_OPTIONS);
+
+    uriMappingDb = JniDBFactory.factory.open(
+        indexRoot.resolve(PlainIndexBuilder.URI_MAPPING_ROOT).toFile(),
+        DEFAULT_DB_OPTIONS);
 
     tokenizer = new TokenizerImpl();
 
@@ -222,17 +229,6 @@ public class PlainIndex implements Index {
           }
         });
 
-    for (UriPageMapping mapping : indexMeta.getUriPageMappingsList()) {
-      URI key;
-      try {
-        key = URI.create(mapping.getUri());
-      }
-      catch (IllegalArgumentException iae) {
-        key = URI.create(URLEncoder.encode(mapping.getUri(), "UTF-8"));
-      }
-      uriToPageIdMap.put(key, mapping.getPageId());
-    }
-
     LOG.info(
         String.format("PlainIndex loaded in %.3f seconds", (System.nanoTime() - startTime) / 1e9));
   }
@@ -274,6 +270,7 @@ public class PlainIndex implements Index {
 
   @Override
   public Page page(URI uri) {
+
     if (!uriToPageIdMap.containsKey(uri)) {
       return PlainPage.EMPTY_PAGE;
     }
