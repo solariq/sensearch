@@ -2,7 +2,9 @@ package com.expleague.sensearch;
 
 import static com.expleague.sensearch.donkey.plain.PlainIndexBuilder.DEFAULT_VEC_SIZE;
 
+import com.expleague.commons.seq.CharSeq;
 import com.expleague.ml.cli.JMLLCLI;
+import com.expleague.ml.embedding.impl.EmbeddingImpl;
 import com.expleague.sensearch.donkey.IndexBuilder;
 import com.expleague.sensearch.donkey.crawler.CrawlerXML;
 import com.expleague.sensearch.donkey.plain.JmllEmbeddingBuilder;
@@ -11,6 +13,8 @@ import com.expleague.sensearch.web.SearchServer;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import java.io.File;
+import java.io.FileWriter;
+import java.io.Writer;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -29,8 +33,8 @@ public class SenSearchCLI {
   private static final String DATA_PATH_OPTION = "data";
   private static final String INDEX_PATH_OPTION = "index";
   // TODO: handle corpus
-  private static final String CORPUS_PATH_OPTION = "corpus";
   private static final String EMBEDDING_PATH_OPTION = "embedding";
+  private static final String EMBEDDING_OUTPUT_PATH_OPTION = "decomp";
   private static final String DO_NOT_USE_LSH_OPTION = "nolsh";
   private static final String MAX_FILTER_ITEMS = "maxfilter";
   private static final String RANK_POOL_PATH_OPTION = "rankpool";
@@ -73,10 +77,10 @@ public class SenSearchCLI {
 
     Option corpusPathOption =
         Option.builder()
-            .longOpt(CORPUS_PATH_OPTION)
-            .desc("path to corpus for embedding")
+            .longOpt(EMBEDDING_OUTPUT_PATH_OPTION)
+            .desc("path to result embedding vecs")
             .hasArg()
-//            .required()
+            .required()
             .build();
     trainEmbeddingOptions.addOption(corpusPathOption);
 
@@ -137,10 +141,19 @@ public class SenSearchCLI {
       ConfigImpl config = new ConfigImpl();
       switch (args[0]) {
         case TRAIN_EMBEDDING_COMMAND:
-          new JmllEmbeddingBuilder(
-              DEFAULT_VEC_SIZE, Paths.get(parse.getOptionValue(EMBEDDING_PATH_OPTION)))
-              .build(
-                  new CrawlerXML(Paths.get(parse.getOptionValue(DATA_PATH_OPTION))).makeStream());
+          try (Writer w =
+              new FileWriter(
+                  Paths.get(parse.getOptionValue(EMBEDDING_OUTPUT_PATH_OPTION)).toFile())) {
+            EmbeddingImpl<CharSeq> embedding =
+                (EmbeddingImpl<CharSeq>)
+                    new JmllEmbeddingBuilder(
+                        DEFAULT_VEC_SIZE,
+                        Paths.get(parse.getOptionValue(EMBEDDING_PATH_OPTION)))
+                        .build(
+                            new CrawlerXML(Paths.get(parse.getOptionValue(DATA_PATH_OPTION)))
+                                .makeStream());
+            embedding.write(w);
+          }
           break;
 
         case BUILD_INDEX_COMMAND:
@@ -227,7 +240,7 @@ public class SenSearchCLI {
   private static String getCommandDescription(String command) {
     switch (command) {
       case TRAIN_EMBEDDING_COMMAND:
-        return "Trains embedding for given data. If corpus is not specified, creates it from data";
+        return "Trains embedding for given data.";
       case BUILD_INDEX_COMMAND:
         return "Builds index. Requires embedding to be already trained";
       case START_SEVER_COMMAND:
