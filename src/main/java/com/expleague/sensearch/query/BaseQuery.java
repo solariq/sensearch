@@ -8,16 +8,13 @@ import java.util.stream.Collectors;
 import org.apache.commons.lang3.tuple.Pair;
 
 public class BaseQuery implements Query {
-  private final Map<Term, List<Term>> synonyms;
+
+  private Map<Term, List<Term>> synonyms;
   private final List<Term> terms;
   private final String text;
 
   private BaseQuery(String input, List<Term> terms) {
     this.terms = terms;
-    this.synonyms = terms.stream()
-        .map(term -> Pair.of(term, term.synonyms().collect(Collectors.toList())))
-        .collect(Collectors.toSet()).stream()
-        .collect(Collectors.toMap(Pair::getLeft, Pair::getRight));
     this.text = input;
   }
 
@@ -32,6 +29,12 @@ public class BaseQuery implements Query {
 
   @Override
   public Map<Term, List<Term>> synonyms() {
+    if (synonyms == null) {
+      synonyms = terms.stream()
+          .map(term -> Pair.of(term, term.synonyms().collect(Collectors.toList())))
+          .collect(Collectors.toSet()).stream()
+          .collect(Collectors.toMap(Pair::getLeft, Pair::getRight));
+    }
     return synonyms;
   }
 
