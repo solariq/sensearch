@@ -8,20 +8,17 @@ import com.expleague.commons.math.vectors.impl.vectors.ArrayVec;
 import com.expleague.commons.random.FastRandom;
 import com.expleague.sensearch.donkey.plain.ByteTools;
 import com.google.common.primitives.Longs;
-import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.list.array.TLongArrayList;
-import org.iq80.leveldb.DB;
-import org.jetbrains.annotations.Nullable;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.BitSet;
 import java.util.List;
 import java.util.stream.DoubleStream;
 import java.util.stream.IntStream;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
+import org.iq80.leveldb.DB;
+import org.jetbrains.annotations.Nullable;
 
 public class QuantLSHCosIndexDB extends BaseQuantLSHCosIndex implements AutoCloseable {
     private static final long SPECIAL_ID_1 = Long.MAX_VALUE - 3;
@@ -35,7 +32,7 @@ public class QuantLSHCosIndexDB extends BaseQuantLSHCosIndex implements AutoClos
         this.vecDB = vecDB;
     }
 
-    public QuantLSHCosIndexDB(int dim, int minDist, TLongArrayList ids, List<TIntArrayList> sketches, CosDistanceHashFunction[] hashes, DB vecDB) {
+    public QuantLSHCosIndexDB(int dim, int minDist, TLongArrayList ids, List<TLongArrayList> sketches, CosDistanceHashFunction[] hashes, DB vecDB) {
         super(dim, minDist, ids, sketches, hashes);
         this.vecDB = vecDB;
     }
@@ -112,11 +109,11 @@ public class QuantLSHCosIndexDB extends BaseQuantLSHCosIndex implements AutoClos
         int minDist = fields[2];
         int sketchesSize = fields[3];
 
-        int[] allSketches = ByteTools.toIntArray(vecDB.get(Longs.toByteArray(SPECIAL_ID_3)));
-        List<TIntArrayList> sketches = new ArrayList<>();
+        long[] allSketches = ByteTools.toLongArray(vecDB.get(Longs.toByteArray(SPECIAL_ID_3)));
+        List<TLongArrayList> sketches = new ArrayList<>();
         int chunkSize = allSketches.length / sketchesSize;
         for (int i = 0; i < sketchesSize; i++) {
-            sketches.add(new TIntArrayList(Arrays.copyOfRange(allSketches, i * chunkSize, (i + 1) *chunkSize)));
+            sketches.add(new TLongArrayList(Arrays.copyOfRange(allSketches, i * chunkSize, (i + 1) *chunkSize)));
         }
 
         double[] allCoords = ByteTools.toDoubleArray(vecDB.get(Longs.toByteArray(SPECIAL_ID_4)));
