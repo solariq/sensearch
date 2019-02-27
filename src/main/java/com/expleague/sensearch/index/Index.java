@@ -3,7 +3,7 @@ package com.expleague.sensearch.index;
 import com.expleague.commons.math.vectors.Vec;
 import com.expleague.sensearch.Page;
 import com.expleague.sensearch.core.Term;
-import com.expleague.sensearch.miner.Features;
+import com.expleague.sensearch.features.Features;
 import com.expleague.sensearch.query.Query;
 import com.expleague.sensearch.web.suggest.SuggestInformationLoader;
 import java.net.URI;

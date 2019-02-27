@@ -1,7 +1,8 @@
-package com.expleague.sensearch.miner.features;
+package com.expleague.sensearch.features.sets.ranker;
 
 import com.expleague.ml.data.tools.FeatureSet;
 import com.expleague.sensearch.core.Term;
+import com.expleague.sensearch.features.QURLItem;
 
 public interface TextFeatureSet extends FeatureSet<QURLItem> {
   void withStats(int totalLength, double averageTotalLength, int titleLength,

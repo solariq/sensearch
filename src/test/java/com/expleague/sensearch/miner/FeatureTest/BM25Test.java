@@ -2,10 +2,10 @@ package com.expleague.sensearch.miner.FeatureTest;
 
 import com.expleague.commons.math.vectors.Vec;
 import com.expleague.sensearch.Page;
-import com.expleague.sensearch.miner.features.BM25FeatureSet;
-import com.expleague.sensearch.miner.features.QURLItem;
-import com.expleague.sensearch.miner.features.TextFeatureSet;
-import com.expleague.sensearch.miner.features.TextFeatureSet.Segment;
+import com.expleague.sensearch.features.sets.ranker.BM25FeatureSet;
+import com.expleague.sensearch.features.QURLItem;
+import com.expleague.sensearch.features.sets.ranker.TextFeatureSet;
+import com.expleague.sensearch.features.sets.ranker.TextFeatureSet.Segment;
 import com.expleague.sensearch.query.BaseQuery;
 import com.expleague.sensearch.query.Query;
 import com.expleague.sensearch.utils.IndexBasedTestCase;

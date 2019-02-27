@@ -1,4 +1,4 @@
-package com.expleague.sensearch.miner.features;
+package com.expleague.sensearch.features;
 
 import com.expleague.ml.meta.DSItem;
 import com.expleague.sensearch.Page;

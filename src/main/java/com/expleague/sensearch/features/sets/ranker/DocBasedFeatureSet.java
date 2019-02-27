@@ -1,4 +1,4 @@
-package com.expleague.sensearch.miner.features;
+package com.expleague.sensearch.features.sets.ranker;
 
 import com.expleague.commons.math.vectors.Vec;
 import com.expleague.ml.data.tools.FeatureSet;
@@ -8,6 +8,7 @@ import com.expleague.sensearch.Page;
 import com.expleague.sensearch.Page.SegmentType;
 import com.expleague.sensearch.core.PartOfSpeech;
 import com.expleague.sensearch.core.Term;
+import com.expleague.sensearch.features.QURLItem;
 
 public class DocBasedFeatureSet extends FeatureSet.Stub<QURLItem> {
 

@@ -4,9 +4,10 @@ import com.expleague.commons.math.vectors.Vec;
 import com.expleague.sensearch.Page;
 import com.expleague.sensearch.core.SearchPhase;
 import com.expleague.sensearch.core.Whiteboard;
+import com.expleague.sensearch.features.Features;
+import com.expleague.sensearch.features.FeaturesImpl;
 import com.expleague.sensearch.index.Index;
-import com.expleague.sensearch.miner.features.AccumulatorFeatureSet;
-import com.expleague.sensearch.miner.features.QURLItem;
+import com.expleague.sensearch.features.QURLItem;
 import com.expleague.sensearch.query.Query;
 import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
@@ -48,6 +49,7 @@ public class MinerPhase implements SearchPhase {
 
     final Map<Page, Features> documentsFeatures = new HashMap<>();
     Query query = Objects.requireNonNull(whiteboard.query()).get(phaseId);
+    features.acceptFilterFeatures(whiteboard.filterFeatures().get(phaseId));
     Arrays.stream(whiteboard.subFilterResults().get(phaseId))
         .forEach(
             page -> {

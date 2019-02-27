@@ -1,4 +1,4 @@
-package com.expleague.sensearch.filter.features;
+package com.expleague.sensearch.features.sets.filter;
 
 import com.expleague.commons.math.vectors.Vec;
 import com.expleague.commons.seq.CharSeq;
@@ -8,7 +8,7 @@ import com.expleague.ml.meta.TargetMeta;
 import com.expleague.sensearch.Page;
 import com.expleague.sensearch.Page.SegmentType;
 import com.expleague.sensearch.core.impl.ResultItemImpl;
-import com.expleague.sensearch.miner.features.QURLItem;
+import com.expleague.sensearch.features.QURLItem;
 import com.expleague.sensearch.query.Query;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.BufferedReader;

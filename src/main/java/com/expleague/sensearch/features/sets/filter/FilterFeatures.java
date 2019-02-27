@@ -1,9 +1,9 @@
-package com.expleague.sensearch.filter.features;
+package com.expleague.sensearch.features.sets.filter;
 
 import com.expleague.commons.math.vectors.Vec;
 import com.expleague.ml.data.tools.FeatureSet;
 import com.expleague.ml.meta.FeatureMeta;
-import com.expleague.sensearch.miner.features.QURLItem;
+import com.expleague.sensearch.features.QURLItem;
 
 public class FilterFeatures extends FeatureSet.Stub<QURLItem> implements EmbeddingFeatures {
     private final static FeatureMeta TITLE = FeatureMeta

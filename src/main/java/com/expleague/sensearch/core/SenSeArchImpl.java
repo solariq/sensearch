@@ -8,7 +8,7 @@ import com.expleague.sensearch.core.impl.ResultItemDebugInfoImpl;
 import com.expleague.sensearch.core.impl.ResultItemImpl;
 import com.expleague.sensearch.core.impl.ResultPageImpl;
 import com.expleague.sensearch.core.impl.WhiteboardImpl;
-import com.expleague.sensearch.miner.Features;
+import com.expleague.sensearch.features.Features;
 import com.expleague.sensearch.snippet.Snippet;
 import com.google.inject.Inject;
 import java.util.ArrayList;

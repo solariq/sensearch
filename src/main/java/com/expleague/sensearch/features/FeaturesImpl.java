@@ -1,9 +1,10 @@
-package com.expleague.sensearch.miner;
+package com.expleague.sensearch.features;
 
 import com.expleague.commons.math.vectors.Vec;
 import com.expleague.commons.math.vectors.impl.vectors.ArrayVec;
 import com.expleague.ml.data.tools.FeatureSet;
 import com.expleague.ml.meta.FeatureMeta;
+import com.expleague.sensearch.features.Features;
 import java.util.stream.Stream;
 import org.apache.log4j.Logger;
 

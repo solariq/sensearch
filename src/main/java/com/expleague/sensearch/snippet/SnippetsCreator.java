@@ -1,17 +1,14 @@
 package com.expleague.sensearch.snippet;
 
 import com.expleague.commons.math.vectors.Vec;
-import com.expleague.commons.math.vectors.impl.vectors.ArrayVec;
-import com.expleague.commons.seq.CharSeqTools;
 import com.expleague.commons.util.Pair;
-import com.expleague.ml.meta.FeatureMeta;
 import com.expleague.sensearch.Page;
 import com.expleague.sensearch.Page.SegmentType;
 import com.expleague.sensearch.core.PartOfSpeech;
 import com.expleague.sensearch.core.Term;
 import com.expleague.sensearch.index.Index;
-import com.expleague.sensearch.miner.Features;
-import com.expleague.sensearch.miner.FeaturesImpl;
+import com.expleague.sensearch.features.Features;
+import com.expleague.sensearch.features.FeaturesImpl;
 import com.expleague.sensearch.query.Query;
 import com.expleague.sensearch.snippet.docbased_snippet.DocBasedSnippet;
 import com.expleague.sensearch.snippet.docbased_snippet.KeyWord;
@@ -28,7 +25,6 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * Created by Maxim on 06.10.2018. Email: alvinmax@mail.ru

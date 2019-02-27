@@ -13,11 +13,11 @@ import com.expleague.sensearch.Page;
 import com.expleague.sensearch.Page.SegmentType;
 import com.expleague.sensearch.core.impl.ResultItemImpl;
 import com.expleague.sensearch.filter.FilterMinerPhase;
-import com.expleague.sensearch.filter.features.FilterFeatures;
-import com.expleague.sensearch.filter.features.TargetFeatureSet;
+import com.expleague.sensearch.features.sets.filter.FilterFeatures;
+import com.expleague.sensearch.features.sets.filter.TargetFeatureSet;
 import com.expleague.sensearch.index.Index;
-import com.expleague.sensearch.miner.Features;
-import com.expleague.sensearch.miner.features.QURLItem;
+import com.expleague.sensearch.features.Features;
+import com.expleague.sensearch.features.QURLItem;
 import com.expleague.sensearch.query.BaseQuery;
 import com.expleague.sensearch.query.Query;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -76,9 +76,14 @@ public class FilterPoolBuilder {
 
       Pool.Builder<QURLItem> poolBuilder = Pool.builder(meta, features, targetFeatureSet);
 
+      int status = 0;
       for (int q = 0; q < queries.size(); q++) {
+        if (status % 100 == 0) {
+          System.err.println(status + " queries completed");
+        }
         String queryString = queries.get(q);
         if (Files.exists(Paths.get("./wordstat").resolve("query_" + queryString))) {
+          status++;
           BufferedReader readerFile = Files.newBufferedReader(Paths.get("./wordstat").resolve("query_" + queryString));
 
           Query query = BaseQuery.create(queryString, index);

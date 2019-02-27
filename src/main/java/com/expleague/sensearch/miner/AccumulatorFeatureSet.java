@@ -1,4 +1,4 @@
-package com.expleague.sensearch.miner.features;
+package com.expleague.sensearch.miner;
 
 import com.expleague.commons.func.Functions;
 import com.expleague.commons.math.vectors.Vec;
@@ -7,10 +7,20 @@ import com.expleague.ml.meta.FeatureMeta;
 import com.expleague.sensearch.Page;
 import com.expleague.sensearch.Page.SegmentType;
 import com.expleague.sensearch.core.Term;
+import com.expleague.sensearch.features.Features;
+import com.expleague.sensearch.features.QURLItem;
+import com.expleague.sensearch.features.sets.filter.FilterFeatures;
+import com.expleague.sensearch.features.sets.ranker.BM25FeatureSet;
+import com.expleague.sensearch.features.sets.ranker.CosDistanceFeatureSet;
+import com.expleague.sensearch.features.sets.ranker.DocBasedFeatureSet;
+import com.expleague.sensearch.features.sets.ranker.HHFeatureSet;
+import com.expleague.sensearch.features.sets.ranker.LinkFeatureSet;
+import com.expleague.sensearch.features.sets.ranker.QuotationFeatureSet;
+import com.expleague.sensearch.features.sets.ranker.TextFeatureSet;
+import com.expleague.sensearch.features.sets.ranker.TextFeatureSet.Segment;
 import com.expleague.sensearch.index.Index;
-import com.expleague.sensearch.miner.features.TextFeatureSet.Segment;
-
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
@@ -24,11 +34,17 @@ public class AccumulatorFeatureSet extends FeatureSet.Stub<QURLItem> {
       new LinkFeatureSet(),
       new CosDistanceFeatureSet(),
       new DocBasedFeatureSet(),
-      new QuotationFeatureSet()
+      new QuotationFeatureSet(),
+      new FilterFeatures()
   );
+  private Map<Page, Features> filterFeatures;
 
   public AccumulatorFeatureSet(Index index) {
     this.index = index;
+  }
+
+  void acceptFilterFeatures(Map<Page, Features> filterFeatures) {
+    this.filterFeatures = filterFeatures;
   }
 
   @Override
@@ -47,8 +63,8 @@ public class AccumulatorFeatureSet extends FeatureSet.Stub<QURLItem> {
           .forEach(fs -> fs
               .withStats(totalLength, index.averageSectionTitleSize() + index.averagePageSize(),
                   titleLength, index.averageSectionTitleSize(),
-              contentLength, index.averagePageSize(),
-              index.size()));
+                  contentLength, index.averagePageSize(),
+                  index.size()));
       { // Title processing
         //features.components().map(Functions.cast(TextFeatureSet.class)).filter(Objects::nonNull)
         //    .forEach(fs -> fs.withSegment(TextFeatureSet.Segment.FULL_TITLE, titleLength));
@@ -76,6 +92,17 @@ public class AccumulatorFeatureSet extends FeatureSet.Stub<QURLItem> {
       }
     }
     { //Link Processing
+    }
+    { //Filter Features Processing
+      features.components()
+          .map(Functions.cast(FilterFeatures.class))
+          .filter(Objects::nonNull)
+          .forEach(fs -> {
+            Vec ff = filterFeatures.get(page).features();
+            fs.withBody(ff.get(1));
+            fs.withTitle(ff.get(0));
+            fs.withLink(ff.get(2));
+          });
     }
     { //Cos-Dist processing
       Vec queryVec = index.vecByTerms(item.queryCache().terms());

@@ -1,4 +1,4 @@
-package com.expleague.sensearch.miner.features;
+package com.expleague.sensearch.features.sets.ranker;
 
 import com.expleague.commons.math.vectors.Vec;
 import com.expleague.commons.math.vectors.VecTools;
@@ -6,6 +6,7 @@ import com.expleague.ml.data.tools.FeatureSet;
 import com.expleague.ml.meta.FeatureMeta;
 import com.expleague.ml.meta.FeatureMeta.ValueType;
 import com.expleague.sensearch.Page;
+import com.expleague.sensearch.features.QURLItem;
 import com.expleague.sensearch.index.plain.PlainPage;
 import java.util.ArrayList;
 import java.util.List;

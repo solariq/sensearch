@@ -1,7 +1,7 @@
-package com.expleague.sensearch.filter.features;
+package com.expleague.sensearch.features.sets.filter;
 
 import com.expleague.ml.data.tools.FeatureSet;
-import com.expleague.sensearch.miner.features.QURLItem;
+import com.expleague.sensearch.features.QURLItem;
 
 public interface EmbeddingFeatures extends FeatureSet<QURLItem> {
 

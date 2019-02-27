@@ -14,9 +14,9 @@ import com.expleague.sensearch.SenSeArch.ResultItem;
 import com.expleague.sensearch.core.impl.ResultItemImpl;
 import com.expleague.sensearch.filter.FilterMinerPhase;
 import com.expleague.sensearch.index.Index;
-import com.expleague.sensearch.miner.features.AccumulatorFeatureSet;
-import com.expleague.sensearch.miner.features.QURLItem;
-import com.expleague.sensearch.miner.features.TargetFeatureSet;
+import com.expleague.sensearch.miner.AccumulatorFeatureSet;
+import com.expleague.sensearch.features.QURLItem;
+import com.expleague.sensearch.features.sets.ranker.TargetFeatureSet;
 import com.expleague.sensearch.query.BaseQuery;
 import com.expleague.sensearch.query.Query;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -61,8 +61,13 @@ public class RankingPoolBuilder {
       Builder<QURLItem> poolBuilder = Pool.builder(meta, features, googleTarget);
 
       String line;
+      int status = 0;
       while ((line = reader.readLine()) != null) {
+        if (status % 100 == 0) {
+          System.err.println(status + " queries completed");
+        }
         if (Files.exists(Paths.get("./wordstat").resolve("query_" + line))) {
+          status++;
           Query query = BaseQuery.create(line, index);
           Set<CharSeq> uniqQURL = new HashSet<>();
 
