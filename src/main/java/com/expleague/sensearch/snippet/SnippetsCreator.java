@@ -113,7 +113,8 @@ public class SnippetsCreator {
     passages.forEach(passage -> {
       features.accept(new QPASItem(query, passage));
       Vec all = features.advance();
-
+      //System.out.println(passage.sentence());
+      //System.out.println(all);
       passagesFeatures.put(
           passage, new FeaturesImpl(features, all)
       );
@@ -138,7 +139,7 @@ public class SnippetsCreator {
   }
 
   private double rank(Vec features) {
-    return features.get(3);
+    return 1 / features.get(4);
   }
 
 }
