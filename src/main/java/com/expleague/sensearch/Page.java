@@ -21,9 +21,7 @@ public interface Page {
    */
   enum LinkType {
     SECTION_LINKS,
-    SECTION_INCLUDING_SELF_LINKS,
     ALL_LINKS,
-    ALL_INCLUDING_SELF_LINKS
   }
 
   @NotNull
@@ -42,14 +40,22 @@ public interface Page {
 
   /**
    * All links lead only to the root page. Sections have no incoming links. If {@param type} is
-   * {@link LinkType#SECTION_LINKS} or {@link LinkType#SECTION_INCLUDING_SELF_LINKS} then it returns
-   * this section's incoming links. Otherwise it returns incoming links for the root page
+   * {@link LinkType#SECTION_LINKS} then it returns this section's incoming links. Otherwise it
+   * returns incoming links for the root page
    *
    * @param type which links to return
    * @return links to this section (or its root page)
    */
   @NotNull
   Stream<Link> incomingLinks(LinkType type);
+
+  default int incomingLinksCount(LinkType type) {
+    return (int) incomingLinks(type).count();
+  }
+
+  default int outgoingLinksCount(LinkType type) {
+    return (int) outgoingLinks(type).count();
+  }
 
   @NotNull
   Page parent();
@@ -76,8 +82,8 @@ public interface Page {
     CharSequence text();
 
     /**
-     * @return {@code true} if Target {@code Page} exists;
-     * {@code false} if Target {@code Page} dose not exist.
+     * @return {@code true} if Target {@code Page} exists; {@code false} if Target {@code Page} dose
+     *     not exist.
      */
     boolean targetExists();
 
@@ -85,9 +91,7 @@ public interface Page {
 
     Page sourcePage();
 
-    /**
-     * @return offset by symbols
-     */
+    /** @return offset by symbols */
     long position();
   }
 }

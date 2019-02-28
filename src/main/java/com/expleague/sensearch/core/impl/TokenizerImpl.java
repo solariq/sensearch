@@ -21,19 +21,19 @@ public class TokenizerImpl implements Tokenizer {
     return Stream.<CharSequence>of(
         WORD_SPLIT_PATTERN.split(
             CharSeqTools.replace(sentence, String.valueOf((char) 769), "")))
-        .map(s -> (CharSequence) s.toString().trim())
+        .map(CharSeqTools::trim)
         .filter(s -> s.length() > 0);
   }
 
   @Override
   public Stream<CharSequence> toParagraphs(CharSequence text) {
-    return Arrays.stream(text.toString().split("\n")).map(String::trim);
+    return Arrays.stream(CharSeqTools.split(text, "\n")).map(CharSeqTools::trim);
   }
 
   @Override
   public Stream<CharSequence> toSentences(CharSequence text) {
     return Stream.<CharSequence>of(SENTENCE_SPLIT_PATTEN.split(text))
-        .map(s -> (CharSequence) s.toString().trim())
+        .map(CharSeqTools::trim)
         .filter(s -> s.length() > 0);
   }
 }

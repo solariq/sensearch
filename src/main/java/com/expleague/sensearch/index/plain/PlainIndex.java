@@ -13,14 +13,14 @@ import com.expleague.sensearch.core.Tokenizer;
 import com.expleague.sensearch.core.impl.TokenizerImpl;
 import com.expleague.sensearch.donkey.plain.IdUtils;
 import com.expleague.sensearch.donkey.plain.PlainIndexBuilder;
-import com.expleague.sensearch.filter.Filter;
-import com.expleague.sensearch.features.sets.filter.FilterFeatures;
-import com.expleague.sensearch.index.Embedding;
-import com.expleague.sensearch.index.Index;
-import com.expleague.sensearch.metrics.LSHSynonymsMetric;
 import com.expleague.sensearch.features.Features;
 import com.expleague.sensearch.features.FeaturesImpl;
 import com.expleague.sensearch.features.QURLItem;
+import com.expleague.sensearch.features.sets.filter.FilterFeatures;
+import com.expleague.sensearch.filter.Filter;
+import com.expleague.sensearch.index.Embedding;
+import com.expleague.sensearch.index.Index;
+import com.expleague.sensearch.metrics.LSHSynonymsMetric;
 import com.expleague.sensearch.protobuf.index.IndexUnits;
 import com.expleague.sensearch.protobuf.index.IndexUnits.TermStatistics;
 import com.expleague.sensearch.protobuf.index.IndexUnits.TermStatistics.TermFrequency;
@@ -306,7 +306,7 @@ public class PlainIndex implements Index {
   @Override
   public Term term(CharSequence seq) {
     final CharSequence normalized = CharSeqTools.toLowerCase(CharSeqTools.trim(seq));
-    return wordToTerms.get(CharSeq.intern(normalized));
+    return wordToTerms.get(CharSeq.create(normalized));
   }
 
   @Override

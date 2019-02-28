@@ -208,29 +208,49 @@ public class PlainPage implements IndexedPage {
   }
 
   @Override
+  public int incomingLinksCount(LinkType type) {
+    switch (type) {
+      case SECTION_LINKS:
+        return protoPage.getIncomingLinksList().size();
+
+      case ALL_LINKS:
+        return root().incomingLinksCount(LinkType.SECTION_LINKS);
+
+      default:
+        return 0;
+    }
+  }
+
+  @Override
+  public int outgoingLinksCount(LinkType type) {
+    switch (type) {
+      case SECTION_LINKS:
+        return protoPage.getOutgoingLinksList().size();
+
+      case ALL_LINKS:
+        return protoPage.getOutgoingLinksList().size()
+            + subpages().mapToInt(page -> page.outgoingLinksCount(LinkType.ALL_LINKS)).sum();
+      default:
+        return 0;
+    }
+  }
+
+  @Override
   public Stream<Link> outgoingLinks(LinkType type) {
     switch (type) {
       case SECTION_LINKS:
-        return outgoingLinks(LinkType.SECTION_INCLUDING_SELF_LINKS)
-            .filter(l -> !l.targetPage().root().equals(root()));
-
-      case SECTION_INCLUDING_SELF_LINKS:
         return protoPage
             .getOutgoingLinksList()
             .stream()
             .map(l -> PlainLink.withSource(l, index, this));
 
       case ALL_LINKS:
-        return outgoingLinks(LinkType.ALL_INCLUDING_SELF_LINKS)
-            .filter(l -> !l.targetPage().root().equals(root()));
-
-      case ALL_INCLUDING_SELF_LINKS:
         return Stream.concat(
             protoPage
                 .getOutgoingLinksList()
                 .stream()
                 .map(l -> PlainLink.withSource(l, index, this)),
-            subpages().flatMap(page -> page.outgoingLinks(LinkType.ALL_INCLUDING_SELF_LINKS)));
+            subpages().flatMap(page -> page.outgoingLinks(LinkType.ALL_LINKS)));
       default:
         return Stream.empty();
     }
@@ -240,10 +260,6 @@ public class PlainPage implements IndexedPage {
   public Stream<Link> incomingLinks(LinkType type) {
     switch (type) {
       case SECTION_LINKS:
-        return incomingLinks(LinkType.SECTION_INCLUDING_SELF_LINKS)
-            .filter(l -> !l.sourcePage().root().equals(root()));
-
-      case SECTION_INCLUDING_SELF_LINKS:
         return protoPage
             .getIncomingLinksList()
             .stream()
@@ -251,9 +267,6 @@ public class PlainPage implements IndexedPage {
 
       case ALL_LINKS:
         return root().incomingLinks(LinkType.SECTION_LINKS);
-
-      case ALL_INCLUDING_SELF_LINKS:
-        return root().incomingLinks(LinkType.SECTION_INCLUDING_SELF_LINKS);
 
       default:
         return Stream.empty();

@@ -13,7 +13,6 @@ import com.expleague.sensearch.web.SearchServer;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import java.io.File;
-import java.io.FileWriter;
 import java.io.Writer;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -75,14 +74,15 @@ public class SenSearchCLI {
     startServerOptions.addOption(indexPathOption);
     buildRankPoolOptions.addOption(indexPathOption);
 
-    Option corpusPathOption =
+    Option embeddingOutputPathOption =
         Option.builder()
             .longOpt(EMBEDDING_OUTPUT_PATH_OPTION)
             .desc("path to result embedding vecs")
             .hasArg()
             .required()
             .build();
-    trainEmbeddingOptions.addOption(corpusPathOption);
+    trainEmbeddingOptions.addOption(embeddingOutputPathOption);
+    buildIndexOptions.addOption(embeddingOutputPathOption);
 
     Option embeddingPathOption =
         Option.builder()
@@ -92,7 +92,6 @@ public class SenSearchCLI {
             .required()
             .build();
     trainEmbeddingOptions.addOption(embeddingPathOption);
-    buildIndexOptions.addOption(embeddingPathOption);
 
     startServerOptions.addOption(
         Option.builder().longOpt(DO_NOT_USE_LSH_OPTION).desc("disables LSH").build());
@@ -154,7 +153,8 @@ public class SenSearchCLI {
 
         case BUILD_INDEX_COMMAND:
           config.setPathToZIP(parse.getOptionValue(DATA_PATH_OPTION));
-          config.setEmbeddingVectors(parse.getOptionValue(EMBEDDING_PATH_OPTION));
+          config.setEmbeddingVectors(parse.getOptionValue(EMBEDDING_OUTPUT_PATH_OPTION));
+          config.setTemporaryIndex(parse.getOptionValue(INDEX_PATH_OPTION));
 
           Guice.createInjector(new AppModule(config)).getInstance(IndexBuilder.class).buildIndex();
           break;

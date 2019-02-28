@@ -29,7 +29,15 @@ import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Objects;
+import java.util.Random;
+import java.util.Set;
+import java.util.TreeMap;
 import java.util.stream.Stream;
 import org.apache.log4j.Logger;
 import org.fusesource.leveldbjni.JniDBFactory;
@@ -265,66 +273,82 @@ public class PlainIndexBuilder implements IndexBuilder {
 
       LOG.info("Creating mappings from wiki ids to raw index ids...");
 
-      final SuggestInformationBuilder suggestBuilder = new SuggestInformationBuilder(suggestUnigramDb, suggestMultigramDb);
+      final SuggestInformationBuilder suggestBuilder =
+          new SuggestInformationBuilder(suggestUnigramDb, suggestMultigramDb);
 
       try {
         LOG.info("Parsing pages...");
-        crawler.makeStream().filter(Objects::nonNull).forEach(doc -> {
-          long pageId = pageIdGenerator(doc.uri()).next(knownPageIds);
-          // We don't add pageId to the knownPageIds as we need first section to have the
-          // same Id
-          // knownPageIds.add(pageId);
-          plainPageBuilder.startPage(doc.id(), pageId, doc.categories(), doc.uri());
-          statisticsBuilder.startPage();
-          indexMetaBuilder.startPage(
+        int[] docCnt = {0};
+        crawler
+            .makeStream()
+            .filter(Objects::nonNull)
+            .forEach(
+                doc -> {
+                  docCnt[0]++;
+                  if (docCnt[0] % 10_000 == 0) {
+                    LOG.debug(docCnt[0] + " documents processed...");
+                  }
+                  long pageId = pageIdGenerator(doc.uri()).next(knownPageIds);
+                  // We don't add pageId to the knownPageIds as we need first section to have the
+                  // same Id
+                  // knownPageIds.add(pageId);
+                  plainPageBuilder.startPage(doc.id(), pageId, doc.categories(), doc.uri());
+                  statisticsBuilder.startPage();
+                  indexMetaBuilder.startPage(
                       doc.id(), pageId, (int) tokenizer.parseTextToWords(doc.title()).count());
-          embeddingBuilder.startPage(doc.id(), pageId);
+                  embeddingBuilder.startPage(doc.id(), pageId);
 
-          doc.sections().forEachOrdered(s -> {
-            long sectionId = pageIdGenerator(s.uri()).next(knownPageIds);
-            knownPageIds.add(sectionId);
+                  doc.sections()
+                      .forEachOrdered(
+                          s -> {
+                            long sectionId = pageIdGenerator(s.uri()).next(knownPageIds);
+                            knownPageIds.add(sectionId);
 
-            plainPageBuilder.addSection(s, sectionId);
-            indexMetaBuilder.addSection(sectionId);
-            embeddingBuilder.addSection(s, sectionId);
+                            plainPageBuilder.addSection(s, sectionId);
+                            indexMetaBuilder.addSection(sectionId);
+                            embeddingBuilder.addSection(s, sectionId);
                             uriMappingBuilder.addSection(s.uri(), sectionId);
 
-            List<CharSequence> sectionTitles = s.titles();
-            String sectionTitle =
-                sectionTitles.get(sectionTitles.size() - 1).toString();
+                            List<CharSequence> sectionTitles = s.titles();
+                            String sectionTitle =
+                                sectionTitles.get(sectionTitles.size() - 1).toString();
 
-            final CharSequence TITLE_STOP = "@@@STOP_TITLE777@@@";
+                            final CharSequence TITLE_STOP = "@@@STOP_TITLE777@@@";
                             boolean[] isTitle = {true};
-                            Stream.concat(Stream.concat(
-                tokenizer.parseTextToWords(sectionTitle),Stream.of(TITLE_STOP)),
-                tokenizer.parseTextToWords(s.text()))
-                .map(CharSeqTools::toLowerCase)
-                .forEach(
-                    word -> {if (word == TITLE_STOP) {
+                            Stream.concat(
+                                Stream.concat(
+                                    tokenizer.parseTextToWords(sectionTitle),
+                                    Stream.of(TITLE_STOP)),
+                                tokenizer.parseTextToWords(s.text()))
+                                .map(CharSeqTools::toLowerCase)
+                                .forEach(
+                                    word -> {
+                                      if (word == TITLE_STOP) {
                                         isTitle[0] = false;
                                       }
-                      TermBuilder.ParsedTerm termLemmaId =
-                          termBuilder.addTerm(word);
+                                      TermBuilder.ParsedTerm termLemmaId =
+                                          termBuilder.addTerm(word);
 
-                      long lemmaId =
-                          termLemmaId.lemmaId == -1
-                              ? termLemmaId.id
-                              : termLemmaId.lemmaId;
-                      statisticsBuilder.enrich(termLemmaId.id, lemmaId);
-                    indexMetaBuilder.addTerm(
+                                      long lemmaId =
+                                          termLemmaId.lemmaId == -1
+                                              ? termLemmaId.id
+                                              : termLemmaId.lemmaId;
+                                      statisticsBuilder.enrich(termLemmaId.id, lemmaId);
+                                      indexMetaBuilder.addTerm(
                                           termLemmaId.id,
                                           isTitle[0]
                                               ? TermSegment.SECTION_TITLE
-                                              : TermSegment.TEXT);});
-          });
+                                              : TermSegment.TEXT);
+                                    });
+                          });
 
-          suggestBuilder.accept(toTermIds(doc.title(), termBuilder));
+                  suggestBuilder.accept(toTermIds(doc.title(), termBuilder));
 
-          embeddingBuilder.endPage();
-          indexMetaBuilder.endPage();
-          statisticsBuilder.endPage();
-          plainPageBuilder.endPage();
-        });
+                  embeddingBuilder.endPage();
+                  indexMetaBuilder.endPage();
+                  statisticsBuilder.endPage();
+                  plainPageBuilder.endPage();
+                });
 
         suggestBuilder.build();
 

@@ -55,6 +55,8 @@ class PlainPageBuilder implements AutoCloseable {
   private final Deque<IndexUnits.Page.Builder> parentPagesStack = new LinkedList<>();
   private final List<Page> builtPages = new ArrayList<>();
 
+  private final TLongLongMap sectionRootId = new TLongLongHashMap();
+
   private boolean isProcessingPage = false;
   // Flag that indicates if there as at least one section added for current page
   private boolean hasSection = false;
@@ -99,9 +101,10 @@ class PlainPageBuilder implements AutoCloseable {
     for (Page.Link.Builder link : links) {
       long wikiTargetId = link.getTargetPageId();
       if (!wikiIdToIndexIdMappings.containsKey(wikiTargetId)) {
-//        LOG.warn(
-//            String.format(
-//                "Mappings to index id for WikiPage with id [ %d ] was not found!", wikiTargetId));
+        //        LOG.warn(
+        //            String.format(
+        //                "Mappings to index id for WikiPage with id [ %d ] was not found!",
+        // wikiTargetId));
         link.clearTargetPageId();
       } else {
         long targetIndexId = wikiIdToIndexIdMappings.get(wikiTargetId);
@@ -109,6 +112,12 @@ class PlainPageBuilder implements AutoCloseable {
       }
 
       Page.Link builtLink = link.build();
+
+      // Eliminating self links
+      if (wikiIdToIndexIdMappings.get(builtLink.getSourcePageId())
+          == wikiIdToIndexIdMappings.get(builtLink.getTargetPageId())) {
+        continue;
+      }
 
       if (builtLink.hasTargetPageId()) {
         long targetId = builtLink.getTargetPageId();
@@ -130,7 +139,8 @@ class PlainPageBuilder implements AutoCloseable {
    * @param categories the categories page belongs to
    * @param uri URI of the page. URIs must be unique among the collection
    */
-    void startPage(long originalPageId, long pageId, List<? extends CharSequence> categories, URI uri) {
+  void startPage(
+      long originalPageId, long pageId, List<? extends CharSequence> categories, URI uri) {
     if (isProcessingPage) {
       throw new IllegalStateException("Duplicate startPage call: page is already being processed");
     }
@@ -152,6 +162,7 @@ class PlainPageBuilder implements AutoCloseable {
    */
   void addSection(CrawlerDocument.Section section, long sectionId) {
     hasSection = true;
+    sectionRootId.put(sectionId, curPageId);
 
     for (Link link : section.links()) {
       Page.Link.Builder linkBuilder =

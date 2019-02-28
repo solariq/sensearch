@@ -3,13 +3,10 @@ package com.expleague.sensearch.index.plain;
 import static junit.framework.TestCase.assertTrue;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertSame;
 
 import com.expleague.sensearch.Page;
-import com.expleague.sensearch.Page.Link;
-import com.expleague.sensearch.Page.LinkType;
 import com.expleague.sensearch.Page.SegmentType;
 import com.expleague.sensearch.utils.IndexBasedTestCase;
 import java.io.UnsupportedEncodingException;
@@ -146,95 +143,95 @@ public class PlainPageTest extends IndexBasedTestCase {
     assertEquals(categories, page4.categories());
   }
 
-  @Test
-  public void testIncomingLinks() {
-    assertEquals(2, rootPage.incomingLinks(LinkType.SECTION_LINKS).count());
-    assertEquals(2, rootPage.incomingLinks(LinkType.ALL_LINKS).count());
-    assertEquals(3, rootPage.incomingLinks(LinkType.SECTION_INCLUDING_SELF_LINKS).count());
-    assertEquals(3, rootPage.incomingLinks(LinkType.ALL_INCLUDING_SELF_LINKS).count());
-
-    assertEquals(2, page1.incomingLinks(LinkType.SECTION_LINKS).count());
-    assertEquals(2, page1.incomingLinks(LinkType.ALL_LINKS).count());
-    assertEquals(3, page1.incomingLinks(LinkType.SECTION_INCLUDING_SELF_LINKS).count());
-    assertEquals(3, page1.incomingLinks(LinkType.ALL_INCLUDING_SELF_LINKS).count());
-
-    assertEquals(0, page2.incomingLinks(LinkType.SECTION_LINKS).count());
-    assertEquals(2, page2.incomingLinks(LinkType.ALL_LINKS).count());
-    assertEquals(0, page2.incomingLinks(LinkType.SECTION_INCLUDING_SELF_LINKS).count());
-    assertEquals(3, page2.incomingLinks(LinkType.ALL_INCLUDING_SELF_LINKS).count());
-
-    assertEquals(0, page3.incomingLinks(LinkType.SECTION_LINKS).count());
-    assertEquals(2, page3.incomingLinks(LinkType.ALL_LINKS).count());
-    assertEquals(0, page3.incomingLinks(LinkType.SECTION_INCLUDING_SELF_LINKS).count());
-    assertEquals(3, page3.incomingLinks(LinkType.ALL_INCLUDING_SELF_LINKS).count());
-
-    assertEquals(0, page4.incomingLinks(LinkType.SECTION_LINKS).count());
-    assertEquals(2, page4.incomingLinks(LinkType.ALL_LINKS).count());
-    assertEquals(0, page4.incomingLinks(LinkType.SECTION_INCLUDING_SELF_LINKS).count());
-    assertEquals(3, page4.incomingLinks(LinkType.ALL_INCLUDING_SELF_LINKS).count());
-
-    Link link =
-        rootPage.incomingLinks(LinkType.SECTION_INCLUDING_SELF_LINKS).findFirst().orElse(null);
-    assertNotNull(link);
-    assertEquals(page4, link.sourcePage());
-    assertEquals(rootPage, link.targetPage());
-    assertEquals("А это ссылка на эту же страницу", link.text());
-  }
-
-  @Test
-  public void testOutgoingLinks() {
-    assertEquals(3, rootPage.outgoingLinks(LinkType.ALL_INCLUDING_SELF_LINKS).count());
-    assertEquals(2, rootPage.outgoingLinks(LinkType.ALL_LINKS).count());
-    assertEquals(1, rootPage.outgoingLinks(LinkType.SECTION_INCLUDING_SELF_LINKS).count());
-    assertEquals(1, rootPage.outgoingLinks(LinkType.SECTION_LINKS).count());
-
-    assertEquals(3, page1.outgoingLinks(LinkType.ALL_INCLUDING_SELF_LINKS).count());
-    assertEquals(2, page1.outgoingLinks(LinkType.ALL_LINKS).count());
-    assertEquals(1, page1.outgoingLinks(LinkType.SECTION_INCLUDING_SELF_LINKS).count());
-    assertEquals(1, page1.outgoingLinks(LinkType.SECTION_LINKS).count());
-
-    assertEquals(0, page2.outgoingLinks(LinkType.ALL_INCLUDING_SELF_LINKS).count());
-    assertEquals(0, page2.outgoingLinks(LinkType.ALL_LINKS).count());
-    assertEquals(0, page2.outgoingLinks(LinkType.SECTION_INCLUDING_SELF_LINKS).count());
-    assertEquals(0, page2.outgoingLinks(LinkType.SECTION_LINKS).count());
-
-    assertEquals(0, page3.outgoingLinks(LinkType.ALL_INCLUDING_SELF_LINKS).count());
-    assertEquals(0, page3.outgoingLinks(LinkType.ALL_LINKS).count());
-    assertEquals(0, page3.outgoingLinks(LinkType.SECTION_INCLUDING_SELF_LINKS).count());
-    assertEquals(0, page3.outgoingLinks(LinkType.SECTION_LINKS).count());
-
-    assertEquals(2, page4.outgoingLinks(LinkType.ALL_INCLUDING_SELF_LINKS).count());
-    assertEquals(1, page4.outgoingLinks(LinkType.ALL_LINKS).count());
-    assertEquals(2, page4.outgoingLinks(LinkType.SECTION_INCLUDING_SELF_LINKS).count());
-    assertEquals(1, page4.outgoingLinks(LinkType.SECTION_LINKS).count());
-
-    Link link1 = rootPage.outgoingLinks(LinkType.SECTION_LINKS).findFirst().orElse(null);
-    assertNotNull(link1);
-    assertEquals(rootPage, link1.sourcePage());
-    assertFalse(link1.targetExists());
-    assertSame(PlainPage.EMPTY_PAGE, link1.targetPage());
-    assertEquals("ссылкой", link1.text());
-
-    Link link2 = page4.outgoingLinks(LinkType.SECTION_LINKS).findFirst().orElse(null);
-    assertNotNull(link2);
-    assertEquals(page4, link2.sourcePage());
-    assertEquals(
-        index().page(URI.create("https://ru.wikipedia.org/wiki/Регент")), link2.targetPage());
-    assertTrue(link2.targetExists());
-    assertEquals("про регентов", link2.text());
-
-    Link link3 =
-        page4
-            .outgoingLinks(LinkType.SECTION_INCLUDING_SELF_LINKS)
-            .filter(l -> !l.targetPage().equals(link2.targetPage()))
-            .findFirst()
-            .orElse(null);
-    assertNotNull(link3);
-    assertEquals(page4, link3.sourcePage());
-    assertEquals(rootPage, link3.targetPage());
-    assertTrue(link3.targetExists());
-    assertEquals("А это ссылка на эту же страницу", link3.text());
-  }
+//  @Test
+//  public void testIncomingLinks() {
+//    assertEquals(2, rootPage.incomingLinks(LinkType.SECTION_LINKS).count());
+//    assertEquals(2, rootPage.incomingLinks(LinkType.ALL_LINKS).count());
+//    assertEquals(3, rootPage.incomingLinks(LinkType.SECTION_INCLUDING_SELF_LINKS).count());
+//    assertEquals(3, rootPage.incomingLinks(LinkType.ALL_INCLUDING_SELF_LINKS).count());
+//
+//    assertEquals(2, page1.incomingLinks(LinkType.SECTION_LINKS).count());
+//    assertEquals(2, page1.incomingLinks(LinkType.ALL_LINKS).count());
+//    assertEquals(3, page1.incomingLinks(LinkType.SECTION_INCLUDING_SELF_LINKS).count());
+//    assertEquals(3, page1.incomingLinks(LinkType.ALL_INCLUDING_SELF_LINKS).count());
+//
+//    assertEquals(0, page2.incomingLinks(LinkType.SECTION_LINKS).count());
+//    assertEquals(2, page2.incomingLinks(LinkType.ALL_LINKS).count());
+//    assertEquals(0, page2.incomingLinks(LinkType.SECTION_INCLUDING_SELF_LINKS).count());
+//    assertEquals(3, page2.incomingLinks(LinkType.ALL_INCLUDING_SELF_LINKS).count());
+//
+//    assertEquals(0, page3.incomingLinks(LinkType.SECTION_LINKS).count());
+//    assertEquals(2, page3.incomingLinks(LinkType.ALL_LINKS).count());
+//    assertEquals(0, page3.incomingLinks(LinkType.SECTION_INCLUDING_SELF_LINKS).count());
+//    assertEquals(3, page3.incomingLinks(LinkType.ALL_INCLUDING_SELF_LINKS).count());
+//
+//    assertEquals(0, page4.incomingLinks(LinkType.SECTION_LINKS).count());
+//    assertEquals(2, page4.incomingLinks(LinkType.ALL_LINKS).count());
+//    assertEquals(0, page4.incomingLinks(LinkType.SECTION_INCLUDING_SELF_LINKS).count());
+//    assertEquals(3, page4.incomingLinks(LinkType.ALL_INCLUDING_SELF_LINKS).count());
+//
+//    Link link =
+//        rootPage.incomingLinks(LinkType.SECTION_INCLUDING_SELF_LINKS).findFirst().orElse(null);
+//    assertNotNull(link);
+//    assertEquals(page4, link.sourcePage());
+//    assertEquals(rootPage, link.targetPage());
+//    assertEquals("А это ссылка на эту же страницу", link.text());
+//  }
+//
+//  @Test
+//  public void testOutgoingLinks() {
+//    assertEquals(3, rootPage.outgoingLinks(LinkType.ALL_INCLUDING_SELF_LINKS).count());
+//    assertEquals(2, rootPage.outgoingLinks(LinkType.ALL_LINKS).count());
+//    assertEquals(1, rootPage.outgoingLinks(LinkType.SECTION_INCLUDING_SELF_LINKS).count());
+//    assertEquals(1, rootPage.outgoingLinks(LinkType.SECTION_LINKS).count());
+//
+//    assertEquals(3, page1.outgoingLinks(LinkType.ALL_INCLUDING_SELF_LINKS).count());
+//    assertEquals(2, page1.outgoingLinks(LinkType.ALL_LINKS).count());
+//    assertEquals(1, page1.outgoingLinks(LinkType.SECTION_INCLUDING_SELF_LINKS).count());
+//    assertEquals(1, page1.outgoingLinks(LinkType.SECTION_LINKS).count());
+//
+//    assertEquals(0, page2.outgoingLinks(LinkType.ALL_INCLUDING_SELF_LINKS).count());
+//    assertEquals(0, page2.outgoingLinks(LinkType.ALL_LINKS).count());
+//    assertEquals(0, page2.outgoingLinks(LinkType.SECTION_INCLUDING_SELF_LINKS).count());
+//    assertEquals(0, page2.outgoingLinks(LinkType.SECTION_LINKS).count());
+//
+//    assertEquals(0, page3.outgoingLinks(LinkType.ALL_INCLUDING_SELF_LINKS).count());
+//    assertEquals(0, page3.outgoingLinks(LinkType.ALL_LINKS).count());
+//    assertEquals(0, page3.outgoingLinks(LinkType.SECTION_INCLUDING_SELF_LINKS).count());
+//    assertEquals(0, page3.outgoingLinks(LinkType.SECTION_LINKS).count());
+//
+//    assertEquals(2, page4.outgoingLinks(LinkType.ALL_INCLUDING_SELF_LINKS).count());
+//    assertEquals(1, page4.outgoingLinks(LinkType.ALL_LINKS).count());
+//    assertEquals(2, page4.outgoingLinks(LinkType.SECTION_INCLUDING_SELF_LINKS).count());
+//    assertEquals(1, page4.outgoingLinks(LinkType.SECTION_LINKS).count());
+//
+//    Link link1 = rootPage.outgoingLinks(LinkType.SECTION_LINKS).findFirst().orElse(null);
+//    assertNotNull(link1);
+//    assertEquals(rootPage, link1.sourcePage());
+//    assertFalse(link1.targetExists());
+//    assertSame(PlainPage.EMPTY_PAGE, link1.targetPage());
+//    assertEquals("ссылкой", link1.text());
+//
+//    Link link2 = page4.outgoingLinks(LinkType.SECTION_LINKS).findFirst().orElse(null);
+//    assertNotNull(link2);
+//    assertEquals(page4, link2.sourcePage());
+//    assertEquals(
+//        index().page(URI.create("https://ru.wikipedia.org/wiki/Регент")), link2.targetPage());
+//    assertTrue(link2.targetExists());
+//    assertEquals("про регентов", link2.text());
+//
+//    Link link3 =
+//        page4
+//            .outgoingLinks(LinkType.SECTION_INCLUDING_SELF_LINKS)
+//            .filter(l -> !l.targetPage().equals(link2.targetPage()))
+//            .findFirst()
+//            .orElse(null);
+//    assertNotNull(link3);
+//    assertEquals(page4, link3.sourcePage());
+//    assertEquals(rootPage, link3.targetPage());
+//    assertTrue(link3.targetExists());
+//    assertEquals("А это ссылка на эту же страницу", link3.text());
+//  }
 
   @Test
   public void sentences() {
