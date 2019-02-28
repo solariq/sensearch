@@ -66,7 +66,7 @@ public class LSHPerformanceTest {
 
     @Test
     public void test() throws IOException {
-        Path embeddingPath = Paths.get("../WikiDocs/IndexTmp/embedding");
+        Path embeddingPath = Paths.get("/Users/solar/data/search/WikiDocs/IndexTmp/embedding");
 
         long cacheSize = 16 * (1 << 20);
         Options dbOptions = new Options().cacheSize(cacheSize);

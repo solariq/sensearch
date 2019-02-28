@@ -29,14 +29,7 @@ import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Random;
-import java.util.Set;
-import java.util.TreeMap;
+import java.util.*;
 import java.util.stream.Stream;
 import org.apache.log4j.Logger;
 import org.fusesource.leveldbjni.JniDBFactory;
@@ -276,7 +269,7 @@ public class PlainIndexBuilder implements IndexBuilder {
 
       try {
         LOG.info("Parsing pages...");
-        crawler.makeStream().forEach(doc -> {
+        crawler.makeStream().filter(Objects::nonNull).forEach(doc -> {
           long pageId = pageIdGenerator(doc.uri()).next(knownPageIds);
           // We don't add pageId to the knownPageIds as we need first section to have the
           // same Id

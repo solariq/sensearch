@@ -57,7 +57,7 @@ import org.iq80.leveldb.ReadOptions;
 public class PlainIndex implements Index {
 
   // TODO: !index version!
-  public static final int VERSION = 12;
+  public static final int VERSION = 13;
 
   private static final long DEFAULT_CACHE_SIZE = 128 * (1 << 20); // 128 MB
 

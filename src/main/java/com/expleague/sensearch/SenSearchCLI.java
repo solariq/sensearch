@@ -141,17 +141,13 @@ public class SenSearchCLI {
       ConfigImpl config = new ConfigImpl();
       switch (args[0]) {
         case TRAIN_EMBEDDING_COMMAND:
-          try (Writer w =
-              new FileWriter(
-                  Paths.get(parse.getOptionValue(EMBEDDING_OUTPUT_PATH_OPTION)).toFile())) {
-            EmbeddingImpl<CharSeq> embedding =
-                (EmbeddingImpl<CharSeq>)
-                    new JmllEmbeddingBuilder(
-                        DEFAULT_VEC_SIZE,
-                        Paths.get(parse.getOptionValue(EMBEDDING_PATH_OPTION)))
-                        .build(
-                            new CrawlerXML(Paths.get(parse.getOptionValue(DATA_PATH_OPTION)))
-                                .makeStream());
+          try (Writer w = Files.newBufferedWriter(Paths.get(parse.getOptionValue(EMBEDDING_OUTPUT_PATH_OPTION)))) {
+            final JmllEmbeddingBuilder embeddingBuilder = new JmllEmbeddingBuilder(
+                DEFAULT_VEC_SIZE,
+                Paths.get(parse.getOptionValue(EMBEDDING_PATH_OPTION))
+            );
+            EmbeddingImpl<CharSeq> embedding = (EmbeddingImpl<CharSeq>)embeddingBuilder
+                .build(new CrawlerXML(Paths.get(parse.getOptionValue(DATA_PATH_OPTION))).makeStream());
             embedding.write(w);
           }
           break;

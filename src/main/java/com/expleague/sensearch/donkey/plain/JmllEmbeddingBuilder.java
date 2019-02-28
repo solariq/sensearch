@@ -27,10 +27,6 @@ public class JmllEmbeddingBuilder {
   }
 
   public Embedding<CharSeq> build(Stream<CrawlerDocument> documents) throws IOException {
-    if (Files.exists(tempEmbeddingPath)) {
-      FileUtils.deleteDirectory(tempEmbeddingPath.toFile());
-    }
-
     Files.createDirectories(tempEmbeddingPath);
     Path corpus = tempEmbeddingPath.resolve("corpus");
 
@@ -60,7 +56,7 @@ public class JmllEmbeddingBuilder {
     LOG.info("Training embedding...");
 
     DecompBuilder builder = (DecompBuilder) Embedding.builder(Embedding.Type.DECOMP);
-    final Embedding<CharSeq> result = builder.dimSym(vecSize).dimSkew(20).minWordCount(3).file(corpus).build();
+    final Embedding<CharSeq> result = builder.dimSym(vecSize).dimSkew(20).minWordCount(3).step(0.05).file(corpus).build();
 
     LOG.info("Jmll embedding trained");
     return result;

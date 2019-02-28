@@ -34,8 +34,9 @@ public class AccumulatorFeatureSet extends FeatureSet.Stub<QURLItem> {
       new LinkFeatureSet(),
       new CosDistanceFeatureSet(),
       new DocBasedFeatureSet(),
-      new QuotationFeatureSet(),
-      new FilterFeatures()
+      new QuotationFeatureSet()
+//      ,
+//      new FilterFeatures()
   );
   private Map<Page, Features> filterFeatures;
 
@@ -93,17 +94,17 @@ public class AccumulatorFeatureSet extends FeatureSet.Stub<QURLItem> {
     }
     { //Link Processing
     }
-    { //Filter Features Processing
-      features.components()
-          .map(Functions.cast(FilterFeatures.class))
-          .filter(Objects::nonNull)
-          .forEach(fs -> {
-            Vec ff = filterFeatures.get(page).features();
-            fs.withBody(ff.get(1));
-            fs.withTitle(ff.get(0));
-            fs.withLink(ff.get(2));
-          });
-    }
+//    { //Filter Features Processing
+//      features.components()
+//          .map(Functions.cast(FilterFeatures.class))
+//          .filter(Objects::nonNull)
+//          .forEach(fs -> {
+//            Vec ff = filterFeatures.get(page).features();
+//            fs.withBody(ff.get(1));
+//            fs.withTitle(ff.get(0));
+//            fs.withLink(ff.get(2));
+//          });
+//    }
     { //Cos-Dist processing
       Vec queryVec = index.vecByTerms(item.queryCache().terms());
       final List<Term> titleTerms = index.parse(item.pageCache()
