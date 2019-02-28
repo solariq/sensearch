@@ -9,7 +9,6 @@ import com.expleague.sensearch.Page.SegmentType;
 import com.expleague.sensearch.core.Term;
 import com.expleague.sensearch.features.Features;
 import com.expleague.sensearch.features.QURLItem;
-import com.expleague.sensearch.features.sets.filter.FilterFeatures;
 import com.expleague.sensearch.features.sets.ranker.BM25FeatureSet;
 import com.expleague.sensearch.features.sets.ranker.CosDistanceFeatureSet;
 import com.expleague.sensearch.features.sets.ranker.DocBasedFeatureSet;
@@ -28,16 +27,17 @@ import java.util.stream.Collectors;
 public class AccumulatorFeatureSet extends FeatureSet.Stub<QURLItem> {
 
   private final Index index;
-  private final FeatureSet<QURLItem> features = FeatureSet.join(
-      new BM25FeatureSet(),
-      new HHFeatureSet(),
-      new LinkFeatureSet(),
-      new CosDistanceFeatureSet(),
-      new DocBasedFeatureSet(),
-      new QuotationFeatureSet()
-//      ,
-//      new FilterFeatures()
-  );
+  private final FeatureSet<QURLItem> features =
+      FeatureSet.join(
+          new BM25FeatureSet(),
+          new HHFeatureSet(),
+          new LinkFeatureSet(),
+          new CosDistanceFeatureSet(),
+          new DocBasedFeatureSet(),
+          new QuotationFeatureSet()
+          //      ,
+          //      new FilterFeatures()
+      );
   private Map<Page, Features> filterFeatures;
 
   public AccumulatorFeatureSet(Index index) {
@@ -52,84 +52,111 @@ public class AccumulatorFeatureSet extends FeatureSet.Stub<QURLItem> {
   public void accept(QURLItem item) {
     features.accept(item);
     final Page page = item.pageCache();
-    { // Text features processing
 
-      final int titleLength = (int) index.parse(page.content(SegmentType.SECTION_TITLE)).count();
-      final int contentLength = (int) index.parse(page.content(SegmentType.BODY)).count();
+    CharSequence body = page.content(SegmentType.BODY);
+    CharSequence title = page.content(SegmentType.SECTION_TITLE);
+
+    List<Term> titleTerms = index.parse(title).collect(Collectors.toList());
+    List<Term> bodyTerms = index.parse(body).collect(Collectors.toList());
+
+    { // Text features processing
+      final int titleLength = titleTerms.size();
+      final int contentLength = bodyTerms.size();
       final int totalLength = titleLength + contentLength;
 
-      features.components()
+      features
+          .components()
           .map(Functions.cast(TextFeatureSet.class))
           .filter(Objects::nonNull)
-          .forEach(fs -> fs
-              .withStats(totalLength, index.averageSectionTitleSize() + index.averagePageSize(),
-                  titleLength, index.averageSectionTitleSize(),
-                  contentLength, index.averagePageSize(),
-                  index.size()));
+          .forEach(
+              fs ->
+                  fs.withStats(
+                      totalLength,
+                      index.averageSectionTitleSize() + index.averagePageSize(),
+                      titleLength,
+                      index.averageSectionTitleSize(),
+                      contentLength,
+                      index.averagePageSize(),
+                      index.size()));
       { // Title processing
-        //features.components().map(Functions.cast(TextFeatureSet.class)).filter(Objects::nonNull)
+        // features.components().map(Functions.cast(TextFeatureSet.class)).filter(Objects::nonNull)
         //    .forEach(fs -> fs.withSegment(TextFeatureSet.Segment.FULL_TITLE, titleLength));
         TermConsumer termConsumer = new TermConsumer();
-        index.parse(page.content(SegmentType.SECTION_TITLE)).forEach(termConsumer);
-        index.parse(page.content(SegmentType.SECTION_TITLE)).forEach(term -> features.components()
-            .map(Functions.cast(TextFeatureSet.class))
-            .filter(Objects::nonNull)
-            .forEach(fs -> fs.withSegment(Segment.TITLE, term)));
+        titleTerms.forEach(termConsumer);
+        titleTerms.forEach(
+            term ->
+                features
+                    .components()
+                    .map(Functions.cast(TextFeatureSet.class))
+                    .filter(Objects::nonNull)
+                    .forEach(fs -> fs.withSegment(Segment.TITLE, term)));
       }
       { // Content processing
-        //features.components().map(Functions.cast(TextFeatureSet.class)).filter(Objects::nonNull)
+        // features.components().map(Functions.cast(TextFeatureSet.class)).filter(Objects::nonNull)
         //    .forEach(fs -> fs.withSegment(TextFeatureSet.Segment.BODY, contentLength));
         TermConsumer termConsumer = new TermConsumer();
-        index.parse(page.content(SegmentType.BODY)).forEach(termConsumer);
-        index.parse(page.content(SegmentType.BODY)).forEach(term -> features.components()
-            .map(Functions.cast(TextFeatureSet.class))
-            .filter(Objects::nonNull)
-            .forEach(fs -> fs.withSegment(Segment.BODY, term)));
-        index.parse(page.content(SegmentType.BODY)).forEach(term -> features.components()
-            .map(Functions.cast(DocBasedFeatureSet.class))
-            .filter(Objects::nonNull)
-            .forEach(fs -> fs.withTerm(term)));
-
+        bodyTerms.forEach(termConsumer);
+        bodyTerms.forEach(
+            term ->
+                features
+                    .components()
+                    .map(Functions.cast(TextFeatureSet.class))
+                    .filter(Objects::nonNull)
+                    .forEach(fs -> fs.withSegment(Segment.BODY, term)));
+        bodyTerms.forEach(
+            term ->
+                features
+                    .components()
+                    .map(Functions.cast(DocBasedFeatureSet.class))
+                    .filter(Objects::nonNull)
+                    .forEach(fs -> fs.withTerm(term)));
       }
     }
-    { //Link Processing
+    { // Link Processing
     }
-//    { //Filter Features Processing
-//      features.components()
-//          .map(Functions.cast(FilterFeatures.class))
-//          .filter(Objects::nonNull)
-//          .forEach(fs -> {
-//            Vec ff = filterFeatures.get(page).features();
-//            fs.withBody(ff.get(1));
-//            fs.withTitle(ff.get(0));
-//            fs.withLink(ff.get(2));
-//          });
-//    }
-    { //Cos-Dist processing
+    //    { //Filter Features Processing
+    //      features.components()
+    //          .map(Functions.cast(FilterFeatures.class))
+    //          .filter(Objects::nonNull)
+    //          .forEach(fs -> {
+    //            Vec ff = filterFeatures.get(page).features();
+    //            fs.withBody(ff.get(1));
+    //            fs.withTitle(ff.get(0));
+    //            fs.withLink(ff.get(2));
+    //          });
+    //    }
+    List<List<Term>> pageSentenceTokens =
+        page.sentences(SegmentType.BODY)
+            .map(sentence -> index.parse(sentence).collect(Collectors.toList()))
+            .collect(Collectors.toList());
+    { // Cos-Dist processing
       Vec queryVec = index.vecByTerms(item.queryCache().terms());
-      final List<Term> titleTerms = index.parse(item.pageCache()
-          .content(SegmentType.SECTION_TITLE))
-          .collect(Collectors.toList());
       Vec titleVec = index.vecByTerms(titleTerms);
 
-      features.components()
+      features
+          .components()
           .map(Functions.cast(CosDistanceFeatureSet.class))
           .filter(Objects::nonNull)
           .forEach(fs -> fs.withStats(queryVec, titleVec));
 
-      item.pageCache().sentences(SegmentType.BODY).forEach(sent -> {
-        Vec passageVec = index.vecByTerms(index.parse(sent).collect(Collectors.toList()));
-        features.components()
-            .map(Functions.cast(CosDistanceFeatureSet.class))
-            .filter(Objects::nonNull)
-            .forEach(fs -> fs.withPassage(passageVec));
-      });
+      pageSentenceTokens.forEach(
+          sentenceTokens -> {
+            Vec passageVec = index.vecByTerms(sentenceTokens);
+            features
+                .components()
+                .map(Functions.cast(CosDistanceFeatureSet.class))
+                .filter(Objects::nonNull)
+                .forEach(fs -> fs.withPassage(passageVec));
+          });
     }
-    { //Quotation
-      item.pageCache().sentences(SegmentType.BODY).forEach(sentence -> features.components()
-          .map(Functions.cast(QuotationFeatureSet.class))
-          .filter(Objects::nonNull)
-          .forEach(fs -> fs.withPassage(index.parse(sentence).collect(Collectors.toList()))));
+    { // Quotation
+      pageSentenceTokens.forEach(
+          sentenceTokens ->
+              features
+                  .components()
+                  .map(Functions.cast(QuotationFeatureSet.class))
+                  .filter(Objects::nonNull)
+                  .forEach(fs -> fs.withPassage(sentenceTokens)));
     }
   }
 
@@ -162,7 +189,8 @@ public class AccumulatorFeatureSet extends FeatureSet.Stub<QURLItem> {
 
     @Override
     public void accept(Term term) {
-      features.components()
+      features
+          .components()
           .map(Functions.cast(TextFeatureSet.class))
           .filter(Objects::nonNull)
           .forEach(fs -> fs.withTerm(term, index));

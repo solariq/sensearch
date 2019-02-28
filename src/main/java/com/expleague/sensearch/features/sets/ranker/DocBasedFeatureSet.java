@@ -9,6 +9,8 @@ import com.expleague.sensearch.Page.SegmentType;
 import com.expleague.sensearch.core.PartOfSpeech;
 import com.expleague.sensearch.core.Term;
 import com.expleague.sensearch.features.QURLItem;
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class DocBasedFeatureSet extends FeatureSet.Stub<QURLItem> {
 
@@ -43,14 +45,15 @@ public class DocBasedFeatureSet extends FeatureSet.Stub<QURLItem> {
 
   @Override
   public Vec advance() {
-    long sentences = page.sentences(SegmentType.BODY).count();
+    List<CharSequence> sentencesList =
+        page.sentences(SegmentType.BODY).collect(Collectors.toList());
+    long sentences = sentencesList.size();
     set(PASSAGES_COUNT, (double) sentences);
     set(
         SENTENCE_LEVEL,
         sentences == 0
             ? 0.0
-            : (double) page.sentences(SegmentType.BODY).filter(s -> !isInterrogative(s)).count()
-                / sentences);
+            : (double) sentencesList.stream().filter(s -> !isInterrogative(s)).count() / sentences);
     set(NOUN_COUNT, terms == 0 ? 0 : (double) nouns / terms);
     return super.advance();
   }
