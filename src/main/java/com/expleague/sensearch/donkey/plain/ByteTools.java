@@ -18,6 +18,7 @@ public final class ByteTools {
   private ByteTools() {
   }
 
+  @Deprecated
   public static byte[] toBytes(List<Vec> vecs) {
     if (vecs.size() == 0) {
       return new byte[0];
@@ -85,6 +86,7 @@ public final class ByteTools {
     return doubles;
   }
 
+  @Deprecated
   public static List<Vec> toVecs(byte[] bytes) {
     DoubleBuffer doubleBuf = ByteBuffer.wrap(bytes).asDoubleBuffer();
     double[] doubles = new double[doubleBuf.remaining()];

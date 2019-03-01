@@ -25,8 +25,9 @@ import java.util.Objects;
 import org.iq80.leveldb.DB;
 
 public class EmbeddingBuilder implements AutoCloseable {
-  private static final int QUANT_DIM = 10;
-  private static final int BATCH_SIZE = 2000;
+  private static final int QUANT_DIM = 5;
+  private static final int SKETCH_BITS_PER_QUANT = 34;
+  private static final int BATCH_SIZE = 4000;
 
   private final Tokenizer tokenizer;
   private final Embedding<CharSeq> jmllEmbedding;
@@ -38,7 +39,7 @@ public class EmbeddingBuilder implements AutoCloseable {
   public EmbeddingBuilder(DB vecDb, Embedding<CharSeq> jmllEmbedding, Tokenizer tokenizer) {
     this.jmllEmbedding = jmllEmbedding;
     this.tokenizer = tokenizer;
-    nnIdx = new QuantLSHCosIndexDB(new FastRandom(), QUANT_DIM, DEFAULT_VEC_SIZE, BATCH_SIZE, vecDb);
+    nnIdx = new QuantLSHCosIndexDB(new FastRandom(), DEFAULT_VEC_SIZE, QUANT_DIM, SKETCH_BITS_PER_QUANT, BATCH_SIZE, vecDb);
   }
 
   @Override
