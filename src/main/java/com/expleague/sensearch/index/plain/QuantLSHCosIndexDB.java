@@ -6,7 +6,7 @@ import com.expleague.commons.math.vectors.impl.nn.lsh.BaseQuantLSHCosIndex;
 import com.expleague.commons.math.vectors.impl.nn.lsh.CosDistanceHashFunction;
 import com.expleague.commons.math.vectors.impl.vectors.ArrayVec;
 import com.expleague.commons.random.FastRandom;
-import com.expleague.sensearch.donkey.plain.ByteTools;
+import com.expleague.sensearch.core.ByteTools;
 import com.google.common.primitives.Longs;
 import gnu.trove.list.array.TLongArrayList;
 import java.io.IOException;

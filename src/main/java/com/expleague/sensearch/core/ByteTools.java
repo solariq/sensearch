@@ -1,7 +1,9 @@
-package com.expleague.sensearch.donkey.plain;
+package com.expleague.sensearch.core;
 
 import com.expleague.commons.math.vectors.Vec;
 import com.expleague.commons.math.vectors.impl.vectors.ArrayVec;
+import com.expleague.sensearch.donkey.plain.PlainIndexBuilder;
+
 import java.nio.ByteBuffer;
 import java.nio.DoubleBuffer;
 import java.nio.IntBuffer;
@@ -10,8 +12,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.stream.IntStream;
-import java.util.stream.LongStream;
 
 public final class ByteTools {
 

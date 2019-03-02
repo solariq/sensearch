@@ -1,18 +1,17 @@
-package com.expleague.sensearch.donkey.plain;
+package com.expleague.sensearch.core;
 
 public class IdUtils {
-
-  public static final int BITS_FOR_TYPE_OF_FEATURE = 5;
-  public static final int BITS_FOR_NUMBER_OF_FEATURE = 15;
+  private static final int BITS_FOR_TYPE_OF_FEATURE = 5;
+  private static final int BITS_FOR_NUMBER_OF_FEATURE = 15;
   public static final int BITS_FOR_FEATURES = BITS_FOR_TYPE_OF_FEATURE + BITS_FOR_NUMBER_OF_FEATURE;
 
-  public static final long SEC_TITLE_ID = 1L;
-  public static final long SEC_TEXT_ID = 2L;
-  public static final long LINK_ID = 3L;
+  private static final long SEC_TITLE_ID = 1L;
+  private static final long SEC_TEXT_ID = 2L;
+  private static final long LINK_ID = 3L;
 
-  public static final long START_SEC_TITLE_PREFIX = SEC_TITLE_ID << BITS_FOR_NUMBER_OF_FEATURE;
-  public static final long START_SEC_TEXT_PREFIX = SEC_TEXT_ID << BITS_FOR_NUMBER_OF_FEATURE;
-  public static final long START_LINK_PREFIX = LINK_ID << BITS_FOR_NUMBER_OF_FEATURE;
+  private static final long START_SEC_TITLE_PREFIX = SEC_TITLE_ID << BITS_FOR_NUMBER_OF_FEATURE;
+  private static final long START_SEC_TEXT_PREFIX = SEC_TEXT_ID << BITS_FOR_NUMBER_OF_FEATURE;
+  private static final long START_LINK_PREFIX = LINK_ID << BITS_FOR_NUMBER_OF_FEATURE;
 
   private static final long toPageMask =
       ((1L << (Long.SIZE - BITS_FOR_FEATURES)) - 1) << BITS_FOR_FEATURES;
@@ -36,7 +35,7 @@ public class IdUtils {
     return id & toPageMask;
   }
 
-  public static long getFeatureTypeId(long id) {
+  private static long getFeatureTypeId(long id) {
     return (id >> BITS_FOR_NUMBER_OF_FEATURE) & ((1 << BITS_FOR_TYPE_OF_FEATURE) - 1);
   }
 

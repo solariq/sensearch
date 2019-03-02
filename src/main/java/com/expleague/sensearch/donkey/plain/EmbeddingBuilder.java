@@ -9,6 +9,7 @@ import com.expleague.commons.math.vectors.impl.vectors.ArrayVec;
 import com.expleague.commons.random.FastRandom;
 import com.expleague.commons.seq.CharSeq;
 import com.expleague.ml.embedding.Embedding;
+import com.expleague.sensearch.core.IdUtils;
 import com.expleague.sensearch.core.Tokenizer;
 import com.expleague.sensearch.donkey.crawler.document.CrawlerDocument;
 import com.expleague.sensearch.index.plain.QuantLSHCosIndexDB;

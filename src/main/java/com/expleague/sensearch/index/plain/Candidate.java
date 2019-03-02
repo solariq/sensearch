@@ -1,6 +1,6 @@
 package com.expleague.sensearch.index.plain;
 
-import com.expleague.sensearch.donkey.plain.IdUtils;
+import com.expleague.sensearch.core.IdUtils;
 
 public class Candidate {
     private final long id, pageId;

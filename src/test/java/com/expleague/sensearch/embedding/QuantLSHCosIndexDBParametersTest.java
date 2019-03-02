@@ -5,7 +5,7 @@ import com.expleague.commons.math.vectors.VecTools;
 import com.expleague.commons.math.vectors.impl.nn.NearestNeighbourIndex;
 import com.expleague.commons.random.FastRandom;
 import com.expleague.commons.util.ArrayTools;
-import com.expleague.sensearch.donkey.plain.ByteTools;
+import com.expleague.sensearch.core.ByteTools;
 import com.expleague.sensearch.index.plain.QuantLSHCosIndexDB;
 import com.google.common.primitives.Longs;
 import gnu.trove.list.TLongList;
@@ -25,6 +25,8 @@ import java.nio.file.Paths;
 import java.util.stream.LongStream;
 
 public class QuantLSHCosIndexDBParametersTest {
+    private static final Path OUTPUT_PATH = Paths.get("ParamAnalisys.txt");
+    private static final Path EMBEDDING_PATH = Paths.get("../WikiDocs/IndexTmp/embedding");
     private static final int DIM = 130;
 
     private static final int MIN_QUANT_DIM = 65;
@@ -58,8 +60,7 @@ public class QuantLSHCosIndexDBParametersTest {
     @Ignore
     @Test
     public void parametersTest() throws IOException {
-        Path embeddingPath = Paths.get("../WikiDocs/IndexTmp/embedding");
-        DB vecDB = JniDBFactory.factory.open(embeddingPath.resolve("vecs").toFile(), DB_OPTIONS);
+        DB vecDB = JniDBFactory.factory.open(EMBEDDING_PATH.resolve("vecs").toFile(), DB_OPTIONS);
 
         TLongList idList = new TLongArrayList();
         try (DBIterator iterator = vecDB.iterator();) {
@@ -74,7 +75,7 @@ public class QuantLSHCosIndexDBParametersTest {
         long[] allIds = idList.toArray();
         FastRandom rng = new FastRandom();
 
-        try (PrintWriter out = new PrintWriter(new FileOutputStream(new File("ParamAnalysis.txt")), true)) {
+        try (PrintWriter out = new PrintWriter(new FileOutputStream(OUTPUT_PATH.toFile()), true)) {
             for (int quantDim = MIN_QUANT_DIM; quantDim <= MAX_QUANT_DIM; quantDim += QUANT_DIM_STEP) {
                 for (int sketchBitsPerQuant = MIN_SKETCH_BITS_PER_QUANT; sketchBitsPerQuant <= MAX_SKETCH_BITS_PER_QUANT; sketchBitsPerQuant += SKETCH_BITS_PER_QUANT_STEP) {
                     for (int batchSize = MIN_BATCH_SIZE; batchSize <= MAX_BATCH_SIZE; batchSize += BATCH_SIZE_STEP) {
@@ -147,6 +148,6 @@ public class QuantLSHCosIndexDBParametersTest {
                     }
                 }
             }
-        } catch (FileNotFoundException ignored) {}
+        }
     }
 }

@@ -11,7 +11,7 @@ import com.expleague.sensearch.core.PartOfSpeech;
 import com.expleague.sensearch.core.Term;
 import com.expleague.sensearch.core.Tokenizer;
 import com.expleague.sensearch.core.impl.TokenizerImpl;
-import com.expleague.sensearch.donkey.plain.IdUtils;
+import com.expleague.sensearch.core.IdUtils;
 import com.expleague.sensearch.donkey.plain.PlainIndexBuilder;
 import com.expleague.sensearch.features.Features;
 import com.expleague.sensearch.features.FeaturesImpl;
@@ -345,7 +345,6 @@ public class PlainIndex implements Index {
   }
 
   Stream<Term> synonyms(Term term) {
-    //    System.out.println("Synonyms for " + term.text());
     Vec termVec = embedding.vec(((IndexTerm) term).id());
     if (termVec == null) {
       return Stream.empty();
