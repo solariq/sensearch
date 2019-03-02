@@ -1,11 +1,19 @@
 package com.expleague.sensearch.snippet.passage;
 
 import com.expleague.sensearch.core.Lemmer;
+import com.expleague.sensearch.core.Term;
 import com.expleague.sensearch.snippet.Segment;
 import java.util.ArrayList;
 import java.util.List;
 
 public class Passages {
+  public static boolean contains(Passage passage, Term term) {
+    return passage.words().anyMatch(x -> x == term);
+  }
+
+  public static boolean containsWithLemma(Passage passage, Term term) {
+    return passage.words().anyMatch(x -> x.lemma() == term.lemma());
+  }
 
   public static boolean contains(Lemmer lemmer, CharSequence s, CharSequence t) {
     /*return lemmer.myStem

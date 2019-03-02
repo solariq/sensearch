@@ -80,5 +80,4 @@ public class AccumulatorFeatureSet extends FeatureSet.Stub<QPASItem> {
     return features.index(meta);
   }
 
-
 }
