@@ -7,6 +7,7 @@ import com.expleague.ml.meta.FeatureMeta.ValueType;
 import com.expleague.sensearch.core.Term;
 import com.expleague.sensearch.snippet.docbased_snippet.KeyWord;
 import com.expleague.sensearch.snippet.passage.Passage;
+import com.expleague.sensearch.snippet.passage.Passages;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -28,19 +29,11 @@ public class SRWFeatureSet extends FeatureSet.Stub<QPASItem> {
     this.keywords.add(keyWord);
   }
 
-  private static boolean containsWithLemma(Passage passage, Term term) {
-    return passage.words().anyMatch(x -> x.lemma() == term.lemma());
-  }
-
-  private static boolean contains(Passage passage, Term term) {
-    return passage.words().anyMatch(x -> x == term);
-  }
-
   @Override
   public Vec advance() {
     double sum = keywords
         .stream()
-        .filter(keyWord -> containsWithLemma(passage, keyWord.word()))
+        .filter(keyWord -> Passages.containsWithLemma(passage, keyWord.word()))
         .mapToDouble(KeyWord::rank)
         .sum();
 
