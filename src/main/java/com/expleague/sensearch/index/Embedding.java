@@ -13,10 +13,10 @@ public interface Embedding extends AutoCloseable {
 
   /**
    * Returns vector for an indexed item with given {@param id}. If this item does not have any
-   * vector, returns null If this item has multiple vectors, returns first of them
+   * vector, returns null
    *
    * @param id indexed item id
-   * @return first vector for this item or null if no vector exists
+   * @return vector for this item or null if no vector exists
    */
   @Nullable
   Vec vec(long id);
@@ -24,8 +24,6 @@ public interface Embedding extends AutoCloseable {
   Stream<Candidate> nearest(Vec qVec, LongPredicate predicate);
   Stream<Candidate> nearest(Vec qVec, LongPredicate predicate, int numberOfNeighbors);
   Stream<Candidate> nearest(Vec qVec, LongPredicate predicate, double maxDistance);
-
-  void setLSHFlag(boolean value);
 
   int dim();
 }

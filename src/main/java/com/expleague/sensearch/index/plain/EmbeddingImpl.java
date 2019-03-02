@@ -27,13 +27,13 @@ import org.iq80.leveldb.DB;
 import org.iq80.leveldb.DBIterator;
 
 public class EmbeddingImpl implements Embedding {
-    public long[] allIds;
-    private boolean lshFlag;
-    private QuantLSHCosIndexDB nnIdx;
+    private final long[] allIds;
+    private final boolean defaultLshFlag;
+    private final QuantLSHCosIndexDB nnIdx;
 
     @Inject
     public EmbeddingImpl(@UseLshFlag boolean useLshFlag, @EmbeddingVecsDb DB vecDb) {
-        lshFlag = useLshFlag;
+        defaultLshFlag = useLshFlag;
         nnIdx = QuantLSHCosIndexDB.load(vecDb);
 
         TLongList idList = new TLongArrayList();
@@ -57,35 +57,39 @@ public class EmbeddingImpl implements Embedding {
     }
 
     @Override
-    public void setLSHFlag(boolean value) {
-        lshFlag = value;
-    }
-
-    @Override
     public Stream<Candidate> nearest(Vec qVec, LongPredicate predicate) {
-        return baseNearest(qVec, predicate, Integer.MAX_VALUE);
+        return nearest(qVec, predicate, defaultLshFlag);
     }
 
     @Override
-    public Stream<Candidate> nearest(Vec qVec, LongPredicate predicate, int numberOfNeighbors) {
-        return baseNearest(qVec, predicate, numberOfNeighbors);
+    public Stream<Candidate> nearest(Vec qVec, LongPredicate predicate, int numOfNeighbors) {
+        return nearest(qVec, predicate, numOfNeighbors, defaultLshFlag);
     }
 
     @Override
-    public Stream<Candidate> nearest(Vec qVec, LongPredicate predicate, double maxDistance) {
-        return baseNearest(qVec, predicate, maxDistance);
+    public Stream<Candidate> nearest(Vec qVec, LongPredicate predicate, double maxDist) {
+        return nearest(qVec, predicate, maxDist, defaultLshFlag);
     }
 
-    //todo: replace object either
-    private Stream<Candidate> baseNearest(Vec qVec, LongPredicate predicate, Object either) {
+    public Stream<Candidate> nearest(Vec qVec, LongPredicate predicate, boolean approximate) {
+        return baseNearest(qVec, predicate, Integer.MAX_VALUE, Double.POSITIVE_INFINITY, approximate);
+    }
+
+    public Stream<Candidate> nearest(Vec qVec, LongPredicate predicate, int numOfNeighbors, boolean approximate) {
+        return baseNearest(qVec, predicate, numOfNeighbors, Double.POSITIVE_INFINITY, approximate);
+    }
+
+    public Stream<Candidate> nearest(Vec qVec, LongPredicate predicate, double maxDist, boolean approximate) {
+        return baseNearest(qVec, predicate, Integer.MAX_VALUE, maxDist, approximate);
+    }
+
+    private Stream<Candidate> baseNearest(Vec qVec, LongPredicate predicate, int numOfNeighbors, double maxDist, boolean approximate) {
         final double qNorm = VecTools.norm(qVec);
         if (qNorm == 0) {
             return Stream.empty();
         }
-        final int num = either instanceof Integer ? (int)either : Integer.MAX_VALUE;
-        final double distance = either instanceof Double ? (double)either : Double.POSITIVE_INFINITY;
 
-        if (!lshFlag) {
+        if (!approximate) {
             final long[] ids = LongStream.of(allIds)
                 .filter(predicate)
                 .distinct()
@@ -94,7 +98,7 @@ public class EmbeddingImpl implements Embedding {
                 .mapToDouble(id -> distance(qVec, qNorm, vec(id)))
                 .toArray();
             ArrayTools.parallelSort(dists, ids);
-            int count = Math.min(ids.length, num < ids.length ? num : Arrays.binarySearch(dists, distance));
+            int count = Math.min(ids.length, numOfNeighbors < ids.length ? numOfNeighbors : Arrays.binarySearch(dists, maxDist));
 
             List<Candidate> candidates = new ArrayList<>();
             for (int i = 0; i < count; i++) {
@@ -102,8 +106,9 @@ public class EmbeddingImpl implements Embedding {
             }
             return candidates.stream();
         }
+
         final Spliterator<NearestNeighbourIndex.Entry> spliterator = nnIdx.nearest(qVec).spliterator();
-        return StreamSupport.stream(new Spliterators.AbstractSpliterator<Candidate>(num, Spliterator.IMMUTABLE | Spliterator.NONNULL) {
+        return StreamSupport.stream(new Spliterators.AbstractSpliterator<Candidate>(numOfNeighbors, Spliterator.IMMUTABLE | Spliterator.NONNULL) {
             boolean eos = false;
             int count = 0;
             @Override
@@ -114,9 +119,9 @@ public class EmbeddingImpl implements Embedding {
                   if (!predicate.test(entry.id())) {
                     return;
                   }
-                    if (++count > num)
+                    if (++count > numOfNeighbors)
                         eos = true;
-                    if (entry.distance() > distance)
+                    if (entry.distance() > maxDist)
                         eos = true;
                     if (!eos)
                         action.accept(new Candidate(entry.id(), entry.distance()));
@@ -124,7 +129,6 @@ public class EmbeddingImpl implements Embedding {
                 return !eos;
             }
         }, false);
-
     }
 
     private double distance(Vec qVec, double qNorm, Vec v) {
