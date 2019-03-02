@@ -22,8 +22,8 @@ public interface Embedding extends AutoCloseable {
   Vec vec(long id);
 
   Stream<Candidate> nearest(Vec qVec, LongPredicate predicate);
-  Stream<Candidate> nearest(Vec qVec, LongPredicate predicate, int numberOfNeighbors);
-  Stream<Candidate> nearest(Vec qVec, LongPredicate predicate, double maxDistance);
+  Stream<Candidate> nearest(Vec qVec, LongPredicate predicate, int numOfNeighbors);
+  Stream<Candidate> nearest(Vec qVec, LongPredicate predicate, double maxDist);
 
   int dim();
 }

@@ -14,7 +14,6 @@ import org.jetbrains.annotations.NotNull;
 
 public class FilterImpl implements Filter {
   private static final Logger LOG = Logger.getLogger(FilterImpl.class.getName());
-  private static final int START_MULTIPLIER = 2;
 
   private final Embedding embedding;
   private final int maxItems;
@@ -24,7 +23,7 @@ public class FilterImpl implements Filter {
     this.embedding = embedding;
     this.maxItems = maxItems;
   }
-  
+
   @Override
   public Stream<Candidate> filtrate(@NotNull Vec qVec, LongPredicate predicate) {
     LOG.info("Filtering started");
@@ -37,6 +36,9 @@ public class FilterImpl implements Filter {
 
   @Override
   public Stream<Candidate> filtrate(@NotNull Vec qVec, LongPredicate predicate, int numOfNeighbors) {
+    if (numOfNeighbors > maxItems) {
+      throw new IllegalArgumentException("numOfNeighbors is too large");
+    }
     LOG.info("Filtering started");
     long start = System.currentTimeMillis();
     Stream<Candidate> result = embedding.nearest(qVec, predicate, numOfNeighbors);
