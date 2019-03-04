@@ -32,12 +32,6 @@ public interface CrawlerDocument {
   Stream<Section> sections();
 
   /**
-   * @return Page ID or 0 if page has no ID
-   */
-  @NotNull
-  long id();
-
-  /**
    * @return Page URI constructed by Page.titles
    */
   @NotNull
@@ -83,11 +77,8 @@ public interface CrawlerDocument {
     @NotNull
     CharSequence targetTitle();
 
-    /**
-     * @return Id of wikipedia article this link references. Equals to -1 if there is no article for
-     *     this link or this link leads to some other resource (for example, image)
-     */
-    long targetId();
+    @NotNull
+    URI targetUri();
 
     /**
      * @return Number of characters from section start to link beginning

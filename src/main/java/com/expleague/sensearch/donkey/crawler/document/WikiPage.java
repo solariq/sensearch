@@ -6,7 +6,6 @@ import java.util.stream.Stream;
 
 public class WikiPage implements CrawlerDocument {
 
-  private long id;
   private String title;
   private List<String> categories;
   private List<Section> sections;
@@ -22,10 +21,6 @@ public class WikiPage implements CrawlerDocument {
   String type;
   String nsId;
   //*/
-
-  public void setId(long id) {
-    this.id = id;
-  }
 
   public void setTitle(String title) {
     this.title = title;
@@ -64,11 +59,6 @@ public class WikiPage implements CrawlerDocument {
       }
     }
     return page;
-  }
-
-  @Override
-  public long id() {
-    return this.id;
   }
 
   @Override
@@ -122,12 +112,15 @@ public class WikiPage implements CrawlerDocument {
     private final CharSequence targetTitle;
     private final long targetId;
     private final int textOffset;
+    private final URI targetUri;
 
-    public WikiLink(CharSequence text, CharSequence targetTitle, long targetId, int textOffset) {
+    public WikiLink(CharSequence text, CharSequence targetTitle, long targetId, int textOffset,
+        URI targetUri) {
       this.text = text;
       this.targetTitle = targetTitle;
       this.targetId = targetId;
       this.textOffset = textOffset;
+      this.targetUri = targetUri;
     }
 
     @Override
@@ -141,8 +134,8 @@ public class WikiPage implements CrawlerDocument {
     }
 
     @Override
-    public long targetId() {
-      return targetId;
+    public URI targetUri() {
+      return targetUri;
     }
 
     @Override

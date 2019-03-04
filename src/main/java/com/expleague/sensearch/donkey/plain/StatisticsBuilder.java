@@ -18,11 +18,14 @@ import java.io.IOException;
 import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
+import org.apache.log4j.Logger;
 import org.iq80.leveldb.DB;
 import org.iq80.leveldb.WriteBatch;
 import org.iq80.leveldb.WriteOptions;
 
 public class StatisticsBuilder implements AutoCloseable {
+
+  private static final Logger LOG = Logger.getLogger(StatisticsBuilder.class);
 
   private static final WriteOptions DEFAULT_WRITE_OPTIONS =
       new WriteOptions().sync(true).snapshot(false);
@@ -149,6 +152,7 @@ public class StatisticsBuilder implements AutoCloseable {
 
   @Override
   public void close() throws IOException {
+    LOG.info("Storing statistics...");
     WriteBatch writeBatch = statisticsDb.createWriteBatch();
     final TermStatistics.Builder tsBuilder = TermStatistics.newBuilder();
     wordFrequencyMap.forEachKey(

@@ -12,10 +12,9 @@ import com.expleague.ml.embedding.Embedding;
 import com.expleague.sensearch.core.IdUtils;
 import com.expleague.sensearch.core.Tokenizer;
 import com.expleague.sensearch.donkey.crawler.document.CrawlerDocument;
+import com.expleague.sensearch.donkey.utils.BrandNewIdGenerator;
 import com.expleague.sensearch.index.plain.QuantLSHCosIndexDB;
-import gnu.trove.map.TLongLongMap;
 import gnu.trove.map.TLongObjectMap;
-import gnu.trove.map.hash.TLongLongHashMap;
 import gnu.trove.map.hash.TLongObjectHashMap;
 import gnu.trove.set.TLongSet;
 import gnu.trove.set.hash.TLongHashSet;
@@ -23,9 +22,13 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import org.apache.log4j.Logger;
 import org.iq80.leveldb.DB;
 
 public class EmbeddingBuilder implements AutoCloseable {
+
+  private static final Logger LOG = Logger.getLogger(EmbeddingBuilder.class);
+
   private static final int QUANT_DIM = 5;
   private static final int SKETCH_BITS_PER_QUANT = 34;
   private static final int BATCH_SIZE = 4000;
@@ -34,39 +37,50 @@ public class EmbeddingBuilder implements AutoCloseable {
   private final Embedding<CharSeq> jmllEmbedding;
   private final TLongSet termIdsInDb = new TLongHashSet();
   private final QuantLSHCosIndexDB nnIdx;
-  private final TLongLongMap wikiIdToIndexIdMap = new TLongLongHashMap();
-  private final TLongObjectMap<List<CharSequence>> wikiIdToLinkTexts = new TLongObjectHashMap<>();
+  private final TLongObjectMap<List<CharSequence>> pageIdToIncomingLinkTexts =
+      new TLongObjectHashMap<>();
+  private final TLongSet existingPageIds = new TLongHashSet();
 
   public EmbeddingBuilder(DB vecDb, Embedding<CharSeq> jmllEmbedding, Tokenizer tokenizer) {
     this.jmllEmbedding = jmllEmbedding;
     this.tokenizer = tokenizer;
-    nnIdx = new QuantLSHCosIndexDB(new FastRandom(), DEFAULT_VEC_SIZE, QUANT_DIM, SKETCH_BITS_PER_QUANT, BATCH_SIZE, vecDb);
+    nnIdx =
+        new QuantLSHCosIndexDB(
+            new FastRandom(),
+            DEFAULT_VEC_SIZE,
+            QUANT_DIM,
+            SKETCH_BITS_PER_QUANT,
+            BATCH_SIZE,
+            vecDb);
   }
 
   @Override
   public void close() throws IOException {
+    LOG.info("Finalizing EmbeddingBuilder...");
     long[] curLinkId = new long[1];
-    wikiIdToLinkTexts.forEachEntry((wikiId, linkTexts) -> {
-      if (wikiIdToIndexIdMap.containsKey(wikiId)) {
-        long pageId = wikiIdToIndexIdMap.get(wikiId);
-        curLinkId[0] = IdUtils.toStartLinkId(pageId);
-        linkTexts.forEach(text -> {
-          Vec textVec = toVector(text);
-          if (textVec != null) {
-            nnIdx.append(curLinkId[0]++, textVec);
+    pageIdToIncomingLinkTexts.forEachEntry(
+        (targetId, linkTexts) -> {
+          if (!existingPageIds.contains(targetId)) {
+            return true;
           }
+          curLinkId[0] = IdUtils.toStartLinkId(targetId);
+          linkTexts.forEach(
+              text -> {
+                Vec textVec = toVector(text);
+                if (textVec != null) {
+                  nnIdx.append(curLinkId[0]++, textVec);
+                }
+              });
+          return true;
         });
-      }
-      return true;
-    });
     nnIdx.save();
   }
 
   private long curPageTitleId;
   private long curPageTextId;
 
-  public void startPage(long originalId, long pageId) {
-    wikiIdToIndexIdMap.put(originalId, pageId);
+  public void startPage(long pageId) {
+    existingPageIds.add(pageId);
     curPageTitleId = IdUtils.toStartSecTitleId(pageId);
     curPageTextId = IdUtils.toStartSecTextId(pageId);
   }
@@ -82,37 +96,46 @@ public class EmbeddingBuilder implements AutoCloseable {
       nnIdx.append(curPageTextId++, textVec);
     }
 
-    section.links().forEach(link -> {
-      long wikiId = link.targetId();
-      if (!wikiIdToLinkTexts.containsKey(wikiId)) {
-        wikiIdToLinkTexts.put(wikiId, new ArrayList<>());
-      }
-      wikiIdToLinkTexts.get(wikiId).add(link.text());
-    });
+    section
+        .links()
+        .forEach(
+            link -> {
+              final long targetId = BrandNewIdGenerator.pageIdGenerator(link.targetUri()).next();
+              if (!pageIdToIncomingLinkTexts.containsKey(targetId)) {
+                pageIdToIncomingLinkTexts.put(targetId, new ArrayList<>());
+              }
+              pageIdToIncomingLinkTexts.get(targetId).add(link.text());
+            });
 
-    tokenizer.toWords(section.text()).map(word -> word.toString().toLowerCase()).forEach(word -> {
-      long id = termIdGenerator(word).next();
-      if (termIdsInDb.contains(id)) {
-        return;
-      }
+    tokenizer
+        .toWords(section.text())
+        .map(word -> word.toString().toLowerCase())
+        .forEach(
+            word -> {
+              long id = termIdGenerator(word).next();
+              if (termIdsInDb.contains(id)) {
+                return;
+              }
 
-      final Vec vec = jmllEmbedding.apply(CharSeq.compact(word));
-      if (vec != null) {
-        nnIdx.append(id, vec);
-      }
-      termIdsInDb.add(id);
-    });
+              final Vec vec = jmllEmbedding.apply(CharSeq.compact(word));
+              if (vec != null) {
+                nnIdx.append(id, vec);
+              }
+              termIdsInDb.add(id);
+            });
   }
 
   public void endPage() {}
 
   private Vec toVector(CharSequence text) {
-    final Vec[] vectors = tokenizer.parseTextToWords(text)
-        .map(word -> word.toString().toLowerCase())
-        .map(CharSeq::intern)
-        .map(jmllEmbedding)
-        .filter(Objects::nonNull)
-        .toArray(Vec[]::new);
+    final Vec[] vectors =
+        tokenizer
+            .parseTextToWords(text)
+            .map(word -> word.toString().toLowerCase())
+            .map(CharSeq::intern)
+            .map(jmllEmbedding)
+            .filter(Objects::nonNull)
+            .toArray(Vec[]::new);
 
     if (vectors.length == 0) {
       return null;

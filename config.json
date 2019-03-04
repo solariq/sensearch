@@ -11,7 +11,7 @@
   "buildIndexFlag": "false",
   "trainEmbeddingFlag": "false",
   "lshNearestFlag": "true",
-  "maxFilterItems": "10",
+  "maxFilterItems": "50",
   "modelPath": "src/main/resources/models/ranking.model",
   "modelFilterPath": "src/main/resources/models/filter.model"
 }

@@ -46,9 +46,9 @@ public class BrandNewIdGenerator {
     }
 
     public long next(TLongSet forbiddenIds) {
-      long id;
-      while (forbiddenIds.contains((id = next()))) {}
-      return id;
+//      long id;
+//      while (forbiddenIds.contains((id = next()))) {}
+      return next();
     }
 
     public void reset() {

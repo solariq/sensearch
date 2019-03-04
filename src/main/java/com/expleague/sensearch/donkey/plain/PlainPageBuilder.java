@@ -2,18 +2,17 @@ package com.expleague.sensearch.donkey.plain;
 
 import com.expleague.sensearch.donkey.crawler.document.CrawlerDocument;
 import com.expleague.sensearch.donkey.crawler.document.CrawlerDocument.Link;
+import com.expleague.sensearch.donkey.utils.BrandNewIdGenerator;
 import com.expleague.sensearch.protobuf.index.IndexUnits;
 import com.expleague.sensearch.protobuf.index.IndexUnits.Page;
-import com.google.common.annotations.VisibleForTesting;
 import com.google.common.primitives.Longs;
-import gnu.trove.map.TLongLongMap;
 import gnu.trove.map.TLongObjectMap;
-import gnu.trove.map.hash.TLongLongHashMap;
 import gnu.trove.map.hash.TLongObjectHashMap;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URI;
+import java.net.URLDecoder;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -27,7 +26,6 @@ import org.apache.commons.io.FileUtils;
 import org.iq80.leveldb.DB;
 import org.iq80.leveldb.WriteBatch;
 import org.iq80.leveldb.WriteOptions;
-import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -46,16 +44,11 @@ class PlainPageBuilder implements AutoCloseable {
 
   private OutputStream temporaryIndexOs;
 
-  // accumulates for all pages
-  private final List<Page.Link.Builder> linkBuilders = new ArrayList<>();
-  private final TLongLongMap wikiIdToIndexId = new TLongLongHashMap();
-
   // accumulates for single page then clears when next page is received
   private List<String> categories = Collections.emptyList();
   private final Deque<IndexUnits.Page.Builder> parentPagesStack = new LinkedList<>();
   private final List<Page> builtPages = new ArrayList<>();
-
-  private final TLongLongMap sectionRootId = new TLongLongHashMap();
+  private final TLongObjectMap<List<Page.Link>> incomingLinksForPage = new TLongObjectHashMap<>();
 
   private boolean isProcessingPage = false;
   // Flag that indicates if there as at least one section added for current page
@@ -81,57 +74,6 @@ class PlainPageBuilder implements AutoCloseable {
   }
 
   /**
-   * Receives list of links and splits it into two maps. Outgoing links map has link's source page
-   * id as a key, so for each id it stores all of the outgoing links. Incoming links map, on the
-   * other hand, stores all incoming links for each id in the similar fashion
-   *
-   * @param links list of Link.Builder each of which has wiki page id as a target id
-   * @param wikiIdToIndexIdMappings mapping from wiki ids to index ids
-   * @param outgoingLinks map of outgoing links links
-   * @param incomingLinks map of incoming links
-   */
-  @VisibleForTesting
-  static void resolveLinks(
-      List<Page.Link.Builder> links,
-      TLongLongMap wikiIdToIndexIdMappings,
-      @NotNull TLongObjectMap<List<Page.Link>> outgoingLinks,
-      @NotNull TLongObjectMap<List<Page.Link>> incomingLinks) {
-    outgoingLinks.clear();
-    incomingLinks.clear();
-    for (Page.Link.Builder link : links) {
-      long wikiTargetId = link.getTargetPageId();
-      if (!wikiIdToIndexIdMappings.containsKey(wikiTargetId)) {
-        //        LOG.warn(
-        //            String.format(
-        //                "Mappings to index id for WikiPage with id [ %d ] was not found!",
-        // wikiTargetId));
-        link.clearTargetPageId();
-      } else {
-        long targetIndexId = wikiIdToIndexIdMappings.get(wikiTargetId);
-        link.setTargetPageId(targetIndexId);
-      }
-
-      Page.Link builtLink = link.build();
-
-      // Eliminating self links
-      if (wikiIdToIndexIdMappings.get(builtLink.getSourcePageId())
-          == wikiIdToIndexIdMappings.get(builtLink.getTargetPageId())) {
-        continue;
-      }
-
-      if (builtLink.hasTargetPageId()) {
-        long targetId = builtLink.getTargetPageId();
-        incomingLinks.putIfAbsent(targetId, new LinkedList<>());
-        incomingLinks.get(targetId).add(builtLink);
-      }
-
-      long sourceId = link.getSourcePageId();
-      outgoingLinks.putIfAbsent(sourceId, new ArrayList<>());
-      outgoingLinks.get(sourceId).add(builtLink);
-    }
-  }
-
-  /**
    * Prepares for receiving sections of the page. Erases all information about the previous page
    *
    * @param originalPageId original id of a page. Id is required for building links between pages
@@ -139,8 +81,7 @@ class PlainPageBuilder implements AutoCloseable {
    * @param categories the categories page belongs to
    * @param uri URI of the page. URIs must be unique among the collection
    */
-  void startPage(
-      long originalPageId, long pageId, List<? extends CharSequence> categories, URI uri) {
+  void startPage(long pageId, List<? extends CharSequence> categories, URI uri) {
     if (isProcessingPage) {
       throw new IllegalStateException("Duplicate startPage call: page is already being processed");
     }
@@ -149,7 +90,6 @@ class PlainPageBuilder implements AutoCloseable {
     hasSection = false;
 
     curPageId = pageId;
-    wikiIdToIndexId.put(originalPageId, curPageId);
     this.categories = categories.stream().map(CharSequence::toString).collect(Collectors.toList());
     parentPagesStack.clear();
   }
@@ -162,17 +102,6 @@ class PlainPageBuilder implements AutoCloseable {
    */
   void addSection(CrawlerDocument.Section section, long sectionId) {
     hasSection = true;
-    sectionRootId.put(sectionId, curPageId);
-
-    for (Link link : section.links()) {
-      Page.Link.Builder linkBuilder =
-          Page.Link.newBuilder()
-              .setPosition(link.textOffset())
-              .setText(link.text().toString())
-              .setSourcePageId(sectionId)
-              .setTargetPageId(link.targetId());
-      linkBuilders.add(linkBuilder);
-    }
 
     List<? extends CharSequence> sectionTitleSeq = section.titles();
     int sectionDepth = sectionTitleSeq.size();
@@ -200,6 +129,29 @@ class PlainPageBuilder implements AutoCloseable {
             .setTitle(sectionTitle.toString())
             .setUri(section.uri().toString())
             .addAllCategories(categories);
+
+    for (Link link : section.links()) {
+      long targetId = BrandNewIdGenerator.pageIdGenerator(link.targetUri()).next();
+      if (targetId == curPageId) {
+        // Ignoring self-links
+        continue;
+      }
+      Page.Link dbLink =
+          Page.Link.newBuilder()
+              .setPosition(link.textOffset())
+              .setText(link.text().toString())
+              .setSourcePageId(sectionId)
+              .setTargetPageId(targetId)
+              .build();
+      pageBuilder.addOutgoingLinks(dbLink);
+      if (!incomingLinksForPage.containsKey(targetId)) {
+        incomingLinksForPage.put(targetId, new ArrayList<>());
+      }
+      if (URLDecoder.decode(link.targetUri().toString()).contains("путин")) {
+        System.out.println();
+      }
+      incomingLinksForPage.get(targetId).add(dbLink);
+    }
 
     if (!parentPagesStack.isEmpty()) {
       pageBuilder.setParentId(parentPagesStack.peekLast().getPageId());
@@ -252,11 +204,8 @@ class PlainPageBuilder implements AutoCloseable {
 
   @Override
   public void close() throws IOException {
+    LOG.info("Storing page links...");
     temporaryIndexOs.close();
-
-    TLongObjectMap<List<Page.Link>> incomingLinks = new TLongObjectHashMap<>();
-    TLongObjectMap<List<Page.Link>> outgoingLinks = new TLongObjectHashMap<>();
-    resolveLinks(linkBuilders, wikiIdToIndexId, outgoingLinks, incomingLinks);
 
     Page.Builder pageBuilder = Page.newBuilder();
     Page rawPage;
@@ -269,12 +218,9 @@ class PlainPageBuilder implements AutoCloseable {
         pageBuilder.clear();
         pageBuilder.mergeFrom(rawPage);
         long pageId = pageBuilder.getPageId();
-        if (outgoingLinks.containsKey(pageId)) {
-          pageBuilder.addAllOutgoingLinks(outgoingLinks.get(pageId));
-        }
 
-        if (incomingLinks.containsKey(pageId)) {
-          pageBuilder.addAllIncomingLinks(incomingLinks.get(pageId));
+        if (incomingLinksForPage.containsKey(pageId)) {
+          pageBuilder.addAllIncomingLinks(incomingLinksForPage.get(pageId));
         }
 
         if (pagesInBatch >= maxPagesInBatch) {

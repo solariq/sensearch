@@ -292,11 +292,11 @@ public class PlainIndexBuilder implements IndexBuilder {
                   // We don't add pageId to the knownPageIds as we need first section to have the
                   // same Id
                   // knownPageIds.add(pageId);
-                  plainPageBuilder.startPage(doc.id(), pageId, doc.categories(), doc.uri());
+                  plainPageBuilder.startPage(pageId, doc.categories(), doc.uri());
                   statisticsBuilder.startPage();
                   indexMetaBuilder.startPage(
-                      doc.id(), pageId, (int) tokenizer.parseTextToWords(doc.title()).count());
-                  embeddingBuilder.startPage(doc.id(), pageId);
+                      pageId, (int) tokenizer.parseTextToWords(doc.title()).count());
+                  embeddingBuilder.startPage(pageId);
 
                   doc.sections()
                       .forEachOrdered(

@@ -71,7 +71,7 @@ public class XMLParser {
       XmlPage xmlPage = element.page;
 
       return parsePage(xmlPage);
-    } catch (JAXBException | UnsupportedEncodingException e) {
+    } catch (JAXBException e) {
       throw new IllegalArgumentException(e);
     }
   }
@@ -80,24 +80,24 @@ public class XMLParser {
     try {
       Unmarshaller um = context.createUnmarshaller();
       return parsePage(um.unmarshal(reader, XmlPage.class).getValue());
-    } catch (JAXBException | UnsupportedEncodingException e) {
+    } catch (JAXBException e) {
       throw new IllegalArgumentException(e);
     }
   }
 
-  private WikiPage parsePage(XmlPage xmlPage) throws UnsupportedEncodingException {
+  private WikiPage parsePage(XmlPage xmlPage) {
     WikiPage page = new WikiPage();
 
     page.setTitle(xmlPage.title == null ? "" : xmlPage.title);
-    String pageUri = page.title().replace(" ", "_").replace("%", "%25");
 
-    page.setUri(URI.create("https://ru.wikipedia.org/wiki/" + pageUri));
+    URI pageUri = createUriForTitle(page.title());
+    page.setUri(pageUri);
+
     if (xmlPage.categories == null) {
       page.setCategories(new ArrayList<>());
     } else {
       page.setCategories(Arrays.asList(xmlPage.categories.split("@")));
     }
-    page.setId(xmlPage.id);
 
     Set<URI> uriSet = new HashSet<>();
 
@@ -130,7 +130,11 @@ public class XMLParser {
                         }
                         links.add(
                             new WikiLink(
-                                link.text, link.targetTitle, link.targetId, text.length()));
+                                link.text,
+                                link.targetTitle,
+                                link.targetId,
+                                text.length(),
+                                createUriForTitle(link.targetTitle)));
                         text.append(link.text.trim());
                         text.append(" ");
                       }
@@ -163,7 +167,7 @@ public class XMLParser {
                 "",
                 title.subList(0, i),
                 Collections.emptyList(),
-                createUri(pageUri, title.get(i), uriSet)));
+                createUriForTitle(pageUri.toString(), title.get(i), uriSet)));
       }
     }
     for (int i = 0; i < sections.size(); i++) {
@@ -173,7 +177,10 @@ public class XMLParser {
               curSection.text(),
               curSection.titles(),
               curSection.links(),
-              createUri(pageUri, curSection.titles().get(curSection.titles().size() - 1), uriSet)));
+              createUriForTitle(
+                  pageUri.toString(),
+                  curSection.titles().get(curSection.titles().size() - 1),
+                  uriSet)));
 
       if (i == sections.size() - 1) {
         continue;
@@ -196,7 +203,7 @@ public class XMLParser {
                 "",
                 newSectionTitle.subList(0, j + 1),
                 Collections.emptyList(),
-                createUri(pageUri, newSectionTitle.get(j), uriSet)));
+                createUriForTitle(pageUri.toString(), newSectionTitle.get(j), uriSet)));
       }
     }
 
@@ -215,7 +222,7 @@ public class XMLParser {
     return page;
   }
 
-  private URI createUri(String pageUri, CharSequence sectionTitle, Set<URI> uriSet) {
+  private URI createUriForTitle(String pageUri, CharSequence sectionTitle, Set<URI> uriSet) {
     URI subPageURI = createUriInternal(pageUri, sectionTitle);
     int uriIdx = 1;
     // Several subsections can have the same title but they URIs must be different
@@ -228,11 +235,15 @@ public class XMLParser {
     return subPageURI;
   }
 
+  private URI createUriForTitle(String title) {
+    String pageUri = URLEncoder.encode(title.replace(" ", "_").replace("%", "%25"));
+    return URI.create("https://ru.wikipedia.org/wiki/" + pageUri);
+  }
+
   private URI createUriInternal(String pageURI, CharSequence sectionTitle) {
     try {
       return URI.create(
-          "https://ru.wikipedia.org/wiki/"
-              + pageURI
+          pageURI
               + "#"
               + URLEncoder.encode(
               sectionTitle

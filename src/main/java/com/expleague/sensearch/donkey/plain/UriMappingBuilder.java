@@ -25,6 +25,7 @@ public class UriMappingBuilder implements AutoCloseable {
 
   @Override
   public void close() throws IOException {
+    LOG.info("Storing URI mapping...");
     final WriteBatch[] writeBatch = new WriteBatch[] {uriMappingDb.createWriteBatch()};
     int maxPagesInBatch = 1000;
     int[] pagesInBatch = new int[1];
