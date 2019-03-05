@@ -12,9 +12,10 @@ import com.expleague.sensearch.query.Query;
 import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Consumer;
 import org.apache.log4j.Logger;
 
 /**
@@ -24,22 +25,22 @@ public class MinerPhase implements SearchPhase {
 
   private static final Logger LOG = Logger.getLogger(MinerPhase.class.getName());
 
-  private final AccumulatorFeatureSet features;
+  private final Index index;
   private final int phaseId;
 
   @Inject
   public MinerPhase(Index index, @Assisted int phaseId) {
-    this.features = new AccumulatorFeatureSet(index);
     this.phaseId = phaseId;
+    this.index = index;
   }
 
   @Override
   public boolean test(Whiteboard whiteboard) {
-    return whiteboard.query() != null &&
-        whiteboard.subFilterResults().size() > phaseId &&
-        whiteboard.subFilterResults().get(phaseId) != null &&
-        Objects.requireNonNull(whiteboard.query()).size() >= phaseId &&
-        Objects.requireNonNull(whiteboard.query()).get(phaseId) != null;
+    return whiteboard.query() != null
+        && whiteboard.subFilterResults().size() > phaseId
+        && whiteboard.subFilterResults().get(phaseId) != null
+        && Objects.requireNonNull(whiteboard.query()).size() >= phaseId
+        && Objects.requireNonNull(whiteboard.query()).get(phaseId) != null;
   }
 
   @Override
@@ -47,18 +48,23 @@ public class MinerPhase implements SearchPhase {
     LOG.info("Miner phase started");
     long startTime = System.nanoTime();
 
-    final Map<Page, Features> documentsFeatures = new HashMap<>();
+    final Map<Page, Features> documentsFeatures = new ConcurrentHashMap<>();
     Query query = Objects.requireNonNull(whiteboard.query()).get(phaseId);
-    features.acceptFilterFeatures(whiteboard.filterFeatures().get(phaseId));
     System.out.println(whiteboard.subFilterResults().get(phaseId).length);
     Arrays.stream(whiteboard.subFilterResults().get(phaseId))
+        .parallel()
         .forEach(
-            page -> {
-              features.accept(new QURLItem(page, query));
-              Vec all = features.advance();
-              documentsFeatures.put(
-                  page,
-                  new FeaturesImpl(features, all));
+            new Consumer<Page>() {
+              ThreadLocal<AccumulatorFeatureSet> features =
+                  ThreadLocal.withInitial(() -> new AccumulatorFeatureSet(index));
+
+              @Override
+              public void accept(Page page) {
+                AccumulatorFeatureSet features = this.features.get();
+                features.accept(new QURLItem(page, query));
+                Vec all = features.advance();
+                documentsFeatures.put(page, new FeaturesImpl(features, all));
+              }
             });
 
     whiteboard.putTextFeatures(documentsFeatures, phaseId);

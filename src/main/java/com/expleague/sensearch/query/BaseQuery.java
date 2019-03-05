@@ -29,11 +29,19 @@ public class BaseQuery implements Query {
 
   @Override
   public Map<Term, List<Term>> synonyms() {
-    if (synonyms == null) {
-      synonyms = terms.stream()
-          .map(term -> Pair.of(term, term.synonyms().collect(Collectors.toList())))
-          .collect(Collectors.toSet()).stream()
-          .collect(Collectors.toMap(Pair::getLeft, Pair::getRight));
+    if (synonyms != null) {
+      return synonyms;
+    }
+    synchronized (this) {
+      if (synonyms == null) {
+        synonyms =
+            terms
+                .stream()
+                .map(term -> Pair.of(term, term.synonyms().collect(Collectors.toList())))
+                .collect(Collectors.toSet())
+                .stream()
+                .collect(Collectors.toMap(Pair::getLeft, Pair::getRight));
+      }
     }
     return synonyms;
   }
