@@ -3,7 +3,7 @@ package com.expleague.sensearch.web.suggest;
 import com.expleague.commons.math.vectors.Vec;
 import com.expleague.commons.math.vectors.VecTools;
 import com.expleague.sensearch.core.Term;
-import com.expleague.sensearch.index.plain.PlainIndex;
+import com.expleague.sensearch.index.Index;
 import com.google.inject.Inject;
 import java.util.Arrays;
 import java.util.Collections;
@@ -18,10 +18,10 @@ public class ProbabilisticSuggestor implements Suggestor {
 	private final Map<Term[], Double> multigramFreqNorm;
 	private final Map<Term[], Double> phraseProb = new HashMap<>();
 
-	private PlainIndex index;
+  private Index index;
 
 	@Inject
-	public ProbabilisticSuggestor(PlainIndex index) {
+  public ProbabilisticSuggestor(Index index) {
 		this.index = index;
 
 		SuggestInformationLoader provider = index.getSuggestInformation();

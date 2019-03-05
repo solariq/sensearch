@@ -2,11 +2,9 @@ package com.expleague.sensearch.core;
 
 import com.expleague.commons.text.lemmer.MyStem;
 import com.expleague.commons.text.lemmer.MyStemImpl;
-import com.google.inject.Singleton;
 import java.nio.file.Path;
 
 
-@Singleton
 public class Lemmer {
 
   public final MyStem myStem;

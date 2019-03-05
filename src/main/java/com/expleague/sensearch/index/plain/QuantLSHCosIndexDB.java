@@ -17,10 +17,14 @@ import java.util.stream.DoubleStream;
 import java.util.stream.IntStream;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
+import org.apache.log4j.Logger;
 import org.iq80.leveldb.DB;
 import org.jetbrains.annotations.Nullable;
 
 public class QuantLSHCosIndexDB extends BaseQuantLSHCosIndex implements AutoCloseable {
+
+  private static final Logger LOG = Logger.getLogger(QuantLSHCosIndexDB.class);
+
     private static final long FIELDS_ID = Long.MAX_VALUE;
     private static final long IDS_ID = Long.MAX_VALUE - 1;
     private static final long HASHES_ID = Long.MAX_VALUE - 2;
@@ -95,6 +99,8 @@ public class QuantLSHCosIndexDB extends BaseQuantLSHCosIndex implements AutoClos
 
 
     public static QuantLSHCosIndexDB load(DB vecDB) {
+      LOG.info("Loading LSH...");
+
         int[] fields = ByteTools.toIntArray(
                 vecDB.get(Longs.toByteArray(FIELDS_ID))
         );

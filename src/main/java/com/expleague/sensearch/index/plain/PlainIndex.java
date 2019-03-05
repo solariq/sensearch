@@ -7,11 +7,11 @@ import com.expleague.commons.seq.CharSeq;
 import com.expleague.commons.seq.CharSeqTools;
 import com.expleague.sensearch.Page;
 import com.expleague.sensearch.core.Annotations.IndexRoot;
+import com.expleague.sensearch.core.IdUtils;
 import com.expleague.sensearch.core.PartOfSpeech;
 import com.expleague.sensearch.core.Term;
 import com.expleague.sensearch.core.Tokenizer;
 import com.expleague.sensearch.core.impl.TokenizerImpl;
-import com.expleague.sensearch.core.IdUtils;
 import com.expleague.sensearch.donkey.plain.PlainIndexBuilder;
 import com.expleague.sensearch.features.Features;
 import com.expleague.sensearch.features.FeaturesImpl;
@@ -29,7 +29,6 @@ import com.expleague.sensearch.web.suggest.SuggestInformationLoader;
 import com.google.common.collect.Streams;
 import com.google.common.primitives.Longs;
 import com.google.inject.Inject;
-import com.google.inject.Singleton;
 import com.google.protobuf.InvalidProtocolBufferException;
 import gnu.trove.map.TLongObjectMap;
 import gnu.trove.map.hash.TLongObjectHashMap;
@@ -53,7 +52,6 @@ import org.iq80.leveldb.DBIterator;
 import org.iq80.leveldb.Options;
 import org.iq80.leveldb.ReadOptions;
 
-@Singleton
 public class PlainIndex implements Index {
 
   // TODO: !index version!

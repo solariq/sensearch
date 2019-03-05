@@ -22,11 +22,11 @@ import com.expleague.sensearch.donkey.IndexBuilder;
 import com.expleague.sensearch.donkey.crawler.Crawler;
 import com.expleague.sensearch.donkey.crawler.CrawlerXML;
 import com.expleague.sensearch.donkey.plain.PlainIndexBuilder;
-import com.expleague.sensearch.index.Embedding;
 import com.expleague.sensearch.filter.Filter;
+import com.expleague.sensearch.filter.FilterImpl;
+import com.expleague.sensearch.index.Embedding;
 import com.expleague.sensearch.index.Index;
 import com.expleague.sensearch.index.plain.EmbeddingImpl;
-import com.expleague.sensearch.filter.FilterImpl;
 import com.expleague.sensearch.index.plain.PlainIndex;
 import com.expleague.sensearch.metrics.RequestCrawler;
 import com.expleague.sensearch.metrics.WebCrawler;
@@ -66,15 +66,11 @@ public class AppModule extends AbstractModule {
 
   @Override
   protected void configure() {
-    Lemmer lemmer = new Lemmer(new Stemmer());
-
-    bind(Embedding.class).to(EmbeddingImpl.class);
-    bind(Filter.class).to(FilterImpl.class);
-
+    // binding constants
     bindConstant().annotatedWith(FilterMaxItems.class).to(config.maxFilterItems());
     bindConstant().annotatedWith(PageSize.class).to(config.getPageSize());
-    bind(Path.class).annotatedWith(MetricPath.class).toInstance(config.getPathToMetrics());
 
+    bind(Path.class).annotatedWith(MetricPath.class).toInstance(config.getPathToMetrics());
     bind(Path.class)
         .annotatedWith(EmbeddingVectorsPath.class)
         .toInstance(config.getEmbeddingVectors());
@@ -82,20 +78,19 @@ public class AppModule extends AbstractModule {
     bind(Path.class).annotatedWith(IndexRoot.class).toInstance(config.getIndexRoot());
     bindConstant().annotatedWith(UseLshFlag.class).to(config.getLshNearestFlag());
 
+    Lemmer lemmer = new Lemmer(new Stemmer());
     bind(Lemmer.class).toInstance(lemmer);
 
-    bind(Index.class).to(PlainIndex.class);
-    // bind(Suggestor.class).to(BigramsBasedSuggestor.class);
-    bind(Suggestor.class).to(ProbabilisticSuggestor.class);
-    bind(SenSeArch.class).to(SenSeArchImpl.class);
-    bind(IndexBuilder.class).to(PlainIndexBuilder.class);
     bind(Crawler.class).to(CrawlerXML.class);
+    bind(Embedding.class).to(EmbeddingImpl.class).in(Singleton.class);
+    bind(Filter.class).to(FilterImpl.class);
+    bind(Index.class).to(PlainIndex.class).in(Singleton.class);
+    bind(IndexBuilder.class).to(PlainIndexBuilder.class);
+    bind(Suggestor.class).to(ProbabilisticSuggestor.class).in(Singleton.class);
+    bind(SenSeArch.class).to(SenSeArchImpl.class);
     bind(WebCrawler.class).to(RequestCrawler.class);
 
     install(new FactoryModuleBuilder().build(SearchPhaseFactory.class));
-    //      bind(SearchPhaseFactory.class)
-    //          .toProvider(FactoryProvider.newFactory(SearchPhaseFactory.class,
-    // QueryPhase.class));
   }
 
   @Provides
@@ -137,6 +132,7 @@ public class AppModule extends AbstractModule {
   @RankFilterModel
   Pair<Function, FeatureMeta[]> getRankFilterModel() throws IOException {
     return DataTools.readModel(
-        new InputStreamReader(Files.newInputStream(config.getFilterModelPath()), StandardCharsets.UTF_8));
+        new InputStreamReader(
+            Files.newInputStream(config.getFilterModelPath()), StandardCharsets.UTF_8));
   }
 }
