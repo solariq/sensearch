@@ -4,6 +4,7 @@ import com.expleague.sensearch.donkey.crawler.document.CrawlerDocument.Link;
 import com.expleague.sensearch.donkey.crawler.document.CrawlerDocument.Section;
 import com.expleague.sensearch.donkey.crawler.document.WikiPage.WikiLink;
 import com.expleague.sensearch.donkey.crawler.document.WikiPage.WikiSection;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -23,6 +24,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
+import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
@@ -60,6 +62,41 @@ public class XMLParser {
     try (final InputStream fis = Files.newInputStream(file)) {
       return parseXML(fis);
     } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  public WikiPage parseXML(XmlPage page) {
+    return parsePage(page);
+  }
+
+  public Object parseXMLToRaw(InputStream file) {
+    try {
+      Unmarshaller um = context.createUnmarshaller();
+      return um.unmarshal(file);
+    } catch (JAXBException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  public XmlPage parseXMLToRaw(XMLStreamReader reader) {
+    try {
+      Unmarshaller um = context.createUnmarshaller();
+      return (XmlPage) um.unmarshal(reader);
+    } catch (JAXBException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  public void saveXml(XmlPageRootElement xml, Path path) {
+    try {
+      try (BufferedWriter w = Files.newBufferedWriter(path)) {
+        Marshaller m = context.createMarshaller();
+        m.marshal(xml, w);
+      } catch (IOException e) {
+        throw new RuntimeException(e);
+      }
+    } catch (JAXBException e) {
       throw new RuntimeException(e);
     }
   }
@@ -259,20 +296,20 @@ public class XMLParser {
   }
 
   @XmlRootElement(name = "pages")
-  private static class XmlPageRootElement {
+  public static class XmlPageRootElement {
 
     @XmlElement(name = "page")
-    XmlPage page;
+    public XmlPage page;
   }
 
   @XmlRootElement(name = "page")
-  private static class XmlPage {
+  public static class XmlPage {
 
     @XmlAttribute(name = "id")
-    long id;
+    public long id;
 
     @XmlAttribute(name = "title")
-    String title;
+    public String title;
 
     @XmlAttribute(name = "categories")
     String categories;
