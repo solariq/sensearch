@@ -385,7 +385,7 @@ public class PlainIndex implements Index {
     tmpID = IdUtils.toStartSecTextId(page.id());
     pageVec = embedding.vec(tmpID);
     while (pageVec != null) {
-      minLink = Math.min(minLink, (1.0 - VecTools.cosine(queryVec, pageVec)) / 2.0);
+      minBody = Math.min(minBody, (1.0 - VecTools.cosine(queryVec, pageVec)) / 2.0);
       tmpID++;
       pageVec = embedding.vec(tmpID);
     }
