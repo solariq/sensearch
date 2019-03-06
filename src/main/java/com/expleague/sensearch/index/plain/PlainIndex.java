@@ -365,7 +365,7 @@ public class PlainIndex implements Index {
         .filter(Objects::nonNull);
   }
 
-  public Vec filterFeatures(Query query, URI pageURI) {
+  public Features filterFeatures(Query query, URI pageURI) {
     double minTitle = 1;
     double minBody = 1;
     double minLink = 1;
@@ -398,7 +398,7 @@ public class PlainIndex implements Index {
       pageVec = embedding.vec(tmpID);
     }
 
-    return new ArrayVec(minTitle, minBody, minLink);
+    return new FeaturesImpl(new FilterFeatures(), new ArrayVec(minTitle, minBody, minLink));
   }
 
   @Override
