@@ -27,6 +27,11 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.log4j.PropertyConfigurator;
 
+// TODO:
+// - filter pool builder
+// - filter model train
+// - fix ranking pool builder/model train
+// - fix printing usage
 public class SenSearchCLI {
 
   private static final String DATA_PATH_OPTION = "data";
@@ -38,18 +43,21 @@ public class SenSearchCLI {
   private static final String MAX_FILTER_ITEMS = "maxfilter";
   private static final String RANK_POOL_PATH_OPTION = "rankpool";
   private static final String RANK_MODEL_PATH_OPTION = "rankmodel";
+  private static final String FILTER_MODEL_PATH_OPTION = "filtermodel";
 
   private static final String TRAIN_EMBEDDING_COMMAND = "trainEmbedding";
   private static final String BUILD_INDEX_COMMAND = "buildIndex";
   private static final String START_SEVER_COMMAND = "startServer";
   private static final String BUILD_RANK_POOL_COMMAND = "buildRankPool";
   private static final String TRAIN_RANK_MODEL_COMMAND = "trainRankModelCommand";
+  private static final String REBUILD_EMBEDDING_COMMAND = "rebuildEmbeddingCommand";
 
   private static Options trainEmbeddingOptions = new Options();
   private static Options buildIndexOptions = new Options();
   private static Options startServerOptions = new Options();
   private static Options buildRankPoolOptions = new Options();
   private static Options trainRankModelOptions = new Options();
+  private static Options rebuildEmbeddingOptions = new Options();
 
   static {
     Option dataOption =
@@ -73,6 +81,7 @@ public class SenSearchCLI {
     buildIndexOptions.addOption(indexPathOption);
     startServerOptions.addOption(indexPathOption);
     buildRankPoolOptions.addOption(indexPathOption);
+    rebuildEmbeddingOptions.addOption(indexPathOption);
 
     Option embeddingOutputPathOption =
         Option.builder()
@@ -83,6 +92,7 @@ public class SenSearchCLI {
             .build();
     trainEmbeddingOptions.addOption(embeddingOutputPathOption);
     buildIndexOptions.addOption(embeddingOutputPathOption);
+    rebuildEmbeddingOptions.addOption(embeddingOutputPathOption);
 
     Option embeddingPathOption =
         Option.builder()
@@ -121,6 +131,16 @@ public class SenSearchCLI {
             .required()
             .build();
     trainRankModelOptions.addOption(rankModelPathOption);
+    startServerOptions.addOption(rankModelPathOption);
+
+    Option filterModelPathOption =
+        Option.builder()
+            .longOpt(FILTER_MODEL_PATH_OPTION)
+            .desc("path to filter model")
+            .hasArg()
+            .required()
+            .build();
+    startServerOptions.addOption(filterModelPathOption);
   }
 
   public static void main(String[] args) throws Exception {
@@ -164,7 +184,7 @@ public class SenSearchCLI {
           config.setLshNearestFlag(!parse.hasOption(DO_NOT_USE_LSH_OPTION));
           config.setMaxFilterItems(Integer.parseInt(parse.getOptionValue(MAX_FILTER_ITEMS)));
           config.setModelPath(parse.getOptionValue(RANK_MODEL_PATH_OPTION));
-
+          config.setModelFilterPath(parse.getOptionValue(FILTER_MODEL_PATH_OPTION));
           Injector injector = Guice.createInjector(new AppModule(config));
           injector.getInstance(SearchServer.class).start(injector);
           break;
@@ -195,6 +215,14 @@ public class SenSearchCLI {
           Files.move(
               Paths.get(parse.getOptionValue(RANK_POOL_PATH_OPTION) + ".model"),
               Paths.get(parse.getOptionValue(RANK_MODEL_PATH_OPTION)));
+
+        case REBUILD_EMBEDDING_COMMAND:
+          config.setTemporaryIndex(parse.getOptionValue(INDEX_PATH_OPTION));
+          config.setEmbeddingVectors(parse.getOptionValue(EMBEDDING_OUTPUT_PATH_OPTION));
+
+          injector = Guice.createInjector(new AppModule(config));
+          RebuildEmbedding rebuildEmbedding = injector.getInstance(RebuildEmbedding.class);
+          rebuildEmbedding.rebuild();
       }
     } catch (ParseException e) {
       System.out.println(e.getLocalizedMessage());
