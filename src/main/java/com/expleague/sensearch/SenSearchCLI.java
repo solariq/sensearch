@@ -105,7 +105,7 @@ public class SenSearchCLI {
 
     startServerOptions.addOption(
         Option.builder().longOpt(DO_NOT_USE_LSH_OPTION).desc("disables LSH").build());
-    startServerOptions.addOption(
+    buildRankPoolOptions.addOption(
         Option.builder()
             .longOpt(MAX_FILTER_ITEMS)
             .desc("maximal number of items to be left after filtering")
@@ -160,13 +160,17 @@ public class SenSearchCLI {
       ConfigImpl config = new ConfigImpl();
       switch (args[0]) {
         case TRAIN_EMBEDDING_COMMAND:
-          try (Writer w = Files.newBufferedWriter(Paths.get(parse.getOptionValue(EMBEDDING_OUTPUT_PATH_OPTION)))) {
-            final JmllEmbeddingBuilder embeddingBuilder = new JmllEmbeddingBuilder(
-                DEFAULT_VEC_SIZE,
-                Paths.get(parse.getOptionValue(EMBEDDING_PATH_OPTION))
-            );
-            EmbeddingImpl<CharSeq> embedding = (EmbeddingImpl<CharSeq>)embeddingBuilder
-                .build(new CrawlerXML(Paths.get(parse.getOptionValue(DATA_PATH_OPTION))).makeStream());
+          try (Writer w =
+              Files.newBufferedWriter(
+                  Paths.get(parse.getOptionValue(EMBEDDING_OUTPUT_PATH_OPTION)))) {
+            final JmllEmbeddingBuilder embeddingBuilder =
+                new JmllEmbeddingBuilder(
+                    DEFAULT_VEC_SIZE, Paths.get(parse.getOptionValue(EMBEDDING_PATH_OPTION)));
+            EmbeddingImpl<CharSeq> embedding =
+                (EmbeddingImpl<CharSeq>)
+                    embeddingBuilder.build(
+                        new CrawlerXML(Paths.get(parse.getOptionValue(DATA_PATH_OPTION)))
+                            .makeStream());
             embedding.write(w);
           }
           break;
@@ -185,12 +189,15 @@ public class SenSearchCLI {
           config.setMaxFilterItems(Integer.parseInt(parse.getOptionValue(MAX_FILTER_ITEMS)));
           config.setModelPath(parse.getOptionValue(RANK_MODEL_PATH_OPTION));
           config.setModelFilterPath(parse.getOptionValue(FILTER_MODEL_PATH_OPTION));
+
           Injector injector = Guice.createInjector(new AppModule(config));
           injector.getInstance(SearchServer.class).start(injector);
           break;
 
         case BUILD_RANK_POOL_COMMAND:
           config.setTemporaryIndex(parse.getOptionValue(INDEX_PATH_OPTION));
+
+          config.setMaxFilterItems(Integer.parseInt(parse.getOptionValue(MAX_FILTER_ITEMS)));
           Path poolPath = Paths.get(parse.getOptionValue(RANK_POOL_PATH_OPTION));
           Guice.createInjector(new AppModule(config))
               .getInstance(RankingPoolBuilder.class)

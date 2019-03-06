@@ -7,18 +7,16 @@ import static javax.xml.stream.XMLStreamConstants.START_DOCUMENT;
 
 import com.expleague.sensearch.core.Annotations.DataZipPath;
 import com.expleague.sensearch.donkey.crawler.document.CrawlerDocument;
-import com.expleague.sensearch.donkey.crawler.document.WikiPage;
 import com.expleague.sensearch.donkey.crawler.document.XMLParser;
+import com.expleague.sensearch.donkey.crawler.document.XMLParser.XmlPage;
+import com.expleague.sensearch.donkey.crawler.document.XMLParser.XmlPageRootElement;
 import com.google.inject.Inject;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
@@ -46,6 +44,10 @@ public class CrawlerXML implements Crawler {
 
   @Override
   public Stream<CrawlerDocument> makeStream() throws IOException {
+    return makeRawStream().map(new XMLParser()::parseXML);
+  }
+
+  private Stream<XmlPage> makeRawStream() throws IOException {
     if (path.toString().endsWith(".zip")) {
       return StreamSupport.stream(
           Spliterators.spliteratorUnknownSize(
@@ -56,12 +58,11 @@ public class CrawlerXML implements Crawler {
           Spliterators.spliteratorUnknownSize(
               new OneDocumentIterator(path), Spliterator.ORDERED | Spliterator.SORTED),
           false);
-
     }
   }
 
   // TODO(tehnar): there is a mess in this code, refactor it later
-  class OneDocumentIterator implements Iterator<CrawlerDocument> {
+  class OneDocumentIterator implements Iterator<XmlPage> {
 
     private final XMLParser parser = new XMLParser();
     private final XMLStreamReader reader;
@@ -98,8 +99,8 @@ public class CrawlerXML implements Crawler {
     }
 
     @Override
-    public CrawlerDocument next() {
-      CrawlerDocument doc = parser.parseXML(reader);
+    public XmlPage next() {
+      XmlPage doc = parser.parseXMLToRaw(reader);
       try {
         skipElements(CHARACTERS, END_ELEMENT);
       } catch (XMLStreamException e) {
@@ -109,8 +110,7 @@ public class CrawlerXML implements Crawler {
     }
   }
 
-
-  class MultipleDocumentIterator implements Iterator<CrawlerDocument> {
+  class MultipleDocumentIterator implements Iterator<XmlPage> {
     private final XMLParser parser = new XMLParser();
     private ZipInputStream zipInputStream;
     private ZipEntry zipEntry;
@@ -127,8 +127,7 @@ public class CrawlerXML implements Crawler {
           while (zipEntry != null && zipEntry.isDirectory()) {
             zipEntry = zipInputStream.getNextEntry();
           }
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
           throw new RuntimeException(e);
         }
       }
@@ -139,93 +138,127 @@ public class CrawlerXML implements Crawler {
     final byte[] buffer = new byte[4096];
 
     @Override
-    public CrawlerDocument next() {
+    public XmlPage next() {
       try {
-        if (!hasNext())
+        if (!hasNext()) {
           return null;
+        }
         temp.reset();
         while (zipInputStream.available() > 0) {
           final int read = zipInputStream.read(buffer);
-          if (read < 0)
+          if (read < 0) {
             break;
+          }
           temp.write(buffer, 0, read);
         }
-        WikiPage result = null;
+        XmlPage result = null;
         try {
-          result = parser.parseXML(new ByteArrayInputStream(temp.toByteArray()));
+          Object res = parser.parseXMLToRaw(new ByteArrayInputStream(temp.toByteArray()));
+          if (res instanceof XmlPage) {
+            result = (XmlPage) res;
+          } else {
+            result = ((XmlPageRootElement) res).page;
+          }
         } catch (IllegalArgumentException ignored) {
           LOG.info(zipEntry.getName() + " wrong format");
         }
         zipInputStream.closeEntry();
         zipEntry = null;
         return result;
-      }
-      catch (IOException ioe) {
+      } catch (IOException ioe) {
         throw new RuntimeException(ioe);
       }
     }
   }
 
+  List<String> TITLES =
+      Arrays.asList(
+          ("The Walking Dead (season 8)\n"
+              + "Persephone\n"
+              + "Judaism\n"
+              + "Football in Spain\n"
+              + "Robot-assisted surgery\n"
+              + "I Love It (Icona Pop song)\n"
+              + "Skywalker family\n"
+              + "Zimbabwe\n"
+              + "Hectare\n"
+              + "Donovan Mitchell\n"
+              + "The Beatles' rooftop concert\n"
+              + "Luis Guillermo Solís\n"
+              + "Power Rangers\n"
+              + "Beverly Hills Cop (film series)\n"
+              + "List of Wimbledon ladies' singles champions\n"
+              + "Jinx (children's game)\n"
+              + "Hickey (surname)\n"
+              + "WWE Greatest Royal Rumble\n"
+              + "Bugsy Malone\n"
+              + "List of Toy Story characters\n"
+              + "It Wasn't Me\n"
+              + "St. Francis Preparatory School\n"
+              + "History of the People's Republic of China\n"
+              + "Take That Look Off Your Face\n"
+              + "Percy Fawcett\n"
+              + "Joanna Going\n"
+              + "Old Course at St Andrews\n"
+              + "College World Series\n"
+              + "The Mother (How I Met Your Mother)\n"
+              + "Grey's Anatomy (season 14)\n"
+              + "Blood gas tension\n"
+              + "List of Full House and Fuller House characters\n"
+              + "Judge Mathis\n"
+              + "The Elf on the Shelf\n"
+              + "Samuel Prescott\n"
+              + "Alone (TV series)\n"
+              + "United States Forces Japan\n"
+              + "Supreme Court of the United States\n"
+              + "Tom Ellis (actor)\n"
+              + "Coat of arms of South Africa\n"
+              + "Election Commission of India's Model Code of Conduct\n"
+              + "Now That's What I Call Music (original UK album)\n"
+              + "106th Grey Cup\n"
+              + "Bastille (band)\n"
+              + "Arkansas River\n"
+              + "The Princess Diaries 2: Royal Engagement\n"
+              + "P wave (electrocardiography)\n"
+              + "Star Trek: The Next Generation\n"
+              + "Robin Ward (singer)\n"
+              + "On Golden Pond (1981 film)\n"
+              + "America's Got Talent (season 4)\n"
+              + "Queen of the South (TV series)\n"
+              + "List of Prime Ministers of Pakistan\n"
+              + "Stephen F. Austin\n"
+              + "Tobiko\n"
+              + "State of Origin series\n"
+              + "Life Is Strange: Before the Storm\n"
+              + "Sodom and Gomorrah\n"
+              + "Xbox 360\n"
+              + "Philosophy of mind\n"
+              + "Cristiano Ronaldo\n"
+              + "Della Reese\n"
+              + "New Orleans Pelicans\n"
+              + "Evolution of fish\n"
+              + "Faith No More\n"
+              + "Gun Control Act of 1968\n"
+              + "Frankenstein\n"
+              + "Mirroring (psychology)\n"
+              + "The Killing (U.S. TV series)\n"
+              + "Church of England")
+              .split("\n"));
+
   public void makeZIP(int num) {
+    XMLParser parser = new XMLParser();
     try {
-      FileInputStream fileInputStream = new FileInputStream(path.toString());
-      ZipInputStream zipInputStream = new ZipInputStream(fileInputStream);
-      ZipEntry zipEntry;
-      int cnt = 0;
-      XMLParser parser = new XMLParser();
-      while ((zipEntry = zipInputStream.getNextEntry()) != null) {
-        if (zipEntry.isDirectory()) {
-          continue;
-        }
-        cnt++;
-        String fileName = "../WikiDocs/Mini_Wiki/";
-        Files.createDirectories(Paths.get(fileName));
-        String[] n = zipEntry.getName().split("/");
-        fileName += n[n.length - 1];
-
-        if (!Files.exists(Paths.get(fileName))) {
-          zipInputStream.closeEntry();
-          continue;
-        }
-        Files.copy(zipInputStream, Paths.get(fileName), StandardCopyOption.REPLACE_EXISTING);
-
-        zipInputStream.closeEntry();
-        File file = new File(fileName);
-        WikiPage page = parser.parseXML(file);
-        boolean[] isOk = new boolean[1];
-        page.categories()
-            .forEach(
-                category -> {
-                  isOk[0] |= category.equals("Актёры России");
-                  isOk[0] |= category.equals("Футболисты России");
-                  isOk[0] |= category.equals("Писатели России по алфавиту");
-                  isOk[0] |= category.equals("Поэты России");
-                  isOk[0] |= category.equals("Актрисы России");
-                  isOk[0] |= category.equals("Мастера спорта России международного класса");
-                  isOk[0] |= category.contains("Правители");
-
-                  //          isOk[0] |= category.contains("Росс") &&
-                  // !category.contains("Википедия:") && !category.contains("ПРО:");
-                  isOk[0] |=
-                      category.contains("Город")
-                          && !category.contains("Википедия:")
-                          && !category.contains("ПРО:");
-                  //          isOk[0] |= category.contains("Фильм") &&
-                  // !category.contains("Википедия:") && !category.contains("ПРО:");
-                  //          isOk[0] |= category.contains("фильм") &&
-                  // !category.contains("Википедия:") && !category.contains("ПРО:");
-                });
-
-        //        if (!isOk[0]) {
-        //          Files.delete(Paths.get(fileName));
-        //        }
-        if (cnt % 100000 == 0) {
-          System.out.println(cnt);
-        }
-        //        if (cnt == num) {
-        //          break;
-        //        }
-      }
+      makeRawStream()
+          .forEach(
+              page -> {
+                String fileName = "Mini_Wiki_en/" + page.id;
+                if (!TITLES.contains(page.title.trim())) {
+                  return;
+                }
+                XmlPageRootElement xmlPageRootElement = new XmlPageRootElement();
+                xmlPageRootElement.page = page;
+                parser.saveXml(xmlPageRootElement, Paths.get(fileName));
+              });
 
     } catch (IOException e) {
       e.printStackTrace();
