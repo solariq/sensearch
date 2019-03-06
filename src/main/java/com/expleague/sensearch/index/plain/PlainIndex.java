@@ -358,9 +358,11 @@ public class PlainIndex implements Index {
 
     LOG.info("LSHSynonymsMetric: " + result);*/
 
+    // TODO: FATAL: this nonNull filter must be redundant (but it's necessary for full ruWiki)
     return filter
         .filtrate(termVec, PlainIndex::isWordId, SYNONYMS_COUNT)
-        .map(c -> idToTerm.get(c.getId()));
+        .map(c -> idToTerm.get(c.getId()))
+        .filter(Objects::nonNull);
   }
 
   @Override

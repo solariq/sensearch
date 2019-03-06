@@ -14,7 +14,6 @@ import java.util.stream.Collectors;
 
 public class ProbabilisticSuggestor implements Suggestor {
 
-	private final Map<Term, Double> unigramCoeff;
 	private final Map<Term[], Double> multigramFreqNorm;
 	private final Map<Term[], Double> phraseProb = new HashMap<>();
 
@@ -25,7 +24,6 @@ public class ProbabilisticSuggestor implements Suggestor {
 		this.index = index;
 
 		SuggestInformationLoader provider = index.getSuggestInformation();
-		unigramCoeff = provider.unigramCoeff;
 		multigramFreqNorm = provider.multigramFreqNorm;
 
 	}
