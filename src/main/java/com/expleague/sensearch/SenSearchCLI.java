@@ -105,13 +105,16 @@ public class SenSearchCLI {
 
     startServerOptions.addOption(
         Option.builder().longOpt(DO_NOT_USE_LSH_OPTION).desc("disables LSH").build());
-    buildRankPoolOptions.addOption(
+
+    Option maxFilterOption =
         Option.builder()
             .longOpt(MAX_FILTER_ITEMS)
             .desc("maximal number of items to be left after filtering")
             .hasArg()
             .required()
-            .build());
+            .build();
+    startServerOptions.addOption(maxFilterOption);
+    buildRankPoolOptions.addOption(maxFilterOption);
 
     Option rankPoolPathOption =
         Option.builder()
@@ -217,11 +220,9 @@ public class SenSearchCLI {
                   "1/0.7",
                   "-v",
                   "-O",
-                  "'GradientBoosting(local=SatL2, weak=GreedyObliviousTree(depth=6), step=0.01, iterations=600)'"
+                  "GradientBoosting(local=SatL2, weak=GreedyObliviousTree(depth=6), step=0.01, iterations=1000)"
               });
-          Files.move(
-              Paths.get(parse.getOptionValue(RANK_POOL_PATH_OPTION) + ".model"),
-              Paths.get(parse.getOptionValue(RANK_MODEL_PATH_OPTION)));
+          break;
 
         case REBUILD_EMBEDDING_COMMAND:
           config.setTemporaryIndex(parse.getOptionValue(INDEX_PATH_OPTION));

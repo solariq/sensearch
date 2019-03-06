@@ -55,7 +55,7 @@ import org.iq80.leveldb.ReadOptions;
 public class PlainIndex implements Index {
 
   // TODO: !index version!
-  public static final int VERSION = 14;
+  public static final int VERSION = 13;
 
   private static final long DEFAULT_CACHE_SIZE = 128 * (1 << 20); // 128 MB
 
@@ -94,7 +94,6 @@ public class PlainIndex implements Index {
 
   private final Embedding embedding;
   private final Filter filter;
-  private final FilterFeatures filterFeatures = new FilterFeatures();
   private final LSHSynonymsMetric lshSynonymsMetric;
   private final Tokenizer tokenizer;
 
@@ -367,6 +366,8 @@ public class PlainIndex implements Index {
 
   @Override
   public Map<Page, Features> fetchDocuments(Query query, int num) {
+    FilterFeatures filterFeatures = new FilterFeatures();
+
     final Vec qVec = vecByTerms(query.terms());
     TLongObjectMap<List<Candidate>> pageIdToCandidatesMap = new TLongObjectHashMap<>();
     filter

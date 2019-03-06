@@ -12,11 +12,11 @@ import com.expleague.sensearch.Page;
 import com.expleague.sensearch.Page.SegmentType;
 import com.expleague.sensearch.SenSeArch.ResultItem;
 import com.expleague.sensearch.core.impl.ResultItemImpl;
+import com.expleague.sensearch.features.QURLItem;
+import com.expleague.sensearch.features.sets.ranker.TargetFeatureSet;
 import com.expleague.sensearch.filter.FilterMinerPhase;
 import com.expleague.sensearch.index.Index;
 import com.expleague.sensearch.miner.AccumulatorFeatureSet;
-import com.expleague.sensearch.features.QURLItem;
-import com.expleague.sensearch.features.sets.ranker.TargetFeatureSet;
 import com.expleague.sensearch.query.BaseQuery;
 import com.expleague.sensearch.query.Query;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -31,6 +31,7 @@ import java.nio.file.Paths;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
 
 public class RankingPoolBuilder {
@@ -41,7 +42,6 @@ public class RankingPoolBuilder {
   @Inject
   public RankingPoolBuilder(Index index) {
     this.index = index;
-
   }
 
   public static void main(String[] args) throws IOException {
@@ -50,57 +50,69 @@ public class RankingPoolBuilder {
   }
 
   public void build(Path poolPath) {
-    try (BufferedReader reader = Files.newBufferedReader(Paths.get("./wordstat/queries.txt"))) {
-      FastRandom rand = new FastRandom();
-      DataSetMeta meta =
-          new JsonDataSetMeta(
-              "Google", "sensearch", new Date(), QURLItem.class, rand.nextBase64String(32));
-      AccumulatorFeatureSet features = new AccumulatorFeatureSet(index);
-      TargetFeatureSet googleTarget = new TargetFeatureSet();
+    FastRandom rand = new FastRandom();
+    DataSetMeta meta =
+        new JsonDataSetMeta(
+            "Google", "sensearch", new Date(), QURLItem.class, rand.nextBase64String(32));
+    AccumulatorFeatureSet features = new AccumulatorFeatureSet(index);
+    TargetFeatureSet googleTarget = new TargetFeatureSet();
 
-      Builder<QURLItem> poolBuilder = Pool.builder(meta, features, googleTarget);
+    Builder<QURLItem> poolBuilder = Pool.builder(meta, features, googleTarget);
 
-      String line;
-      int status = 0;
-      while ((line = reader.readLine()) != null) {
-        if (status % 100 == 0) {
-          System.err.println(status + " queries completed");
-        }
-        if (Files.exists(Paths.get("./wordstat").resolve("query_" + line))) {
-          status++;
-          Query query = BaseQuery.create(line, index);
-          Set<CharSeq> uniqQURL = new HashSet<>();
+    AtomicInteger status = new AtomicInteger();
+    try {
+      Files.readAllLines(Paths.get("./wordstat/queries.txt"))
+          .stream()
+          .parallel()
+          .forEach(
+              line -> {
+                if (status.get() % 100 == 0) {
+                  System.err.println(status + " queries completed");
+                }
+                if (Files.exists(Paths.get("./wordstat").resolve("query_" + line))) {
+                  status.incrementAndGet();
+                  Query query = BaseQuery.create(line, index);
+                  Set<CharSeq> uniqQURL = new HashSet<>();
 
-          try (BufferedReader queryReader =
-              Files.newBufferedReader(Paths.get("./wordstat").resolve("query_" + query.text()))) {
-            ObjectMapper objectMapper = new ObjectMapper();
-            ResultItem[] res = objectMapper.readValue(queryReader, ResultItemImpl[].class);
-            for (ResultItem page : res) {
-              uniqQURL.add(CharSeq.create(page.title()));
-              poolBuilder.accept(new QURLItem(index.page(page.reference()), query));
-              poolBuilder.advance();
-            }
-          } catch (IOException ignored) {
-          }
+                  try (BufferedReader queryReader =
+                      Files.newBufferedReader(
+                          Paths.get("./wordstat").resolve("query_" + query.text()))) {
+                    ObjectMapper objectMapper = new ObjectMapper();
+                    ResultItem[] res = objectMapper.readValue(queryReader, ResultItemImpl[].class);
+                    synchronized (poolBuilder) {
+                      for (ResultItem page : res) {
+                        uniqQURL.add(CharSeq.create(page.title()));
+                        poolBuilder.accept(new QURLItem(index.page(page.reference()), query));
+                        poolBuilder.advance();
+                      }
+                    }
+                  } catch (IOException e) {
+                    e.printStackTrace();
+                  }
 
-          Stream<Page> sensearchResult =
-              index
-                  .fetchDocuments(query, FilterMinerPhase.FILTERED_DOC_NUMBER)
-                  .keySet().stream()
-                  .filter(
-                      page ->
-                          !uniqQURL.contains(CharSeq.create(page.content(SegmentType.SECTION_TITLE))))
-                  .limit(RANK_DOCUMENTS);
-          sensearchResult.forEach(
-              page -> {
-                if (!uniqQURL.contains(CharSeq.create(page.content(SegmentType.SECTION_TITLE)))) {
-                  uniqQURL.add(CharSeq.create(page.content(SegmentType.SECTION_TITLE)));
-                  poolBuilder.accept(new QURLItem(page, query));
-                  poolBuilder.advance();
+                  Stream<Page> sensearchResult =
+                      index
+                          .fetchDocuments(query, FilterMinerPhase.FILTERED_DOC_NUMBER)
+                          .keySet()
+                          .stream()
+                          .filter(
+                              page ->
+                                  !uniqQURL.contains(
+                                      CharSeq.create(page.content(SegmentType.SECTION_TITLE))))
+                          .limit(RANK_DOCUMENTS);
+                  synchronized (poolBuilder) {
+                    sensearchResult.forEach(
+                        page -> {
+                          if (!uniqQURL.contains(
+                              CharSeq.create(page.content(SegmentType.SECTION_TITLE)))) {
+                            uniqQURL.add(CharSeq.create(page.content(SegmentType.SECTION_TITLE)));
+                            poolBuilder.accept(new QURLItem(page, query));
+                            poolBuilder.advance();
+                          }
+                        });
+                  }
                 }
               });
-        }
-      }
       Pool<QURLItem> pool = poolBuilder.create();
       DataTools.writePoolTo(pool, Files.newBufferedWriter(poolPath));
     } catch (IOException e) {
