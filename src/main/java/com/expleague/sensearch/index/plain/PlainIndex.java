@@ -20,6 +20,7 @@ import com.expleague.sensearch.features.sets.filter.FilterFeatures;
 import com.expleague.sensearch.filter.Filter;
 import com.expleague.sensearch.index.Embedding;
 import com.expleague.sensearch.index.Index;
+import com.expleague.sensearch.index.IndexedPage;
 import com.expleague.sensearch.metrics.LSHSynonymsMetric;
 import com.expleague.sensearch.protobuf.index.IndexUnits;
 import com.expleague.sensearch.protobuf.index.IndexUnits.TermStatistics;
@@ -362,6 +363,42 @@ public class PlainIndex implements Index {
         .filtrate(termVec, PlainIndex::isWordId, SYNONYMS_COUNT)
         .map(c -> idToTerm.get(c.getId()))
         .filter(Objects::nonNull);
+  }
+
+  public Vec filterFeatures(Query query, URI pageURI) {
+    double minTitle = 1;
+    double minBody = 1;
+    double minLink = 1;
+
+    Vec queryVec = vecByTerms(query.terms());
+    IndexedPage page = (IndexedPage) page(pageURI);
+    long tmpID;
+    //Title
+    tmpID = IdUtils.toStartSecTitleId(page.id());
+    Vec pageVec = embedding.vec(tmpID);
+    while (pageVec != null) {
+      minTitle = Math.min(minTitle, (1.0 - VecTools.cosine(queryVec, pageVec)) / 2.0);
+      tmpID++;
+      pageVec = embedding.vec(tmpID);
+    }
+    //Body
+    tmpID = IdUtils.toStartSecTextId(page.id());
+    pageVec = embedding.vec(tmpID);
+    while (pageVec != null) {
+      minLink = Math.min(minLink, (1.0 - VecTools.cosine(queryVec, pageVec)) / 2.0);
+      tmpID++;
+      pageVec = embedding.vec(tmpID);
+    }
+    //Link
+    tmpID = IdUtils.toStartLinkId(page.id());
+    pageVec = embedding.vec(tmpID);
+    while (pageVec != null) {
+      minLink = Math.min(minLink, (1.0 - VecTools.cosine(queryVec, pageVec)) / 2.0);
+      tmpID++;
+      pageVec = embedding.vec(tmpID);
+    }
+
+    return new ArrayVec(minTitle, minBody, minLink);
   }
 
   @Override

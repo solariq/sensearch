@@ -50,16 +50,6 @@ public class WhiteboardImpl implements Whiteboard {
   }
 
   @Override
-  public synchronized void putTextFeatures(List<Map<Page, Features>> textFeatures) {
-    this.textFeatures = textFeatures;
-  }
-
-  @Override
-  public void putFilterFeatures(List<Map<Page, Features>> filterFeatures) {
-    this.filterFeatures = filterFeatures;
-  }
-
-  @Override
   public synchronized void putTextFeatures(Map<Page, Features> textFeatures, int index) {
       this.textFeatures.set(index, textFeatures);
   }
@@ -110,16 +100,6 @@ public class WhiteboardImpl implements Whiteboard {
   @Override
   public List<Page[]> subFilterResults() {
     return subFilterResults;
-  }
-
-  @Override
-  public synchronized void putSubResults(List<Page[]> subResults) {
-    this.subResults = subResults;
-  }
-
-  @Override
-  public void putSubFilterResults(List<Page[]> subResults) {
-    subFilterResults = subResults;
   }
 
   @Override

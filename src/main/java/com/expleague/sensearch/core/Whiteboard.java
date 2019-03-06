@@ -15,10 +15,6 @@ public interface Whiteboard {
 
   List<Map<Page, Features>> filterFeatures();
 
-  void putTextFeatures(List<Map<Page, Features>> textFeatures);
-
-  void putFilterFeatures(List<Map<Page, Features>> filterFeatures);
-
   void putTextFeatures(Map<Page, Features> textFeatures, int index);
 
   void putFilterFeatures(Map<Page, Features> filterFeatures, int index);
@@ -42,10 +38,6 @@ public interface Whiteboard {
   List<Page[]> subResults();
 
   List<Page[]> subFilterResults();
-
-  void putSubResults(List<Page[]> subResults);
-
-  void putSubFilterResults(List<Page[]> subResults);
 
   void putSubResult(Page[] subResult, int index);
 
