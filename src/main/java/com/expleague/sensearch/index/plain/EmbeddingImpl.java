@@ -23,11 +23,15 @@ import java.util.function.LongPredicate;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
+import org.apache.log4j.Logger;
 import org.iq80.leveldb.DB;
 import org.iq80.leveldb.DBIterator;
 
 public class EmbeddingImpl implements Embedding {
-  private final long[] allIds;
+
+  private static final Logger LOG = Logger.getLogger(EmbeddingImpl.class);
+
+  private long[] allIds;
   private final boolean defaultLshFlag;
   private final QuantLSHCosIndexDB nnIdx;
 
@@ -36,19 +40,21 @@ public class EmbeddingImpl implements Embedding {
     defaultLshFlag = useLshFlag;
     nnIdx = QuantLSHCosIndexDB.load(vecDb);
 
-    TLongList idList = new TLongArrayList();
-    try (DBIterator iterator = vecDb.iterator();) {
-      for(iterator.seekToFirst(); iterator.hasNext(); iterator.next()) {
-        byte[] key = iterator.peekNext().getKey();
-        long id = Longs.fromByteArray(key);
-        if (id < Long.MAX_VALUE - 3) {
-          idList.add(id);
+    if (!useLshFlag) {
+      TLongList idList = new TLongArrayList();
+      try (DBIterator iterator = vecDb.iterator();) {
+        for (iterator.seekToFirst(); iterator.hasNext(); iterator.next()) {
+          byte[] key = iterator.peekNext().getKey();
+          long id = Longs.fromByteArray(key);
+          if (id < Long.MAX_VALUE - 3) {
+            idList.add(id);
+          }
         }
+      } catch (IOException e) {
+        throw new RuntimeException(e);
       }
-    } catch (IOException e){
-      throw new RuntimeException(e);
+      allIds = idList.toArray();
     }
-    allIds = idList.toArray();
   }
 
   @Override
@@ -75,30 +81,32 @@ public class EmbeddingImpl implements Embedding {
     return baseNearest(qVec, predicate, Integer.MAX_VALUE, Double.POSITIVE_INFINITY, approximate);
   }
 
-  public Stream<Candidate> nearest(Vec qVec, LongPredicate predicate, int numOfNeighbors, boolean approximate) {
+  public Stream<Candidate> nearest(
+      Vec qVec, LongPredicate predicate, int numOfNeighbors, boolean approximate) {
     return baseNearest(qVec, predicate, numOfNeighbors, Double.POSITIVE_INFINITY, approximate);
   }
 
-  public Stream<Candidate> nearest(Vec qVec, LongPredicate predicate, double maxDist, boolean approximate) {
+  public Stream<Candidate> nearest(
+      Vec qVec, LongPredicate predicate, double maxDist, boolean approximate) {
     return baseNearest(qVec, predicate, Integer.MAX_VALUE, maxDist, approximate);
   }
 
-  private Stream<Candidate> baseNearest(Vec qVec, LongPredicate predicate, int numOfNeighbors, double maxDist, boolean approximate) {
+  private Stream<Candidate> baseNearest(
+      Vec qVec, LongPredicate predicate, int numOfNeighbors, double maxDist, boolean approximate) {
     final double qNorm = VecTools.norm(qVec);
     if (qNorm == 0) {
       return Stream.empty();
     }
 
     if (!approximate) {
-      final long[] ids = LongStream.of(allIds)
-          .filter(predicate)
-          .distinct()
-          .toArray();
-      final double[] dists = LongStream.of(ids)
-          .mapToDouble(id -> distance(qVec, qNorm, vec(id)))
-          .toArray();
+      final long[] ids = LongStream.of(allIds).filter(predicate).distinct().toArray();
+      final double[] dists =
+          LongStream.of(ids).mapToDouble(id -> distance(qVec, qNorm, vec(id))).toArray();
       ArrayTools.parallelSort(dists, ids);
-      int count = Math.min(ids.length, numOfNeighbors < ids.length ? numOfNeighbors : Arrays.binarySearch(dists, maxDist));
+      int count =
+          Math.min(
+              ids.length,
+              numOfNeighbors < ids.length ? numOfNeighbors : Arrays.binarySearch(dists, maxDist));
 
       List<Candidate> candidates = new ArrayList<>();
       for (int i = 0; i < count; i++) {
@@ -107,25 +115,36 @@ public class EmbeddingImpl implements Embedding {
       return candidates.stream();
     }
 
-    final Spliterator<NearestNeighbourIndex.Entry> spliterator = nnIdx.nearest(qVec, predicate).spliterator();
-    return StreamSupport.stream(new Spliterators.AbstractSpliterator<Candidate>(numOfNeighbors, Spliterator.IMMUTABLE | Spliterator.NONNULL) {
-      boolean eos = false;
-      int count = 0;
-      @Override
-      public boolean tryAdvance(Consumer<? super Candidate> action) {
-        if (eos)
-          return false;
-        spliterator.tryAdvance(entry -> {
-          if (++count > numOfNeighbors)
-            eos = true;
-          if (entry.distance() > maxDist)
-            eos = true;
-          if (!eos)
-            action.accept(new Candidate(entry.id(), entry.distance()));
-        });
-        return !eos;
-      }
-    }, false);
+    final Spliterator<NearestNeighbourIndex.Entry> spliterator =
+        nnIdx.nearest(qVec, predicate).spliterator();
+    return StreamSupport.stream(
+        new Spliterators.AbstractSpliterator<Candidate>(
+            numOfNeighbors, Spliterator.IMMUTABLE | Spliterator.NONNULL) {
+          boolean eos = false;
+          int count = 0;
+
+          @Override
+          public boolean tryAdvance(Consumer<? super Candidate> action) {
+            if (eos) {
+              return false;
+            }
+            long startTime = System.nanoTime();
+            spliterator.tryAdvance(
+                entry -> {
+                  if (++count > numOfNeighbors) {
+                    eos = true;
+                  }
+                  if (entry.distance() > maxDist) {
+                    eos = true;
+                  }
+                  if (!eos) {
+                    action.accept(new Candidate(entry.id(), entry.distance()));
+                  }
+                });
+            return !eos;
+          }
+        },
+        false);
   }
 
   private double distance(Vec qVec, double qNorm, Vec v) {
