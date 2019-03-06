@@ -1,6 +1,6 @@
 package com.expleague.sensearch.donkey.plain;
 
-import static com.expleague.sensearch.donkey.utils.BrandNewIdGenerator.pageIdGenerator;
+import static com.expleague.sensearch.donkey.utils.BrandNewIdGenerator.generatePageId;
 
 import com.expleague.commons.math.vectors.Vec;
 import com.expleague.commons.math.vectors.VecTools;
@@ -218,6 +218,7 @@ public class PlainIndexBuilder implements IndexBuilder {
   // TODO: Make it more readable, add possibility of incomplete rebuilding
   @Override
   public void buildIndex() throws IOException {
+    LOG.info("Reading jmll embedding...");
     buildIndex(EmbeddingImpl.read(new FileReader(embeddingVectorsPath.toFile()), CharSeq.class));
   }
 
@@ -288,7 +289,7 @@ public class PlainIndexBuilder implements IndexBuilder {
                   if (docCnt[0] % 10_000 == 0) {
                     LOG.debug(docCnt[0] + " documents processed...");
                   }
-                  long pageId = pageIdGenerator(doc.uri()).next(knownPageIds);
+                  long pageId = generatePageId(doc.uri());
                   // We don't add pageId to the knownPageIds as we need first section to have the
                   // same Id
                   // knownPageIds.add(pageId);
@@ -301,8 +302,10 @@ public class PlainIndexBuilder implements IndexBuilder {
                   doc.sections()
                       .forEachOrdered(
                           s -> {
-                            long sectionId = pageIdGenerator(s.uri()).next(knownPageIds);
+                            long sectionId = generatePageId(s.uri());
                             knownPageIds.add(sectionId);
+
+                            s.links().forEach(indexMetaBuilder::addLink);
 
                             plainPageBuilder.addSection(s, sectionId);
                             indexMetaBuilder.addSection(sectionId);

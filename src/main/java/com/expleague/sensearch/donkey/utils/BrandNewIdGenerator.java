@@ -5,7 +5,6 @@ import static com.expleague.sensearch.core.IdUtils.BITS_FOR_FEATURES;
 import com.google.common.base.Charsets;
 import com.google.common.hash.HashFunction;
 import com.google.common.hash.Hashing;
-import gnu.trove.set.TLongSet;
 import java.net.URI;
 
 public class BrandNewIdGenerator {
@@ -14,45 +13,17 @@ public class BrandNewIdGenerator {
 
   private BrandNewIdGenerator() {}
 
-  public static GenericIdGenerator pageIdGenerator(URI uri) {
+  public static long generatePageId(URI uri) {
     long hash = MURMUR.hashString(uri.toString(), Charsets.UTF_8).asInt();
     if (hash > 0) {
       hash = -hash;
     }
-
-    return new GenericIdGenerator(hash << BITS_FOR_FEATURES, 1L << BITS_FOR_FEATURES);
+    return hash << BITS_FOR_FEATURES;
   }
 
-  public static GenericIdGenerator termIdGenerator(CharSequence term) {
+  public static long generateTermId(CharSequence term) {
     long hash = MURMUR.hashString(term, Charsets.UTF_8).asLong();
-    hash = hash <= 0 ? (hash == Long.MIN_VALUE ? -(hash + 1) : hash < 0 ? -hash : 1) : hash;
-    return new GenericIdGenerator(hash, -1);
+    return hash <= 0 ? (hash == Long.MIN_VALUE ? -(hash + 1) : hash < 0 ? -hash : 1) : hash;
   }
 
-  public static class GenericIdGenerator {
-    private final long seed;
-    private final long increment;
-    private int iteration;
-
-    GenericIdGenerator(long seed, long increment) {
-      this.seed = seed;
-      this.increment = increment;
-      this.iteration = 0;
-    }
-
-    // TODO: check if hash within bound
-    public long next() {
-      return seed + increment * iteration++;
-    }
-
-    public long next(TLongSet forbiddenIds) {
-//      long id;
-//      while (forbiddenIds.contains((id = next()))) {}
-      return next();
-    }
-
-    public void reset() {
-      iteration = 0;
-    }
-  }
 }
