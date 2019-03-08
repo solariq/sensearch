@@ -76,8 +76,6 @@ class PlainPageBuilder implements AutoCloseable {
   /**
    * Prepares for receiving sections of the page. Erases all information about the previous page
    *
-   * @param originalPageId original id of a page. Id is required for building links between pages
-   *     when build() is called
    * @param categories the categories page belongs to
    * @param uri URI of the page. URIs must be unique among the collection
    */
