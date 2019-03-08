@@ -1,6 +1,8 @@
 package com.expleague.sensearch.miner.pool;
 
 import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URI;
 import java.nio.file.Files;
@@ -60,7 +62,13 @@ public class FilterPoolBuilderRememberTop {
 	private final Trans model;
 
 	private final ObjectMapper mapper = new ObjectMapper();
-
+	
+	private final Path rememberDir = Paths.get("pbdata/filterPhaseTop/");
+	
+	private File getRememberTopFile(String queryString) {
+		return rememberDir.resolve("query_" + queryString).toFile();
+	}
+	
 	@Inject
 	public FilterPoolBuilderRememberTop(Index index, 
 			@RankFilterModel Pair<Function, FeatureMeta[]> rankModel) {
@@ -70,19 +78,23 @@ public class FilterPoolBuilderRememberTop {
 
 	public static void main(String[] args) throws IOException {
 		Injector injector = Guice.createInjector(new AppModule());
-		injector.getInstance(FilterPoolBuilder.class).build(Paths.get("filter.pool"));
+		injector.getInstance(FilterPoolBuilderRememberTop.class).build(Paths.get("filter.pool"));
 	}
 
 	private  List<URI> getSavedQueryTop(String queryString) throws IOException {
-		return
-				mapper.readValue(
-						Paths.get("wordtstat/filterPhaseTop/query_" + queryString).toFile(),
-						new TypeReference<List<URI>>(){});
+		List<URI> res = new ArrayList<>();
+		try {
+			res = mapper.readValue(
+					getRememberTopFile(queryString),
+					new TypeReference<List<URI>>(){});
+		} catch (FileNotFoundException fnfe) {}
+		return res;
 	}
 	
 	private  void saveQueryTop(String queryString, List<URI> l) throws IOException {
+		Files.createDirectories(rememberDir);
 		mapper.writeValue(
-						Paths.get("wordtstat/filterPhaseTop/query_" + queryString).toFile(),
+						getRememberTopFile(queryString),
 						l);
 	}
 
@@ -120,9 +132,10 @@ public class FilterPoolBuilderRememberTop {
 							.collect(Collectors.toSet());
 
 					Map<Page, Features> allDocs = index.fetchDocuments(query, FilterMinerPhase.FILTERED_DOC_NUMBER);
-
+					
 					List<URI> rememberedURIs = getSavedQueryTop(queryString);
-
+					
+					
 					rememberedURIs.forEach(uri -> {
 						Page page = index.page(uri);
 						accept(poolBuilder,
@@ -162,7 +175,8 @@ public class FilterPoolBuilderRememberTop {
 
 			Pool<QURLItem> pool = poolBuilder.create();
 			DataTools.writePoolTo(pool, Files.newBufferedWriter(poolPath));
-		} catch (IOException ignored) {
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
 	}
 
