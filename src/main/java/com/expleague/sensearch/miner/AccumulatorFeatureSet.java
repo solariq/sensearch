@@ -45,7 +45,7 @@ public class AccumulatorFeatureSet extends FeatureSet.Stub<QURLItem> {
     this.index = index;
   }
 
-  void acceptFilterFeatures(Map<Page, Features> filterFeatures) {
+  public void acceptFilterFeatures(Map<Page, Features> filterFeatures) {
     this.filterFeatures = filterFeatures;
   }
 

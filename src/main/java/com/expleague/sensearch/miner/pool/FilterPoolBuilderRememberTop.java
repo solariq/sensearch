@@ -1,8 +1,6 @@
 package com.expleague.sensearch.miner.pool;
 
 import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URI;
 import java.nio.file.Files;
@@ -43,13 +41,12 @@ import com.expleague.sensearch.index.Index;
 import com.expleague.sensearch.index.plain.PlainIndex;
 import com.expleague.sensearch.query.BaseQuery;
 import com.expleague.sensearch.query.Query;
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Guice;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 
-public class FilterPoolBuilderRememberTop {
+public class FilterPoolBuilderRememberTop extends RememberTopPoolBuilder {
 	private static final int FILTER_SIZE = 100;
 	private final Index index;
 	private final static FeatureMeta TITLE = FeatureMeta
@@ -61,14 +58,6 @@ public class FilterPoolBuilderRememberTop {
 
 	private final Trans model;
 
-	private final ObjectMapper mapper = new ObjectMapper();
-	
-	private final Path rememberDir = Paths.get("pbdata/filterPhaseTop/");
-	
-	private File getRememberTopFile(String queryString) {
-		return rememberDir.resolve("query_" + queryString).toFile();
-	}
-	
 	@Inject
 	public FilterPoolBuilderRememberTop(Index index, 
 			@RankFilterModel Pair<Function, FeatureMeta[]> rankModel) {
@@ -81,22 +70,7 @@ public class FilterPoolBuilderRememberTop {
 		injector.getInstance(FilterPoolBuilderRememberTop.class).build(Paths.get("filter.pool"));
 	}
 
-	private  List<URI> getSavedQueryTop(String queryString) throws IOException {
-		List<URI> res = new ArrayList<>();
-		try {
-			res = mapper.readValue(
-					getRememberTopFile(queryString),
-					new TypeReference<List<URI>>(){});
-		} catch (FileNotFoundException fnfe) {}
-		return res;
-	}
-	
-	private  void saveQueryTop(String queryString, List<URI> l) throws IOException {
-		Files.createDirectories(rememberDir);
-		mapper.writeValue(
-						getRememberTopFile(queryString),
-						l);
-	}
+
 
 	public void build(Path poolPath) {
 		try (BufferedReader reader = Files.newBufferedReader(Paths.get("./wordstat/queries.txt"))) {
@@ -132,10 +106,10 @@ public class FilterPoolBuilderRememberTop {
 							.collect(Collectors.toSet());
 
 					Map<Page, Features> allDocs = index.fetchDocuments(query, FilterMinerPhase.FILTERED_DOC_NUMBER);
-					
+
 					List<URI> rememberedURIs = getSavedQueryTop(queryString);
-					
-					
+
+
 					rememberedURIs.forEach(uri -> {
 						Page page = index.page(uri);
 						accept(poolBuilder,
@@ -157,18 +131,18 @@ public class FilterPoolBuilderRememberTop {
 							cnt[0]++;
 						}
 					});
-					
+
 					allDocs.entrySet().stream()
 					.sorted(
 							Comparator.comparingDouble(
 									e -> 
-							-model.trans(e.getValue().features()).get(0))
-					)
+									-model.trans(e.getValue().features()).get(0))
+							)
 					.limit(10)
 					.forEach(e -> {
 						rememberedURIs.add(e.getKey().uri());
 					});
-					
+
 					saveQueryTop(queryString, rememberedURIs);
 				}
 			}
@@ -190,5 +164,10 @@ public class FilterPoolBuilderRememberTop {
 			fs.withTitle(feat.features(TITLE).get(0));
 		});
 		poolBuilder.advance();
+	}
+
+	@Override
+	public Path getRememberDir() {
+		return Paths.get("pbdata/filterPhaseTop/");
 	}
 }
