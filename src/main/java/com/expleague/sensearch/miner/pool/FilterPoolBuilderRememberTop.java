@@ -39,6 +39,7 @@ import com.expleague.sensearch.features.sets.filter.TargetFeatureSet;
 import com.expleague.sensearch.filter.FilterMinerPhase;
 import com.expleague.sensearch.index.Index;
 import com.expleague.sensearch.index.plain.PlainIndex;
+import com.expleague.sensearch.index.plain.PlainPage;
 import com.expleague.sensearch.query.BaseQuery;
 import com.expleague.sensearch.query.Query;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -155,6 +156,8 @@ public class FilterPoolBuilderRememberTop extends RememberTopPoolBuilder {
 	}
 
 	private void accept (Pool.Builder<QURLItem> poolBuilder, Page page, Query query, Features feat) {
+		if (page == PlainPage.EMPTY_PAGE)
+			return;
 		poolBuilder.accept(new QURLItem(page, query));
 		poolBuilder.features().map(Functions.cast(FilterFeatures.class))
 		.filter(Objects::nonNull)
