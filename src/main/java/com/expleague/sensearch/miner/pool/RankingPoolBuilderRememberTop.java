@@ -22,6 +22,8 @@ import com.expleague.sensearch.features.QURLItem;
 import com.expleague.sensearch.features.sets.ranker.TargetFeatureSet;
 import com.expleague.sensearch.filter.FilterMinerPhase;
 import com.expleague.sensearch.index.Index;
+import com.expleague.sensearch.index.plain.PlainIndex;
+import com.expleague.sensearch.index.plain.PlainPage;
 import com.expleague.sensearch.miner.AccumulatorFeatureSet;
 import com.expleague.sensearch.query.BaseQuery;
 import com.expleague.sensearch.query.Query;
@@ -31,18 +33,19 @@ import com.google.inject.Inject;
 import com.google.inject.Injector;
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
-import java.net.URI;
 
 
 public class RankingPoolBuilderRememberTop extends RememberTopPoolBuilder {
@@ -97,7 +100,16 @@ public class RankingPoolBuilderRememberTop extends RememberTopPoolBuilder {
 								synchronized (poolBuilder) {
 									for (ResultItem page : res) {
 										uniqQURL.add(CharSeq.create(page.title()));
-										poolBuilder.accept(new QURLItem(index.page(page.reference()), query));
+										Page resPage = index.page(page.reference());
+										if (resPage == PlainPage.EMPTY_PAGE) {
+											continue;
+										}
+										poolBuilder.features().forEach(fs -> {
+											if (fs instanceof AccumulatorFeatureSet) {
+												((AccumulatorFeatureSet) fs).acceptFilterFeatures(filterFeatures(query, resPage));
+											}
+										});
+										poolBuilder.accept(new QURLItem(resPage, query));
 										poolBuilder.advance();
 									}
 								}
@@ -108,14 +120,20 @@ public class RankingPoolBuilderRememberTop extends RememberTopPoolBuilder {
 							List<URI> savedTop = getSavedQueryTop(query.text());
 
 							synchronized (poolBuilder) {
-								savedTop.stream().map(uri -> index.page(uri))
+								savedTop.stream().map(index::page)
 								.filter(
 										page ->
 										!uniqQURL.contains(
-												CharSeq.create(page.content(SegmentType.SECTION_TITLE))))
+												CharSeq.create(page.content(SegmentType.SECTION_TITLE)))
+										&& (page != PlainPage.EMPTY_PAGE))
 								.forEach(page -> {
 									uniqQURL.add(
 											CharSeq.create(page.content(SegmentType.SECTION_TITLE)));
+									poolBuilder.features().forEach(fs -> {
+										if (fs instanceof AccumulatorFeatureSet) {
+											((AccumulatorFeatureSet) fs).acceptFilterFeatures(filterFeatures(query, page));
+										}
+									});
 									poolBuilder.accept(new QURLItem(page, query));
 									poolBuilder.advance();
 								});
@@ -169,6 +187,12 @@ public class RankingPoolBuilderRememberTop extends RememberTopPoolBuilder {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+	}
+
+	private Map<Page, Features> filterFeatures(Query query, Page page) {
+		Map<Page, Features> filterFeatures = new HashMap<>();
+		filterFeatures.put(page, ((PlainIndex)index).filterFeatures(query, page.uri()));
+		return filterFeatures;
 	}
 
 	@Override
