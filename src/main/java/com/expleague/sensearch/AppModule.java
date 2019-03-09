@@ -53,7 +53,7 @@ import org.iq80.leveldb.Options;
 
 public class AppModule extends AbstractModule {
 
-	private static final long CACHE_SIZE = 16 * (1 << 20);
+	private static final long CACHE_SIZE = 32 * (1 << 20);
 	private static final Options DB_OPTIONS = new Options().cacheSize(CACHE_SIZE);
 
 	private final Config config;
