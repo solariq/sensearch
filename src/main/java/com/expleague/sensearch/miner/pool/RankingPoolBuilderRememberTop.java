@@ -45,6 +45,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicIntegerArray;
 import java.util.function.Function;
 
 
@@ -78,6 +79,7 @@ public class RankingPoolBuilderRememberTop extends RememberTopPoolBuilder {
                 ThreadLocal.withInitial(() -> new AccumulatorFeatureSet(index));
 		
 		AtomicInteger status = new AtomicInteger();
+		AtomicIntegerArray addedSavedCnt = new AtomicIntegerArray(2);
 		try {
 			Files.readAllLines(Paths.get("./wordstat/queries.txt"))
 			.stream()
@@ -161,8 +163,12 @@ public class RankingPoolBuilderRememberTop extends RememberTopPoolBuilder {
 								return -model.trans(all).get(0);
 							}))
 							.limit(10)
-							.forEach(page -> savedTop.add(page.uri()));
-
+							.forEach(page -> {
+								savedTop.add(page.uri());
+								addedSavedCnt.incrementAndGet(0);
+							});
+							
+							addedSavedCnt.addAndGet(1, savedTop.size());
 							saveQueryTop(query.text(), savedTop);
 							
 							synchronized (poolBuilder) {
@@ -182,6 +188,9 @@ public class RankingPoolBuilderRememberTop extends RememberTopPoolBuilder {
 							}
 						}
 					});
+			
+			System.out.format("Добавлено новых %d\n"
+					+ "Всего сохранено %d\n", addedSavedCnt.get(0), addedSavedCnt.get(1));
 			Pool<QURLItem> pool = poolBuilder.create();
 			DataTools.writePoolTo(pool, Files.newBufferedWriter(poolPath));
 		} catch (IOException e) {
