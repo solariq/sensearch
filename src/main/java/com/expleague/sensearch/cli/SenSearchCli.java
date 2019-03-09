@@ -3,7 +3,6 @@ package com.expleague.sensearch.cli;
 import static com.expleague.sensearch.donkey.plain.PlainIndexBuilder.DEFAULT_VEC_SIZE;
 
 import com.expleague.commons.seq.CharSeq;
-import com.expleague.ml.cli.JMLLCLI;
 import com.expleague.ml.embedding.impl.EmbeddingImpl;
 import com.expleague.sensearch.AppModule;
 import com.expleague.sensearch.ConfigImpl;
@@ -29,7 +28,7 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.log4j.PropertyConfigurator;
 
-public class SenSearchCLI {
+public class SenSearchCli {
 
   private static final String DATA_PATH_OPTION = "data";
   private static final String INDEX_PATH_OPTION = "index";
@@ -219,7 +218,7 @@ public class SenSearchCLI {
       case BUILD_RANK_POOL_COMMAND:
         return buildRankPoolOptions;
       case TRAIN_RANK_MODEL_COMMAND:
-        return trainRankModelOptions;
+        return null;
       default:
         System.out.println("Unknown command " + command);
         printUsage();
@@ -253,7 +252,7 @@ public class SenSearchCLI {
     String commandDescription = getCommandDescription(command);
 
     String jarName =
-        new File(SenSearchCLI.class.getProtectionDomain().getCodeSource().getLocation().getPath())
+        new File(SenSearchCli.class.getProtectionDomain().getCodeSource().getLocation().getPath())
             .getName();
 
     HelpFormatter helpFormatter = new HelpFormatter();
