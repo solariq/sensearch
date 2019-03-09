@@ -14,6 +14,7 @@ import com.expleague.ml.cli.builders.methods.impl.GradientBoostingBuilder;
 import com.expleague.ml.cli.builders.methods.impl.GreedyObliviousTreeBuilder;
 import com.expleague.ml.cli.output.ModelWriter;
 import com.expleague.ml.cli.output.printers.DefaultProgressPrinter;
+import com.expleague.ml.cli.output.printers.ResultsPrinter;
 import com.expleague.ml.data.tools.Pool;
 import com.expleague.ml.methods.VecOptimization;
 import com.expleague.sensearch.cli.utils.SingleArgOptions.DoubleOption;
@@ -187,6 +188,10 @@ public class FitRankingCli {
     Interval.suspend();
     Trans result = gbotOptimizer.fit(trainPool.vecData(), target);
     Interval.stopAndPrint("Total fit time:");
+
+    if (CROSS_VALIDATION.value(commandLine) > 0) {
+      ResultsPrinter.printResults(result, trainPool, testPool, target, testMetrics);
+    }
 
     new ModelWriter(outputPath.toString())
         .writeModel(result, trainPool);
