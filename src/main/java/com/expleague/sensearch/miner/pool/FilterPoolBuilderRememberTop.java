@@ -90,6 +90,7 @@ public class FilterPoolBuilderRememberTop extends RememberTopPoolBuilder {
 			Pool.Builder<QURLItem> poolBuilder = Pool.builder(meta, features, targetFeatureSet);
 
 			int status = 0;
+			int[] cntAddedSaved = {0, 0};
 			for (String queryString : queries) {
 				if (status % 100 == 0) {
 					System.err.println(status + " queries completed");
@@ -113,6 +114,8 @@ public class FilterPoolBuilderRememberTop extends RememberTopPoolBuilder {
 
 					rememberedURIs.forEach(uri -> {
 						Page page = index.page(uri);
+						if (page == PlainPage.EMPTY_PAGE)
+							return;
 						accept(poolBuilder,
 								page,
 								query,
@@ -125,6 +128,8 @@ public class FilterPoolBuilderRememberTop extends RememberTopPoolBuilder {
 					final int[] cnt = {0};
 					allDocs
 					.forEach((page, feat) -> {
+						if (page == PlainPage.EMPTY_PAGE)
+							return;
 						if (googleTitles.contains(CharSeq.create(page.content(SegmentType.SECTION_TITLE)))) {
 							accept(poolBuilder, page, query, feat);
 						} else if (cnt[0] < FILTER_SIZE) {
@@ -142,12 +147,17 @@ public class FilterPoolBuilderRememberTop extends RememberTopPoolBuilder {
 					.limit(10)
 					.forEach(e -> {
 						rememberedURIs.add(e.getKey().uri());
+						cntAddedSaved[0]++;
 					});
-
+					
+					cntAddedSaved[1] += rememberedURIs.size();
 					saveQueryTop(queryString, rememberedURIs);
 				}
 			}
 
+			System.out.format("Запомнено новых результатов %d\n"
+					+ "Всего запомнено %d\n", cntAddedSaved[0], cntAddedSaved[1]);
+			
 			Pool<QURLItem> pool = poolBuilder.create();
 			DataTools.writePoolTo(pool, Files.newBufferedWriter(poolPath));
 		} catch (Exception e) {
