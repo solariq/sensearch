@@ -1,10 +1,12 @@
-package com.expleague.sensearch;
+package com.expleague.sensearch.cli;
 
 import static com.expleague.sensearch.donkey.plain.PlainIndexBuilder.DEFAULT_VEC_SIZE;
 
 import com.expleague.commons.seq.CharSeq;
 import com.expleague.ml.cli.JMLLCLI;
 import com.expleague.ml.embedding.impl.EmbeddingImpl;
+import com.expleague.sensearch.AppModule;
+import com.expleague.sensearch.ConfigImpl;
 import com.expleague.sensearch.donkey.IndexBuilder;
 import com.expleague.sensearch.donkey.crawler.CrawlerXML;
 import com.expleague.sensearch.donkey.plain.JmllEmbeddingBuilder;
@@ -43,13 +45,12 @@ public class SenSearchCLI {
   private static final String BUILD_INDEX_COMMAND = "buildIndex";
   private static final String START_SEVER_COMMAND = "startServer";
   private static final String BUILD_RANK_POOL_COMMAND = "buildRankPool";
-  private static final String TRAIN_RANK_MODEL_COMMAND = "trainRankModelCommand";
+  private static final String TRAIN_RANK_MODEL_COMMAND = "fitrk";
 
   private static Options trainEmbeddingOptions = new Options();
   private static Options buildIndexOptions = new Options();
   private static Options startServerOptions = new Options();
   private static Options buildRankPoolOptions = new Options();
-  private static Options trainRankModelOptions = new Options();
 
   static {
     Option dataOption =
@@ -111,16 +112,6 @@ public class SenSearchCLI {
             .required()
             .build();
     buildRankPoolOptions.addOption(rankPoolPathOption);
-    trainRankModelOptions.addOption(rankPoolPathOption);
-
-    Option rankModelPathOption =
-        Option.builder()
-            .longOpt(RANK_MODEL_PATH_OPTION)
-            .desc("path to rank model")
-            .hasArg()
-            .required()
-            .build();
-    trainRankModelOptions.addOption(rankModelPathOption);
   }
 
   public static void main(String[] args) throws Exception {
@@ -135,66 +126,70 @@ public class SenSearchCLI {
 
     CommandLineParser cliParser = new DefaultParser();
     try {
-      CommandLine parse = cliParser.parse(getCommandOptions(args[0]), args);
+      CommandLine parser;
 
       ConfigImpl config = new ConfigImpl();
       switch (args[0]) {
         case TRAIN_EMBEDDING_COMMAND:
-          try (Writer w = Files.newBufferedWriter(Paths.get(parse.getOptionValue(EMBEDDING_OUTPUT_PATH_OPTION)))) {
+          parser = cliParser.parse(trainEmbeddingOptions, args);
+          try (Writer w = Files.newBufferedWriter(Paths.get(parser.getOptionValue(EMBEDDING_OUTPUT_PATH_OPTION)))) {
             final JmllEmbeddingBuilder embeddingBuilder = new JmllEmbeddingBuilder(
                 DEFAULT_VEC_SIZE,
-                Paths.get(parse.getOptionValue(EMBEDDING_PATH_OPTION))
+                Paths.get(parser.getOptionValue(EMBEDDING_PATH_OPTION))
             );
             EmbeddingImpl<CharSeq> embedding = (EmbeddingImpl<CharSeq>)embeddingBuilder
-                .build(new CrawlerXML(Paths.get(parse.getOptionValue(DATA_PATH_OPTION))).makeStream());
+                .build(new CrawlerXML(Paths.get(parser.getOptionValue(DATA_PATH_OPTION))).makeStream());
             embedding.write(w);
           }
           break;
 
         case BUILD_INDEX_COMMAND:
-          config.setPathToZIP(parse.getOptionValue(DATA_PATH_OPTION));
-          config.setEmbeddingVectors(parse.getOptionValue(EMBEDDING_OUTPUT_PATH_OPTION));
-          config.setTemporaryIndex(parse.getOptionValue(INDEX_PATH_OPTION));
+          parser = cliParser.parse(buildIndexOptions, args);
+          config.setPathToZIP(parser.getOptionValue(DATA_PATH_OPTION));
+          config.setEmbeddingVectors(parser.getOptionValue(EMBEDDING_OUTPUT_PATH_OPTION));
+          config.setTemporaryIndex(parser.getOptionValue(INDEX_PATH_OPTION));
 
           Guice.createInjector(new AppModule(config)).getInstance(IndexBuilder.class).buildIndex();
           break;
 
         case START_SEVER_COMMAND:
-          config.setTemporaryIndex(parse.getOptionValue(INDEX_PATH_OPTION));
-          config.setLshNearestFlag(!parse.hasOption(DO_NOT_USE_LSH_OPTION));
-          config.setMaxFilterItems(Integer.parseInt(parse.getOptionValue(MAX_FILTER_ITEMS)));
-          config.setModelPath(parse.getOptionValue(RANK_MODEL_PATH_OPTION));
+          parser = cliParser.parse(startServerOptions, args);
+          config.setTemporaryIndex(parser.getOptionValue(INDEX_PATH_OPTION));
+          config.setLshNearestFlag(!parser.hasOption(DO_NOT_USE_LSH_OPTION));
+          config.setMaxFilterItems(Integer.parseInt(parser.getOptionValue(MAX_FILTER_ITEMS)));
+          config.setModelPath(parser.getOptionValue(RANK_MODEL_PATH_OPTION));
 
           Injector injector = Guice.createInjector(new AppModule(config));
           injector.getInstance(SearchServer.class).start(injector);
           break;
 
         case BUILD_RANK_POOL_COMMAND:
-          config.setTemporaryIndex(parse.getOptionValue(INDEX_PATH_OPTION));
-          Path poolPath = Paths.get(parse.getOptionValue(RANK_POOL_PATH_OPTION));
+          parser = cliParser.parse(buildRankPoolOptions, args);
+          config.setTemporaryIndex(parser.getOptionValue(INDEX_PATH_OPTION));
+          Path poolPath = Paths.get(parser.getOptionValue(RANK_POOL_PATH_OPTION));
           Guice.createInjector(new AppModule(config))
               .getInstance(RankingPoolBuilder.class)
               .build(poolPath);
           break;
 
         case TRAIN_RANK_MODEL_COMMAND:
-          JMLLCLI.main(
-              new String[]{
-                  "fit",
-                  "--print-period",
-                  "10",
-                  "--json-format",
-                  "--learn",
-                  parse.getOptionValue(RANK_POOL_PATH_OPTION),
-                  "-X",
-                  "1/0.7",
-                  "-v",
-                  "-O",
-                  "'GradientBoosting(local=SatL2, weak=GreedyObliviousTree(depth=6), step=0.01, iterations=600)'"
-              });
-          Files.move(
-              Paths.get(parse.getOptionValue(RANK_POOL_PATH_OPTION) + ".model"),
-              Paths.get(parse.getOptionValue(RANK_MODEL_PATH_OPTION)));
+//          JMLLCLI.main(
+//              new String[]{
+//                  "fit",
+//                  "--print-period",
+//                  "10",
+//                  "--json-format",
+//                  "--learn",
+//                  parse.getOptionValue(RANK_POOL_PATH_OPTION),
+//                  "-X",
+//                  "1/0.7",
+//                  "-v",
+//                  "-O",
+//                  "'GradientBoosting(local=SatL2, weak=GreedyObliviousTree(depth=6), step=0.01, iterations=600)'"
+//              });
+//          Files.move(
+//              Paths.get(parser.getOptionValue(RANK_POOL_PATH_OPTION) + ".model"),
+//              Paths.get(parser.getOptionValue(RANK_MODEL_PATH_OPTION)));
       }
     } catch (ParseException e) {
       System.out.println(e.getLocalizedMessage());
