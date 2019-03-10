@@ -8,6 +8,7 @@ import com.expleague.ml.embedding.impl.EmbeddingImpl;
 import com.expleague.sensearch.donkey.IndexBuilder;
 import com.expleague.sensearch.donkey.crawler.CrawlerXML;
 import com.expleague.sensearch.donkey.plain.JmllEmbeddingBuilder;
+import com.expleague.sensearch.miner.pool.FilterPoolBuilder;
 import com.expleague.sensearch.miner.pool.RankingPoolBuilder;
 import com.expleague.sensearch.web.SearchServer;
 import com.google.inject.Guice;
@@ -41,23 +42,33 @@ public class SenSearchCLI {
   private static final String EMBEDDING_OUTPUT_PATH_OPTION = "decomp";
   private static final String DO_NOT_USE_LSH_OPTION = "nolsh";
   private static final String MAX_FILTER_ITEMS = "maxfilter";
-  private static final String RANK_POOL_PATH_OPTION = "rankpool";
+  private static final String POOL_PATH_OPTION = "pool";
+
+  private static final String MODEL_PATH_OPTION = "model";
   private static final String RANK_MODEL_PATH_OPTION = "rankmodel";
   private static final String FILTER_MODEL_PATH_OPTION = "filtermodel";
 
   private static final String TRAIN_EMBEDDING_COMMAND = "trainEmbedding";
-  private static final String BUILD_INDEX_COMMAND = "buildIndex";
-  private static final String START_SEVER_COMMAND = "startServer";
-  private static final String BUILD_RANK_POOL_COMMAND = "buildRankPool";
-  private static final String TRAIN_RANK_MODEL_COMMAND = "trainRankModelCommand";
+
   private static final String REBUILD_EMBEDDING_COMMAND = "rebuildEmbeddingCommand";
 
+  private static final String BUILD_INDEX_COMMAND = "buildIndex";
+  private static final String START_SEVER_COMMAND = "startServer";
+
+  private static final String BUILD_FILTER_POOL_COMMAND = "buildFilterPool";
+  private static final String BUILD_RANK_POOL_COMMAND = "buildRankPool";
+  private static final String TRAIN_MODEL_COMMAND = "trainRankModel";
+
   private static Options trainEmbeddingOptions = new Options();
+
+  private static Options rebuildEmbeddingOptions = new Options();
+
   private static Options buildIndexOptions = new Options();
   private static Options startServerOptions = new Options();
+
+  private static Options buildFilterPoolOptions = new Options();
   private static Options buildRankPoolOptions = new Options();
-  private static Options trainRankModelOptions = new Options();
-  private static Options rebuildEmbeddingOptions = new Options();
+  private static Options trainModelOptions = new Options();
 
   static {
     Option dataOption =
@@ -80,6 +91,7 @@ public class SenSearchCLI {
             .build();
     buildIndexOptions.addOption(indexPathOption);
     startServerOptions.addOption(indexPathOption);
+    buildFilterPoolOptions.addOption(indexPathOption);
     buildRankPoolOptions.addOption(indexPathOption);
     rebuildEmbeddingOptions.addOption(indexPathOption);
 
@@ -114,17 +126,29 @@ public class SenSearchCLI {
             .required()
             .build();
     startServerOptions.addOption(maxFilterOption);
+    buildFilterPoolOptions.addOption(maxFilterOption);
     buildRankPoolOptions.addOption(maxFilterOption);
 
-    Option rankPoolPathOption =
+    Option poolPathOption =
         Option.builder()
-            .longOpt(RANK_POOL_PATH_OPTION)
-            .desc("path to rank model pool")
+            .longOpt(POOL_PATH_OPTION)
+            .desc("path to model pool")
             .hasArg()
             .required()
             .build();
-    buildRankPoolOptions.addOption(rankPoolPathOption);
-    trainRankModelOptions.addOption(rankPoolPathOption);
+
+    buildFilterPoolOptions.addOption(poolPathOption);
+    buildRankPoolOptions.addOption(poolPathOption);
+    trainModelOptions.addOption(poolPathOption);
+
+    Option trainedModelPathOption =
+        Option.builder()
+            .longOpt(MODEL_PATH_OPTION)
+            .desc("path to result model")
+            .hasArg()
+            .required()
+            .build();
+    trainModelOptions.addOption(trainedModelPathOption);
 
     Option rankModelPathOption =
         Option.builder()
@@ -133,7 +157,6 @@ public class SenSearchCLI {
             .hasArg()
             .required()
             .build();
-    trainRankModelOptions.addOption(rankModelPathOption);
     startServerOptions.addOption(rankModelPathOption);
 
     Option filterModelPathOption =
@@ -197,17 +220,27 @@ public class SenSearchCLI {
           injector.getInstance(SearchServer.class).start(injector);
           break;
 
+        case BUILD_FILTER_POOL_COMMAND:
+          config.setTemporaryIndex(parse.getOptionValue(INDEX_PATH_OPTION));
+
+          config.setMaxFilterItems(Integer.parseInt(parse.getOptionValue(MAX_FILTER_ITEMS)));
+          Path poolPath = Paths.get(parse.getOptionValue(POOL_PATH_OPTION));
+          Guice.createInjector(new AppModule(config))
+              .getInstance(FilterPoolBuilder.class)
+              .build(poolPath);
+          break;
+
         case BUILD_RANK_POOL_COMMAND:
           config.setTemporaryIndex(parse.getOptionValue(INDEX_PATH_OPTION));
 
           config.setMaxFilterItems(Integer.parseInt(parse.getOptionValue(MAX_FILTER_ITEMS)));
-          Path poolPath = Paths.get(parse.getOptionValue(RANK_POOL_PATH_OPTION));
+          poolPath = Paths.get(parse.getOptionValue(POOL_PATH_OPTION));
           Guice.createInjector(new AppModule(config))
               .getInstance(RankingPoolBuilder.class)
               .build(poolPath);
           break;
 
-        case TRAIN_RANK_MODEL_COMMAND:
+        case TRAIN_MODEL_COMMAND:
           JMLLCLI.main(
               new String[]{
                   "fit",
@@ -215,7 +248,7 @@ public class SenSearchCLI {
                   "10",
                   "--json-format",
                   "--learn",
-                  parse.getOptionValue(RANK_POOL_PATH_OPTION),
+                  parse.getOptionValue(POOL_PATH_OPTION),
                   "-X",
                   "1/0.7",
                   "-v",
@@ -234,7 +267,7 @@ public class SenSearchCLI {
       }
     } catch (ParseException e) {
       System.out.println(e.getLocalizedMessage());
-      printUsage();
+      printUsage(args[0]);
     }
 
     //    cliParser.parse(startServerOptions, args).getOptionValue()
@@ -245,8 +278,9 @@ public class SenSearchCLI {
     printUsage(TRAIN_EMBEDDING_COMMAND);
     printUsage(BUILD_INDEX_COMMAND);
     printUsage(START_SEVER_COMMAND);
+    printUsage(BUILD_FILTER_POOL_COMMAND);
     printUsage(BUILD_RANK_POOL_COMMAND);
-    printUsage(TRAIN_RANK_MODEL_COMMAND);
+    printUsage(TRAIN_MODEL_COMMAND);
   }
 
   private static Options getCommandOptions(String command) {
@@ -257,10 +291,12 @@ public class SenSearchCLI {
         return buildIndexOptions;
       case START_SEVER_COMMAND:
         return startServerOptions;
+      case BUILD_FILTER_POOL_COMMAND:
+        return buildFilterPoolOptions;
       case BUILD_RANK_POOL_COMMAND:
         return buildRankPoolOptions;
-      case TRAIN_RANK_MODEL_COMMAND:
-        return trainRankModelOptions;
+      case TRAIN_MODEL_COMMAND:
+        return trainModelOptions;
       default:
         System.out.println("Unknown command " + command);
         printUsage();
@@ -277,9 +313,11 @@ public class SenSearchCLI {
         return "Builds index. Requires embedding to be already trained";
       case START_SEVER_COMMAND:
         return "Starts server. Requires index to be built";
+      case BUILD_FILTER_POOL_COMMAND:
+        return "Collects pool for filter model training. Requires index to be built";
       case BUILD_RANK_POOL_COMMAND:
         return "Collects pool for ranking model training. Requires index to be built";
-      case TRAIN_RANK_MODEL_COMMAND:
+      case TRAIN_MODEL_COMMAND:
         return "Trains ranking model. Requires rank pool to be collected";
       default:
         System.out.println("Unknown command " + command);
