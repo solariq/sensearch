@@ -47,121 +47,137 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.function.Function;
+import org.apache.log4j.Logger;
 import org.fusesource.leveldbjni.JniDBFactory;
 import org.iq80.leveldb.DB;
 import org.iq80.leveldb.Options;
 
 public class AppModule extends AbstractModule {
 
-	private static final long CACHE_SIZE = 32 * (1 << 20);
-	private static final Options DB_OPTIONS = new Options().cacheSize(CACHE_SIZE);
+  private static final Logger LOG = Logger.getLogger(AppModule.class.getName());
 
-	private final Config config;
+  private static final long CACHE_SIZE = 32 * (1 << 20);
+  private static final Options DB_OPTIONS = new Options().cacheSize(CACHE_SIZE);
 
-	public AppModule() throws IOException {
-		this.config =
-				new ObjectMapper().readValue(Paths.get("./config.json").toFile(), ConfigImpl.class);
-	}
+  private final Config config;
 
-	public AppModule(Config config) {
-		this.config = config;
-	}
+  public AppModule() throws IOException {
+    this.config =
+        new ObjectMapper().readValue(Paths.get("./config.json").toFile(), ConfigImpl.class);
+  }
 
-	@Override
-	protected void configure() {
-		// binding constants
-		bindConstant().annotatedWith(FilterMaxItems.class).to(config.maxFilterItems());
-		bindConstant().annotatedWith(PageSize.class).to(config.getPageSize());
+  public AppModule(Config config) {
+    this.config = config;
+  }
 
-		bind(Path.class).annotatedWith(MetricPath.class).toInstance(config.getPathToMetrics());
-		bind(Path.class)
-		.annotatedWith(EmbeddingVectorsPath.class)
-		.toInstance(config.getEmbeddingVectors());
-		bind(Path.class).annotatedWith(DataZipPath.class).toInstance(config.getPathToZIP());
-		bind(Path.class).annotatedWith(IndexRoot.class).toInstance(config.getIndexRoot());
-		bindConstant().annotatedWith(UseLshFlag.class).to(config.getLshNearestFlag());
+  @Override
+  protected void configure() {
+    // binding constants
+    bindConstant().annotatedWith(FilterMaxItems.class).to(config.maxFilterItems());
+    bindConstant().annotatedWith(PageSize.class).to(config.getPageSize());
 
-		Lemmer lemmer = new Lemmer(new Stemmer());
-		bind(Lemmer.class).toInstance(lemmer);
+    bind(Path.class).annotatedWith(MetricPath.class).toInstance(config.getPathToMetrics());
+    bind(Path.class)
+        .annotatedWith(EmbeddingVectorsPath.class)
+        .toInstance(config.getEmbeddingVectors());
+    bind(Path.class).annotatedWith(DataZipPath.class).toInstance(config.getPathToZIP());
+    bind(Path.class).annotatedWith(IndexRoot.class).toInstance(config.getIndexRoot());
+    bindConstant().annotatedWith(UseLshFlag.class).to(config.getLshNearestFlag());
 
-		bind(Crawler.class).to(CrawlerXML.class);
-		bind(Embedding.class).to(EmbeddingImpl.class).in(Singleton.class);
-		bind(Filter.class).to(FilterImpl.class);
-		bind(Index.class).to(PlainIndex.class).in(Singleton.class);
-		bind(IndexBuilder.class).to(PlainIndexBuilder.class);
-		bind(Suggestor.class).to(ProbabilisticSuggestor.class).in(Singleton.class);
-		bind(SenSeArch.class).to(SenSeArchImpl.class);
-		bind(WebCrawler.class).to(RequestCrawler.class);
+    Lemmer lemmer = new Lemmer(new Stemmer());
+    bind(Lemmer.class).toInstance(lemmer);
 
-		install(new FactoryModuleBuilder().build(SearchPhaseFactory.class));
-	}
+    bind(Crawler.class).to(CrawlerXML.class);
+    bind(Embedding.class).to(EmbeddingImpl.class).in(Singleton.class);
+    bind(Filter.class).to(FilterImpl.class);
+    bind(Index.class).to(PlainIndex.class).in(Singleton.class);
+    bind(IndexBuilder.class).to(PlainIndexBuilder.class);
+    bind(Suggestor.class).to(ProbabilisticSuggestor.class).in(Singleton.class);
+    bind(SenSeArch.class).to(SenSeArchImpl.class);
+    bind(WebCrawler.class).to(RequestCrawler.class);
 
-	@Provides
-	@Singleton
-	@EmbeddingVecsDb
-	DB getEmbeddingDb() throws IOException {
-		return JniDBFactory.factory.open(
-				config
-				.getIndexRoot()
-				.resolve(PlainIndexBuilder.EMBEDDING_ROOT)
-				.resolve(PlainIndexBuilder.VECS_ROOT)
-				.toFile(),
-				DB_OPTIONS);
-	}
+    install(new FactoryModuleBuilder().build(SearchPhaseFactory.class));
+  }
 
-	@Provides
-	@Singleton
-	@EmbeddingLshTablesDb
-	DB getLshDb() throws IOException {
-		return JniDBFactory.factory.open(
-				config
-				.getIndexRoot()
-				.resolve(PlainIndexBuilder.EMBEDDING_ROOT)
-				.resolve(PlainIndexBuilder.LSH_ROOT)
-				.toFile(),
-				DB_OPTIONS);
-	}
+  @Provides
+  @Singleton
+  @EmbeddingVecsDb
+  DB getEmbeddingDb() throws IOException {
+    return JniDBFactory.factory.open(
+        config
+            .getIndexRoot()
+            .resolve(PlainIndexBuilder.EMBEDDING_ROOT)
+            .resolve(PlainIndexBuilder.VECS_ROOT)
+            .toFile(),
+        DB_OPTIONS);
+  }
 
-	private Pair<Function, FeatureMeta[]> getModelStub() {
-		return new Pair(new Trans.Stub() {
+  @Provides
+  @Singleton
+  @EmbeddingLshTablesDb
+  DB getLshDb() throws IOException {
+    return JniDBFactory.factory.open(
+        config
+            .getIndexRoot()
+            .resolve(PlainIndexBuilder.EMBEDDING_ROOT)
+            .resolve(PlainIndexBuilder.LSH_ROOT)
+            .toFile(),
+        DB_OPTIONS);
+  }
 
-			@Override
-			public int xdim() {
-				return 0;
-			}
+  private Pair<Function, FeatureMeta[]> getModelStub() {
+    return new Pair<>(
+        new Trans.Stub() {
 
-			@Override
-			public int ydim() {
-				return 0;
-			}
+          @Override
+          public int xdim() {
+            return 0;
+          }
 
-			@Override
-			public Vec trans(Vec arg) {
-				return new SingleValueVec(1);
-			}
+          @Override
+          public int ydim() {
+            return 0;
+          }
 
-		}, null);
-	}
+          @Override
+          public Vec trans(Vec arg) {
+            return new SingleValueVec(1);
+          }
+        },
+        new FeatureMeta[0]);
+  }
 
-	@Provides
-	@Singleton
-	@RankModel
-	Pair<Function, FeatureMeta[]> getRankModel() throws IOException {
-		if (Files.exists(config.getModelPath()))
-			return DataTools.readModel(
-					new InputStreamReader(Files.newInputStream(config.getModelPath()), StandardCharsets.UTF_8));
+  @Provides
+  @Singleton
+  @RankModel
+  Pair<Function, FeatureMeta[]> getRankModel() throws IOException {
+    if (Files.exists(config.getModelPath())) {
+      return DataTools.readModel(
+          new InputStreamReader(
+              Files.newInputStream(config.getModelPath()), StandardCharsets.UTF_8));
+    }
 
-		return getModelStub();
-	}
+    LOG.warn(
+        "Rank model can not be found at path ["
+            + config.getModelPath()
+            + "], using empty model instead");
+    return getModelStub();
+  }
 
-	@Provides
-	@Singleton
-	@RankFilterModel
-	Pair<Function, FeatureMeta[]> getRankFilterModel() throws IOException {
-		if (Files.exists(config.getFilterModelPath()))
-			return DataTools.readModel(
-					new InputStreamReader(
-							Files.newInputStream(config.getFilterModelPath()), StandardCharsets.UTF_8));
-		return getModelStub();
-	}
+  @Provides
+  @Singleton
+  @RankFilterModel
+  Pair<Function, FeatureMeta[]> getRankFilterModel() throws IOException {
+    if (Files.exists(config.getFilterModelPath())) {
+      return DataTools.readModel(
+          new InputStreamReader(
+              Files.newInputStream(config.getFilterModelPath()), StandardCharsets.UTF_8));
+    }
+
+    LOG.warn(
+        "Filter model can not be found at path ["
+            + config.getFilterModelPath()
+            + "], using empty model instead");
+    return getModelStub();
+  }
 }

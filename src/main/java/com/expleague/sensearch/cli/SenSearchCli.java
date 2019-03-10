@@ -10,7 +10,7 @@ import com.expleague.sensearch.RebuildEmbedding;
 import com.expleague.sensearch.donkey.IndexBuilder;
 import com.expleague.sensearch.donkey.crawler.CrawlerXML;
 import com.expleague.sensearch.donkey.plain.JmllEmbeddingBuilder;
-import com.expleague.sensearch.miner.pool.FilterPoolBuilder;
+import com.expleague.sensearch.miner.pool.FilterPoolBuilderRememberTop;
 import com.expleague.sensearch.miner.pool.RankingPoolBuilder;
 import com.expleague.sensearch.web.SearchServer;
 import com.google.inject.Guice;
@@ -228,7 +228,7 @@ public class SenSearchCli {
           config.setMaxFilterItems(Integer.parseInt(parser.getOptionValue(MAX_FILTER_ITEMS)));
           Path poolPath = Paths.get(parser.getOptionValue(POOL_PATH_OPTION));
           Guice.createInjector(new AppModule(config))
-              .getInstance(FilterPoolBuilder.class)
+              .getInstance(FilterPoolBuilderRememberTop.class)
               .build(poolPath);
           break;
 
