@@ -27,6 +27,8 @@ import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.log4j.PropertyConfigurator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class SenSearchCli {
 
@@ -113,6 +115,7 @@ public class SenSearchCli {
     buildRankPoolOptions.addOption(rankPoolPathOption);
   }
 
+  private static final Logger LOG = LoggerFactory.getLogger(SenSearchCli.class);
   public static void main(String[] args) throws Exception {
     if (args.length < 1) {
       printUsage();
@@ -172,7 +175,9 @@ public class SenSearchCli {
           break;
 
         case TRAIN_RANK_MODEL_COMMAND:
-//          JMLLCLI.main(
+          LOG.debug("Executing command 'fitrk'");
+          FitRankingCli.run(args);
+          //          JMLLCLI.main(
 //              new String[]{
 //                  "fit",
 //                  "--print-period",
