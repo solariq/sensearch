@@ -210,7 +210,8 @@ public class FitRankingCli {
     DataBuilder dataBuilder = dataBuilderCrossValidation;
     dataBuilder.setLearnPath(TRAIN_DATA.value(commandLine).toString());
     // TODO: configure pool reader from command line
-    dataBuilder.setReader(ReaderFactory.createFeatureTxtReader());
+    // TODO: determine type of the pool from command line
+    dataBuilder.setReader(ReaderFactory.createJsonReader());
 
     return dataBuilder.create();
   }
