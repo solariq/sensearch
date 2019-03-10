@@ -126,6 +126,7 @@ public class FitRankingCli {
   private static final IntOption PRINT_PERIOD = new IntOption(Option.builder("p")
       .longOpt("print-period")
       .desc("Print period in iterations")
+      .numberOfArgs(1)
       .build(), 10, PositiveInteger.get()
   );
   private static final StringOption LOG_FILE = new StringOption(Option.builder("l")
