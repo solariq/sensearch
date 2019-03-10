@@ -76,7 +76,7 @@ public class FitRankingCli {
               + " Should be the number from (0; 1). Usually, 0.2 is enough."
               + " If no value is given all data will be used for training")
       .numberOfArgs(1)
-      .build(), 0, new SegmentDouble(0, 1));
+      .build(), 0.2, new SegmentDouble(0.01, 1));
 
   // gradient boosting on oblivious trees specific arguments (L1, L2 ?)
   // also option for target function should be added
@@ -169,6 +169,11 @@ public class FitRankingCli {
     try {
       commandLine = CLI_PARSER.parse(OPTIONS, args);
     } catch (Exception e) {
+      printUsage();
+      return;
+    }
+
+    if (commandLine.hasOption(HELP.getOpt())) {
       printUsage();
       return;
     }
