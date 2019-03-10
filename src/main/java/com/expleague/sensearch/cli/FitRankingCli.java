@@ -152,6 +152,8 @@ public class FitRankingCli {
     ITERATIONS.addToOptions(OPTIONS);
     TARGET.addToOptions(OPTIONS);
     OUTPUT.addToOptions(OPTIONS);
+    PRINT_PERIOD.addToOptions(OPTIONS);
+
     OPTIONS.addOption(VERBOSE);
     OPTIONS.addOption(HELP);
   }
