@@ -15,7 +15,7 @@ public class MergePhase implements SearchPhase {
 
   @Override
   public boolean test(Whiteboard whiteboard) {
-    return whiteboard.subResults() != null && allSubResultsArePresent(whiteboard);
+    return allSubResultsArePresent(whiteboard);
   }
 
   private boolean allSubResultsArePresent(Whiteboard whiteboard) {

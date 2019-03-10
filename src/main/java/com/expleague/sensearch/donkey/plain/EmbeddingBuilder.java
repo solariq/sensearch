@@ -1,7 +1,7 @@
 package com.expleague.sensearch.donkey.plain;
 
 import static com.expleague.sensearch.donkey.plain.PlainIndexBuilder.DEFAULT_VEC_SIZE;
-import static com.expleague.sensearch.donkey.utils.BrandNewIdGenerator.termIdGenerator;
+import static com.expleague.sensearch.donkey.utils.BrandNewIdGenerator.generateTermId;
 
 import com.expleague.commons.math.vectors.Vec;
 import com.expleague.commons.math.vectors.VecTools;
@@ -29,9 +29,9 @@ public class EmbeddingBuilder implements AutoCloseable {
 
   private static final Logger LOG = Logger.getLogger(EmbeddingBuilder.class);
 
-  private static final int QUANT_DIM = 5;
-  private static final int SKETCH_BITS_PER_QUANT = 34;
-  private static final int BATCH_SIZE = 4000;
+  private static final int QUANT_DIM = 65;
+  private static final int SKETCH_BITS_PER_QUANT = 96;
+  private static final int BATCH_SIZE = 1000;
 
   private final Tokenizer tokenizer;
   private final Embedding<CharSeq> jmllEmbedding;
@@ -100,7 +100,7 @@ public class EmbeddingBuilder implements AutoCloseable {
         .links()
         .forEach(
             link -> {
-              final long targetId = BrandNewIdGenerator.pageIdGenerator(link.targetUri()).next();
+              final long targetId = BrandNewIdGenerator.generatePageId(link.targetUri());
               if (!pageIdToIncomingLinkTexts.containsKey(targetId)) {
                 pageIdToIncomingLinkTexts.put(targetId, new ArrayList<>());
               }
@@ -112,7 +112,7 @@ public class EmbeddingBuilder implements AutoCloseable {
         .map(word -> word.toString().toLowerCase())
         .forEach(
             word -> {
-              long id = termIdGenerator(word).next();
+              long id = generateTermId(word);
               if (termIdsInDb.contains(id)) {
                 return;
               }

@@ -1,5 +1,8 @@
 package com.expleague.sensearch;
 
+import com.expleague.commons.math.Trans;
+import com.expleague.commons.math.vectors.SingleValueVec;
+import com.expleague.commons.math.vectors.Vec;
 import com.expleague.commons.util.Pair;
 import com.expleague.ml.data.tools.DataTools;
 import com.expleague.ml.meta.FeatureMeta;
@@ -50,89 +53,115 @@ import org.iq80.leveldb.Options;
 
 public class AppModule extends AbstractModule {
 
-  private static final long CACHE_SIZE = 16 * (1 << 20);
-  private static final Options DB_OPTIONS = new Options().cacheSize(CACHE_SIZE);
+	private static final long CACHE_SIZE = 32 * (1 << 20);
+	private static final Options DB_OPTIONS = new Options().cacheSize(CACHE_SIZE);
 
-  private final Config config;
+	private final Config config;
 
-  public AppModule() throws IOException {
-    this.config =
-        new ObjectMapper().readValue(Paths.get("./config.json").toFile(), ConfigImpl.class);
-  }
+	public AppModule() throws IOException {
+		this.config =
+				new ObjectMapper().readValue(Paths.get("./config.json").toFile(), ConfigImpl.class);
+	}
 
-  public AppModule(Config config) {
-    this.config = config;
-  }
+	public AppModule(Config config) {
+		this.config = config;
+	}
 
-  @Override
-  protected void configure() {
-    // binding constants
-    bindConstant().annotatedWith(FilterMaxItems.class).to(config.maxFilterItems());
-    bindConstant().annotatedWith(PageSize.class).to(config.getPageSize());
+	@Override
+	protected void configure() {
+		// binding constants
+		bindConstant().annotatedWith(FilterMaxItems.class).to(config.maxFilterItems());
+		bindConstant().annotatedWith(PageSize.class).to(config.getPageSize());
 
-    bind(Path.class).annotatedWith(MetricPath.class).toInstance(config.getPathToMetrics());
-    bind(Path.class)
-        .annotatedWith(EmbeddingVectorsPath.class)
-        .toInstance(config.getEmbeddingVectors());
-    bind(Path.class).annotatedWith(DataZipPath.class).toInstance(config.getPathToZIP());
-    bind(Path.class).annotatedWith(IndexRoot.class).toInstance(config.getIndexRoot());
-    bindConstant().annotatedWith(UseLshFlag.class).to(config.getLshNearestFlag());
+		bind(Path.class).annotatedWith(MetricPath.class).toInstance(config.getPathToMetrics());
+		bind(Path.class)
+		.annotatedWith(EmbeddingVectorsPath.class)
+		.toInstance(config.getEmbeddingVectors());
+		bind(Path.class).annotatedWith(DataZipPath.class).toInstance(config.getPathToZIP());
+		bind(Path.class).annotatedWith(IndexRoot.class).toInstance(config.getIndexRoot());
+		bindConstant().annotatedWith(UseLshFlag.class).to(config.getLshNearestFlag());
 
-    Lemmer lemmer = new Lemmer(new Stemmer());
-    bind(Lemmer.class).toInstance(lemmer);
+		Lemmer lemmer = new Lemmer(new Stemmer());
+		bind(Lemmer.class).toInstance(lemmer);
 
-    bind(Crawler.class).to(CrawlerXML.class);
-    bind(Embedding.class).to(EmbeddingImpl.class).in(Singleton.class);
-    bind(Filter.class).to(FilterImpl.class);
-    bind(Index.class).to(PlainIndex.class).in(Singleton.class);
-    bind(IndexBuilder.class).to(PlainIndexBuilder.class);
-    bind(Suggestor.class).to(ProbabilisticSuggestor.class).in(Singleton.class);
-    bind(SenSeArch.class).to(SenSeArchImpl.class);
-    bind(WebCrawler.class).to(RequestCrawler.class);
+		bind(Crawler.class).to(CrawlerXML.class);
+		bind(Embedding.class).to(EmbeddingImpl.class).in(Singleton.class);
+		bind(Filter.class).to(FilterImpl.class);
+		bind(Index.class).to(PlainIndex.class).in(Singleton.class);
+		bind(IndexBuilder.class).to(PlainIndexBuilder.class);
+		bind(Suggestor.class).to(ProbabilisticSuggestor.class).in(Singleton.class);
+		bind(SenSeArch.class).to(SenSeArchImpl.class);
+		bind(WebCrawler.class).to(RequestCrawler.class);
 
-    install(new FactoryModuleBuilder().build(SearchPhaseFactory.class));
-  }
+		install(new FactoryModuleBuilder().build(SearchPhaseFactory.class));
+	}
 
-  @Provides
-  @Singleton
-  @EmbeddingVecsDb
-  DB getEmbeddingDb() throws IOException {
-    return JniDBFactory.factory.open(
-        config
-            .getIndexRoot()
-            .resolve(PlainIndexBuilder.EMBEDDING_ROOT)
-            .resolve(PlainIndexBuilder.VECS_ROOT)
-            .toFile(),
-        DB_OPTIONS);
-  }
+	@Provides
+	@Singleton
+	@EmbeddingVecsDb
+	DB getEmbeddingDb() throws IOException {
+		return JniDBFactory.factory.open(
+				config
+				.getIndexRoot()
+				.resolve(PlainIndexBuilder.EMBEDDING_ROOT)
+				.resolve(PlainIndexBuilder.VECS_ROOT)
+				.toFile(),
+				DB_OPTIONS);
+	}
 
-  @Provides
-  @Singleton
-  @EmbeddingLshTablesDb
-  DB getLshDb() throws IOException {
-    return JniDBFactory.factory.open(
-        config
-            .getIndexRoot()
-            .resolve(PlainIndexBuilder.EMBEDDING_ROOT)
-            .resolve(PlainIndexBuilder.LSH_ROOT)
-            .toFile(),
-        DB_OPTIONS);
-  }
+	@Provides
+	@Singleton
+	@EmbeddingLshTablesDb
+	DB getLshDb() throws IOException {
+		return JniDBFactory.factory.open(
+				config
+				.getIndexRoot()
+				.resolve(PlainIndexBuilder.EMBEDDING_ROOT)
+				.resolve(PlainIndexBuilder.LSH_ROOT)
+				.toFile(),
+				DB_OPTIONS);
+	}
 
-  @Provides
-  @Singleton
-  @RankModel
-  Pair<Function, FeatureMeta[]> getRankModel() throws IOException {
-    return DataTools.readModel(
-        new InputStreamReader(Files.newInputStream(config.getModelPath()), StandardCharsets.UTF_8));
-  }
+	private Pair<Function, FeatureMeta[]> getModelStub() {
+		return new Pair(new Trans.Stub() {
 
-  @Provides
-  @Singleton
-  @RankFilterModel
-  Pair<Function, FeatureMeta[]> getRankFilterModel() throws IOException {
-    return DataTools.readModel(
-        new InputStreamReader(
-            Files.newInputStream(config.getFilterModelPath()), StandardCharsets.UTF_8));
-  }
+			@Override
+			public int xdim() {
+				return 0;
+			}
+
+			@Override
+			public int ydim() {
+				return 0;
+			}
+
+			@Override
+			public Vec trans(Vec arg) {
+				return new SingleValueVec(1);
+			}
+
+		}, null);
+	}
+
+	@Provides
+	@Singleton
+	@RankModel
+	Pair<Function, FeatureMeta[]> getRankModel() throws IOException {
+		if (Files.exists(config.getModelPath()))
+			return DataTools.readModel(
+					new InputStreamReader(Files.newInputStream(config.getModelPath()), StandardCharsets.UTF_8));
+
+		return getModelStub();
+	}
+
+	@Provides
+	@Singleton
+	@RankFilterModel
+	Pair<Function, FeatureMeta[]> getRankFilterModel() throws IOException {
+		if (Files.exists(config.getFilterModelPath()))
+			return DataTools.readModel(
+					new InputStreamReader(
+							Files.newInputStream(config.getFilterModelPath()), StandardCharsets.UTF_8));
+		return getModelStub();
+	}
 }

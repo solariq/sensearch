@@ -61,6 +61,7 @@ public class MinerPhase implements SearchPhase {
               @Override
               public void accept(Page page) {
                 AccumulatorFeatureSet features = this.features.get();
+                features.acceptFilterFeatures(whiteboard.filterFeatures().get(phaseId));
                 features.accept(new QURLItem(page, query));
                 Vec all = features.advance();
                 documentsFeatures.put(page, new FeaturesImpl(features, all));

@@ -20,6 +20,7 @@ import com.expleague.sensearch.features.sets.filter.FilterFeatures;
 import com.expleague.sensearch.filter.Filter;
 import com.expleague.sensearch.index.Embedding;
 import com.expleague.sensearch.index.Index;
+import com.expleague.sensearch.index.IndexedPage;
 import com.expleague.sensearch.metrics.LSHSynonymsMetric;
 import com.expleague.sensearch.protobuf.index.IndexUnits;
 import com.expleague.sensearch.protobuf.index.IndexUnits.TermStatistics;
@@ -55,7 +56,7 @@ import org.iq80.leveldb.ReadOptions;
 public class PlainIndex implements Index {
 
   // TODO: !index version!
-  public static final int VERSION = 13;
+  public static final int VERSION = 14;
 
   private static final long DEFAULT_CACHE_SIZE = 128 * (1 << 20); // 128 MB
 
@@ -94,7 +95,6 @@ public class PlainIndex implements Index {
 
   private final Embedding embedding;
   private final Filter filter;
-  private final FilterFeatures filterFeatures = new FilterFeatures();
   private final LSHSynonymsMetric lshSynonymsMetric;
   private final Tokenizer tokenizer;
 
@@ -358,13 +358,53 @@ public class PlainIndex implements Index {
 
     LOG.info("LSHSynonymsMetric: " + result);*/
 
+    // TODO: FATAL: this nonNull filter must be redundant (but it's necessary for full ruWiki)
     return filter
         .filtrate(termVec, PlainIndex::isWordId, SYNONYMS_COUNT)
-        .map(c -> idToTerm.get(c.getId()));
+        .map(c -> idToTerm.get(c.getId()))
+        .filter(Objects::nonNull);
+  }
+
+  public Features filterFeatures(Query query, URI pageURI) {
+    double minTitle = 1;
+    double minBody = 1;
+    double minLink = 1;
+
+    Vec queryVec = vecByTerms(query.terms());
+    IndexedPage page = (IndexedPage) page(pageURI);
+    long tmpID;
+    //Title
+    tmpID = IdUtils.toStartSecTitleId(page.id());
+    Vec pageVec = embedding.vec(tmpID);
+    while (pageVec != null) {
+      minTitle = Math.min(minTitle, (1.0 - VecTools.cosine(queryVec, pageVec)) / 2.0);
+      tmpID++;
+      pageVec = embedding.vec(tmpID);
+    }
+    //Body
+    tmpID = IdUtils.toStartSecTextId(page.id());
+    pageVec = embedding.vec(tmpID);
+    while (pageVec != null) {
+      minBody = Math.min(minBody, (1.0 - VecTools.cosine(queryVec, pageVec)) / 2.0);
+      tmpID++;
+      pageVec = embedding.vec(tmpID);
+    }
+    //Link
+    tmpID = IdUtils.toStartLinkId(page.id());
+    pageVec = embedding.vec(tmpID);
+    while (pageVec != null) {
+      minLink = Math.min(minLink, (1.0 - VecTools.cosine(queryVec, pageVec)) / 2.0);
+      tmpID++;
+      pageVec = embedding.vec(tmpID);
+    }
+
+    return new FeaturesImpl(new FilterFeatures(), new ArrayVec(minTitle, minBody, minLink));
   }
 
   @Override
   public Map<Page, Features> fetchDocuments(Query query, int num) {
+    FilterFeatures filterFeatures = new FilterFeatures();
+
     final Vec qVec = vecByTerms(query.terms());
     TLongObjectMap<List<Candidate>> pageIdToCandidatesMap = new TLongObjectHashMap<>();
     filter

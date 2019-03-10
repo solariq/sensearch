@@ -3,16 +3,13 @@ package com.expleague.sensearch.donkey.plain;
 import com.expleague.sensearch.donkey.crawler.document.CrawlerDocument;
 import com.expleague.sensearch.donkey.crawler.document.CrawlerDocument.Link;
 import com.expleague.sensearch.donkey.utils.BrandNewIdGenerator;
-import com.expleague.sensearch.protobuf.index.IndexUnits;
 import com.expleague.sensearch.protobuf.index.IndexUnits.Page;
+import com.expleague.sensearch.protobuf.index.IndexUnits.Page.Builder;
 import com.google.common.primitives.Longs;
-import gnu.trove.map.TLongObjectMap;
-import gnu.trove.map.hash.TLongObjectHashMap;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URI;
-import java.net.URLDecoder;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -20,7 +17,9 @@ import java.util.Collections;
 import java.util.Deque;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 import org.apache.commons.io.FileUtils;
 import org.iq80.leveldb.DB;
@@ -39,21 +38,18 @@ class PlainPageBuilder implements AutoCloseable {
       new WriteOptions().sync(true).snapshot(false);
 
   private final DB plainDb;
-
   private final Path temporaryIndexRoot;
-
   private OutputStream temporaryIndexOs;
 
-  // accumulates for single page then clears when next page is received
-  private List<String> categories = Collections.emptyList();
-  private final Deque<IndexUnits.Page.Builder> parentPagesStack = new LinkedList<>();
-  private final List<Page> builtPages = new ArrayList<>();
-  private final TLongObjectMap<List<Page.Link>> incomingLinksForPage = new TLongObjectHashMap<>();
+  private final List<Page> builtPages = Collections.synchronizedList(new ArrayList<>());
+  private final Map<Long, List<Page.Link>> incomingLinksForPage = new ConcurrentHashMap<>();
 
-  private boolean isProcessingPage = false;
-  // Flag that indicates if there as at least one section added for current page
-  private boolean hasSection = false;
-  private long curPageId;
+  // accumulates for single page then clears when next page is received
+  private ThreadLocal<List<String>> categories = new ThreadLocal<>();
+  private final ThreadLocal<Deque<Builder>> parentPagesStack = ThreadLocal
+      .withInitial(LinkedList::new);
+  private ThreadLocal<Boolean> isProcessingPage = ThreadLocal.withInitial(() -> false);
+  private ThreadLocal<Long> curPageId = new ThreadLocal<>();
 
   /**
    * PlainPageBuilder provides builder for the database of indexed pages. It processes each page
@@ -80,16 +76,16 @@ class PlainPageBuilder implements AutoCloseable {
    * @param uri URI of the page. URIs must be unique among the collection
    */
   void startPage(long pageId, List<? extends CharSequence> categories, URI uri) {
-    if (isProcessingPage) {
+    if (isProcessingPage.get()) {
       throw new IllegalStateException("Duplicate startPage call: page is already being processed");
     }
 
-    isProcessingPage = true;
-    hasSection = false;
+    isProcessingPage.set(true);
 
-    curPageId = pageId;
-    this.categories = categories.stream().map(CharSequence::toString).collect(Collectors.toList());
-    parentPagesStack.clear();
+    curPageId.set(pageId);
+    this.categories
+        .set(categories.stream().map(CharSequence::toString).collect(Collectors.toList()));
+    parentPagesStack.get().clear();
   }
 
   /**
@@ -99,24 +95,23 @@ class PlainPageBuilder implements AutoCloseable {
    * @param section section of a crawler document
    */
   void addSection(CrawlerDocument.Section section, long sectionId) {
-    hasSection = true;
 
     List<? extends CharSequence> sectionTitleSeq = section.titles();
     int sectionDepth = sectionTitleSeq.size();
-
-    if (sectionDepth - parentPagesStack.size() > 1) {
+    Deque<Builder> parentPagesStackLocal = parentPagesStack.get();
+    if (sectionDepth - parentPagesStackLocal.size() > 1) {
       LOG.error(
           String.format(
               "Received page (id [ %d ] section id [ %d ] with the depth [ %d ], when current depth is [ %d ]."
                   + " Probably some sections are missing or sections order is incorrect. Index may become corrupted",
-              curPageId, sectionId, sectionDepth, parentPagesStack.size()));
+              curPageId, sectionId, sectionDepth, parentPagesStackLocal.size()));
       // TODO: if there were a missing section then we should add it to the stack otherwise parents
       // might become incorrect
     }
 
     // section depth is always greater than 1
-    while (parentPagesStack.size() >= sectionDepth) {
-      builtPages.add(Objects.requireNonNull(parentPagesStack.pollLast()).build());
+    while (parentPagesStackLocal.size() >= sectionDepth) {
+      builtPages.add(Objects.requireNonNull(parentPagesStackLocal.pollLast()).build());
     }
 
     CharSequence sectionTitle = sectionTitleSeq.get(sectionDepth - 1);
@@ -126,11 +121,11 @@ class PlainPageBuilder implements AutoCloseable {
             .setContent(section.text().toString())
             .setTitle(sectionTitle.toString())
             .setUri(section.uri().toString())
-            .addAllCategories(categories);
+            .addAllCategories(categories.get());
 
     for (Link link : section.links()) {
-      long targetId = BrandNewIdGenerator.pageIdGenerator(link.targetUri()).next();
-      if (targetId == curPageId) {
+      long targetId = BrandNewIdGenerator.generatePageId(link.targetUri());
+      if (targetId == curPageId.get()) {
         // Ignoring self-links
         continue;
       }
@@ -145,18 +140,15 @@ class PlainPageBuilder implements AutoCloseable {
       if (!incomingLinksForPage.containsKey(targetId)) {
         incomingLinksForPage.put(targetId, new ArrayList<>());
       }
-      if (URLDecoder.decode(link.targetUri().toString()).contains("путин")) {
-        System.out.println();
-      }
       incomingLinksForPage.get(targetId).add(dbLink);
     }
 
-    if (!parentPagesStack.isEmpty()) {
-      pageBuilder.setParentId(parentPagesStack.peekLast().getPageId());
-      parentPagesStack.peekLast().addSubpagesIds(sectionId);
+    if (!parentPagesStackLocal.isEmpty()) {
+      pageBuilder.setParentId(parentPagesStackLocal.peekLast().getPageId());
+      parentPagesStackLocal.peekLast().addSubpagesIds(sectionId);
     }
 
-    parentPagesStack.addLast(pageBuilder);
+    parentPagesStackLocal.addLast(pageBuilder);
   }
 
   /**
@@ -164,13 +156,14 @@ class PlainPageBuilder implements AutoCloseable {
    * information about the page
    */
   void endPage() {
-    if (!isProcessingPage) {
+    if (!isProcessingPage.get()) {
       throw new IllegalStateException("Illegal call to endPage: no page is being processed");
     }
-    isProcessingPage = false;
+    isProcessingPage.set(false);
 
-    while (!parentPagesStack.isEmpty()) {
-      builtPages.add(Objects.requireNonNull(parentPagesStack.pollLast()).build());
+    Deque<Builder> parentPagesStackLocal = parentPagesStack.get();
+    while (!parentPagesStackLocal.isEmpty()) {
+      builtPages.add(Objects.requireNonNull(parentPagesStackLocal.pollLast()).build());
     }
 
     builtPages.forEach(
@@ -196,8 +189,8 @@ class PlainPageBuilder implements AutoCloseable {
     }
 
     builtPages.clear();
-    parentPagesStack.clear();
-    categories.clear();
+    parentPagesStackLocal.clear();
+    categories.get().clear();
   }
 
   @Override

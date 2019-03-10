@@ -6,9 +6,11 @@ import com.expleague.commons.seq.CharSeq;
 import com.expleague.ml.embedding.impl.EmbeddingImpl;
 import com.expleague.sensearch.AppModule;
 import com.expleague.sensearch.ConfigImpl;
+import com.expleague.sensearch.RebuildEmbedding;
 import com.expleague.sensearch.donkey.IndexBuilder;
 import com.expleague.sensearch.donkey.crawler.CrawlerXML;
 import com.expleague.sensearch.donkey.plain.JmllEmbeddingBuilder;
+import com.expleague.sensearch.miner.pool.FilterPoolBuilder;
 import com.expleague.sensearch.miner.pool.RankingPoolBuilder;
 import com.expleague.sensearch.web.SearchServer;
 import com.google.inject.Guice;
@@ -30,6 +32,11 @@ import org.apache.log4j.PropertyConfigurator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+// TODO:
+// - filter pool builder
+// - filter model train
+// - fix ranking pool builder/model train
+// - fix printing usage
 public class SenSearchCli {
 
   private static final String DATA_PATH_OPTION = "data";
@@ -39,18 +46,31 @@ public class SenSearchCli {
   private static final String EMBEDDING_OUTPUT_PATH_OPTION = "decomp";
   private static final String DO_NOT_USE_LSH_OPTION = "nolsh";
   private static final String MAX_FILTER_ITEMS = "maxfilter";
-  private static final String RANK_POOL_PATH_OPTION = "rankpool";
+  private static final String POOL_PATH_OPTION = "pool";
+
+  private static final String MODEL_PATH_OPTION = "model";
   private static final String RANK_MODEL_PATH_OPTION = "rankmodel";
+  private static final String FILTER_MODEL_PATH_OPTION = "filtermodel";
 
   private static final String TRAIN_EMBEDDING_COMMAND = "trainEmbedding";
+
+  private static final String REBUILD_EMBEDDING_COMMAND = "rebuildEmbeddingCommand";
+
   private static final String BUILD_INDEX_COMMAND = "buildIndex";
   private static final String START_SEVER_COMMAND = "startServer";
+
+  private static final String BUILD_FILTER_POOL_COMMAND = "buildFilterPool";
   private static final String BUILD_RANK_POOL_COMMAND = "buildRankPool";
   private static final String TRAIN_RANK_MODEL_COMMAND = "fitrk";
 
   private static Options trainEmbeddingOptions = new Options();
+
+  private static Options rebuildEmbeddingOptions = new Options();
+
   private static Options buildIndexOptions = new Options();
   private static Options startServerOptions = new Options();
+
+  private static Options buildFilterPoolOptions = new Options();
   private static Options buildRankPoolOptions = new Options();
 
   static {
@@ -74,7 +94,9 @@ public class SenSearchCli {
             .build();
     buildIndexOptions.addOption(indexPathOption);
     startServerOptions.addOption(indexPathOption);
+    buildFilterPoolOptions.addOption(indexPathOption);
     buildRankPoolOptions.addOption(indexPathOption);
+    rebuildEmbeddingOptions.addOption(indexPathOption);
 
     Option embeddingOutputPathOption =
         Option.builder()
@@ -85,6 +107,7 @@ public class SenSearchCli {
             .build();
     trainEmbeddingOptions.addOption(embeddingOutputPathOption);
     buildIndexOptions.addOption(embeddingOutputPathOption);
+    rebuildEmbeddingOptions.addOption(embeddingOutputPathOption);
 
     Option embeddingPathOption =
         Option.builder()
@@ -97,25 +120,58 @@ public class SenSearchCli {
 
     startServerOptions.addOption(
         Option.builder().longOpt(DO_NOT_USE_LSH_OPTION).desc("disables LSH").build());
-    startServerOptions.addOption(
+
+    Option maxFilterOption =
         Option.builder()
             .longOpt(MAX_FILTER_ITEMS)
             .desc("maximal number of items to be left after filtering")
             .hasArg()
             .required()
-            .build());
+            .build();
+    startServerOptions.addOption(maxFilterOption);
+    buildFilterPoolOptions.addOption(maxFilterOption);
+    buildRankPoolOptions.addOption(maxFilterOption);
 
-    Option rankPoolPathOption =
+    Option poolPathOption =
         Option.builder()
-            .longOpt(RANK_POOL_PATH_OPTION)
-            .desc("path to rank model pool")
+            .longOpt(POOL_PATH_OPTION)
+            .desc("path to model pool")
             .hasArg()
             .required()
             .build();
-    buildRankPoolOptions.addOption(rankPoolPathOption);
+
+    buildFilterPoolOptions.addOption(poolPathOption);
+    buildRankPoolOptions.addOption(poolPathOption);
+
+    Option trainedModelPathOption =
+        Option.builder()
+            .longOpt(MODEL_PATH_OPTION)
+            .desc("path to result model")
+            .hasArg()
+            .required()
+            .build();
+
+    Option rankModelPathOption =
+        Option.builder()
+            .longOpt(RANK_MODEL_PATH_OPTION)
+            .desc("path to rank model")
+            .hasArg()
+            .required()
+            .build();
+    startServerOptions.addOption(rankModelPathOption);
+
+    Option filterModelPathOption =
+        Option.builder()
+            .longOpt(FILTER_MODEL_PATH_OPTION)
+            .desc("path to filter model")
+            .hasArg()
+            .required()
+            .build();
+    startServerOptions.addOption(filterModelPathOption);
   }
 
   private static final Logger LOG = LoggerFactory.getLogger(SenSearchCli.class);
+
   public static void main(String[] args) throws Exception {
     if (args.length < 1) {
       printUsage();
@@ -165,15 +221,27 @@ public class SenSearchCli {
           injector.getInstance(SearchServer.class).start(injector);
           break;
 
+        case BUILD_FILTER_POOL_COMMAND:
+          parser = cliParser.parse(buildFilterPoolOptions, args);
+          config.setTemporaryIndex(parser.getOptionValue(INDEX_PATH_OPTION));
+
+          config.setMaxFilterItems(Integer.parseInt(parser.getOptionValue(MAX_FILTER_ITEMS)));
+          Path poolPath = Paths.get(parser.getOptionValue(POOL_PATH_OPTION));
+          Guice.createInjector(new AppModule(config))
+              .getInstance(FilterPoolBuilder.class)
+              .build(poolPath);
+          break;
+
         case BUILD_RANK_POOL_COMMAND:
           parser = cliParser.parse(buildRankPoolOptions, args);
           config.setTemporaryIndex(parser.getOptionValue(INDEX_PATH_OPTION));
-          Path poolPath = Paths.get(parser.getOptionValue(RANK_POOL_PATH_OPTION));
+
+          config.setMaxFilterItems(Integer.parseInt(parser.getOptionValue(MAX_FILTER_ITEMS)));
+          poolPath = Paths.get(parser.getOptionValue(POOL_PATH_OPTION));
           Guice.createInjector(new AppModule(config))
               .getInstance(RankingPoolBuilder.class)
               .build(poolPath);
           break;
-
         case TRAIN_RANK_MODEL_COMMAND:
           LOG.debug("Executing command 'fitrk'");
           FitRankingCli.run(args);
@@ -194,10 +262,20 @@ public class SenSearchCli {
 //          Files.move(
 //              Paths.get(parser.getOptionValue(RANK_POOL_PATH_OPTION) + ".model"),
 //              Paths.get(parser.getOptionValue(RANK_MODEL_PATH_OPTION)));
+          break;
+
+        case REBUILD_EMBEDDING_COMMAND:
+          parser = cliParser.parse(rebuildEmbeddingOptions, args);
+          config.setTemporaryIndex(parser.getOptionValue(INDEX_PATH_OPTION));
+          config.setEmbeddingVectors(parser.getOptionValue(EMBEDDING_OUTPUT_PATH_OPTION));
+
+          injector = Guice.createInjector(new AppModule(config));
+          RebuildEmbedding rebuildEmbedding = injector.getInstance(RebuildEmbedding.class);
+          rebuildEmbedding.rebuild();
       }
     } catch (ParseException e) {
       System.out.println(e.getLocalizedMessage());
-      printUsage();
+      printUsage(args[0]);
     }
 
     //    cliParser.parse(startServerOptions, args).getOptionValue()
@@ -208,8 +286,9 @@ public class SenSearchCli {
     printUsage(TRAIN_EMBEDDING_COMMAND);
     printUsage(BUILD_INDEX_COMMAND);
     printUsage(START_SEVER_COMMAND);
+    printUsage(BUILD_FILTER_POOL_COMMAND);
     printUsage(BUILD_RANK_POOL_COMMAND);
-    printUsage(TRAIN_RANK_MODEL_COMMAND);
+    FitRankingCli.printUsage();
   }
 
   private static Options getCommandOptions(String command) {
@@ -220,6 +299,8 @@ public class SenSearchCli {
         return buildIndexOptions;
       case START_SEVER_COMMAND:
         return startServerOptions;
+      case BUILD_FILTER_POOL_COMMAND:
+        return buildFilterPoolOptions;
       case BUILD_RANK_POOL_COMMAND:
         return buildRankPoolOptions;
       case TRAIN_RANK_MODEL_COMMAND:
@@ -240,6 +321,8 @@ public class SenSearchCli {
         return "Builds index. Requires embedding to be already trained";
       case START_SEVER_COMMAND:
         return "Starts server. Requires index to be built";
+      case BUILD_FILTER_POOL_COMMAND:
+        return "Collects pool for filter model training. Requires index to be built";
       case BUILD_RANK_POOL_COMMAND:
         return "Collects pool for ranking model training. Requires index to be built";
       case TRAIN_RANK_MODEL_COMMAND:

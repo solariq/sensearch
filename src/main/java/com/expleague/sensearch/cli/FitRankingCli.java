@@ -158,14 +158,18 @@ public class FitRankingCli {
 
   private static final CommandLineParser CLI_PARSER = new DefaultParser();
 
+  static void printUsage() {
+    HelpFormatter helpFormatter = new HelpFormatter();
+    helpFormatter.printHelp("fitrk", OPTIONS);
+  }
+
   @SuppressWarnings("unchecked")
   static void run(String[] args) throws Exception {
     CommandLine commandLine;
     try {
       commandLine = CLI_PARSER.parse(OPTIONS, args);
     } catch (Exception e) {
-      HelpFormatter helpFormatter = new HelpFormatter();
-      helpFormatter.printHelp("fitrk", OPTIONS);
+      printUsage();
       return;
     }
 

@@ -9,6 +9,7 @@ import com.expleague.sensearch.Page.SegmentType;
 import com.expleague.sensearch.core.Term;
 import com.expleague.sensearch.features.Features;
 import com.expleague.sensearch.features.QURLItem;
+import com.expleague.sensearch.features.sets.filter.FilterFeatures;
 import com.expleague.sensearch.features.sets.ranker.BM25FeatureSet;
 import com.expleague.sensearch.features.sets.ranker.CosDistanceFeatureSet;
 import com.expleague.sensearch.features.sets.ranker.DocBasedFeatureSet;
@@ -44,7 +45,7 @@ public class AccumulatorFeatureSet extends FeatureSet.Stub<QURLItem> {
     this.index = index;
   }
 
-  void acceptFilterFeatures(Map<Page, Features> filterFeatures) {
+  public void acceptFilterFeatures(Map<Page, Features> filterFeatures) {
     this.filterFeatures = filterFeatures;
   }
 
@@ -114,17 +115,17 @@ public class AccumulatorFeatureSet extends FeatureSet.Stub<QURLItem> {
     }
     { // Link Processing
     }
-    //    { //Filter Features Processing
-    //      features.components()
-    //          .map(Functions.cast(FilterFeatures.class))
-    //          .filter(Objects::nonNull)
-    //          .forEach(fs -> {
-    //            Vec ff = filterFeatures.get(page).features();
-    //            fs.withBody(ff.get(1));
-    //            fs.withTitle(ff.get(0));
-    //            fs.withLink(ff.get(2));
-    //          });
-    //    }
+    { //Filter Features Processing
+      features.components()
+          .map(Functions.cast(FilterFeatures.class))
+          .filter(Objects::nonNull)
+          .forEach(fs -> {
+            Vec ff = filterFeatures.get(page).features();
+            fs.withBody(ff.get(1));
+            fs.withTitle(ff.get(0));
+            fs.withLink(ff.get(2));
+          });
+    }
     List<List<Term>> pageSentenceTokens =
         page.sentences(SegmentType.BODY)
             .map(sentence -> index.parse(sentence).collect(Collectors.toList()))

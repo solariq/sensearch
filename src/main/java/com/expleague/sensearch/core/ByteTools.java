@@ -2,45 +2,34 @@ package com.expleague.sensearch.core;
 
 import com.expleague.commons.math.vectors.Vec;
 import com.expleague.commons.math.vectors.impl.vectors.ArrayVec;
-import com.expleague.sensearch.donkey.plain.PlainIndexBuilder;
-
 import java.nio.ByteBuffer;
 import java.nio.DoubleBuffer;
+import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 import java.nio.LongBuffer;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
 
 public final class ByteTools {
 
   private ByteTools() {
   }
 
-  @Deprecated
-  public static byte[] toBytes(List<Vec> vecs) {
-    if (vecs.size() == 0) {
-      return new byte[0];
-    }
-
-    ByteBuffer byteBuf = ByteBuffer.allocate(Double.BYTES * vecs.get(0).length() * vecs.size());
-    DoubleBuffer doubleBuf = byteBuf.asDoubleBuffer();
-    for (Vec vec : vecs) {
-      double[] coords = vec.toArray();
-      doubleBuf.put(coords);
-    }
-    return byteBuf.array();
-  }
-
   public static byte[] toBytes(Vec vec) {
-    return toBytes(vec.toArray());
+    double[] doubles = vec.toArray();
+    float[] floats = new float[doubles.length];
+    for (int i = 0; i < floats.length; i++) {
+      floats[i] = (float) doubles[i];
+    }
+    return toBytes(floats);
   }
 
   public static Vec toVec(byte[] bytes) {
-    DoubleBuffer doubleBuf = ByteBuffer.wrap(bytes).asDoubleBuffer();
-    double[] doubles = new double[doubleBuf.remaining()];
-    doubleBuf.get(doubles);
+    FloatBuffer floatBuffer = ByteBuffer.wrap(bytes).asFloatBuffer();
+    float[] floats = new float[floatBuffer.remaining()];
+    floatBuffer.get(floats);
+    double[] doubles = new double[floats.length];
+    for (int i = 0; i < doubles.length; i++) {
+      doubles[i] = floats[i];
+    }
     return new ArrayVec(doubles);
   }
 
@@ -55,6 +44,7 @@ public final class ByteTools {
     ByteBuffer byteBuf = ByteBuffer.allocate(Integer.BYTES * ints.length);
     IntBuffer intBuf = byteBuf.asIntBuffer();
     intBuf.put(ints);
+
     return byteBuf.array();
   }
 
@@ -62,6 +52,13 @@ public final class ByteTools {
     ByteBuffer byteBuf = ByteBuffer.allocate(Double.BYTES * doubles.length);
     DoubleBuffer doubleBuf = byteBuf.asDoubleBuffer();
     doubleBuf.put(doubles);
+    return byteBuf.array();
+  }
+
+  public static byte[] toBytes(float[] floats) {
+    ByteBuffer byteBuf = ByteBuffer.allocate(Float.BYTES * floats.length);
+    FloatBuffer floatBuf = byteBuf.asFloatBuffer();
+    floatBuf.put(floats);
     return byteBuf.array();
   }
 
@@ -86,30 +83,10 @@ public final class ByteTools {
     return doubles;
   }
 
-  @Deprecated
-  public static List<Vec> toVecs(byte[] bytes) {
-    DoubleBuffer doubleBuf = ByteBuffer.wrap(bytes).asDoubleBuffer();
-    double[] doubles = new double[doubleBuf.remaining()];
-    doubleBuf.get(doubles);
-
-    if (doubles.length == 0) {
-      return Collections.emptyList();
-    }
-    if (doubles.length == PlainIndexBuilder.DEFAULT_VEC_SIZE) {
-      return Collections.singletonList(new ArrayVec(doubles));
-    }
-
-    if (doubles.length % PlainIndexBuilder.DEFAULT_VEC_SIZE != 0) {
-      throw new IllegalArgumentException(
-          String.format("Invalid buffer size ([%d])", doubles.length));
-    }
-
-    List<Vec> result = new ArrayList<>();
-    for (int i = 0; i < doubles.length; i += PlainIndexBuilder.DEFAULT_VEC_SIZE) {
-      result.add(
-          new ArrayVec(Arrays.copyOfRange(doubles, i, i + PlainIndexBuilder.DEFAULT_VEC_SIZE)));
-    }
-
-    return result;
+  public static float[] toFloatArray(byte[] bytes) {
+    FloatBuffer floatBuf = ByteBuffer.wrap(bytes).asFloatBuffer();
+    float[] floats = new float[floatBuf.remaining()];
+    floatBuf.get(floats);
+    return floats;
   }
 }
