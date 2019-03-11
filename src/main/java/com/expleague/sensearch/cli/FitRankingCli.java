@@ -189,12 +189,16 @@ public class FitRankingCli {
     TargetFunc target = trainPool.targetByName(TARGET.value(commandLine).targetName());
     // TODO: configure metrics from cmd line
     Func[] testMetrics = {testPool.targetByName(TARGET.value(commandLine).targetName)};
+    DefaultProgressPrinter progressPrinter = null;
     if (commandLine.hasOption(VERBOSE.getOpt())) {
+      progressPrinter = new DefaultProgressPrinter(trainPool, testPool, target,
+          testMetrics,
+          PRINT_PERIOD.value(commandLine));
       ((WeakListenerHolder) gbotOptimizer).addListener(
-          new DefaultProgressPrinter(trainPool, testPool, target, testMetrics,
-              PRINT_PERIOD.value(commandLine)));
+          progressPrinter);
     }
-
+    // TODO: WTF WHY DO I NEED THERE? (otherwise progressPrinter will be GC-ed?)
+    System.out.println(progressPrinter);
     // Start fitting
     Interval.start();
     Interval.suspend();

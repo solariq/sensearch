@@ -48,7 +48,6 @@ public class SenSearchCli {
   private static final String MAX_FILTER_ITEMS = "maxfilter";
   private static final String POOL_PATH_OPTION = "pool";
 
-  private static final String MODEL_PATH_OPTION = "model";
   private static final String RANK_MODEL_PATH_OPTION = "rankmodel";
   private static final String FILTER_MODEL_PATH_OPTION = "filtermodel";
 
@@ -143,14 +142,6 @@ public class SenSearchCli {
     buildFilterPoolOptions.addOption(poolPathOption);
     buildRankPoolOptions.addOption(poolPathOption);
 
-    Option trainedModelPathOption =
-        Option.builder()
-            .longOpt(MODEL_PATH_OPTION)
-            .desc("path to result model")
-            .hasArg()
-            .required()
-            .build();
-
     Option rankModelPathOption =
         Option.builder()
             .longOpt(RANK_MODEL_PATH_OPTION)
@@ -159,6 +150,7 @@ public class SenSearchCli {
             .required()
             .build();
     startServerOptions.addOption(rankModelPathOption);
+    buildRankPoolOptions.addOption(rankModelPathOption);
 
     Option filterModelPathOption =
         Option.builder()
@@ -168,6 +160,8 @@ public class SenSearchCli {
             .required()
             .build();
     startServerOptions.addOption(filterModelPathOption);
+    buildFilterPoolOptions.addOption(filterModelPathOption);
+    buildRankPoolOptions.addOption(filterModelPathOption);
   }
 
   private static final Logger LOG = LoggerFactory.getLogger(SenSearchCli.class);
@@ -190,13 +184,17 @@ public class SenSearchCli {
       switch (args[0]) {
         case TRAIN_EMBEDDING_COMMAND:
           parser = cliParser.parse(trainEmbeddingOptions, args);
-          try (Writer w = Files.newBufferedWriter(Paths.get(parser.getOptionValue(EMBEDDING_OUTPUT_PATH_OPTION)))) {
-            final JmllEmbeddingBuilder embeddingBuilder = new JmllEmbeddingBuilder(
-                DEFAULT_VEC_SIZE,
-                Paths.get(parser.getOptionValue(EMBEDDING_PATH_OPTION))
-            );
-            EmbeddingImpl<CharSeq> embedding = (EmbeddingImpl<CharSeq>)embeddingBuilder
-                .build(new CrawlerXML(Paths.get(parser.getOptionValue(DATA_PATH_OPTION))).makeStream());
+          try (Writer w =
+              Files.newBufferedWriter(
+                  Paths.get(parser.getOptionValue(EMBEDDING_OUTPUT_PATH_OPTION)))) {
+            final JmllEmbeddingBuilder embeddingBuilder =
+                new JmllEmbeddingBuilder(
+                    DEFAULT_VEC_SIZE, Paths.get(parser.getOptionValue(EMBEDDING_PATH_OPTION)));
+            EmbeddingImpl<CharSeq> embedding =
+                (EmbeddingImpl<CharSeq>)
+                    embeddingBuilder.build(
+                        new CrawlerXML(Paths.get(parser.getOptionValue(DATA_PATH_OPTION)))
+                            .makeStream());
             embedding.write(w);
           }
           break;
@@ -226,6 +224,11 @@ public class SenSearchCli {
           config.setTemporaryIndex(parser.getOptionValue(INDEX_PATH_OPTION));
 
           config.setMaxFilterItems(Integer.parseInt(parser.getOptionValue(MAX_FILTER_ITEMS)));
+
+          if (parser.hasOption(FILTER_MODEL_PATH_OPTION)) {
+            config.setModelFilterPath(parser.getOptionValue(FILTER_MODEL_PATH_OPTION));
+          }
+
           Path poolPath = Paths.get(parser.getOptionValue(POOL_PATH_OPTION));
           Guice.createInjector(new AppModule(config))
               .getInstance(FilterPoolBuilderRememberTop.class)
@@ -237,6 +240,14 @@ public class SenSearchCli {
           config.setTemporaryIndex(parser.getOptionValue(INDEX_PATH_OPTION));
 
           config.setMaxFilterItems(Integer.parseInt(parser.getOptionValue(MAX_FILTER_ITEMS)));
+
+          if (parser.hasOption(FILTER_MODEL_PATH_OPTION)) {
+            config.setModelFilterPath(parser.getOptionValue(FILTER_MODEL_PATH_OPTION));
+          }
+          if (parser.hasOption(RANK_MODEL_PATH_OPTION)) {
+            config.setModelPath(parser.getOptionValue(RANK_MODEL_PATH_OPTION));
+          }
+
           poolPath = Paths.get(parser.getOptionValue(POOL_PATH_OPTION));
           Guice.createInjector(new AppModule(config))
               .getInstance(RankingPoolBuilder.class)
@@ -246,22 +257,23 @@ public class SenSearchCli {
           LOG.debug("Executing command 'fitrk'");
           FitRankingCli.run(args);
           //          JMLLCLI.main(
-//              new String[]{
-//                  "fit",
-//                  "--print-period",
-//                  "10",
-//                  "--json-format",
-//                  "--learn",
-//                  parse.getOptionValue(RANK_POOL_PATH_OPTION),
-//                  "-X",
-//                  "1/0.7",
-//                  "-v",
-//                  "-O",
-//                  "'GradientBoosting(local=SatL2, weak=GreedyObliviousTree(depth=6), step=0.01, iterations=600)'"
-//              });
-//          Files.move(
-//              Paths.get(parser.getOptionValue(RANK_POOL_PATH_OPTION) + ".model"),
-//              Paths.get(parser.getOptionValue(RANK_MODEL_PATH_OPTION)));
+          //              new String[]{
+          //                  "fit",
+          //                  "--print-period",
+          //                  "10",
+          //                  "--json-format",
+          //                  "--learn",
+          //                  parse.getOptionValue(RANK_POOL_PATH_OPTION),
+          //                  "-X",
+          //                  "1/0.7",
+          //                  "-v",
+          //                  "-O",
+          //                  "'GradientBoosting(local=SatL2, weak=GreedyObliviousTree(depth=6),
+          // step=0.01, iterations=600)'"
+          //              });
+          //          Files.move(
+          //              Paths.get(parser.getOptionValue(RANK_POOL_PATH_OPTION) + ".model"),
+          //              Paths.get(parser.getOptionValue(RANK_MODEL_PATH_OPTION)));
           break;
 
         case REBUILD_EMBEDDING_COMMAND:
