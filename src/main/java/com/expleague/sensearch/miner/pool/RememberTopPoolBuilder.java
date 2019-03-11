@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.List;
 
 public abstract class RememberTopPoolBuilder {
@@ -23,8 +24,9 @@ public abstract class RememberTopPoolBuilder {
     try {
       return mapper.readValue(getRememberTopFile(queryString), new TypeReference<List<URI>>() {
       });
-    } catch (IOException e) {
-      throw new RuntimeException(e);
+    } catch (IOException ignored) {
+      // no saved top found
+      return new ArrayList<>();
     }
   }
 
