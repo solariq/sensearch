@@ -12,12 +12,12 @@ import com.expleague.sensearch.AppModule;
 import com.expleague.sensearch.Page;
 import com.expleague.sensearch.Page.SegmentType;
 import com.expleague.sensearch.core.impl.ResultItemImpl;
-import com.expleague.sensearch.filter.FilterMinerPhase;
-import com.expleague.sensearch.features.sets.filter.FilterFeatures;
-import com.expleague.sensearch.features.sets.filter.TargetFeatureSet;
-import com.expleague.sensearch.index.Index;
 import com.expleague.sensearch.features.Features;
 import com.expleague.sensearch.features.QURLItem;
+import com.expleague.sensearch.features.sets.filter.FilterFeatures;
+import com.expleague.sensearch.features.sets.filter.TargetFeatureSet;
+import com.expleague.sensearch.filter.FilterMinerPhase;
+import com.expleague.sensearch.index.Index;
 import com.expleague.sensearch.query.BaseQuery;
 import com.expleague.sensearch.query.Query;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -36,19 +36,26 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 public class FilterPoolBuilder {
 
   private static final int FILTER_SIZE = 100;
   private final Index index;
-  private final static FeatureMeta TITLE = FeatureMeta
-      .create("dist-title", "cos distance between Query and Title", FeatureMeta.ValueType.VEC);
-  private final static FeatureMeta SECTION = FeatureMeta
-      .create("dist-section", "cos distance between Query and Nearest Section Body", FeatureMeta.ValueType.VEC);
-  private final static FeatureMeta LINK = FeatureMeta
-      .create("dist-link", "cos distance between Query and Nearest Incoming Link", FeatureMeta.ValueType.VEC);
-
+  private static final FeatureMeta TITLE =
+      FeatureMeta.create(
+          "dist-title", "cos distance between Query and Title", FeatureMeta.ValueType.VEC);
+  private static final FeatureMeta SECTION =
+      FeatureMeta.create(
+          "dist-section",
+          "cos distance between Query and Nearest Section Body",
+          FeatureMeta.ValueType.VEC);
+  private static final FeatureMeta LINK =
+      FeatureMeta.create(
+          "dist-link",
+          "cos distance between Query and Nearest Incoming Link",
+          FeatureMeta.ValueType.VEC);
 
   @Inject
   public FilterPoolBuilder(Index index) {
@@ -76,42 +83,55 @@ public class FilterPoolBuilder {
 
       Pool.Builder<QURLItem> poolBuilder = Pool.builder(meta, features, targetFeatureSet);
 
-      int status = 0;
-      for (int q = 0; q < queries.size(); q++) {
-        if (status % 100 == 0) {
-          System.err.println(status + " queries completed");
-        }
-        String queryString = queries.get(q);
-        if (Files.exists(Paths.get("./wordstat").resolve("query_" + queryString))) {
-          status++;
-          BufferedReader readerFile = Files.newBufferedReader(Paths.get("./wordstat").resolve("query_" + queryString));
+      AtomicInteger status = new AtomicInteger(0);
+      queries
+          .parallelStream()
+          .forEach(
+              queryString -> {
+                try {
+                  if (status.get() % 100 == 0) {
+                    System.err.println(status.get() + " queries completed");
+                  }
+                  if (Files.exists(Paths.get("./wordstat").resolve("query_" + queryString))) {
+                    status.incrementAndGet();
+                    BufferedReader readerFile;
+                    readerFile =
+                        Files.newBufferedReader(
+                            Paths.get("./wordstat").resolve("query_" + queryString));
 
-          Query query = BaseQuery.create(queryString, index);
-          ObjectMapper objectMapper = new ObjectMapper();
-          Set<CharSeq> validTitles = Arrays.stream(objectMapper.readValue(readerFile, ResultItemImpl[].class))
-              .map(ResultItemImpl::title)
-              .map(CharSeq::create)
-              .collect(Collectors.toSet());
-          Map<Page, Features> allDocs = index.fetchDocuments(query, FilterMinerPhase.FILTERED_DOC_NUMBER);
-          allDocs
-              .forEach((page, feat) -> {
-                if (validTitles.contains(CharSeq.create(page.content(SegmentType.SECTION_TITLE)))) {
-                  accept(poolBuilder, page, query, feat);
+                    Query query = BaseQuery.create(queryString, index);
+                    ObjectMapper objectMapper = new ObjectMapper();
+                    Set<CharSeq> validTitles =
+                        Arrays.stream(objectMapper.readValue(readerFile, ResultItemImpl[].class))
+                            .map(ResultItemImpl::title)
+                            .map(CharSeq::create)
+                            .collect(Collectors.toSet());
+                    Map<Page, Features> allDocs =
+                        index.fetchDocuments(query, FilterMinerPhase.FILTERED_DOC_NUMBER);
+                    allDocs.forEach(
+                        (page, feat) -> {
+                          if (validTitles.contains(
+                              CharSeq.create(page.content(SegmentType.SECTION_TITLE)))) {
+                            accept(poolBuilder, page, query, feat);
+                          }
+                        });
+                    final int[] cnt = {0};
+                    allDocs.forEach(
+                        (page, feat) -> {
+                          if (cnt[0] == FILTER_SIZE) {
+                            return;
+                          }
+                          if (!validTitles.contains(
+                              CharSeq.create(page.content(SegmentType.SECTION_TITLE)))) {
+                            accept(poolBuilder, page, query, feat);
+                            cnt[0]++;
+                          }
+                        });
+                  }
+                } catch (IOException e) {
+                  throw new RuntimeException(e);
                 }
               });
-          final int[] cnt = {0};
-          allDocs
-              .forEach((page, feat) -> {
-                if (cnt[0] == FILTER_SIZE) {
-                  return;
-                }
-                if (!validTitles.contains(CharSeq.create(page.content(SegmentType.SECTION_TITLE)))) {
-                  accept(poolBuilder, page, query, feat);
-                  cnt[0]++;
-                }
-              });
-        }
-      }
 
       Pool<QURLItem> pool = poolBuilder.create();
       DataTools.writePoolTo(pool, Files.newBufferedWriter(poolPath));
@@ -119,15 +139,21 @@ public class FilterPoolBuilder {
     }
   }
 
-  private void accept (Pool.Builder<QURLItem> poolBuilder, Page page, Query query, Features feat) {
-    poolBuilder.accept(new QURLItem(page, query));
-    poolBuilder.features().map(Functions.cast(FilterFeatures.class))
-        .filter(Objects::nonNull)
-        .forEach(fs -> {
-          fs.withBody(feat.features(SECTION).get(0));
-          fs.withLink(feat.features(LINK).get(0));
-          fs.withTitle(feat.features(TITLE).get(0));
-        });
-    poolBuilder.advance();
+  private void accept(Pool.Builder<QURLItem> poolBuilder, Page page, Query query, Features feat) {
+    synchronized (poolBuilder) {
+      poolBuilder.accept(new QURLItem(page, query));
+      poolBuilder
+          .features()
+          .map(Functions.cast(FilterFeatures.class))
+          .filter(Objects::nonNull)
+          .forEach(
+              fs -> {
+                fs.withBody(feat.features(SECTION).get(0));
+                fs.withLink(feat.features(LINK).get(0));
+                fs.withTitle(feat.features(TITLE).get(0));
+              });
+      poolBuilder.advance();
+    }
   }
+
 }

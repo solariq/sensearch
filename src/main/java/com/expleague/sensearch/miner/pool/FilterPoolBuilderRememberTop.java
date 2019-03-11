@@ -1,22 +1,5 @@
 package com.expleague.sensearch.miner.pool;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.net.URI;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
-import java.util.function.Function;
-import java.util.stream.Collectors;
-
 import com.expleague.commons.func.Functions;
 import com.expleague.commons.math.Trans;
 import com.expleague.commons.random.FastRandom;
@@ -46,141 +29,188 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Guice;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.net.URI;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicIntegerArray;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 public class FilterPoolBuilderRememberTop extends RememberTopPoolBuilder {
-	private static final int FILTER_SIZE = 100;
-	private final Index index;
-	private final static FeatureMeta TITLE = FeatureMeta
-			.create("dist-title", "cos distance between Query and Title", FeatureMeta.ValueType.VEC);
-	private final static FeatureMeta SECTION = FeatureMeta
-			.create("dist-section", "cos distance between Query and Nearest Section Body", FeatureMeta.ValueType.VEC);
-	private final static FeatureMeta LINK = FeatureMeta
-			.create("dist-link", "cos distance between Query and Nearest Incoming Link", FeatureMeta.ValueType.VEC);
 
-	private final Trans model;
+  private static final int FILTER_SIZE = 10;
+  private final Index index;
+  private static final FeatureMeta TITLE =
+      FeatureMeta.create(
+          "dist-title", "cos distance between Query and Title", FeatureMeta.ValueType.VEC);
+  private static final FeatureMeta SECTION =
+      FeatureMeta.create(
+          "dist-section",
+          "cos distance between Query and Nearest Section Body",
+          FeatureMeta.ValueType.VEC);
+  private static final FeatureMeta LINK =
+      FeatureMeta.create(
+          "dist-link",
+          "cos distance between Query and Nearest Incoming Link",
+          FeatureMeta.ValueType.VEC);
 
-	@Inject
-	public FilterPoolBuilderRememberTop(Index index, 
-			@RankFilterModel Pair<Function, FeatureMeta[]> rankModel) {
-		this.index = index;
-		this.model = (Trans) rankModel.getFirst();
-	}
+  private final Trans model;
 
-	public static void main(String[] args) throws IOException {
-		Injector injector = Guice.createInjector(new AppModule());
-		injector.getInstance(FilterPoolBuilderRememberTop.class).build(Paths.get("filter.pool"));
-	}
+  @Inject
+  public FilterPoolBuilderRememberTop(
+      Index index, @RankFilterModel Pair<Function, FeatureMeta[]> rankModel) {
+    this.index = index;
+    this.model = (Trans) rankModel.getFirst();
+  }
 
+  public static void main(String[] args) throws IOException {
+    Injector injector = Guice.createInjector(new AppModule());
+    injector.getInstance(FilterPoolBuilderRememberTop.class).build(Paths.get("filter.pool"));
+  }
 
+  public void build(Path poolPath) {
+    try (BufferedReader reader = Files.newBufferedReader(Paths.get("./wordstat/queries.txt"))) {
+      FastRandom rand = new FastRandom();
+      DataSetMeta meta =
+          new JsonDataSetMeta(
+              "Google", "sensearch", new Date(), QURLItem.class, rand.nextBase64String(32));
+      List<String> queries = new ArrayList<>();
+      String line;
+      while ((line = reader.readLine()) != null) {
+        queries.add(line);
+      }
+      FilterFeatures features = new FilterFeatures();
+      TargetFeatureSet targetFeatureSet = new TargetFeatureSet();
 
-	public void build(Path poolPath) {
-		try (BufferedReader reader = Files.newBufferedReader(Paths.get("./wordstat/queries.txt"))) {
-			FastRandom rand = new FastRandom();
-			DataSetMeta meta =
-					new JsonDataSetMeta(
-							"Google", "sensearch", new Date(), QURLItem.class, rand.nextBase64String(32));
-			List<String> queries = new ArrayList<>();
-			String line;
-			while ((line = reader.readLine()) != null) {
-				queries.add(line);
-			}
-			FilterFeatures features = new FilterFeatures();
-			TargetFeatureSet targetFeatureSet = new TargetFeatureSet();
+      Pool.Builder<QURLItem> poolBuilder = Pool.builder(meta, features, targetFeatureSet);
 
-			Pool.Builder<QURLItem> poolBuilder = Pool.builder(meta, features, targetFeatureSet);
+      AtomicInteger status = new AtomicInteger(0);
 
-			int status = 0;
-			int[] cntAddedSaved = {0, 0};
-			for (String queryString : queries) {
-				if (status % 100 == 0) {
-					System.err.println(status + " queries completed");
-				}
-				if (Files.exists(Paths.get("./wordstat").resolve("query_" + queryString))) {
-					status++;
-					BufferedReader readerFile = Files.newBufferedReader(Paths.get("./wordstat").resolve("query_" + queryString));
+      AtomicIntegerArray cntAddedSaved = new AtomicIntegerArray(2);
+      queries
+          .parallelStream()
+          .forEach(
+              queryString -> {
+                try {
+                  if (status.get() % 100 == 0) {
+                    System.err.println(status.get() + " queries completed");
+                  }
+                  if (Files.exists(Paths.get("./wordstat").resolve("query_" + queryString))) {
+                    status.incrementAndGet();
+                    BufferedReader readerFile =
+                        Files.newBufferedReader(
+                            Paths.get("./wordstat").resolve("query_" + queryString));
 
-					Query query = BaseQuery.create(queryString, index);
-					ObjectMapper objectMapper = new ObjectMapper();
+                    Query query = BaseQuery.create(queryString, index);
+                    ObjectMapper objectMapper = new ObjectMapper();
 
-					Set<CharSeq> googleTitles = Arrays.stream(objectMapper.readValue(readerFile, ResultItemImpl[].class))
-							.map(ResultItemImpl::title)
-							.map(CharSeq::create)
-							.collect(Collectors.toSet());
+                    Set<CharSeq> googleTitles =
+                        Arrays.stream(objectMapper.readValue(readerFile, ResultItemImpl[].class))
+                            .map(ResultItemImpl::title)
+                            .map(CharSeq::create)
+                            .collect(Collectors.toSet());
 
-					Map<Page, Features> allDocs = index.fetchDocuments(query, FilterMinerPhase.FILTERED_DOC_NUMBER);
+                    Map<Page, Features> allDocs =
+                        index.fetchDocuments(query, FilterMinerPhase.FILTERED_DOC_NUMBER);
 
-					List<URI> rememberedURIs = getSavedQueryTop(queryString);
+                    List<URI> rememberedURIs = getSavedQueryTop(queryString);
 
+                    rememberedURIs.forEach(
+                        uri -> {
+                          Page page = index.page(uri);
+                          if (page == PlainPage.EMPTY_PAGE) {
+                            return;
+                          }
+                          accept(
+                              poolBuilder,
+                              page,
+                              query,
+                              ((PlainIndex) index).filterFeatures(query, uri));
+                          allDocs.remove(page);
+                        });
 
-					rememberedURIs.forEach(uri -> {
-						Page page = index.page(uri);
-						if (page == PlainPage.EMPTY_PAGE)
-							return;
-						accept(poolBuilder,
-								page,
-								query,
-								((PlainIndex)index).filterFeatures(query, uri)
-								);
-						allDocs.remove(page);
-					});
+                    final int[] cnt = {0};
+                    allDocs
+                        .entrySet()
+                        .stream()
+                        .sorted(
+                            Comparator.comparingDouble(
+                                e -> -model.trans(e.getValue().features()).get(0)))
+                        .forEach(
+                            (entry) -> {
+                              Page page = entry.getKey();
+                              Features feat = entry.getValue();
 
+                              if (page == PlainPage.EMPTY_PAGE
+                                  || rememberedURIs.contains(page.uri())) {
+                                return;
+                              }
 
-					final int[] cnt = {0};
-					allDocs
-					.forEach((page, feat) -> {
-						if (page == PlainPage.EMPTY_PAGE)
-							return;
-						if (googleTitles.contains(CharSeq.create(page.content(SegmentType.SECTION_TITLE)))) {
-							accept(poolBuilder, page, query, feat);
-						} else if (cnt[0] < FILTER_SIZE) {
-							accept(poolBuilder, page, query, feat);
-							cnt[0]++;
-						}
-					});
+                              if (googleTitles.contains(
+                                  CharSeq.create(page.content(SegmentType.SECTION_TITLE)))) {
+                                accept(poolBuilder, page, query, feat);
+                              } else if (cnt[0] < FILTER_SIZE) {
+                                cntAddedSaved.incrementAndGet(0);
+                                rememberedURIs.add(page.uri());
 
-					allDocs.entrySet().stream()
-					.sorted(
-							Comparator.comparingDouble(
-									e -> 
-									-model.trans(e.getValue().features()).get(0))
-							)
-					.limit(10)
-					.forEach(e -> {
-						rememberedURIs.add(e.getKey().uri());
-						cntAddedSaved[0]++;
-					});
-					
-					cntAddedSaved[1] += rememberedURIs.size();
-					saveQueryTop(queryString, rememberedURIs);
-				}
-			}
+                                accept(poolBuilder, page, query, feat);
+                                cnt[0]++;
+                              }
+                            });
 
-			System.out.format("Запомнено новых результатов %d\n"
-					+ "Всего запомнено %d\n", cntAddedSaved[0], cntAddedSaved[1]);
-			
-			Pool<QURLItem> pool = poolBuilder.create();
-			DataTools.writePoolTo(pool, Files.newBufferedWriter(poolPath));
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
+                    cntAddedSaved.addAndGet(1, rememberedURIs.size());
+                    saveQueryTop(queryString, rememberedURIs);
+                  }
+                } catch (IOException e) {
+                  throw new RuntimeException(e);
+                }
+              });
 
-	private void accept (Pool.Builder<QURLItem> poolBuilder, Page page, Query query, Features feat) {
-		if (page == PlainPage.EMPTY_PAGE)
-			return;
-		poolBuilder.accept(new QURLItem(page, query));
-		poolBuilder.features().map(Functions.cast(FilterFeatures.class))
-		.filter(Objects::nonNull)
-		.forEach(fs -> {
-			fs.withBody(feat.features(SECTION).get(0));
-			fs.withLink(feat.features(LINK).get(0));
-			fs.withTitle(feat.features(TITLE).get(0));
-		});
-		poolBuilder.advance();
-	}
+      System.out.format(
+          "Запомнено новых результатов %d\n" + "Всего запомнено %d\n",
+          cntAddedSaved.get(0), cntAddedSaved.get(1));
 
-	@Override
-	public Path getRememberDir() {
-		return Paths.get("pbdata/filterPhaseTop/");
-	}
+      Pool<QURLItem> pool = poolBuilder.create();
+      DataTools.writePoolTo(pool, Files.newBufferedWriter(poolPath));
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+  }
+
+  private void accept(Pool.Builder<QURLItem> poolBuilder, Page page, Query query, Features feat) {
+    if (page == PlainPage.EMPTY_PAGE) {
+      return;
+    }
+    synchronized (poolBuilder) {
+      poolBuilder.accept(new QURLItem(page, query));
+      poolBuilder
+          .features()
+          .map(Functions.cast(FilterFeatures.class))
+          .filter(Objects::nonNull)
+          .forEach(
+              fs -> {
+                fs.withBody(feat.features(SECTION).get(0));
+                fs.withLink(feat.features(LINK).get(0));
+                fs.withTitle(feat.features(TITLE).get(0));
+              });
+      poolBuilder.advance();
+    }
+  }
+
+  @Override
+  public Path getRememberDir() {
+    return Paths.get("pbdata/filterPhaseTop/");
+  }
 }
