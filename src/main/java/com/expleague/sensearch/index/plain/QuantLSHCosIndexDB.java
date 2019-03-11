@@ -59,8 +59,9 @@ public class QuantLSHCosIndexDB extends BaseQuantLSHCosIndex implements AutoClos
         query,
         idx -> {
           long id = ids.getQuick(idx);
-          if (!idCondition.test(id))
-        return null;
+          if (!idCondition.test(id)) {
+            return null;
+          }
           return VecTools.normalizeL2(ByteTools.toVec(vecDB.get(Longs.toByteArray(id))));
         });
   }

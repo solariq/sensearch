@@ -373,7 +373,7 @@ public class PlainIndex implements Index {
     Vec queryVec = vecByTerms(query.terms());
     IndexedPage page = (IndexedPage) page(pageURI);
     long tmpID;
-    //Title
+    // Title
     tmpID = IdUtils.toStartSecTitleId(page.id());
     Vec pageVec = embedding.vec(tmpID);
     while (pageVec != null) {
@@ -381,7 +381,7 @@ public class PlainIndex implements Index {
       tmpID++;
       pageVec = embedding.vec(tmpID);
     }
-    //Body
+    // Body
     tmpID = IdUtils.toStartSecTextId(page.id());
     pageVec = embedding.vec(tmpID);
     while (pageVec != null) {
@@ -389,7 +389,7 @@ public class PlainIndex implements Index {
       tmpID++;
       pageVec = embedding.vec(tmpID);
     }
-    //Link
+    // Link
     tmpID = IdUtils.toStartLinkId(page.id());
     pageVec = embedding.vec(tmpID);
     while (pageVec != null) {

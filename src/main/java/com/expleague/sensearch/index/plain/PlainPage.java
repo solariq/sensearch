@@ -1,6 +1,8 @@
 package com.expleague.sensearch.index.plain;
 
 import com.expleague.commons.seq.CharSeqTools;
+import com.expleague.commons.util.cache.CacheStrategy.Type;
+import com.expleague.commons.util.cache.impl.FixedSizeCache;
 import com.expleague.sensearch.Page;
 import com.expleague.sensearch.index.IndexedPage;
 import com.expleague.sensearch.protobuf.index.IndexUnits;
@@ -92,15 +94,11 @@ public class PlainPage implements IndexedPage {
 
   private static final Logger LOG = LoggerFactory.getLogger(PlainPage.class);
 
-  private static final double MAX_DIST = -1;
   private final long id;
   private final PlainIndex index;
   private final IndexUnits.Page protoPage;
   private final URI uri;
   private final boolean isEmpty;
-  private double titleDist;
-  private double bodyDist;
-  private double linkDist;
 
   private PlainPage(IndexUnits.Page protoPage, PlainIndex index) {
     this.index = index;
@@ -111,23 +109,33 @@ public class PlainPage implements IndexedPage {
     isEmpty = false;
   }
 
+  private static final int CACHE_SIZE = 4 * (1 << 10); // 4K pages
+
+  private static final FixedSizeCache<Long, IndexedPage> vecCache =
+      new FixedSizeCache<>(CACHE_SIZE, Type.LRU);
+
   static IndexedPage create(long id, PlainIndex plainIndex) {
-    try {
-      IndexUnits.Page protoPage = plainIndex.protoPageLoad(id);
-      return new PlainPage(protoPage, plainIndex);
-    } catch (NoSuchElementException e) {
-      LOG.warn(
-          String.format(
-              "No page was found in the index by given id [ %d ]." + " Returned empty page", id));
-      return EMPTY_PAGE;
-    } catch (InvalidProtocolBufferException e) {
-      LOG.warn(
-          String.format(
-              "Encountered invalid protobuf for the page with id [ %d ]."
-                  + " Empty page is returned. Cause: %s",
-              id, e.toString()));
-      return EMPTY_PAGE;
-    }
+    return vecCache.get(
+        id,
+        (id1) -> {
+          try {
+            IndexUnits.Page protoPage = plainIndex.protoPageLoad(id);
+            return new PlainPage(protoPage, plainIndex);
+          } catch (NoSuchElementException e) {
+            LOG.warn(
+                String.format(
+                    "No page was found in the index by given id [ %d ]." + " Returned empty page",
+                    id));
+            return EMPTY_PAGE;
+          } catch (InvalidProtocolBufferException e) {
+            LOG.warn(
+                String.format(
+                    "Encountered invalid protobuf for the page with id [ %d ]."
+                        + " Empty page is returned. Cause: %s",
+                    id, e.toString()));
+            return EMPTY_PAGE;
+          }
+        });
   }
 
   @Override
