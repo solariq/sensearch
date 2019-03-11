@@ -48,6 +48,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicIntegerArray;
 import java.util.function.Function;
 
+
 public class RankingPoolBuilderRememberTop extends RememberTopPoolBuilder {
 
   private static final int RANK_DOCUMENTS = 10;
@@ -55,8 +56,8 @@ public class RankingPoolBuilderRememberTop extends RememberTopPoolBuilder {
   private final Trans model;
 
   @Inject
-  public RankingPoolBuilderRememberTop(
-      Index index, @RankModel Pair<Function, FeatureMeta[]> rankModel) {
+  public RankingPoolBuilderRememberTop(Index index,
+      @RankModel Pair<Function, FeatureMeta[]> rankModel) {
     this.index = index;
     this.model = (Trans) rankModel.getFirst();
   }
@@ -73,8 +74,8 @@ public class RankingPoolBuilderRememberTop extends RememberTopPoolBuilder {
             "Google", "sensearch", new Date(), QURLItem.class, rand.nextBase64String(32));
     TargetFeatureSet googleTarget = new TargetFeatureSet();
 
-    Builder<QURLItem> poolBuilder =
-        Pool.builder(meta, new AccumulatorFeatureSet(index), googleTarget);
+    Builder<QURLItem> poolBuilder = Pool
+        .builder(meta, new AccumulatorFeatureSet(index), googleTarget);
 
     ThreadLocal<AccumulatorFeatureSet> featuresProvider =
         ThreadLocal.withInitial(() -> new AccumulatorFeatureSet(index));
@@ -107,15 +108,12 @@ public class RankingPoolBuilderRememberTop extends RememberTopPoolBuilder {
                         if (resPage == PlainPage.EMPTY_PAGE) {
                           continue;
                         }
-                        poolBuilder
-                            .features()
-                            .forEach(
-                                fs -> {
-                                  if (fs instanceof AccumulatorFeatureSet) {
-                                    ((AccumulatorFeatureSet) fs)
-                                        .acceptFilterFeatures(filterFeatures(query, resPage));
-                                  }
-                                });
+                        poolBuilder.features().forEach(fs -> {
+                          if (fs instanceof AccumulatorFeatureSet) {
+                            ((AccumulatorFeatureSet) fs)
+                                .acceptFilterFeatures(filterFeatures(query, resPage));
+                          }
+                        });
                         poolBuilder.accept(new QURLItem(resPage, query));
                         poolBuilder.advance();
                       }
@@ -127,69 +125,72 @@ public class RankingPoolBuilderRememberTop extends RememberTopPoolBuilder {
                   List<URI> savedTop = getSavedQueryTop(query.text());
 
                   synchronized (poolBuilder) {
-                    savedTop
-                        .stream()
-                        .map(index::page)
+                    savedTop.stream().map(index::page)
                         .filter(
                             page ->
                                 !uniqQURL.contains(
                                     CharSeq.create(page.content(SegmentType.SECTION_TITLE)))
                                     && (page != PlainPage.EMPTY_PAGE))
-                        .forEach(
-                            page -> {
-                              uniqQURL.add(CharSeq.create(page.content(SegmentType.SECTION_TITLE)));
-                              poolBuilder
-                                  .features()
-                                  .forEach(
-                                      fs -> {
-                                        if (fs instanceof AccumulatorFeatureSet) {
-                                          ((AccumulatorFeatureSet) fs)
-                                              .acceptFilterFeatures(filterFeatures(query, page));
-                                        }
-                                      });
-                              poolBuilder.accept(new QURLItem(page, query));
-                              poolBuilder.advance();
-                            });
+                        .forEach(page -> {
+                          uniqQURL.add(
+                              CharSeq.create(page.content(SegmentType.SECTION_TITLE)));
+                          poolBuilder.features().forEach(fs -> {
+                            if (fs instanceof AccumulatorFeatureSet) {
+                              ((AccumulatorFeatureSet) fs)
+                                  .acceptFilterFeatures(filterFeatures(query, page));
+                            }
+                          });
+                          poolBuilder.accept(new QURLItem(page, query));
+                          poolBuilder.advance();
+                        });
                   }
 
-                  Map<Page, Features> sensearchResult =
-                      index.fetchDocuments(query, FilterMinerPhase.FILTERED_DOC_NUMBER);
+                  Map<Page, Features> sensearchResult = index
+                      .fetchDocuments(query, FilterMinerPhase.FILTERED_DOC_NUMBER);
+
+                  sensearchResult
+                      .keySet()
+                      .stream()
+                      .filter(
+                          page ->
+                              !uniqQURL.contains(
+                                  CharSeq.create(page.content(SegmentType.SECTION_TITLE))))
+                      .sorted(Comparator.comparingDouble(page -> {
+                        AccumulatorFeatureSet features = featuresProvider.get();
+                        features.acceptFilterFeatures(sensearchResult);
+                        features.accept(new QURLItem(page, query));
+                        Vec all = features.advance();
+                        return -model.trans(all).get(0);
+                      }))
+                      .limit(10)
+                      .forEach(page -> {
+                        savedTop.add(page.uri());
+                        addedSavedCnt.incrementAndGet(0);
+                      });
+
+                  addedSavedCnt.addAndGet(1, savedTop.size());
+                  saveQueryTop(query.text(), savedTop);
 
                   synchronized (poolBuilder) {
-                    sensearchResult
-                        .keySet()
+                    sensearchResult.keySet()
                         .stream()
                         .filter(
                             page ->
                                 !uniqQURL.contains(
                                     CharSeq.create(page.content(SegmentType.SECTION_TITLE))))
-                        .sorted(
-                            Comparator.comparingDouble(
-                                page -> {
-                                  AccumulatorFeatureSet features = featuresProvider.get();
-                                  features.acceptFilterFeatures(sensearchResult);
-                                  features.accept(new QURLItem(page, query));
-                                  Vec all = features.advance();
-                                  return -model.trans(all).get(0);
-                                }))
                         .limit(RANK_DOCUMENTS)
                         .forEach(
                             page -> {
-                              savedTop.add(page.uri());
-                              addedSavedCnt.incrementAndGet(0);
-
+                              uniqQURL.add(CharSeq.create(page.content(SegmentType.SECTION_TITLE)));
                               poolBuilder.accept(new QURLItem(page, query));
                               poolBuilder.advance();
                             });
                   }
-                  addedSavedCnt.addAndGet(1, savedTop.size());
-                  saveQueryTop(query.text(), savedTop);
                 }
               });
 
-      System.out.format(
-          "Добавлено новых %d\n" + "Всего сохранено %d\n",
-          addedSavedCnt.get(0), addedSavedCnt.get(1));
+      System.out.format("Добавлено новых %d\n"
+          + "Всего сохранено %d\n", addedSavedCnt.get(0), addedSavedCnt.get(1));
       Pool<QURLItem> pool = poolBuilder.create();
       DataTools.writePoolTo(pool, Files.newBufferedWriter(poolPath));
     } catch (IOException e) {
