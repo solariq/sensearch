@@ -23,7 +23,7 @@ public class PlainPageTest extends IndexBasedTestCase {
   private static final URI TEST_PAGE_URI =
       URI.create("https://ru.wikipedia.org/wiki/Тестовый_заголовок");
   private static final URI SECTION_URI_1 =
-      URI.create("https://ru.wikipedia.org/wiki/Тестовый_заголовок#Тестовый_заголовок");
+      URI.create("https://ru.wikipedia.org/wiki/Тестовый_заголовок");
   private static final URI SECTION_URI_2 =
       URI.create("https://ru.wikipedia.org/wiki/Тестовый_заголовок#Подсекция");
   private static final URI SECTION_URI_3 =
