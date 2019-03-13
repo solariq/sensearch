@@ -36,9 +36,6 @@ public class FilterImpl implements Filter {
 
   @Override
   public Stream<Candidate> filtrate(@NotNull Vec qVec, LongPredicate predicate, int numOfNeighbors) {
-    if (numOfNeighbors > maxItems) {
-      throw new IllegalArgumentException("numOfNeighbors is too large");
-    }
     LOG.info("Filtering started");
     long start = System.currentTimeMillis();
     Stream<Candidate> result = embedding.nearest(qVec, predicate, numOfNeighbors);

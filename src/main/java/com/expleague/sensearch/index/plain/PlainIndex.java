@@ -108,6 +108,7 @@ public class PlainIndex implements Index {
     pageBase.close();
     termBase.close();
     termStatisticsBase.close();
+    uriMappingDb.close();
     suggestUnigramDb.close();
     suggestMultigramDb.close();
   }
