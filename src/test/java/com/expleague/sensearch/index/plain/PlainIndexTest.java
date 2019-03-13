@@ -162,8 +162,8 @@ public class PlainIndexTest extends IndexBasedTestCase {
   @Test
   public void testPage_existing() {
     URI uri = URI.create("https://ru.wikipedia.org/wiki/Диктатор");
-
     Page page = index().page(uri);
+
     assertNotSame(PlainPage.EMPTY_PAGE, page);
   }
 
@@ -185,8 +185,6 @@ public class PlainIndexTest extends IndexBasedTestCase {
         URI.create(
             "https://ru.wikipedia.org/wiki/Диктатор#Диктаторы_XXI_века_по_версии_журнала_The_Foreign_Policy");
     Page page = index().page(uri);
-
-    assertEquals(content, page.content());
     assertEquals(content, page.content(SegmentType.BODY));
   }
 

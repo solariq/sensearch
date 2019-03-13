@@ -32,6 +32,7 @@ public class UriMappingBuilder implements AutoCloseable {
 
     pageUri.forEachEntry(
         (uri, id) -> {
+//          System.err.println(uri);
           writeBatch[0].put(
               uri.getBytes(),
               UriPageMapping.newBuilder().setUri(uri).setPageId(id).build().toByteArray());
@@ -48,7 +49,9 @@ public class UriMappingBuilder implements AutoCloseable {
           }
           return true;
         });
-
+    if (pagesInBatch[0] > 0) {
+      uriMappingDb.write(writeBatch[0]);
+    }
     uriMappingDb.close();
   }
 }
