@@ -31,8 +31,6 @@ import java.util.stream.Collectors;
  */
 public class SnippetsCreator {
 
-  private static final long NUMBER_OF_KEYWORDS = 6;
-
   private final Index index;
 
   @Inject
@@ -40,81 +38,24 @@ public class SnippetsCreator {
     this.index = index;
   }
 
-  private boolean containsWithLemma(Passage passage, Term term) {
-    return passage.words().anyMatch(x -> x.lemma() == term.lemma());
-  }
-
-  private boolean contains(Passage passage, Term term) {
-    return passage.words().anyMatch(x -> x == term);
-  }
-
   public Snippet getSnippet(Page page, Query query) {
     CharSequence title = page.content(SegmentType.SECTION_TITLE);
 
-    List<Passage> passages =
-        page
-            .sentences(SegmentType.SUB_BODY)
-            .map(x -> new Passage(x, index.parse(x).collect(Collectors.toList())))
-            .collect(Collectors.toList());
+    List<Passage> passages = page
+        .sentences(SegmentType.SUB_BODY)
+        .map(x -> new Passage(x, index.parse(x).collect(Collectors.toList()), page))
+        .collect(Collectors.toList());
 
     for (int i = 0; i < passages.size(); i++) {
       passages.get(i).setId(i);
     }
 
-    Set<KeyWord> uniqueWords =
-        passages
-            .stream()
-            .flatMap(passage -> passage.words().map(KeyWord::new))
-            .collect(Collectors.toCollection(HashSet::new));
-
-    Predicate<Passage> queryRelevant =
-        passage -> query.terms().stream().anyMatch(term -> containsWithLemma(passage, term));
-
-    Predicate<Passage> notQueryRelevant =
-        passage -> query.terms().stream().noneMatch(term -> containsWithLemma(passage, term));
-
-    List<Passage> passagesWithQueryWords =
-        passages.stream().filter(queryRelevant).collect(Collectors.toList());
-
-    List<Passage> passagesWithoutQueryWords =
-        passages.stream().filter(notQueryRelevant).collect(Collectors.toList());
-
-    List<KeyWord> keyWords =
-        uniqueWords
-            .stream()
-            .filter(x -> x.word().partOfSpeech() == PartOfSpeech.S)
-            .peek(
-                x -> {
-                  long r =
-                      passagesWithQueryWords
-                          .stream()
-                          .filter(passage -> containsWithLemma(passage, x.word()))
-                          .count();
-                  long R = passagesWithQueryWords.size();
-                  long s =
-                      passagesWithoutQueryWords
-                          .stream()
-                          .filter(passage -> containsWithLemma(passage, x.word()))
-                          .count();
-                  long S = passagesWithoutQueryWords.size();
-                  // System.out.println(x.word().text() + " " + r + " " + R + " " + s + " " + S);
-                  double w = Math.log((r + 0.5) * (S - s + 0.5) / ((R - r + 0.5) * (s + 0.5)));
-                  x.setRank(w);
-                })
-            .sorted(Comparator.comparingDouble(KeyWord::rank).reversed())
-            .limit(NUMBER_OF_KEYWORDS)
-            .collect(Collectors.toList());
-
     final AccumulatorFeatureSet features = new AccumulatorFeatureSet(index);
-    features.withKeyWords(keyWords);
-
     final Map<Passage, Features> passagesFeatures = new HashMap<>();
 
     passages.forEach(passage -> {
       features.accept(new QPASItem(query, passage));
       Vec all = features.advance();
-      //System.out.println(passage.sentence());
-      //System.out.println(all);
       passagesFeatures.put(
           passage, new FeaturesImpl(features, all)
       );

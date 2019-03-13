@@ -1,5 +1,6 @@
 package com.expleague.sensearch.snippet.passage;
 
+import com.expleague.sensearch.Page;
 import com.expleague.sensearch.core.Term;
 import java.util.List;
 import java.util.stream.Stream;
@@ -11,21 +12,13 @@ public class Passage {
 
   private final CharSequence sentence;
   private final List<Term> words;
-  private double rating;
+  private final Page owner;
   private int id;
 
-  public Passage(CharSequence sentence, List<Term> terms) {
+  public Passage(CharSequence sentence, List<Term> terms, Page owner) {
     this.sentence = sentence;
     this.words = terms;
-    this.rating = 0;
-  }
-
-  public double rating() {
-    return rating;
-  }
-
-  public void setRating(double rating) {
-    this.rating = rating;
+    this.owner = owner;
   }
 
   public int id() {
@@ -44,4 +37,7 @@ public class Passage {
     return words.stream();
   }
 
+  public Page owner() {
+    return owner;
+  }
 }

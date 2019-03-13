@@ -22,9 +22,11 @@ public class QuotationFeatureSet extends FeatureSet.Stub<QPASItem> {
   private Query query;
   private Passage passage;
 
-  public void withStats(Query query, Passage passage) {
-    this.query = query;
-    this.passage = passage;
+  @Override
+  public void accept(QPASItem item) {
+    this.query = item.queryCache();
+    this.passage = item.passageCache();
+    super.accept(item);
   }
 
   @Override
