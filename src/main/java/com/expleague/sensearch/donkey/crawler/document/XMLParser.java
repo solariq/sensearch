@@ -67,6 +67,9 @@ public class XMLParser {
   }
 
   public WikiPage parseXML(XmlPage page) {
+    if (page == null) {
+      return null;
+    }
     return parsePage(page);
   }
 
@@ -109,7 +112,7 @@ public class XMLParser {
 
       return parsePage(xmlPage);
     } catch (JAXBException e) {
-      throw new IllegalArgumentException(e);
+      throw new RuntimeException(e);
     }
   }
 
@@ -118,7 +121,7 @@ public class XMLParser {
       Unmarshaller um = context.createUnmarshaller();
       return parsePage(um.unmarshal(reader, XmlPage.class).getValue());
     } catch (JAXBException e) {
-      throw new IllegalArgumentException(e);
+      throw new RuntimeException(e);
     }
   }
 

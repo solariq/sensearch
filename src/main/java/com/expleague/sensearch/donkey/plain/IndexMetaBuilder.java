@@ -47,7 +47,6 @@ public class IndexMetaBuilder {
     state.termIds.add(termId);
     switch (termSegment) {
       case SECTION_TITLE:
-        state.totalTokenCount++;
         state.titleTokensCount++;
       case TEXT:
         state.totalTokenCount++;
@@ -76,6 +75,7 @@ public class IndexMetaBuilder {
 
   public IndexMeta build() {
     LOG.info("Building index meta...");
+    long start = System.currentTimeMillis();
 
     int titlesCount = allStates.stream().mapToInt(state -> state.titlesCount).sum();
     int pageCount = allStates.stream().mapToInt(state -> state.pageCount).sum();
@@ -101,9 +101,9 @@ public class IndexMetaBuilder {
 
     TLongSet termIds = new TLongHashSet();
     allStates.forEach(
-        state -> {
-          termIds.addAll(state.termIds);
-        });
+        state -> termIds.addAll(state.termIds));
+    long end = System.currentTimeMillis();
+    LOG.info(String.format("Index meta build in %.3f seconds", (end - start) / 1e3));
 
     return IndexMeta.newBuilder()
         .setVersion(version)

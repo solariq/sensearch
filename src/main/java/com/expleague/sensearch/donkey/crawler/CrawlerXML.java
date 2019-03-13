@@ -159,7 +159,7 @@ public class CrawlerXML implements Crawler {
           } else {
             result = ((XmlPageRootElement) res).page;
           }
-        } catch (IllegalArgumentException ignored) {
+        } catch (RuntimeException ignored) {
           LOG.info(zipEntry.getName() + " wrong format");
         }
         zipInputStream.closeEntry();
