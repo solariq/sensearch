@@ -124,30 +124,8 @@ public class RankingPoolBuilderRememberTop extends RememberTopPoolBuilder {
 
                   List<URI> savedTop = getSavedQueryTop(query.text());
 
-                  synchronized (poolBuilder) {
-                    savedTop.stream().map(index::page)
-                        .filter(
-                            page ->
-                                !uniqQURL.contains(
-                                    CharSeq.create(page.content(SegmentType.SECTION_TITLE)))
-                                    && (page != PlainPage.EMPTY_PAGE))
-                        .forEach(page -> {
-                          uniqQURL.add(
-                              CharSeq.create(page.content(SegmentType.SECTION_TITLE)));
-                          poolBuilder.features().forEach(fs -> {
-                            if (fs instanceof AccumulatorFeatureSet) {
-                              ((AccumulatorFeatureSet) fs)
-                                  .acceptFilterFeatures(filterFeatures(query, page));
-                            }
-                          });
-                          poolBuilder.accept(new QURLItem(page, query));
-                          poolBuilder.advance();
-                        });
-                  }
-
                   Map<Page, Features> sensearchResult = index
                       .fetchDocuments(query, FilterMinerPhase.FILTERED_DOC_NUMBER);
-
 
                   sensearchResult
                       .keySet()
@@ -171,6 +149,29 @@ public class RankingPoolBuilderRememberTop extends RememberTopPoolBuilder {
 
                   addedSavedCnt.addAndGet(1, savedTop.size());
                   saveQueryTop(query.text(), savedTop);
+                  
+                  synchronized (poolBuilder) {
+                    savedTop.stream().map(index::page)
+                        .filter(
+                            page ->
+                                !uniqQURL.contains(
+                                    CharSeq.create(page.content(SegmentType.SECTION_TITLE)))
+                                    && (page != PlainPage.EMPTY_PAGE))
+                        .forEach(page -> {
+                          uniqQURL.add(
+                              CharSeq.create(page.content(SegmentType.SECTION_TITLE)));
+                          poolBuilder.features().forEach(fs -> {
+                            if (fs instanceof AccumulatorFeatureSet) {
+                              ((AccumulatorFeatureSet) fs)
+                                  .acceptFilterFeatures(filterFeatures(query, page));
+                            }
+                          });
+                          poolBuilder.accept(new QURLItem(page, query));
+                          poolBuilder.advance();
+                        });
+                  }
+
+                  
 
                   synchronized (poolBuilder) {
                     poolBuilder.features().forEach(fs -> {
