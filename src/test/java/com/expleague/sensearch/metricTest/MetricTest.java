@@ -30,6 +30,7 @@ public class MetricTest {
     searcher = injector.getInstance(SenSeArch.class);
   }
 
+  @Ignore
   @Test
   public void metricTest() {
     Path pathToMetric = Paths.get("./resources/Metrics");

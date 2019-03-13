@@ -16,7 +16,6 @@ import com.expleague.sensearch.utils.IndexBasedTestCase;
 import java.net.URI;
 import java.util.List;
 import java.util.stream.Collectors;
-import org.junit.Ignore;
 import org.junit.Test;
 
 public class PlainIndexTest extends IndexBasedTestCase {
@@ -168,7 +167,7 @@ public class PlainIndexTest extends IndexBasedTestCase {
     assertNotSame(PlainPage.EMPTY_PAGE, page);
   }
 
-  @Ignore("Sections are not indexed for now")
+//  @Ignore("Sections are not indexed for now")
   @Test
   public void testPage_existingSection() {
     URI uri = URI.create("https://ru.wikipedia.org/wiki/Диктатор#Римские_диктаторы");
@@ -177,7 +176,7 @@ public class PlainIndexTest extends IndexBasedTestCase {
     assertNotSame(PlainPage.EMPTY_PAGE, page);
   }
 
-  @Ignore("Sections are not indexed for now")
+//  @Ignore("Sections are not indexed for now")
   @Test
   public void testPage_sectionContent() {
     String content =
