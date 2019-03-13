@@ -2,27 +2,37 @@ package com.expleague.sensearch.core.impl;
 
 import com.expleague.commons.seq.CharSeqTools;
 import com.expleague.sensearch.core.Tokenizer;
+import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.regex.Pattern;
+import java.util.List;
 import java.util.stream.Stream;
 
 public class TokenizerImpl implements Tokenizer {
-
-  private static final Pattern SENTENCE_SPLIT_PATTEN =
-      Pattern.compile("(?<=[.!?]|[.!?]['\"])(?=\\p{javaWhitespace}*\\p{javaUpperCase})");
-  private static final Pattern WORD_SPLIT_PATTERN =
-      Pattern.compile("[^\\p{javaAlphabetic}\\p{javaDigit}]");
 
   public TokenizerImpl() {
   }
 
   @Override
   public Stream<CharSequence> toWords(CharSequence sentence) {
-    return Stream.<CharSequence>of(
-        WORD_SPLIT_PATTERN.split(
-            CharSeqTools.replace(sentence, String.valueOf((char) 769), "")))
-        .map(CharSeqTools::trim)
-        .filter(s -> s.length() > 0);
+    List<CharSequence> words = new ArrayList<>();
+    int wordStart = -1;
+    int length = sentence.length();
+    for (int i = 0; i < length; i++) {
+      char c = sentence.charAt(i);
+      if (wordStart == -1 && (Character.isDigit(c) || isAlpha(c))) {
+        wordStart = i;
+      }
+      if (wordStart != -1 && !Character.isDigit(c) && !isAlpha(c)) {
+        words.add(sentence.subSequence(wordStart, i));
+        wordStart = -1;
+      }
+    }
+
+    if (wordStart != -1) {
+      words.add(sentence.subSequence(wordStart, length));
+    }
+
+    return words.stream();
   }
 
   @Override
@@ -32,8 +42,70 @@ public class TokenizerImpl implements Tokenizer {
 
   @Override
   public Stream<CharSequence> toSentences(CharSequence text) {
-    return Stream.<CharSequence>of(SENTENCE_SPLIT_PATTEN.split(text))
-        .map(CharSeqTools::trim)
-        .filter(s -> s.length() > 0);
+    int endOfSentencePos = -1;
+    int sentenceStart = 0;
+    List<CharSequence> sentences = new ArrayList<>();
+
+    int length = text.length();
+    for (int i = 0; i < length; i++) {
+      char c = text.charAt(i);
+      if (c == '!' || c == '?' || c == '.') {
+        endOfSentencePos = i;
+      }
+      if (endOfSentencePos != -1 && endOfSentencePos == i - 1 && (c == '\'' || c == '"')) {
+        endOfSentencePos = i;
+      }
+      if (Character.isWhitespace(c)) {
+        continue;
+      }
+      boolean isUpperCase = isUpperCase(c);
+
+      if (endOfSentencePos != -1 && isUpperCase) {
+        if (sentenceStart == 0) {
+          sentenceStart = trimStart(sentenceStart, text);
+        }
+        sentences.add(text.subSequence(sentenceStart, endOfSentencePos + 1));
+        endOfSentencePos = -1;
+        sentenceStart = i;
+      }
+
+      if (endOfSentencePos != -1
+          && (c == '\'' || c == '"')
+          && i + 1 < text.length()
+          && isUpperCase(text.charAt(i + 1))) {
+
+        if (sentenceStart == 0) {
+          sentenceStart = trimStart(sentenceStart, text);
+        }
+
+        sentences.add(text.subSequence(sentenceStart, endOfSentencePos + 1));
+        endOfSentencePos = -1;
+        sentenceStart = i;
+      }
+    }
+
+    sentences.add(CharSeqTools.trim(text.subSequence(sentenceStart, text.length())));
+
+    return sentences.stream().filter(s -> s.length() > 0);
+  }
+
+  private int trimStart(int sentenceStart, CharSequence text) {
+    while (sentenceStart < text.length() && Character.isWhitespace(text.charAt(sentenceStart))) {
+      sentenceStart++;
+    }
+    return sentenceStart;
+  }
+
+  private boolean isUpperCase(char c) {
+    return (c >= 'A' && c <= 'Z') || (c >= 'А' && c <= 'Я') || c == 'Ё';
+  }
+
+  private boolean isAlpha(char c) {
+    return (c >= 'A' && c <= 'Z')
+        || (c >= 'А' && c <= 'Я')
+        || c == 'Ё'
+        || (c >= 'a' && c <= 'z')
+        || (c >= 'а' && c <= 'я')
+        || c == 'ё';
   }
 }
