@@ -47,6 +47,7 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicIntegerArray;
 import java.util.function.Function;
+import java.util.function.ToDoubleFunction;
 
 
 public class RankingPoolBuilderRememberTop extends RememberTopPoolBuilder {
@@ -84,118 +85,132 @@ public class RankingPoolBuilderRememberTop extends RememberTopPoolBuilder {
     AtomicIntegerArray addedSavedCnt = new AtomicIntegerArray(2);
     try {
       Files.readAllLines(Paths.get("./wordstat/queries.txt"))
-          .stream()
-          .parallel()
-          .forEach(
-              line -> {
-                if (status.get() % 100 == 0) {
-                  System.err.println(status + " queries completed");
-                }
-                if (Files.exists(Paths.get("./wordstat").resolve("query_" + line))) {
-                  status.incrementAndGet();
-                  Query query = BaseQuery.create(line, index);
-                  Set<CharSeq> uniqQURL = new HashSet<>();
+      .stream()
+      .parallel()
+      .forEach(
+          line -> {
+            if (status.get() % 100 == 0) {
+              System.err.println(status + " queries completed");
+            }
+            if (Files.exists(Paths.get("./wordstat").resolve("query_" + line))) {
+              status.incrementAndGet();
+              Query query = BaseQuery.create(line, index);
+              Set<CharSeq> uniqQURL = new HashSet<>();
 
-                  try (BufferedReader queryReader =
-                      Files.newBufferedReader(
-                          Paths.get("./wordstat").resolve("query_" + query.text()))) {
-                    ObjectMapper objectMapper = new ObjectMapper();
-                    ResultItem[] res = objectMapper.readValue(queryReader, ResultItemImpl[].class);
-                    synchronized (poolBuilder) {
-                      for (ResultItem page : res) {
-                        uniqQURL.add(CharSeq.create(page.title()));
-                        Page resPage = index.page(page.reference());
-                        if (resPage == PlainPage.EMPTY_PAGE) {
-                          continue;
-                        }
-                        poolBuilder.features().forEach(fs -> {
-                          if (fs instanceof AccumulatorFeatureSet) {
-                            ((AccumulatorFeatureSet) fs)
-                                .acceptFilterFeatures(filterFeatures(query, resPage));
-                          }
-                        });
-                        poolBuilder.accept(new QURLItem(resPage, query));
-                        poolBuilder.advance();
-                      }
+              try (BufferedReader queryReader =
+                  Files.newBufferedReader(
+                      Paths.get("./wordstat").resolve("query_" + query.text()))) {
+                ObjectMapper objectMapper = new ObjectMapper();
+                ResultItem[] res = objectMapper.readValue(queryReader, ResultItemImpl[].class);
+                synchronized (poolBuilder) {
+                  for (ResultItem page : res) {
+                    uniqQURL.add(CharSeq.create(page.title()));
+                    Page resPage = index.page(page.reference());
+                    if (resPage == PlainPage.EMPTY_PAGE) {
+                      continue;
                     }
-                  } catch (IOException e) {
-                    e.printStackTrace();
-                  }
-
-                  List<URI> savedTop = getSavedQueryTop(query.text());
-
-                  Map<Page, Features> sensearchResult = index
-                      .fetchDocuments(query, FilterMinerPhase.FILTERED_DOC_NUMBER);
-
-                  sensearchResult
-                      .keySet()
-                      .stream()
-                      .filter(
-                          page ->
-                              !uniqQURL.contains(
-                                  CharSeq.create(page.content(SegmentType.SECTION_TITLE))))
-                      .sorted(Comparator.comparingDouble(page -> {
-                        AccumulatorFeatureSet features = featuresProvider.get();
-                        features.acceptFilterFeatures(sensearchResult);
-                        features.accept(new QURLItem(page, query));
-                        Vec all = features.advance();
-                        return -model.trans(all).get(0);
-                      }))
-                      .limit(10)
-                      .forEach(page -> {
-                        savedTop.add(page.uri());
-                        addedSavedCnt.incrementAndGet(0);
-                      });
-
-                  addedSavedCnt.addAndGet(1, savedTop.size());
-                  saveQueryTop(query.text(), savedTop);
-                  
-                  synchronized (poolBuilder) {
-                    savedTop.stream().map(index::page)
-                        .filter(
-                            page ->
-                                !uniqQURL.contains(
-                                    CharSeq.create(page.content(SegmentType.SECTION_TITLE)))
-                                    && (page != PlainPage.EMPTY_PAGE))
-                        .forEach(page -> {
-                          uniqQURL.add(
-                              CharSeq.create(page.content(SegmentType.SECTION_TITLE)));
-                          poolBuilder.features().forEach(fs -> {
-                            if (fs instanceof AccumulatorFeatureSet) {
-                              ((AccumulatorFeatureSet) fs)
-                                  .acceptFilterFeatures(filterFeatures(query, page));
-                            }
-                          });
-                          poolBuilder.accept(new QURLItem(page, query));
-                          poolBuilder.advance();
-                        });
-                  }
-
-                  
-
-                  synchronized (poolBuilder) {
                     poolBuilder.features().forEach(fs -> {
                       if (fs instanceof AccumulatorFeatureSet) {
                         ((AccumulatorFeatureSet) fs)
-                            .acceptFilterFeatures(sensearchResult);
+                        .acceptFilterFeatures(filterFeatures(query, resPage));
                       }
                     });
-                    sensearchResult.keySet()
-                        .stream()
-                        .filter(
-                            page ->
-                                !uniqQURL.contains(
-                                    CharSeq.create(page.content(SegmentType.SECTION_TITLE))))
-                        .limit(RANK_DOCUMENTS)
-                        .forEach(
-                            page -> {
-                              uniqQURL.add(CharSeq.create(page.content(SegmentType.SECTION_TITLE)));
-                              poolBuilder.accept(new QURLItem(page, query));
-                              poolBuilder.advance();
-                            });
+                    poolBuilder.accept(new QURLItem(resPage, query));
+                    poolBuilder.advance();
                   }
                 }
+              } catch (IOException e) {
+                e.printStackTrace();
+              }
+
+              List<URI> savedTop = getSavedQueryTop(query.text());
+
+              Map<Page, Features> sensearchResult = index
+                  .fetchDocuments(query, FilterMinerPhase.FILTERED_DOC_NUMBER);
+
+              sensearchResult
+              .keySet()
+              .stream()
+              .filter(
+                  page ->
+                  !uniqQURL.contains(
+                      CharSeq.create(page.content(SegmentType.SECTION_TITLE))))
+              .sorted(Comparator.comparingDouble( 
+                  new ToDoubleFunction<Page>() {
+                    private Map<Long, Double> computedValues = new HashMap<>();
+                    @Override
+                    public double applyAsDouble(Page page) {
+                      Double res = computedValues.get(((PlainPage)page).id());
+                      if (res != null) 
+                        return res;
+
+                      AccumulatorFeatureSet features = featuresProvider.get();
+                      features.acceptFilterFeatures(sensearchResult);
+                      features.accept(new QURLItem(page, query));
+                      Vec all = features.advance();
+                      res = -model.trans(all).get(0);
+                      computedValues.put(((PlainPage)page).id(), res);
+                      return res;
+                    }
+
+                  }
+
+                  ))
+              .limit(10)
+              .forEach(page -> {
+                savedTop.add(page.uri());
+                addedSavedCnt.incrementAndGet(0);
               });
+
+              addedSavedCnt.addAndGet(1, savedTop.size());
+              saveQueryTop(query.text(), savedTop);
+
+              synchronized (poolBuilder) {
+                savedTop.stream().map(index::page)
+                .filter(
+                    page ->
+                    !uniqQURL.contains(
+                        CharSeq.create(page.content(SegmentType.SECTION_TITLE)))
+                    && (page != PlainPage.EMPTY_PAGE))
+                .forEach(page -> {
+                  uniqQURL.add(
+                      CharSeq.create(page.content(SegmentType.SECTION_TITLE)));
+                  poolBuilder.features().forEach(fs -> {
+                    if (fs instanceof AccumulatorFeatureSet) {
+                      ((AccumulatorFeatureSet) fs)
+                      .acceptFilterFeatures(filterFeatures(query, page));
+                    }
+                  });
+                  poolBuilder.accept(new QURLItem(page, query));
+                  poolBuilder.advance();
+                });
+              }
+
+
+
+              synchronized (poolBuilder) {
+                poolBuilder.features().forEach(fs -> {
+                  if (fs instanceof AccumulatorFeatureSet) {
+                    ((AccumulatorFeatureSet) fs)
+                    .acceptFilterFeatures(sensearchResult);
+                  }
+                });
+                sensearchResult.keySet()
+                .stream()
+                .filter(
+                    page ->
+                    !uniqQURL.contains(
+                        CharSeq.create(page.content(SegmentType.SECTION_TITLE))))
+                .limit(RANK_DOCUMENTS)
+                .forEach(
+                    page -> {
+                      uniqQURL.add(CharSeq.create(page.content(SegmentType.SECTION_TITLE)));
+                      poolBuilder.accept(new QURLItem(page, query));
+                      poolBuilder.advance();
+                    });
+              }
+            }
+          });
 
       System.out.format("Добавлено новых %d\n"
           + "Всего сохранено %d\n", addedSavedCnt.get(0), addedSavedCnt.get(1));
