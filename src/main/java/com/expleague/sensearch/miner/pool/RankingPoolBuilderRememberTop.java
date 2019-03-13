@@ -148,6 +148,7 @@ public class RankingPoolBuilderRememberTop extends RememberTopPoolBuilder {
                   Map<Page, Features> sensearchResult = index
                       .fetchDocuments(query, FilterMinerPhase.FILTERED_DOC_NUMBER);
 
+
                   sensearchResult
                       .keySet()
                       .stream()
@@ -172,6 +173,12 @@ public class RankingPoolBuilderRememberTop extends RememberTopPoolBuilder {
                   saveQueryTop(query.text(), savedTop);
 
                   synchronized (poolBuilder) {
+                    poolBuilder.features().forEach(fs -> {
+                      if (fs instanceof AccumulatorFeatureSet) {
+                        ((AccumulatorFeatureSet) fs)
+                            .acceptFilterFeatures(sensearchResult);
+                      }
+                    });
                     sensearchResult.keySet()
                         .stream()
                         .filter(
