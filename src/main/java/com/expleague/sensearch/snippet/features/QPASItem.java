@@ -30,12 +30,12 @@ public class QPASItem extends DSItem.Stub {
   }
 
   @JsonProperty("query")
-  public String query() {
+  public String getQuery() {
     return query;
   }
 
   @JsonProperty("passage")
-  public CharSequence passage() {
+  public CharSequence getPassage() {
     return passage;
   }
 

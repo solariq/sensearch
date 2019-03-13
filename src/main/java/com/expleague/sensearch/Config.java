@@ -35,4 +35,6 @@ public interface Config {
   Path getModelPath();
 
   Path getFilterModelPath();
+
+  Path getSnippetModelPath();
 }

@@ -1,9 +1,12 @@
 package com.expleague.sensearch.snippet;
 
+import com.expleague.commons.math.Trans;
 import com.expleague.commons.math.vectors.Vec;
 import com.expleague.commons.util.Pair;
+import com.expleague.ml.meta.FeatureMeta;
 import com.expleague.sensearch.Page;
 import com.expleague.sensearch.Page.SegmentType;
+import com.expleague.sensearch.core.Annotations.SnippetModel;
 import com.expleague.sensearch.core.PartOfSpeech;
 import com.expleague.sensearch.core.Term;
 import com.expleague.sensearch.index.Index;
@@ -23,6 +26,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -32,10 +36,14 @@ import java.util.stream.Collectors;
 public class SnippetsCreator {
 
   private final Index index;
+  private final Trans model;
+  private final FeatureMeta[] featuresInModel;
 
   @Inject
-  public SnippetsCreator(Index index) {
+  public SnippetsCreator(Index index, @SnippetModel Pair<Function, FeatureMeta[]> snippetModel) {
     this.index = index;
+    this.model = (Trans) snippetModel.getFirst();
+    this.featuresInModel = snippetModel.getSecond();
   }
 
   public Snippet getSnippet(Page page, Query query) {
@@ -80,7 +88,7 @@ public class SnippetsCreator {
   }
 
   private double rank(Vec features) {
-    return 1 / features.get(4);
+    return model.trans(features).get(0);
   }
 
 }

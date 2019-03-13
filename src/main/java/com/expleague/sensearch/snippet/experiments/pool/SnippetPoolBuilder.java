@@ -53,7 +53,7 @@ public class SnippetPoolBuilder {
     FastRandom rand = new FastRandom();
     DataSetMeta meta =
         new JsonDataSetMeta(
-            "Google", "sensearch", new Date(), QURLItem.class, rand.nextBase64String(32));
+            "Google", "sensearch", new Date(), QPASItem.class, rand.nextBase64String(32));
     AccumulatorFeatureSet featureSet = new AccumulatorFeatureSet(index);
     TargetFeatureSet targetFeatureSet = new TargetFeatureSet(index);
 
@@ -67,7 +67,7 @@ public class SnippetPoolBuilder {
       Data[] datas = objectMapper.readValue(jsonData, Data[].class);
 
       Arrays.stream(datas)
-         // .parallel()
+          //.parallel()
           .forEach(data -> {
             if (status.get() % 10 == 0) {
               System.err.println(status + " datas completed");
@@ -84,12 +84,21 @@ public class SnippetPoolBuilder {
                   .sentences(SegmentType.SUB_BODY)
                   .map(x -> new Passage(x, index.parse(x).collect(Collectors.toList()), page.get()))
                   .collect(Collectors.toList());
+              for (int i = 0; i < passages.size(); i++) {
+                passages.get(i).setId(i);
+              }
 
-            //  synchronized (poolBuilder) {
-                for (Passage passage : passages) {
+             // synchronized (poolBuilder) {
+              System.out.println("--------------------");
+              //System.out.println(data.getLong_answer());
+              //System.out.println();
+              //System.out.println(page.get().content(SegmentType.SUB_BODY));
+              System.out.println(passages.size());
+              for (Passage passage : passages) {
                   poolBuilder.accept(new QPASItem(query, passage));
                   poolBuilder.advance();
                 }
+              System.out.println("--------------------");
             //  }
             }
           });

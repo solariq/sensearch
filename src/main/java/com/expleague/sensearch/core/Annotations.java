@@ -85,4 +85,13 @@ public class Annotations {
 
   }
 
+  @Retention(RetentionPolicy.RUNTIME)
+  @Target({ElementType.FIELD, ElementType.PARAMETER, ElementType.METHOD})
+  @BindingAnnotation
+  public @interface SnippetModel {
+
+  }
+
+
+
 }

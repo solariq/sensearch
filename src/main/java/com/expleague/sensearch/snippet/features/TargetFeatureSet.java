@@ -15,6 +15,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -51,19 +52,31 @@ public class TargetFeatureSet extends FeatureSet.Stub<QPASItem> {
     }
 
     Optional<Data> data = Arrays.stream(datas)
-        .filter(d -> d.getTitle().equals(query.text()))
+        .filter(d -> d.getQuery().equals(query.text()))
         .findFirst();
     if (data.isPresent()) {
       CharSequence shortAnswer = data.get().getShort_answer();
-      List<CharSequence> longAnswer = index.parse(data.get().getLong_answer())
-          .map(Term::text)
-          .collect(Collectors.toList());
-      CharSequence sentence = passage.sentence();
+      List<Term> shortAnswerTerms = index.parse(shortAnswer).collect(Collectors.toList());
 
-      if (CharSeqTools.indexOf(sentence, shortAnswer) != -1) {
+      List<CharSequence> longAnswer = index.sentences(data.get().getLong_answer())
+          .collect(Collectors.toList());
+
+      CharSequence sentence = passage.sentence();
+      List<Term> sentenceTerms = passage.words().collect(Collectors.toList());
+
+      if (Collections.indexOfSubList(sentenceTerms, shortAnswerTerms) != -1) {
         set(TARGET_META, 1.0);
       } else {
-        if (longAnswer.stream().anyMatch(x -> x.equals(sentence))) {
+        if (longAnswer.stream().anyMatch(la -> {
+          List<Term> longAnswerTerms = index.parse(la).collect(Collectors.toList());
+          if (Collections.indexOfSubList(sentenceTerms, longAnswerTerms) != -1) {
+            System.out.println("--");
+            System.out.println(la);
+            System.out.println(sentence);
+            System.out.println("--");
+          }
+          return Collections.indexOfSubList(sentenceTerms, longAnswerTerms) != -1;
+        })) {
           set(TARGET_META, 0.5);
         } else {
           set(TARGET_META, 0.0);

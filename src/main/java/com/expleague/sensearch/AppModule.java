@@ -16,6 +16,7 @@ import com.expleague.sensearch.core.Annotations.MetricPath;
 import com.expleague.sensearch.core.Annotations.PageSize;
 import com.expleague.sensearch.core.Annotations.RankFilterModel;
 import com.expleague.sensearch.core.Annotations.RankModel;
+import com.expleague.sensearch.core.Annotations.SnippetModel;
 import com.expleague.sensearch.core.Annotations.UseLshFlag;
 import com.expleague.sensearch.core.Lemmer;
 import com.expleague.sensearch.core.SearchPhaseFactory;
@@ -180,4 +181,23 @@ public class AppModule extends AbstractModule {
             + "], using empty model instead");
     return getModelStub();
   }
+
+  @Provides
+  @Singleton
+  @SnippetModel
+  Pair<Function, FeatureMeta[]> getSnippetModel() throws IOException {
+    if (Files.exists(config.getSnippetModelPath())) {
+      return DataTools.readModel(
+          new InputStreamReader(
+              Files.newInputStream(config.getSnippetModelPath()), StandardCharsets.UTF_8));
+    }
+
+    LOG.warn(
+        "Filter model can not be found at path ["
+            + config.getSnippetModelPath()
+            + "], using empty model instead");
+    return getModelStub();
+  }
+
+
 }
