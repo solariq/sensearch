@@ -11,7 +11,7 @@ import com.expleague.sensearch.donkey.IndexBuilder;
 import com.expleague.sensearch.donkey.crawler.CrawlerXML;
 import com.expleague.sensearch.donkey.plain.JmllEmbeddingBuilder;
 import com.expleague.sensearch.miner.pool.FilterPoolBuilderRememberTop;
-import com.expleague.sensearch.miner.pool.RankingPoolBuilder;
+import com.expleague.sensearch.miner.pool.RankingPoolBuilderRememberTop;
 import com.expleague.sensearch.web.SearchServer;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
@@ -56,7 +56,7 @@ public class SenSearchCli {
   private static final String REBUILD_EMBEDDING_COMMAND = "rebuildEmbeddingCommand";
 
   private static final String BUILD_INDEX_COMMAND = "buildIndex";
-  private static final String START_SEVER_COMMAND = "startServer";
+  private static final String START_SERVER_COMMAND = "startServer";
 
   private static final String BUILD_FILTER_POOL_COMMAND = "buildFilterPool";
   private static final String BUILD_RANK_POOL_COMMAND = "buildRankPool";
@@ -208,12 +208,13 @@ public class SenSearchCli {
           Guice.createInjector(new AppModule(config)).getInstance(IndexBuilder.class).buildIndex();
           break;
 
-        case START_SEVER_COMMAND:
+        case START_SERVER_COMMAND:
           parser = cliParser.parse(startServerOptions, args);
           config.setTemporaryIndex(parser.getOptionValue(INDEX_PATH_OPTION));
           config.setLshNearestFlag(!parser.hasOption(DO_NOT_USE_LSH_OPTION));
           config.setMaxFilterItems(Integer.parseInt(parser.getOptionValue(MAX_FILTER_ITEMS)));
           config.setModelPath(parser.getOptionValue(RANK_MODEL_PATH_OPTION));
+          config.setModelFilterPath(parser.getOptionValue(FILTER_MODEL_PATH_OPTION));
 
           Injector injector = Guice.createInjector(new AppModule(config));
           injector.getInstance(SearchServer.class).start(injector);
@@ -250,7 +251,7 @@ public class SenSearchCli {
 
           poolPath = Paths.get(parser.getOptionValue(POOL_PATH_OPTION));
           Guice.createInjector(new AppModule(config))
-              .getInstance(RankingPoolBuilder.class)
+              .getInstance(RankingPoolBuilderRememberTop.class)
               .build(poolPath);
           break;
         case TRAIN_RANK_MODEL_COMMAND:
@@ -297,7 +298,7 @@ public class SenSearchCli {
   private static void printUsage() {
     printUsage(TRAIN_EMBEDDING_COMMAND);
     printUsage(BUILD_INDEX_COMMAND);
-    printUsage(START_SEVER_COMMAND);
+    printUsage(START_SERVER_COMMAND);
     printUsage(BUILD_FILTER_POOL_COMMAND);
     printUsage(BUILD_RANK_POOL_COMMAND);
     FitRankingCli.printUsage();
@@ -309,7 +310,7 @@ public class SenSearchCli {
         return trainEmbeddingOptions;
       case BUILD_INDEX_COMMAND:
         return buildIndexOptions;
-      case START_SEVER_COMMAND:
+      case START_SERVER_COMMAND:
         return startServerOptions;
       case BUILD_FILTER_POOL_COMMAND:
         return buildFilterPoolOptions;
@@ -331,7 +332,7 @@ public class SenSearchCli {
         return "Trains embedding for given data.";
       case BUILD_INDEX_COMMAND:
         return "Builds index. Requires embedding to be already trained";
-      case START_SEVER_COMMAND:
+      case START_SERVER_COMMAND:
         return "Starts server. Requires index to be built";
       case BUILD_FILTER_POOL_COMMAND:
         return "Collects pool for filter model training. Requires index to be built";
