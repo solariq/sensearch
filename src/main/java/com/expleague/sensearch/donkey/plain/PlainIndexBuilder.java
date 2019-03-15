@@ -17,6 +17,7 @@ import com.expleague.sensearch.donkey.IndexBuilder;
 import com.expleague.sensearch.donkey.crawler.Crawler;
 import com.expleague.sensearch.donkey.plain.IndexMetaBuilder.TermSegment;
 import com.expleague.sensearch.index.plain.PlainIndex;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Inject;
 import gnu.trove.map.TLongObjectMap;
 import gnu.trove.set.TLongSet;
@@ -29,11 +30,14 @@ import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Random;
 import java.util.Set;
@@ -61,9 +65,10 @@ public class PlainIndexBuilder implements IndexBuilder {
   public static final String TEMP_EMBEDDING_ROOT = "temp_embedding";
   public static final String VECS_ROOT = "vecs";
 
+  public static final String RARE_INV_IDX_ROOT = "rare_iidx";
+  
   public static final String SUGGEST_UNIGRAM_ROOT = "suggest/unigram_coeff";
   public static final String SUGGEST_MULTIGRAMS_ROOT = "suggest/multigram_freq_norm";
-  public static final String SUGGEST_INVERTED_INDEX_ROOT = "suggest/inverted_index";
 
   public static final String INDEX_META_FILE = "index.meta";
   public static final int DEFAULT_VEC_SIZE = 130;
@@ -277,6 +282,9 @@ public class PlainIndexBuilder implements IndexBuilder {
       final SuggestInformationBuilder suggestBuilder =
           new SuggestInformationBuilder(suggestUnigramDb, suggestMultigramDb);
 
+      
+      final Map<Long, List<Long>> rareTermsInvIdx = new HashMap<>();
+      
       try {
         LOG.info("Parsing pages...");
         int[] docCnt = {0};
@@ -284,7 +292,7 @@ public class PlainIndexBuilder implements IndexBuilder {
             .makeStream()
             .filter(Objects::nonNull)
             .forEach(
-                doc -> {
+                doc -> {                  
                   docCnt[0]++;
                   if (docCnt[0] % 10_000 == 0) {
                     LOG.debug(docCnt[0] + " documents processed...");
@@ -326,12 +334,19 @@ public class PlainIndexBuilder implements IndexBuilder {
                                 .map(CharSeqTools::toLowerCase)
                                 .forEach(
                                     word -> {
+                                      
                                       if (word == TITLE_STOP) {
                                         isTitle[0] = false;
                                       }
                                       TermBuilder.ParsedTerm termLemmaId =
                                           termBuilder.addTerm(word);
 
+                                      
+                                      if (jmllEmbedding.apply(CharSeq.compact(word)) == null) {
+                                        rareTermsInvIdx.putIfAbsent(termLemmaId.id, new ArrayList<>());
+                                        rareTermsInvIdx.get(termLemmaId.id).add(pageId);
+                                      }
+                                      
                                       long lemmaId =
                                           termLemmaId.lemmaId == -1
                                               ? termLemmaId.id
@@ -369,6 +384,14 @@ public class PlainIndexBuilder implements IndexBuilder {
         // saving index-wise data
         indexMetaBuilder.build().writeTo(Files.newOutputStream(indexRoot.resolve(INDEX_META_FILE)));
 
+        {
+          ObjectMapper mapper = new ObjectMapper();
+          Files.createDirectories(indexRoot.resolve(RARE_INV_IDX_ROOT));
+          mapper.writeValue(
+              indexRoot.resolve(RARE_INV_IDX_ROOT).resolve("iidx").toFile(),
+              rareTermsInvIdx
+              );
+        }
       } catch (Exception e) {
         throw new IOException(e);
       }
