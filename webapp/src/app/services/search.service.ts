@@ -2,7 +2,7 @@ import {Injectable} from '@angular/core';
 import {HttpClient} from "@angular/common/http";
 import {Observable} from "rxjs";
 import {environment} from "../../environments/environment";
-import {SearchResultPageModel} from "../models/search-result-item.model";
+import {SearchResultPageModel, SynonymInfoModel} from "../models/search-result-item.model";
 
 @Injectable({
   providedIn: 'root'
@@ -26,5 +26,15 @@ export class SearchService {
       }
     });
     return response as Observable<SearchResultPageModel>
+  }
+
+  getSynonyms$(query: string, uri: string): Observable<SynonymInfoModel[]> {
+    let response = this.http.get(`${environment.backendUrl}/query_synonyms`, {
+      params: {
+        query: query,
+        uri: uri,
+      }
+    });
+    return response as Observable<SynonymInfoModel[]>
   }
 }

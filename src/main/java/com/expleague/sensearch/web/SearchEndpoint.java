@@ -47,6 +47,15 @@ public class SearchEndpoint {
     return mapper.writeValueAsString(search.search(query, pageNumber, debug, metric));
   }
 
+  @GET
+  @Path("/query_synonyms")
+  @Produces(MediaType.APPLICATION_JSON)
+  public String pageSynonyms(
+      @QueryParam("uri") String uri, @DefaultValue("") @QueryParam("query") String query)
+      throws JsonProcessingException {
+    return mapper.writeValueAsString(search.synonyms(uri, query));
+  }
+
   //  @GET
   //  @Produces(MediaType.TEXT_HTML)
   //  public String index() throws IOException {

@@ -105,15 +105,15 @@ public class RankingPoolBuilderRememberTop extends RememberTopPoolBuilder {
                       if (resPage == PlainPage.EMPTY_PAGE) {
                         continue;
                       }
-                      poolBuilder
-                          .features()
-                          .forEach(
-                              fs -> {
-                                if (fs instanceof AccumulatorFeatureSet) {
-                                  ((AccumulatorFeatureSet) fs)
-                                      .acceptFilterFeatures(filterFeatures(query, resPage));
-                                }
-                              });
+//                      poolBuilder
+//                          .features()
+//                          .forEach(
+//                              fs -> {
+//                                if (fs instanceof AccumulatorFeatureSet) {
+//                                  ((AccumulatorFeatureSet) fs)
+//                                      .acceptFilterFeatures(filterFeatures(query, resPage));
+//                                }
+//                              });
                       poolBuilder.accept(new QURLItem(resPage, query));
                       poolBuilder.advance();
                     }
@@ -146,7 +146,7 @@ public class RankingPoolBuilderRememberTop extends RememberTopPoolBuilder {
                                   }
 
                                   AccumulatorFeatureSet features = featuresProvider.get();
-                                  features.acceptFilterFeatures(sensearchResult);
+//                                  features.acceptFilterFeatures(sensearchResult);
                                   features.accept(new QURLItem(page, query));
                                   Vec all = features.advance();
                                   res = -model.trans(all).get(0);
@@ -175,27 +175,27 @@ public class RankingPoolBuilderRememberTop extends RememberTopPoolBuilder {
                       .forEach(
                           page -> {
                             uniqQURL.add(CharSeq.create(page.content(SegmentType.SECTION_TITLE)));
-                            poolBuilder
-                                .features()
-                                .forEach(
-                                    fs -> {
-                                      if (fs instanceof AccumulatorFeatureSet) {
-                                        ((AccumulatorFeatureSet) fs)
-                                            .acceptFilterFeatures(filterFeatures(query, page));
-                                      }
-                                    });
+//                            poolBuilder
+//                                .features()
+//                                .forEach(
+//                                    fs -> {
+//                                      if (fs instanceof AccumulatorFeatureSet) {
+//                                        ((AccumulatorFeatureSet) fs)
+//                                            .acceptFilterFeatures(filterFeatures(query, page));
+//                                      }
+//                                    });
                             poolBuilder.accept(new QURLItem(page, query));
                             poolBuilder.advance();
                           });
 
-                  poolBuilder
-                      .features()
-                      .forEach(
-                          fs -> {
-                            if (fs instanceof AccumulatorFeatureSet) {
-                              ((AccumulatorFeatureSet) fs).acceptFilterFeatures(sensearchResult);
-                            }
-                          });
+//                  poolBuilder
+//                      .features()
+//                      .forEach(
+//                          fs -> {
+//                            if (fs instanceof AccumulatorFeatureSet) {
+//                              ((AccumulatorFeatureSet) fs).acceptFilterFeatures(sensearchResult);
+//                            }
+//                          });
                   sensearchResult
                       .keySet()
                       .stream()

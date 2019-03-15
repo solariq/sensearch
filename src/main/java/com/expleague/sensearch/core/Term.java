@@ -11,6 +11,12 @@ public interface Term {
 
   Stream<Term> synonyms();
 
+  Stream<Term> synonyms(double synonymThreshold);
+
+  Stream<TermAndDistance> synonymsWithDistance(double synonymThreshold);
+
+  Stream<TermAndDistance> synonymsWithDistance();
+
   int documentFreq();
 
   /**
@@ -24,4 +30,12 @@ public interface Term {
   // Can be null if lemma can not be determined
   @Nullable
   PartOfSpeech partOfSpeech();
+
+
+  interface TermAndDistance {
+
+    Term term();
+
+    double distance();
+  }
 }

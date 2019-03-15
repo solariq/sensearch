@@ -290,9 +290,9 @@ public class PlainIndexBuilder implements IndexBuilder {
                     LOG.debug(docCnt[0] + " documents processed...");
                   }
                   long pageId = generatePageId(doc.uri());
-                  // We don't add pageId to the knownPageIds as we need first section to have the
+                  // We don't add uri to the knownPageIds as we need first section to have the
                   // same Id
-                  // knownPageIds.add(pageId);
+                  // knownPageIds.add(uri);
                   plainPageBuilder.startPage(pageId, doc.categories(), doc.uri());
                   statisticsBuilder.startPage();
                   indexMetaBuilder.startPage(

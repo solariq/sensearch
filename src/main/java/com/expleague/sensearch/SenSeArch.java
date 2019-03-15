@@ -6,6 +6,7 @@ import com.expleague.sensearch.core.impl.json.ResultItemDeserializer;
 import com.expleague.sensearch.core.impl.json.ResultItemSerializer;
 import com.expleague.sensearch.core.impl.json.ResultPageDeserializer;
 import com.expleague.sensearch.core.impl.json.ResultPageSerializer;
+import com.expleague.sensearch.core.impl.json.SynonymInfoSerializer;
 import com.expleague.sensearch.snippet.Segment;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
@@ -16,6 +17,8 @@ public interface SenSeArch {
 
   ResultPage search(String query, int pageNo, boolean debug, boolean metric);
 
+  List<SynonymInfo> synonyms(String uri, String query);
+
   @JsonSerialize(using = ResultPageSerializer.class)
   @JsonDeserialize(using = ResultPageDeserializer.class)
   interface ResultPage {
@@ -23,6 +26,8 @@ public interface SenSeArch {
     int number();
 
     int totalResultsFound();
+
+    String query();
 
     ResultItem[] results();
 
@@ -47,13 +52,33 @@ public interface SenSeArch {
   @JsonSerialize(using = ResultItemDebugInfoSerializer.class)
   interface ResultItemDebugInfo {
 
+    String uri();
+
     /**
      * @return rank of this result or -1 if it's filtered out
      */
+
     int rank();
 
     double[] features();
 
     String[] featureIds();
   }
+
+  @JsonSerialize(using = SynonymInfoSerializer.class)
+  interface SynonymInfo {
+
+    String queryWord();
+
+    SynonymAndScore[] queryWordSynonyms();
+  }
+
+  interface SynonymAndScore {
+
+    double score();
+
+    String synonym();
+  }
+
+
 }

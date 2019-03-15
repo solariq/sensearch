@@ -4,31 +4,41 @@ import com.expleague.commons.util.Pair;
 import com.expleague.sensearch.Page;
 import com.expleague.sensearch.Page.SegmentType;
 import com.expleague.sensearch.SenSeArch;
+import com.expleague.sensearch.core.Term.TermAndDistance;
 import com.expleague.sensearch.core.impl.ResultItemDebugInfoImpl;
 import com.expleague.sensearch.core.impl.ResultItemImpl;
 import com.expleague.sensearch.core.impl.ResultPageImpl;
+import com.expleague.sensearch.core.impl.SynonymAndScoreImpl;
+import com.expleague.sensearch.core.impl.SynonymInfoImpl;
 import com.expleague.sensearch.core.impl.WhiteboardImpl;
 import com.expleague.sensearch.features.Features;
+import com.expleague.sensearch.index.Index;
+import com.expleague.sensearch.query.BaseQuery;
 import com.expleague.sensearch.snippet.Snippet;
 import com.google.inject.Inject;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 public class SenSeArchImpl implements SenSeArch {
 
   private final SearchPhaseFactory searchPhaseFactory;
+  private final Index index;
 
   @Inject
-  public SenSeArchImpl(SearchPhaseFactory searchPhaseFactory) {
+  public SenSeArchImpl(SearchPhaseFactory searchPhaseFactory, Index index) {
     this.searchPhaseFactory = searchPhaseFactory;
+    this.index = index;
   }
 
   @Override
@@ -130,6 +140,7 @@ public class SenSeArchImpl implements SenSeArch {
       ResultItemDebugInfo debugInfo =
           debug
               ? new ResultItemDebugInfoImpl(
+              pages[i].uri().toString(),
               i,
               features.features().toArray(),
               IntStream.range(0, features.dim())
@@ -147,6 +158,40 @@ public class SenSeArchImpl implements SenSeArch {
               debugInfo);
     }
 
-    return new ResultPageImpl(0, snippets.length, results, googleResults);
+    return new ResultPageImpl(query, 0, snippets.length, results, googleResults);
+  }
+
+  @Override
+  public List<SynonymInfo> synonyms(String uri, String query) {
+    Page page = index.page(URI.create(uri));
+    List<Term> content =
+        index
+            .parse(page.content(SegmentType.FULL_TITLE, SegmentType.BODY))
+            .collect(Collectors.toList());
+    List<Term> queryTerms = index.parse(query).collect(Collectors.toList());
+
+    List<SynonymInfo> synonymInfos = new ArrayList<>();
+    for (Term term : queryTerms) {
+      Map<Term, Double> synonyms =
+          term.synonymsWithDistance(BaseQuery.SYNONYM_THRESHOLD)
+              .collect(
+                  Collectors.toMap(
+                      z -> z.term().lemma(),
+                      TermAndDistance::distance,
+                      (x, y) -> {
+                        System.out.println(x + y);
+                        return x;
+                      }));
+      SynonymAndScore[] synonymsInPage =
+          content
+              .stream()
+              .filter(contentTerm -> synonyms.containsKey(contentTerm.lemma()))
+              .distinct()
+              .map(z -> new SynonymAndScoreImpl(synonyms.get(z.lemma()), z.text().toString()))
+              .toArray(SynonymAndScore[]::new);
+      synonymInfos.add(new SynonymInfoImpl(term.text().toString(), synonymsInPage));
+    }
+
+    return synonymInfos;
   }
 }

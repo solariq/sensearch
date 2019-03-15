@@ -1,4 +1,5 @@
 export class SearchResultPageModel {
+  query: string;
   results: SearchResultItemModel[];
   googleResults: SearchResultItemModel[];
 }
@@ -9,6 +10,17 @@ export class SearchResultItemModel {
   passages: Passage[];
   score: number;
   debugInfo: DebugInfo;
+  pageId: number;
+}
+
+export class SynonymInfoModel {
+  word: string;
+  synonyms: WordAndScore[];
+}
+
+export class WordAndScore {
+  word: string;
+  score: number;
 }
 
 export class Passage {
@@ -17,6 +29,7 @@ export class Passage {
 }
 
 export class DebugInfo {
+  uri: string;
   rank: number;
   features: number[];
   featureIds: string[];
