@@ -39,7 +39,8 @@ public class ResultPageDeserializer extends StdDeserializer<ResultPage> {
       googleResults.add(codec.treeToValue(result, ResultItem.class));
     }
 
+    // TODO: null
     return new ResultPageImpl(
-        0, 0, results.toArray(new ResultItem[0]), googleResults.toArray(new ResultItem[0]));
+        null, 0, 0, results.toArray(new ResultItem[0]), googleResults.toArray(new ResultItem[0]));
   }
 }

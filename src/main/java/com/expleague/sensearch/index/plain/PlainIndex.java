@@ -10,6 +10,7 @@ import com.expleague.sensearch.core.Annotations.IndexRoot;
 import com.expleague.sensearch.core.IdUtils;
 import com.expleague.sensearch.core.PartOfSpeech;
 import com.expleague.sensearch.core.Term;
+import com.expleague.sensearch.core.Term.TermAndDistance;
 import com.expleague.sensearch.core.Tokenizer;
 import com.expleague.sensearch.core.impl.TokenizerImpl;
 import com.expleague.sensearch.donkey.plain.PlainIndexBuilder;
@@ -56,7 +57,7 @@ import org.iq80.leveldb.ReadOptions;
 public class PlainIndex implements Index {
 
   // TODO: !index version!
-  public static final int VERSION = 14;
+  public static final int VERSION = 15;
 
   private static final long DEFAULT_CACHE_SIZE = 128 * (1 << 20); // 128 MB
 
@@ -344,26 +345,37 @@ public class PlainIndex implements Index {
   }
 
   Stream<Term> synonyms(Term term) {
+    return synonymsWithDistance(term).map(TermAndDistance::term);
+  }
+
+  Stream<Term> synonyms(Term term, double synonymThreshold) {
+    return synonymsWithDistance(term, synonymThreshold).map(TermAndDistance::term);
+  }
+
+  Stream<TermAndDistance> synonymsWithDistance(Term term, double synonymThreshold) {
     Vec termVec = embedding.vec(((IndexTerm) term).id());
     if (termVec == null) {
       return Stream.empty();
     }
 
-    /*Set<Long> LSHIds =
-        filter
-            .filtrate(termVec, SYNONYMS_COUNT, PlainIndex::isWordId)
-            .boxed()
-            .collect(Collectors.toSet());
+    // TODO: FATAL: this nonNull filter must be redundant (but it's necessary for full ruWiki)
+    return filter
+        .filtrate(termVec, PlainIndex::isWordId, synonymThreshold)
+        .filter(Objects::nonNull)
+        .map(c -> new IndexTerm.IndexTermAndDistance(idToTerm.get(c.getId()), c.getDist()));
+  }
 
-    double result = lshSynonymsMetric.calc(((IndexTerm) term).id(), LSHIds);
-
-    LOG.info("LSHSynonymsMetric: " + result);*/
+  Stream<TermAndDistance> synonymsWithDistance(Term term) {
+    Vec termVec = embedding.vec(((IndexTerm) term).id());
+    if (termVec == null) {
+      return Stream.empty();
+    }
 
     // TODO: FATAL: this nonNull filter must be redundant (but it's necessary for full ruWiki)
     return filter
         .filtrate(termVec, PlainIndex::isWordId, SYNONYMS_COUNT)
-        .map(c -> idToTerm.get(c.getId()))
-        .filter(Objects::nonNull);
+        .filter(Objects::nonNull)
+        .map(c -> new IndexTerm.IndexTermAndDistance(idToTerm.get(c.getId()), c.getDist()));
   }
 
   public Features filterFeatures(Query query, URI pageURI) {

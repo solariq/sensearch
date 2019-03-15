@@ -4,14 +4,21 @@ import com.expleague.sensearch.SenSeArch.ResultItemDebugInfo;
 
 public class ResultItemDebugInfoImpl implements ResultItemDebugInfo {
 
+  private final String uri;
   private final int rank;
   private final double[] features;
   private final String[] featureIds;
 
-  public ResultItemDebugInfoImpl(int rank, double[] features, String[] featureIds) {
+  public ResultItemDebugInfoImpl(String uri, int rank, double[] features, String[] featureIds) {
+    this.uri = uri;
     this.rank = rank;
     this.features = features;
     this.featureIds = featureIds;
+  }
+
+  @Override
+  public String uri() {
+    return uri;
   }
 
   @Override

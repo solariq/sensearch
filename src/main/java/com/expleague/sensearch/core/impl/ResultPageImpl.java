@@ -5,13 +5,19 @@ import com.expleague.sensearch.SenSeArch.ResultPage;
 
 public class ResultPageImpl implements ResultPage {
 
+  private final String query;
   private final int number;
   private final int totalResults;
   private final ResultItem[] results;
   private final ResultItem[] googleResults;
 
   public ResultPageImpl(
-      int number, int totalResults, ResultItem[] results, ResultItem[] googleResults) {
+      String query,
+      int number,
+      int totalResults,
+      ResultItem[] results,
+      ResultItem[] googleResults) {
+    this.query = query;
     this.number = number;
     this.totalResults = totalResults;
     this.results = results;
@@ -26,6 +32,11 @@ public class ResultPageImpl implements ResultPage {
   @Override
   public int totalResultsFound() {
     return totalResults;
+  }
+
+  @Override
+  public String query() {
+    return query;
   }
 
   @Override

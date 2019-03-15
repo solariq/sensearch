@@ -114,7 +114,7 @@ public class PlainPage implements IndexedPage {
   private static final FixedSizeCache<Long, IndexedPage> vecCache =
       new FixedSizeCache<>(CACHE_SIZE, Type.LRU);
 
-  static IndexedPage create(long id, PlainIndex plainIndex) {
+  public static IndexedPage create(long id, PlainIndex plainIndex) {
     return vecCache.get(
         id,
         (id1) -> {

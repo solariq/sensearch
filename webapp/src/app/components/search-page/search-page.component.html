@@ -30,11 +30,13 @@
 <div class="search-results" *ngIf="searchResults">
   <ng-container *ngFor="let item of searchResults.results; let i = index">
     <app-search-result class="our-result" *ngIf="item" [debug]="debug" [searchItem]="item"
+                       [query]="searchResults.query"
                        [style.grid-row]="i + 1">
     </app-search-result>
   </ng-container>
   <ng-container *ngFor="let item of searchResults.googleResults; let i = index">
     <app-search-result class="google-result" *ngIf="item" [debug]="debug" [searchItem]="item"
+                       [query]="searchResults.query"
                        [style.grid-row]="i + 1">
     </app-search-result>
   </ng-container>

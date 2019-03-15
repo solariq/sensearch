@@ -9,6 +9,7 @@ import org.apache.commons.lang3.tuple.Pair;
 
 public class BaseQuery implements Query {
 
+  public static final double SYNONYM_THRESHOLD = 0.15;
   private Map<Term, List<Term>> synonyms;
   private final List<Term> terms;
   private final String text;
@@ -37,7 +38,10 @@ public class BaseQuery implements Query {
         synonyms =
             terms
                 .stream()
-                .map(term -> Pair.of(term, term.synonyms().collect(Collectors.toList())))
+                .map(
+                    term ->
+                        Pair.of(
+                            term, term.synonyms(SYNONYM_THRESHOLD).collect(Collectors.toList())))
                 .collect(Collectors.toSet())
                 .stream()
                 .collect(Collectors.toMap(Pair::getLeft, Pair::getRight));

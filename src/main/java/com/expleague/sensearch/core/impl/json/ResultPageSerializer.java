@@ -22,6 +22,8 @@ public class ResultPageSerializer extends StdSerializer<ResultPage> {
       throws IOException {
     jsonGenerator.writeStartObject();
 
+    jsonGenerator.writeStringField("query", resultPage.query());
+
     jsonGenerator.writeObjectField("results", resultPage.results());
     jsonGenerator.writeObjectField("googleResults", resultPage.googleResults());
 

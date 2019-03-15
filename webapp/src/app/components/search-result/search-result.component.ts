@@ -1,5 +1,11 @@
 import {Component, Input, OnInit} from '@angular/core';
-import {Passage, SearchResultItemModel} from "../../models/search-result-item.model";
+import {
+  Passage,
+  SearchResultItemModel,
+  SynonymInfoModel,
+  WordAndScore
+} from "../../models/search-result-item.model";
+import {SearchService} from "../../services/search.service";
 
 @Component({
   selector: 'app-search-result',
@@ -9,9 +15,15 @@ import {Passage, SearchResultItemModel} from "../../models/search-result-item.mo
 export class SearchResultComponent implements OnInit {
 
   @Input() searchItem: SearchResultItemModel;
+  @Input() query: string;
   @Input() debug: boolean;
 
-  constructor() { }
+  private synonyms: SynonymInfoModel[] = [];
+
+  constructor(
+    private searchService: SearchService,
+  ) {
+  }
 
   ngOnInit() {
   }
@@ -26,5 +38,21 @@ export class SearchResultComponent implements OnInit {
     });
 
     return text;
+  }
+
+  showSynonyms(uri: string) {
+    this.searchService.getSynonyms$(this.query, uri).subscribe(synonyms => {
+      this.synonyms = synonyms;
+    })
+  }
+
+
+  sortedSynonyms(synonyms: WordAndScore[]) {
+    return synonyms.sort((a, b) => {
+      if (a.score < b.score) {
+        return -1;
+      }
+      return a.score == b.score ? 0 : 1;
+    })
   }
 }

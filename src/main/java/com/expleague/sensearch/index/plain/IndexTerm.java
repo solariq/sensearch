@@ -38,6 +38,21 @@ public class IndexTerm implements Term {
   }
 
   @Override
+  public Stream<Term> synonyms(double synonymThreshold) {
+    return owner.synonyms(this, synonymThreshold);
+  }
+
+  @Override
+  public Stream<TermAndDistance> synonymsWithDistance(double synonymThreshold) {
+    return owner.synonymsWithDistance(this, synonymThreshold);
+  }
+
+  @Override
+  public Stream<TermAndDistance> synonymsWithDistance() {
+    return owner.synonymsWithDistance(this);
+  }
+
+  @Override
   public int documentFreq() {
     return owner.documentFrequency(this);
   }
@@ -60,5 +75,27 @@ public class IndexTerm implements Term {
 
   public long id() {
     return id;
+  }
+
+
+  public static class IndexTermAndDistance implements TermAndDistance {
+
+    private final Term term;
+    private final double distance;
+
+    public IndexTermAndDistance(Term term, double distance) {
+      this.term = term;
+      this.distance = distance;
+    }
+
+    @Override
+    public Term term() {
+      return term;
+    }
+
+    @Override
+    public double distance() {
+      return distance;
+    }
   }
 }

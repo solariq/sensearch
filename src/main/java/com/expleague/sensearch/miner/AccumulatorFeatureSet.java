@@ -7,9 +7,7 @@ import com.expleague.ml.meta.FeatureMeta;
 import com.expleague.sensearch.Page;
 import com.expleague.sensearch.Page.SegmentType;
 import com.expleague.sensearch.core.Term;
-import com.expleague.sensearch.features.Features;
 import com.expleague.sensearch.features.QURLItem;
-import com.expleague.sensearch.features.sets.filter.FilterFeatures;
 import com.expleague.sensearch.features.sets.ranker.BM25FeatureSet;
 import com.expleague.sensearch.features.sets.ranker.CosDistanceFeatureSet;
 import com.expleague.sensearch.features.sets.ranker.DocBasedFeatureSet;
@@ -20,7 +18,6 @@ import com.expleague.sensearch.features.sets.ranker.TextFeatureSet;
 import com.expleague.sensearch.features.sets.ranker.TextFeatureSet.Segment;
 import com.expleague.sensearch.index.Index;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
@@ -35,7 +32,7 @@ public class AccumulatorFeatureSet extends FeatureSet.Stub<QURLItem> {
   private final CosDistanceFeatureSet cosDistanceFeatureSet = new CosDistanceFeatureSet();
   private final DocBasedFeatureSet docBasedFeatureSet = new DocBasedFeatureSet();
   private final QuotationFeatureSet quotationFeatureSet = new QuotationFeatureSet();
-  private final FilterFeatures filterFeatures = new FilterFeatures();
+  //  private final FilterFeatures filterFeatures = new FilterFeatures();
 
   private final FeatureSet<QURLItem> features =
       FeatureSet.join(
@@ -44,8 +41,9 @@ public class AccumulatorFeatureSet extends FeatureSet.Stub<QURLItem> {
           linkFeatureSet,
           cosDistanceFeatureSet,
           docBasedFeatureSet,
-          quotationFeatureSet,
-          filterFeatures);
+          quotationFeatureSet
+          //          filterFeatures
+      );
 
   private final List<TextFeatureSet> textFeatureSet =
       features
@@ -54,15 +52,15 @@ public class AccumulatorFeatureSet extends FeatureSet.Stub<QURLItem> {
           .filter(Objects::nonNull)
           .collect(Collectors.toList());
 
-  private Map<Page, Features> filterFeaturesMap;
+//  private Map<Page, Features> filterFeaturesMap;
 
   public AccumulatorFeatureSet(Index index) {
     this.index = index;
   }
 
-  public void acceptFilterFeatures(Map<Page, Features> filterFeatures) {
-    this.filterFeaturesMap = filterFeatures;
-  }
+  //  public void acceptFilterFeatures(Map<Page, Features> filterFeatures) {
+  //    this.filterFeaturesMap = filterFeatures;
+  //  }
 
   @Override
   public void accept(QURLItem item) {
@@ -109,12 +107,12 @@ public class AccumulatorFeatureSet extends FeatureSet.Stub<QURLItem> {
     }
     { // Link Processing
     }
-    { // Filter Features Processing
-      Vec ff = filterFeaturesMap.get(page).features();
-      filterFeatures.withBody(ff.get(1));
-      filterFeatures.withTitle(ff.get(0));
-      filterFeatures.withLink(ff.get(2));
-    }
+    //    { // Filter Features Processing
+    //      Vec ff = filterFeaturesMap.get(page).features();
+    //      filterFeatures.withBody(ff.get(1));
+    //      filterFeatures.withTitle(ff.get(0));
+    //      filterFeatures.withLink(ff.get(2));
+    //    }
     List<List<Term>> pageSentenceTokens =
         page.sentences(SegmentType.BODY)
             .map(sentence -> index.parse(sentence).collect(Collectors.toList()))

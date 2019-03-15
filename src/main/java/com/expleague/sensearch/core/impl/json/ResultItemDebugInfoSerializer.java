@@ -17,8 +17,11 @@ public class ResultItemDebugInfoSerializer extends StdSerializer<ResultItemDebug
   }
 
   @Override
-  public void serialize(ResultItemDebugInfo debugInfo, JsonGenerator jsonGenerator,
-      SerializerProvider serializerProvider) throws IOException {
+  public void serialize(
+      ResultItemDebugInfo debugInfo,
+      JsonGenerator jsonGenerator,
+      SerializerProvider serializerProvider)
+      throws IOException {
 
     jsonGenerator.writeStartObject();
     jsonGenerator.writeNumberField("rank", debugInfo.rank());
@@ -32,8 +35,8 @@ public class ResultItemDebugInfoSerializer extends StdSerializer<ResultItemDebug
     }
     jsonGenerator.writeEndArray();
 
+    jsonGenerator.writeStringField("uri", debugInfo.uri());
+
     jsonGenerator.writeEndObject();
   }
-
-
 }
