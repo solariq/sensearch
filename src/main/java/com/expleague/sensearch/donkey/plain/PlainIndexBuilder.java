@@ -65,7 +65,7 @@ public class PlainIndexBuilder implements IndexBuilder {
   public static final String TEMP_EMBEDDING_ROOT = "temp_embedding";
   public static final String VECS_ROOT = "vecs";
 
-  public static final String RARE_INV_IDX_ROOT = "rare_iidx";
+  public static final Path RARE_INV_IDX_FILE = Paths.get("rare_iidx").resolve("iidx");
   
   public static final String SUGGEST_UNIGRAM_ROOT = "suggest/unigram_coeff";
   public static final String SUGGEST_MULTIGRAMS_ROOT = "suggest/multigram_freq_norm";
@@ -386,9 +386,9 @@ public class PlainIndexBuilder implements IndexBuilder {
 
         {
           ObjectMapper mapper = new ObjectMapper();
-          Files.createDirectories(indexRoot.resolve(RARE_INV_IDX_ROOT));
+          Files.createDirectories(indexRoot.resolve(RARE_INV_IDX_FILE).getParent());
           mapper.writeValue(
-              indexRoot.resolve(RARE_INV_IDX_ROOT).resolve("iidx").toFile(),
+              indexRoot.resolve(RARE_INV_IDX_FILE).toFile(),
               rareTermsInvIdx
               );
         }

@@ -146,8 +146,11 @@ public class FilterPoolBuilderRememberTop extends RememberTopPoolBuilder {
                         .entrySet()
                         .stream()
                         .sorted(
-                            Comparator.comparingDouble(
-                                e -> -model.trans(e.getValue().features()).get(0)))
+                            Comparator.comparingDouble(e -> {
+                              if (e.getValue().isRequiredInResults())
+                                return -Double.MAX_VALUE;
+                              return -model.trans(e.getValue().features()).get(0);
+                            }))
                         .forEach(
                             (entry) -> {
                               Page page = entry.getKey();

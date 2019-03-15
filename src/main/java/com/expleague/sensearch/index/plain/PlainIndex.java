@@ -15,6 +15,7 @@ import com.expleague.sensearch.core.Tokenizer;
 import com.expleague.sensearch.core.impl.TokenizerImpl;
 import com.expleague.sensearch.donkey.plain.PlainIndexBuilder;
 import com.expleague.sensearch.features.Features;
+import com.expleague.sensearch.features.FeaturesForRequiredDocument;
 import com.expleague.sensearch.features.FeaturesImpl;
 import com.expleague.sensearch.features.QURLItem;
 import com.expleague.sensearch.features.sets.filter.FilterFeatures;
@@ -28,6 +29,8 @@ import com.expleague.sensearch.protobuf.index.IndexUnits.TermStatistics;
 import com.expleague.sensearch.protobuf.index.IndexUnits.TermStatistics.TermFrequency;
 import com.expleague.sensearch.query.Query;
 import com.expleague.sensearch.web.suggest.SuggestInformationLoader;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Streams;
 import com.google.common.primitives.Longs;
 import com.google.inject.Inject;
@@ -103,6 +106,8 @@ public class PlainIndex implements Index {
 
   private SuggestInformationLoader suggestLoader;
 
+  private final Map<Term, List<Page>> rareTermsInvIdx;
+  
   @Override
   public void close() throws Exception {
     embedding.close();
@@ -223,6 +228,26 @@ public class PlainIndex implements Index {
           }
         });
 
+    rareTermsInvIdx = new HashMap<>();
+
+    if (Files.exists(indexRoot.resolve(PlainIndexBuilder.RARE_INV_IDX_FILE))) {
+      ObjectMapper mapper = new ObjectMapper();
+      Map<Long, List<Long>> invIdxIds =
+          mapper.readValue(indexRoot.resolve(PlainIndexBuilder.RARE_INV_IDX_FILE).toFile(),
+              new TypeReference<Map<Long, List<Long>>>() {});
+      
+      invIdxIds.forEach((t, docs) -> {
+        Term term = idToTerm.get(t);
+        List<Page> l = new ArrayList<>();
+
+        rareTermsInvIdx.put(term, l);
+        
+        docs.forEach(pageId -> {
+          l.add(PlainPage.create(pageId, this));
+        });
+      });
+    }
+    
     LOG.info(
         String.format("PlainIndex loaded in %.3f seconds", (System.nanoTime() - startTime) / 1e9));
   }
@@ -418,7 +443,9 @@ public class PlainIndex implements Index {
   public Map<Page, Features> fetchDocuments(Query query, int num) {
     FilterFeatures filterFeatures = new FilterFeatures();
 
-    final Vec qVec = vecByTerms(query.terms());
+    List<Term> queryTerms = query.terms();
+    
+    final Vec qVec = vecByTerms(queryTerms);
     TLongObjectMap<List<Candidate>> pageIdToCandidatesMap = new TLongObjectHashMap<>();
     filter
         .filtrate(qVec, PlainIndex::isSectionId, 0.5)
@@ -451,6 +478,14 @@ public class PlainIndex implements Index {
           allFilterFeatures.put(page, new FeaturesImpl(filterFeatures, vec));
           return true;
         });
+    
+    queryTerms.forEach(term -> {
+      if (rareTermsInvIdx.containsKey(term)) {
+        rareTermsInvIdx.get(term).forEach(page -> {
+          allFilterFeatures.put(page, new FeaturesForRequiredDocument());
+        });
+      }
+    });
     return allFilterFeatures;
   }
 

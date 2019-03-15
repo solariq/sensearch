@@ -12,4 +12,6 @@ public interface Features {
 
   FeatureMeta meta(int index);
   int dim();
+  
+  boolean isRequiredInResults();
 }

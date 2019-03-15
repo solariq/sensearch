@@ -7,6 +7,7 @@ import com.expleague.ml.meta.FeatureMeta;
 import com.expleague.sensearch.Page;
 import com.expleague.sensearch.core.Annotations.PageSize;
 import com.expleague.sensearch.core.Annotations.RankModel;
+import com.expleague.sensearch.features.Features;
 import com.expleague.sensearch.core.SearchPhase;
 import com.expleague.sensearch.core.Whiteboard;
 import com.google.inject.Inject;
@@ -61,7 +62,7 @@ public class RankingPhase implements SearchPhase {
             .get(phaseId)
             .entrySet()
             .stream()
-            .collect(Collectors.toMap(Entry::getKey, p -> rank(p.getValue().features(featuresInModel)))));
+            .collect(Collectors.toMap(Entry::getKey, p -> rank(p.getValue()))));
 
     whiteboard.putSubResult(
         Objects.requireNonNull(whiteboard
@@ -69,7 +70,7 @@ public class RankingPhase implements SearchPhase {
             .get(phaseId)
             .entrySet()
             .stream()
-            .map(p -> Pair.create(p.getKey(), rank(p.getValue().features(featuresInModel))))
+            .map(p -> Pair.create(p.getKey(), rank(p.getValue())))
             .sorted(Comparator.<Pair<Page, Double>>comparingDouble(Pair::getSecond).reversed())
             .map(Pair::getFirst)
             .skip(pageNo * pageSize)
@@ -82,14 +83,10 @@ public class RankingPhase implements SearchPhase {
             "Ranking phase finished in %.3f seconds", (System.nanoTime() - startTime) / 1e9));
   }
 
-  private double rank(Vec features) {
-    /*double vec = 0;
-    for (int ind = 0;  ind < features.dim(); ind++) {
-      double normalize = 1.0 / (ind + 1);
-      double f =features.get(ind);
-      vec += (f * normalize);
+  private double rank(Features feat) {
+    if (feat.isRequiredInResults()) {
+      return Double.MAX_VALUE;
     }
-    return vec;*/
-    return model.trans(features).get(0);
+    return model.trans(feat.features(featuresInModel)).get(0);
   }
 }

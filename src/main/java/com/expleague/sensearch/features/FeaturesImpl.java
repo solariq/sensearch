@@ -49,4 +49,9 @@ public class FeaturesImpl implements Features {
   public int dim() {
     return features.dim();
   }
+
+  @Override
+  public boolean isRequiredInResults() {
+    return false;
+  }
 }

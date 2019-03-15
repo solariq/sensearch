@@ -8,6 +8,7 @@ import com.expleague.sensearch.Page;
 import com.expleague.sensearch.core.Annotations.RankFilterModel;
 import com.expleague.sensearch.core.SearchPhase;
 import com.expleague.sensearch.core.Whiteboard;
+import com.expleague.sensearch.features.Features;
 import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
 import java.util.Comparator;
@@ -54,7 +55,7 @@ public class FilterRankingPhase implements SearchPhase {
             .get(phaseId)
             .entrySet()
             .stream()
-            .collect(Collectors.toMap(Entry::getKey, p -> rank(p.getValue().features(featuresInModel)))));
+            .collect(Collectors.toMap(Entry::getKey, p -> rank(p.getValue()))));
 
     whiteboard.putSubFilterResult(
         Objects.requireNonNull(whiteboard
@@ -62,7 +63,7 @@ public class FilterRankingPhase implements SearchPhase {
             .get(phaseId)
             .entrySet()
             .stream()
-            .map(p -> Pair.create(p.getKey(), rank(p.getValue().features(featuresInModel))))
+            .map(p -> Pair.create(p.getKey(), rank(p.getValue())))
             .sorted(Comparator.<Pair<Page, Double>>comparingDouble(Pair::getSecond).reversed())
             .map(Pair::getFirst)
             .limit(FILTERED_DOC_NUMBER)
@@ -75,8 +76,11 @@ public class FilterRankingPhase implements SearchPhase {
   }
 
 
-  private double rank(Vec features) {
-    return model.trans(features).get(0);
+  private double rank(Features feat) {
+    if (feat.isRequiredInResults()) {
+      return Double.MAX_VALUE;
+    }
+    return model.trans(feat.features(featuresInModel)).get(0);
   }
 
 }
