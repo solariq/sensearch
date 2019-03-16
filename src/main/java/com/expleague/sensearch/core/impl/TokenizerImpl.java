@@ -97,15 +97,10 @@ public class TokenizerImpl implements Tokenizer {
   }
 
   private boolean isUpperCase(char c) {
-    return (c >= 'A' && c <= 'Z') || (c >= 'А' && c <= 'Я') || c == 'Ё';
+    return Character.isUpperCase(c);
   }
 
   private boolean isAlpha(char c) {
-    return (c >= 'A' && c <= 'Z')
-        || (c >= 'А' && c <= 'Я')
-        || c == 'Ё'
-        || (c >= 'a' && c <= 'z')
-        || (c >= 'а' && c <= 'я')
-        || c == 'ё';
+    return Character.isLetter(c);
   }
 }
