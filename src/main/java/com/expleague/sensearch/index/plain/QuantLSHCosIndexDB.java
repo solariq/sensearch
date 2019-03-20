@@ -24,7 +24,7 @@ import org.jetbrains.annotations.Nullable;
 
 public class QuantLSHCosIndexDB extends BaseQuantLSHCosIndex implements AutoCloseable {
 
-  private static final Logger LOG = Logger.getLogger(QuantLSHCosIndexDB.class);
+  private static final Logger LOG = Logger.getLogger(QuantLSHCosIndexDB.class.getName());
 
   private static final long FIELDS_ID = Long.MAX_VALUE;
   private static final long IDS_ID = Long.MAX_VALUE - 1;

@@ -2,6 +2,7 @@ package com.expleague.sensearch.miner.pool;
 
 import com.expleague.commons.math.Trans;
 import com.expleague.commons.math.vectors.Vec;
+import com.expleague.commons.math.vectors.impl.vectors.ArrayVec;
 import com.expleague.commons.random.FastRandom;
 import com.expleague.commons.seq.CharSeq;
 import com.expleague.commons.util.Pair;
@@ -72,10 +73,19 @@ public class RankingPoolBuilderRememberTop extends RememberTopPoolBuilder {
     DataSetMeta meta =
         new JsonDataSetMeta(
             "Google", "sensearch", new Date(), QURLItem.class, rand.nextBase64String(32));
+    AccumulatorFeatureSet features = new AccumulatorFeatureSet(index);
     TargetFeatureSet googleTarget = new TargetFeatureSet();
+    FeatureMeta[] metas = new FeatureMeta[features.dim() + googleTarget.dim()];
+
+    for (int f = 0; f < features.dim(); f++) {
+      metas[f] = features.meta(f);
+    }
+    for (int f = 0; f < googleTarget.dim(); f++) {
+      metas[f + features.dim()] = googleTarget.meta(f);
+    }
 
     Builder<QURLItem> poolBuilder =
-        Pool.builder(meta, new AccumulatorFeatureSet(index), googleTarget);
+        Pool.builder(meta, features, googleTarget);
 
     ThreadLocal<AccumulatorFeatureSet> featuresProvider =
         ThreadLocal.withInitial(() -> new AccumulatorFeatureSet(index));
@@ -84,6 +94,8 @@ public class RankingPoolBuilderRememberTop extends RememberTopPoolBuilder {
     AtomicIntegerArray addedSavedCnt = new AtomicIntegerArray(2);
     try {
       Files.readAllLines(Paths.get("./wordstat/queries.txt"))
+          .parallelStream()
+          .limit(10)
           .forEach(
               line -> {
                 if (status.get() % 100 == 0) {
@@ -114,8 +126,10 @@ public class RankingPoolBuilderRememberTop extends RememberTopPoolBuilder {
 //                                      .acceptFilterFeatures(filterFeatures(query, resPage));
 //                                }
 //                              });
-                      poolBuilder.accept(new QURLItem(resPage, query));
-                      poolBuilder.advance();
+                      synchronized (poolBuilder) {
+                        poolBuilder.accept(new QURLItem(resPage, query));
+                        poolBuilder.advance();
+                      }
                     }
                   } catch (IOException e) {
                     e.printStackTrace();
@@ -126,6 +140,7 @@ public class RankingPoolBuilderRememberTop extends RememberTopPoolBuilder {
                   Map<Page, Features> sensearchResult =
                       index.fetchDocuments(query, FilterMinerPhase.FILTERED_DOC_NUMBER);
 
+                  Map<Page, Vec> savedRes = new HashMap<>();
                   sensearchResult
                       .keySet()
                       .stream()
@@ -149,6 +164,7 @@ public class RankingPoolBuilderRememberTop extends RememberTopPoolBuilder {
 //                                  features.acceptFilterFeatures(sensearchResult);
                                   features.accept(new QURLItem(page, query));
                                   Vec all = features.advance();
+                                  savedRes.put(page, all);
                                   res = -model.trans(all).get(0);
                                   computedValues.put(((PlainPage) page).id(), res);
                                   return res;
@@ -184,8 +200,10 @@ public class RankingPoolBuilderRememberTop extends RememberTopPoolBuilder {
 //                                            .acceptFilterFeatures(filterFeatures(query, page));
 //                                      }
 //                                    });
-                            poolBuilder.accept(new QURLItem(page, query));
-                            poolBuilder.advance();
+                            synchronized (poolBuilder) {
+                              poolBuilder.accept(new QURLItem(page, query));
+                              poolBuilder.advance();
+                            }
                           });
 
 //                  poolBuilder
@@ -207,8 +225,19 @@ public class RankingPoolBuilderRememberTop extends RememberTopPoolBuilder {
                       .forEach(
                           page -> {
                             uniqQURL.add(CharSeq.create(page.content(SegmentType.SECTION_TITLE)));
-                            poolBuilder.accept(new QURLItem(page, query));
-                            poolBuilder.advance();
+                            QURLItem item = new QURLItem(page, query);
+                            Vec v = savedRes.get(page);
+                            double[] vec = new double[metas.length];
+                            for (int f = 0; f < v.dim(); f++) {
+                              vec[f] = v.get(f);
+                            }
+                            TargetFeatureSet fs = new TargetFeatureSet();
+                            fs.accept(item);
+                            vec[v.dim()] = fs.advance().get(0);
+
+                            synchronized (poolBuilder) {
+                              poolBuilder.accept(item, new ArrayVec(vec), metas);
+                            }
                           });
                 }
               });

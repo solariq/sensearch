@@ -2,8 +2,8 @@ package com.expleague.sensearch.miner.pool;
 
 import com.expleague.commons.func.Functions;
 import com.expleague.commons.math.Trans;
+import com.expleague.commons.math.vectors.impl.vectors.ArrayVec;
 import com.expleague.commons.random.FastRandom;
-import com.expleague.commons.seq.CharSeq;
 import com.expleague.commons.util.Pair;
 import com.expleague.ml.data.tools.DataTools;
 import com.expleague.ml.data.tools.Pool;
@@ -12,7 +12,6 @@ import com.expleague.ml.meta.FeatureMeta;
 import com.expleague.ml.meta.impl.JsonDataSetMeta;
 import com.expleague.sensearch.AppModule;
 import com.expleague.sensearch.Page;
-import com.expleague.sensearch.Page.SegmentType;
 import com.expleague.sensearch.core.Annotations.RankFilterModel;
 import com.expleague.sensearch.core.impl.ResultItemImpl;
 import com.expleague.sensearch.features.Features;
@@ -42,11 +41,9 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicIntegerArray;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
 public class FilterPoolBuilderRememberTop extends RememberTopPoolBuilder {
 
@@ -93,6 +90,13 @@ public class FilterPoolBuilderRememberTop extends RememberTopPoolBuilder {
       }
       FilterFeatures features = new FilterFeatures();
       TargetFeatureSet targetFeatureSet = new TargetFeatureSet();
+      FeatureMeta[] metas = new FeatureMeta[features.dim() + targetFeatureSet.dim()];
+      for (int f = 0; f < features.dim(); f++) {
+        metas[f] = features.meta(f);
+      }
+      for (int f = 0; f < targetFeatureSet.dim(); f++) {
+        metas[f + features.dim()] = targetFeatureSet.meta(f);
+      }
 
       Pool.Builder<QURLItem> poolBuilder = Pool.builder(meta, features, targetFeatureSet);
 
@@ -116,12 +120,6 @@ public class FilterPoolBuilderRememberTop extends RememberTopPoolBuilder {
                     Query query = BaseQuery.create(queryString, index);
                     ObjectMapper objectMapper = new ObjectMapper();
 
-                    Set<CharSeq> googleTitles =
-                        Arrays.stream(objectMapper.readValue(readerFile, ResultItemImpl[].class))
-                            .map(ResultItemImpl::title)
-                            .map(CharSeq::create)
-                            .collect(Collectors.toSet());
-
                     Map<Page, Features> allDocs =
                         index.fetchDocuments(query, FilterMinerPhase.FILTERED_DOC_NUMBER);
 
@@ -130,16 +128,32 @@ public class FilterPoolBuilderRememberTop extends RememberTopPoolBuilder {
                     rememberedURIs.forEach(
                         uri -> {
                           Page page = index.page(uri);
-                          if (page == PlainPage.EMPTY_PAGE) {
-                            return;
+                          if (page != PlainPage.EMPTY_PAGE) {
+                            accept(
+                                poolBuilder,
+                                page,
+                                query,
+                                ((PlainIndex) index).filterFeatures(query, uri));
+                            allDocs.remove(page);
                           }
-                          accept(
-                              poolBuilder,
-                              page,
-                              query,
-                              ((PlainIndex) index).filterFeatures(query, uri));
-                          allDocs.remove(page);
                         });
+
+                    Arrays.stream(objectMapper.readValue(readerFile, ResultItemImpl[].class))
+                        .map(ResultItemImpl::reference)
+                        .forEach(
+                            uri -> {
+                              Page page = index.page(uri);
+                              if (page == PlainPage.EMPTY_PAGE
+                                  || rememberedURIs.contains(uri)) {
+                                return;
+                              }
+                              accept(
+                                  poolBuilder,
+                                  page,
+                                  query,
+                                  ((PlainIndex) index).filterFeatures(query, uri));
+                              allDocs.remove(page);
+                            });
 
                     final int[] cnt = {0};
                     allDocs
@@ -147,8 +161,9 @@ public class FilterPoolBuilderRememberTop extends RememberTopPoolBuilder {
                         .stream()
                         .sorted(
                             Comparator.comparingDouble(e -> {
-                              if (e.getValue().isRequiredInResults())
+                              if (e.getValue().isRequiredInResults()) {
                                 return -Double.MAX_VALUE;
+                              }
                               return -model.trans(e.getValue().features()).get(0);
                             }))
                         .forEach(
@@ -156,19 +171,24 @@ public class FilterPoolBuilderRememberTop extends RememberTopPoolBuilder {
                               Page page = entry.getKey();
                               Features feat = entry.getValue();
 
-                              if (page == PlainPage.EMPTY_PAGE
-                                  || rememberedURIs.contains(page.uri())) {
+                              if (page == PlainPage.EMPTY_PAGE || rememberedURIs.contains(page.uri())) {
                                 return;
                               }
 
-                              if (googleTitles.contains(
-                                  CharSeq.create(page.content(SegmentType.SECTION_TITLE)))) {
-                                accept(poolBuilder, page, query, feat);
-                              } else if (cnt[0] < FILTER_SIZE) {
+                              double[] vec = new double[metas.length];
+                              for (int f = 0; f < feat.dim(); f++) {
+                                vec[f] = feat.features().get(f);
+                              }
+                              if (cnt[0] < FILTER_SIZE) {
                                 cntAddedSaved.incrementAndGet(0);
                                 rememberedURIs.add(page.uri());
-
-                                accept(poolBuilder, page, query, feat);
+                                vec[feat.dim()] = 0.0;
+                                synchronized (poolBuilder) {
+                                  poolBuilder.accept(new QURLItem(page, query),
+                                      new ArrayVec(vec),
+                                      metas);
+                                }
+//                                accept(poolBuilder, page, query, feat);
                                 cnt[0]++;
                               }
                             });

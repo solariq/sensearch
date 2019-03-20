@@ -96,11 +96,11 @@
       <version>2.9.1</version>
     </dependency>
 
-    <dependency>
-      <groupId>org.slf4j</groupId>
-      <artifactId>slf4j-log4j12</artifactId>
-      <version>1.7.25</version>
-    </dependency>
+    <!--<dependency>-->
+      <!--<groupId>org.slf4j</groupId>-->
+      <!--<artifactId>slf4j-log4j12</artifactId>-->
+      <!--<version>1.7.25</version>-->
+    <!--</dependency>-->
 
     <dependency>
       <groupId>junit</groupId>
@@ -150,13 +150,13 @@
     <dependency>
       <groupId>com.expleague</groupId>
       <artifactId>commons</artifactId>
-      <version>1.4.9-SNAPSHOT</version>
+      <version>1.4.10-SNAPSHOT</version>
     </dependency>
 
     <dependency>
       <groupId>com.expleague</groupId>
       <artifactId>jmll</artifactId>
-      <version>1.4.9-SNAPSHOT</version>
+      <version>1.4.10-SNAPSHOT</version>
     </dependency>
 
     <!-- https://mvnrepository.com/artifact/com.fasterxml.jackson.core/jackson-core -->
