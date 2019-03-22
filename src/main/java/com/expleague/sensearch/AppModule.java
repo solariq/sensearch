@@ -34,7 +34,7 @@ import com.expleague.sensearch.index.plain.EmbeddingImpl;
 import com.expleague.sensearch.index.plain.PlainIndex;
 import com.expleague.sensearch.metrics.RequestCrawler;
 import com.expleague.sensearch.metrics.WebCrawler;
-import com.expleague.sensearch.web.suggest.ProbabilisticSuggestor;
+import com.expleague.sensearch.web.suggest.OneWordSuggestor;
 import com.expleague.sensearch.web.suggest.Suggestor;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.AbstractModule;
@@ -93,7 +93,7 @@ public class AppModule extends AbstractModule {
     bind(Filter.class).to(FilterImpl.class);
     bind(Index.class).to(PlainIndex.class).in(Singleton.class);
     bind(IndexBuilder.class).to(PlainIndexBuilder.class);
-    bind(Suggestor.class).to(ProbabilisticSuggestor.class).in(Singleton.class);
+    bind(Suggestor.class).to(OneWordSuggestor.class).in(Singleton.class);
     bind(SenSeArch.class).to(SenSeArchImpl.class);
     bind(WebCrawler.class).to(RequestCrawler.class);
 

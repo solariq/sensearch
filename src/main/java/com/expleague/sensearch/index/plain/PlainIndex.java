@@ -402,6 +402,13 @@ public class PlainIndex implements Index {
         .filter(Objects::nonNull)
         .map(c -> new IndexTerm.IndexTermAndDistance(idToTerm.get(c.getId()), c.getDist()));
   }
+  
+  public Stream<Term> nearestTerms(Vec vec) {
+    return embedding
+        .nearest(vec, PlainIndex::isWordId)
+        .filter(Objects::nonNull)
+        .map(c -> idToTerm.get(c.getId()));
+  }
 
   public Features filterFeatures(Query query, URI pageURI) {
     double minTitle = 1;

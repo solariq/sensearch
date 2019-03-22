@@ -30,7 +30,7 @@ public class ProbabilisticSuggestor implements Suggestor {
 
 	@Override
 	public List<String> getSuggestions(String searchString) {
-		System.out.println("suggest requested: " + searchString);
+		//System.out.println("suggest requested: " + searchString);
 		List<String> res = null;
 		try {
 			res = getSuggestions(index.parse(searchString.toLowerCase())
@@ -39,7 +39,7 @@ public class ProbabilisticSuggestor implements Suggestor {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		System.out.println("returning suggest: " + searchString);
+		//System.out.println("returning suggest: " + searchString);
 		return res;
 	}
 
@@ -88,7 +88,8 @@ public class ProbabilisticSuggestor implements Suggestor {
 				.limit(10)
 				.map(e -> qcText + " " + Arrays.stream(e.getKey())
 					.map(Term::text)
-					.collect(Collectors.joining(" ")) + String.format(" %.3f", e.getValue()))
+					//.collect(Collectors.joining(" ")) + String.format(" %.3f", e.getValue()))
+					.collect(Collectors.joining(" ")))
 				.collect(Collectors.toList());
 	}
 
