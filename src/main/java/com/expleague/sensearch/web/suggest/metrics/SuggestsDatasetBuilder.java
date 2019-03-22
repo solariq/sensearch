@@ -19,8 +19,9 @@ public class SuggestsDatasetBuilder {
 		Files.lines(Paths.get("wordstat/queries.txt"))
 		.map(s -> s.split(" "))
 		.filter(s -> s.length >= 2 && s[1].length() > 0)
+		.distinct()
 		.forEach(s -> {
-			for (int i = 1; i < 2; i++) {
+			for (int i = 1; i < s[1].length(); i++) {
 				String partQuery = s[0] + " " + s[1].substring(0, i);
 				try {
 					Thread.sleep(500);

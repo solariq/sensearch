@@ -3,7 +3,6 @@ package com.expleague.sensearch.web.suggest.metrics;
 import java.io.IOException;
 import java.net.URL;
 import java.net.URLEncoder;
-import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
