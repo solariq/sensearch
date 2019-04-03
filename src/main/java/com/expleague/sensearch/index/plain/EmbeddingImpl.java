@@ -135,7 +135,7 @@ public class EmbeddingImpl implements Embedding {
               return false;
             }
             long startTime = System.nanoTime();
-            spliterator.tryAdvance(
+            boolean advanced = spliterator.tryAdvance(
                 entry -> {
                   if (++count > numOfNeighbors) {
                     eos = true;
@@ -147,6 +147,9 @@ public class EmbeddingImpl implements Embedding {
                     action.accept(new Candidate(entry.id(), entry.distance()));
                   }
                 });
+            if (!advanced) {
+              return false;
+            }
             return !eos;
           }
         },

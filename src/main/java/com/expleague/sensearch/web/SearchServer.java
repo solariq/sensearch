@@ -40,6 +40,9 @@ public class SearchServer {
   }
 
   public static void main(String[] args) throws Exception {
+    System.setProperty("org.eclipse.jetty.util.log.class", "org.eclipse.jetty.util.log.StdErrLog");
+    System.setProperty("org.eclipse.jetty.LEVEL", "OFF");
+
     Properties logProperties = new Properties();
     logProperties.load(Files.newInputStream(Paths.get("log4j.properties")));
     PropertyConfigurator.configure(logProperties);
