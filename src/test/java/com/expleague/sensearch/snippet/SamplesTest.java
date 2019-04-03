@@ -2,7 +2,7 @@
 //
 //import com.expleague.commons.text.lemmer.MyStem;
 //import com.expleague.sensearch.Page;
-//import com.expleague.sensearch.core.Lemmer;
+//import com.expleague.sensearch.core.lemmer.Lemmer;
 //import com.expleague.sensearch.query.Query;
 //import com.expleague.sensearch.utils.IndexBasedTestCase;
 //import java.io.File;
