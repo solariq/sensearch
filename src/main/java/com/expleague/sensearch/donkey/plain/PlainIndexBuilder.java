@@ -10,7 +10,7 @@ import com.expleague.ml.embedding.Embedding;
 import com.expleague.ml.embedding.impl.EmbeddingImpl;
 import com.expleague.sensearch.core.Annotations.EmbeddingVectorsPath;
 import com.expleague.sensearch.core.Annotations.IndexRoot;
-import com.expleague.sensearch.core.Lemmer;
+import com.expleague.sensearch.core.lemmer.Lemmer;
 import com.expleague.sensearch.core.Tokenizer;
 import com.expleague.sensearch.core.impl.TokenizerImpl;
 import com.expleague.sensearch.donkey.IndexBuilder;

@@ -1,6 +1,6 @@
 package com.expleague.sensearch.snippet.passage;
 
-import com.expleague.sensearch.core.Lemmer;
+import com.expleague.sensearch.core.lemmer.Lemmer;
 import com.expleague.sensearch.core.Term;
 import com.expleague.sensearch.snippet.Segment;
 import java.util.ArrayList;

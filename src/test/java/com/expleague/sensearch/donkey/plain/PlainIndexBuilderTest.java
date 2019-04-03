@@ -1,7 +1,7 @@
 package com.expleague.sensearch.donkey.plain;
 
 import com.expleague.sensearch.Config;
-import com.expleague.sensearch.core.Lemmer;
+import com.expleague.sensearch.core.lemmer.Lemmer;
 import com.expleague.sensearch.donkey.IndexBuilder;
 import com.expleague.sensearch.donkey.crawler.CrawlerXML;
 import com.expleague.sensearch.utils.SensearchTestCase;
@@ -28,7 +28,7 @@ public class PlainIndexBuilderTest extends SensearchTestCase {
             new CrawlerXML(config.getPathToZIP()),
             config.getIndexRoot(),
             config.getEmbeddingVectors(),
-            new Lemmer(myStemForTest("PlainIndexBuilderTest", "completeBuildTest")));
+            Lemmer.getInstance());
     indexBuilder.buildIndexAndEmbedding();
   }
 }

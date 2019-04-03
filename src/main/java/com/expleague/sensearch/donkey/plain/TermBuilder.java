@@ -6,7 +6,7 @@ import com.expleague.commons.seq.CharSeq;
 import com.expleague.commons.text.lemmer.LemmaInfo;
 import com.expleague.commons.text.lemmer.MyStem;
 import com.expleague.commons.text.lemmer.WordInfo;
-import com.expleague.sensearch.core.Lemmer;
+import com.expleague.sensearch.core.lemmer.Lemmer;
 import com.expleague.sensearch.core.PartOfSpeech;
 import com.expleague.sensearch.protobuf.index.IndexUnits;
 import com.expleague.sensearch.protobuf.index.IndexUnits.Term;
@@ -40,7 +40,7 @@ public class TermBuilder implements AutoCloseable {
 
   public TermBuilder(DB termDb, Lemmer lemmer) {
     this.termDb = termDb;
-    this.myStem = lemmer.myStem;
+    this.myStem = lemmer;
   }
 
   /**

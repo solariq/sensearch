@@ -18,7 +18,7 @@ import com.expleague.sensearch.core.Annotations.RankFilterModel;
 import com.expleague.sensearch.core.Annotations.RankModel;
 import com.expleague.sensearch.core.Annotations.SnippetModel;
 import com.expleague.sensearch.core.Annotations.UseLshFlag;
-import com.expleague.sensearch.core.Lemmer;
+import com.expleague.sensearch.core.lemmer.Lemmer;
 import com.expleague.sensearch.core.SearchPhaseFactory;
 import com.expleague.sensearch.core.SenSeArchImpl;
 import com.expleague.sensearch.core.Stemmer;
@@ -85,9 +85,8 @@ public class AppModule extends AbstractModule {
     bind(Path.class).annotatedWith(IndexRoot.class).toInstance(config.getIndexRoot());
     bindConstant().annotatedWith(UseLshFlag.class).to(config.getLshNearestFlag());
 
-    Lemmer lemmer = new Lemmer(new Stemmer());
+    Lemmer lemmer = Lemmer.getInstance();
     bind(Lemmer.class).toInstance(lemmer);
-
     bind(Crawler.class).to(CrawlerXML.class);
     bind(Embedding.class).to(EmbeddingImpl.class).in(Singleton.class);
     bind(Filter.class).to(FilterImpl.class);
@@ -193,7 +192,7 @@ public class AppModule extends AbstractModule {
     }
 
     LOG.warn(
-        "Filter model can not be found at path ["
+        "Snippet model can not be found at path ["
             + config.getSnippetModelPath()
             + "], using empty model instead");
     return getModelStub();
