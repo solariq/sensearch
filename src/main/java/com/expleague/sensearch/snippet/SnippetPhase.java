@@ -25,7 +25,7 @@ public class SnippetPhase implements SearchPhase {
 
   @Override
   public boolean test(Whiteboard whiteboard) {
-    return whiteboard.results() != null && whiteboard.query() != null;
+    return whiteboard.results() != null;
   }
 
   @Override

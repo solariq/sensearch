@@ -1,7 +1,6 @@
 package com.expleague.sensearch.filter;
 
 import com.expleague.commons.math.Trans;
-import com.expleague.commons.math.vectors.Vec;
 import com.expleague.commons.util.Pair;
 import com.expleague.ml.meta.FeatureMeta;
 import com.expleague.sensearch.Page;
@@ -39,9 +38,7 @@ public class FilterRankingPhase implements SearchPhase {
 
   @Override
   public boolean test(Whiteboard whiteboard) {
-    return whiteboard.filterFeatures() != null
-        && Objects.requireNonNull(whiteboard.filterFeatures()).size() != 0
-        && Objects.requireNonNull(whiteboard.filterFeatures()).get(phaseId) != null;
+    return whiteboard.filterFeatures().containsKey(phaseId);
   }
 
   @Override

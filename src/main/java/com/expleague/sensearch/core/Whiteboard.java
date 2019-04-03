@@ -1,19 +1,19 @@
 package com.expleague.sensearch.core;
 
+import com.carrotsearch.hppc.IntObjectMap;
 import com.expleague.sensearch.Page;
 import com.expleague.sensearch.SenSeArch.ResultItem;
 import com.expleague.sensearch.features.Features;
 import com.expleague.sensearch.query.Query;
 import com.expleague.sensearch.snippet.Snippet;
-import java.util.List;
 import java.util.Map;
 import org.jetbrains.annotations.Nullable;
 
 public interface Whiteboard {
 
-  List<Map<Page, Features>> textFeatures();
+  IntObjectMap<Map<Page, Features>> textFeatures();
 
-  List<Map<Page, Features>> filterFeatures();
+  IntObjectMap<Map<Page, Features>> filterFeatures();
 
   void putTextFeatures(Map<Page, Features> textFeatures, int index);
 
@@ -35,9 +35,9 @@ public interface Whiteboard {
   void putResults(Page[] pages);
 
   @Nullable
-  List<Page[]> subResults();
+  IntObjectMap<Page[]> subResults();
 
-  List<Page[]> subFilterResults();
+  IntObjectMap<Page[]> subFilterResults();
 
   void putSubResult(Page[] subResult, int index);
 
@@ -48,9 +48,9 @@ public interface Whiteboard {
   void putSnippets(Snippet[] snippets);
 
   @Nullable
-  List<Query> query();
+  IntObjectMap<Query> query();
 
-  void putQuery(List<Query> baseQuery);
+  void putQuery(IntObjectMap<Query> baseQuery);
 
   String input();
 

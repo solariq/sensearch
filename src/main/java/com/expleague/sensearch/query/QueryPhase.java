@@ -1,11 +1,11 @@
 package com.expleague.sensearch.query;
 
+import com.carrotsearch.hppc.IntObjectHashMap;
+import com.carrotsearch.hppc.IntObjectMap;
 import com.expleague.sensearch.core.SearchPhase;
 import com.expleague.sensearch.core.Whiteboard;
 import com.expleague.sensearch.index.Index;
 import com.google.inject.Inject;
-import java.util.ArrayList;
-import java.util.List;
 import org.apache.log4j.Logger;
 
 
@@ -28,13 +28,12 @@ public class QueryPhase implements SearchPhase {
   public void accept(Whiteboard whiteboard) {
     LOG.info("Query phase started");
     long startTime = System.nanoTime();
-    int queriesNumber = whiteboard.queriesNumber();
 
     final String input = whiteboard.input();
 
-    List<Query> queries = new ArrayList<>();
+    IntObjectMap<Query> queries = new IntObjectHashMap<>();
 
-    queries.add(BaseQuery.create(input, index));
+    queries.put(0, BaseQuery.create(input, index));
 
     whiteboard.putQuery(queries);
 

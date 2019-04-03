@@ -1,15 +1,14 @@
 package com.expleague.sensearch.ranking;
 
 import com.expleague.commons.math.Trans;
-import com.expleague.commons.math.vectors.Vec;
 import com.expleague.commons.util.Pair;
 import com.expleague.ml.meta.FeatureMeta;
 import com.expleague.sensearch.Page;
 import com.expleague.sensearch.core.Annotations.PageSize;
 import com.expleague.sensearch.core.Annotations.RankModel;
-import com.expleague.sensearch.features.Features;
 import com.expleague.sensearch.core.SearchPhase;
 import com.expleague.sensearch.core.Whiteboard;
+import com.expleague.sensearch.features.Features;
 import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
 import java.util.Comparator;
@@ -43,9 +42,7 @@ public class RankingPhase implements SearchPhase {
 
   @Override
   public boolean test(Whiteboard whiteboard) {
-    return whiteboard.textFeatures() != null
-        && Objects.requireNonNull(whiteboard.textFeatures()).size() != 0
-        && Objects.requireNonNull(whiteboard.textFeatures()).get(phaseId) != null;
+    return whiteboard.textFeatures().containsKey(phaseId);
   }
 
   @Override
