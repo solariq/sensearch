@@ -16,13 +16,13 @@
   </properties>
   <build>
     <plugins>
-      <plugin>
+     <!-- <plugin>-->
         <!-- NOTE: We don't need a groupId specification because the group is
              org.apache.maven.plugins ...which is assumed by default.
          -->
-        <artifactId>maven-assembly-plugin</artifactId>
+        <!--<artifactId>maven-assembly-plugin</artifactId>
         <version>3.1.0</version>
-        <configuration>
+       	<configuration>
           <archive>
             <manifest>
               <mainClass>com.expleague.sensearch.cli.SenSearchCli</mainClass>
@@ -31,8 +31,8 @@
           <descriptorRefs>
             <descriptorRef>jar-with-dependencies</descriptorRef>
           </descriptorRefs>
-        </configuration>
-      </plugin>
+      	</configuration>
+      </plugin>-->
 
       <plugin>
         <artifactId>maven-compiler-plugin</artifactId>
@@ -85,6 +85,17 @@
           </execution>
         </executions>
       </plugin>
+
+	<!-- download source code in Eclipse, best practice -->
+	<plugin>
+		<groupId>org.apache.maven.plugins</groupId>
+		<artifactId>maven-eclipse-plugin</artifactId>
+		<version>2.9</version>
+		<configuration>
+			<downloadSources>true</downloadSources>
+			<downloadJavadocs>false</downloadJavadocs>
+		</configuration>
+	</plugin>
 
       <!-- Maven Shade Plugin -->
       <plugin>
