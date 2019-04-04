@@ -20,7 +20,6 @@ import com.expleague.sensearch.index.plain.PlainIndex;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Inject;
 import gnu.trove.list.TLongList;
-import gnu.trove.list.array.TLongArrayList;
 import gnu.trove.map.TLongObjectMap;
 import gnu.trove.map.hash.TLongObjectHashMap;
 import gnu.trove.set.TLongSet;
@@ -341,12 +340,14 @@ public class PlainIndexBuilder implements IndexBuilder {
                                       TermBuilder.ParsedTerm termLemmaId =
                                           termBuilder.addTerm(word);
 
-                                      
+                                      // TODO: uncomment it
+                                      /*
                                       if (jmllEmbedding.apply(CharSeq.compact(word)) == null) {
                                         rareTermsInvIdx
                                             .putIfAbsent(termLemmaId.id, new TLongArrayList());
                                         rareTermsInvIdx.get(termLemmaId.id).add(pageId);
                                       }
+                                      */
                                       
                                       long lemmaId =
                                           termLemmaId.lemmaId == -1

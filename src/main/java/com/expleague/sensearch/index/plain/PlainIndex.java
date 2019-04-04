@@ -29,12 +29,11 @@ import com.expleague.sensearch.protobuf.index.IndexUnits.TermStatistics;
 import com.expleague.sensearch.protobuf.index.IndexUnits.TermStatistics.TermFrequency;
 import com.expleague.sensearch.query.Query;
 import com.expleague.sensearch.web.suggest.SuggestInformationLoader;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Streams;
 import com.google.common.primitives.Longs;
 import com.google.inject.Inject;
 import com.google.protobuf.InvalidProtocolBufferException;
+import gnu.trove.list.TLongList;
 import gnu.trove.map.TLongObjectMap;
 import gnu.trove.map.hash.TLongObjectHashMap;
 import java.io.IOException;
@@ -106,8 +105,8 @@ public class PlainIndex implements Index {
 
   private SuggestInformationLoader suggestLoader;
 
-  private final Map<Term, List<Page>> rareTermsInvIdx;
-  
+  private final Map<Term, TLongList> rareTermsInvIdx;
+
   @Override
   public void close() throws Exception {
     embedding.close();
@@ -230,24 +229,26 @@ public class PlainIndex implements Index {
 
     rareTermsInvIdx = new HashMap<>();
 
-    if (Files.exists(indexRoot.resolve(PlainIndexBuilder.RARE_INV_IDX_FILE))) {
-      ObjectMapper mapper = new ObjectMapper();
-      Map<Long, List<Long>> invIdxIds =
-          mapper.readValue(indexRoot.resolve(PlainIndexBuilder.RARE_INV_IDX_FILE).toFile(),
-              new TypeReference<Map<Long, List<Long>>>() {});
-      
-      invIdxIds.forEach((t, docs) -> {
-        Term term = idToTerm.get(t);
-        List<Page> l = new ArrayList<>();
+    // TODO: uncomment it
+//    if (Files.exists(indexRoot.resolve(PlainIndexBuilder.RARE_INV_IDX_FILE))) {
+//      ObjectMapper mapper = new ObjectMapper();
+//      TLongObjectMap<TLongList> invIdxIds =
+//          mapper.readValue(
+//              indexRoot.resolve(PlainIndexBuilder.RARE_INV_IDX_FILE).toFile(),
+//              new TypeReference<TLongObjectMap<TLongList>>() {});
+//
+//      invIdxIds.forEachEntry(
+//          (t, docs) -> {
+//            Term term = idToTerm.get(t);
+//            TLongList l = new TLongArrayList();
+//
+//            rareTermsInvIdx.put(term, l);
+//
+//            docs.forEach(l::add);
+//            return true;
+//          });
+//    }
 
-        rareTermsInvIdx.put(term, l);
-        
-        docs.forEach(pageId -> {
-          l.add(PlainPage.create(pageId, this));
-        });
-      });
-    }
-    
     LOG.info(
         String.format("PlainIndex loaded in %.3f seconds", (System.nanoTime() - startTime) / 1e9));
   }
@@ -402,7 +403,7 @@ public class PlainIndex implements Index {
         .filter(Objects::nonNull)
         .map(c -> new IndexTerm.IndexTermAndDistance(idToTerm.get(c.getId()), c.getDist()));
   }
-  
+
   public Stream<Term> nearestTerms(Vec vec) {
     return embedding
         .nearest(vec, PlainIndex::isWordId)
@@ -451,7 +452,7 @@ public class PlainIndex implements Index {
     FilterFeatures filterFeatures = new FilterFeatures();
 
     List<Term> queryTerms = query.terms();
-    
+
     final Vec qVec = vecByTerms(queryTerms);
     TLongObjectMap<List<Candidate>> pageIdToCandidatesMap = new TLongObjectHashMap<>();
     filter
@@ -485,14 +486,21 @@ public class PlainIndex implements Index {
           allFilterFeatures.put(page, new FeaturesImpl(filterFeatures, vec));
           return true;
         });
-    
-    queryTerms.forEach(term -> {
-      if (rareTermsInvIdx.containsKey(term)) {
-        rareTermsInvIdx.get(term).forEach(page -> {
-          allFilterFeatures.put(page, new FeaturesForRequiredDocument());
+
+    queryTerms.forEach(
+        term -> {
+          if (rareTermsInvIdx.containsKey(term)) {
+            rareTermsInvIdx
+                .get(term)
+                .forEach(
+                    pageId -> {
+                      LOG.info("Adding all documents with rare query term " + term.text());
+                      allFilterFeatures.put(
+                          PlainPage.create(pageId, this), new FeaturesForRequiredDocument());
+                      return true;
+                    });
+          }
         });
-      }
-    });
     return allFilterFeatures;
   }
 
