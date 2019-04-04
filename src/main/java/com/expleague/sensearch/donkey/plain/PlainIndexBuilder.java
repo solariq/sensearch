@@ -10,16 +10,19 @@ import com.expleague.ml.embedding.Embedding;
 import com.expleague.ml.embedding.impl.EmbeddingImpl;
 import com.expleague.sensearch.core.Annotations.EmbeddingVectorsPath;
 import com.expleague.sensearch.core.Annotations.IndexRoot;
-import com.expleague.sensearch.core.lemmer.Lemmer;
 import com.expleague.sensearch.core.Tokenizer;
 import com.expleague.sensearch.core.impl.TokenizerImpl;
+import com.expleague.sensearch.core.lemmer.Lemmer;
 import com.expleague.sensearch.donkey.IndexBuilder;
 import com.expleague.sensearch.donkey.crawler.Crawler;
 import com.expleague.sensearch.donkey.plain.IndexMetaBuilder.TermSegment;
 import com.expleague.sensearch.index.plain.PlainIndex;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Inject;
+import gnu.trove.list.TLongList;
+import gnu.trove.list.array.TLongArrayList;
 import gnu.trove.map.TLongObjectMap;
+import gnu.trove.map.hash.TLongObjectHashMap;
 import gnu.trove.set.TLongSet;
 import gnu.trove.set.hash.TLongHashSet;
 import java.io.FileOutputStream;
@@ -34,10 +37,8 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Random;
 import java.util.Set;
@@ -282,8 +283,7 @@ public class PlainIndexBuilder implements IndexBuilder {
       final SuggestInformationBuilder suggestBuilder =
           new SuggestInformationBuilder(suggestUnigramDb, suggestMultigramDb);
 
-      
-      final Map<Long, List<Long>> rareTermsInvIdx = new HashMap<>();
+      final TLongObjectMap<TLongList> rareTermsInvIdx = new TLongObjectHashMap<>();
       
       try {
         LOG.info("Parsing pages...");
@@ -343,7 +343,8 @@ public class PlainIndexBuilder implements IndexBuilder {
 
                                       
                                       if (jmllEmbedding.apply(CharSeq.compact(word)) == null) {
-                                        rareTermsInvIdx.putIfAbsent(termLemmaId.id, new ArrayList<>());
+                                        rareTermsInvIdx
+                                            .putIfAbsent(termLemmaId.id, new TLongArrayList());
                                         rareTermsInvIdx.get(termLemmaId.id).add(pageId);
                                       }
                                       
