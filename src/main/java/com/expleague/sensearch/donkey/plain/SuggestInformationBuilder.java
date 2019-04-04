@@ -3,6 +3,7 @@ package com.expleague.sensearch.donkey.plain;
 import com.expleague.sensearch.protobuf.index.IndexUnits;
 import com.google.common.primitives.Longs;
 import com.google.inject.Inject;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -41,7 +42,7 @@ public class SuggestInformationBuilder {
     m.put(key, m.get(key) + inc);
   }
 
-  public void build() {
+  public void build() throws IOException {
     // computeUnigrams(titles);
     // computeMultigrams(titles);
     computeAvgOrderFreq();
@@ -55,7 +56,7 @@ public class SuggestInformationBuilder {
     computeMultigrams(wordIds);
   }
 
-  private void saveTargets() {
+  private void saveTargets() throws IOException {
 
     {
       WriteBatch batch = unigramCoeffDB.createWriteBatch();
@@ -63,6 +64,7 @@ public class SuggestInformationBuilder {
           (key, value) ->
               batch.put(Longs.toByteArray(key), Longs.toByteArray(Double.doubleToLongBits(value))));
       unigramCoeffDB.write(batch, DEFAULT_WRITE_OPTIONS);
+      batch.close();
     }
 
     {
@@ -76,6 +78,7 @@ public class SuggestInformationBuilder {
                 Longs.toByteArray(Double.doubleToLongBits(value)));
           });
       multigramFreqNormDB.write(batch, DEFAULT_WRITE_OPTIONS);
+      batch.close();
     }
 
   }
