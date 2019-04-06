@@ -150,7 +150,7 @@ public class FilterPoolBuilder extends PoolBuilder {
                       allDocs.remove(page);
                     }
                   });
-              int[] cnt = {0, 0};
+              int[] cnt = {0};
               allDocs
                   .entrySet()
                   .stream()
@@ -179,8 +179,7 @@ public class FilterPoolBuilder extends PoolBuilder {
                             poolBuilder.accept(new QURLItem(page, query),
                                 new ArrayVec(vec), metas);
                           }
-                          if (!used.contains(page.uri()) && cnt[1] < SAVE_SIZE) {
-                            cnt[1]++;
+                          if (!used.contains(page.uri()) && added.get() < SAVE_SIZE) {
                             added.incrementAndGet();
                             negative.add(new PageAndRank(page.uri().toString(), 0));
                           }
