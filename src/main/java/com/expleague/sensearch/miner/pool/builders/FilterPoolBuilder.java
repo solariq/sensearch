@@ -26,7 +26,6 @@ import com.expleague.sensearch.miner.pool.QueryAndResults;
 import com.expleague.sensearch.miner.pool.QueryAndResults.PageAndRank;
 import com.expleague.sensearch.query.BaseQuery;
 import com.expleague.sensearch.query.Query;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Guice;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
@@ -53,7 +52,6 @@ public class FilterPoolBuilder extends PoolBuilder {
    */
 
   private Path dir;
-  private final ObjectMapper mapper = new ObjectMapper();
   private int SAVE_SIZE = 5;
 
   private static final int FILTER_SIZE = 10;
@@ -80,12 +78,6 @@ public class FilterPoolBuilder extends PoolBuilder {
     this.model = (Trans) rankModel.getFirst();
   }
 
-  public FilterPoolBuilder(int saveSize
-      , Index index, @RankFilterModel Pair<Function, FeatureMeta[]> rankModel) {
-    this.SAVE_SIZE = saveSize;
-    this.index = index;
-    this.model = (Trans) rankModel.getFirst();
-  }
 
 
   public static void main(String[] args) throws IOException {
