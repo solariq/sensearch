@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import java.net.URI;
+import java.util.List;
 
 @JsonPropertyOrder({"query", "answers"})
 public class QueryAndResults {
@@ -13,9 +14,9 @@ public class QueryAndResults {
 
   @JsonCreator
   public QueryAndResults(@JsonProperty("query") String query
-      , @JsonProperty("answers") PageAndRank[] answers) {
+      , @JsonProperty("answers") List<PageAndRank> answers) {
     this.query = query;
-    this.answers = answers;
+    this.answers = answers.toArray(new PageAndRank[0]);
   }
 
   @JsonProperty("query")
