@@ -80,7 +80,7 @@ public class BM25Test extends IndexBasedTestCase {
     Vec resBM25 = testBM25.advance();
     double scoreBM25 = Math.log((double) TMP_INDEX_SIZE / query.terms().get(0).documentFreq()) * 2 / (2 + K * (1 - B + B * totLen / averageTotalLen));
     double scoreBM25L = Math.log((double) TMP_INDEX_SIZE / query.terms().get(0).documentLemmaFreq()) * 2 / (2 + K * (1 - B + B * totLen / averageTotalLen));
-    System.err.println("Query: Суффет   Vec: " + resBM25);
+//    System.err.println("Query: Суффет   Vec: " + resBM25);
     Assert.assertEquals(0, Double.compare(resBM25.get(0), scoreBM25));
     Assert.assertEquals(0, Double.compare(resBM25.get(1), scoreBM25L));
 
@@ -95,7 +95,7 @@ public class BM25Test extends IndexBasedTestCase {
     scoreBM25L = Math.log((double) TMP_INDEX_SIZE / query.terms().get(0).documentLemmaFreq()) * 2 / (2 + K * (1 - B + B * totLen / averageTotalLen))
         + Math.log((double) TMP_INDEX_SIZE / query.terms().get(1).documentLemmaFreq()) * 1 / (1 + K * (1 - B + B * totLen / averageTotalLen));
 
-    System.err.println("Query: Военные предводители   Vec: " + resBM25);
+//    System.err.println("Query: Военные предводители   Vec: " + resBM25);
 //    System.err.println(query.terms().get(0).lemma().documentLemmaFreq());
 //    System.err.println(query.terms().get(1).lemma().documentLemmaFreq());
 //    System.err.println();
@@ -111,7 +111,9 @@ public class BM25Test extends IndexBasedTestCase {
     testBM25 = new BM25FeatureSet();
     Query query = BaseQuery.create("Правитель", index());
     QURLItem item = new QURLItem(new TestPage(), query);
-    //index().parse(PAGE_2).forEach(t -> System.err.println(t.lemma().text()));
+//    query.terms().forEach(t -> System.err.println(t.lemma().text()));
+//    System.err.println("====================");
+//    index().parse(PAGE_2).forEach(t -> System.err.println(t.lemma().text()));
     testBM25.accept(item);
     init(TITLE_2, PAGE_2);
 
@@ -121,8 +123,9 @@ public class BM25Test extends IndexBasedTestCase {
 
     Vec resBM25 = testBM25.advance();
     double scoreBM25 = Math.log((double) TMP_INDEX_SIZE / query.terms().get(0).documentFreq()) * 4 / (4 + K * (1 - B + B * totLen / averageTotalLen));
-    double scoreBM25L = Math.log((double) TMP_INDEX_SIZE / query.terms().get(0).documentLemmaFreq()) * 5 / (5 + K * (1 - B + B * totLen / averageTotalLen));
-    System.err.println("Query: Правитель   Vec: " + resBM25);
+    double scoreBM25L = Math.log((double) TMP_INDEX_SIZE / query.terms().get(0).documentLemmaFreq()) * 4 / (4 + K * (1 - B + B * totLen / averageTotalLen));
+//    System.err.println("Query: Правитель   Vec: " + resBM25);
+//    System.err.println("resBM25: " + scoreBM25 + " resBM25L: " + scoreBM25L);
     Assert.assertEquals(0, Double.compare(resBM25.get(0), scoreBM25));
     Assert.assertEquals(0, Double.compare(resBM25.get(1), scoreBM25L));
 
