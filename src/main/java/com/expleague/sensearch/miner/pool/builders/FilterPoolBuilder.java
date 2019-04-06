@@ -23,7 +23,7 @@ import com.expleague.sensearch.index.Index;
 import com.expleague.sensearch.index.plain.PlainIndex;
 import com.expleague.sensearch.index.plain.PlainPage;
 import com.expleague.sensearch.miner.pool.QueryAndResults;
-import com.expleague.sensearch.miner.pool.QueryAndResults.PageAndRank;
+import com.expleague.sensearch.miner.pool.QueryAndResults.PageAndWight;
 import com.expleague.sensearch.query.BaseQuery;
 import com.expleague.sensearch.query.Query;
 import com.google.inject.Guice;
@@ -79,7 +79,6 @@ public class FilterPoolBuilder extends PoolBuilder {
   }
 
 
-
   public static void main(String[] args) throws IOException {
     Injector injector = Guice.createInjector(new AppModule());
     injector.getInstance(FilterPoolBuilder.class).build(Paths.get("./PoolData/filter/"));
@@ -102,9 +101,9 @@ public class FilterPoolBuilder extends PoolBuilder {
 
     QueryAndResults[] positiveExamples = positiveData();
     QueryAndResults[] negativeExmaples = savedData();
-    Map<Query, List<PageAndRank>> negativeExmpl = Arrays.stream(negativeExmaples)
-        .collect(Collectors.toMap(qNr -> BaseQuery.create(qNr.getQuery(), index)
-            , qNr -> Arrays.asList(qNr.getAnswers())));
+    Map<Query, List<PageAndWight>> negativeExmpl = Arrays.stream(negativeExmaples)
+        .collect(Collectors.toMap(qNr -> BaseQuery.create(qNr.getQuery(), index),
+            qNr -> Arrays.asList(qNr.getAnswers())));
 
     Arrays.stream(positiveExamples)
         .parallel()
@@ -123,21 +122,19 @@ public class FilterPoolBuilder extends PoolBuilder {
                   .forEach(pNr -> {
                     Page page = index.page(pNr.getUri());
                     if (page != PlainPage.EMPTY_PAGE) {
-                      accept(poolBuilder, page, query
-                          , ((PlainIndex) index).filterFeatures(query, page.uri())
-                          , 1);
+                      accept(poolBuilder, page, query,
+                          ((PlainIndex) index).filterFeatures(query, page.uri()), 1);
                       used.add(page.uri());
                       allDocs.remove(page);
                     }
                   });
-              List<PageAndRank> negative = negativeExmpl.get(query);
+              List<PageAndWight> negative = negativeExmpl.get(query);
               negative
                   .forEach(pNr -> {
                     Page page = index.page(pNr.getUri());
                     if (page != PlainPage.EMPTY_PAGE && !used.contains(page.uri())) {
-                      accept(poolBuilder, page, query
-                          , ((PlainIndex) index).filterFeatures(query, page.uri())
-                          , 0);
+                      accept(poolBuilder, page, query,
+                          ((PlainIndex) index).filterFeatures(query, page.uri()), 0);
                       used.add(page.uri());
                       allDocs.remove(page);
                     }
@@ -147,37 +144,31 @@ public class FilterPoolBuilder extends PoolBuilder {
                   .entrySet()
                   .stream()
                   .sorted(
-                      Comparator.comparingDouble(e -> {
-                        if (e.getValue().isRequiredInResults()) {
-                          return -Double.MAX_VALUE;
-                        }
-                        return -model.trans(e.getValue().features()).get(0);
-                      }))
-                  .forEach(
-                      (entry) -> {
-                        Page page = entry.getKey();
-                        Features feat = entry.getValue();
-                        if (page == PlainPage.EMPTY_PAGE) {
-                          return;
-                        }
+                      Comparator.comparingDouble(e -> -model.trans(e.getValue().features()).get(0)))
+                  .forEach((entry) -> {
+                    Page page = entry.getKey();
+                    Features feat = entry.getValue();
+                    if (page == PlainPage.EMPTY_PAGE) {
+                      return;
+                    }
 
-                        double[] vec = new double[metas.length];
-                        for (int f = 0; f < feat.dim(); f++) {
-                          vec[f] = feat.features().get(f);
-                        }
-                        if (cnt[0] < FILTER_SIZE) {
-                          vec[feat.dim()] = 0.0;
-                          synchronized (poolBuilder) {
-                            poolBuilder.accept(new QURLItem(page, query),
-                                new ArrayVec(vec), metas);
-                          }
-                          if (!used.contains(page.uri()) && added.get() < SAVE_SIZE) {
-                            added.incrementAndGet();
-                            negative.add(new PageAndRank(page.uri().toString(), 0));
-                          }
-                          cnt[0]++;
-                        }
-                      });
+                    double[] vec = new double[metas.length];
+                    for (int f = 0; f < feat.dim(); f++) {
+                      vec[f] = feat.features().get(f);
+                    }
+                    if (cnt[0] < FILTER_SIZE) {
+                      vec[feat.dim()] = 0.0;
+                      synchronized (poolBuilder) {
+                        poolBuilder.accept(new QURLItem(page, query),
+                            new ArrayVec(vec), metas);
+                      }
+                      if (!used.contains(page.uri()) && added.get() < SAVE_SIZE) {
+                        added.incrementAndGet();
+                        negative.add(new PageAndWight(page.uri().toString(), 0));
+                      }
+                      cnt[0]++;
+                    }
+                  });
               negativeExmpl.put(query, negative);
             }
         );
@@ -209,7 +200,7 @@ public class FilterPoolBuilder extends PoolBuilder {
               fs -> {
                 if (fs instanceof TargetFS) {
                   ((TargetFS) fs).acceptTargetValue(target);
-                } else if (fs instanceof FilterFeatures){
+                } else if (fs instanceof FilterFeatures) {
                   ((FilterFeatures) fs).withBody(feat.features(SECTION).get(0));
                   ((FilterFeatures) fs).withLink(feat.features(LINK).get(0));
                   ((FilterFeatures) fs).withTitle(feat.features(TITLE).get(0));

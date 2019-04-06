@@ -10,13 +10,13 @@ import java.util.List;
 public class QueryAndResults {
 
   private String query;
-  private PageAndRank[] answers;
+  private PageAndWight[] answers;
 
   @JsonCreator
   public QueryAndResults(@JsonProperty("query") String query
-      , @JsonProperty("answers") List<PageAndRank> answers) {
+      , @JsonProperty("answers") List<PageAndWight> answers) {
     this.query = query;
-    this.answers = answers.toArray(new PageAndRank[0]);
+    this.answers = answers.toArray(new PageAndWight[0]);
   }
 
   @JsonProperty("query")
@@ -25,21 +25,21 @@ public class QueryAndResults {
   }
 
   @JsonProperty("answers")
-  public PageAndRank[] getAnswers() {
+  public PageAndWight[] getAnswers() {
     return answers;
   }
 
-  @JsonPropertyOrder({"uri", "rank"})
-  public static class PageAndRank {
+  @JsonPropertyOrder({"uri", "wight"})
+  public static class PageAndWight {
 
     private final URI uri;
-    private final double rank;
+    private final double wight;
 
     @JsonCreator
-    public PageAndRank(@JsonProperty("uri") String uri
-        , @JsonProperty("rank") double rank) {
+    public PageAndWight(@JsonProperty("uri") String uri
+        , @JsonProperty("wight") double wight) {
       this.uri = URI.create(uri);
-      this.rank = rank;
+      this.wight = wight;
     }
 
     @JsonProperty("uri")
@@ -47,9 +47,9 @@ public class QueryAndResults {
       return uri;
     }
 
-    @JsonProperty("rank")
-    public double getRank() {
-      return rank;
+    @JsonProperty("wight")
+    public double getWight() {
+      return wight;
     }
   }
 
