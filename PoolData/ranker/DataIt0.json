@@ -1,0 +1,151 @@
+[ {
+  "query" : "query_фильмы 2018",
+  "answers" : [ {
+    "uri" : "https://ru.wikipedia.org/wiki/Категория:Фильмы_2018_года",
+    "weigh" : 1.0
+  }, {
+    "uri" : "https://ru.wikipedia.org/wiki/2018_год_в_кино",
+    "weigh" : 0.5
+  }, {
+    "uri" : "https://ru.wikipedia.org/wiki/Категория:Фильмы_США_2018_года",
+    "weigh" : 0.3333333333333333
+  }, {
+    "uri" : "https://ru.wikipedia.org/wiki/Категория:Фильмы_России_2018_года",
+    "weigh" : 0.25
+  }, {
+    "uri" : "https://ru.wikipedia.org/wiki/Категория:Фильмы_2018_года_в_3D",
+    "weigh" : 0.2
+  }, {
+    "uri" : "https://ru.wikipedia.org/wiki/Категория:Фантастические_фильмы_2018_года",
+    "weigh" : 0.16666666666666666
+  }, {
+    "uri" : "https://ru.wikipedia.org/wiki/Категория:Фильмы_ужасов_2018_года",
+    "weigh" : 0.14285714285714285
+  }, {
+    "uri" : "https://ru.wikipedia.org/wiki/Власть_(фильм,_2018)",
+    "weigh" : 0.125
+  }, {
+    "uri" : "https://ru.wikipedia.org/wiki/Реинкарнация_(фильм,_2018)",
+    "weigh" : 0.1111111111111111
+  }, {
+    "uri" : "https://ru.wikipedia.org/wiki/Профессионал_(фильм,_2018)",
+    "weigh" : 0.1
+  } ]
+}, {
+  "query" : "query_федор",
+  "answers" : [ {
+    "uri" : "https://ru.wikipedia.org/wiki/Фёдор",
+    "weigh" : 1.0
+  }, {
+    "uri" : "https://ru.wikipedia.org/wiki/Фёдор_Иванович",
+    "weigh" : 0.5
+  }, {
+    "uri" : "https://ru.wikipedia.org/wiki/Фёдор_(князь_киевский)",
+    "weigh" : 0.3333333333333333
+  }, {
+    "uri" : "https://ru.wikipedia.org/wiki/Емельяненко,_Фёдор_Владимирович",
+    "weigh" : 0.25
+  }, {
+    "uri" : "https://ru.wikipedia.org/wiki/Бондарчук,_Фёдор_Сергеевич",
+    "weigh" : 0.2
+  }, {
+    "uri" : "https://ru.wikipedia.org/wiki/Фёдор_Ярославич",
+    "weigh" : 0.16666666666666666
+  }, {
+    "uri" : "https://ru.wikipedia.org/wiki/Фёдор_III_Алексеевич",
+    "weigh" : 0.14285714285714285
+  }, {
+    "uri" : "https://ru.wikipedia.org/wiki/Фёдор_Юрьевич",
+    "weigh" : 0.125
+  }, {
+    "uri" : "https://ru.wikipedia.org/wiki/Тимоскайнен,_Фёдор_Фёдорович",
+    "weigh" : 0.1111111111111111
+  }, {
+    "uri" : "https://ru.wikipedia.org/wiki/Фёдор_Данилович_(князь_острожский)",
+    "weigh" : 0.1
+  } ]
+}, {
+  "query" : "query_андреев",
+  "answers" : [ {
+    "uri" : "https://ru.wikipedia.org/wiki/Андреев,_Владимир_Алексеевич",
+    "weigh" : 1.0
+  }, {
+    "uri" : "https://ru.wikipedia.org/wiki/Андреев,_Борис_Фёдорович",
+    "weigh" : 0.5
+  }, {
+    "uri" : "https://ru.wikipedia.org/wiki/Андреев,_Юрий_Андреевич",
+    "weigh" : 0.3333333333333333
+  }, {
+    "uri" : "https://ru.wikipedia.org/wiki/Андреев,_Михаил_Васильевич",
+    "weigh" : 0.25
+  } ]
+}, {
+  "query" : "query_борис",
+  "answers" : [ {
+    "uri" : "https://ru.wikipedia.org/wiki/Борис_I",
+    "weigh" : 1.0
+  }, {
+    "uri" : "https://ru.wikipedia.org/wiki/Борис_III",
+    "weigh" : 0.5
+  }, {
+    "uri" : "https://ru.wikipedia.org/wiki/Борис_II",
+    "weigh" : 0.3333333333333333
+  }, {
+    "uri" : "https://ru.wikipedia.org/wiki/Хмельницкий,_Борис_Алексеевич",
+    "weigh" : 0.25
+  }, {
+    "uri" : "https://ru.wikipedia.org/wiki/Каморзин,_Борис_Борисович",
+    "weigh" : 0.2
+  }, {
+    "uri" : "https://ru.wikipedia.org/wiki/Скосырев,_Борис_Михайлович",
+    "weigh" : 0.16666666666666666
+  }, {
+    "uri" : "https://ru.wikipedia.org/wiki/Чирков,_Борис_Петрович",
+    "weigh" : 0.14285714285714285
+  }, {
+    "uri" : "https://ru.wikipedia.org/wiki/Химичев,_Борис_Петрович",
+    "weigh" : 0.125
+  }, {
+    "uri" : "https://ru.wikipedia.org/wiki/Токарев,_Борис_Александрович",
+    "weigh" : 0.1111111111111111
+  }, {
+    "uri" : "https://ru.wikipedia.org/wiki/Башилов,_Борис_Платонович",
+    "weigh" : 0.1
+  }, {
+    "uri" : "https://ru.wikipedia.org/wiki/Щербаков,_Борис_Васильевич",
+    "weigh" : 0.09090909090909091
+  } ]
+}, {
+  "query" : "query_васильевой",
+  "answers" : [ {
+    "uri" : "https://ru.wikipedia.org/wiki/Васильева,_Евгения_Николаевна",
+    "weigh" : 1.0
+  }, {
+    "uri" : "https://ru.wikipedia.org/wiki/Васильева,_Татьяна_Григорьевна",
+    "weigh" : 0.5
+  }, {
+    "uri" : "https://ru.wikipedia.org/wiki/Васильева,_Екатерина_Сергеевна_(актриса)",
+    "weigh" : 0.3333333333333333
+  }, {
+    "uri" : "https://ru.wikipedia.org/wiki/Васильева,_Вера_Кузьминична",
+    "weigh" : 0.25
+  }, {
+    "uri" : "https://ru.wikipedia.org/wiki/Васильева,_Ольга_Юрьевна",
+    "weigh" : 0.2
+  }, {
+    "uri" : "https://ru.wikipedia.org/wiki/Васильева,_Татьяна_Вадимовна",
+    "weigh" : 0.16666666666666666
+  }, {
+    "uri" : "https://ru.wikipedia.org/wiki/Васильева,_Софья_Владимировна",
+    "weigh" : 0.14285714285714285
+  }, {
+    "uri" : "https://ru.wikipedia.org/wiki/Саркосцифа_Васильевой",
+    "weigh" : 0.125
+  }, {
+    "uri" : "https://ru.wikipedia.org/wiki/Васильева,_Татьяна_Николаевна",
+    "weigh" : 0.1111111111111111
+  }, {
+    "uri" : "https://ru.wikipedia.org/wiki/Васильева,_Екатерина_Николаевна",
+    "weigh" : 0.1
+  } ]
+} ]
