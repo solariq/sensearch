@@ -1,6 +1,8 @@
 package com.expleague.sensearch.miner.pool.builders;
 
 import com.expleague.commons.math.Trans;
+import com.expleague.commons.math.vectors.Vec;
+import com.expleague.commons.math.vectors.VecTools;
 import com.expleague.commons.math.vectors.impl.vectors.ArrayVec;
 import com.expleague.commons.random.FastRandom;
 import com.expleague.commons.util.Pair;
@@ -30,17 +32,15 @@ import com.google.inject.Guice;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import java.io.IOException;
-import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Date;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -81,10 +81,10 @@ public class FilterPoolBuilder extends PoolBuilder {
 
   public static void main(String[] args) throws IOException {
     Injector injector = Guice.createInjector(new AppModule());
-    injector.getInstance(FilterPoolBuilder.class).build(Paths.get("./PoolData/filter/"));
+    injector.getInstance(FilterPoolBuilder.class).build(Paths.get("./PoolData/filter/"), 1);
   }
 
-  public void build(Path dir) {
+  public void build(Path dir, int iteration) {
     this.dir = dir;
 
     FastRandom rand = new FastRandom();
@@ -99,83 +99,67 @@ public class FilterPoolBuilder extends PoolBuilder {
     AtomicInteger status = new AtomicInteger(0);
     AtomicInteger added = new AtomicInteger(0);
 
-    QueryAndResults[] positiveExamples = positiveData();
-    QueryAndResults[] negativeExmaples = savedData();
-    Map<Query, List<PageAndWight>> negativeExmpl = Arrays.stream(negativeExmaples)
+    QueryAndResults[] positiveExamples = positiveData(iteration);
+    Map<Query, List<PageAndWight>> data = Arrays.stream(positiveExamples)
         .collect(Collectors.toMap(qNr -> BaseQuery.create(qNr.getQuery(), index),
             qNr -> Arrays.asList(qNr.getAnswers())));
+    List<QueryAndResults> newData = new ArrayList<>();
 
-    Arrays.stream(positiveExamples)
-        .parallel()
-        .forEach(
-            qNr -> {
-              if (status.get() % 100 == 0) {
-                System.err.println(status.get() + " queries completed");
+    data.forEach((query, res) -> {
+      if (status.get() % 100 == 0) {
+        System.err.println(status.get() + " queries completed");
+      }
+      status.incrementAndGet();
+      Map<Page, Features> allDocs =
+          index.fetchDocuments(query, FilterMinerPhase.FILTERED_DOC_NUMBER);
+
+      res.forEach(
+          pNw -> {
+            Page page = index.page(pNw.getUri());
+            if (page != PlainPage.EMPTY_PAGE) {
+              double target = 0;
+              if (pNw.getWight() > 0) {
+                target = 1;
               }
-              status.incrementAndGet();
-              Query query = BaseQuery.create(qNr.getQuery(), index);
-              Set<URI> used = new HashSet<>();
-              Map<Page, Features> allDocs =
-                  index.fetchDocuments(query, FilterMinerPhase.FILTERED_DOC_NUMBER);
-
-              Arrays.stream(qNr.getAnswers())
-                  .forEach(pNr -> {
-                    Page page = index.page(pNr.getUri());
-                    if (page != PlainPage.EMPTY_PAGE) {
-                      accept(poolBuilder, page, query,
-                          ((PlainIndex) index).filterFeatures(query, page.uri()), 1);
-                      used.add(page.uri());
-                      allDocs.remove(page);
-                    }
-                  });
-              List<PageAndWight> negative = negativeExmpl.get(query);
-              negative
-                  .forEach(pNr -> {
-                    Page page = index.page(pNr.getUri());
-                    if (page != PlainPage.EMPTY_PAGE && !used.contains(page.uri())) {
-                      accept(poolBuilder, page, query,
-                          ((PlainIndex) index).filterFeatures(query, page.uri()), 0);
-                      used.add(page.uri());
-                      allDocs.remove(page);
-                    }
-                  });
-              int[] cnt = {0};
-              allDocs
-                  .entrySet()
-                  .stream()
-                  .sorted(
-                      Comparator.comparingDouble(e -> -model.trans(e.getValue().features()).get(0)))
-                  .forEach((entry) -> {
-                    Page page = entry.getKey();
-                    Features feat = entry.getValue();
-                    if (page == PlainPage.EMPTY_PAGE) {
-                      return;
-                    }
-
-                    double[] vec = new double[metas.length];
-                    for (int f = 0; f < feat.dim(); f++) {
-                      vec[f] = feat.features().get(f);
-                    }
-                    if (cnt[0] < FILTER_SIZE) {
-                      vec[feat.dim()] = 0.0;
-                      synchronized (poolBuilder) {
-                        poolBuilder.accept(new QURLItem(page, query),
-                            new ArrayVec(vec), metas);
-                      }
-                      if (!used.contains(page.uri()) && added.get() < SAVE_SIZE) {
-                        added.incrementAndGet();
-                        negative.add(new PageAndWight(page.uri().toString(), 0));
-                      }
-                      cnt[0]++;
-                    }
-                  });
-              negativeExmpl.put(query, negative);
+              accept(poolBuilder, page, query,
+                  ((PlainIndex) index).filterFeatures(query, page.uri()), target);
+              allDocs.remove(page);
             }
-        );
+          });
 
-    saveNewData(negativeExmpl.entrySet().stream()
-        .map(e -> new QueryAndResults(e.getKey().toString(), e.getValue()))
-        .toArray(QueryAndResults[]::new));
+      List<PageAndWight> newRes = new ArrayList<>(res);
+      int tmpAdded = added.get();
+      int[] cnt = {0};
+      allDocs
+          .entrySet()
+          .stream()
+          .sorted(Comparator.comparingDouble(e -> -model.trans(e.getValue().features()).get(0)))
+          .forEach(e -> {
+            Page page = e.getKey();
+            Features feat = e.getValue();
+            if (page == PlainPage.EMPTY_PAGE) {
+              return;
+            }
+
+            Vec vec = feat.features();
+            vec = VecTools.concat(vec, new ArrayVec(0.0));
+
+            if (cnt[0] < FILTER_SIZE) {
+              synchronized (poolBuilder) {
+                poolBuilder.accept(new QURLItem(page, query),
+                    vec, metas);
+              }
+              if (added.get() - tmpAdded < SAVE_SIZE) {
+                added.incrementAndGet();
+                newRes.add(new PageAndWight(page.uri().toString(), 0));
+              }
+              cnt[0]++;
+            }
+          });
+      newData.add(new QueryAndResults(query.text(), newRes));
+    });
+
+    saveNewData(newData.toArray(new QueryAndResults[0]), iteration + 1);
 
     System.out.format("Запомнено новых результатов %d\n", added.get());
 

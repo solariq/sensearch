@@ -4,6 +4,7 @@ import com.expleague.ml.data.tools.FeatureSet;
 import com.expleague.ml.meta.FeatureMeta;
 import com.expleague.sensearch.miner.pool.QueryAndResults;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -11,9 +12,11 @@ import java.nio.file.Path;
 public abstract class PoolBuilder {
 
   private final ObjectMapper mapper = new ObjectMapper();
-  private Path savedDocs;
-
   public abstract Path acceptDir();
+
+  public PoolBuilder() {
+    mapper.enable(SerializationFeature.INDENT_OUTPUT);
+  }
 
   FeatureMeta[] metaData(FeatureSet features, FeatureSet targetFeatures) {
     FeatureMeta[] metas = new FeatureMeta[features.dim() + targetFeatures.dim()];
@@ -26,26 +29,19 @@ public abstract class PoolBuilder {
     return metas;
   }
 
-  QueryAndResults[] savedData() {
+
+  QueryAndResults[] positiveData(int iteration) {
     try {
-      return mapper.readValue(acceptDir().resolve("savedData.json").toFile(), QueryAndResults[].class);
+      return mapper.readValue(acceptDir().resolve("DataIt" + iteration + ".json").toFile(), QueryAndResults[].class);
     } catch (IOException e) {
       return new QueryAndResults[0];
     }
   }
 
-  QueryAndResults[] positiveData() {
-    try {
-      return mapper.readValue(acceptDir().resolve("positiveData.json").toFile(), QueryAndResults[].class);
-    } catch (IOException e) {
-      return new QueryAndResults[0];
-    }
-  }
-
-  void saveNewData(QueryAndResults[] result) {
+  void saveNewData(QueryAndResults[] result, int iteration) {
     try {
       Files.createDirectories(acceptDir());
-      mapper.writeValue(acceptDir().resolve("savedData.json").toFile(), result);
+      mapper.writeValue(acceptDir().resolve("DataIt" + iteration + ".json").toFile(), result);
     } catch (IOException e) {
       throw new RuntimeException(e);
     }

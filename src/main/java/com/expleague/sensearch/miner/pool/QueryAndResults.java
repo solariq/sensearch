@@ -29,17 +29,17 @@ public class QueryAndResults {
     return answers;
   }
 
-  @JsonPropertyOrder({"uri", "wight"})
+  @JsonPropertyOrder({"uri", "weigh"})
   public static class PageAndWight {
 
     private final URI uri;
-    private final double wight;
+    private final double weigh;
 
     @JsonCreator
     public PageAndWight(@JsonProperty("uri") String uri
-        , @JsonProperty("wight") double wight) {
+        , @JsonProperty("weigh") double weigh) {
       this.uri = URI.create(uri);
-      this.wight = wight;
+      this.weigh = weigh;
     }
 
     @JsonProperty("uri")
@@ -47,9 +47,9 @@ public class QueryAndResults {
       return uri;
     }
 
-    @JsonProperty("wight")
+    @JsonProperty("weigh")
     public double getWight() {
-      return wight;
+      return weigh;
     }
   }
 
