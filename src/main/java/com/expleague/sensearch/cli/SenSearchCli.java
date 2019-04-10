@@ -10,8 +10,8 @@ import com.expleague.sensearch.RebuildEmbedding;
 import com.expleague.sensearch.donkey.IndexBuilder;
 import com.expleague.sensearch.donkey.crawler.CrawlerXML;
 import com.expleague.sensearch.donkey.plain.JmllEmbeddingBuilder;
-import com.expleague.sensearch.miner.pool.FilterPoolBuilderRememberTop;
-import com.expleague.sensearch.miner.pool.RankingPoolBuilderRememberTop;
+import com.expleague.sensearch.miner.pool.builders.FilterPoolBuilder;
+import com.expleague.sensearch.miner.pool.builders.RankingPoolBuilder;
 import com.expleague.sensearch.web.SearchServer;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
@@ -50,6 +50,8 @@ public class SenSearchCli {
 
   private static final String RANK_MODEL_PATH_OPTION = "rankmodel";
   private static final String FILTER_MODEL_PATH_OPTION = "filtermodel";
+
+  private static final String POOL_ITERATION_OPTION = "poolIteration";
 
   private static final String TRAIN_EMBEDDING_COMMAND = "trainEmbedding";
 
@@ -119,6 +121,16 @@ public class SenSearchCli {
 
     startServerOptions.addOption(
         Option.builder().longOpt(DO_NOT_USE_LSH_OPTION).desc("disables LSH").build());
+
+    Option poolIterationOption =
+        Option.builder()
+            .longOpt(POOL_ITERATION_OPTION)
+            .desc("Pool iteration")
+            .hasArg()
+            .required()
+            .build();
+    buildFilterPoolOptions.addOption(poolIterationOption);
+    buildRankPoolOptions.addOption(poolIterationOption);
 
     Option maxFilterOption =
         Option.builder()
@@ -232,8 +244,8 @@ public class SenSearchCli {
 
           Path poolPath = Paths.get(parser.getOptionValue(POOL_PATH_OPTION));
           Guice.createInjector(new AppModule(config))
-              .getInstance(FilterPoolBuilderRememberTop.class)
-              .build(poolPath);
+              .getInstance(FilterPoolBuilder.class)
+              .build(poolPath, Integer.parseInt(parser.getOptionValue(POOL_ITERATION_OPTION)));
           break;
 
         case BUILD_RANK_POOL_COMMAND:
@@ -251,8 +263,8 @@ public class SenSearchCli {
 
           poolPath = Paths.get(parser.getOptionValue(POOL_PATH_OPTION));
           Guice.createInjector(new AppModule(config))
-              .getInstance(RankingPoolBuilderRememberTop.class)
-              .build(poolPath);
+              .getInstance(RankingPoolBuilder.class)
+              .build(poolPath, Integer.parseInt(parser.getOptionValue(POOL_ITERATION_OPTION)));
           break;
         case TRAIN_RANK_MODEL_COMMAND:
           LOG.debug("Executing command 'fitrk'");
