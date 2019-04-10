@@ -36,6 +36,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
@@ -97,7 +98,7 @@ public class FilterPoolBuilder extends PoolBuilder {
     Map<Query, List<PageAndWeight>> data = Arrays.stream(positiveExamples)
         .collect(Collectors.toMap(qNr -> BaseQuery.create(qNr.getQuery(), index),
             qNr -> Arrays.asList(qNr.getAnswers())));
-    List<QueryAndResults> newData = new ArrayList<>();
+    List<QueryAndResults> newData = Collections.synchronizedList(new ArrayList<>());
 
     data.entrySet()
         .parallelStream()

@@ -36,6 +36,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
@@ -91,7 +92,7 @@ public class RankingPoolBuilder extends PoolBuilder {
     AtomicInteger added = new AtomicInteger(0);
 
     QueryAndResults[] positiveExamples = positiveData(iteration);
-    List<QueryAndResults> newData = new ArrayList<>();
+    List<QueryAndResults> newData = Collections.synchronizedList(new ArrayList<>());
     Arrays.stream(positiveExamples)
         .parallel()
         .forEach(
@@ -113,12 +114,14 @@ public class RankingPoolBuilder extends PoolBuilder {
                     Page page = index.page(pNw.getUri());
                     if (page != PlainPage.EMPTY_PAGE) {
                       double target = pNw.getWight();
-                      poolBuilder.accept(new QURLItem(page, query));
-                      poolBuilder.features()
-                          .map(Functions.cast(TargetFS.class))
-                          .filter(Objects::nonNull)
-                          .forEach(fs -> fs.acceptTargetValue(target));
-                      poolBuilder.advance();
+                      synchronized (poolBuilder) {
+                        poolBuilder.accept(new QURLItem(page, query));
+                        poolBuilder.features()
+                            .map(Functions.cast(TargetFS.class))
+                            .filter(Objects::nonNull)
+                            .forEach(fs -> fs.acceptTargetValue(target));
+                        poolBuilder.advance();
+                      }
                       allDocs.remove(page);
                     }
                   });
