@@ -53,7 +53,7 @@ public class FilterPoolBuilder extends PoolBuilder {
       никакие два запроса не повторяются!
    */
 
-  private static final org.apache.log4j.Logger LOG = Logger.getLogger(FilterPoolBuilder.class.getName());
+  private static final Logger LOG = Logger.getLogger(FilterPoolBuilder.class.getName());
   private Path dir;
   private int SAVE_SIZE = 5;
 

@@ -42,12 +42,16 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Properties;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 import java.util.function.ToDoubleFunction;
+import org.apache.log4j.Logger;
+import org.apache.log4j.PropertyConfigurator;
 
 public class RankingPoolBuilder extends PoolBuilder {
 
+  private static final Logger LOG = Logger.getLogger(FilterPoolBuilder.class.getName());
   private Path dir;
   private int SAVE_SIZE = 5;
 
@@ -62,11 +66,16 @@ public class RankingPoolBuilder extends PoolBuilder {
   }
 
   public static void main(String[] args) throws IOException {
+    Properties logProperties = new Properties();
+    logProperties.load(Files.newInputStream(Paths.get("log4j.properties")));
+    PropertyConfigurator.configure(logProperties);
     Injector injector = Guice.createInjector(new AppModule());
     injector.getInstance(RankingPoolBuilder.class).build(Paths.get("./PoolData/ranker/"), 0);
   }
 
   public void build(Path dir, int iteration) {
+    LOG.info("RankingPool build start");
+    long startTime = System.nanoTime();
     this.dir = dir;
 
     FastRandom rand = new FastRandom();
@@ -84,6 +93,7 @@ public class RankingPoolBuilder extends PoolBuilder {
     QueryAndResults[] positiveExamples = positiveData(iteration);
     List<QueryAndResults> newData = new ArrayList<>();
     Arrays.stream(positiveExamples)
+        .parallel()
         .forEach(
             qNr -> {
               int tmpAdded = added.get();
@@ -173,6 +183,9 @@ public class RankingPoolBuilder extends PoolBuilder {
     } catch (IOException e) {
       System.err.println(e.getMessage());
     }
+    LOG.info(
+        String.format(
+            "RankingPool build finished in %.3f seconds", (System.nanoTime() - startTime) / 1e9));
   }
 
   @Override
