@@ -10,13 +10,13 @@ import java.util.List;
 public class QueryAndResults {
 
   private String query;
-  private PageAndWight[] answers;
+  private PageAndWeight[] answers;
 
   @JsonCreator
   public QueryAndResults(@JsonProperty("query") String query
-      , @JsonProperty("answers") List<PageAndWight> answers) {
+      , @JsonProperty("answers") List<PageAndWeight> answers) {
     this.query = query;
-    this.answers = answers.toArray(new PageAndWight[0]);
+    this.answers = answers.toArray(new PageAndWeight[0]);
   }
 
   @JsonProperty("query")
@@ -25,21 +25,21 @@ public class QueryAndResults {
   }
 
   @JsonProperty("answers")
-  public PageAndWight[] getAnswers() {
+  public PageAndWeight[] getAnswers() {
     return answers;
   }
 
-  @JsonPropertyOrder({"uri", "weigh"})
-  public static class PageAndWight {
+  @JsonPropertyOrder({"uri", "weight"})
+  public static class PageAndWeight {
 
     private final URI uri;
-    private final double weigh;
+    private final double weight;
 
     @JsonCreator
-    public PageAndWight(@JsonProperty("uri") String uri
-        , @JsonProperty("weigh") double weigh) {
+    public PageAndWeight(@JsonProperty("uri") String uri
+        , @JsonProperty("weight") double weigh) {
       this.uri = URI.create(uri);
-      this.weigh = weigh;
+      this.weight = weigh;
     }
 
     @JsonProperty("uri")
@@ -47,9 +47,9 @@ public class QueryAndResults {
       return uri;
     }
 
-    @JsonProperty("weigh")
+    @JsonProperty("weight")
     public double getWight() {
-      return weigh;
+      return weight;
     }
   }
 

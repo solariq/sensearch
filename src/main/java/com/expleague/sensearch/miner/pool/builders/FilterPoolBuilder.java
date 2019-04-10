@@ -24,7 +24,7 @@ import com.expleague.sensearch.index.Index;
 import com.expleague.sensearch.index.plain.PlainIndex;
 import com.expleague.sensearch.index.plain.PlainPage;
 import com.expleague.sensearch.miner.pool.QueryAndResults;
-import com.expleague.sensearch.miner.pool.QueryAndResults.PageAndWight;
+import com.expleague.sensearch.miner.pool.QueryAndResults.PageAndWeight;
 import com.expleague.sensearch.query.BaseQuery;
 import com.expleague.sensearch.query.Query;
 import com.google.inject.Guice;
@@ -40,9 +40,12 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import org.apache.log4j.Logger;
+import org.apache.log4j.PropertyConfigurator;
 
 public class FilterPoolBuilder extends PoolBuilder {
 
@@ -50,6 +53,7 @@ public class FilterPoolBuilder extends PoolBuilder {
       никакие два запроса не повторяются!
    */
 
+  private static final org.apache.log4j.Logger LOG = Logger.getLogger(FilterPoolBuilder.class.getName());
   private Path dir;
   private int SAVE_SIZE = 5;
 
@@ -79,11 +83,16 @@ public class FilterPoolBuilder extends PoolBuilder {
 
 
   public static void main(String[] args) throws IOException {
+    Properties logProperties = new Properties();
+    logProperties.load(Files.newInputStream(Paths.get("log4j.properties")));
+    PropertyConfigurator.configure(logProperties);
     Injector injector = Guice.createInjector(new AppModule());
     injector.getInstance(FilterPoolBuilder.class).build(Paths.get("./PoolData/filter/"), 0);
   }
 
   public void build(Path dir, int iteration) {
+    LOG.info("FilterPool build start");
+    long startTime = System.nanoTime();
     this.dir = dir;
 
     FastRandom rand = new FastRandom();
@@ -99,15 +108,16 @@ public class FilterPoolBuilder extends PoolBuilder {
     AtomicInteger added = new AtomicInteger(0);
 
     QueryAndResults[] positiveExamples = positiveData(iteration);
-    Map<Query, List<PageAndWight>> data = Arrays.stream(positiveExamples)
+    Map<Query, List<PageAndWeight>> data = Arrays.stream(positiveExamples)
         .collect(Collectors.toMap(qNr -> BaseQuery.create(qNr.getQuery(), index),
             qNr -> Arrays.asList(qNr.getAnswers())));
     List<QueryAndResults> newData = new ArrayList<>();
 
-    data.entrySet().parallelStream()
+    data.entrySet()
+        .parallelStream()
         .forEach(entry -> {
           Query query = entry.getKey();
-          List<PageAndWight> res = entry.getValue();
+          List<PageAndWeight> res = entry.getValue();
           if (status.get() % 100 == 0) {
             System.err.println(status.get() + " queries completed");
           }
@@ -147,7 +157,7 @@ public class FilterPoolBuilder extends PoolBuilder {
                 }
               });
 
-          List<PageAndWight> newRes = new ArrayList<>(res);
+          List<PageAndWeight> newRes = new ArrayList<>(res);
           final int[] tmpAdded = {0};
           int[] cnt = {0};
           allDocs
@@ -171,7 +181,7 @@ public class FilterPoolBuilder extends PoolBuilder {
                   }
                   if (tmpAdded[0] < SAVE_SIZE) {
                     tmpAdded[0]++;
-                    newRes.add(new PageAndWight(page.uri().toString(), 0));
+                    newRes.add(new PageAndWeight(page.uri().toString(), 0));
                   }
                   cnt[0]++;
                 }
@@ -190,6 +200,9 @@ public class FilterPoolBuilder extends PoolBuilder {
     } catch (IOException e) {
       System.err.println(e.getMessage());
     }
+    LOG.info(
+        String.format(
+            "FilterPool build finished in %.3f seconds", (System.nanoTime() - startTime) / 1e9));
   }
 
   @Override

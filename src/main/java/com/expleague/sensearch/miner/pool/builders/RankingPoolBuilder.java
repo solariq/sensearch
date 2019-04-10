@@ -24,7 +24,7 @@ import com.expleague.sensearch.index.Index;
 import com.expleague.sensearch.index.plain.PlainPage;
 import com.expleague.sensearch.miner.AccumulatorFeatureSet;
 import com.expleague.sensearch.miner.pool.QueryAndResults;
-import com.expleague.sensearch.miner.pool.QueryAndResults.PageAndWight;
+import com.expleague.sensearch.miner.pool.QueryAndResults.PageAndWeight;
 import com.expleague.sensearch.query.BaseQuery;
 import com.expleague.sensearch.query.Query;
 import com.google.inject.Guice;
@@ -93,7 +93,7 @@ public class RankingPoolBuilder extends PoolBuilder {
               status.incrementAndGet();
 
               Query query = BaseQuery.create(qNr.getQuery(), index);
-              List<PageAndWight> res = Arrays.asList(qNr.getAnswers());
+              List<PageAndWeight> res = Arrays.asList(qNr.getAnswers());
 
               Map<Page, Features> allDocs =
                   index.fetchDocuments(query, FilterMinerPhase.FILTERED_DOC_NUMBER);
@@ -113,7 +113,7 @@ public class RankingPoolBuilder extends PoolBuilder {
                     }
                   });
 
-              List<PageAndWight> newRes = new ArrayList<>(res);
+              List<PageAndWeight> newRes = new ArrayList<>(res);
 
               Map<Page, Vec> feat = new HashMap<>();
 
@@ -155,7 +155,7 @@ public class RankingPoolBuilder extends PoolBuilder {
                       }
                       if (added.get() - tmpAdded < SAVE_SIZE) {
                         added.incrementAndGet();
-                        newRes.add(new PageAndWight(page.uri().toString(), 0));
+                        newRes.add(new PageAndWeight(page.uri().toString(), 0));
                       }
                       cnt[0]++;
                     }

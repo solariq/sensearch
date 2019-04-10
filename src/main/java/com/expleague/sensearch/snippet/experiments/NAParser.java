@@ -1,6 +1,7 @@
 package com.expleague.sensearch.snippet.experiments;
 
 import com.expleague.sensearch.miner.pool.QueryAndResults;
+import com.expleague.sensearch.miner.pool.QueryAndResults.PageAndWeight;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import java.io.File;
@@ -45,7 +46,7 @@ public class NAParser {
       { // for learning
         String query = result.getQuestion_text();
         String uri = createUriForTitle(result.getDocument_title()).toString();
-        QueryAndResults.PageAndWight pw = new QueryAndResults.PageAndWight(uri, 1.0);
+        PageAndWeight pw = new PageAndWeight(uri, 1.0);
         queryAndResults.add(new QueryAndResults(query, Collections.singletonList(pw)));
       }
 
