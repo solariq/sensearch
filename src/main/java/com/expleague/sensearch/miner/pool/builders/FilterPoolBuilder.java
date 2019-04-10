@@ -41,12 +41,10 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import org.apache.log4j.Logger;
-import org.apache.log4j.PropertyConfigurator;
 
 public class FilterPoolBuilder extends PoolBuilder {
 
@@ -70,9 +68,6 @@ public class FilterPoolBuilder extends PoolBuilder {
 
 
   public static void main(String[] args) throws IOException {
-    Properties logProperties = new Properties();
-    logProperties.load(Files.newInputStream(Paths.get("log4j.properties")));
-    PropertyConfigurator.configure(logProperties);
     Injector injector = Guice.createInjector(new AppModule());
     injector.getInstance(FilterPoolBuilder.class).build(Paths.get("./PoolData/filter/"), 0);
   }

@@ -57,4 +57,9 @@ public class QURLItem extends GroupedDSItem.Stub {
   public String groupId() {
     return query;
   }
+
+  @Override
+  public int hashCode() {
+    return (query + uri.toString()).hashCode();
+  }
 }

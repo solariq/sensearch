@@ -43,12 +43,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Properties;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 import java.util.function.ToDoubleFunction;
 import org.apache.log4j.Logger;
-import org.apache.log4j.PropertyConfigurator;
 
 public class RankingPoolBuilder extends PoolBuilder {
 
@@ -67,9 +65,6 @@ public class RankingPoolBuilder extends PoolBuilder {
   }
 
   public static void main(String[] args) throws IOException {
-    Properties logProperties = new Properties();
-    logProperties.load(Files.newInputStream(Paths.get("log4j.properties")));
-    PropertyConfigurator.configure(logProperties);
     Injector injector = Guice.createInjector(new AppModule());
     injector.getInstance(RankingPoolBuilder.class).build(Paths.get("./PoolData/ranker/"), 0);
   }
@@ -97,7 +92,7 @@ public class RankingPoolBuilder extends PoolBuilder {
         .parallel()
         .forEach(
             qNr -> {
-              int tmpAdded = added.get();
+              final int[] tmpAdded = {0};
               if (status.get() % 100 == 0) {
                 System.err.println(status.get() + " queries completed");
               }
@@ -129,6 +124,7 @@ public class RankingPoolBuilder extends PoolBuilder {
               List<PageAndWeight> newRes = new ArrayList<>(res);
 
               Map<Page, Vec> feat = new HashMap<>();
+              AccumulatorFeatureSet AFS = new AccumulatorFeatureSet(index);
 
               int[] cnt = {0};
               allDocs
@@ -145,8 +141,8 @@ public class RankingPoolBuilder extends PoolBuilder {
                               if (res != null) {
                                 return res;
                               }
-                              features.accept(new QURLItem(page, query));
-                              Vec all = features.advance();
+                              AFS.accept(new QURLItem(page, query));
+                              Vec all = AFS.advance();
                               feat.put(page, all);
                               res = -model.trans(all).get(0);
                               computedValues.put(((PlainPage) page).id(), res);
@@ -166,13 +162,14 @@ public class RankingPoolBuilder extends PoolBuilder {
                         poolBuilder.accept(new QURLItem(page, query),
                             vec, metas);
                       }
-                      if (added.get() - tmpAdded < SAVE_SIZE) {
-                        added.incrementAndGet();
+                      if (tmpAdded[0] < SAVE_SIZE) {
+                        tmpAdded[0]++;
                         newRes.add(new PageAndWeight(page.uri().toString(), 0));
                       }
                       cnt[0]++;
                     }
                   });
+              added.addAndGet(tmpAdded[0]);
               newData.add(new QueryAndResults(query.text(), newRes));
             });
 
