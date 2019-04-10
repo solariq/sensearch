@@ -85,6 +85,7 @@ public class NAParser {
 
             datas.add(data);
           }
+          break;
         default:
             return;
       }
