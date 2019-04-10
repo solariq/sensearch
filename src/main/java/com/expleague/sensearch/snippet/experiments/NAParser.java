@@ -1,20 +1,17 @@
 package com.expleague.sensearch.snippet.experiments;
 
-import com.fasterxml.jackson.core.util.DefaultPrettyPrinter;
+import com.expleague.sensearch.miner.pool.QueryAndResults;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.ObjectWriter;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import java.io.File;
-import java.io.IOException;
+import java.net.URI;
+import java.net.URLEncoder;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
-import org.json.JSONArray;
-import org.json.JSONObject;
 
 public class NAParser {
 
@@ -27,15 +24,31 @@ public class NAParser {
         .trim();
   }
 
+  private static URI createUriForTitle(String title) {
+    String pageUri = URLEncoder.encode(title.replace(" ", "_").replace("%", "%25"));
+    return URI.create("https://ru.wikipedia.org/wiki/" + pageUri);
+  }
+
   public static void main(String[] args) throws Exception {
     byte[] jsonData = Files.readAllBytes(Paths.get("./resources/nq-train-sample.json"));
 
     ObjectMapper objectMapper = new ObjectMapper();
+//    objectMapper.configure(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY, true);
     Result[] results = objectMapper.readValue(jsonData, Result[].class);
 
     List<Data> datas = new ArrayList<>();
+    List<QueryAndResults> queryAndResults = new ArrayList<>();
+
     for (int i = 0; i < results.length; i++) {
       Result result = results[i];
+
+      { // for learning
+        String query = result.getQuestion_text();
+        String uri = createUriForTitle(result.getDocument_title()).toString();
+        QueryAndResults.PageAndWight pw = new QueryAndResults.PageAndWight(uri, 1.0);
+        queryAndResults.add(new QueryAndResults(query, Collections.singletonList(pw)));
+      }
+
       if (result.getAnnotations().size() > 0
           && result.getAnnotations().get(0).getShort_answers().size() > 0) {
         String title = result.getDocument_title();
@@ -63,10 +76,12 @@ public class NAParser {
 
         datas.add(data);
       }
-
-      ObjectMapper mapper = new ObjectMapper();
-      mapper.enable(SerializationFeature.INDENT_OUTPUT);
-      mapper.writeValue(new File("./src/main/java/com/expleague/sensearch/snippet/experiments/data.json"), datas);
     }
+
+    ObjectMapper mapper = new ObjectMapper();
+    mapper.enable(SerializationFeature.INDENT_OUTPUT);
+
+    mapper.writeValue(new File("./src/main/java/com/expleague/sensearch/snippet/experiments/data.json"), datas);
+    mapper.writeValue(new File("./PoolData/na.json"), queryAndResults);
   }
 }
