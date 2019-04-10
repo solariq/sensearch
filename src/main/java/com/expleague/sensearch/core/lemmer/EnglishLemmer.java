@@ -11,15 +11,21 @@ import edu.mit.jwi.morph.WordnetStemmer;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.List;
 
 public class EnglishLemmer {
-
   private WordnetStemmer wordnetStemmer;
 
   public EnglishLemmer() {
     String path = "./resources/dict";
+    if (!Files.exists(Paths.get(path))) {
+      throw new IllegalArgumentException(
+          "Missing english disctionary. Please download it from gDrive");
+    }
+
     URL url = null;
     try {
       url = new URL("file", null, path);
@@ -76,7 +82,8 @@ public class EnglishLemmer {
       partOfSpeech = POS.ADVERB;
     }
 
-    return new WordInfo(CharSeq.create(word),
+    return new WordInfo(
+        CharSeq.create(word),
         Collections.singletonList(new LemmaInfo(CharSeq.create(lemma), 1, convert(partOfSpeech))));
   }
 }

@@ -25,11 +25,11 @@ import gnu.trove.map.hash.TLongObjectHashMap;
 import gnu.trove.set.TLongSet;
 import gnu.trove.set.hash.TLongHashSet;
 import java.io.FileOutputStream;
-import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
+import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -43,6 +43,7 @@ import java.util.Random;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.stream.Stream;
+import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 import org.fusesource.leveldbjni.JniDBFactory;
 import org.iq80.leveldb.CompressionType;
@@ -224,7 +225,10 @@ public class PlainIndexBuilder implements IndexBuilder {
   @Override
   public void buildIndex() throws IOException {
     LOG.info("Reading jmll embedding...");
-    buildIndex(EmbeddingImpl.read(new FileReader(embeddingVectorsPath.toFile()), CharSeq.class));
+    buildIndex(
+        EmbeddingImpl.read(
+            Files.newBufferedReader(embeddingVectorsPath, Charset.forName("UTF-8")),
+            CharSeq.class));
   }
 
   private void buildIndex(Embedding<CharSeq> jmllEmbedding) throws IOException {
@@ -239,6 +243,8 @@ public class PlainIndexBuilder implements IndexBuilder {
     Files.createDirectories(indexRoot.resolve(TERM_STATISTICS_ROOT));
     Files.createDirectories(indexRoot.resolve(EMBEDDING_ROOT));
     Files.createDirectories(indexRoot.resolve(SUGGEST_UNIGRAM_ROOT));
+    Files.createDirectories(indexRoot.resolve(URI_MAPPING_ROOT));
+    Files.createDirectories(indexRoot.resolve(TERM_ROOT));
 
     final TLongSet knownPageIds = new TLongHashSet();
     try (final PlainPageBuilder plainPageBuilder =
@@ -389,12 +395,16 @@ public class PlainIndexBuilder implements IndexBuilder {
         {
           ObjectMapper mapper = new ObjectMapper();
           Files.createDirectories(indexRoot.resolve(RARE_INV_IDX_FILE).getParent());
-          mapper.writeValue(
-              indexRoot.resolve(RARE_INV_IDX_FILE).toFile(),
-              rareTermsInvIdx
-              );
+          mapper.writeValue(indexRoot.resolve(RARE_INV_IDX_FILE).toFile(), rareTermsInvIdx);
         }
       } catch (Exception e) {
+        FileUtils.deleteDirectory(indexRoot.resolve(PAGE_ROOT).toFile());
+        FileUtils.deleteDirectory(indexRoot.resolve(TERM_STATISTICS_ROOT).toFile());
+        FileUtils.deleteDirectory(indexRoot.resolve(EMBEDDING_ROOT).toFile());
+        FileUtils.deleteDirectory(indexRoot.resolve("suggest").toFile());
+        FileUtils.deleteDirectory(indexRoot.resolve(URI_MAPPING_ROOT).toFile());
+        FileUtils.deleteDirectory(indexRoot.resolve(TERM_ROOT).toFile());
+
         throw new IOException(e);
       }
     }

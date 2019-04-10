@@ -147,4 +147,8 @@ public class EmbeddingBuilder implements AutoCloseable {
     }
     return VecTools.scale(mean, 1.0 / vectors.length);
   }
+
+  public void addTerm(long id, Vec vec) {
+    nnIdx.append(id, vec);
+  }
 }
