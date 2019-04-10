@@ -59,20 +59,6 @@ public class FilterPoolBuilder extends PoolBuilder {
 
   private static final int FILTER_SIZE = 10;
   private final Index index;
-  private static final FeatureMeta TITLE =
-      FeatureMeta.create(
-          "dist-title", "cos distance between Query and Title", FeatureMeta.ValueType.VEC);
-  private static final FeatureMeta SECTION =
-      FeatureMeta.create(
-          "dist-section",
-          "cos distance between Query and Nearest Section Body",
-          FeatureMeta.ValueType.VEC);
-  private static final FeatureMeta LINK =
-      FeatureMeta.create(
-          "dist-link",
-          "cos distance between Query and Nearest Incoming Link",
-          FeatureMeta.ValueType.VEC);
-
   private final Trans model;
 
   @Inject
@@ -145,9 +131,9 @@ public class FilterPoolBuilder extends PoolBuilder {
                               if (fs instanceof TargetFS) {
                                 ((TargetFS) fs).acceptTargetValue(finalTarget);
                               } else if (fs instanceof FilterFeatures) {
-                                ((FilterFeatures) fs).withBody(feat.features(SECTION).get(0));
-                                ((FilterFeatures) fs).withLink(feat.features(LINK).get(0));
-                                ((FilterFeatures) fs).withTitle(feat.features(TITLE).get(0));
+                                ((FilterFeatures) fs).withBody(feat.features(FilterFeatures.SECTION).get(0));
+                                ((FilterFeatures) fs).withLink(feat.features(FilterFeatures.LINK).get(0));
+                                ((FilterFeatures) fs).withTitle(feat.features(FilterFeatures.TITLE).get(0));
                               }
                             }
                         );

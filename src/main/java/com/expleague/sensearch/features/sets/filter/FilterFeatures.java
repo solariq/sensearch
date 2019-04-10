@@ -6,11 +6,11 @@ import com.expleague.ml.meta.FeatureMeta;
 import com.expleague.sensearch.features.QURLItem;
 
 public class FilterFeatures extends FeatureSet.Stub<QURLItem> implements EmbeddingFeatures {
-    private final static FeatureMeta TITLE = FeatureMeta
+    public final static FeatureMeta TITLE = FeatureMeta
             .create("dist-title", "cos distance between Query and Title", FeatureMeta.ValueType.VEC);
-    private final static FeatureMeta SECTION = FeatureMeta
+    public final static FeatureMeta SECTION = FeatureMeta
             .create("dist-section", "cos distance between Query and Nearest Section Body", FeatureMeta.ValueType.VEC);
-    private final static FeatureMeta LINK = FeatureMeta
+    public final static FeatureMeta LINK = FeatureMeta
             .create("dist-link", "cos distance between Query and Nearest Incoming Link", FeatureMeta.ValueType.VEC);
 
     private double minTitle;
