@@ -51,7 +51,6 @@ import org.apache.log4j.Logger;
 public class RankingPoolBuilder extends PoolBuilder {
 
   private static final Logger LOG = Logger.getLogger(FilterPoolBuilder.class.getName());
-  private Path dir;
   private int SAVE_SIZE = 5;
 
   private static final int RANK_DOCUMENTS = 10;
@@ -69,10 +68,9 @@ public class RankingPoolBuilder extends PoolBuilder {
     injector.getInstance(RankingPoolBuilder.class).build(Paths.get("./PoolData/ranker/"), 0);
   }
 
-  public void build(Path dir, int iteration) {
+  public void build(Path dataPath, int iteration) {
     LOG.info("RankingPool build start");
     long startTime = System.nanoTime();
-    this.dir = dir;
 
     FastRandom rand = new FastRandom();
     DataSetMeta meta =
@@ -86,7 +84,7 @@ public class RankingPoolBuilder extends PoolBuilder {
     AtomicInteger status = new AtomicInteger(0);
     AtomicInteger added = new AtomicInteger(0);
 
-    QueryAndResults[] positiveExamples = positiveData(iteration);
+    QueryAndResults[] positiveExamples = readData(dataPath, iteration);
     List<QueryAndResults> newData = Collections.synchronizedList(new ArrayList<>());
     Arrays.stream(positiveExamples)
         .parallel()
@@ -111,7 +109,8 @@ public class RankingPoolBuilder extends PoolBuilder {
                       double target = pNw.getWight();
                       synchronized (poolBuilder) {
                         poolBuilder.accept(new QURLItem(page, query));
-                        poolBuilder.features()
+                        poolBuilder
+                            .features()
                             .map(Functions.cast(TargetFS.class))
                             .filter(Objects::nonNull)
                             .forEach(fs -> fs.acceptTargetValue(target));
@@ -149,47 +148,42 @@ public class RankingPoolBuilder extends PoolBuilder {
                               return res;
                             }
                           }))
-                  .forEach(page -> {
-                    if (page == PlainPage.EMPTY_PAGE) {
-                      return;
-                    }
+                  .forEach(
+                      page -> {
+                        if (page == PlainPage.EMPTY_PAGE) {
+                          return;
+                        }
 
-                    Vec vec = feat.get(page);
-                    vec = VecTools.concat(vec, new ArrayVec(0.0));
+                        Vec vec = feat.get(page);
+                        vec = VecTools.concat(vec, new ArrayVec(0.0));
 
-                    if (cnt[0] < RANK_DOCUMENTS) {
-                      synchronized (poolBuilder) {
-                        poolBuilder.accept(new QURLItem(page, query),
-                            vec, metas);
-                      }
-                      if (tmpAdded[0] < SAVE_SIZE) {
-                        tmpAdded[0]++;
-                        newRes.add(new PageAndWeight(page.uri().toString(), 0));
-                      }
-                      cnt[0]++;
-                    }
-                  });
+                        if (cnt[0] < RANK_DOCUMENTS) {
+                          synchronized (poolBuilder) {
+                            poolBuilder.accept(new QURLItem(page, query), vec, metas);
+                          }
+                          if (tmpAdded[0] < SAVE_SIZE) {
+                            tmpAdded[0]++;
+                            newRes.add(new PageAndWeight(page.uri().toString(), 0));
+                          }
+                          cnt[0]++;
+                        }
+                      });
               added.addAndGet(tmpAdded[0]);
               newData.add(new QueryAndResults(query.text(), newRes));
             });
 
-    saveNewData(newData.toArray(new QueryAndResults[0]), iteration + 1);
+    saveNewIterationData(dataPath, newData.toArray(new QueryAndResults[0]), iteration + 1);
 
     System.out.format("Запомнено новых результатов %d\n", added.get());
 
     Pool<QURLItem> pool = poolBuilder.create();
     try {
-      DataTools.writePoolTo(pool, Files.newBufferedWriter(dir.resolve("ranker.pool")));
+      DataTools.writePoolTo(pool, Files.newBufferedWriter(dataPath.resolve("ranker.pool")));
     } catch (IOException e) {
       System.err.println(e.getMessage());
     }
     LOG.info(
         String.format(
             "RankingPool build finished in %.3f seconds", (System.nanoTime() - startTime) / 1e9));
-  }
-
-  @Override
-  public Path acceptDir() {
-    return dir;
   }
 }

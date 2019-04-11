@@ -8,13 +8,12 @@ import java.util.stream.Stream;
 
 public class JoomPage implements CrawlerDocument {
 
-  private final static String JOOM_ROOT = "https://www.joom.com/en/products/";
   private final String title;
   private final Section description;
   private final URI uri;
 
   public JoomPage(String title, String description, String id) {
-    this.uri = URI.create(JOOM_ROOT + id);
+    this.uri = JoomUtils.uriForId(id);
     this.title = title;
     this.description = new Section() {
       @Override
@@ -24,7 +23,7 @@ public class JoomPage implements CrawlerDocument {
 
       @Override
       public URI uri() {
-        return URI.create(JOOM_ROOT + id);
+        return JoomUtils.uriForId(id);
       }
 
       @Override

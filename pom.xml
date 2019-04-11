@@ -16,23 +16,23 @@
   </properties>
   <build>
     <plugins>
-     <!-- <plugin>-->
-        <!-- NOTE: We don't need a groupId specification because the group is
-             org.apache.maven.plugins ...which is assumed by default.
-         -->
-        <!--<artifactId>maven-assembly-plugin</artifactId>
-        <version>3.1.0</version>
-       	<configuration>
-          <archive>
-            <manifest>
-              <mainClass>com.expleague.sensearch.cli.SenSearchCli</mainClass>
-            </manifest>
-          </archive>
-          <descriptorRefs>
-            <descriptorRef>jar-with-dependencies</descriptorRef>
-          </descriptorRefs>
-      	</configuration>
-      </plugin>-->
+      <!-- <plugin>-->
+      <!-- NOTE: We don't need a groupId specification because the group is
+           org.apache.maven.plugins ...which is assumed by default.
+       -->
+      <!--<artifactId>maven-assembly-plugin</artifactId>
+      <version>3.1.0</version>
+       <configuration>
+        <archive>
+          <manifest>
+            <mainClass>com.expleague.sensearch.cli.SenSearchCli</mainClass>
+          </manifest>
+        </archive>
+        <descriptorRefs>
+          <descriptorRef>jar-with-dependencies</descriptorRef>
+        </descriptorRefs>
+      </configuration>
+    </plugin>-->
 
       <plugin>
         <artifactId>maven-compiler-plugin</artifactId>
@@ -86,16 +86,16 @@
         </executions>
       </plugin>
 
-	<!-- download source code in Eclipse, best practice -->
-	<plugin>
-		<groupId>org.apache.maven.plugins</groupId>
-		<artifactId>maven-eclipse-plugin</artifactId>
-		<version>2.9</version>
-		<configuration>
-			<downloadSources>true</downloadSources>
-			<downloadJavadocs>false</downloadJavadocs>
-		</configuration>
-	</plugin>
+      <!-- download source code in Eclipse, best practice -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-eclipse-plugin</artifactId>
+        <version>2.9</version>
+        <configuration>
+          <downloadSources>true</downloadSources>
+          <downloadJavadocs>false</downloadJavadocs>
+        </configuration>
+      </plugin>
 
       <!-- Maven Shade Plugin -->
       <plugin>
@@ -110,20 +110,21 @@
               <goal>shade</goal>
             </goals>
             <configuration>
-		<filters>
-		        <filter>
-		            <artifact>*:*</artifact>
-		            <excludes>
-		                <exclude>META-INF/*.SF</exclude>
-		                <exclude>META-INF/*.DSA</exclude>
-		                <exclude>META-INF/*.RSA</exclude>
-		            </excludes>
-		        </filter>
-		    </filters>
-		    <!-- Additional configuration. -->
+              <filters>
+                <filter>
+                  <artifact>*:*</artifact>
+                  <excludes>
+                    <exclude>META-INF/*.SF</exclude>
+                    <exclude>META-INF/*.DSA</exclude>
+                    <exclude>META-INF/*.RSA</exclude>
+                  </excludes>
+                </filter>
+              </filters>
+              <!-- Additional configuration. -->
               <transformers>
                 <!-- add Main-Class to manifest file -->
-                <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                <transformer
+                  implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
                   <!--<mainClass>com.expleague.sensearch.snippet.experiments.NAParser</mainClass>-->
                   <mainClass>com.expleague.sensearch.cli.SenSearchCli</mainClass>
                 </transformer>
@@ -144,9 +145,9 @@
     </dependency>
 
     <!--<dependency>-->
-      <!--<groupId>org.slf4j</groupId>-->
-      <!--<artifactId>slf4j-log4j12</artifactId>-->
-      <!--<version>1.7.25</version>-->
+    <!--<groupId>org.slf4j</groupId>-->
+    <!--<artifactId>slf4j-log4j12</artifactId>-->
+    <!--<version>1.7.25</version>-->
     <!--</dependency>-->
 
     <!-- https://mvnrepository.com/artifact/edu.mit/jwi -->
@@ -333,6 +334,12 @@
       <groupId>org.cfg4j</groupId>
       <artifactId>cfg4j-git</artifactId>
       <version>4.4.1</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.apache.commons</groupId>
+      <artifactId>commons-csv</artifactId>
+      <version>1.6</version>
     </dependency>
 
   </dependencies>

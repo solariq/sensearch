@@ -11,6 +11,7 @@ import com.expleague.sensearch.donkey.IndexBuilder;
 import com.expleague.sensearch.donkey.crawler.Crawler;
 import com.expleague.sensearch.donkey.plain.JmllEmbeddingBuilder;
 import com.expleague.sensearch.experiments.joom.CrawlerJoom;
+import com.expleague.sensearch.experiments.joom.JoomCsvTransformer;
 import com.expleague.sensearch.experiments.wiki.CrawlerWiki;
 import com.expleague.sensearch.miner.pool.builders.FilterPoolBuilder;
 import com.expleague.sensearch.miner.pool.builders.RankingPoolBuilder;
@@ -49,6 +50,7 @@ public class SenSearchCli {
   private static final String DO_NOT_USE_LSH_OPTION = "nolsh";
   private static final String MAX_FILTER_ITEMS = "maxfilter";
   private static final String POOL_PATH_OPTION = "pool";
+  private static final String RAW_POOL_PATH_OPTION = "rawPool";
 
   private static final String RANK_MODEL_PATH_OPTION = "rankmodel";
   private static final String FILTER_MODEL_PATH_OPTION = "filtermodel";
@@ -66,6 +68,8 @@ public class SenSearchCli {
   private static final String BUILD_INDEX_COMMAND = "buildIndex";
   private static final String START_SERVER_COMMAND = "startServer";
 
+  private static final String TRANSFORM_POOL_DATA_COMMAND = "poolTransform";
+
   private static final String BUILD_FILTER_POOL_COMMAND = "buildFilterPool";
   private static final String BUILD_RANK_POOL_COMMAND = "buildRankPool";
   private static final String TRAIN_RANK_MODEL_COMMAND = "fitrk";
@@ -76,6 +80,8 @@ public class SenSearchCli {
 
   private static Options buildIndexOptions = new Options();
   private static Options startServerOptions = new Options();
+
+  private static Options transformDataOptions = new Options();
 
   private static Options buildFilterPoolOptions = new Options();
   private static Options buildRankPoolOptions = new Options();
@@ -104,6 +110,15 @@ public class SenSearchCli {
     buildFilterPoolOptions.addOption(indexPathOption);
     buildRankPoolOptions.addOption(indexPathOption);
     rebuildEmbeddingOptions.addOption(indexPathOption);
+
+    Option rawPoolPathOption =
+        Option.builder()
+            .longOpt(RAW_POOL_PATH_OPTION)
+            .desc("Path to unformatted data")
+            .hasArg()
+            .required()
+            .build();
+    transformDataOptions.addOption(rawPoolPathOption);
 
     Option dataFormatOption =
         Option.builder()
@@ -168,6 +183,7 @@ public class SenSearchCli {
 
     buildFilterPoolOptions.addOption(poolPathOption);
     buildRankPoolOptions.addOption(poolPathOption);
+    transformDataOptions.addOption(poolPathOption);
 
     Option rankModelPathOption =
         Option.builder()
@@ -267,9 +283,11 @@ public class SenSearchCli {
           }
 
           Path poolPath = Paths.get(parser.getOptionValue(POOL_PATH_OPTION));
+          int iteration = Integer.parseInt(parser.getOptionValue(POOL_ITERATION_OPTION));
+
           Guice.createInjector(new AppModule(config))
               .getInstance(FilterPoolBuilder.class)
-              .build(poolPath, Integer.parseInt(parser.getOptionValue(POOL_ITERATION_OPTION)));
+              .build(poolPath, iteration);
           break;
 
         case BUILD_RANK_POOL_COMMAND:
@@ -321,6 +339,14 @@ public class SenSearchCli {
           injector = Guice.createInjector(new AppModule(config));
           RebuildEmbedding rebuildEmbedding = injector.getInstance(RebuildEmbedding.class);
           rebuildEmbedding.rebuild();
+          break;
+
+        case TRANSFORM_POOL_DATA_COMMAND:
+          parser = cliParser.parse(transformDataOptions, args);
+
+          Path originalDataPath = Paths.get(parser.getOptionValue(RAW_POOL_PATH_OPTION));
+          Path dataPath = Paths.get(parser.getOptionValue(POOL_PATH_OPTION));
+          new JoomCsvTransformer().transformData(originalDataPath, dataPath);
       }
     } catch (ParseException e) {
       System.out.println(e.getLocalizedMessage());
@@ -337,6 +363,7 @@ public class SenSearchCli {
     printUsage(START_SERVER_COMMAND);
     printUsage(BUILD_FILTER_POOL_COMMAND);
     printUsage(BUILD_RANK_POOL_COMMAND);
+    printUsage(TRANSFORM_POOL_DATA_COMMAND);
     FitRankingCli.printUsage();
   }
 
@@ -376,6 +403,8 @@ public class SenSearchCli {
         return "Collects pool for ranking model training. Requires index to be built";
       case TRAIN_RANK_MODEL_COMMAND:
         return "Trains ranking model. Requires rank pool to be collected";
+      case TRANSFORM_POOL_DATA_COMMAND:
+        return "Transforms Joom json data to format compatible with pool buidlers";
       default:
         System.out.println("Unknown command " + command);
         printUsage();

@@ -6,13 +6,16 @@ import com.expleague.sensearch.miner.pool.QueryAndResults;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import org.apache.log4j.Logger;
 
 public abstract class PoolBuilder {
 
+  private static final Logger LOG = Logger.getLogger(PoolBuilder.class);
+
   private final ObjectMapper mapper = new ObjectMapper();
-  public abstract Path acceptDir();
 
   public PoolBuilder() {
     mapper.enable(SerializationFeature.INDENT_OUTPUT);
@@ -29,22 +32,23 @@ public abstract class PoolBuilder {
     return metas;
   }
 
-
-  QueryAndResults[] positiveData(int iteration) {
+  QueryAndResults[] readData(Path dataPath, int iteration) {
     try {
-      return mapper.readValue(acceptDir().resolve("DataIt" + iteration + ".json").toFile(), QueryAndResults[].class);
+      Path path = dataPath.resolve("DataIt" + iteration + ".json");
+      return mapper.readValue(
+          Files.newBufferedReader(path, StandardCharsets.UTF_8), QueryAndResults[].class);
     } catch (IOException e) {
+      LOG.info("Cannot read file " + dataPath);
       return new QueryAndResults[0];
     }
   }
 
-  void saveNewData(QueryAndResults[] result, int iteration) {
+  void saveNewIterationData(Path savePath, QueryAndResults[] result, int iteration) {
     try {
-      Files.createDirectories(acceptDir());
-      mapper.writeValue(acceptDir().resolve("DataIt" + iteration + ".json").toFile(), result);
+      Files.createDirectories(savePath);
+      mapper.writeValue(savePath.resolve("DataIt" + iteration + ".json").toFile(), result);
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
   }
-
 }
