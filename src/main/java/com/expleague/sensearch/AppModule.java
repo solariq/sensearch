@@ -18,14 +18,13 @@ import com.expleague.sensearch.core.Annotations.RankFilterModel;
 import com.expleague.sensearch.core.Annotations.RankModel;
 import com.expleague.sensearch.core.Annotations.SnippetModel;
 import com.expleague.sensearch.core.Annotations.UseLshFlag;
-import com.expleague.sensearch.core.lemmer.Lemmer;
 import com.expleague.sensearch.core.SearchPhaseFactory;
 import com.expleague.sensearch.core.SenSeArchImpl;
-import com.expleague.sensearch.core.Stemmer;
+import com.expleague.sensearch.core.lemmer.Lemmer;
 import com.expleague.sensearch.donkey.IndexBuilder;
 import com.expleague.sensearch.donkey.crawler.Crawler;
-import com.expleague.sensearch.donkey.crawler.CrawlerXML;
 import com.expleague.sensearch.donkey.plain.PlainIndexBuilder;
+import com.expleague.sensearch.experiments.wiki.CrawlerWiki;
 import com.expleague.sensearch.filter.Filter;
 import com.expleague.sensearch.filter.FilterImpl;
 import com.expleague.sensearch.index.Embedding;
@@ -61,14 +60,21 @@ public class AppModule extends AbstractModule {
   private static final Options DB_OPTIONS = new Options().cacheSize(CACHE_SIZE);
 
   private final Config config;
+  private final Class<? extends Crawler> crawler;
 
   public AppModule() throws IOException {
+    this(CrawlerWiki.class);
+  }
+
+  public AppModule(Class<? extends Crawler> crawler) throws IOException {
+    this.crawler = crawler;
     this.config =
         new ObjectMapper().readValue(Paths.get("./config.json").toFile(), ConfigImpl.class);
   }
 
   public AppModule(Config config) {
     this.config = config;
+    this.crawler = CrawlerWiki.class;
   }
 
   @Override
@@ -87,7 +93,7 @@ public class AppModule extends AbstractModule {
 
     Lemmer lemmer = Lemmer.getInstance();
     bind(Lemmer.class).toInstance(lemmer);
-    bind(Crawler.class).to(CrawlerXML.class);
+    bind(Crawler.class).to(crawler);
     bind(Embedding.class).to(EmbeddingImpl.class).in(Singleton.class);
     bind(Filter.class).to(FilterImpl.class);
     bind(Index.class).to(PlainIndex.class).in(Singleton.class);
@@ -197,6 +203,4 @@ public class AppModule extends AbstractModule {
             + "], using empty model instead");
     return getModelStub();
   }
-
-
 }

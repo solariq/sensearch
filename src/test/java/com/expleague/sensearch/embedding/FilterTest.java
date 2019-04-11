@@ -3,7 +3,7 @@
 // import com.expleague.commons.text.lemmer.LemmaInfo;
 // import com.expleague.sensearch.ConfigImpl;
 // import com.expleague.sensearch.Page;
-// import com.expleague.sensearch.donkey.crawler.CrawlerXML;
+// import com.expleague.sensearch.experiments.wiki.CrawlerWiki;
 // import com.expleague.sensearch.donkey.plain.PlainIndexBuilder;
 // import com.expleague.sensearch.index.Index;
 // import com.expleague.sensearch.query.Query;
@@ -37,7 +37,7 @@
 //  public void initIndex() throws Exception {
 //    byte[] jsonData = Files.readAllBytes(Paths.get("./config.json"));
 //    ConfigImpl config = new ObjectMapper().readValue(jsonData, ConfigImpl.class);
-//    index = new PlainIndexBuilder(config).buildIndex(new CrawlerXML(config).makeStream());
+//    index = new PlainIndexBuilder(config).buildIndex(new CrawlerWiki(config).makeStream());
 //  }
 //
 //  @Test

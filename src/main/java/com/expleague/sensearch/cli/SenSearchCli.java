@@ -8,8 +8,10 @@ import com.expleague.sensearch.AppModule;
 import com.expleague.sensearch.ConfigImpl;
 import com.expleague.sensearch.RebuildEmbedding;
 import com.expleague.sensearch.donkey.IndexBuilder;
-import com.expleague.sensearch.donkey.crawler.CrawlerXML;
+import com.expleague.sensearch.donkey.crawler.Crawler;
 import com.expleague.sensearch.donkey.plain.JmllEmbeddingBuilder;
+import com.expleague.sensearch.experiments.joom.CrawlerJoom;
+import com.expleague.sensearch.experiments.wiki.CrawlerWiki;
 import com.expleague.sensearch.miner.pool.builders.FilterPoolBuilder;
 import com.expleague.sensearch.miner.pool.builders.RankingPoolBuilder;
 import com.expleague.sensearch.web.SearchServer;
@@ -57,6 +59,10 @@ public class SenSearchCli {
 
   private static final String REBUILD_EMBEDDING_COMMAND = "rebuildEmbeddingCommand";
 
+  private static final String DATA_FORMAT_OPTION = "dataFormat";
+  private static final String WIKI_FORMAT = "wiki";
+  private static final String JOOM_FORMAT = "joom";
+
   private static final String BUILD_INDEX_COMMAND = "buildIndex";
   private static final String START_SERVER_COMMAND = "startServer";
 
@@ -98,6 +104,15 @@ public class SenSearchCli {
     buildFilterPoolOptions.addOption(indexPathOption);
     buildRankPoolOptions.addOption(indexPathOption);
     rebuildEmbeddingOptions.addOption(indexPathOption);
+
+    Option dataFormatOption =
+        Option.builder()
+            .longOpt(DATA_FORMAT_OPTION)
+            .desc("Input file format")
+            .hasArg()
+            .required()
+            .build();
+    buildIndexOptions.addOption(dataFormatOption);
 
     Option embeddingOutputPathOption =
         Option.builder()
@@ -205,7 +220,7 @@ public class SenSearchCli {
             EmbeddingImpl<CharSeq> embedding =
                 (EmbeddingImpl<CharSeq>)
                     embeddingBuilder.build(
-                        new CrawlerXML(Paths.get(parser.getOptionValue(DATA_PATH_OPTION)))
+                        new CrawlerWiki(Paths.get(parser.getOptionValue(DATA_PATH_OPTION)))
                             .makeStream());
             embedding.write(w);
           }
@@ -216,6 +231,15 @@ public class SenSearchCli {
           config.setPathToZIP(parser.getOptionValue(DATA_PATH_OPTION));
           config.setEmbeddingVectors(parser.getOptionValue(EMBEDDING_OUTPUT_PATH_OPTION));
           config.setTemporaryIndex(parser.getOptionValue(INDEX_PATH_OPTION));
+
+          Class<? extends Crawler> crawlerClass;
+          switch (parser.getOptionValue(DATA_FORMAT_OPTION)) {
+            case WIKI_FORMAT:
+              crawlerClass = CrawlerWiki.class;
+              break;
+            case JOOM_FORMAT:
+              crawlerClass = CrawlerJoom.class;
+          }
 
           Guice.createInjector(new AppModule(config)).getInstance(IndexBuilder.class).buildIndex();
           break;

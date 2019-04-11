@@ -2,7 +2,7 @@ package com.expleague.sensearch.utils;
 
 import com.expleague.sensearch.ConfigImpl;
 import com.expleague.sensearch.donkey.crawler.Crawler;
-import com.expleague.sensearch.donkey.crawler.CrawlerXML;
+import com.expleague.sensearch.experiments.wiki.CrawlerWiki;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import org.junit.BeforeClass;
@@ -26,7 +26,7 @@ public abstract class CrawlerBasedTestCase extends SensearchTestCase {
       // TODO: Fail with exception? Probably tests taht require crawler should be skipped in that matter...
       return;
     }
-    miniCrawler = new CrawlerXML(sensearchConfig().getPathToZIP());
+    miniCrawler = new CrawlerWiki(sensearchConfig().getPathToZIP());
   }
 
   protected static TestConfigImpl crawlerConfig() {

@@ -1,4 +1,4 @@
-package com.expleague.sensearch.donkey.crawler;
+package com.expleague.sensearch.experiments.wiki;
 
 import static javax.xml.stream.XMLStreamConstants.CHARACTERS;
 import static javax.xml.stream.XMLStreamConstants.DTD;
@@ -6,10 +6,10 @@ import static javax.xml.stream.XMLStreamConstants.END_ELEMENT;
 import static javax.xml.stream.XMLStreamConstants.START_DOCUMENT;
 
 import com.expleague.sensearch.core.Annotations.DataZipPath;
+import com.expleague.sensearch.donkey.crawler.Crawler;
 import com.expleague.sensearch.donkey.crawler.document.CrawlerDocument;
-import com.expleague.sensearch.donkey.crawler.document.XMLParser;
-import com.expleague.sensearch.donkey.crawler.document.XMLParser.XmlPage;
-import com.expleague.sensearch.donkey.crawler.document.XMLParser.XmlPageRootElement;
+import com.expleague.sensearch.experiments.wiki.XMLParser.XmlPage;
+import com.expleague.sensearch.experiments.wiki.XMLParser.XmlPageRootElement;
 import com.google.inject.Inject;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -32,13 +32,13 @@ import javax.xml.stream.XMLStreamReader;
 import org.apache.commons.compress.compressors.gzip.GzipCompressorInputStream;
 import org.apache.log4j.Logger;
 
-public class CrawlerXML implements Crawler {
+public class CrawlerWiki implements Crawler {
 
   private static final Logger LOG = Logger.getLogger(Crawler.class.getName());
   private final Path path;
 
   @Inject
-  public CrawlerXML(@DataZipPath Path zipPath) {
+  public CrawlerWiki(@DataZipPath Path zipPath) {
     this.path = zipPath;
   }
 
@@ -111,6 +111,7 @@ public class CrawlerXML implements Crawler {
   }
 
   class MultipleDocumentIterator implements Iterator<XmlPage> {
+
     private final XMLParser parser = new XMLParser();
     private ZipInputStream zipInputStream;
     private ZipEntry zipEntry;

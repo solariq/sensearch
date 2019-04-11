@@ -5,6 +5,7 @@ import static org.junit.Assert.assertTrue;
 
 import com.expleague.sensearch.donkey.crawler.document.CrawlerDocument.Link;
 import com.expleague.sensearch.donkey.crawler.document.CrawlerDocument.Section;
+import com.expleague.sensearch.experiments.wiki.XMLParser;
 import com.expleague.sensearch.utils.SensearchTestCase;
 import java.net.URI;
 import java.nio.file.Path;

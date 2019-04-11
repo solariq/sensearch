@@ -1,9 +1,10 @@
-package com.expleague.sensearch.donkey.crawler.document;
+package com.expleague.sensearch.experiments.wiki;
 
+import com.expleague.sensearch.donkey.crawler.document.CrawlerDocument;
 import com.expleague.sensearch.donkey.crawler.document.CrawlerDocument.Link;
 import com.expleague.sensearch.donkey.crawler.document.CrawlerDocument.Section;
-import com.expleague.sensearch.donkey.crawler.document.WikiPage.WikiLink;
-import com.expleague.sensearch.donkey.crawler.document.WikiPage.WikiSection;
+import com.expleague.sensearch.experiments.wiki.WikiPage.WikiLink;
+import com.expleague.sensearch.experiments.wiki.WikiPage.WikiSection;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;

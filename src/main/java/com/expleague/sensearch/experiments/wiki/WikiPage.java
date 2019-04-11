@@ -1,5 +1,6 @@
-package com.expleague.sensearch.donkey.crawler.document;
+package com.expleague.sensearch.experiments.wiki;
 
+import com.expleague.sensearch.donkey.crawler.document.CrawlerDocument;
 import java.net.URI;
 import java.util.List;
 import java.util.stream.Stream;
@@ -72,6 +73,7 @@ public class WikiPage implements CrawlerDocument {
     private final List<CharSequence> title;
     private final List<Link> links;
     private final URI uri;
+
 
     public WikiSection(CharSequence text, List<CharSequence> title, List<Link> links, URI uri) {
       this.text = text;
