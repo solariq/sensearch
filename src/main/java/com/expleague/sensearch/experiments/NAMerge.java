@@ -2,6 +2,7 @@ package com.expleague.sensearch.experiments;
 
 import com.expleague.sensearch.miner.pool.QueryAndResults;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 
 import java.io.File;
 import java.io.IOException;
@@ -24,6 +25,7 @@ public class NAMerge {
             queryAndResults.addAll(Arrays.asList(t));
         }
 
+        objectMapper.enable(SerializationFeature.INDENT_OUTPUT);
         objectMapper.writeValue(new File(args[1]), queryAndResults);
     }
 }
