@@ -3,13 +3,20 @@ package com.expleague.sensearch.cli;
 import com.expleague.sensearch.AppModule;
 import com.expleague.sensearch.Config;
 import com.expleague.sensearch.ConfigImpl;
+import com.expleague.sensearch.SenSeArch;
+import com.expleague.sensearch.SenSeArch.ResultPage;
 import com.expleague.sensearch.cli.utils.SingleArgOptions;
 import com.expleague.sensearch.cli.utils.SingleArgOptions.IntOption;
 import com.expleague.sensearch.cli.utils.SingleArgOptions.PathOption;
 import com.expleague.sensearch.cli.utils.SingleArgPredicates;
+import com.expleague.sensearch.core.SenSeArchImpl;
+import com.expleague.sensearch.core.impl.json.ResultPageDeserializer;
 import com.expleague.sensearch.web.SearchServer;
+import com.google.gson.Gson;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
@@ -111,8 +118,24 @@ public class ServerCli {
     config.setMaxFilterItems(FILTERED_ITEMS_COUNT.value(commandLine));
     config.setModelPath(RANKING_MODEL_PATH.value(commandLine).toString());
     config.setModelFilterPath(FILTER_MODEL_PATH.value(commandLine).toString());
+    config.setPageSize(RESULT_PAGE_SIZE.value(commandLine));
+
     Injector injector = Guice.createInjector(new AppModule(config));
-    injector.getInstance(SearchServer.class).start(injector);
+    if (commandLine.hasOption(COMMAND_LINE_SEARCH.getOpt())) {
+      AppModule appModule = new AppModule(config);
+      appModule.configure();
+      BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(System.in));
+      SenSeArch senSeArch = injector.getInstance(SenSeArchImpl.class);
+      // TODO: stop condition!
+      String query;
+      Gson gson = new Gson();
+      while ((query = bufferedReader.readLine()) != null) {
+        ResultPage page = senSeArch.search(query, 1, false, false);
+        System.out.println(gson.toJson(page));
+      }
+    } else {
+      injector.getInstance(SearchServer.class).start(injector);
+    }
   }
 
   static void printUsage() {
