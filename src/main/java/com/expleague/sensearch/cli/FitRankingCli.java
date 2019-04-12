@@ -17,6 +17,7 @@ import com.expleague.ml.cli.output.printers.DefaultProgressPrinter;
 import com.expleague.ml.cli.output.printers.ResultsPrinter;
 import com.expleague.ml.data.tools.Pool;
 import com.expleague.ml.methods.VecOptimization;
+import com.expleague.sensearch.cli.utils.SingleArgOptions;
 import com.expleague.sensearch.cli.utils.SingleArgOptions.DoubleOption;
 import com.expleague.sensearch.cli.utils.SingleArgOptions.EnumOption;
 import com.expleague.sensearch.cli.utils.SingleArgOptions.IntOption;
@@ -180,6 +181,10 @@ public class FitRankingCli {
       printUsage();
       return;
     }
+
+    SingleArgOptions
+        .checkOptions(commandLine, TRAIN_DATA, SEED, CROSS_VALIDATION, DEPTH, STEP, ITERATIONS,
+            TARGET, OUTPUT, PRINT_PERIOD);
 
     Path outputPath = OUTPUT.value(commandLine);
     Pair<? extends Pool, ? extends Pool> trainTestSplit = createDataPools(commandLine);

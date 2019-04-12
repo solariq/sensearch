@@ -15,13 +15,28 @@ import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 
+// TODO: All constructors should NOT accept Options and build them within themselves
 public class SingleArgOptions {
 
-  public static class IntOption {
+  public static void checkOptions(CommandLine commandLine, CheckableOption... options) {
+    for (CheckableOption option : options) {
+      option.check(commandLine);
+    }
+  }
+
+  public interface CheckableOption {
+
+    void check(CommandLine commandLine);
+  }
+
+  public static class IntOption implements CheckableOption {
 
     private final Option option;
     private final OptionalInt defaultValue;
     private final IntOptionPredicate[] predicates;
+
+    private int savedValue;
+    private CommandLine savedCommandLine;
 
     public IntOption(Option option, IntOptionPredicate... predicates) {
       this(option, OptionalInt.empty(), predicates);
@@ -38,16 +53,30 @@ public class SingleArgOptions {
     }
 
     public int value(CommandLine commandLine) {
+      if (commandLine != savedCommandLine) {
+        check(commandLine);
+      }
+      return savedValue;
+    }
+
+    public void addToOptions(Options options) {
+      options.addOption(option);
+    }
+
+    @Override
+    public void check(CommandLine commandLine) throws IllegalArgumentException {
       if (!commandLine.hasOption(option.getOpt())) {
         if (defaultValue.isPresent()) {
-          return defaultValue.getAsInt();
+          savedCommandLine = commandLine;
+          savedValue = defaultValue.getAsInt();
+          return;
         }
         throw new IllegalArgumentException(String.format("Option [ -%s ] has no default value!"
             + " Please, pass a value as argument", option.getOpt()));
       }
 
-      String stringValue = commandLine.getOptionValue(option.getOpt());
       int value;
+      String stringValue = commandLine.getOptionValue(option.getOpt());
       try {
         value = Integer.parseInt(stringValue);
       } catch (NumberFormatException e) {
@@ -62,19 +91,19 @@ public class SingleArgOptions {
         }
       }
 
-      return value;
-    }
-
-    public void addToOptions(Options options) {
-      options.addOption(option);
+      savedCommandLine = commandLine;
+      savedValue = value;
     }
   }
 
-  public static class DoubleOption {
+  public static class DoubleOption implements CheckableOption {
 
     private final Option option;
     private final OptionalDouble defaultValue;
     private final DoubleOptionPredicate[] predicates;
+
+    private double savedValue;
+    private CommandLine savedCommandLine;
 
     public DoubleOption(Option option, DoubleOptionPredicate... predicates) {
       this(option, OptionalDouble.empty(), predicates);
@@ -92,9 +121,23 @@ public class SingleArgOptions {
     }
 
     public double value(CommandLine commandLine) {
+      if (commandLine != savedCommandLine) {
+        check(commandLine);
+      }
+      return savedValue;
+    }
+
+    public void addToOptions(Options options) {
+      options.addOption(option);
+    }
+
+    @Override
+    public void check(CommandLine commandLine) {
       if (!commandLine.hasOption(option.getOpt())) {
         if (defaultValue.isPresent()) {
-          return defaultValue.getAsDouble();
+          savedCommandLine = commandLine;
+          savedValue = defaultValue.getAsDouble();
+          return;
         }
         throw new IllegalArgumentException(String.format("Option [ -%s ] has no default value!"
             + " Please, pass a value as argument", option.getOpt()));
@@ -117,19 +160,19 @@ public class SingleArgOptions {
         }
       }
 
-      return value;
-    }
-
-    public void addToOptions(Options options) {
-      options.addOption(option);
+      savedValue = value;
+      savedCommandLine = commandLine;
     }
   }
 
-  public static class LongOption {
+  public static class LongOption implements CheckableOption {
 
     private final Option option;
     private final OptionalLong defaultValue;
     private final LongOptionPredicate[] predicates;
+
+    private long savedValue;
+    private CommandLine savedCommandLine;
 
     public LongOption(Option option, LongOptionPredicate... predicates) {
       this(option, OptionalLong.empty(), predicates);
@@ -147,9 +190,23 @@ public class SingleArgOptions {
     }
 
     public long value(CommandLine commandLine) {
+      if (commandLine != savedCommandLine) {
+        check(commandLine);
+      }
+      return savedValue;
+    }
+
+    public void addToOptions(Options options) {
+      options.addOption(option);
+    }
+
+    @Override
+    public void check(CommandLine commandLine) {
       if (!commandLine.hasOption(option.getOpt())) {
         if (defaultValue.isPresent()) {
-          return defaultValue.getAsLong();
+          savedValue = defaultValue.getAsLong();
+          savedCommandLine = commandLine;
+          return;
         }
         throw new IllegalArgumentException(String.format("Option [ -%s ] has no default value!"
             + " Please, pass a value as argument", option.getOpt()));
@@ -172,19 +229,19 @@ public class SingleArgOptions {
         }
       }
 
-      return value;
-    }
-
-    public void addToOptions(Options options) {
-      options.addOption(option);
+      savedValue = value;
+      savedCommandLine = commandLine;
     }
   }
 
-  public static class StringOption {
+  public static class StringOption implements CheckableOption {
 
     private final Option option;
     private final Optional<String> defaultValue;
     private final StringOptionPredicate[] predicates;
+
+    private CommandLine savedCommandLine;
+    private String savedValue;
 
     public StringOption(Option option, StringOptionPredicate... predicates) {
       this(option, Optional.empty(), predicates);
@@ -202,9 +259,24 @@ public class SingleArgOptions {
     }
 
     public String value(CommandLine commandLine) {
+      if (commandLine != savedCommandLine) {
+        check(commandLine);
+      }
+
+      return savedValue;
+    }
+
+    public void addToOptions(Options options) {
+      options.addOption(option);
+    }
+
+    @Override
+    public void check(CommandLine commandLine) {
       if (!commandLine.hasOption(option.getOpt())) {
         if (defaultValue.isPresent()) {
-          return defaultValue.get();
+          savedValue = defaultValue.get();
+          savedCommandLine = commandLine;
+          return;
         }
         throw new IllegalArgumentException(String.format("Option [ -%s ] has no default value!"
             + " Please, pass a value as an argument", option.getOpt()));
@@ -219,19 +291,19 @@ public class SingleArgOptions {
         }
       }
 
-      return stringValue;
-    }
-
-    public void addToOptions(Options options) {
-      options.addOption(option);
+      savedValue = stringValue;
+      savedCommandLine = commandLine;
     }
   }
 
-  public static class PathOption {
+  public static class PathOption implements CheckableOption {
 
     private final Option option;
     private final Optional<Path> defaultValue;
     private final PathOptionPredicate[] predicates;
+
+    private CommandLine savedCommandLine;
+    private Path savedValue;
 
     public PathOption(Option option, PathOptionPredicate... predicates) {
       this(option, Optional.empty(), predicates);
@@ -253,9 +325,25 @@ public class SingleArgOptions {
     }
 
     public Path value(CommandLine commandLine) {
+      if (commandLine != savedCommandLine) {
+        check(commandLine);
+      }
+
+      return savedValue;
+    }
+
+    public void addToOptions(Options options) {
+      options.addOption(option);
+    }
+
+    @Override
+    public void check(CommandLine commandLine) {
+
       if (!commandLine.hasOption(option.getOpt())) {
         if (defaultValue.isPresent()) {
-          return defaultValue.get();
+          savedValue = defaultValue.get();
+          savedCommandLine = commandLine;
+          return;
         }
         throw new IllegalArgumentException(String.format("Option [ -%s ] has no default value!"
             + " Please, pass a value as an argument", option.getOpt()));
@@ -271,20 +359,20 @@ public class SingleArgOptions {
         }
       }
 
-      return value;
-    }
-
-    public void addToOptions(Options options) {
-      options.addOption(option);
+      savedValue = value;
+      savedCommandLine = commandLine;
     }
   }
 
-  public static class EnumOption<T extends Enum<T>> {
+  public static class EnumOption<T extends Enum<T>> implements CheckableOption {
 
     private final Option option;
     private final Class<T> enumType;
     private final Optional<T> defaultValue;
     private final String availableValusHint;
+
+    private T savedValue;
+    private CommandLine savedCommandLine;
 
     public EnumOption(Option option, Class<T> enumType) {
       this(option, Optional.empty(), enumType);
@@ -306,12 +394,27 @@ public class SingleArgOptions {
     }
 
     public T value(CommandLine commandLine) {
+      if (commandLine != savedCommandLine) {
+        check(commandLine);
+      }
+
+      return savedValue;
+    }
+
+    public void addToOptions(Options options) {
+      options.addOption(option);
+    }
+
+    @Override
+    public void check(CommandLine commandLine) {
       if (!commandLine.hasOption(option.getOpt())) {
         if (defaultValue.isPresent()) {
-          return defaultValue.get();
+          savedValue = defaultValue.get();
+          savedCommandLine = commandLine;
+          return;
         }
         throw new IllegalArgumentException(String.format("Option [ -%s ] has no default value!"
-            + " Please, pass a value as argument. Available values: %s",
+                + " Please, pass a value as argument. Available values: %s",
             option.getOpt(), availableValusHint));
       }
 
@@ -325,11 +428,8 @@ public class SingleArgOptions {
             option.getOpt(), availableValusHint, stringValue));
       }
 
-      return value;
-    }
-
-    public void addToOptions(Options options) {
-      options.addOption(option);
+      savedValue = value;
+      savedCommandLine = commandLine;
     }
   }
 }
