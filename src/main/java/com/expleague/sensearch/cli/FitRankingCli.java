@@ -45,6 +45,7 @@ public class FitRankingCli {
   private static final String MODE_DESCRIPTION = "";
 
   private enum Target {
+    GROUPED_L2("GroupedL2"),
     SAT_L2("SatL2");
 
     private final String targetName;

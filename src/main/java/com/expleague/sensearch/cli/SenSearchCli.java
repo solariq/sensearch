@@ -224,6 +224,7 @@ public class SenSearchCli {
       CommandLine parser;
 
       ConfigImpl config = new ConfigImpl();
+      Injector injector;
       switch (args[0]) {
         case TRAIN_EMBEDDING_COMMAND:
           parser = cliParser.parse(trainEmbeddingOptions, args);
@@ -261,15 +262,7 @@ public class SenSearchCli {
           break;
 
         case START_SERVER_COMMAND:
-          parser = cliParser.parse(startServerOptions, args);
-          config.setTemporaryIndex(parser.getOptionValue(INDEX_PATH_OPTION));
-          config.setLshNearestFlag(!parser.hasOption(DO_NOT_USE_LSH_OPTION));
-          config.setMaxFilterItems(Integer.parseInt(parser.getOptionValue(MAX_FILTER_ITEMS)));
-          config.setModelPath(parser.getOptionValue(RANK_MODEL_PATH_OPTION));
-          config.setModelFilterPath(parser.getOptionValue(FILTER_MODEL_PATH_OPTION));
-
-          Injector injector = Guice.createInjector(new AppModule(config));
-          injector.getInstance(SearchServer.class).start(injector);
+          ServerCli.run(args);
           break;
 
         case BUILD_FILTER_POOL_COMMAND:
