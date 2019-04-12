@@ -4,10 +4,10 @@ import com.expleague.sensearch.miner.pool.QueryAndResults;
 import com.expleague.sensearch.miner.pool.QueryAndResults.PageAndWeight;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+
 import java.io.File;
 import java.net.URI;
 import java.net.URLEncoder;
-import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -35,9 +35,8 @@ public class NAParser {
       System.err.println("Wrong arguments. Usage : <path to na json> <action : 0 - data for ranking, 1 - data for snippets> <path to save data>");
       return;
     }
-//    byte[] jsonData = Files.readAllBytes(Paths.get(args[0]));
-    ObjectMapper objectMapper = new ObjectMapper();
-//    objectMapper.configure(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY, true);
+
+      ObjectMapper objectMapper = new ObjectMapper();
     Result[] results = objectMapper.readValue(Paths.get(args[0]).toFile(), Result[].class);
     objectMapper.enable(SerializationFeature.INDENT_OUTPUT);
 
