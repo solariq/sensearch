@@ -1,15 +1,10 @@
 package com.expleague.sensearch.cli;
 
-import static com.expleague.sensearch.donkey.plain.PlainIndexBuilder.DEFAULT_VEC_SIZE;
-
-import com.expleague.commons.seq.CharSeq;
-import com.expleague.ml.embedding.impl.EmbeddingImpl;
 import com.expleague.sensearch.AppModule;
 import com.expleague.sensearch.ConfigImpl;
 import com.expleague.sensearch.RebuildEmbedding;
 import com.expleague.sensearch.donkey.IndexBuilder;
 import com.expleague.sensearch.donkey.crawler.Crawler;
-import com.expleague.sensearch.donkey.plain.JmllEmbeddingBuilder;
 import com.expleague.sensearch.experiments.joom.CrawlerJoom;
 import com.expleague.sensearch.experiments.joom.JoomCsvTransformer;
 import com.expleague.sensearch.experiments.wiki.CrawlerWiki;
@@ -18,7 +13,6 @@ import com.expleague.sensearch.miner.pool.builders.RankingPoolBuilder;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import java.io.File;
-import java.io.Writer;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -73,8 +67,6 @@ public class SenSearchCli {
   private static final String BUILD_RANK_POOL_COMMAND = "buildRankPool";
   private static final String TRAIN_RANK_MODEL_COMMAND = "fitrk";
 
-  private static Options trainEmbeddingOptions = new Options();
-
   private static Options rebuildEmbeddingOptions = new Options();
 
   private static Options buildIndexOptions = new Options();
@@ -94,7 +86,6 @@ public class SenSearchCli {
             .required()
             .build();
 
-    trainEmbeddingOptions.addOption(dataOption);
     buildIndexOptions.addOption(dataOption);
 
     Option indexPathOption =
@@ -135,7 +126,6 @@ public class SenSearchCli {
             .hasArg()
             .required()
             .build();
-    trainEmbeddingOptions.addOption(embeddingOutputPathOption);
     buildIndexOptions.addOption(embeddingOutputPathOption);
     rebuildEmbeddingOptions.addOption(embeddingOutputPathOption);
 
@@ -146,7 +136,6 @@ public class SenSearchCli {
             .hasArg()
             .required()
             .build();
-    trainEmbeddingOptions.addOption(embeddingPathOption);
 
     startServerOptions.addOption(
         Option.builder().longOpt(DO_NOT_USE_LSH_OPTION).desc("disables LSH").build());
@@ -225,21 +214,14 @@ public class SenSearchCli {
       ConfigImpl config = new ConfigImpl();
       Injector injector;
       switch (args[0]) {
-        case TRAIN_EMBEDDING_COMMAND:
-          parser = cliParser.parse(trainEmbeddingOptions, args);
-          try (Writer w =
-              Files.newBufferedWriter(
-                  Paths.get(parser.getOptionValue(EMBEDDING_OUTPUT_PATH_OPTION)))) {
-            final JmllEmbeddingBuilder embeddingBuilder =
-                new JmllEmbeddingBuilder(
-                    DEFAULT_VEC_SIZE, Paths.get(parser.getOptionValue(EMBEDDING_PATH_OPTION)));
-            EmbeddingImpl<CharSeq> embedding =
-                (EmbeddingImpl<CharSeq>)
-                    embeddingBuilder.build(
-                        new CrawlerWiki(Paths.get(parser.getOptionValue(DATA_PATH_OPTION)))
-                            .makeStream());
-            embedding.write(w);
-          }
+        case TrainEmbeddingCli.COMMAND_NAME:
+          TrainEmbeddingCli.run(args);
+          break;
+        case RunSearchCli.COMMAND_NAME:
+          RunSearchCli.run(args);
+          break;
+        case FitRankingModelCli.COMMAND_NAME:
+          FitRankingModelCli.run(args);
           break;
 
         case BUILD_INDEX_COMMAND:
@@ -260,9 +242,6 @@ public class SenSearchCli {
           Guice.createInjector(new AppModule(config)).getInstance(IndexBuilder.class).buildIndex();
           break;
 
-        case START_SERVER_COMMAND:
-          RunSearchCli.run(args);
-          break;
 
         case BUILD_FILTER_POOL_COMMAND:
           parser = cliParser.parse(buildFilterPoolOptions, args);
@@ -300,10 +279,6 @@ public class SenSearchCli {
               .getInstance(RankingPoolBuilder.class)
               .build(poolPath, Integer.parseInt(parser.getOptionValue(POOL_ITERATION_OPTION)));
           break;
-        case TRAIN_RANK_MODEL_COMMAND:
-          LOG.debug("Executing command 'fitrk'");
-          FitRankingCli.run(args);
-          break;
 
         case REBUILD_EMBEDDING_COMMAND:
           parser = cliParser.parse(rebuildEmbeddingOptions, args);
@@ -329,19 +304,17 @@ public class SenSearchCli {
   }
 
   private static void printUsage() {
-    printUsage(TRAIN_EMBEDDING_COMMAND);
     printUsage(BUILD_INDEX_COMMAND);
     printUsage(BUILD_FILTER_POOL_COMMAND);
     printUsage(BUILD_RANK_POOL_COMMAND);
     printUsage(TRANSFORM_POOL_DATA_COMMAND);
-    FitRankingCli.printUsage();
+    TrainEmbeddingCli.printUsage();
+    FitRankingModelCli.printUsage();
     RunSearchCli.printUsage();
   }
 
   private static Options getCommandOptions(String command) {
     switch (command) {
-      case TRAIN_EMBEDDING_COMMAND:
-        return trainEmbeddingOptions;
       case BUILD_INDEX_COMMAND:
         return buildIndexOptions;
       case BUILD_FILTER_POOL_COMMAND:
@@ -349,8 +322,10 @@ public class SenSearchCli {
       case BUILD_RANK_POOL_COMMAND:
         return buildRankPoolOptions;
       default:
-        System.out.println("Unknown command " + command);
-        printUsage();
+        System.out.println(
+            String.format("Unknown command [ %s ]. Use [ -h ] or [ --help ] to see help message",
+                command)
+        );
         System.exit(1);
     }
     return null;
@@ -358,21 +333,19 @@ public class SenSearchCli {
 
   private static String getCommandDescription(String command) {
     switch (command) {
-      case TRAIN_EMBEDDING_COMMAND:
-        return "Trains embedding for given data.";
       case BUILD_INDEX_COMMAND:
         return "Builds index. Requires embedding to be already trained";
       case BUILD_FILTER_POOL_COMMAND:
         return "Collects pool for filter model training. Requires index to be built";
       case BUILD_RANK_POOL_COMMAND:
         return "Collects pool for ranking model training. Requires index to be built";
-      case TRAIN_RANK_MODEL_COMMAND:
-        return "Trains ranking model. Requires rank pool to be collected";
       case TRANSFORM_POOL_DATA_COMMAND:
         return "Transforms Joom json data to format compatible with pool buidlers";
       default:
-        System.out.println("Unknown command " + command);
-        printUsage();
+        System.out.println(
+            String.format("Unknown command [ %s ]. Use [ -h ] or [ --help ] to see help message",
+                command)
+        );
         System.exit(1);
     }
     return null;

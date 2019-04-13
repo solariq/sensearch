@@ -27,6 +27,7 @@ import org.slf4j.LoggerFactory;
 
 
 public class RunSearchCli {
+  static final String COMMAND_NAME = "srch";
 
   private static final Logger LOG = LoggerFactory.getLogger(RunSearchCli.class);
 
@@ -87,6 +88,10 @@ public class RunSearchCli {
   }
 
   private static final CommandLineParser CLI_PARSER = new DefaultParser();
+
+  static String commandName() {
+    return COMMAND_NAME;
+  }
 
   public static void run(String[] args) throws Exception {
     CommandLine commandLine;

@@ -16,7 +16,6 @@ import com.expleague.ml.cli.output.ModelWriter;
 import com.expleague.ml.cli.output.printers.DefaultProgressPrinter;
 import com.expleague.ml.cli.output.printers.ResultsPrinter;
 import com.expleague.ml.data.tools.Pool;
-import com.expleague.ml.loss.NormalizedDcg;
 import com.expleague.ml.methods.VecOptimization;
 import com.expleague.sensearch.cli.utils.SingleArgOptions;
 import com.expleague.sensearch.cli.utils.SingleArgOptions.DoubleOption;
@@ -24,7 +23,6 @@ import com.expleague.sensearch.cli.utils.SingleArgOptions.EnumOption;
 import com.expleague.sensearch.cli.utils.SingleArgOptions.IntOption;
 import com.expleague.sensearch.cli.utils.SingleArgOptions.LongOption;
 import com.expleague.sensearch.cli.utils.SingleArgOptions.PathOption;
-import com.expleague.sensearch.cli.utils.SingleArgOptions.StringOption;
 import com.expleague.sensearch.cli.utils.SingleArgPredicates.ExistingPath;
 import com.expleague.sensearch.cli.utils.SingleArgPredicates.NegativeLong;
 import com.expleague.sensearch.cli.utils.SingleArgPredicates.PositiveDouble;
@@ -42,10 +40,13 @@ import org.apache.commons.cli.Options;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class FitRankingCli {
+public class FitRankingModelCli {
 
-  private static final Logger LOG = LoggerFactory.getLogger(FitRankingCli.class);
+  static final String COMMAND_NAME = "fitrk";
+
+  private static final Logger LOG = LoggerFactory.getLogger(FitRankingModelCli.class);
   private static final String MODE_DESCRIPTION = "";
+
   private static final PathOption TRAIN_DATA = PathOption.builder()
       .shortOption("D")
       .longOption("data")
@@ -157,6 +158,10 @@ public class FitRankingCli {
 
     OPTIONS.addOption(VERBOSE);
     OPTIONS.addOption(HELP);
+  }
+
+  static String commandName() {
+    return COMMAND_NAME;
   }
 
   static void printUsage() {
