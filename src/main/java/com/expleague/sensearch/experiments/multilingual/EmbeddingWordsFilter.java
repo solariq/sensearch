@@ -47,7 +47,7 @@ public class EmbeddingWordsFilter {
             }
 
             all++;
-            if (!Pattern.matches("\\p{javaAlphabetic}[\\p{javaAlphabetic}-']*", word)) {
+            if (!Pattern.matches("[\\p{Digit}\\p{javaAlphabetic}-']*", word)) {
                 bad++;
                 log.print(word + "\n");
                 continue;
