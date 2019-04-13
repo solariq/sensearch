@@ -1,13 +1,13 @@
 package com.expleague.sensearch.core.impl;
 
-import com.carrotsearch.hppc.IntObjectHashMap;
-import com.carrotsearch.hppc.IntObjectMap;
 import com.expleague.sensearch.Page;
 import com.expleague.sensearch.SenSeArch.ResultItem;
 import com.expleague.sensearch.core.Whiteboard;
 import com.expleague.sensearch.features.Features;
 import com.expleague.sensearch.query.Query;
 import com.expleague.sensearch.snippet.Snippet;
+import gnu.trove.map.TIntObjectMap;
+import gnu.trove.map.hash.TIntObjectHashMap;
 import java.util.HashMap;
 import java.util.Map;
 import org.jetbrains.annotations.Nullable;
@@ -21,14 +21,14 @@ public class WhiteboardImpl implements Whiteboard {
   private Page[] results;
   private ResultItem[] googleResults;
 
-  private IntObjectMap<Query> queries = new IntObjectHashMap<>();
+  private TIntObjectMap<Query> queries = new TIntObjectHashMap<>();
 
-  private IntObjectMap<Page[]> subFilterResults = new IntObjectHashMap<>();
-  private IntObjectMap<Map<Page, Features>> filterFeatures = new IntObjectHashMap<>();
+  private TIntObjectMap<Page[]> subFilterResults = new TIntObjectHashMap<>();
+  private TIntObjectMap<Map<Page, Features>> filterFeatures = new TIntObjectHashMap<>();
   private Map<Page, Double> pageFilterScores = new HashMap<>();
 
-  private IntObjectMap<Page[]> subResults = new IntObjectHashMap<>();
-  private IntObjectMap<Map<Page, Features>> textFeatures = new IntObjectHashMap<>();
+  private TIntObjectMap<Page[]> subResults = new TIntObjectHashMap<>();
+  private TIntObjectMap<Map<Page, Features>> textFeatures = new TIntObjectHashMap<>();
   private Map<Page, Double> pageScores = new HashMap<>();
 
   private Snippet[] snippets;
@@ -41,7 +41,7 @@ public class WhiteboardImpl implements Whiteboard {
   /*==============================================================================================*/
 
   @Override
-  public synchronized IntObjectMap<Map<Page, Features>> filterFeatures() {
+  public synchronized TIntObjectMap<Map<Page, Features>> filterFeatures() {
     return filterFeatures;
   }
 
@@ -51,7 +51,7 @@ public class WhiteboardImpl implements Whiteboard {
   }
 
   @Override
-  public IntObjectMap<Page[]> subFilterResults() {
+  public TIntObjectMap<Page[]> subFilterResults() {
     return subFilterResults;
   }
 
@@ -73,7 +73,7 @@ public class WhiteboardImpl implements Whiteboard {
   /*==============================================================================================*/
 
   @Override
-  public synchronized IntObjectMap<Map<Page, Features>> textFeatures() {
+  public synchronized TIntObjectMap<Map<Page, Features>> textFeatures() {
     return textFeatures;
   }
 
@@ -84,7 +84,7 @@ public class WhiteboardImpl implements Whiteboard {
 
   @Nullable
   @Override
-  public synchronized IntObjectMap<Page[]> subResults() {
+  public synchronized TIntObjectMap<Page[]> subResults() {
     return subResults;
   }
 
@@ -149,12 +149,12 @@ public class WhiteboardImpl implements Whiteboard {
 
   @Nullable
   @Override
-  public synchronized IntObjectMap<Query> query() {
+  public synchronized TIntObjectMap<Query> query() {
     return queries;
   }
 
   @Override
-  public synchronized void putQuery(IntObjectMap<Query> query) {
+  public synchronized void putQuery(TIntObjectMap<Query> query) {
     this.queries = query;
   }
 
