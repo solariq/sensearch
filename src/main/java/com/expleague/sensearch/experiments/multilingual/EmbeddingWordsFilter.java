@@ -31,6 +31,7 @@ public class EmbeddingWordsFilter {
     private void filter(String from, String to) throws IOException {
         BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(from)));
         PrintWriter pw = new PrintWriter(new File(to));
+        PrintWriter log = new PrintWriter(new File("./bad_words"));
 
         int bad = 0;
         int all = 0;
@@ -48,6 +49,7 @@ public class EmbeddingWordsFilter {
             all++;
             if (!Pattern.matches("\\p{javaAlphabetic}[\\p{javaAlphabetic}-']*", word)) {
                 bad++;
+                log.print(word + "\n");
                 continue;
             }
 
@@ -63,5 +65,6 @@ public class EmbeddingWordsFilter {
 
         br.close();
         pw.close();
+        log.close();
     }
 }
