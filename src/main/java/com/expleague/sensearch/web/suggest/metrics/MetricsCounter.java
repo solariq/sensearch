@@ -43,7 +43,7 @@ public class MetricsCounter {
       int pos = 1;
       for (String ms : mySugg) {
         for (String os : e.getValue()) {
-          if (ms.startsWith(os)) {
+          if (ms.equals(os)) {
             matched++;
             rrSum += 1.0 / pos;
             System.out.println("####\n" + e.getKey() + "\n"
