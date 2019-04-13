@@ -58,6 +58,11 @@ public class OneWordSuggestor implements Suggestor {
     //System.out.println("returning number suggestions: " + res.size());
     return res;
   }
+  
+  @Override
+  public String getName() {
+    return "One Word";
+  }
 
   private List<String> getSuggestions(List<Term> terms) {
 
@@ -69,7 +74,6 @@ public class OneWordSuggestor implements Suggestor {
 
     TreeSet<MultigramWrapper> phraseProb = new TreeSet<>(mwCmp);
 
-    String qcText = "";
     l:  for(int intersectLength = 3; intersectLength >= 1; intersectLength--) {
 
       if (terms.size() < intersectLength) {
@@ -78,11 +82,6 @@ public class OneWordSuggestor implements Suggestor {
 
       List<Term> qc = terms.subList(0, terms.size() - intersectLength);
       Term[] qt = terms.subList(terms.size() - intersectLength, terms.size()).toArray(new Term[0]);
-
-      qcText = qc
-          .stream()
-          .map(Term::text)
-          .collect(Collectors.joining(" "));
 
       Vec queryVec = index.vecByTerms(qc);
 
@@ -97,7 +96,7 @@ public class OneWordSuggestor implements Suggestor {
         phraseProb.removeIf(it -> phraseProb.size() > RETURN_LIMIT);
 
         workCounter++;
-        if (workCounter > 1e7) {
+        if (workCounter > 1e6) {
           System.err.println("Suggestor stopped by counter");
           break l;
         }
@@ -108,10 +107,15 @@ public class OneWordSuggestor implements Suggestor {
 
     }
 
-    String qcText1 = qcText;
     return phraseProb.stream()
         .sorted((m1, m2) -> -Double.compare(m1.coeff, m2.coeff))
-        .map(p -> qcText1 + " " + p)
+        .map(p -> {
+          String qcText = terms.subList(0, terms.size() - p.phrase.length)
+              .stream()
+              .map(Term::text)
+              .collect(Collectors.joining(" "));
+          return qcText + " " + p;
+        })
         .collect(Collectors.toList());
   }
 
