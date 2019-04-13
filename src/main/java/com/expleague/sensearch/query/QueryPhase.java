@@ -1,11 +1,11 @@
 package com.expleague.sensearch.query;
 
-import com.carrotsearch.hppc.IntObjectHashMap;
-import com.carrotsearch.hppc.IntObjectMap;
 import com.expleague.sensearch.core.SearchPhase;
 import com.expleague.sensearch.core.Whiteboard;
 import com.expleague.sensearch.index.Index;
 import com.google.inject.Inject;
+import gnu.trove.map.TIntObjectMap;
+import gnu.trove.map.hash.TIntObjectHashMap;
 import org.apache.log4j.Logger;
 
 
@@ -31,7 +31,7 @@ public class QueryPhase implements SearchPhase {
 
     final String input = whiteboard.input();
 
-    IntObjectMap<Query> queries = new IntObjectHashMap<>();
+    TIntObjectMap<Query> queries = new TIntObjectHashMap<>();
 
     queries.put(0, BaseQuery.create(input, index));
 

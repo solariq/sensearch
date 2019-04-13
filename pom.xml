@@ -125,7 +125,7 @@
                 <!-- add Main-Class to manifest file -->
                 <transformer
                   implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                  <!--<mainClass>com.expleague.sensearch.snippet.experiments.NAParser</mainClass>-->
+<!--                  <mainClass>com.expleague.sensearch.experiments.multilingual.EmbeddingWordsFilter</mainClass>-->
                   <mainClass>com.expleague.sensearch.cli.SenSearchCli</mainClass>
                 </transformer>
               </transformers>
