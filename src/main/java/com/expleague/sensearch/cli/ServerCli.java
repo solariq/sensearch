@@ -122,8 +122,6 @@ public class ServerCli {
 
     Injector injector = Guice.createInjector(new AppModule(config));
     if (commandLine.hasOption(COMMAND_LINE_SEARCH.getOpt())) {
-      AppModule appModule = new AppModule(config);
-      appModule.configure();
       BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(System.in));
       SenSeArch senSeArch = injector.getInstance(SenSeArchImpl.class);
       // TODO: stop condition!
