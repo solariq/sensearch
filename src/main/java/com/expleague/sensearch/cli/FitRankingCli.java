@@ -31,6 +31,8 @@ import com.expleague.sensearch.cli.utils.SingleArgPredicates.PositiveDouble;
 import com.expleague.sensearch.cli.utils.SingleArgPredicates.PositiveInteger;
 import com.expleague.sensearch.cli.utils.SingleArgPredicates.SegmentDouble;
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
@@ -44,79 +46,96 @@ public class FitRankingCli {
 
   private static final Logger LOG = LoggerFactory.getLogger(FitRankingCli.class);
   private static final String MODE_DESCRIPTION = "";
-  private static final PathOption TRAIN_DATA = new PathOption(Option.builder("D")
-      .longOpt("data")
-      .desc("Specify path to the train data")
-      .numberOfArgs(1)
-      .build(), ExistingPath.get());
-  private static final LongOption SEED = new LongOption(Option.builder("r")
-      .longOpt("random-seed")
-      .desc("Specify random seed to make results reproducible")
-      .numberOfArgs(1)
-      .build(), 42, NegativeLong.get());
-  private static final DoubleOption CROSS_VALIDATION = new DoubleOption(Option.builder("c")
-      .longOpt("cross-val")
-      .desc(
+  private static final PathOption TRAIN_DATA = PathOption.builder()
+      .shortOption("D")
+      .longOption("data")
+      .description("Specify path to the train data")
+      .predicates(ExistingPath.get())
+      .build();
+  private static final LongOption SEED = LongOption.builder()
+      .shortOption("r")
+      .longOption("random-seed")
+      .description("Specify random seed to make results reproducible")
+      .defaultValue(42)
+      .predicates(NegativeLong.get().negate())
+      .build();
+  private static final DoubleOption TEST_PROPORTION = DoubleOption.builder()
+      .shortOption("t")
+      .longOption("test-prop")
+      .description(
           "Specify proportion of the data that will be used for the testing, the rest will be used for training."
               + " Should be the number from (0; 1). Usually, 0.2 is enough."
               + " If no value is given all data will be used for training")
-      .numberOfArgs(1)
-      .build(), 0.2, new SegmentDouble(0.01, 1));
+      .defaultValue(0.2)
+      .predicates(SegmentDouble.get(0.01, 1))
+      .build();
   // gradient boosting on oblivious trees specific arguments (L1, L2 ?)
   // also option for target function should be added
-  private static final IntOption DEPTH = new IntOption(Option.builder("d")
-      .longOpt("max-depth")
-      .desc(
-          "Specify maximum depth of a tree in the ensemble. Default value is 5. Usually the depth should not be more than 15")
-      .numberOfArgs(1)
-      .build(), 5, PositiveInteger.get());
-  private static final DoubleOption STEP = new DoubleOption(Option.builder("s")
-      .longOpt("step")
-      .desc(
+  private static final IntOption DEPTH = IntOption.builder()
+      .shortOption("d")
+      .longOption("max-depth")
+      .description(
+          "Specify maximum depth of a tree in the ensemble. Default value is 5."
+              + " Usually the depth should not be more than 15")
+      .defaultValue(5)
+      .predicates(PositiveInteger.get())
+      .build();
+  private static final DoubleOption STEP = DoubleOption.builder()
+      .shortOption("s")
+      .longOption("step")
+      .description(
           "Specify shrinkage coefficient for single step. The less value is the more iterations is needed to fit a data")
-      .numberOfArgs(1)
-      .build(), 0.01, PositiveDouble.get());
-  private static final IntOption ITERATIONS = new IntOption(Option.builder("i")
-      .longOpt("iterations")
-      .desc("Specify count of trees in the ensemble, i.e. iterations of the algorithm."
+      .defaultValue(0.01)
+      .predicates(PositiveDouble.get())
+      .build();
+  private static final IntOption ITERATIONS = IntOption.builder()
+      .shortOption("i")
+      .longOption("iterations")
+      .description("Specify count of trees in the ensemble, i.e. iterations of the algorithm."
           + " This value depends on the value of the step, the more step is the less iterations is needed")
-      .numberOfArgs(1)
-      .build(), 100, PositiveInteger.get());
-  private static final IntOption GRID_BINS = new IntOption(Option.builder("g")
-      .longOpt("grid-bins")
-      .desc("Specify count of grid bins")
-      .numberOfArgs(1)
-      .build(), 32, PositiveInteger.get()
-  );
-  private static final EnumOption<Target> TARGET = new EnumOption<>(Option.builder("t")
-      .longOpt("target")
-      .desc("Specify target function which will be optimized")
-      .numberOfArgs(1)
-      .build(), Target.SAT_L2, Target.class
-  );
-  // output option
-  private static final PathOption OUTPUT = new PathOption(Option.builder("o")
-      .longOpt("output")
-      .desc("Path to the output file. Execution will be terminated if output file already exists")
-      .numberOfArgs(1)
-      .build(), ExistingPath.negated());
+      .defaultValue(100)
+      .predicates(PositiveInteger.get())
+      .build();
+  private static final IntOption GRID_BINS = IntOption.builder()
+      .shortOption("g")
+      .longOption("grid-bins")
+      .description("Specify degree of binarization of the data. This will determine the number"
+          + " of possible bins formed for features")
+      .defaultValue(32)
+      .predicates(PositiveInteger.get())
+      .build();
+  private static final EnumOption<Target> TARGET_LOSS = EnumOption.builder(Target.class)
+      .shortOption("t")
+      .longOption("target-loss")
+      .description("Specify target function for optimization")
+      .defaultValue(Target.SAT_L2)
+      .build();
+  private static final EnumOption<Metric> TEST_METRIC = EnumOption.builder(Metric.class)
+      .shortOption("m")
+      .longOption("test-metric")
+      .description("Specify test metric which will be calculated on test data set")
+      .defaultValue(Metric.NONE)
+      .build();
+  private static final PathOption OUTPUT = PathOption.builder()
+      .shortOption("o")
+      .longOption("output")
+      .description("Path to the output file. Execution will be terminated if output file already exists")
+      .predicates(ExistingPath.get())
+      .build();
+
   private static final Option VERBOSE = Option.builder("v")
       .longOpt("verbose")
       .desc("Make process more verbose")
       .numberOfArgs(0)
       .build();
-  private static final IntOption PRINT_PERIOD = new IntOption(Option.builder("p")
-      .longOpt("print-period")
-      .desc("Print period in iterations")
-      .numberOfArgs(1)
-      .build(), 10, PositiveInteger.get()
-  );
-  private static final StringOption LOG_FILE = new StringOption(Option.builder("l")
-      .longOpt("log-file")
-      .desc("Specify log file to which all messages will be written. If no file is given then will"
-          + " be used standard output")
-      .numberOfArgs(1)
-      .build());
+  private static final IntOption PRINT_PERIOD = IntOption.builder()
+      .shortOption("p")
+      .longOption("print-period")
+      .description("Print period in iterations")
+      .defaultValue(10)
+      .predicates(PositiveInteger.get())
+      .build();
+
   private static final Option HELP = Option.builder("h").
       longOpt("help")
       .desc("Show help message")
@@ -128,11 +147,11 @@ public class FitRankingCli {
   static {
     TRAIN_DATA.addToOptions(OPTIONS);
     SEED.addToOptions(OPTIONS);
-    CROSS_VALIDATION.addToOptions(OPTIONS);
+    TEST_PROPORTION.addToOptions(OPTIONS);
     DEPTH.addToOptions(OPTIONS);
     STEP.addToOptions(OPTIONS);
     ITERATIONS.addToOptions(OPTIONS);
-    TARGET.addToOptions(OPTIONS);
+    TARGET_LOSS.addToOptions(OPTIONS);
     OUTPUT.addToOptions(OPTIONS);
     PRINT_PERIOD.addToOptions(OPTIONS);
 
@@ -161,20 +180,27 @@ public class FitRankingCli {
     }
 
     SingleArgOptions
-        .checkOptions(commandLine, TRAIN_DATA, SEED, CROSS_VALIDATION, DEPTH, STEP, ITERATIONS,
-            TARGET, OUTPUT, PRINT_PERIOD);
+        .checkOptions(commandLine, TRAIN_DATA, SEED, TEST_PROPORTION, DEPTH, STEP, ITERATIONS,
+            TARGET_LOSS, OUTPUT, PRINT_PERIOD);
 
     Path outputPath = OUTPUT.value(commandLine);
     Pair<? extends Pool, ? extends Pool> trainTestSplit = createDataPools(commandLine);
     Pool trainPool = trainTestSplit.getFirst();
     Pool testPool = trainTestSplit.getSecond();
     VecOptimization gbotOptimizer = createOptimizer(commandLine, trainPool);
-    TargetFunc target = trainPool.targetByName(TARGET.value(commandLine).targetName());
-    // TODO: configure metrics from cmd line
-    Func[] testMetrics = {
-        testPool.targetByName(TARGET.value(commandLine).targetName),
-        testPool.target(NormalizedDcg.class)
-    };
+    TargetFunc target = trainPool.targetByName(TARGET_LOSS.value(commandLine).targetName());
+
+    Func[] testMetrics;
+    {
+      List<Func> testMetricsTmp = new ArrayList<>();
+      testMetricsTmp.add(testPool.targetByName(TARGET_LOSS.value(commandLine).targetName()));
+      if (TEST_METRIC.value(commandLine) != Metric.NONE) {
+        testMetricsTmp.add(testPool.targetByName(TEST_METRIC.value(commandLine).metricName()));
+      }
+      testMetrics = new Func[testMetricsTmp.size()];
+      testMetricsTmp.toArray(testMetrics);
+    }
+
     DefaultProgressPrinter progressPrinter = null;
     if (commandLine.hasOption(VERBOSE.getOpt())) {
       progressPrinter = new DefaultProgressPrinter(trainPool, testPool, target,
@@ -191,7 +217,7 @@ public class FitRankingCli {
     Trans result = gbotOptimizer.fit(trainPool.vecData(), target);
     Interval.stopAndPrint("Total fit time:");
 
-    if (CROSS_VALIDATION.value(commandLine) > 0) {
+    if (TEST_PROPORTION.value(commandLine) > 0) {
       ResultsPrinter.printResults(result, trainPool, testPool, target, testMetrics);
     }
 
@@ -203,7 +229,7 @@ public class FitRankingCli {
     DataBuilderCrossValidation dataBuilderCrossValidation = new DataBuilderCrossValidation();
     dataBuilderCrossValidation.setRandomSeed(SEED.value(commandLine));
     // TODO: set partition from double, not only string
-    dataBuilderCrossValidation.setPartition(Double.toString(CROSS_VALIDATION.value(commandLine)));
+    dataBuilderCrossValidation.setPartition(Double.toString(TEST_PROPORTION.value(commandLine)));
 
     DataBuilder dataBuilder = dataBuilderCrossValidation;
     dataBuilder.setLearnPath(TRAIN_DATA.value(commandLine).toString());
@@ -228,7 +254,7 @@ public class FitRankingCli {
     boostingBuilder.setWeak(weakBuilder.create());
     boostingBuilder.setIterations(ITERATIONS.value(commandLine));
     boostingBuilder.setStep(STEP.value(commandLine));
-    boostingBuilder.setLocal(TARGET.value(commandLine).targetName());
+    boostingBuilder.setLocal(TARGET_LOSS.value(commandLine).targetName());
 
     return boostingBuilder.create();
   }
@@ -245,6 +271,19 @@ public class FitRankingCli {
 
     public String targetName() {
       return targetName;
+    }
+  }
+
+  private enum Metric {
+    NDGC("NomralizedDCG"),
+    NONE("");
+    private final String metricName;
+    Metric(String metricName) {
+      this.metricName = metricName;
+    }
+
+    public String metricName() {
+      return metricName();
     }
   }
 }

@@ -1,16 +1,15 @@
 package com.expleague.sensearch.cli;
 
 import com.expleague.sensearch.AppModule;
-import com.expleague.sensearch.Config;
 import com.expleague.sensearch.ConfigImpl;
 import com.expleague.sensearch.SenSeArch;
 import com.expleague.sensearch.SenSeArch.ResultPage;
 import com.expleague.sensearch.cli.utils.SingleArgOptions;
 import com.expleague.sensearch.cli.utils.SingleArgOptions.IntOption;
 import com.expleague.sensearch.cli.utils.SingleArgOptions.PathOption;
-import com.expleague.sensearch.cli.utils.SingleArgPredicates;
+import com.expleague.sensearch.cli.utils.SingleArgPredicates.ExistingPath;
+import com.expleague.sensearch.cli.utils.SingleArgPredicates.PositiveInteger;
 import com.expleague.sensearch.core.SenSeArchImpl;
-import com.expleague.sensearch.core.impl.json.ResultPageDeserializer;
 import com.expleague.sensearch.web.SearchServer;
 import com.google.gson.Gson;
 import com.google.inject.Guice;
@@ -27,44 +26,40 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 
-public class ServerCli {
+public class RunSearchCli {
 
-  private static final Logger LOG = LoggerFactory.getLogger(ServerCli.class);
+  private static final Logger LOG = LoggerFactory.getLogger(RunSearchCli.class);
 
-  private static final PathOption INDEX_PATH = new PathOption(Option.builder("i")
-      .longOpt("index-path")
-      .desc("Specify path to the index")
-      .numberOfArgs(1)
-      .build(), SingleArgPredicates.ExistingPath.get()
-  );
-  private static final PathOption RANKING_MODEL_PATH = new PathOption(
-      Option.builder("r")
-          .longOpt("ranking-model")
-          .desc("Specify path to the ranking model")
-          .numberOfArgs(1)
-          .build(), SingleArgPredicates.ExistingPath.get()
-  );
-  private static final PathOption FILTER_MODEL_PATH = new PathOption(
-      Option.builder("f")
-          .longOpt("filter-model")
-          .desc("Specify path to the filter model")
-          .numberOfArgs(1)
-          .build(), SingleArgPredicates.ExistingPath.get()
-  );
-  private static final IntOption FILTERED_ITEMS_COUNT = new IntOption(
-      Option.builder()
-          .longOpt("max-filter")
-          .desc("Set maximum count of items to be filtered for ranking")
-          .numberOfArgs(1)
-          .build(), 1000, SingleArgPredicates.PositiveInteger.get()
-  );
-  private static final IntOption RESULT_PAGE_SIZE = new IntOption(
-      Option.builder()
-          .longOpt("serp-size")
-          .desc("Set results count per page")
-          .numberOfArgs(1)
-          .build(), 10, SingleArgPredicates.PositiveInteger.get()
-  );
+  private static final PathOption INDEX_PATH = PathOption.builder()
+      .shortOption("i")
+      .longOption("index-path")
+      .description("Specify path to the index")
+      .predicates(ExistingPath.get())
+      .build();
+  private static final PathOption RANKING_MODEL_PATH = PathOption.builder()
+      .shortOption("r")
+      .longOption("ranking-model")
+      .description("Specify path to the ranking model")
+      .predicates(ExistingPath.get())
+      .build();
+  private static final PathOption FILTER_MODEL_PATH = PathOption.builder()
+      .shortOption("f")
+      .longOption("filter-model")
+      .description("Specify path to the filter model")
+      .predicates(ExistingPath.get())
+      .build();
+  private static final IntOption FILTERED_ITEMS_COUNT = IntOption.builder()
+      .longOption("max-filter")
+      .description("Set maximum count of items to be filtered for ranking")
+      .defaultValue(1000)
+      .predicates(PositiveInteger.get())
+      .build();
+  private static final IntOption RESULT_PAGE_SIZE = IntOption.builder()
+      .longOption("serp-size")
+      .description("Set results count per page")
+      .defaultValue(10)
+      .predicates(PositiveInteger.get())
+      .build();
 
   private static final Option COMMAND_LINE_SEARCH = Option.builder("c")
       .longOpt("cmd-line")

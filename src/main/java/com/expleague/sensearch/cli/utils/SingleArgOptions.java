@@ -13,7 +13,9 @@ import java.util.OptionalInt;
 import java.util.OptionalLong;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Option;
+import org.apache.commons.cli.Option.Builder;
 import org.apache.commons.cli.Options;
+import org.apache.commons.lang3.StringUtils;
 
 // TODO: All constructors should NOT accept Options and build them within themselves
 public class SingleArgOptions {
@@ -38,12 +40,65 @@ public class SingleArgOptions {
     private int savedValue;
     private CommandLine savedCommandLine;
 
-    public IntOption(Option option, IntOptionPredicate... predicates) {
-      this(option, OptionalInt.empty(), predicates);
+    public static class IntOptionBuilder {
+
+      private String shortOption;
+      private String longOption;
+
+      private OptionalInt defaultValue = OptionalInt.empty();
+      private String description = "There is no description for the option";
+      private IntOptionPredicate[] predicates = new IntOptionPredicate[0];
+
+      private IntOptionBuilder() {
+      }
+
+      public IntOptionBuilder description(String description) {
+        this.description = description;
+        return this;
+      }
+
+      public IntOptionBuilder shortOption(String shortOption) {
+        this.shortOption = shortOption;
+        return this;
+      }
+
+      public IntOptionBuilder longOption(String longOption) {
+        this.longOption = longOption;
+        return this;
+      }
+
+      public IntOptionBuilder predicates(IntOptionPredicate... predicates) {
+        this.predicates = predicates;
+        return this;
+      }
+
+      public IntOptionBuilder defaultValue(int defaultValue) {
+        this.defaultValue = OptionalInt.of(defaultValue);
+        return this;
+      }
+
+      public IntOption build() {
+        if (StringUtils.isEmpty(longOption) && StringUtils.isEmpty(shortOption)) {
+          throw new IllegalArgumentException(
+              "Either short name or long name must be set to build an option!");
+        }
+        Builder optionBuilder = Option.builder();
+        if (StringUtils.isNotEmpty(shortOption)) {
+          optionBuilder.argName(shortOption);
+        }
+        if (StringUtils.isNotEmpty(longOption)) {
+          optionBuilder.longOpt(longOption);
+        }
+        optionBuilder.desc(description);
+        optionBuilder.numberOfArgs(1);
+        optionBuilder.required(false);
+
+        return new IntOption(optionBuilder.build(), defaultValue, predicates);
+      }
     }
 
-    public IntOption(Option option, int defaultValue, IntOptionPredicate... predicates) {
-      this(option, OptionalInt.of(defaultValue), predicates);
+    public static IntOptionBuilder builder() {
+      return new IntOptionBuilder();
     }
 
     private IntOption(Option option, OptionalInt defaultValue, IntOptionPredicate... predicates) {
@@ -105,12 +160,65 @@ public class SingleArgOptions {
     private double savedValue;
     private CommandLine savedCommandLine;
 
-    public DoubleOption(Option option, DoubleOptionPredicate... predicates) {
-      this(option, OptionalDouble.empty(), predicates);
+    public static class DoubleOptionBuilder {
+
+      private String shortOption;
+      private String longOption;
+
+      private OptionalDouble defaultValue = OptionalDouble.empty();
+      private String description = "There is no description for the option";
+      private DoubleOptionPredicate[] predicates = new DoubleOptionPredicate[0];
+
+      private DoubleOptionBuilder() {
+      }
+
+      public DoubleOptionBuilder description(String description) {
+        this.description = description;
+        return this;
+      }
+
+      public DoubleOptionBuilder shortOption(String shortOption) {
+        this.shortOption = shortOption;
+        return this;
+      }
+
+      public DoubleOptionBuilder longOption(String longOption) {
+        this.longOption = longOption;
+        return this;
+      }
+
+      public DoubleOptionBuilder predicates(DoubleOptionPredicate... predicates) {
+        this.predicates = predicates;
+        return this;
+      }
+
+      public DoubleOptionBuilder defaultValue(double defaultValue) {
+        this.defaultValue = OptionalDouble.of(defaultValue);
+        return this;
+      }
+
+      public DoubleOption build() {
+        if (StringUtils.isEmpty(longOption) && StringUtils.isEmpty(shortOption)) {
+          throw new IllegalArgumentException(
+              "Either short name or long name must be set to build an option!");
+        }
+        Builder optionBuilder = Option.builder();
+        if (StringUtils.isNotEmpty(shortOption)) {
+          optionBuilder.argName(shortOption);
+        }
+        if (StringUtils.isNotEmpty(longOption)) {
+          optionBuilder.longOpt(longOption);
+        }
+        optionBuilder.desc(description);
+        optionBuilder.numberOfArgs(1);
+        optionBuilder.required(false);
+
+        return new DoubleOption(optionBuilder.build(), defaultValue, predicates);
+      }
     }
 
-    public DoubleOption(Option option, double defaultValue, DoubleOptionPredicate... predicates) {
-      this(option, OptionalDouble.of(defaultValue), predicates);
+    public static DoubleOptionBuilder builder() {
+      return new DoubleOptionBuilder();
     }
 
     private DoubleOption(Option option, OptionalDouble defaultValue,
@@ -174,12 +282,65 @@ public class SingleArgOptions {
     private long savedValue;
     private CommandLine savedCommandLine;
 
-    public LongOption(Option option, LongOptionPredicate... predicates) {
-      this(option, OptionalLong.empty(), predicates);
+    public static class LongOptionBuilder {
+
+      private String shortOption;
+      private String longOption;
+
+      private OptionalLong defaultValue = OptionalLong.empty();
+      private String description = "There is no description for the option";
+      private LongOptionPredicate[] predicates = new LongOptionPredicate[0];
+
+      private LongOptionBuilder() {
+      }
+
+      public LongOptionBuilder description(String description) {
+        this.description = description;
+        return this;
+      }
+
+      public LongOptionBuilder shortOption(String shortOption) {
+        this.shortOption = shortOption;
+        return this;
+      }
+
+      public LongOptionBuilder longOption(String longOption) {
+        this.longOption = longOption;
+        return this;
+      }
+
+      public LongOptionBuilder predicates(LongOptionPredicate... predicates) {
+        this.predicates = predicates;
+        return this;
+      }
+
+      public LongOptionBuilder defaultValue(long defaultValue) {
+        this.defaultValue = OptionalLong.of(defaultValue);
+        return this;
+      }
+
+      public LongOption build() {
+        if (StringUtils.isEmpty(longOption) && StringUtils.isEmpty(shortOption)) {
+          throw new IllegalArgumentException(
+              "Either short name or long name must be set to build an option!");
+        }
+        Builder optionBuilder = Option.builder();
+        if (StringUtils.isNotEmpty(shortOption)) {
+          optionBuilder.argName(shortOption);
+        }
+        if (StringUtils.isNotEmpty(longOption)) {
+          optionBuilder.longOpt(longOption);
+        }
+        optionBuilder.desc(description);
+        optionBuilder.numberOfArgs(1);
+        optionBuilder.required(false);
+
+        return new LongOption(optionBuilder.build(), defaultValue, predicates);
+      }
     }
 
-    public LongOption(Option option, long defaultValue, LongOptionPredicate... predicates) {
-      this(option, OptionalLong.of(defaultValue), predicates);
+    public static LongOptionBuilder builder() {
+      return new LongOptionBuilder();
     }
 
     private LongOption(Option option, OptionalLong defaultValue,
@@ -243,12 +404,65 @@ public class SingleArgOptions {
     private CommandLine savedCommandLine;
     private String savedValue;
 
-    public StringOption(Option option, StringOptionPredicate... predicates) {
-      this(option, Optional.empty(), predicates);
+    public static class StringOptionBuilder {
+
+      private String shortOption;
+      private String longOption;
+
+      private Optional<String> defaultValue = Optional.empty();
+      private String description = "There is no description for the option";
+      private StringOptionPredicate[] predicates = new StringOptionPredicate[0];
+
+      private StringOptionBuilder() {
+      }
+
+      public StringOptionBuilder description(String description) {
+        this.description = description;
+        return this;
+      }
+
+      public StringOptionBuilder shortOption(String shortOption) {
+        this.shortOption = shortOption;
+        return this;
+      }
+
+      public StringOptionBuilder longOption(String longOption) {
+        this.longOption = longOption;
+        return this;
+      }
+
+      public StringOptionBuilder predicates(StringOptionPredicate... predicates) {
+        this.predicates = predicates;
+        return this;
+      }
+
+      public StringOptionBuilder defaultValue(String defaultValue) {
+        this.defaultValue = Optional.of(defaultValue);
+        return this;
+      }
+
+      public StringOption build() {
+        if (StringUtils.isEmpty(longOption) && StringUtils.isEmpty(shortOption)) {
+          throw new IllegalArgumentException(
+              "Either short name or long name must be set to build an option!");
+        }
+        Builder optionBuilder = Option.builder();
+        if (StringUtils.isNotEmpty(shortOption)) {
+          optionBuilder.argName(shortOption);
+        }
+        if (StringUtils.isNotEmpty(longOption)) {
+          optionBuilder.longOpt(longOption);
+        }
+        optionBuilder.desc(description);
+        optionBuilder.numberOfArgs(1);
+        optionBuilder.required(false);
+
+        return new StringOption(optionBuilder.build(), defaultValue, predicates);
+      }
     }
 
-    public StringOption(Option option, String defaultValue, StringOptionPredicate... predicates) {
-      this(option, Optional.of(defaultValue), predicates);
+    public static StringOptionBuilder builder() {
+      return new StringOptionBuilder();
     }
 
     private StringOption(Option option, Optional<String> defaultValue,
@@ -305,16 +519,70 @@ public class SingleArgOptions {
     private CommandLine savedCommandLine;
     private Path savedValue;
 
-    public PathOption(Option option, PathOptionPredicate... predicates) {
-      this(option, Optional.empty(), predicates);
+    public static class PathOptionBuilder {
+
+      private String shortOption;
+      private String longOption;
+
+      private Optional<Path> defaultValue = Optional.empty();
+      private String description = "There is no description for the option";
+      private PathOptionPredicate[] predicates = new PathOptionPredicate[0];
+
+      private PathOptionBuilder() {
+      }
+
+      public PathOptionBuilder description(String description) {
+        this.description = description;
+        return this;
+      }
+
+      public PathOptionBuilder shortOption(String shortOption) {
+        this.shortOption = shortOption;
+        return this;
+      }
+
+      public PathOptionBuilder longOption(String longOption) {
+        this.longOption = longOption;
+        return this;
+      }
+
+      public PathOptionBuilder predicates(PathOptionPredicate... predicates) {
+        this.predicates = predicates;
+        return this;
+      }
+
+      public PathOptionBuilder defaultValue(String defaultValue) {
+        this.defaultValue = Optional.of(Paths.get(defaultValue));
+        return this;
+      }
+
+      public PathOptionBuilder defaultValue(Path defaultValue) {
+        this.defaultValue = Optional.of(defaultValue);
+        return this;
+      }
+
+      public PathOption build() {
+        if (StringUtils.isEmpty(longOption) && StringUtils.isEmpty(shortOption)) {
+          throw new IllegalArgumentException(
+              "Either short name or long name must be set to build an option!");
+        }
+        Builder optionBuilder = Option.builder();
+        if (StringUtils.isNotEmpty(shortOption)) {
+          optionBuilder.argName(shortOption);
+        }
+        if (StringUtils.isNotEmpty(longOption)) {
+          optionBuilder.longOpt(longOption);
+        }
+        optionBuilder.desc(description);
+        optionBuilder.numberOfArgs(1);
+        optionBuilder.required(false);
+
+        return new PathOption(optionBuilder.build(), defaultValue, predicates);
+      }
     }
 
-    public PathOption(Option option, String defaultValue, PathOptionPredicate... predicates) {
-      this(option, Optional.of(Paths.get(defaultValue)), predicates);
-    }
-
-    public PathOption(Option option, Path defaultValue, PathOptionPredicate... predicates) {
-      this(option, Optional.of(defaultValue), predicates);
+    public static PathOptionBuilder builder() {
+      return new PathOptionBuilder();
     }
 
     private PathOption(Option option, Optional<Path> defaultValue,
@@ -374,12 +642,61 @@ public class SingleArgOptions {
     private T savedValue;
     private CommandLine savedCommandLine;
 
-    public EnumOption(Option option, Class<T> enumType) {
-      this(option, Optional.empty(), enumType);
+    public static class EnumOptionBuilder<T extends Enum<T>> {
+
+      private String shortOption;
+      private String longOption;
+      private Class<T> enumType;
+
+      private Optional<T> defaultValue = Optional.empty();
+      private String description = "There is no description for the option";
+
+      private EnumOptionBuilder(Class<T> enumType) {
+        this.enumType = enumType;
+      }
+
+      public EnumOptionBuilder<T> description(String description) {
+        this.description = description;
+        return this;
+      }
+
+      public EnumOptionBuilder<T> shortOption(String shortOption) {
+        this.shortOption = shortOption;
+        return this;
+      }
+
+      public EnumOptionBuilder<T> longOption(String longOption) {
+        this.longOption = longOption;
+        return this;
+      }
+
+      public EnumOptionBuilder<T> defaultValue(T defaultValue) {
+        this.defaultValue = Optional.of(defaultValue);
+        return this;
+      }
+
+      public EnumOption<T> build() {
+        if (StringUtils.isEmpty(longOption) && StringUtils.isEmpty(shortOption)) {
+          throw new IllegalArgumentException(
+              "Either short name or long name must be set to build an option!");
+        }
+        Builder optionBuilder = Option.builder();
+        if (StringUtils.isNotEmpty(shortOption)) {
+          optionBuilder.argName(shortOption);
+        }
+        if (StringUtils.isNotEmpty(longOption)) {
+          optionBuilder.longOpt(longOption);
+        }
+        optionBuilder.desc(description);
+        optionBuilder.numberOfArgs(1);
+        optionBuilder.required(false);
+
+        return new EnumOption(optionBuilder.build(), defaultValue, enumType);
+      }
     }
 
-    public EnumOption(Option option, T defaultValue, Class<T> enumType) {
-      this(option, Optional.of(defaultValue), enumType);
+    public static <T extends Enum<T>> EnumOptionBuilder<T> builder(Class<T> enumType) {
+      return new EnumOptionBuilder<>(enumType);
     }
 
     private EnumOption(Option option, Optional<T> defaultValue, Class<T> enumType) {

@@ -15,7 +15,6 @@ import com.expleague.sensearch.experiments.joom.JoomCsvTransformer;
 import com.expleague.sensearch.experiments.wiki.CrawlerWiki;
 import com.expleague.sensearch.miner.pool.builders.FilterPoolBuilder;
 import com.expleague.sensearch.miner.pool.builders.RankingPoolBuilder;
-import com.expleague.sensearch.web.SearchServer;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import java.io.File;
@@ -66,7 +65,7 @@ public class SenSearchCli {
   private static final String JOOM_FORMAT = "joom";
 
   private static final String BUILD_INDEX_COMMAND = "buildIndex";
-  private static final String START_SERVER_COMMAND = "startServer";
+  private static final String START_SERVER_COMMAND = "srch";
 
   private static final String TRANSFORM_POOL_DATA_COMMAND = "poolTransform";
 
@@ -211,6 +210,7 @@ public class SenSearchCli {
 
   public static void main(String[] args) throws Exception {
     if (args.length < 1) {
+      System.out.println("No arguments provided! Help message will be printed");
       printUsage();
       return;
     }
@@ -222,7 +222,6 @@ public class SenSearchCli {
     CommandLineParser cliParser = new DefaultParser();
     try {
       CommandLine parser;
-
       ConfigImpl config = new ConfigImpl();
       Injector injector;
       switch (args[0]) {
@@ -262,7 +261,7 @@ public class SenSearchCli {
           break;
 
         case START_SERVER_COMMAND:
-          ServerCli.run(args);
+          RunSearchCli.run(args);
           break;
 
         case BUILD_FILTER_POOL_COMMAND:
@@ -304,24 +303,6 @@ public class SenSearchCli {
         case TRAIN_RANK_MODEL_COMMAND:
           LOG.debug("Executing command 'fitrk'");
           FitRankingCli.run(args);
-          //          JMLLCLI.main(
-          //              new String[]{
-          //                  "fit",
-          //                  "--print-period",
-          //                  "10",
-          //                  "--json-format",
-          //                  "--learn",
-          //                  parse.getOptionValue(RANK_POOL_PATH_OPTION),
-          //                  "-X",
-          //                  "1/0.7",
-          //                  "-v",
-          //                  "-O",
-          //                  "'GradientBoosting(local=SatL2, weak=GreedyObliviousTree(depth=6),
-          // step=0.01, iterations=600)'"
-          //              });
-          //          Files.move(
-          //              Paths.get(parser.getOptionValue(RANK_POOL_PATH_OPTION) + ".model"),
-          //              Paths.get(parser.getOptionValue(RANK_MODEL_PATH_OPTION)));
           break;
 
         case REBUILD_EMBEDDING_COMMAND:
@@ -345,19 +326,16 @@ public class SenSearchCli {
       System.out.println(e.getLocalizedMessage());
       printUsage(args[0]);
     }
-
-    //    cliParser.parse(startServerOptions, args).getOptionValue()
-    //    System.out.println(options.);
   }
 
   private static void printUsage() {
     printUsage(TRAIN_EMBEDDING_COMMAND);
     printUsage(BUILD_INDEX_COMMAND);
-    printUsage(START_SERVER_COMMAND);
     printUsage(BUILD_FILTER_POOL_COMMAND);
     printUsage(BUILD_RANK_POOL_COMMAND);
     printUsage(TRANSFORM_POOL_DATA_COMMAND);
     FitRankingCli.printUsage();
+    RunSearchCli.printUsage();
   }
 
   private static Options getCommandOptions(String command) {
@@ -366,14 +344,10 @@ public class SenSearchCli {
         return trainEmbeddingOptions;
       case BUILD_INDEX_COMMAND:
         return buildIndexOptions;
-      case START_SERVER_COMMAND:
-        return startServerOptions;
       case BUILD_FILTER_POOL_COMMAND:
         return buildFilterPoolOptions;
       case BUILD_RANK_POOL_COMMAND:
         return buildRankPoolOptions;
-      case TRAIN_RANK_MODEL_COMMAND:
-        return null;
       default:
         System.out.println("Unknown command " + command);
         printUsage();
@@ -388,8 +362,6 @@ public class SenSearchCli {
         return "Trains embedding for given data.";
       case BUILD_INDEX_COMMAND:
         return "Builds index. Requires embedding to be already trained";
-      case START_SERVER_COMMAND:
-        return "Starts server. Requires index to be built";
       case BUILD_FILTER_POOL_COMMAND:
         return "Collects pool for filter model training. Requires index to be built";
       case BUILD_RANK_POOL_COMMAND:

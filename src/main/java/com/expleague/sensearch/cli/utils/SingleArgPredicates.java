@@ -110,7 +110,12 @@ public class SingleArgPredicates {
   public static class SegmentDouble implements DoubleOptionPredicate {
     private final double lower;
     private final double upper;
-    public SegmentDouble(double lower, double upper) {
+
+    public static SegmentDouble get(double lower, double upper) {
+      return new SegmentDouble(lower, upper);
+    }
+
+    private SegmentDouble(double lower, double upper) {
       this.lower = lower;
       this.upper = upper;
     }
