@@ -53,8 +53,7 @@ public class EmbeddingWordsFilter {
                 continue;
             }
 
-            pw.print(word);
-            pw.print(" " + n);
+            pw.print(word + "\t" + n);
             for (int i = 0; i < n; i++) {
                 pw.print(" " + x[i]);
             }
