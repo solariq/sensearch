@@ -16,6 +16,7 @@ import com.expleague.ml.cli.output.ModelWriter;
 import com.expleague.ml.cli.output.printers.DefaultProgressPrinter;
 import com.expleague.ml.cli.output.printers.ResultsPrinter;
 import com.expleague.ml.data.tools.Pool;
+import com.expleague.ml.loss.NormalizedDcg;
 import com.expleague.ml.methods.VecOptimization;
 import com.expleague.sensearch.cli.utils.SingleArgOptions;
 import com.expleague.sensearch.cli.utils.SingleArgOptions.DoubleOption;
@@ -43,34 +44,16 @@ public class FitRankingCli {
 
   private static final Logger LOG = LoggerFactory.getLogger(FitRankingCli.class);
   private static final String MODE_DESCRIPTION = "";
-
-  private enum Target {
-    GROUPED_L2("GroupedL2"),
-    SAT_L2("SatL2");
-
-    private final String targetName;
-
-    Target(String targetName) {
-      this.targetName = targetName;
-    }
-
-    public String targetName() {
-      return targetName;
-    }
-  }
-
   private static final PathOption TRAIN_DATA = new PathOption(Option.builder("D")
       .longOpt("data")
       .desc("Specify path to the train data")
       .numberOfArgs(1)
       .build(), ExistingPath.get());
-
   private static final LongOption SEED = new LongOption(Option.builder("r")
       .longOpt("random-seed")
       .desc("Specify random seed to make results reproducible")
       .numberOfArgs(1)
       .build(), 42, NegativeLong.get());
-
   private static final DoubleOption CROSS_VALIDATION = new DoubleOption(Option.builder("c")
       .longOpt("cross-val")
       .desc(
@@ -79,7 +62,6 @@ public class FitRankingCli {
               + " If no value is given all data will be used for training")
       .numberOfArgs(1)
       .build(), 0.2, new SegmentDouble(0.01, 1));
-
   // gradient boosting on oblivious trees specific arguments (L1, L2 ?)
   // also option for target function should be added
   private static final IntOption DEPTH = new IntOption(Option.builder("d")
@@ -112,14 +94,12 @@ public class FitRankingCli {
       .numberOfArgs(1)
       .build(), Target.SAT_L2, Target.class
   );
-
   // output option
   private static final PathOption OUTPUT = new PathOption(Option.builder("o")
       .longOpt("output")
       .desc("Path to the output file. Execution will be terminated if output file already exists")
       .numberOfArgs(1)
       .build(), ExistingPath.negated());
-
   private static final Option VERBOSE = Option.builder("v")
       .longOpt("verbose")
       .desc("Make process more verbose")
@@ -137,14 +117,13 @@ public class FitRankingCli {
           + " be used standard output")
       .numberOfArgs(1)
       .build());
-
   private static final Option HELP = Option.builder("h").
       longOpt("help")
       .desc("Show help message")
       .numberOfArgs(0)
       .build();
-
   private static final Options OPTIONS = new Options();
+  private static final CommandLineParser CLI_PARSER = new DefaultParser();
 
   static {
     TRAIN_DATA.addToOptions(OPTIONS);
@@ -160,8 +139,6 @@ public class FitRankingCli {
     OPTIONS.addOption(VERBOSE);
     OPTIONS.addOption(HELP);
   }
-
-  private static final CommandLineParser CLI_PARSER = new DefaultParser();
 
   static void printUsage() {
     HelpFormatter helpFormatter = new HelpFormatter();
@@ -194,7 +171,10 @@ public class FitRankingCli {
     VecOptimization gbotOptimizer = createOptimizer(commandLine, trainPool);
     TargetFunc target = trainPool.targetByName(TARGET.value(commandLine).targetName());
     // TODO: configure metrics from cmd line
-    Func[] testMetrics = {testPool.targetByName(TARGET.value(commandLine).targetName)};
+    Func[] testMetrics = {
+        testPool.targetByName(TARGET.value(commandLine).targetName),
+        testPool.target(NormalizedDcg.class)
+    };
     DefaultProgressPrinter progressPrinter = null;
     if (commandLine.hasOption(VERBOSE.getOpt())) {
       progressPrinter = new DefaultProgressPrinter(trainPool, testPool, target,
@@ -251,5 +231,20 @@ public class FitRankingCli {
     boostingBuilder.setLocal(TARGET.value(commandLine).targetName());
 
     return boostingBuilder.create();
+  }
+
+  private enum Target {
+    GROUPED_L2("GroupedL2"),
+    SAT_L2("SatL2");
+
+    private final String targetName;
+
+    Target(String targetName) {
+      this.targetName = targetName;
+    }
+
+    public String targetName() {
+      return targetName;
+    }
   }
 }
