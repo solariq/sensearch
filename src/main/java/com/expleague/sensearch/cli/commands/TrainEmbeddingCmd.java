@@ -25,7 +25,7 @@ import org.apache.commons.cli.Options;
 
 public class TrainEmbeddingCmd implements Command {
 
-  static final String COMMAND_NAME = "train-emb";
+  private static final String COMMAND_NAME = "train-emb";
 
   private static final PathOption DATA_PATH = PathOption.builder()
       .shortOption("d")
@@ -93,12 +93,12 @@ public class TrainEmbeddingCmd implements Command {
     try {
       commandLine = CLI_PARSER.parse(OPTIONS, args);
     } catch (Exception e) {
-      printUsage();
+      printHelp();
       return;
     }
 
     if (commandLine.hasOption(HELP.getOpt())) {
-      printUsage();
+      printHelp();
       return;
     }
 
@@ -120,7 +120,7 @@ public class TrainEmbeddingCmd implements Command {
   }
 
   @Override
-  public void printUsage() {
+  public void printHelp() {
     HelpFormatter helpFormatter = new HelpFormatter();
     helpFormatter.printHelp(COMMAND_NAME, OPTIONS);
   }

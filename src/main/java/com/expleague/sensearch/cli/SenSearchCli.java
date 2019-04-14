@@ -305,9 +305,9 @@ public class SenSearchCli {
     printUsage(BUILD_FILTER_POOL_COMMAND);
     printUsage(BUILD_RANK_POOL_COMMAND);
     printUsage(TRANSFORM_POOL_DATA_COMMAND);
-    TrainEmbeddingCmd.printUsage();
-    FitRankingModelCmd.printUsage();
-    RunSearchCmd.printUsage();
+    TrainEmbeddingCmd.printHelp();
+    FitRankingModelCmd.printHelp();
+    RunSearchCmd.printHelp();
   }
 
   private static Options getCommandOptions(String command) {
