@@ -17,7 +17,7 @@ import org.apache.commons.cli.Option.Builder;
 import org.apache.commons.cli.Options;
 import org.apache.commons.lang3.StringUtils;
 
-// TODO: All constructors should NOT accept Options and build them within themselves
+// TODO: tit should be possible to make any option optional
 public class SingleArgOptions {
 
   public static void checkOptions(CommandLine commandLine, CheckableOption... options) {
@@ -36,6 +36,7 @@ public class SingleArgOptions {
     private final Option option;
     private final OptionalInt defaultValue;
     private final IntOptionPredicate[] predicates;
+    private final boolean isOptional;
 
     private int savedValue;
     private CommandLine savedCommandLine;
@@ -45,6 +46,7 @@ public class SingleArgOptions {
       private String shortOption;
       private String longOption;
 
+      private boolean isOptional = false;
       private OptionalInt defaultValue = OptionalInt.empty();
       private String description = "There is no description for the option";
       private IntOptionPredicate[] predicates = new IntOptionPredicate[0];
@@ -77,6 +79,11 @@ public class SingleArgOptions {
         return this;
       }
 
+      public IntOptionBuilder isOptional() {
+        isOptional = true;
+        return this;
+      }
+
       public IntOption build() {
         if (StringUtils.isEmpty(longOption) && StringUtils.isEmpty(shortOption)) {
           throw new IllegalArgumentException(
@@ -89,11 +96,12 @@ public class SingleArgOptions {
         if (StringUtils.isNotEmpty(longOption)) {
           optionBuilder.longOpt(longOption);
         }
+
         optionBuilder.desc(description);
         optionBuilder.numberOfArgs(1);
         optionBuilder.required(false);
 
-        return new IntOption(optionBuilder.build(), defaultValue, predicates);
+        return new IntOption(optionBuilder.build(), defaultValue, isOptional, predicates);
       }
     }
 
@@ -101,17 +109,47 @@ public class SingleArgOptions {
       return new IntOptionBuilder();
     }
 
-    private IntOption(Option option, OptionalInt defaultValue, IntOptionPredicate... predicates) {
+    private IntOption(Option option, OptionalInt defaultValue, boolean isOptional,
+        IntOptionPredicate... predicates) {
       this.option = option;
       this.defaultValue = defaultValue;
       this.predicates = predicates;
+      this.isOptional = isOptional;
     }
 
     public int value(CommandLine commandLine) {
       if (commandLine != savedCommandLine) {
         check(commandLine);
       }
+
+      if (!defaultValue.isPresent() && !commandLine.hasOption(option.getOpt())) {
+        throw new IllegalStateException(
+            String.format("Tried to get value for option [ -%s ]"
+                + " when it has no value!", option.getOpt()));
+      }
+
       return savedValue;
+    }
+
+    public boolean hasValue(CommandLine commandLine) {
+      if (commandLine != savedCommandLine) {
+        check(commandLine);
+      }
+      return commandLine.hasOption(option.getOpt());
+    }
+
+    public boolean hasDefaultValue() {
+      return defaultValue.isPresent();
+    }
+
+    public int defaultValue() {
+      if (!defaultValue.isPresent()) {
+        throw new IllegalStateException(
+            String.format("Tried to get default value for option [ -%s ]"
+                + " when it has no default value!", option.getOpt()));
+      }
+
+      return defaultValue.getAsInt();
     }
 
     public void addToOptions(Options options) {
@@ -120,21 +158,29 @@ public class SingleArgOptions {
 
     @Override
     public void check(CommandLine commandLine) throws IllegalArgumentException {
+      if (commandLine == null) {
+        throw new NullPointerException(String.format(
+            "Tried to parse argument [ -%s ] from 'null' command line!", option.getOpt()));
+      }
+
       if (!commandLine.hasOption(option.getOpt())) {
+        if (isOptional) {
+          savedCommandLine = commandLine;
+          return;
+        }
         if (defaultValue.isPresent()) {
           savedCommandLine = commandLine;
           savedValue = defaultValue.getAsInt();
           return;
         }
         throw new IllegalArgumentException(String.format("Option [ -%s ] has no default value!"
-            + " Please, pass a value as argument", option.getOpt()));
+            + " Please, pass a value as an argument", option.getOpt()));
       }
-
       int value;
       String stringValue = commandLine.getOptionValue(option.getOpt());
       try {
         value = Integer.parseInt(stringValue);
-      } catch (NumberFormatException e) {
+      } catch (NullPointerException | NumberFormatException e) {
         throw new IllegalArgumentException(String.format("Parameter of the option [ -%s ]"
             + " must be an integer! Received [ %s ] instead", option.getOpt(), stringValue));
       }

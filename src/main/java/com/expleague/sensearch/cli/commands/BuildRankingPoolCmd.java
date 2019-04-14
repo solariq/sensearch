@@ -1,6 +1,7 @@
 package com.expleague.sensearch.cli.commands;
 
 import com.expleague.sensearch.cli.Command;
+import com.expleague.sensearch.cli.utils.SingleArgOptions;
 import com.expleague.sensearch.cli.utils.SingleArgOptions.IntOption;
 import com.expleague.sensearch.cli.utils.SingleArgOptions.PathOption;
 import com.expleague.sensearch.cli.utils.SingleArgPredicates.ExistingPath;
@@ -30,7 +31,7 @@ public class BuildRankingPoolCmd implements Command {
   private static final PathOption RANKING_MODEL_PATH = PathOption.builder()
       .shortOption("m")
       .longOption("ranking-model")
-      .defaultValue("Specify path to the filter model")
+      .description("Specify path to the filter model")
       .predicates(ExistingPath.get())
       .build();
   private static final IntOption POOL_ITERATIONS = IntOption.builder()
@@ -86,6 +87,9 @@ public class BuildRankingPoolCmd implements Command {
       printHelp();
       return;
     }
+
+    SingleArgOptions.checkOptions(commandLine, INDEX_PATH, MAX_FILTER_ITEMS, RANKING_MODEL_PATH,
+        POOL_ITERATIONS, POOL_PATH);
   }
 
   @Override
