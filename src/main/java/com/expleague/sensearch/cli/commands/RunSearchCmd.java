@@ -1,9 +1,10 @@
-package com.expleague.sensearch.cli;
+package com.expleague.sensearch.cli.commands;
 
 import com.expleague.sensearch.AppModule;
 import com.expleague.sensearch.ConfigImpl;
 import com.expleague.sensearch.SenSeArch;
 import com.expleague.sensearch.SenSeArch.ResultPage;
+import com.expleague.sensearch.cli.Command;
 import com.expleague.sensearch.cli.utils.SingleArgOptions;
 import com.expleague.sensearch.cli.utils.SingleArgOptions.IntOption;
 import com.expleague.sensearch.cli.utils.SingleArgOptions.PathOption;
@@ -26,10 +27,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 
-public class RunSearchCli {
-  static final String COMMAND_NAME = "srch";
+public class RunSearchCmd implements Command {
 
-  private static final Logger LOG = LoggerFactory.getLogger(RunSearchCli.class);
+  private static final String COMMAND_NAME = "start-srch";
+
+  private static final Logger LOG = LoggerFactory.getLogger(RunSearchCmd.class);
 
   private static final PathOption INDEX_PATH = PathOption.builder()
       .shortOption("i")
@@ -75,6 +77,8 @@ public class RunSearchCli {
 
 
   private static final Options OPTIONS = new Options();
+  private static final CommandLineParser CLI_PARSER = new DefaultParser();
+  private static final RunSearchCmd INSTANCE = new RunSearchCmd();
 
   static {
     INDEX_PATH.addToOptions(OPTIONS);
@@ -87,13 +91,21 @@ public class RunSearchCli {
     OPTIONS.addOption(HELP);
   }
 
-  private static final CommandLineParser CLI_PARSER = new DefaultParser();
+  private RunSearchCmd() {
 
-  static String commandName() {
+  }
+
+  public static RunSearchCmd instance() {
+    return INSTANCE;
+  }
+
+  @Override
+  public String commandName() {
     return COMMAND_NAME;
   }
 
-  public static void run(String[] args) throws Exception {
+  @Override
+  public void run(String[] args) throws Exception {
     CommandLine commandLine;
     try {
       commandLine = CLI_PARSER.parse(OPTIONS, args);
@@ -109,7 +121,6 @@ public class RunSearchCli {
 
     SingleArgOptions.checkOptions(commandLine, INDEX_PATH, RANKING_MODEL_PATH, FILTER_MODEL_PATH,
         RESULT_PAGE_SIZE, FILTERED_ITEMS_COUNT);
-
 
     ConfigImpl config = new ConfigImpl();
     config.setTemporaryIndex(INDEX_PATH.value(commandLine).toString());
@@ -136,8 +147,9 @@ public class RunSearchCli {
     }
   }
 
-  static void printUsage() {
+  @Override
+  public void printUsage() {
     HelpFormatter helpFormatter = new HelpFormatter();
-    helpFormatter.printHelp("srch", OPTIONS);
+    helpFormatter.printHelp(COMMAND_NAME, OPTIONS);
   }
 }

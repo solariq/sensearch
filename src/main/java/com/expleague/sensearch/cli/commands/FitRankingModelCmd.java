@@ -1,4 +1,4 @@
-package com.expleague.sensearch.cli;
+package com.expleague.sensearch.cli.commands;
 
 import com.expleague.commons.func.WeakListenerHolder;
 import com.expleague.commons.math.Func;
@@ -17,6 +17,7 @@ import com.expleague.ml.cli.output.printers.DefaultProgressPrinter;
 import com.expleague.ml.cli.output.printers.ResultsPrinter;
 import com.expleague.ml.data.tools.Pool;
 import com.expleague.ml.methods.VecOptimization;
+import com.expleague.sensearch.cli.Command;
 import com.expleague.sensearch.cli.utils.SingleArgOptions;
 import com.expleague.sensearch.cli.utils.SingleArgOptions.DoubleOption;
 import com.expleague.sensearch.cli.utils.SingleArgOptions.EnumOption;
@@ -40,11 +41,11 @@ import org.apache.commons.cli.Options;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class FitRankingModelCli {
+public class FitRankingModelCmd implements Command {
 
-  static final String COMMAND_NAME = "fitrk";
+  private static final String COMMAND_NAME = "train-rk";
 
-  private static final Logger LOG = LoggerFactory.getLogger(FitRankingModelCli.class);
+  private static final Logger LOG = LoggerFactory.getLogger(FitRankingModelCmd.class);
   private static final String MODE_DESCRIPTION = "";
 
   private static final PathOption TRAIN_DATA = PathOption.builder()
@@ -64,7 +65,8 @@ public class FitRankingModelCli {
       .shortOption("t")
       .longOption("test-prop")
       .description(
-          "Specify proportion of the data that will be used for the testing, the rest will be used for training."
+          "Specify proportion of the data that will be used for the testing,"
+              + " the rest will be used for training."
               + " Should be the number from (0; 1). Usually, 0.2 is enough."
               + " If no value is given all data will be used for training")
       .defaultValue(0.2)
@@ -120,7 +122,8 @@ public class FitRankingModelCli {
   private static final PathOption OUTPUT = PathOption.builder()
       .shortOption("o")
       .longOption("output")
-      .description("Path to the output file. Execution will be terminated if output file already exists")
+      .description(
+          "Path to the output file. Execution will be terminated if output file already exists")
       .predicates(ExistingPath.get())
       .build();
 
@@ -144,6 +147,7 @@ public class FitRankingModelCli {
       .build();
   private static final Options OPTIONS = new Options();
   private static final CommandLineParser CLI_PARSER = new DefaultParser();
+  private static final FitRankingModelCmd INSTANCE = new FitRankingModelCmd();
 
   static {
     TRAIN_DATA.addToOptions(OPTIONS);
@@ -160,17 +164,61 @@ public class FitRankingModelCli {
     OPTIONS.addOption(HELP);
   }
 
-  static String commandName() {
+  private FitRankingModelCmd() {
+  }
+
+  public static FitRankingModelCmd instance() {
+    return INSTANCE;
+  }
+
+  private static Pair<? extends Pool, ? extends Pool> createDataPools(CommandLine commandLine) {
+    DataBuilderCrossValidation dataBuilderCrossValidation = new DataBuilderCrossValidation();
+    dataBuilderCrossValidation.setRandomSeed(SEED.value(commandLine));
+    // TODO: set partition from double, not only string
+    dataBuilderCrossValidation.setPartition(Double.toString(TEST_PROPORTION.value(commandLine)));
+
+    DataBuilder dataBuilder = dataBuilderCrossValidation;
+    dataBuilder.setLearnPath(TRAIN_DATA.value(commandLine).toString());
+    // TODO: configure pool reader from command line
+    // TODO: determine type of the pool from command line
+    dataBuilder.setReader(ReaderFactory.createJsonReader());
+
+    return dataBuilder.create();
+  }
+
+  private static VecOptimization createOptimizer(CommandLine commandLine, Pool trainData) {
+    GradientBoostingBuilder boostingBuilder = new GradientBoostingBuilder();
+
+    GridBuilder gridBuilder = new GridBuilder();
+    gridBuilder.setBinsCount(GRID_BINS.value(commandLine));
+    gridBuilder.setDataSet(trainData.vecData());
+
+    GreedyObliviousTreeBuilder weakBuilder = new GreedyObliviousTreeBuilder();
+    weakBuilder.setDepth(DEPTH.value(commandLine));
+    weakBuilder.setGridBuilder(gridBuilder);
+
+    boostingBuilder.setWeak(weakBuilder.create());
+    boostingBuilder.setIterations(ITERATIONS.value(commandLine));
+    boostingBuilder.setStep(STEP.value(commandLine));
+    boostingBuilder.setLocal(TARGET_LOSS.value(commandLine).targetName());
+
+    return boostingBuilder.create();
+  }
+
+  @Override
+  public String commandName() {
     return COMMAND_NAME;
   }
 
-  static void printUsage() {
+  @Override
+  public void printUsage() {
     HelpFormatter helpFormatter = new HelpFormatter();
-    helpFormatter.printHelp("fitrk", OPTIONS);
+    helpFormatter.printHelp(COMMAND_NAME, OPTIONS);
   }
 
   @SuppressWarnings("unchecked")
-  static void run(String[] args) throws Exception {
+  @Override
+  public void run(String[] args) throws Exception {
     CommandLine commandLine;
     try {
       commandLine = CLI_PARSER.parse(OPTIONS, args);
@@ -230,40 +278,6 @@ public class FitRankingModelCli {
         .writeModel(result, trainPool);
   }
 
-  private static Pair<? extends Pool, ? extends Pool> createDataPools(CommandLine commandLine) {
-    DataBuilderCrossValidation dataBuilderCrossValidation = new DataBuilderCrossValidation();
-    dataBuilderCrossValidation.setRandomSeed(SEED.value(commandLine));
-    // TODO: set partition from double, not only string
-    dataBuilderCrossValidation.setPartition(Double.toString(TEST_PROPORTION.value(commandLine)));
-
-    DataBuilder dataBuilder = dataBuilderCrossValidation;
-    dataBuilder.setLearnPath(TRAIN_DATA.value(commandLine).toString());
-    // TODO: configure pool reader from command line
-    // TODO: determine type of the pool from command line
-    dataBuilder.setReader(ReaderFactory.createJsonReader());
-
-    return dataBuilder.create();
-  }
-
-  private static VecOptimization createOptimizer(CommandLine commandLine, Pool trainData) {
-    GradientBoostingBuilder boostingBuilder = new GradientBoostingBuilder();
-
-    GridBuilder gridBuilder = new GridBuilder();
-    gridBuilder.setBinsCount(GRID_BINS.value(commandLine));
-    gridBuilder.setDataSet(trainData.vecData());
-
-    GreedyObliviousTreeBuilder weakBuilder = new GreedyObliviousTreeBuilder();
-    weakBuilder.setDepth(DEPTH.value(commandLine));
-    weakBuilder.setGridBuilder(gridBuilder);
-
-    boostingBuilder.setWeak(weakBuilder.create());
-    boostingBuilder.setIterations(ITERATIONS.value(commandLine));
-    boostingBuilder.setStep(STEP.value(commandLine));
-    boostingBuilder.setLocal(TARGET_LOSS.value(commandLine).targetName());
-
-    return boostingBuilder.create();
-  }
-
   private enum Target {
     GROUPED_L2("GroupedL2"),
     SAT_L2("SatL2");
@@ -283,6 +297,7 @@ public class FitRankingModelCli {
     NDGC("NomralizedDCG"),
     NONE("");
     private final String metricName;
+
     Metric(String metricName) {
       this.metricName = metricName;
     }

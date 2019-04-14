@@ -3,6 +3,9 @@ package com.expleague.sensearch.cli;
 import com.expleague.sensearch.AppModule;
 import com.expleague.sensearch.ConfigImpl;
 import com.expleague.sensearch.RebuildEmbedding;
+import com.expleague.sensearch.cli.commands.FitRankingModelCmd;
+import com.expleague.sensearch.cli.commands.RunSearchCmd;
+import com.expleague.sensearch.cli.commands.TrainEmbeddingCmd;
 import com.expleague.sensearch.donkey.IndexBuilder;
 import com.expleague.sensearch.donkey.crawler.Crawler;
 import com.expleague.sensearch.experiments.joom.CrawlerJoom;
@@ -66,14 +69,11 @@ public class SenSearchCli {
   private static final String BUILD_FILTER_POOL_COMMAND = "buildFilterPool";
   private static final String BUILD_RANK_POOL_COMMAND = "buildRankPool";
   private static final String TRAIN_RANK_MODEL_COMMAND = "fitrk";
-
+  private static final Logger LOG = LoggerFactory.getLogger(SenSearchCli.class);
   private static Options rebuildEmbeddingOptions = new Options();
-
   private static Options buildIndexOptions = new Options();
   private static Options startServerOptions = new Options();
-
   private static Options transformDataOptions = new Options();
-
   private static Options buildFilterPoolOptions = new Options();
   private static Options buildRankPoolOptions = new Options();
 
@@ -195,8 +195,6 @@ public class SenSearchCli {
     buildRankPoolOptions.addOption(filterModelPathOption);
   }
 
-  private static final Logger LOG = LoggerFactory.getLogger(SenSearchCli.class);
-
   public static void main(String[] args) throws Exception {
     if (args.length < 1) {
       System.out.println("No arguments provided! Help message will be printed");
@@ -214,14 +212,14 @@ public class SenSearchCli {
       ConfigImpl config = new ConfigImpl();
       Injector injector;
       switch (args[0]) {
-        case TrainEmbeddingCli.COMMAND_NAME:
-          TrainEmbeddingCli.run(args);
+        case TrainEmbeddingCmd.COMMAND_NAME:
+          TrainEmbeddingCmd.run(args);
           break;
-        case RunSearchCli.COMMAND_NAME:
-          RunSearchCli.run(args);
+        case RunSearchCmd.COMMAND_NAME:
+          RunSearchCmd.run(args);
           break;
-        case FitRankingModelCli.COMMAND_NAME:
-          FitRankingModelCli.run(args);
+        case FitRankingModelCmd.COMMAND_NAME:
+          FitRankingModelCmd.run(args);
           break;
 
         case BUILD_INDEX_COMMAND:
@@ -241,7 +239,6 @@ public class SenSearchCli {
 
           Guice.createInjector(new AppModule(config)).getInstance(IndexBuilder.class).buildIndex();
           break;
-
 
         case BUILD_FILTER_POOL_COMMAND:
           parser = cliParser.parse(buildFilterPoolOptions, args);
@@ -308,9 +305,9 @@ public class SenSearchCli {
     printUsage(BUILD_FILTER_POOL_COMMAND);
     printUsage(BUILD_RANK_POOL_COMMAND);
     printUsage(TRANSFORM_POOL_DATA_COMMAND);
-    TrainEmbeddingCli.printUsage();
-    FitRankingModelCli.printUsage();
-    RunSearchCli.printUsage();
+    TrainEmbeddingCmd.printUsage();
+    FitRankingModelCmd.printUsage();
+    RunSearchCmd.printUsage();
   }
 
   private static Options getCommandOptions(String command) {

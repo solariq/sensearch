@@ -1,7 +1,8 @@
-package com.expleague.sensearch.cli;
+package com.expleague.sensearch.cli.commands;
 
 import com.expleague.commons.seq.CharSeq;
 import com.expleague.ml.embedding.impl.EmbeddingImpl;
+import com.expleague.sensearch.cli.Command;
 import com.expleague.sensearch.cli.utils.SingleArgOptions;
 import com.expleague.sensearch.cli.utils.SingleArgOptions.EnumOption;
 import com.expleague.sensearch.cli.utils.SingleArgOptions.IntOption;
@@ -22,7 +23,8 @@ import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 
-public class TrainEmbeddingCli {
+public class TrainEmbeddingCmd implements Command {
+
   static final String COMMAND_NAME = "train-emb";
 
   private static final PathOption DATA_PATH = PathOption.builder()
@@ -61,6 +63,7 @@ public class TrainEmbeddingCli {
 
   private static final CommandLineParser CLI_PARSER = new DefaultParser();
   private static final Options OPTIONS = new Options();
+  private static final TrainEmbeddingCmd INSTANCE = new TrainEmbeddingCmd();
 
   static {
     DATA_PATH.addToOptions(OPTIONS);
@@ -72,11 +75,20 @@ public class TrainEmbeddingCli {
     OPTIONS.addOption(HELP);
   }
 
-  static String commandName() {
+  private TrainEmbeddingCmd() {
+  }
+
+  public static TrainEmbeddingCmd instance() {
+    return INSTANCE;
+  }
+
+  @Override
+  public String commandName() {
     return COMMAND_NAME;
   }
 
-  public static void run(String... args) throws Exception {
+  @Override
+  public void run(String... args) throws Exception {
     CommandLine commandLine;
     try {
       commandLine = CLI_PARSER.parse(OPTIONS, args);
@@ -107,9 +119,10 @@ public class TrainEmbeddingCli {
     }
   }
 
-  static void printUsage() {
+  @Override
+  public void printUsage() {
     HelpFormatter helpFormatter = new HelpFormatter();
-    helpFormatter.printHelp("srch", OPTIONS);
+    helpFormatter.printHelp(COMMAND_NAME, OPTIONS);
   }
 
   private enum DataCrawler {
