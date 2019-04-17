@@ -25,118 +25,118 @@ import java.util.stream.Stream;
 
 public class QuantLSHCosIndexDB extends BaseQuantLSHCosIndex implements AutoCloseable {
 
-  private static final Logger LOG = Logger.getLogger(QuantLSHCosIndexDB.class.getName());
+    private static final Logger LOG = Logger.getLogger(QuantLSHCosIndexDB.class.getName());
 
-  private static final long FIELDS_ID = Long.MAX_VALUE;
-  private static final long IDS_ID = Long.MAX_VALUE - 1;
-  private static final long HASHES_ID = Long.MAX_VALUE - 2;
-  private static final long SKETCHES_ID = Long.MAX_VALUE - 3;
-  private final DB vecDB;
+    private static final long FIELDS_ID = Long.MAX_VALUE;
+    private static final long IDS_ID = Long.MAX_VALUE - 1;
+    private static final long HASHES_ID = Long.MAX_VALUE - 2;
+    private static final long SKETCHES_ID = Long.MAX_VALUE - 3;
+    private final DB vecDB;
 
-  public QuantLSHCosIndexDB(
-      FastRandom rng, int dim, int quantDim, int sketchBitsPerQuant, int batchSize, DB vecDB) {
-    super(rng, dim, quantDim, sketchBitsPerQuant, batchSize);
-    this.vecDB = vecDB;
-  }
-
-  public QuantLSHCosIndexDB(
-      int dim,
-      int batchSize,
-      TLongArrayList ids,
-      List<TLongArrayList> sketches,
-      CosDistanceHashFunction[] hashes,
-      DB vecDB) {
-    super(dim, batchSize, ids, sketches, hashes);
-    this.vecDB = vecDB;
-  }
-
-  @Override
-  public Stream<Entry> nearest(Vec query) {
-    return nearest(query, value -> true);
-  }
-
-  public Stream<Entry> nearest(Vec query, LongPredicate idCondition) {
-    return baseNearest(
-        query,
-        idx -> {
-          long id = ids.getQuick(idx);
-          if (!idCondition.test(id)) {
-            return null;
-          }
-          return VecTools.normalizeL2(ByteTools.toVec(vecDB.get(Longs.toByteArray(id))));
-        });
-  }
-
-  @Override
-  public synchronized void append(long id, Vec vec) {
-    baseAppend(id, vec);
-    vecDB.put(Longs.toByteArray(id), ByteTools.toBytes(vec));
-  }
-
-  @Override
-  public synchronized void remove(long id) {
-    baseRemove(id);
-    vecDB.delete(Longs.toByteArray(id));
-  }
-
-  @Nullable
-  public Vec get(long id) {
-    byte[] bytes = vecDB.get(Longs.toByteArray(id));
-    if (bytes != null) {
-      return ByteTools.toVec(bytes);
-    }
-    return null;
-  }
-
-  public static QuantLSHCosIndexDB load(DB vecDB) {
-    LOG.info("Loading LSH...");
-    long startTime = System.nanoTime();
-
-    int[] fields = ByteTools.toIntArray(vecDB.get(Longs.toByteArray(FIELDS_ID)));
-    int dim = fields[0];
-    int quantDim = fields[1];
-    int sketchBitsPerQuant = fields[2];
-    int batchSize = fields[3];
-      int sketchesCount = fields[4];
-
-    TLongArrayList ids =
-        new TLongArrayList(ByteTools.toLongArray(vecDB.get(Longs.toByteArray(IDS_ID))));
-
-    double[] allCoords = ByteTools.toDoubleArray(vecDB.get(Longs.toByteArray(HASHES_ID)));
-    CosDistanceHashFunction[] hashes =
-        new CosDistanceHashFunction[sketchBitsPerQuant * (int) Math.ceil(dim / (double) quantDim)];
-    for (int i = 0; i < dim; i += quantDim) {
-      int finalI = i;
-      final int currentDim = Math.min(quantDim, dim - i);
-      for (int b = 0; b < sketchBitsPerQuant; b++) {
-        int index = i / quantDim * sketchBitsPerQuant + b;
-        final Vec w =
-            new ArrayVec(
-                Arrays.copyOfRange(
-                    allCoords,
-                    i * sketchBitsPerQuant + b * currentDim,
-                    i * sketchBitsPerQuant + (b + 1) * currentDim));
-        hashes[index] =
-            new CosDistanceHashFunction(w) { // quant sketch
-              @Override
-              public int hash(Vec v) {
-                return super.hash(v.sub(finalI, currentDim));
-              }
-            };
-      }
+    public QuantLSHCosIndexDB(
+            FastRandom rng, int dim, int quantDim, int sketchBitsPerQuant, int batchSize, DB vecDB) {
+        super(rng, dim, quantDim, sketchBitsPerQuant, batchSize);
+        this.vecDB = vecDB;
     }
 
-
-      List<TLongArrayList> sketches = new ArrayList<>();
-
-      for (int i = 0; i < sketchesCount; i++) {
-          long[] sketch = ByteTools.toLongArray(vecDB.get(Longs.toByteArray(SKETCHES_ID - i)));
-          sketches.add(new TLongArrayList(sketch));
+    public QuantLSHCosIndexDB(
+            int dim,
+            int batchSize,
+            TLongArrayList ids,
+            List<TLongArrayList> sketches,
+            CosDistanceHashFunction[] hashes,
+            DB vecDB) {
+        super(dim, batchSize, ids, sketches, hashes);
+        this.vecDB = vecDB;
     }
 
-    LOG.info("LSH loaded in " + (System.nanoTime() - startTime) / 1e9 + " seconds");
-    return new QuantLSHCosIndexDB(dim, batchSize, ids, sketches, hashes, vecDB);
-  }
+    public static QuantLSHCosIndexDB load(DB vecDB) {
+        LOG.info("Loading LSH...");
+        long startTime = System.nanoTime();
+
+        int[] fields = ByteTools.toIntArray(vecDB.get(Longs.toByteArray(FIELDS_ID)));
+        int dim = fields[0];
+        int quantDim = fields[1];
+        int sketchBitsPerQuant = fields[2];
+        int batchSize = fields[3];
+        int sketchesCount = fields[4];
+
+        TLongArrayList ids =
+                new TLongArrayList(ByteTools.toLongArray(vecDB.get(Longs.toByteArray(IDS_ID))));
+
+        double[] allCoords = ByteTools.toDoubleArray(vecDB.get(Longs.toByteArray(HASHES_ID)));
+        CosDistanceHashFunction[] hashes =
+                new CosDistanceHashFunction[sketchBitsPerQuant * (int) Math.ceil(dim / (double) quantDim)];
+        for (int i = 0; i < dim; i += quantDim) {
+            int finalI = i;
+            final int currentDim = Math.min(quantDim, dim - i);
+            for (int b = 0; b < sketchBitsPerQuant; b++) {
+                int index = i / quantDim * sketchBitsPerQuant + b;
+                final Vec w =
+                        new ArrayVec(
+                                Arrays.copyOfRange(
+                                        allCoords,
+                                        i * sketchBitsPerQuant + b * currentDim,
+                                        i * sketchBitsPerQuant + (b + 1) * currentDim));
+                hashes[index] =
+                        new CosDistanceHashFunction(w) { // quant sketch
+                            @Override
+                            public int hash(Vec v) {
+                                return super.hash(v.sub(finalI, currentDim));
+                            }
+                        };
+            }
+        }
+
+
+        List<TLongArrayList> sketches = new ArrayList<>();
+
+        for (int i = 0; i < sketchesCount; i++) {
+            long[] sketch = ByteTools.toLongArray(vecDB.get(Longs.toByteArray(SKETCHES_ID - i)));
+            sketches.add(new TLongArrayList(sketch));
+        }
+
+        LOG.info("LSH loaded in " + (System.nanoTime() - startTime) / 1e9 + " seconds");
+        return new QuantLSHCosIndexDB(dim, batchSize, ids, sketches, hashes, vecDB);
+    }
+
+    @Override
+    public Stream<Entry> nearest(Vec query) {
+        return nearest(query, value -> true);
+    }
+
+    public Stream<Entry> nearest(Vec query, LongPredicate idCondition) {
+        return baseNearest(
+                query,
+                idx -> {
+                    long id = ids.getQuick(idx);
+                    if (!idCondition.test(id)) {
+                        return null;
+                    }
+                    return VecTools.normalizeL2(ByteTools.toVec(vecDB.get(Longs.toByteArray(id))));
+                });
+    }
+
+    @Override
+    public synchronized void append(long id, Vec vec) {
+        baseAppend(id, vec);
+        vecDB.put(Longs.toByteArray(id), ByteTools.toBytes(vec));
+    }
+
+    @Override
+    public synchronized void remove(long id) {
+        baseRemove(id);
+        vecDB.delete(Longs.toByteArray(id));
+    }
+
+    @Nullable
+    public Vec get(long id) {
+        byte[] bytes = vecDB.get(Longs.toByteArray(id));
+        if (bytes != null) {
+            return ByteTools.toVec(bytes);
+        }
+        return null;
+    }
 
     public void save() throws IOException {
         vecDB.put(
@@ -162,8 +162,8 @@ public class QuantLSHCosIndexDB extends BaseQuantLSHCosIndex implements AutoClos
         vecDB.close();
     }
 
-  @Override
-  public void close() throws IOException {
-    vecDB.close();
-  }
+    @Override
+    public void close() throws IOException {
+        vecDB.close();
+    }
 }
