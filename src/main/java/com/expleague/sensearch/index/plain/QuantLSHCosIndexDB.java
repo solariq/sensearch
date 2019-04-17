@@ -9,6 +9,10 @@ import com.expleague.commons.random.FastRandom;
 import com.expleague.sensearch.core.ByteTools;
 import com.google.common.primitives.Longs;
 import gnu.trove.list.array.TLongArrayList;
+import org.apache.log4j.Logger;
+import org.iq80.leveldb.DB;
+import org.jetbrains.annotations.Nullable;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -18,9 +22,6 @@ import java.util.stream.DoubleStream;
 import java.util.stream.IntStream;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
-import org.apache.log4j.Logger;
-import org.iq80.leveldb.DB;
-import org.jetbrains.annotations.Nullable;
 
 public class QuantLSHCosIndexDB extends BaseQuantLSHCosIndex implements AutoCloseable {
 
@@ -87,24 +88,6 @@ public class QuantLSHCosIndexDB extends BaseQuantLSHCosIndex implements AutoClos
     return null;
   }
 
-  public void save() throws IOException {
-    vecDB.put(
-        Longs.toByteArray(FIELDS_ID),
-        ByteTools.toBytes(IntStream.of(dim, quantDim, sketchBitsPerQuant, batchSize).toArray()));
-    vecDB.put(Longs.toByteArray(IDS_ID), ByteTools.toBytes(ids.toArray()));
-    vecDB.put(
-        Longs.toByteArray(HASHES_ID),
-        ByteTools.toBytes(
-            Arrays.stream(hashes)
-                .flatMapToDouble(h -> DoubleStream.of(h.randVec().toArray()))
-                .toArray()));
-    vecDB.put(
-        Longs.toByteArray(SKETCHES_ID),
-        ByteTools.toBytes(
-            sketches.stream().flatMapToLong(l -> LongStream.of(l.toArray())).toArray()));
-    vecDB.close();
-  }
-
   public static QuantLSHCosIndexDB load(DB vecDB) {
     LOG.info("Loading LSH...");
     long startTime = System.nanoTime();
@@ -114,6 +97,7 @@ public class QuantLSHCosIndexDB extends BaseQuantLSHCosIndex implements AutoClos
     int quantDim = fields[1];
     int sketchBitsPerQuant = fields[2];
     int batchSize = fields[3];
+      int sketchesCount = fields[4];
 
     TLongArrayList ids =
         new TLongArrayList(ByteTools.toLongArray(vecDB.get(Longs.toByteArray(IDS_ID))));
@@ -142,18 +126,41 @@ public class QuantLSHCosIndexDB extends BaseQuantLSHCosIndex implements AutoClos
       }
     }
 
-    long[] allSketches = ByteTools.toLongArray(vecDB.get(Longs.toByteArray(SKETCHES_ID)));
-    List<TLongArrayList> sketches = new ArrayList<>();
-    int sketchesSize = (int) Math.ceil(hashes.length / 64.);
-    int chunkSize = allSketches.length / sketchesSize;
-    for (int i = 0; i < sketchesSize; i++) {
-      sketches.add(
-          new TLongArrayList(Arrays.copyOfRange(allSketches, i * chunkSize, (i + 1) * chunkSize)));
+
+      List<TLongArrayList> sketches = new ArrayList<>();
+
+      for (int i = 0; i < sketchesCount; i++) {
+          long[] sketch = ByteTools.toLongArray(vecDB.get(Longs.toByteArray(SKETCHES_ID - i)));
+          sketches.add(new TLongArrayList(sketch));
     }
 
     LOG.info("LSH loaded in " + (System.nanoTime() - startTime) / 1e9 + " seconds");
     return new QuantLSHCosIndexDB(dim, batchSize, ids, sketches, hashes, vecDB);
   }
+
+    public void save() throws IOException {
+        vecDB.put(
+                Longs.toByteArray(FIELDS_ID),
+                ByteTools.toBytes(IntStream.of(dim, quantDim, sketchBitsPerQuant, batchSize, sketches.size()).toArray()));
+        vecDB.put(Longs.toByteArray(IDS_ID), ByteTools.toBytes(ids.toArray()));
+        vecDB.put(
+                Longs.toByteArray(HASHES_ID),
+                ByteTools.toBytes(
+                        Arrays.stream(hashes)
+                                .flatMapToDouble(h -> DoubleStream.of(h.randVec().toArray()))
+                                .toArray()));
+
+        for (int i = 0; i < sketches.size(); i++) {
+            vecDB.put(
+                    Longs.toByteArray(SKETCHES_ID - i),
+                    ByteTools.toBytes(
+                            LongStream.of(sketches.get(i).toArray()).toArray()
+                    )
+            );
+        }
+
+        vecDB.close();
+    }
 
   @Override
   public void close() throws IOException {
