@@ -1,11 +1,16 @@
 package com.expleague.sensearch.cli.commands;
 
+import com.expleague.sensearch.AppModule;
+import com.expleague.sensearch.ConfigImpl;
 import com.expleague.sensearch.cli.Command;
 import com.expleague.sensearch.cli.utils.SingleArgOptions;
 import com.expleague.sensearch.cli.utils.SingleArgOptions.IntOption;
 import com.expleague.sensearch.cli.utils.SingleArgOptions.PathOption;
 import com.expleague.sensearch.cli.utils.SingleArgPredicates.ExistingPath;
 import com.expleague.sensearch.cli.utils.SingleArgPredicates.PositiveInteger;
+import com.expleague.sensearch.miner.pool.builders.RankingPoolBuilder;
+import com.google.inject.Guice;
+import java.nio.file.Paths;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
@@ -24,12 +29,17 @@ public class BuildRankingPoolCmd implements Command {
       .predicates(ExistingPath.get())
       .build();
   private static final IntOption MAX_FILTER_ITEMS = IntOption.builder()
-      .longOption("max-items")
+      .longOption("filter-items")
       .description("Specify maximum items to be filtered")
       .predicates(PositiveInteger.get())
       .build();
+  private static final PathOption FILTER_MODEL_PATH = PathOption.builder()
+      .shortOption("f")
+      .longOption("filter-model")
+      .description("Specify path to the filter model")
+      .build();
   private static final PathOption RANKING_MODEL_PATH = PathOption.builder()
-      .shortOption("m")
+      .shortOption("r")
       .longOption("ranking-model")
       .description("Specify path to the filter model")
       .predicates(ExistingPath.get())
@@ -88,8 +98,25 @@ public class BuildRankingPoolCmd implements Command {
       return;
     }
 
-    SingleArgOptions.checkOptions(commandLine, INDEX_PATH, MAX_FILTER_ITEMS, RANKING_MODEL_PATH,
-        POOL_ITERATIONS, POOL_PATH);
+    SingleArgOptions.checkOptions(commandLine, INDEX_PATH, MAX_FILTER_ITEMS, POOL_ITERATIONS, POOL_PATH);
+
+    ConfigImpl config = new ConfigImpl();
+    config.setTemporaryIndex(INDEX_PATH.value(commandLine).toString());
+
+    config.setMaxFilterItems(MAX_FILTER_ITEMS.value(commandLine));
+
+    if () {
+      config.setModelFilterPath(parser.getOptionValue(FILTER_MODEL_PATH_OPTION));
+    }
+    if (parser.hasOption(RANK_MODEL_PATH_OPTION)) {
+      config.setModelPath(parser.getOptionValue(RANK_MODEL_PATH_OPTION));
+    }
+
+    poolPath = Paths.get(parser.getOptionValue(POOL_PATH_OPTION));
+    Guice.createInjector(new AppModule(config))
+        .getInstance(RankingPoolBuilder.class)
+        .build(poolPath, Integer.parseInt(parser.getOptionValue(POOL_ITERATION_OPTION)));
+
   }
 
   @Override

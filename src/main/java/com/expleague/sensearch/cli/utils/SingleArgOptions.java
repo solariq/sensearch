@@ -1,5 +1,6 @@
 package com.expleague.sensearch.cli.utils;
 
+import com.expleague.sensearch.cli.Command;
 import com.expleague.sensearch.cli.utils.SingleArgPredicates.DoubleOptionPredicate;
 import com.expleague.sensearch.cli.utils.SingleArgPredicates.IntOptionPredicate;
 import com.expleague.sensearch.cli.utils.SingleArgPredicates.LongOptionPredicate;
@@ -36,7 +37,6 @@ public class SingleArgOptions {
     private final Option option;
     private final OptionalInt defaultValue;
     private final IntOptionPredicate[] predicates;
-    private final boolean isOptional;
 
     private int savedValue;
     private CommandLine savedCommandLine;
@@ -46,7 +46,6 @@ public class SingleArgOptions {
       private String shortOption;
       private String longOption;
 
-      private boolean isOptional = false;
       private OptionalInt defaultValue = OptionalInt.empty();
       private String description = "There is no description for the option";
       private IntOptionPredicate[] predicates = new IntOptionPredicate[0];
@@ -79,11 +78,6 @@ public class SingleArgOptions {
         return this;
       }
 
-      public IntOptionBuilder isOptional() {
-        isOptional = true;
-        return this;
-      }
-
       public IntOption build() {
         if (StringUtils.isEmpty(longOption) && StringUtils.isEmpty(shortOption)) {
           throw new IllegalArgumentException(
@@ -101,7 +95,7 @@ public class SingleArgOptions {
         optionBuilder.numberOfArgs(1);
         optionBuilder.required(false);
 
-        return new IntOption(optionBuilder.build(), defaultValue, isOptional, predicates);
+        return new IntOption(optionBuilder.build(), defaultValue, predicates);
       }
     }
 
@@ -109,12 +103,10 @@ public class SingleArgOptions {
       return new IntOptionBuilder();
     }
 
-    private IntOption(Option option, OptionalInt defaultValue, boolean isOptional,
-        IntOptionPredicate... predicates) {
+    private IntOption(Option option, OptionalInt defaultValue, IntOptionPredicate... predicates) {
       this.option = option;
       this.defaultValue = defaultValue;
       this.predicates = predicates;
-      this.isOptional = isOptional;
     }
 
     public int value(CommandLine commandLine) {
@@ -131,25 +123,8 @@ public class SingleArgOptions {
       return savedValue;
     }
 
-    public boolean hasValue(CommandLine commandLine) {
-      if (commandLine != savedCommandLine) {
-        check(commandLine);
-      }
+    public boolean hasOption(CommandLine commandLine) {
       return commandLine.hasOption(option.getOpt());
-    }
-
-    public boolean hasDefaultValue() {
-      return defaultValue.isPresent();
-    }
-
-    public int defaultValue() {
-      if (!defaultValue.isPresent()) {
-        throw new IllegalStateException(
-            String.format("Tried to get default value for option [ -%s ]"
-                + " when it has no default value!", option.getOpt()));
-      }
-
-      return defaultValue.getAsInt();
     }
 
     public void addToOptions(Options options) {
@@ -164,10 +139,6 @@ public class SingleArgOptions {
       }
 
       if (!commandLine.hasOption(option.getOpt())) {
-        if (isOptional) {
-          savedCommandLine = commandLine;
-          return;
-        }
         if (defaultValue.isPresent()) {
           savedCommandLine = commandLine;
           savedValue = defaultValue.getAsInt();
@@ -281,12 +252,21 @@ public class SingleArgOptions {
       return savedValue;
     }
 
+    public boolean hasOption(CommandLine commandLine) {
+      return commandLine.hasOption(option.getOpt());
+    }
+
     public void addToOptions(Options options) {
       options.addOption(option);
     }
 
     @Override
     public void check(CommandLine commandLine) {
+      if (commandLine == null) {
+        throw new NullPointerException(String.format(
+            "Tried to parse argument [ -%s ] from 'null' command line!", option.getOpt()));
+      }
+
       if (!commandLine.hasOption(option.getOpt())) {
         if (defaultValue.isPresent()) {
           savedCommandLine = commandLine;
@@ -403,12 +383,21 @@ public class SingleArgOptions {
       return savedValue;
     }
 
+    public boolean hasOption(CommandLine commandLine) {
+      return commandLine.hasOption(option.getOpt());
+    }
+
     public void addToOptions(Options options) {
       options.addOption(option);
     }
 
     @Override
     public void check(CommandLine commandLine) {
+      if (commandLine == null) {
+        throw new NullPointerException(String.format(
+            "Tried to parse argument [ -%s ] from 'null' command line!", option.getOpt()));
+      }
+
       if (!commandLine.hasOption(option.getOpt())) {
         if (defaultValue.isPresent()) {
           savedValue = defaultValue.getAsLong();
@@ -526,12 +515,21 @@ public class SingleArgOptions {
       return savedValue;
     }
 
+    public boolean hasOption(CommandLine commandLine) {
+      return commandLine.hasOption(option.getOpt());
+    }
+
     public void addToOptions(Options options) {
       options.addOption(option);
     }
 
     @Override
     public void check(CommandLine commandLine) {
+      if (commandLine == null) {
+        throw new NullPointerException(String.format(
+            "Tried to parse argument [ -%s ] from 'null' command line!", option.getOpt()));
+      }
+
       if (!commandLine.hasOption(option.getOpt())) {
         if (defaultValue.isPresent()) {
           savedValue = defaultValue.get();
@@ -646,12 +644,20 @@ public class SingleArgOptions {
       return savedValue;
     }
 
+    public boolean hasOption(CommandLine commandLine) {
+      return commandLine.hasOption(option.getOpt());
+    }
+
     public void addToOptions(Options options) {
       options.addOption(option);
     }
 
     @Override
     public void check(CommandLine commandLine) {
+      if (commandLine == null) {
+        throw new NullPointerException(String.format(
+            "Tried to parse argument [ -%s ] from 'null' command line!", option.getOpt()));
+      }
 
       if (!commandLine.hasOption(option.getOpt())) {
         if (defaultValue.isPresent()) {
@@ -737,7 +743,7 @@ public class SingleArgOptions {
         optionBuilder.numberOfArgs(1);
         optionBuilder.required(false);
 
-        return new EnumOption(optionBuilder.build(), defaultValue, enumType);
+        return new EnumOption<>(optionBuilder.build(), defaultValue, enumType);
       }
     }
 
@@ -764,12 +770,21 @@ public class SingleArgOptions {
       return savedValue;
     }
 
+    public boolean hasOption(CommandLine commandLine) {
+      return commandLine.hasOption(option.getOpt());
+    }
+
     public void addToOptions(Options options) {
       options.addOption(option);
     }
 
     @Override
     public void check(CommandLine commandLine) {
+      if (commandLine == null) {
+        throw new NullPointerException(String.format(
+            "Tried to parse argument [ -%s ] from 'null' command line!", option.getOpt()));
+      }
+
       if (!commandLine.hasOption(option.getOpt())) {
         if (defaultValue.isPresent()) {
           savedValue = defaultValue.get();

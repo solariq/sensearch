@@ -16,6 +16,8 @@ import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class BuildFilterPoolCmd implements Command {
 
@@ -56,6 +58,7 @@ public class BuildFilterPoolCmd implements Command {
       .numberOfArgs(0)
       .build();
 
+  private static final Logger LOG = LoggerFactory.getLogger(BuildFilterPoolCmd.class);
   private static final CommandLineParser CLI_PARSER = new DefaultParser();
   private static final Options OPTIONS = new Options();
   private static final BuildFilterPoolCmd INSTANCE = new BuildFilterPoolCmd();
@@ -92,13 +95,15 @@ public class BuildFilterPoolCmd implements Command {
       return;
     }
 
-    SingleArgOptions.checkOptions(commandLine, INDEX_PATH, MAX_FILTER_ITEMS,
-        FILTER_MODEL_PATH, POOL_ITERATIONS, POOL_PATH);
+    SingleArgOptions.checkOptions(commandLine, INDEX_PATH, MAX_FILTER_ITEMS, POOL_ITERATIONS, POOL_PATH);
 
     ConfigImpl config = new ConfigImpl();
     config.setTemporaryIndex(INDEX_PATH.value(commandLine).toString());
     config.setMaxFilterItems(MAX_FILTER_ITEMS.value(commandLine));
-    config.setModelFilterPath(FILTER_MODEL_PATH.value(commandLine).toString());
+    if (FILTER_MODEL_PATH.hasOption(commandLine)) {
+      config.setModelFilterPath(FILTER_MODEL_PATH.value(commandLine).toString());
+      LOG.info(String.format("Received old filter model by given path [ %s ]", FILTER_MODEL_PATH.value(commandLine)));
+    }
 
 
     Guice.createInjector(new AppModule(config))

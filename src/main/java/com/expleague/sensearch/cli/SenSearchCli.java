@@ -260,21 +260,7 @@ public class SenSearchCli {
 
         case BUILD_RANK_POOL_COMMAND:
           parser = cliParser.parse(buildRankPoolOptions, args);
-          config.setTemporaryIndex(parser.getOptionValue(INDEX_PATH_OPTION));
 
-          config.setMaxFilterItems(Integer.parseInt(parser.getOptionValue(MAX_FILTER_ITEMS)));
-
-          if (parser.hasOption(FILTER_MODEL_PATH_OPTION)) {
-            config.setModelFilterPath(parser.getOptionValue(FILTER_MODEL_PATH_OPTION));
-          }
-          if (parser.hasOption(RANK_MODEL_PATH_OPTION)) {
-            config.setModelPath(parser.getOptionValue(RANK_MODEL_PATH_OPTION));
-          }
-
-          poolPath = Paths.get(parser.getOptionValue(POOL_PATH_OPTION));
-          Guice.createInjector(new AppModule(config))
-              .getInstance(RankingPoolBuilder.class)
-              .build(poolPath, Integer.parseInt(parser.getOptionValue(POOL_ITERATION_OPTION)));
           break;
 
         case REBUILD_EMBEDDING_COMMAND:

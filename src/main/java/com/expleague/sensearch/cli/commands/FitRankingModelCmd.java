@@ -111,7 +111,7 @@ public class FitRankingModelCmd implements Command {
       .shortOption("t")
       .longOption("target-loss")
       .description("Specify target function for optimization")
-      .defaultValue(Target.SAT_L2)
+      .defaultValue(Target.MSE)
       .build();
   private static final EnumOption<Metric> TEST_METRIC = EnumOption.builder(Metric.class)
       .shortOption("m")
@@ -279,8 +279,8 @@ public class FitRankingModelCmd implements Command {
   }
 
   private enum Target {
-    GROUPED_L2("GroupedL2"),
-    SAT_L2("SatL2");
+    QMSE("GroupedL2"),
+    MSE("SatL2");
 
     private final String targetName;
 
@@ -294,7 +294,7 @@ public class FitRankingModelCmd implements Command {
   }
 
   private enum Metric {
-    NDGC("NomralizedDCG"),
+    NDCG("NormalizedDCG"),
     NONE("");
     private final String metricName;
 
