@@ -75,6 +75,10 @@ public class BuildIndexCmd implements Command {
     return INSTANCE;
   }
 
+  public static String commandName() {
+    return COMMAND_NAME;
+  }
+
   @Override
   public void run(String... args) throws Exception {
     CommandLine commandLine;
@@ -106,11 +110,6 @@ public class BuildIndexCmd implements Command {
   public void printHelp() {
     HelpFormatter helpFormatter = new HelpFormatter();
     helpFormatter.printHelp(COMMAND_NAME, OPTIONS);
-  }
-
-  @Override
-  public String commandName() {
-    return COMMAND_NAME;
   }
 
   private enum DataCrawler {

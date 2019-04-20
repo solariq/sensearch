@@ -102,9 +102,9 @@ public class BuildFilterPoolCmd implements Command {
     config.setMaxFilterItems(MAX_FILTER_ITEMS.value(commandLine));
     if (FILTER_MODEL_PATH.hasOption(commandLine)) {
       config.setModelFilterPath(FILTER_MODEL_PATH.value(commandLine).toString());
-      LOG.info(String.format("Received old filter model by given path [ %s ]", FILTER_MODEL_PATH.value(commandLine)));
+      LOG.info(String.format("Received filter model by given path [ %s ]",
+          FILTER_MODEL_PATH.value(commandLine).toString()));
     }
-
 
     Guice.createInjector(new AppModule(config))
         .getInstance(FilterPoolBuilder.class)
@@ -118,8 +118,7 @@ public class BuildFilterPoolCmd implements Command {
     helpFormatter.printHelp(COMMAND_NAME, OPTIONS);
   }
 
-  @Override
-  public String commandName() {
+  public static String commandName() {
     return COMMAND_NAME;
   }
 }

@@ -99,8 +99,7 @@ public class RunSearchCmd implements Command {
     return INSTANCE;
   }
 
-  @Override
-  public String commandName() {
+  public static String commandName() {
     return COMMAND_NAME;
   }
 

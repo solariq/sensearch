@@ -17,6 +17,8 @@ import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class BuildRankingPoolCmd implements Command {
 
@@ -62,6 +64,7 @@ public class BuildRankingPoolCmd implements Command {
       .numberOfArgs(0)
       .build();
 
+  private static final Logger LOG = LoggerFactory.getLogger(BuildRankingPoolCmd.class);
   private static final CommandLineParser CLI_PARSER = new DefaultParser();
   private static final Options OPTIONS = new Options();
   private static final BuildRankingPoolCmd INSTANCE = new BuildRankingPoolCmd();
@@ -83,6 +86,10 @@ public class BuildRankingPoolCmd implements Command {
     return INSTANCE;
   }
 
+  public static String commandName() {
+    return COMMAND_NAME;
+  }
+
   @Override
   public void run(String... args) throws Exception {
     CommandLine commandLine;
@@ -102,20 +109,23 @@ public class BuildRankingPoolCmd implements Command {
 
     ConfigImpl config = new ConfigImpl();
     config.setTemporaryIndex(INDEX_PATH.value(commandLine).toString());
-
     config.setMaxFilterItems(MAX_FILTER_ITEMS.value(commandLine));
 
-    if () {
-      config.setModelFilterPath(parser.getOptionValue(FILTER_MODEL_PATH_OPTION));
-    }
-    if (parser.hasOption(RANK_MODEL_PATH_OPTION)) {
-      config.setModelPath(parser.getOptionValue(RANK_MODEL_PATH_OPTION));
+    if (FILTER_MODEL_PATH.hasOption(commandLine)) {
+      config.setModelFilterPath(FILTER_MODEL_PATH.value(commandLine).toString());
+      LOG.info(String.format("Received filter model by given path [ %s ]",
+          FILTER_MODEL_PATH.value(commandLine).toString()));
     }
 
-    poolPath = Paths.get(parser.getOptionValue(POOL_PATH_OPTION));
+    if (RANKING_MODEL_PATH.hasOption(commandLine)) {
+      config.setModelPath(RANKING_MODEL_PATH.value(commandLine).toString());
+      LOG.info(String.format("Received ranking model by given path [ %s ]",
+          RANKING_MODEL_PATH.value(commandLine).toString()));
+    }
+
     Guice.createInjector(new AppModule(config))
         .getInstance(RankingPoolBuilder.class)
-        .build(poolPath, Integer.parseInt(parser.getOptionValue(POOL_ITERATION_OPTION)));
+        .build(POOL_PATH.value(commandLine), POOL_ITERATIONS.value(commandLine));
 
   }
 
@@ -125,8 +135,4 @@ public class BuildRankingPoolCmd implements Command {
     helpFormatter.printHelp(COMMAND_NAME, OPTIONS);
   }
 
-  @Override
-  public String commandName() {
-    return COMMAND_NAME;
-  }
 }

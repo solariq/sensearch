@@ -171,6 +171,10 @@ public class FitRankingModelCmd implements Command {
     return INSTANCE;
   }
 
+  public static String commandName() {
+    return COMMAND_NAME;
+  }
+
   private static Pair<? extends Pool, ? extends Pool> createDataPools(CommandLine commandLine) {
     DataBuilderCrossValidation dataBuilderCrossValidation = new DataBuilderCrossValidation();
     dataBuilderCrossValidation.setRandomSeed(SEED.value(commandLine));
@@ -203,11 +207,6 @@ public class FitRankingModelCmd implements Command {
     boostingBuilder.setLocal(TARGET_LOSS.value(commandLine).targetName());
 
     return boostingBuilder.create();
-  }
-
-  @Override
-  public String commandName() {
-    return COMMAND_NAME;
   }
 
   @Override
