@@ -1,5 +1,8 @@
 package com.expleague.sensearch.donkey.plain;
 
+import com.expleague.sensearch.Page;
+import com.expleague.sensearch.index.Index;
+import com.expleague.sensearch.index.plain.IndexTerm;
 import com.expleague.sensearch.protobuf.index.IndexUnits;
 import com.google.common.primitives.Longs;
 import com.google.inject.Inject;
@@ -44,18 +47,34 @@ public class SuggestInformationBuilder {
   private final DB unigramCoeffDB;
   private final DB multigramFreqNormDB;
 
+  private final Index index;
+  
   public void build() throws IOException {
-    // computeUnigrams(titles);
-    // computeMultigrams(titles);
+    useIndex();
     computeAvgOrderFreq();
     computeFreqNorm();
     computeTargetMaps();
     saveTargets();
   }
-
-  public void accept(long[] wordIds) {
+  
+  private void useIndex() {
+    index
+    .allDocuments()
+    .forEach(d -> {
+      accept(toTermIds(d.content(Page.SegmentType.FULL_TITLE)), d.incomingLinksCount(Page.LinkType.ALL_LINKS));
+    });
+  }
+  
+  private long[] toTermIds(CharSequence text) {
+    return index.parse(text)
+        .map(t -> ((IndexTerm) t).id())
+        .mapToLong(i -> i)
+        .toArray();
+  }
+  
+  private void accept(long[] wordIds, int docIncomingLinks) {
     computeUnigrams(wordIds);
-    computeMultigrams(wordIds);
+    computeMultigrams(wordIds, docIncomingLinks);
   }
 
   private void saveTargets() throws IOException {
@@ -91,7 +110,8 @@ public class SuggestInformationBuilder {
   }
 
   @Inject
-  public SuggestInformationBuilder(DB unigramCoeffDB, DB multigramFreqNormDB) {
+  public SuggestInformationBuilder(Index index, DB unigramCoeffDB, DB multigramFreqNormDB) {
+    this.index = index;
     this.unigramCoeffDB = unigramCoeffDB;
     this.multigramFreqNormDB = multigramFreqNormDB;
   }
@@ -120,11 +140,10 @@ public class SuggestInformationBuilder {
     return result;
   }
 
-  private void computeMultigrams(long[] wordIds) {
+  private void computeMultigrams(long[] wordIds, int docIncomingLinks) {
     for (int i = 1; i <= maxNgramsOrder; i++) {
       getNgrams(wordIds, i).forEach(l -> {
-        multigramFreq.putIfAbsent(l, 0);
-        multigramFreq.increment(l);
+        multigramFreq.adjustOrPutValue(l, docIncomingLinks + 1, docIncomingLinks + 1);
       });
     }
   }
