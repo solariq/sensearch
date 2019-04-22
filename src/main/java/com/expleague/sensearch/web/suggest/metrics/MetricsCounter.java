@@ -20,7 +20,6 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
-//import org.apache.lucene.util.MutableBits;
 
 public class MetricsCounter {
 
@@ -103,7 +102,7 @@ public class MetricsCounter {
     MetricsCounter mc = new MetricsCounter(
         new BigramsBasedSuggestor(index),
         new OneWordSuggestor(index),
-        new RawLuceneSuggestor(index, config.getIndexRoot())
+        new RawLuceneSuggestor(config.getIndexRoot())
         );
 
     mc.getSuggestsExamples("миронов", "миронов а");
