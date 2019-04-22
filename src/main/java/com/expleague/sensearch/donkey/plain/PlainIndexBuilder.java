@@ -23,6 +23,7 @@ import com.expleague.sensearch.donkey.plain.IndexMetaBuilder.TermSegment;
 import com.expleague.sensearch.index.Index;
 import com.expleague.sensearch.index.plain.PlainIndex;
 import com.expleague.sensearch.index.plain.PlainPage;
+import com.expleague.sensearch.web.suggest.SuggestInformationBuilder;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Streams;
 import com.google.common.primitives.Longs;
@@ -254,6 +255,8 @@ public class PlainIndexBuilder implements IndexBuilder {
 
   public void buildSuggestAfterIndex() throws IOException {
 
+    Files.createDirectories(indexRoot.resolve(SUGGEST_UNIGRAM_ROOT));
+
     try (final DB suggestUnigramDb =
         JniDBFactory.factory.open(
             indexRoot.resolve(SUGGEST_UNIGRAM_ROOT).toFile(), STATS_DB_OPTIONS);
@@ -270,7 +273,7 @@ public class PlainIndexBuilder implements IndexBuilder {
         LOG.info("Building suggest...");
         long start = System.nanoTime();
         SuggestInformationBuilder suggestBuilder =
-            new SuggestInformationBuilder(index, suggestUnigramDb, suggestMultigramDb);
+            new SuggestInformationBuilder(index, config.getIndexRoot(), suggestUnigramDb, suggestMultigramDb);
 
         suggestBuilder.build();
 
@@ -288,7 +291,6 @@ public class PlainIndexBuilder implements IndexBuilder {
     Files.createDirectories(indexRoot.resolve(PAGE_ROOT));
     Files.createDirectories(indexRoot.resolve(TERM_STATISTICS_ROOT));
     Files.createDirectories(indexRoot.resolve(EMBEDDING_ROOT));
-    Files.createDirectories(indexRoot.resolve(SUGGEST_UNIGRAM_ROOT));
     Files.createDirectories(indexRoot.resolve(URI_MAPPING_ROOT));
     Files.createDirectories(indexRoot.resolve(TERM_ROOT));
 

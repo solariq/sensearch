@@ -114,7 +114,7 @@ public class OneWordSuggestor implements Suggestor {
               .stream()
               .map(Term::text)
               .collect(Collectors.joining(" "));
-          return qcText + " " + p;
+          return qcText.isEmpty() ? p.toString() : qcText + " " + p;
         })
         .collect(Collectors.toList());
   }
