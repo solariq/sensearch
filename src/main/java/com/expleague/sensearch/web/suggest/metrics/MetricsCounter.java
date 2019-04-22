@@ -13,7 +13,7 @@ import com.expleague.sensearch.Config;
 import com.expleague.sensearch.ConfigImpl;
 import com.expleague.sensearch.index.Index;
 import com.expleague.sensearch.web.suggest.BigramsBasedSuggestor;
-import com.expleague.sensearch.web.suggest.LuceneBasedSuggestor;
+import com.expleague.sensearch.web.suggest.RawLuceneSuggestor;
 import com.expleague.sensearch.web.suggest.OneWordSuggestor;
 import com.expleague.sensearch.web.suggest.Suggestor;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -103,7 +103,7 @@ public class MetricsCounter {
     MetricsCounter mc = new MetricsCounter(
         new BigramsBasedSuggestor(index),
         new OneWordSuggestor(index),
-        new LuceneBasedSuggestor(index, config.getIndexRoot())
+        new RawLuceneSuggestor(index, config.getIndexRoot())
         );
 
     mc.getSuggestsExamples("миронов", "миронов а");
