@@ -248,7 +248,7 @@ public class SenSearchCli {
           config.setEmbeddingVectors(parser.getOptionValue(EMBEDDING_OUTPUT_PATH_OPTION));
           config.setTemporaryIndex(parser.getOptionValue(INDEX_PATH_OPTION));
 
-          Class<? extends Crawler> crawlerClass;
+          Class<? extends Crawler> crawlerClass = null;
           switch (parser.getOptionValue(DATA_FORMAT_OPTION)) {
             case WIKI_FORMAT:
               crawlerClass = CrawlerWiki.class;
@@ -257,7 +257,8 @@ public class SenSearchCli {
               crawlerClass = CrawlerJoom.class;
           }
 
-          Guice.createInjector(new AppModule(config)).getInstance(IndexBuilder.class).buildIndex();
+          Guice.createInjector(new AppModule(config, crawlerClass)).getInstance(IndexBuilder.class)
+              .buildIndex();
           break;
 
         case START_SERVER_COMMAND:
@@ -381,6 +382,8 @@ public class SenSearchCli {
         return buildRankPoolOptions;
       case TRAIN_RANK_MODEL_COMMAND:
         return null;
+      case TRANSFORM_POOL_DATA_COMMAND:
+        return transformDataOptions;
       default:
         System.out.println("Unknown command " + command);
         printUsage();
