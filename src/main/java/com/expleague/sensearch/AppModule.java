@@ -71,6 +71,11 @@ public class AppModule extends AbstractModule {
         .toFile(), ConfigImpl.class), crawler);
   }
 
+  public AppModule(Config config, Class<? extends Crawler> crawler) throws IOException {
+    this.crawler = crawler;
+    this.config = config;
+  }
+
   public AppModule(Config config) {
     this(config, CrawlerWiki.class);
   }
