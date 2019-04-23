@@ -10,20 +10,32 @@ import com.expleague.ml.embedding.Embedding;
 import com.expleague.ml.embedding.impl.EmbeddingImpl;
 import com.expleague.sensearch.core.Annotations.EmbeddingVectorsPath;
 import com.expleague.sensearch.core.Annotations.IndexRoot;
+import com.expleague.sensearch.AppModule;
+import com.expleague.sensearch.Config;
+import com.expleague.sensearch.ConfigImpl;
+import com.expleague.sensearch.Page;
 import com.expleague.sensearch.core.Tokenizer;
 import com.expleague.sensearch.core.impl.TokenizerImpl;
 import com.expleague.sensearch.core.lemmer.Lemmer;
 import com.expleague.sensearch.donkey.IndexBuilder;
 import com.expleague.sensearch.donkey.crawler.Crawler;
 import com.expleague.sensearch.donkey.plain.IndexMetaBuilder.TermSegment;
+import com.expleague.sensearch.index.Index;
 import com.expleague.sensearch.index.plain.PlainIndex;
+import com.expleague.sensearch.index.plain.PlainPage;
+import com.expleague.sensearch.web.suggest.SuggestInformationBuilder;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.collect.Streams;
+import com.google.common.primitives.Longs;
+import com.google.inject.Guice;
 import com.google.inject.Inject;
+import com.google.inject.Injector;
 import gnu.trove.list.TLongList;
 import gnu.trove.map.TLongObjectMap;
 import gnu.trove.map.hash.TLongObjectHashMap;
 import gnu.trove.set.TLongSet;
 import gnu.trove.set.hash.TLongHashSet;
+import jdk.internal.jline.internal.Log;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -39,15 +51,18 @@ import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
+import java.util.Properties;
 import java.util.Random;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.stream.Stream;
 import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
+import org.apache.log4j.PropertyConfigurator;
 import org.fusesource.leveldbjni.JniDBFactory;
 import org.iq80.leveldb.CompressionType;
 import org.iq80.leveldb.DB;
+import org.iq80.leveldb.DBIterator;
 import org.iq80.leveldb.Options;
 
 public class PlainIndexBuilder implements IndexBuilder {
@@ -234,15 +249,48 @@ public class PlainIndexBuilder implements IndexBuilder {
   private void buildIndex(Embedding<CharSeq> jmllEmbedding) throws IOException {
     long startTime = System.nanoTime();
     buildIndexInternal(jmllEmbedding);
+    buildSuggestAfterIndex();
     LOG.info(String.format("Index build in [%.3f] seconds", (System.nanoTime() - startTime) / 1e9));
   }
 
+  public void buildSuggestAfterIndex() throws IOException {
+
+    Files.createDirectories(indexRoot.resolve(SUGGEST_UNIGRAM_ROOT));
+
+    try (final DB suggestUnigramDb =
+        JniDBFactory.factory.open(
+            indexRoot.resolve(SUGGEST_UNIGRAM_ROOT).toFile(), STATS_DB_OPTIONS);
+        final DB suggestMultigramDb =
+            JniDBFactory.factory.open(
+                indexRoot.resolve(SUGGEST_MULTIGRAMS_ROOT).toFile(), STATS_DB_OPTIONS);
+        ) {
+      Config config =
+          new ObjectMapper().readValue(Paths.get("./config.json").toFile(), ConfigImpl.class);
+      Injector injector = Guice.createInjector(new AppModule(config));
+
+      try (Index index = injector.getInstance(Index.class)) {
+
+        LOG.info("Building suggest...");
+        long start = System.nanoTime();
+        SuggestInformationBuilder suggestBuilder =
+            new SuggestInformationBuilder(index, config.getIndexRoot(), suggestUnigramDb, suggestMultigramDb);
+
+        suggestBuilder.build();
+
+
+        LOG.info(String.format("Suggest index was built in %.1f sec", (System.nanoTime() - start) / 1e9));
+      } catch (Exception e) {
+        e.printStackTrace();
+      }
+    }
+  }
+
+  
   private void buildIndexInternal(Embedding<CharSeq> jmllEmbedding) throws IOException {
     LOG.info("Creating database files...");
     Files.createDirectories(indexRoot.resolve(PAGE_ROOT));
     Files.createDirectories(indexRoot.resolve(TERM_STATISTICS_ROOT));
     Files.createDirectories(indexRoot.resolve(EMBEDDING_ROOT));
-    Files.createDirectories(indexRoot.resolve(SUGGEST_UNIGRAM_ROOT));
     Files.createDirectories(indexRoot.resolve(URI_MAPPING_ROOT));
     Files.createDirectories(indexRoot.resolve(TERM_ROOT));
 
@@ -270,12 +318,6 @@ public class PlainIndexBuilder implements IndexBuilder {
                 indexRoot.resolve(EMBEDDING_ROOT),*/
                 jmllEmbedding,
                 tokenizer);
-        final DB suggestUnigramDb =
-            JniDBFactory.factory.open(
-                indexRoot.resolve(SUGGEST_UNIGRAM_ROOT).toFile(), STATS_DB_OPTIONS);
-        final DB suggestMultigramDb =
-            JniDBFactory.factory.open(
-                indexRoot.resolve(SUGGEST_MULTIGRAMS_ROOT).toFile(), STATS_DB_OPTIONS);
         final UriMappingBuilder uriMappingBuilder =
             new UriMappingBuilder(
                 JniDBFactory.factory.open(
@@ -284,9 +326,6 @@ public class PlainIndexBuilder implements IndexBuilder {
       IndexMetaBuilder indexMetaBuilder = new IndexMetaBuilder(PlainIndex.VERSION);
 
       LOG.info("Creating mappings from wiki ids to raw index ids...");
-
-      final SuggestInformationBuilder suggestBuilder =
-          new SuggestInformationBuilder(suggestUnigramDb, suggestMultigramDb);
 
       final TLongObjectMap<TLongList> rareTermsInvIdx = new TLongObjectHashMap<>();
       
@@ -368,15 +407,12 @@ public class PlainIndexBuilder implements IndexBuilder {
                                     });
                           });
 
-                  suggestBuilder.accept(toTermIds(doc.title(), termBuilder));
-
                   embeddingBuilder.endPage();
                   indexMetaBuilder.endPage();
                   statisticsBuilder.endPage();
                   plainPageBuilder.endPage();
                 });
-
-        suggestBuilder.build();
+        
 
         Path lshMetricPath = indexRoot.resolve(EMBEDDING_ROOT).resolve(LSH_METRIC_ROOT);
         Files.createDirectories(lshMetricPath);
@@ -397,6 +433,7 @@ public class PlainIndexBuilder implements IndexBuilder {
           Files.createDirectories(indexRoot.resolve(RARE_INV_IDX_FILE).getParent());
           mapper.writeValue(indexRoot.resolve(RARE_INV_IDX_FILE).toFile(), rareTermsInvIdx);
         }
+
       } catch (Exception e) {
         FileUtils.deleteDirectory(indexRoot.resolve(PAGE_ROOT).toFile());
         FileUtils.deleteDirectory(indexRoot.resolve(TERM_STATISTICS_ROOT).toFile());

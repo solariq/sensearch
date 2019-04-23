@@ -82,8 +82,8 @@ public class PlainIndex implements Index {
   private final DB pageBase;
   private final DB termBase;
 
-  private final DB suggestUnigramDb;
-  private final DB suggestMultigramDb;
+  private DB suggestUnigramDb;
+  private DB suggestMultigramDb;
 
   private final DB uriMappingDb;
 
@@ -107,6 +107,7 @@ public class PlainIndex implements Index {
 
   private final Map<Term, TLongList> rareTermsInvIdx;
 
+  private final Path indexRoot;
   @Override
   public void close() throws Exception {
     embedding.close();
@@ -114,14 +115,18 @@ public class PlainIndex implements Index {
     termBase.close();
     termStatisticsBase.close();
     uriMappingDb.close();
-    suggestUnigramDb.close();
-    suggestMultigramDb.close();
+    if(suggestUnigramDb != null)
+      suggestUnigramDb.close();
+    if (suggestMultigramDb != null)
+      suggestMultigramDb.close();
   }
 
   @Inject
   public PlainIndex(@IndexRoot Path indexRoot, Embedding embedding, Filter filter)
       throws IOException {
 
+    this.indexRoot = indexRoot;
+    
     this.embedding = embedding;
     this.filter = filter;
 
@@ -144,14 +149,6 @@ public class PlainIndex implements Index {
         JniDBFactory.factory.open(
             indexRoot.resolve(PlainIndexBuilder.TERM_ROOT).toFile(), DEFAULT_DB_OPTIONS);
 
-    suggestUnigramDb =
-        JniDBFactory.factory.open(
-            indexRoot.resolve(PlainIndexBuilder.SUGGEST_UNIGRAM_ROOT).toFile(), DEFAULT_DB_OPTIONS);
-
-    suggestMultigramDb =
-        JniDBFactory.factory.open(
-            indexRoot.resolve(PlainIndexBuilder.SUGGEST_MULTIGRAMS_ROOT).toFile(),
-            DEFAULT_DB_OPTIONS);
 
     uriMappingDb =
         JniDBFactory.factory.open(
@@ -550,6 +547,18 @@ public class PlainIndex implements Index {
   @Override
   public SuggestInformationLoader getSuggestInformation() {
     if (suggestLoader == null) {
+      try {
+        suggestUnigramDb =
+            JniDBFactory.factory.open(
+                indexRoot.resolve(PlainIndexBuilder.SUGGEST_UNIGRAM_ROOT).toFile(), DEFAULT_DB_OPTIONS);
+        suggestMultigramDb =
+            JniDBFactory.factory.open(
+                indexRoot.resolve(PlainIndexBuilder.SUGGEST_MULTIGRAMS_ROOT).toFile(),
+                DEFAULT_DB_OPTIONS);
+      } catch (IOException e) {
+        e.printStackTrace();
+      }
+
       suggestLoader = new SuggestInformationLoader(suggestUnigramDb, suggestMultigramDb, idToTerm);
     }
     return suggestLoader;

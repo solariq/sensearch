@@ -15,13 +15,13 @@ public class SortedMultigramsArray {
 
   private final Comparator<Term[]> bsCmp = new BinSearchComparator();
   private final Comparator<Term[]> sortCmp = new PhraseSortingComparator();
-  
+
   public SortedMultigramsArray(Collection<MultigramWrapper> multList) {
     sortedMultigrams.addAll(multList);
     Collections.sort(sortedMultigrams,
         (m1, m2) -> sortCmp.compare(m1.phrase, m2.phrase));
   }
-  
+
   public SortedMultigramsArray(Map<Term[], Double> multList) {
     multList.forEach((t, d) -> sortedMultigrams.add(new MultigramWrapper(t, d)));
     Collections.sort(sortedMultigrams,
@@ -44,7 +44,7 @@ public class SortedMultigramsArray {
   }
 
   public List<MultigramWrapper> getMatchingPhrases(Term[] lastWords) {
-    
+
     //System.out.println("Array: " + Arrays.stream(lastWords).map(t -> t.text()).collect(Collectors.joining("#")));
     int lowerBound = binSearchPosition(lastWords, false);
 

@@ -1,5 +1,9 @@
-package com.expleague.sensearch.donkey.plain;
+package com.expleague.sensearch.web.suggest;
 
+import com.expleague.sensearch.Page;
+import com.expleague.sensearch.core.Term;
+import com.expleague.sensearch.index.Index;
+import com.expleague.sensearch.index.plain.IndexTerm;
 import com.expleague.sensearch.protobuf.index.IndexUnits;
 import com.google.common.primitives.Longs;
 import com.google.inject.Inject;
@@ -12,10 +16,20 @@ import gnu.trove.map.hash.TLongIntHashMap;
 import gnu.trove.map.hash.TObjectDoubleHashMap;
 import gnu.trove.map.hash.TObjectIntHashMap;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Properties;
 import java.util.stream.Collectors;
+import org.apache.log4j.Logger;
+import org.apache.log4j.PropertyConfigurator;
+import org.apache.lucene.analysis.standard.StandardAnalyzer;
+import org.apache.lucene.search.suggest.analyzing.AnalyzingInfixSuggester;
+import org.apache.lucene.store.FSDirectory;
+import org.apache.lucene.util.BytesRef;
 import org.iq80.leveldb.DB;
 import org.iq80.leveldb.WriteBatch;
 import org.iq80.leveldb.WriteOptions;
@@ -44,18 +58,70 @@ public class SuggestInformationBuilder {
   private final DB unigramCoeffDB;
   private final DB multigramFreqNormDB;
 
+  private final Index index;
+
+  private final AnalyzingInfixSuggester luceneSuggestor;
+
+  private static final Logger LOG = Logger.getLogger(SuggestInformationBuilder.class);
+
   public void build() throws IOException {
-    // computeUnigrams(titles);
-    // computeMultigrams(titles);
+    useIndex();
     computeAvgOrderFreq();
     computeFreqNorm();
     computeTargetMaps();
     saveTargets();
+
+    luceneSuggestor.commit();
+    luceneSuggestor.close();
   }
 
-  public void accept(long[] wordIds) {
-    computeUnigrams(wordIds);
-    computeMultigrams(wordIds);
+  private void useIndex() throws IOException {
+
+    int[] cnt = {0};
+
+    index
+    .allDocuments()
+    .forEach(d -> {
+      CharSequence title = d.content(Page.SegmentType.FULL_TITLE);
+      accept(toTerms(title), d.incomingLinksCount(Page.LinkType.ALL_LINKS));
+
+      cnt[0]++;
+      if (cnt[0] % 10000 == 0) {
+        LOG.info(cnt[0] + " documents processed");
+      }
+    });
+  }
+
+  private long[] toTermIds(CharSequence text) {
+    return index.parse(text)
+        .map(t -> ((IndexTerm) t).id())
+        .mapToLong(i -> i)
+        .toArray();
+  }
+
+  private Term[] toTerms(CharSequence text) {
+    return index.parse(text)
+        .toArray(Term[]::new);
+  }
+
+  private long[] termsToIds(Term[] terms) {
+    long[] res = new long[terms.length];
+
+    for (int i = 0; i < terms.length; i++) {
+      res[i] = ((IndexTerm)terms[i]).id();
+    }
+
+    return res;
+  }
+
+  private String termsToString(Term[] terms) {
+    return Arrays.stream(terms).map(t -> t.text().toString())
+        .collect(Collectors.joining(" "));
+  }
+
+  private void accept(Term[] wordIds, int docIncomingLinks) {
+    //computeUnigrams(wordIds);
+    computeMultigrams(wordIds, docIncomingLinks);
   }
 
   private void saveTargets() throws IOException {
@@ -91,9 +157,18 @@ public class SuggestInformationBuilder {
   }
 
   @Inject
-  public SuggestInformationBuilder(DB unigramCoeffDB, DB multigramFreqNormDB) {
+  public SuggestInformationBuilder(Index index, Path indexRoot, DB unigramCoeffDB, DB multigramFreqNormDB) throws IOException {
+    Properties logProperties = new Properties();
+    logProperties.load(Files.newInputStream(Paths.get("log4j.properties")));
+    PropertyConfigurator.configure(logProperties);
+
+    this.index = index;
     this.unigramCoeffDB = unigramCoeffDB;
     this.multigramFreqNormDB = multigramFreqNormDB;
+
+    luceneSuggestor =  new AnalyzingInfixSuggester(
+        FSDirectory.open(Files.createDirectory(indexRoot.resolve("luceneSuggest"))),
+        new StandardAnalyzer());
   }
 
   private void computeUnigrams(long[] wordIds) {
@@ -109,9 +184,9 @@ public class SuggestInformationBuilder {
     });
   }
 
-  private List<long[]> getNgrams(long[] wordsIds, int order) {
+  private List<Term[]> getNgrams(Term[] wordsIds, int order) {
 
-    List<long[]> result = new ArrayList<>();
+    List<Term[]> result = new ArrayList<>();
 
     for (int i = 0; i < wordsIds.length - order + 1; i++) {
       result.add(Arrays.copyOfRange(wordsIds, i, i + order));
@@ -120,12 +195,17 @@ public class SuggestInformationBuilder {
     return result;
   }
 
-  private void computeMultigrams(long[] wordIds) {
+  private void computeMultigrams(Term[] wordIds, int docIncomingLinks) {
     for (int i = 1; i <= maxNgramsOrder; i++) {
-      getNgrams(wordIds, i).forEach(l -> {
-        multigramFreq.putIfAbsent(l, 0);
-        multigramFreq.increment(l);
-      });
+      for(Term[] l : getNgrams(wordIds, i)) {
+        long[] lIds = termsToIds(l);
+        try {
+          luceneSuggestor.add(new BytesRef(termsToString(l)), null, docIncomingLinks, null);
+        } catch (IOException e) {
+          throw new RuntimeException(e);
+        }
+        multigramFreq.adjustOrPutValue(lIds, docIncomingLinks + 1, docIncomingLinks + 1);
+      }
     }
   }
 
