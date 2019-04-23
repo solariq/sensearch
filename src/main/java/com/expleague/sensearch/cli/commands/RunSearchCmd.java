@@ -132,15 +132,16 @@ public class RunSearchCmd implements Command {
 
     Injector injector = Guice.createInjector(new AppModule(config));
     if (commandLine.hasOption(COMMAND_LINE_SEARCH.getOpt())) {
-      BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(System.in));
-      SenSeArch senSeArch = injector.getInstance(SenSeArchImpl.class);
-      // TODO: stop condition!
-      String query;
-      Gson gson = new Gson();
-      while ((query = bufferedReader.readLine()) != null) {
-        ResultPage page = senSeArch.search(query, 1, false, false);
-        System.out.println(gson.toJson(page));
-      }
+      System.out.println("Coming soon!");
+//      BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(System.in));
+//      SenSeArch senSeArch = injector.getInstance(SenSeArchImpl.class);
+//       TODO: stop condition!
+//      String query;
+//      Gson gson = new Gson();
+//      while ((query = bufferedReader.readLine()) != null) {
+//        ResultPage page = senSeArch.search(query, 1, false, false);
+//        System.out.println(gson.toJson(page));
+//      }
     } else {
       injector.getInstance(SearchServer.class).start(injector);
     }
