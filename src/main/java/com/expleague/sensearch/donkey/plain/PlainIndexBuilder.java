@@ -8,25 +8,22 @@ import com.expleague.commons.seq.CharSeq;
 import com.expleague.commons.seq.CharSeqTools;
 import com.expleague.ml.embedding.Embedding;
 import com.expleague.ml.embedding.impl.EmbeddingImpl;
-import com.expleague.sensearch.core.Annotations.EmbeddingVectorsPath;
-import com.expleague.sensearch.core.Annotations.IndexRoot;
 import com.expleague.sensearch.AppModule;
 import com.expleague.sensearch.Config;
 import com.expleague.sensearch.ConfigImpl;
-import com.expleague.sensearch.Page;
+import com.expleague.sensearch.core.Annotations.EmbeddingVectorsPath;
+import com.expleague.sensearch.core.Annotations.IndexRoot;
 import com.expleague.sensearch.core.Tokenizer;
 import com.expleague.sensearch.core.impl.TokenizerImpl;
 import com.expleague.sensearch.core.lemmer.Lemmer;
 import com.expleague.sensearch.donkey.IndexBuilder;
 import com.expleague.sensearch.donkey.crawler.Crawler;
 import com.expleague.sensearch.donkey.plain.IndexMetaBuilder.TermSegment;
+import com.expleague.sensearch.donkey.plain.TermBuilder.ParsedTerm;
 import com.expleague.sensearch.index.Index;
 import com.expleague.sensearch.index.plain.PlainIndex;
-import com.expleague.sensearch.index.plain.PlainPage;
 import com.expleague.sensearch.web.suggest.SuggestInformationBuilder;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.collect.Streams;
-import com.google.common.primitives.Longs;
 import com.google.inject.Guice;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
@@ -35,7 +32,6 @@ import gnu.trove.map.TLongObjectMap;
 import gnu.trove.map.hash.TLongObjectHashMap;
 import gnu.trove.set.TLongSet;
 import gnu.trove.set.hash.TLongHashSet;
-import jdk.internal.jline.internal.Log;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -51,18 +47,15 @@ import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
-import java.util.Properties;
 import java.util.Random;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.stream.Stream;
 import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
-import org.apache.log4j.PropertyConfigurator;
 import org.fusesource.leveldbjni.JniDBFactory;
 import org.iq80.leveldb.CompressionType;
 import org.iq80.leveldb.DB;
-import org.iq80.leveldb.DBIterator;
 import org.iq80.leveldb.Options;
 
 public class PlainIndexBuilder implements IndexBuilder {
@@ -87,7 +80,7 @@ public class PlainIndexBuilder implements IndexBuilder {
   public static final String SUGGEST_MULTIGRAMS_ROOT = "suggest/multigram_freq_norm";
 
   public static final String INDEX_META_FILE = "index.meta";
-  public static final int DEFAULT_VEC_SIZE = 130;
+  public static final int DEFAULT_VEC_SIZE = 300;
 
   private static final int NEIGHBORS_NUM = 50;
   private static final int NUM_OF_RANDOM_IDS = 100;
@@ -285,7 +278,7 @@ public class PlainIndexBuilder implements IndexBuilder {
     }
   }
 
-  
+
   private void buildIndexInternal(Embedding<CharSeq> jmllEmbedding) throws IOException {
     LOG.info("Creating database files...");
     Files.createDirectories(indexRoot.resolve(PAGE_ROOT));
@@ -323,6 +316,11 @@ public class PlainIndexBuilder implements IndexBuilder {
                 JniDBFactory.factory.open(
                     indexRoot.resolve(URI_MAPPING_ROOT).toFile(), URI_DB_OPTIONS))) {
 
+      EmbeddingImpl<CharSeq> jmllEmbedding1 = (EmbeddingImpl<CharSeq>) jmllEmbedding;
+      for (int i = 0; i < jmllEmbedding1.vocabSize(); i++) {
+        ParsedTerm parsedTerm = termBuilder.addTerm(jmllEmbedding1.getObj(i));
+        embeddingBuilder.addTerm(parsedTerm.id, jmllEmbedding1.apply(parsedTerm.text));
+      }
       IndexMetaBuilder indexMetaBuilder = new IndexMetaBuilder(PlainIndex.VERSION);
 
       LOG.info("Creating mappings from wiki ids to raw index ids...");
@@ -412,7 +410,6 @@ public class PlainIndexBuilder implements IndexBuilder {
                   statisticsBuilder.endPage();
                   plainPageBuilder.endPage();
                 });
-        
 
         Path lshMetricPath = indexRoot.resolve(EMBEDDING_ROOT).resolve(LSH_METRIC_ROOT);
         Files.createDirectories(lshMetricPath);
