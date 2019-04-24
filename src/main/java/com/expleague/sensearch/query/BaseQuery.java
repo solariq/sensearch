@@ -1,16 +1,20 @@
 package com.expleague.sensearch.query;
 
 import com.expleague.sensearch.core.Term;
+import com.expleague.sensearch.core.Term.TermAndDistance;
 import com.expleague.sensearch.index.Index;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.stream.Collectors;
 import org.apache.commons.lang3.tuple.Pair;
 
 public class BaseQuery implements Query {
 
-  public static final double SYNONYM_THRESHOLD = 0.15;
-  private Map<Term, List<Term>> synonyms;
+  public static final double SYNONYM_THRESHOLD = 0.75;
+  public static final int MAX_SYNONYMS = 300;
+
+  private Map<Term, List<TermAndDistance>> synonyms;
   private final List<Term> terms;
   private final String text;
 
@@ -29,7 +33,7 @@ public class BaseQuery implements Query {
   }
 
   @Override
-  public Map<Term, List<Term>> synonyms() {
+  public Map<Term, List<TermAndDistance>> synonymsWithDistance() {
     if (synonyms != null) {
       return synonyms;
     }
@@ -41,13 +45,35 @@ public class BaseQuery implements Query {
                 .map(
                     term ->
                         Pair.of(
-                            term, term.synonyms(SYNONYM_THRESHOLD).collect(Collectors.toList())))
+                            term,
+                            term.synonymsWithDistance()
+                                .limit(MAX_SYNONYMS)
+                                .collect(Collectors.toList())))
                 .collect(Collectors.toSet())
                 .stream()
-                .collect(Collectors.toMap(Pair::getLeft, Pair::getRight));
+                .collect(
+                    Collectors.toMap(
+                        Pair::getLeft,
+                        Pair::getRight,
+                        (x, y) -> {
+                          System.out.println(x + " " + y);
+                          return x;
+                        }));
       }
+      return synonyms;
     }
-    return synonyms;
+  }
+
+  @Override
+  public Map<Term, List<Term>> synonyms() {
+    return synonymsWithDistance()
+        .entrySet()
+        .stream()
+        .collect(
+            Collectors.toMap(
+                Entry::getKey,
+                x ->
+                    x.getValue().stream().map(TermAndDistance::term).collect(Collectors.toList())));
   }
 
   @Override
