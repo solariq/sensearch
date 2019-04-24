@@ -51,8 +51,7 @@ public class BuildFilterPoolCmd implements Command {
       .description("Specify pool path")
       .build();
 
-  private static final Option HELP = Option.builder()
-      .argName("h")
+  private static final Option HELP = Option.builder("h")
       .longOpt("help")
       .required(false)
       .numberOfArgs(0)

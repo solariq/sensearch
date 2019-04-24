@@ -47,8 +47,7 @@ public class BuildIndexCmd implements Command {
       .predicates(ExistingPath.negated())
       .build();
 
-  private static final Option HELP = Option.builder()
-      .argName("h")
+  private static final Option HELP = Option.builder("h")
       .longOpt("help")
       .desc("Print help message for the option")
       .required(false)
