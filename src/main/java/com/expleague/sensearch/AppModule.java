@@ -67,13 +67,9 @@ public class AppModule extends AbstractModule {
   }
 
   public AppModule(Class<? extends Crawler> crawler) throws IOException {
-    this(new ObjectMapper().readValue(Paths.get("./config.json")
-        .toFile(), ConfigImpl.class), crawler);
-  }
-
-  public AppModule(Config config, Class<? extends Crawler> crawler) throws IOException {
-    this.crawler = crawler;
-    this.config = config;
+    this(
+        new ObjectMapper().readValue(Paths.get("./config.json").toFile(), ConfigImpl.class),
+        crawler);
   }
 
   public AppModule(Config config) {
