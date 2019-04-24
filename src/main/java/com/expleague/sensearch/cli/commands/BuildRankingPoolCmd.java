@@ -71,6 +71,7 @@ public class BuildRankingPoolCmd implements Command {
   static {
     INDEX_PATH.addToOptions(OPTIONS);
     MAX_FILTER_ITEMS.addToOptions(OPTIONS);
+    FILTER_MODEL_PATH.addToOptions(OPTIONS);
     RANKING_MODEL_PATH.addToOptions(OPTIONS);
     POOL_ITERATIONS.addToOptions(OPTIONS);
     POOL_PATH.addToOptions(OPTIONS);
