@@ -16,6 +16,11 @@ public class BigramsBasedSuggestor implements Suggestor {
     this.index = index;
   }
 
+  @Override
+  public String getName() {
+    return "Bigrams based";
+  }
+  
   public List<String> getSuggestions(String searchString) {
     // TODO: dummy implementation via most frequent neighbours
     // TODO: is it needed to make 'smarter' data structure for such approach?

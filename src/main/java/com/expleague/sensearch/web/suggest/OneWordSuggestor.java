@@ -101,9 +101,9 @@ public class OneWordSuggestor implements Suggestor {
           break l;
         }
       }
-
+/*
       if (phraseProb.size() > 5)
-        break l;
+        break l;*/
 
     }
 
@@ -114,7 +114,7 @@ public class OneWordSuggestor implements Suggestor {
               .stream()
               .map(Term::text)
               .collect(Collectors.joining(" "));
-          return qcText.isEmpty() ? p.toString() : qcText + " " + p;
+          return (qcText.isEmpty() ? p.toString() : qcText + " " + p);// + " " + p.coeff;
         })
         .collect(Collectors.toList());
   }

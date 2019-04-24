@@ -294,7 +294,8 @@ public class SuggestInformationBuilder {
   }
 
   private double freqNorm(long[] l) {
-    return multigramFreq.get(l) / Math.log(1 + avgOrderFreq[l.length - 1]);
+    //return multigramFreq.get(l) / Math.log(1 + avgOrderFreq[l.length - 1]);
+    return multigramFreq.get(l);
   }
 
   private void computeFreqNorm() {

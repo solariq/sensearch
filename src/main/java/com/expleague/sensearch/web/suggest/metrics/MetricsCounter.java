@@ -55,13 +55,24 @@ public class MetricsCounter {
         Paths.get("sugg_dataset/map").toFile(),
         new TypeReference<Map<String, List<String>>>() {});
 
-    int cnt = 0;    
+    int cnt = 0;
     double[] rrSum = new double[nSugg];
+    long[] timeSum = new long[nSugg];
+    long[] timeMax = new long[nSugg];
     int[] matched = new int[nSugg];
 
     for (Entry<String, List<String>> e : map.entrySet()) {
       for (int i = 0; i < nSugg; i++) {
+
+        long startTime = System.nanoTime();
         List<String> mySugg = suggestors[i].getSuggestions(e.getKey());
+        long delta = System.nanoTime() - startTime;
+        timeSum[i] += delta;
+        
+        if (delta > timeMax[i]) {
+          timeMax[i] = delta;
+        }
+
         int pos = 1;
         for (String ms : mySugg) {
           for (String os : e.getValue()) {
@@ -83,8 +94,14 @@ public class MetricsCounter {
           "Метод %s\n" 
               + "совпадений подсказок %d\n" 
               + "MRR %.3f\n"
+              + "Avg. time %.3f\n"
+              + "Max time %.3f\n"
               + "--------------------\n",
-              suggestors[i].getName(), matched[i], rrSum[i] / cnt);
+              suggestors[i].getName(),
+              matched[i],
+              rrSum[i] / cnt,
+              timeSum[i] / cnt / 1e9,
+              timeMax[i] / 1e9);
     }
 
   }
@@ -103,7 +120,7 @@ public class MetricsCounter {
     Index index = injector.getInstance(Index.class);
 
     MetricsCounter mc = new MetricsCounter(
-        //new BigramsBasedSuggestor(index),
+        new BigramsBasedSuggestor(index),
         new OneWordSuggestor(index),
         new RawLuceneSuggestor(suggestRoot),
         new OneWordLuceneSuggestor(index, suggestRoot)
