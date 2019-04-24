@@ -8,12 +8,12 @@ import java.net.URI;
 import java.util.List;
 
 @JsonPropertyOrder({"query", "answers"})
-public class QueryAndSnippet {
+public class QueryAndPassages {
     private String query;
     private PassageAndWeight[] answers;
 
     @JsonCreator
-    public QueryAndSnippet(@JsonProperty("query") String query, @JsonProperty("answers") List<PassageAndWeight> answers) {
+    public QueryAndPassages(@JsonProperty("query") String query, @JsonProperty("answers") List<PassageAndWeight> answers) {
         this.query = query;
         this.answers = answers.toArray(new PassageAndWeight[0]);
     }
