@@ -15,19 +15,28 @@ import gnu.trove.map.hash.TLongDoubleHashMap;
 import gnu.trove.map.hash.TLongIntHashMap;
 import gnu.trove.map.hash.TObjectDoubleHashMap;
 import gnu.trove.map.hash.TObjectIntHashMap;
+import java.io.DataOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
+import java.util.Set;
 import java.util.stream.Collectors;
 import org.apache.log4j.Logger;
 import org.apache.log4j.PropertyConfigurator;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
+import org.apache.lucene.search.suggest.InputIterator;
 import org.apache.lucene.search.suggest.analyzing.AnalyzingInfixSuggester;
+import org.apache.lucene.search.suggest.analyzing.AnalyzingSuggester;
 import org.apache.lucene.store.FSDirectory;
 import org.apache.lucene.util.BytesRef;
 import org.iq80.leveldb.DB;
@@ -59,8 +68,60 @@ public class SuggestInformationBuilder {
   private final DB multigramFreqNormDB;
 
   private final Index index;
+  private final Path suggestIndexRoot;
+  
+  private final AnalyzingInfixSuggester luceneInfixSuggester;
+  private final AnalyzingSuggester lucenePrefixSuggester;
 
-  private final AnalyzingInfixSuggester luceneSuggestor;
+  private final MyInputIterator prefixPhrases = new MyInputIterator();
+  private class MyInputIterator implements InputIterator {
+
+    private List<BytesRef> refs = new ArrayList<>();
+    private List<Integer> weights = new ArrayList<>();
+
+    private int currIdx = -1;
+
+    void add(BytesRef phrase, int weight) {
+      refs.add(phrase);
+      weights.add(weight);
+    }
+
+    @Override
+    public BytesRef next() throws IOException {
+      currIdx++;
+      if (currIdx >= refs.size()) {
+        LOG.info("MyInpytIterator is empty");
+        return null;
+      }
+
+      return refs.get(currIdx);
+    }
+
+    @Override
+    public long weight() {
+      return weights.get(currIdx);
+    }
+
+    @Override
+    public BytesRef payload() {
+      return null;
+    }
+
+    @Override
+    public boolean hasPayloads() {
+      return false;
+    }
+
+    @Override
+    public boolean hasContexts() {
+      return false;
+    }
+
+    @Override
+    public Set<BytesRef> contexts() {
+      return null;
+    }
+  };
 
   private static final Logger LOG = Logger.getLogger(SuggestInformationBuilder.class);
 
@@ -71,8 +132,11 @@ public class SuggestInformationBuilder {
     computeTargetMaps();
     saveTargets();
 
-    luceneSuggestor.commit();
-    luceneSuggestor.close();
+    luceneInfixSuggester.commit();
+    luceneInfixSuggester.close();
+
+    lucenePrefixSuggester.build(prefixPhrases);
+    lucenePrefixSuggester.store(new FileOutputStream(suggestIndexRoot.resolve(OneWordLuceneSuggestor.storePath).toFile()));
   }
 
   private void useIndex() throws IOException {
@@ -90,13 +154,6 @@ public class SuggestInformationBuilder {
         LOG.info(cnt[0] + " documents processed");
       }
     });
-  }
-
-  private long[] toTermIds(CharSequence text) {
-    return index.parse(text)
-        .map(t -> ((IndexTerm) t).id())
-        .mapToLong(i -> i)
-        .toArray();
   }
 
   private Term[] toTerms(CharSequence text) {
@@ -166,9 +223,17 @@ public class SuggestInformationBuilder {
     this.unigramCoeffDB = unigramCoeffDB;
     this.multigramFreqNormDB = multigramFreqNormDB;
 
-    luceneSuggestor =  new AnalyzingInfixSuggester(
-        FSDirectory.open(Files.createDirectory(indexRoot.resolve("luceneSuggest"))),
+    this.suggestIndexRoot = indexRoot.resolve("suggest");
+    
+    luceneInfixSuggester =  new AnalyzingInfixSuggester(
+        FSDirectory.open(Files.createDirectory(suggestIndexRoot.resolve(RawLuceneSuggestor.storePath))),
         new StandardAnalyzer());
+
+    lucenePrefixSuggester = new AnalyzingSuggester(
+        FSDirectory.open(Files.createDirectory(suggestIndexRoot.resolve(OneWordLuceneSuggestor.storePath.getParent()))), 
+        OneWordLuceneSuggestor.filePrefix, 
+        new StandardAnalyzer());
+
   }
 
   private void computeUnigrams(long[] wordIds) {
@@ -184,23 +249,25 @@ public class SuggestInformationBuilder {
     });
   }
 
-  private List<Term[]> getNgrams(Term[] wordsIds, int order) {
+  private List<Term[]> getNgrams(Term[] terms, int order) {
 
     List<Term[]> result = new ArrayList<>();
 
-    for (int i = 0; i < wordsIds.length - order + 1; i++) {
-      result.add(Arrays.copyOfRange(wordsIds, i, i + order));
+    for (int i = 0; i < terms.length - order + 1; i++) {
+      result.add(Arrays.copyOfRange(terms, i, i + order));
     }
 
     return result;
   }
 
-  private void computeMultigrams(Term[] wordIds, int docIncomingLinks) {
+  private void computeMultigrams(Term[] terms, int docIncomingLinks) {
     for (int i = 1; i <= maxNgramsOrder; i++) {
-      for(Term[] l : getNgrams(wordIds, i)) {
+      for(Term[] l : getNgrams(terms, i)) {
         long[] lIds = termsToIds(l);
         try {
-          luceneSuggestor.add(new BytesRef(termsToString(l)), null, docIncomingLinks, null);
+          BytesRef br = new BytesRef(termsToString(l));
+          luceneInfixSuggester.add(br, null, docIncomingLinks, null);
+          prefixPhrases.add(br, docIncomingLinks);
         } catch (IOException e) {
           throw new RuntimeException(e);
         }

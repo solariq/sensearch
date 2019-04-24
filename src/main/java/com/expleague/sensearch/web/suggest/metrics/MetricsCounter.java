@@ -2,6 +2,7 @@ package com.expleague.sensearch.web.suggest.metrics;
 
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.Map;
@@ -13,6 +14,7 @@ import com.expleague.sensearch.Config;
 import com.expleague.sensearch.ConfigImpl;
 import com.expleague.sensearch.index.Index;
 import com.expleague.sensearch.web.suggest.BigramsBasedSuggestor;
+import com.expleague.sensearch.web.suggest.OneWordLuceneSuggestor;
 import com.expleague.sensearch.web.suggest.RawLuceneSuggestor;
 import com.expleague.sensearch.web.suggest.OneWordSuggestor;
 import com.expleague.sensearch.web.suggest.Suggestor;
@@ -34,9 +36,9 @@ public class MetricsCounter {
   public void getSuggestsExamples(String... queries) {
     System.out.println("Примеры подсказок:");
     for (String query : queries) {
-      System.out.println("--------------------------\nЗапрос " + query);
+      System.out.println("|||||||||||||||||||||||||||||| Запрос " + query);
       for (int i = 0; i < nSugg; i++) {
-        System.out.println(suggestors[i].getName());
+        System.out.println("------------------------ " + suggestors[i].getName());
         List<String> suggests = suggestors[i].getSuggestions(query);
         for (String sugg : suggests) {
           System.out.println(sugg);
@@ -97,15 +99,18 @@ public class MetricsCounter {
         new ObjectMapper().readValue(Paths.get("./config.json").toFile(), ConfigImpl.class);
     Injector injector = Guice.createInjector(new AppModule(config));
 
+    Path suggestRoot = config.getIndexRoot().resolve("suggest");
     Index index = injector.getInstance(Index.class);
 
     MetricsCounter mc = new MetricsCounter(
-        new BigramsBasedSuggestor(index),
+        //new BigramsBasedSuggestor(index),
         new OneWordSuggestor(index),
-        new RawLuceneSuggestor(config.getIndexRoot())
+        new RawLuceneSuggestor(suggestRoot),
+        new OneWordLuceneSuggestor(index, suggestRoot)
         );
 
-    mc.getSuggestsExamples("миронов", "миронов а");
+    //mc.getSuggestsExamples("а", "б");
+    //mc.getSuggestsExamples("миронов", "миронов а");
     mc.evaluate();
   }
 }
