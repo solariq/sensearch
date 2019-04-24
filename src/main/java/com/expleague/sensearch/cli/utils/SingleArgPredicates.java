@@ -26,6 +26,48 @@ public class SingleArgPredicates {
   public interface PathOptionPredicate extends Predicate<Path>, AbstractArgPredicate {
   }
 
+  public static class NegativeInteger implements IntOptionPredicate {
+    private static final NegativeInteger SINGLETON = new NegativeInteger();
+    private static final IntOptionPredicate NON_NEGATIVE = new NegativeInteger() {
+      @Override
+      public String failMessage() {
+        return "Value must be non negative";
+      }
+
+      @Override
+      public boolean test(int value) {
+        return !super.test(value);
+      }
+
+      @Override
+      public IntOptionPredicate negate() {
+        return SINGLETON;
+      }
+    };
+
+    private NegativeInteger() {}
+
+    public static NegativeInteger get() {
+      return SINGLETON;
+    }
+
+    public static IntOptionPredicate negated() { return NON_NEGATIVE; }
+    @Override
+    public String failMessage() {
+      return "Value must be negative!";
+    }
+
+    @Override
+    public IntOptionPredicate negate() {
+      return NON_NEGATIVE;
+    }
+
+    @Override
+    public boolean test(int value) {
+      return value > 0;
+    }
+  }
+
   public static class PositiveInteger implements IntOptionPredicate {
     private static final PositiveInteger SINGLETON = new PositiveInteger();
     private static final IntOptionPredicate NON_POSITIVE = new PositiveInteger() {

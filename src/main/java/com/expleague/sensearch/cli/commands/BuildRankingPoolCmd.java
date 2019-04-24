@@ -7,10 +7,10 @@ import com.expleague.sensearch.cli.utils.SingleArgOptions;
 import com.expleague.sensearch.cli.utils.SingleArgOptions.IntOption;
 import com.expleague.sensearch.cli.utils.SingleArgOptions.PathOption;
 import com.expleague.sensearch.cli.utils.SingleArgPredicates.ExistingPath;
+import com.expleague.sensearch.cli.utils.SingleArgPredicates.NegativeInteger;
 import com.expleague.sensearch.cli.utils.SingleArgPredicates.PositiveInteger;
 import com.expleague.sensearch.miner.pool.builders.RankingPoolBuilder;
 import com.google.inject.Guice;
-import java.nio.file.Paths;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
@@ -49,7 +49,7 @@ public class BuildRankingPoolCmd implements Command {
   private static final IntOption POOL_ITERATIONS = IntOption.builder()
       .longOption("pool-iters")
       .description("Specify iterations count")
-      .predicates(PositiveInteger.get())
+      .predicates(NegativeInteger.negated())
       .build();
   private static final PathOption POOL_PATH = PathOption.builder()
       .shortOption("p")
@@ -70,7 +70,6 @@ public class BuildRankingPoolCmd implements Command {
 
   static {
     INDEX_PATH.addToOptions(OPTIONS);
-    MAX_FILTER_ITEMS.addToOptions(OPTIONS);
     FILTER_MODEL_PATH.addToOptions(OPTIONS);
     RANKING_MODEL_PATH.addToOptions(OPTIONS);
     POOL_ITERATIONS.addToOptions(OPTIONS);
@@ -105,11 +104,10 @@ public class BuildRankingPoolCmd implements Command {
       return;
     }
 
-    SingleArgOptions.checkOptions(commandLine, INDEX_PATH, MAX_FILTER_ITEMS, POOL_ITERATIONS, POOL_PATH);
+    SingleArgOptions.checkOptions(commandLine, INDEX_PATH, POOL_ITERATIONS, POOL_PATH);
 
     ConfigImpl config = new ConfigImpl();
     config.setTemporaryIndex(INDEX_PATH.value(commandLine).toString());
-    config.setMaxFilterItems(MAX_FILTER_ITEMS.value(commandLine));
 
     if (FILTER_MODEL_PATH.hasOption(commandLine)) {
       config.setModelFilterPath(FILTER_MODEL_PATH.value(commandLine).toString());
