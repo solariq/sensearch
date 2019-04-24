@@ -27,6 +27,11 @@ public class SingleArgOptions {
     }
   }
 
+  private static String value(CommandLine commandLine, Option option) {
+    return option.getOpt() != null ? commandLine.getOptionValue(option.getOpt()) :
+        commandLine.getOptionValue(option.getLongOpt());
+  }
+
   public interface CheckableOption {
 
     void check(CommandLine commandLine);
@@ -136,11 +141,12 @@ public class SingleArgOptions {
           savedValue = defaultValue.getAsInt();
           return;
         }
+        // TODO: fix exception message when option has no OPT
         throw new IllegalArgumentException(String.format("Option [ -%s ] has no default value!"
             + " Please, pass a value as an argument", option.getOpt()));
       }
       int value;
-      String stringValue = commandLine.getOptionValue(option.getOpt());
+      String stringValue = SingleArgOptions.value(commandLine, this.option);
       try {
         value = Integer.parseInt(stringValue);
       } catch (NullPointerException | NumberFormatException e) {
@@ -268,7 +274,7 @@ public class SingleArgOptions {
             + " Please, pass a value as argument", option.getOpt()));
       }
 
-      String stringValue = commandLine.getOptionValue(option.getOpt());
+      String stringValue = SingleArgOptions.value(commandLine, this.option);
       double value;
       try {
         value = Double.parseDouble(stringValue);
@@ -400,7 +406,7 @@ public class SingleArgOptions {
             + " Please, pass a value as argument", option.getOpt()));
       }
 
-      String stringValue = commandLine.getOptionValue(option.getOpt());
+      String stringValue = SingleArgOptions.value(commandLine, this.option);
       long value;
       try {
         value = Long.parseLong(stringValue);
@@ -531,7 +537,7 @@ public class SingleArgOptions {
             + " Please, pass a value as an argument", option.getOpt()));
       }
 
-      String stringValue = commandLine.getOptionValue(option.getOpt());
+      String stringValue = SingleArgOptions.value(commandLine, this.option);
       for (StringOptionPredicate predicate : predicates) {
         if (!predicate.test(stringValue)) {
           throw new IllegalArgumentException(
@@ -660,7 +666,7 @@ public class SingleArgOptions {
             + " Please, pass a value as an argument", option.getOpt()));
       }
 
-      String stringValue = commandLine.getOptionValue(option.getOpt());
+      String stringValue = SingleArgOptions.value(commandLine, this.option);
       Path value = Paths.get(stringValue);
       for (PathOptionPredicate predicate : predicates) {
         if (!predicate.test(value)) {
@@ -786,7 +792,7 @@ public class SingleArgOptions {
             option.getOpt(), availableValusHint));
       }
 
-      String stringValue = commandLine.getOptionValue(option.getOpt());
+      String stringValue = SingleArgOptions.value(commandLine, this.option);
       T value;
       try {
         value = Enum.valueOf(enumType, stringValue);
