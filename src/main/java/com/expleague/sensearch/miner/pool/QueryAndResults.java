@@ -37,9 +37,9 @@ public class QueryAndResults {
 
     @JsonCreator
     public PageAndWeight(@JsonProperty("uri") String uri
-        , @JsonProperty("weight") double weigh) {
+            , @JsonProperty("weight") double weight) {
       this.uri = URI.create(uri);
-      this.weight = weigh;
+      this.weight = weight;
     }
 
     @JsonProperty("uri")
