@@ -46,7 +46,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import org.apache.log4j.Logger;
 
-public class FilterPoolBuilder extends PoolBuilder {
+public class FilterPoolBuilder extends PoolBuilder<QueryAndResults> {
 
   /* Контракт на данные:
      никакие два запроса не повторяются!
@@ -61,6 +61,7 @@ public class FilterPoolBuilder extends PoolBuilder {
 
   @Inject
   public FilterPoolBuilder(Index index, @RankFilterModel Pair<Function, FeatureMeta[]> rankModel) {
+    super();
     this.index = index;
     this.model = (Trans) rankModel.getFirst();
   }
@@ -85,7 +86,7 @@ public class FilterPoolBuilder extends PoolBuilder {
     AtomicInteger status = new AtomicInteger(0);
     AtomicInteger added = new AtomicInteger(0);
 
-    QueryAndResults[] positiveExamples = readData(dataPath, iteration);
+    QueryAndResults[] positiveExamples = readData(QueryAndResults.class, iteration, dataPath);
     Map<Query, List<PageAndWeight>> data =
         Arrays.stream(positiveExamples)
             .collect(

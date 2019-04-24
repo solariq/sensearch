@@ -2,16 +2,16 @@ package com.expleague.sensearch.miner.pool.builders;
 
 import com.expleague.ml.data.tools.FeatureSet;
 import com.expleague.ml.meta.FeatureMeta;
-import com.expleague.sensearch.miner.pool.QueryAndResults;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import java.io.IOException;
+import java.lang.reflect.Array;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import org.apache.log4j.Logger;
 
-public abstract class PoolBuilder {
+public abstract class PoolBuilder<DS> {
 
   private static final Logger LOG = Logger.getLogger(PoolBuilder.class);
 
@@ -32,18 +32,19 @@ public abstract class PoolBuilder {
     return metas;
   }
 
-  QueryAndResults[] readData(Path dataPath, int iteration) {
+  DS[] readData(Class<DS> cl, int iteration, Path dataPath) {
+    DS[] empty = (DS[]) Array.newInstance(cl, 0);
     try {
       Path path = dataPath.resolve("DataIt" + iteration + ".json");
-      return mapper.readValue(
-          Files.newBufferedReader(path, StandardCharsets.UTF_8), QueryAndResults[].class);
+      return (DS[]) mapper.readValue(
+          Files.newBufferedReader(path, StandardCharsets.UTF_8), empty.getClass());
     } catch (IOException e) {
       LOG.info("Cannot read file " + dataPath);
-      return new QueryAndResults[0];
+      return empty;
     }
   }
 
-  void saveNewIterationData(Path savePath, QueryAndResults[] result, int iteration) {
+  void saveNewIterationData(Path savePath, DS[] result, int iteration) {
     try {
       Files.createDirectories(savePath);
       mapper.writeValue(savePath.resolve("DataIt" + iteration + ".json").toFile(), result);

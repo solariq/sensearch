@@ -48,7 +48,7 @@ import java.util.function.Function;
 import java.util.function.ToDoubleFunction;
 import org.apache.log4j.Logger;
 
-public class RankingPoolBuilder extends PoolBuilder {
+public class RankingPoolBuilder extends PoolBuilder<QueryAndResults> {
 
   private static final Logger LOG = Logger.getLogger(FilterPoolBuilder.class.getName());
   private int SAVE_SIZE = 5;
@@ -84,7 +84,7 @@ public class RankingPoolBuilder extends PoolBuilder {
     AtomicInteger status = new AtomicInteger(0);
     AtomicInteger added = new AtomicInteger(0);
 
-    QueryAndResults[] positiveExamples = readData(dataPath, iteration);
+    QueryAndResults[] positiveExamples = readData(QueryAndResults.class, iteration, dataPath);
     List<QueryAndResults> newData = Collections.synchronizedList(new ArrayList<>());
     Arrays.stream(positiveExamples)
         .parallel()
