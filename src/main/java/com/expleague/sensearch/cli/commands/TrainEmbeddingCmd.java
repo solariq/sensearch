@@ -36,6 +36,7 @@ public class TrainEmbeddingCmd implements Command {
   private static final EnumOption<DataCrawler> DATA_CRAWLER = EnumOption.builder(DataCrawler.class)
       .shortOption("c")
       .longOption("data-crawler")
+      .description("'WIKI' or 'JOOM'")
       .build();
   private static final IntOption VECTORS_LENGTH = IntOption.builder()
       .shortOption("l")
