@@ -111,18 +111,12 @@ public class SingleArgOptions {
       if (commandLine != savedCommandLine) {
         check(commandLine);
       }
-
-      if (!defaultValue.isPresent() && !commandLine.hasOption(option.getOpt())) {
-        throw new IllegalStateException(
-            String.format("Tried to get value for option [ -%s ]"
-                + " when it has no value!", option.getOpt()));
-      }
-
       return savedValue;
     }
 
     public boolean hasOption(CommandLine commandLine) {
-      return commandLine.hasOption(option.getOpt());
+      return option.getOpt() != null && commandLine.hasOption(option.getOpt()) ||
+          commandLine.hasOption(option.getLongOpt());
     }
 
     public void addToOptions(Options options) {
@@ -136,7 +130,7 @@ public class SingleArgOptions {
             "Tried to parse argument [ -%s ] from 'null' command line!", option.getOpt()));
       }
 
-      if (!commandLine.hasOption(option.getOpt())) {
+      if (!hasOption(commandLine)) {
         if (defaultValue.isPresent()) {
           savedCommandLine = commandLine;
           savedValue = defaultValue.getAsInt();
@@ -249,7 +243,8 @@ public class SingleArgOptions {
     }
 
     public boolean hasOption(CommandLine commandLine) {
-      return commandLine.hasOption(option.getOpt());
+      return option.getOpt() != null && commandLine.hasOption(option.getOpt()) ||
+          commandLine.hasOption(option.getLongOpt());
     }
 
     public void addToOptions(Options options) {
@@ -263,7 +258,7 @@ public class SingleArgOptions {
             "Tried to parse argument [ -%s ] from 'null' command line!", option.getOpt()));
       }
 
-      if (!commandLine.hasOption(option.getOpt())) {
+      if (!hasOption(commandLine)) {
         if (defaultValue.isPresent()) {
           savedCommandLine = commandLine;
           savedValue = defaultValue.getAsDouble();
@@ -380,7 +375,8 @@ public class SingleArgOptions {
     }
 
     public boolean hasOption(CommandLine commandLine) {
-      return commandLine.hasOption(option.getOpt());
+      return option.getOpt() != null && commandLine.hasOption(option.getOpt()) ||
+          commandLine.hasOption(option.getLongOpt());
     }
 
     public void addToOptions(Options options) {
@@ -394,7 +390,7 @@ public class SingleArgOptions {
             "Tried to parse argument [ -%s ] from 'null' command line!", option.getOpt()));
       }
 
-      if (!commandLine.hasOption(option.getOpt())) {
+      if (!hasOption(commandLine)) {
         if (defaultValue.isPresent()) {
           savedValue = defaultValue.getAsLong();
           savedCommandLine = commandLine;
@@ -510,7 +506,8 @@ public class SingleArgOptions {
     }
 
     public boolean hasOption(CommandLine commandLine) {
-      return commandLine.hasOption(option.getOpt());
+      return option.getOpt() != null && commandLine.hasOption(option.getOpt()) ||
+          commandLine.hasOption(option.getLongOpt());
     }
 
     public void addToOptions(Options options) {
@@ -524,7 +521,7 @@ public class SingleArgOptions {
             "Tried to parse argument [ -%s ] from 'null' command line!", option.getOpt()));
       }
 
-      if (!commandLine.hasOption(option.getOpt())) {
+      if (!hasOption(commandLine)) {
         if (defaultValue.isPresent()) {
           savedValue = defaultValue.get();
           savedCommandLine = commandLine;
@@ -638,7 +635,8 @@ public class SingleArgOptions {
     }
 
     public boolean hasOption(CommandLine commandLine) {
-      return commandLine.hasOption(option.getOpt());
+      return option.getOpt() != null && commandLine.hasOption(option.getOpt()) ||
+          commandLine.hasOption(option.getLongOpt());
     }
 
     public void addToOptions(Options options) {
@@ -652,7 +650,7 @@ public class SingleArgOptions {
             "Tried to parse argument [ -%s ] from 'null' command line!", option.getOpt()));
       }
 
-      if (!commandLine.hasOption(option.getOpt())) {
+      if (!hasOption(commandLine)) {
         if (defaultValue.isPresent()) {
           savedValue = defaultValue.get();
           savedCommandLine = commandLine;
@@ -762,7 +760,8 @@ public class SingleArgOptions {
     }
 
     public boolean hasOption(CommandLine commandLine) {
-      return commandLine.hasOption(option.getOpt());
+      return option.getOpt() != null && commandLine.hasOption(option.getOpt()) ||
+          commandLine.hasOption(option.getLongOpt());
     }
 
     public void addToOptions(Options options) {
@@ -776,7 +775,7 @@ public class SingleArgOptions {
             "Tried to parse argument [ -%s ] from 'null' command line!", option.getOpt()));
       }
 
-      if (!commandLine.hasOption(option.getOpt())) {
+      if (!hasOption(commandLine)) {
         if (defaultValue.isPresent()) {
           savedValue = defaultValue.get();
           savedCommandLine = commandLine;
