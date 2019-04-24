@@ -83,10 +83,8 @@ public class SingleArgOptions {
           throw new IllegalArgumentException(
               "Either short name or long name must be set to build an option!");
         }
-        Builder optionBuilder = Option.builder();
-        if (StringUtils.isNotEmpty(shortOption)) {
-          optionBuilder.argName(shortOption);
-        }
+        Builder optionBuilder = StringUtils.isNotEmpty(shortOption) ?
+            Option.builder(shortOption) : Option.builder();
         if (StringUtils.isNotEmpty(longOption)) {
           optionBuilder.longOpt(longOption);
         }
@@ -219,10 +217,8 @@ public class SingleArgOptions {
           throw new IllegalArgumentException(
               "Either short name or long name must be set to build an option!");
         }
-        Builder optionBuilder = Option.builder();
-        if (StringUtils.isNotEmpty(shortOption)) {
-          optionBuilder.argName(shortOption);
-        }
+        Builder optionBuilder = StringUtils.isNotEmpty(shortOption) ?
+            Option.builder(shortOption) : Option.builder();
         if (StringUtils.isNotEmpty(longOption)) {
           optionBuilder.longOpt(longOption);
         }
@@ -481,10 +477,8 @@ public class SingleArgOptions {
           throw new IllegalArgumentException(
               "Either short name or long name must be set to build an option!");
         }
-        Builder optionBuilder = Option.builder();
-        if (StringUtils.isNotEmpty(shortOption)) {
-          optionBuilder.argName(shortOption);
-        }
+        Builder optionBuilder = StringUtils.isNotEmpty(shortOption) ?
+            Option.builder(shortOption) : Option.builder();
         if (StringUtils.isNotEmpty(longOption)) {
           optionBuilder.longOpt(longOption);
         }
@@ -610,10 +604,9 @@ public class SingleArgOptions {
           throw new IllegalArgumentException(
               "Either short name or long name must be set to build an option!");
         }
-        Builder optionBuilder = Option.builder();
-        if (StringUtils.isNotEmpty(shortOption)) {
-          optionBuilder.argName(shortOption);
-        }
+        Builder optionBuilder = StringUtils.isNotEmpty(shortOption) ?
+            Option.builder(shortOption) : Option.builder();
+
         if (StringUtils.isNotEmpty(longOption)) {
           optionBuilder.longOpt(longOption);
         }
@@ -732,10 +725,8 @@ public class SingleArgOptions {
           throw new IllegalArgumentException(
               "Either short name or long name must be set to build an option!");
         }
-        Builder optionBuilder = Option.builder();
-        if (StringUtils.isNotEmpty(shortOption)) {
-          optionBuilder.argName(shortOption);
-        }
+        Builder optionBuilder = StringUtils.isNotEmpty(shortOption) ?
+            Option.builder(shortOption) : Option.builder();
         if (StringUtils.isNotEmpty(longOption)) {
           optionBuilder.longOpt(longOption);
         }
