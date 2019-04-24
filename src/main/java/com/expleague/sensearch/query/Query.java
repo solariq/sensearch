@@ -8,5 +8,7 @@ public interface Query {
   List<Term> terms();
   Map<Term, List<Term>> synonyms();
 
+  Map<Term, List<Term.TermAndDistance>> synonymsWithDistance();
+
   String text();
 }

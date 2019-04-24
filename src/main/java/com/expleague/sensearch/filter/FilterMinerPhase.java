@@ -9,7 +9,7 @@ import org.apache.log4j.Logger;
 
 public class FilterMinerPhase implements SearchPhase {
 
-  public static final int FILTERED_DOC_NUMBER = 5000;
+  public static final int FILTERED_DOC_NUMBER = 1000;
   private static final Logger LOG = Logger.getLogger(Filter.class.getName());
 
 
@@ -38,7 +38,4 @@ public class FilterMinerPhase implements SearchPhase {
         String.format(
             "FilterMiner phase finished in %.3f seconds", (System.nanoTime() - startTime) / 1e9));
   }
-
-
-
 }

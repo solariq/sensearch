@@ -1,18 +1,17 @@
 {
-  "temporaryIndex": "../WikiDocs/IndexTmp",
+  "temporaryIndex": "joom_data/index",
 
   "webRoot": "webapp/dist/webapp",
-  "embeddingVectors": "./resources/vectors.decomp",
+  "embeddingVectors": "joom_data/vectors.decomp",
   "myStem": "./resources/mystem",
-
-  "pathToZIP": "../WikiDocs/Mini_Wiki_categories.zip",
+  "pathToZIP": "joom_data/sample.json.gz",
 
   "pathToMetrics": "./resources/Metrics",
   "buildIndexFlag": "false",
   "trainEmbeddingFlag": "false",
   "lshNearestFlag": "true",
   "maxFilterItems": "50",
-  "modelPath": "src/main/resources/models/ranking.model",
-  "modelFilterPath": "src/main/resources/models/filter.model",
-  "snippetModelPath": "src/main/resources/models/snippet.model"
+  "modelPath": "joom_data/ranking.model",
+  "modelFilterPath": "joom_data/filter.model",
+  "snippetModelPath": "joom_data/snippet.model"
 }

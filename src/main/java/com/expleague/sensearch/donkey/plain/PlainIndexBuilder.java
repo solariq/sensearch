@@ -8,9 +8,6 @@ import com.expleague.commons.seq.CharSeq;
 import com.expleague.commons.seq.CharSeqTools;
 import com.expleague.ml.embedding.Embedding;
 import com.expleague.ml.embedding.impl.EmbeddingImpl;
-import com.expleague.sensearch.AppModule;
-import com.expleague.sensearch.Config;
-import com.expleague.sensearch.ConfigImpl;
 import com.expleague.sensearch.core.Annotations.EmbeddingVectorsPath;
 import com.expleague.sensearch.core.Annotations.IndexRoot;
 import com.expleague.sensearch.core.Tokenizer;
@@ -20,13 +17,9 @@ import com.expleague.sensearch.donkey.IndexBuilder;
 import com.expleague.sensearch.donkey.crawler.Crawler;
 import com.expleague.sensearch.donkey.plain.IndexMetaBuilder.TermSegment;
 import com.expleague.sensearch.donkey.plain.TermBuilder.ParsedTerm;
-import com.expleague.sensearch.index.Index;
 import com.expleague.sensearch.index.plain.PlainIndex;
-import com.expleague.sensearch.web.suggest.SuggestInformationBuilder;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.inject.Guice;
 import com.google.inject.Inject;
-import com.google.inject.Injector;
 import gnu.trove.list.TLongList;
 import gnu.trove.map.TLongObjectMap;
 import gnu.trove.map.hash.TLongObjectHashMap;
@@ -55,7 +48,6 @@ import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 import org.fusesource.leveldbjni.JniDBFactory;
 import org.iq80.leveldb.CompressionType;
-import org.iq80.leveldb.DB;
 import org.iq80.leveldb.Options;
 
 public class PlainIndexBuilder implements IndexBuilder {
@@ -247,35 +239,35 @@ public class PlainIndexBuilder implements IndexBuilder {
   }
 
   public void buildSuggestAfterIndex() throws IOException {
-
-    Files.createDirectories(indexRoot.resolve(SUGGEST_UNIGRAM_ROOT));
-
-    try (final DB suggestUnigramDb =
-        JniDBFactory.factory.open(
-            indexRoot.resolve(SUGGEST_UNIGRAM_ROOT).toFile(), STATS_DB_OPTIONS);
-        final DB suggestMultigramDb =
-            JniDBFactory.factory.open(
-                indexRoot.resolve(SUGGEST_MULTIGRAMS_ROOT).toFile(), STATS_DB_OPTIONS);
-        ) {
-      Config config =
-          new ObjectMapper().readValue(Paths.get("./config.json").toFile(), ConfigImpl.class);
-      Injector injector = Guice.createInjector(new AppModule(config));
-
-      try (Index index = injector.getInstance(Index.class)) {
-
-        LOG.info("Building suggest...");
-        long start = System.nanoTime();
-        SuggestInformationBuilder suggestBuilder =
-            new SuggestInformationBuilder(index, config.getIndexRoot(), suggestUnigramDb, suggestMultigramDb);
-
-        suggestBuilder.build();
-
-
-        LOG.info(String.format("Suggest index was built in %.1f sec", (System.nanoTime() - start) / 1e9));
-      } catch (Exception e) {
-        e.printStackTrace();
-      }
-    }
+//
+//    Files.createDirectories(indexRoot.resolve(SUGGEST_UNIGRAM_ROOT));
+//
+//    try (final DB suggestUnigramDb =
+//        JniDBFactory.factory.open(
+//            indexRoot.resolve(SUGGEST_UNIGRAM_ROOT).toFile(), STATS_DB_OPTIONS);
+//        final DB suggestMultigramDb =
+//            JniDBFactory.factory.open(
+//                indexRoot.resolve(SUGGEST_MULTIGRAMS_ROOT).toFile(), STATS_DB_OPTIONS);
+//        ) {
+//      Config config =
+//          new ObjectMapper().readValue(Paths.get("./config.json").toFile(), ConfigImpl.class);
+//      Injector injector = Guice.createInjector(new AppModule(config));
+//
+//      try (Index index = injector.getInstance(Index.class)) {
+//
+//        LOG.info("Building suggest...");
+//        long start = System.nanoTime();
+//        SuggestInformationBuilder suggestBuilder =
+//            new SuggestInformationBuilder(index, config.getIndexRoot(), suggestUnigramDb, suggestMultigramDb);
+//
+//        suggestBuilder.build();
+//
+//
+//        LOG.info(String.format("Suggest index was built in %.1f sec", (System.nanoTime() - start) / 1e9));
+//      } catch (Exception e) {
+//        e.printStackTrace();
+//      }
+//    }
   }
 
 

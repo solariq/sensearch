@@ -4,6 +4,7 @@ import com.expleague.sensearch.AppModule;
 import com.expleague.sensearch.Config;
 import com.expleague.sensearch.ConfigImpl;
 import com.expleague.sensearch.donkey.IndexBuilder;
+import com.expleague.sensearch.experiments.joom.CrawlerJoom;
 import com.expleague.sensearch.index.Index;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Guice;
@@ -49,7 +50,7 @@ public class SearchServer {
 
     Config config =
         new ObjectMapper().readValue(Paths.get("./config.json").toFile(), ConfigImpl.class);
-    Injector injector = Guice.createInjector(new AppModule(config));
+    Injector injector = Guice.createInjector(new AppModule(config, CrawlerJoom.class));
 
     if (config.getBuildIndexFlag()) {
       IndexBuilder indexBuilder = injector.getInstance(IndexBuilder.class);

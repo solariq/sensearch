@@ -6,6 +6,7 @@ import com.expleague.commons.math.vectors.impl.vectors.ArrayVec;
 import com.expleague.commons.seq.CharSeq;
 import com.expleague.commons.seq.CharSeqTools;
 import com.expleague.sensearch.Page;
+import com.expleague.sensearch.Page.SegmentType;
 import com.expleague.sensearch.core.Annotations.IndexRoot;
 import com.expleague.sensearch.core.IdUtils;
 import com.expleague.sensearch.core.PartOfSpeech;
@@ -46,6 +47,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Objects;
+import java.util.function.LongPredicate;
 import java.util.stream.Stream;
 import org.apache.log4j.Logger;
 import org.fusesource.leveldbjni.JniDBFactory;
@@ -108,6 +110,7 @@ public class PlainIndex implements Index {
   private final Map<Term, TLongList> rareTermsInvIdx;
 
   private final Path indexRoot;
+
   @Override
   public void close() throws Exception {
     embedding.close();
@@ -115,10 +118,12 @@ public class PlainIndex implements Index {
     termBase.close();
     termStatisticsBase.close();
     uriMappingDb.close();
-    if(suggestUnigramDb != null)
+    if (suggestUnigramDb != null) {
       suggestUnigramDb.close();
-    if (suggestMultigramDb != null)
+    }
+    if (suggestMultigramDb != null) {
       suggestMultigramDb.close();
+    }
   }
 
   @Inject
@@ -126,7 +131,7 @@ public class PlainIndex implements Index {
       throws IOException {
 
     this.indexRoot = indexRoot;
-    
+
     this.embedding = embedding;
     this.filter = filter;
 
@@ -148,7 +153,6 @@ public class PlainIndex implements Index {
     termBase =
         JniDBFactory.factory.open(
             indexRoot.resolve(PlainIndexBuilder.TERM_ROOT).toFile(), DEFAULT_DB_OPTIONS);
-
 
     uriMappingDb =
         JniDBFactory.factory.open(
@@ -227,24 +231,24 @@ public class PlainIndex implements Index {
     rareTermsInvIdx = new HashMap<>();
 
     // TODO: uncomment it
-//    if (Files.exists(indexRoot.resolve(PlainIndexBuilder.RARE_INV_IDX_FILE))) {
-//      ObjectMapper mapper = new ObjectMapper();
-//      TLongObjectMap<TLongList> invIdxIds =
-//          mapper.readValue(
-//              indexRoot.resolve(PlainIndexBuilder.RARE_INV_IDX_FILE).toFile(),
-//              new TypeReference<TLongObjectMap<TLongList>>() {});
-//
-//      invIdxIds.forEachEntry(
-//          (t, docs) -> {
-//            Term term = idToTerm.get(t);
-//            TLongList l = new TLongArrayList();
-//
-//            rareTermsInvIdx.put(term, l);
-//
-//            docs.forEach(l::add);
-//            return true;
-//          });
-//    }
+    //    if (Files.exists(indexRoot.resolve(PlainIndexBuilder.RARE_INV_IDX_FILE))) {
+    //      ObjectMapper mapper = new ObjectMapper();
+    //      TLongObjectMap<TLongList> invIdxIds =
+    //          mapper.readValue(
+    //              indexRoot.resolve(PlainIndexBuilder.RARE_INV_IDX_FILE).toFile(),
+    //              new TypeReference<TLongObjectMap<TLongList>>() {});
+    //
+    //      invIdxIds.forEachEntry(
+    //          (t, docs) -> {
+    //            Term term = idToTerm.get(t);
+    //            TLongList l = new TLongArrayList();
+    //
+    //            rareTermsInvIdx.put(term, l);
+    //
+    //            docs.forEach(l::add);
+    //            return true;
+    //          });
+    //    }
 
     LOG.info(
         String.format("PlainIndex loaded in %.3f seconds", (System.nanoTime() - startTime) / 1e9));
@@ -323,7 +327,7 @@ public class PlainIndex implements Index {
     iterator.seekToFirst();
     return Streams.stream(iterator)
         .map(entry -> (Page) PlainPage.create(Longs.fromByteArray(entry.getKey()), this))
-        .filter(page -> !page.isRoot());
+        .filter(Page::isRoot);
   }
 
   @Override
@@ -396,7 +400,15 @@ public class PlainIndex implements Index {
 
     // TODO: FATAL: this nonNull filter must be redundant (but it's necessary for full ruWiki)
     return filter
-        .filtrate(termVec, PlainIndex::isWordId, SYNONYMS_COUNT)
+        .filtrate(
+            termVec,
+            ((LongPredicate) (PlainIndex::isWordId))
+                .and(
+                    id -> {
+                      Term curTerm = idToTerm.get(id);
+                      return curTerm.text().charAt(0) >= 'a' && curTerm.text().charAt(0) <= 'z';
+                    }),
+            SYNONYMS_COUNT)
         .filter(Objects::nonNull)
         .map(c -> new IndexTerm.IndexTermAndDistance(idToTerm.get(c.getId()), c.getDist()));
   }
@@ -453,7 +465,7 @@ public class PlainIndex implements Index {
     final Vec qVec = vecByTerms(queryTerms);
     TLongObjectMap<List<Candidate>> pageIdToCandidatesMap = new TLongObjectHashMap<>();
     filter
-        .filtrate(qVec, PlainIndex::isSectionId, 0.5)
+        .filtrate(qVec, PlainIndex::isSectionId, num)
         .limit(num)
         .forEach(
             candidate -> {
@@ -498,6 +510,16 @@ public class PlainIndex implements Index {
                     });
           }
         });
+    allFilterFeatures
+        .keySet()
+        .stream()
+        .filter(
+            page -> page.content(SegmentType.FULL_TITLE).toString().contains("Tie"))
+        .forEach(
+            page ->
+                System.out.println(
+                    page.content(SegmentType.FULL_TITLE) + " " + page.uri().toString() + " "
+                        + allFilterFeatures.get(page).features()));
     return allFilterFeatures;
   }
 
@@ -550,7 +572,8 @@ public class PlainIndex implements Index {
       try {
         suggestUnigramDb =
             JniDBFactory.factory.open(
-                indexRoot.resolve(PlainIndexBuilder.SUGGEST_UNIGRAM_ROOT).toFile(), DEFAULT_DB_OPTIONS);
+                indexRoot.resolve(PlainIndexBuilder.SUGGEST_UNIGRAM_ROOT).toFile(),
+                DEFAULT_DB_OPTIONS);
         suggestMultigramDb =
             JniDBFactory.factory.open(
                 indexRoot.resolve(PlainIndexBuilder.SUGGEST_MULTIGRAMS_ROOT).toFile(),

@@ -8,6 +8,7 @@ import com.expleague.commons.math.vectors.VecTools;
 import com.expleague.commons.math.vectors.impl.vectors.ArrayVec;
 import com.expleague.commons.random.FastRandom;
 import com.expleague.commons.seq.CharSeq;
+import com.expleague.commons.seq.CharSeqTools;
 import com.expleague.ml.embedding.Embedding;
 import com.expleague.sensearch.core.IdUtils;
 import com.expleague.sensearch.core.Tokenizer;
@@ -89,6 +90,14 @@ public class EmbeddingBuilder implements AutoCloseable {
     final Vec titleVec = toVector(section.title());
     if (titleVec != null) {
       nnIdx.append(curPageTitleId++, titleVec);
+    }
+
+    CharSequence[] s = CharSeqTools.split(section.title(), ' ');
+    for (CharSequence seq : s) {
+      Vec vec = jmllEmbedding.apply(CharSeq.create(CharSeqTools.toLowerCase(seq)));
+      if (vec != null) {
+        nnIdx.append(curPageTitleId++, vec);
+      }
     }
 
     final Vec textVec = toVector(section.text());

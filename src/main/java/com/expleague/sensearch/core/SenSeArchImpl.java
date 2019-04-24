@@ -173,7 +173,8 @@ public class SenSeArchImpl implements SenSeArch {
     List<SynonymInfo> synonymInfos = new ArrayList<>();
     for (Term term : queryTerms) {
       Map<Term, Double> synonyms =
-          term.synonymsWithDistance(BaseQuery.SYNONYM_THRESHOLD)
+          term.synonymsWithDistance()
+              .limit(BaseQuery.MAX_SYNONYMS)
               .collect(
                   Collectors.toMap(
                       z -> z.term().lemma(),

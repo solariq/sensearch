@@ -120,8 +120,8 @@ public class SuggestInformationBuilder {
   }
 
   private void accept(Term[] wordIds, int docIncomingLinks) {
-    //computeUnigrams(wordIds);
-    computeMultigrams(wordIds, docIncomingLinks);
+//    computeUnigrams(wordIds);
+//    computeMultigrams(wordIds, docIncomingLinks);
   }
 
   private void saveTargets() throws IOException {

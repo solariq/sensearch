@@ -53,9 +53,9 @@ public class FilterPoolBuilder extends PoolBuilder {
   */
 
   private static final Logger LOG = Logger.getLogger(FilterPoolBuilder.class.getName());
-  private int SAVE_SIZE = 5;
+  private int SAVE_SIZE = 15;
 
-  private static final int FILTER_SIZE = 10;
+  private static final int FILTER_SIZE = 30;
   private final Index index;
   private final Trans model;
 
@@ -160,7 +160,7 @@ public class FilterPoolBuilder extends PoolBuilder {
                         Vec vec = feat.features();
                         vec = VecTools.concat(vec, new ArrayVec(0.0));
 
-                        if (cnt[0] < FILTER_SIZE) {
+                        if (cnt[0] < FILTER_SIZE && cnt[0] < res.size()) {
                           synchronized (poolBuilder) {
                             poolBuilder.accept(new QURLItem(page, query), vec, metas);
                           }

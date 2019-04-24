@@ -51,9 +51,9 @@ import org.apache.log4j.Logger;
 public class RankingPoolBuilder extends PoolBuilder {
 
   private static final Logger LOG = Logger.getLogger(FilterPoolBuilder.class.getName());
-  private int SAVE_SIZE = 5;
+  private int SAVE_SIZE = 15;
 
-  private static final int RANK_DOCUMENTS = 10;
+  private static final int RANK_DOCUMENTS = 30;
   private final Index index;
   private final Trans model;
 
@@ -157,7 +157,7 @@ public class RankingPoolBuilder extends PoolBuilder {
                         Vec vec = feat.get(page);
                         vec = VecTools.concat(vec, new ArrayVec(0.0));
 
-                        if (cnt[0] < RANK_DOCUMENTS) {
+                        if (cnt[0] < RANK_DOCUMENTS && cnt[0] < res.size()) {
                           synchronized (poolBuilder) {
                             poolBuilder.accept(new QURLItem(page, query), vec, metas);
                           }
