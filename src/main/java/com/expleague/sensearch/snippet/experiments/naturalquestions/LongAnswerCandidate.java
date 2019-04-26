@@ -1,4 +1,4 @@
-package com.expleague.sensearch.snippet.experiments;
+package com.expleague.sensearch.snippet.experiments.naturalquestions;
 
 public class LongAnswerCandidate {
   private int end_byte;

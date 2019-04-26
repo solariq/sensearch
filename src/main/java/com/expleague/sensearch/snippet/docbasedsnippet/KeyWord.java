@@ -1,4 +1,4 @@
-package com.expleague.sensearch.snippet.docbased_snippet;
+package com.expleague.sensearch.snippet.docbasedsnippet;
 
 import com.expleague.sensearch.core.Term;
 import java.util.Objects;

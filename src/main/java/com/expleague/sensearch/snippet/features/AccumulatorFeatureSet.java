@@ -4,12 +4,8 @@ import com.expleague.commons.func.Functions;
 import com.expleague.commons.math.vectors.Vec;
 import com.expleague.ml.data.tools.FeatureSet;
 import com.expleague.ml.meta.FeatureMeta;
-import com.expleague.sensearch.core.Term;
 import com.expleague.sensearch.index.Index;
-import com.expleague.sensearch.query.Query;
-import com.expleague.sensearch.snippet.docbased_snippet.KeyWord;
-import com.expleague.sensearch.snippet.passage.Passage;
-import java.util.List;
+
 import java.util.Objects;
 import java.util.stream.Collectors;
 

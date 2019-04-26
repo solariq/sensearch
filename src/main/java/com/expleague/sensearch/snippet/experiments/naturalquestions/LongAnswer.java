@@ -1,10 +1,11 @@
-package com.expleague.sensearch.snippet.experiments;
+package com.expleague.sensearch.snippet.experiments.naturalquestions;
 
-public class ShortAnswer {
+public class LongAnswer {
   private int start_byte;
   private int end_byte;
   private int start_token;
   private int end_token;
+  private int candidate_index;
 
   public int getStart_byte() {
     return start_byte;
@@ -36,5 +37,13 @@ public class ShortAnswer {
 
   public void setEnd_token(int end_token) {
     this.end_token = end_token;
+  }
+
+  public int getCandidate_index() {
+    return candidate_index;
+  }
+
+  public void setCandidate_index(int candidate_index) {
+    this.candidate_index = candidate_index;
   }
 }

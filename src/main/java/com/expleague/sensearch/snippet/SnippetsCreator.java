@@ -7,27 +7,21 @@ import com.expleague.ml.meta.FeatureMeta;
 import com.expleague.sensearch.Page;
 import com.expleague.sensearch.Page.SegmentType;
 import com.expleague.sensearch.core.Annotations.SnippetModel;
-import com.expleague.sensearch.core.PartOfSpeech;
-import com.expleague.sensearch.core.Term;
 import com.expleague.sensearch.index.Index;
 import com.expleague.sensearch.features.Features;
 import com.expleague.sensearch.features.FeaturesImpl;
 import com.expleague.sensearch.query.Query;
-import com.expleague.sensearch.snippet.docbased_snippet.DocBasedSnippet;
-import com.expleague.sensearch.snippet.docbased_snippet.KeyWord;
+import com.expleague.sensearch.snippet.docbasedsnippet.DocBasedSnippet;
 import com.expleague.sensearch.snippet.features.AccumulatorFeatureSet;
 import com.expleague.sensearch.snippet.features.QPASItem;
 import com.expleague.sensearch.snippet.passage.Passage;
 import com.google.inject.Inject;
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Set;
 import java.util.function.Function;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 /**

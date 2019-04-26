@@ -9,7 +9,7 @@ import com.expleague.sensearch.Page.SegmentType;
 import com.expleague.sensearch.core.PartOfSpeech;
 import com.expleague.sensearch.index.Index;
 import com.expleague.sensearch.query.Query;
-import com.expleague.sensearch.snippet.docbased_snippet.KeyWord;
+import com.expleague.sensearch.snippet.docbasedsnippet.KeyWord;
 import com.expleague.sensearch.snippet.passage.Passage;
 import com.expleague.sensearch.snippet.passage.Passages;
 import java.util.Comparator;
