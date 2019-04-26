@@ -160,6 +160,7 @@ public class FitRankingModelCmd implements Command {
     ITERATIONS.addToOptions(OPTIONS);
     TARGET_LOSS.addToOptions(OPTIONS);
     OUTPUT.addToOptions(OPTIONS);
+    TEST_METRIC.addToOptions(OPTIONS);
     PRINT_PERIOD.addToOptions(OPTIONS);
 
     OPTIONS.addOption(VERBOSE);
