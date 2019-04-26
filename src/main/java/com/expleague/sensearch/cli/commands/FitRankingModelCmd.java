@@ -64,7 +64,7 @@ public class FitRankingModelCmd implements Command {
       .predicates(NegativeLong.get().negate())
       .build();
   private static final DoubleOption TEST_PROPORTION = DoubleOption.builder()
-      .shortOption("t")
+      .shortOption("cv")
       .longOption("test-prop")
       .description(
           "Specify proportion of the data that will be used for the testing,"
