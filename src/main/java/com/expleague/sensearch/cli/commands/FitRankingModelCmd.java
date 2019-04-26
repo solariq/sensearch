@@ -126,7 +126,7 @@ public class FitRankingModelCmd implements Command {
       .longOption("output")
       .description(
           "Path to the output file. Execution will be terminated if output file already exists")
-      .predicates(ExistingPath.get())
+      .predicates(ExistingPath.negated())
       .build();
 
   private static final Option VERBOSE = Option.builder("v")
