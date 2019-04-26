@@ -64,7 +64,7 @@ public class SingleArgPredicates {
 
     @Override
     public boolean test(int value) {
-      return value > 0;
+      return value < 0;
     }
   }
 
