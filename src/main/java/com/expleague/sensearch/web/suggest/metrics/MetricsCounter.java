@@ -120,13 +120,13 @@ public class MetricsCounter {
     Index index = injector.getInstance(Index.class);
 
     MetricsCounter mc = new MetricsCounter(
-        new BigramsBasedSuggestor(index),
+        //new BigramsBasedSuggestor(index),
         new OneWordSuggestor(index),
-        new RawLuceneSuggestor(suggestRoot),
+        //new RawLuceneSuggestor(suggestRoot),
         new OneWordLuceneSuggestor(index, suggestRoot)
         );
 
-    //mc.getSuggestsExamples("а", "б");
+    mc.getSuggestsExamples("а", "б");
     //mc.getSuggestsExamples("миронов", "миронов а");
     mc.evaluate();
   }

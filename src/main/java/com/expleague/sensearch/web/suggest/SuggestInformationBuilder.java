@@ -7,14 +7,17 @@ import com.expleague.sensearch.index.plain.IndexTerm;
 import com.expleague.sensearch.protobuf.index.IndexUnits;
 import com.google.common.primitives.Longs;
 import com.google.inject.Inject;
+import gnu.trove.iterator.TObjectLongIterator;
 import gnu.trove.map.TLongDoubleMap;
 import gnu.trove.map.TLongIntMap;
 import gnu.trove.map.TObjectDoubleMap;
 import gnu.trove.map.TObjectIntMap;
+import gnu.trove.map.TObjectLongMap;
 import gnu.trove.map.hash.TLongDoubleHashMap;
 import gnu.trove.map.hash.TLongIntHashMap;
 import gnu.trove.map.hash.TObjectDoubleHashMap;
 import gnu.trove.map.hash.TObjectIntHashMap;
+import gnu.trove.map.hash.TObjectLongHashMap;
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -69,37 +72,38 @@ public class SuggestInformationBuilder {
 
   private final Index index;
   private final Path suggestIndexRoot;
-  
+
   private final AnalyzingInfixSuggester luceneInfixSuggester;
   private final AnalyzingSuggester lucenePrefixSuggester;
 
   private final MyInputIterator prefixPhrases = new MyInputIterator();
   private class MyInputIterator implements InputIterator {
 
-    private List<BytesRef> refs = new ArrayList<>();
-    private List<Integer> weights = new ArrayList<>();
+    private TObjectLongMap<BytesRef> refMap = new TObjectLongHashMap<>();
+    private TObjectLongIterator<BytesRef> iter = null;
 
-    private int currIdx = -1;
-
-    void add(BytesRef phrase, int weight) {
-      refs.add(phrase);
-      weights.add(weight);
+    public void add(BytesRef phrase, int weight) {
+      refMap.adjustOrPutValue(phrase, weight, weight);
     }
 
     @Override
     public BytesRef next() throws IOException {
-      currIdx++;
-      if (currIdx >= refs.size()) {
-        LOG.info("MyInpytIterator is empty");
+      if (iter == null) {
+        iter = refMap.iterator();
+      }
+
+      if (!iter.hasNext()) {
         return null;
       }
 
-      return refs.get(currIdx);
+      iter.advance();
+
+      return iter.key();
     }
 
     @Override
     public long weight() {
-      return weights.get(currIdx);
+      return iter.value();
     }
 
     @Override
@@ -224,7 +228,7 @@ public class SuggestInformationBuilder {
     this.multigramFreqNormDB = multigramFreqNormDB;
 
     this.suggestIndexRoot = indexRoot.resolve("suggest");
-    
+
     luceneInfixSuggester =  new AnalyzingInfixSuggester(
         FSDirectory.open(Files.createDirectory(suggestIndexRoot.resolve(RawLuceneSuggestor.storePath))),
         new StandardAnalyzer());
@@ -267,7 +271,7 @@ public class SuggestInformationBuilder {
         try {
           BytesRef br = new BytesRef(termsToString(l));
           luceneInfixSuggester.add(br, null, docIncomingLinks, null);
-          prefixPhrases.add(br, docIncomingLinks);
+          prefixPhrases.add(br, docIncomingLinks + 1);
         } catch (IOException e) {
           throw new RuntimeException(e);
         }

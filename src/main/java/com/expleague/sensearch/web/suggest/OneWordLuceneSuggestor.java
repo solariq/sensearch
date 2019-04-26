@@ -102,7 +102,7 @@ public class OneWordLuceneSuggestor implements Suggestor{
 
       Vec queryVec = index.vecByTerms(qc);
 
-      List<LookupResult> endingPhrases = suggester.lookup(termsToString(qt), false, 1000000);
+      List<LookupResult> endingPhrases = suggester.lookup(termsToString(qt), false, 10000);
       
       //System.out.println("number of selected phrases: " + endingPhrases.size());
       for (LookupResult p : endingPhrases) {
@@ -126,7 +126,8 @@ public class OneWordLuceneSuggestor implements Suggestor{
       }
 /*
       if (phraseProb.size() > 5)
-        break l;*/
+        break l;
+*/
 
     }
 
