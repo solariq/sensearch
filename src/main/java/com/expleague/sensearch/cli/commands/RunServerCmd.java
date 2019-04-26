@@ -1,8 +1,11 @@
 package com.expleague.sensearch.cli.commands;
 
+import static com.expleague.sensearch.cli.utils.CommandLineTools.checkOptions;
+
 import com.expleague.sensearch.AppModule;
 import com.expleague.sensearch.ConfigImpl;
 import com.expleague.sensearch.SenSeArch;
+import com.expleague.sensearch.SenSeArch.ResultItem;
 import com.expleague.sensearch.SenSeArch.ResultPage;
 import com.expleague.sensearch.cli.Command;
 import com.expleague.sensearch.cli.utils.SingleArgOptions;
@@ -13,6 +16,8 @@ import com.expleague.sensearch.cli.utils.SingleArgPredicates.PositiveInteger;
 import com.expleague.sensearch.core.SenSeArchImpl;
 import com.expleague.sensearch.web.SearchServer;
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonParser;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import java.io.BufferedReader;
@@ -27,11 +32,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 
-public class RunSearchCmd implements Command {
+public class RunServerCmd implements Command {
 
-  private static final String COMMAND_NAME = "start-srch";
+  private static final String COMMAND_NAME = "start-srv";
 
-  private static final Logger LOG = LoggerFactory.getLogger(RunSearchCmd.class);
+  private static final Logger LOG = LoggerFactory.getLogger(RunServerCmd.class);
 
   private static final PathOption INDEX_PATH = PathOption.builder()
       .shortOption("i")
@@ -64,11 +69,6 @@ public class RunSearchCmd implements Command {
       .predicates(PositiveInteger.get())
       .build();
 
-  private static final Option COMMAND_LINE_SEARCH = Option.builder("c")
-      .longOpt("cmd-line")
-      .desc("Run search in command line. It is useful for debug purposes")
-      .numberOfArgs(0)
-      .build();
   private static final Option HELP = Option.builder("h")
       .longOpt("help")
       .desc("Print help message")
@@ -78,7 +78,7 @@ public class RunSearchCmd implements Command {
 
   private static final Options OPTIONS = new Options();
   private static final CommandLineParser CLI_PARSER = new DefaultParser();
-  private static final RunSearchCmd INSTANCE = new RunSearchCmd();
+  private static final RunServerCmd INSTANCE = new RunServerCmd();
 
   static {
     INDEX_PATH.addToOptions(OPTIONS);
@@ -87,15 +87,14 @@ public class RunSearchCmd implements Command {
     RESULT_PAGE_SIZE.addToOptions(OPTIONS);
     FILTERED_ITEMS_COUNT.addToOptions(OPTIONS);
 
-    OPTIONS.addOption(COMMAND_LINE_SEARCH);
     OPTIONS.addOption(HELP);
   }
 
-  private RunSearchCmd() {
+  private RunServerCmd() {
 
   }
 
-  public static RunSearchCmd instance() {
+  public static RunServerCmd instance() {
     return INSTANCE;
   }
 
@@ -118,7 +117,7 @@ public class RunSearchCmd implements Command {
       return;
     }
 
-    SingleArgOptions.checkOptions(commandLine, INDEX_PATH, RANKING_MODEL_PATH, FILTER_MODEL_PATH,
+    checkOptions(commandLine, INDEX_PATH, RANKING_MODEL_PATH, FILTER_MODEL_PATH,
         RESULT_PAGE_SIZE, FILTERED_ITEMS_COUNT);
 
     ConfigImpl config = new ConfigImpl();
@@ -131,20 +130,7 @@ public class RunSearchCmd implements Command {
     config.setPageSize(RESULT_PAGE_SIZE.value(commandLine));
 
     Injector injector = Guice.createInjector(new AppModule(config));
-    if (commandLine.hasOption(COMMAND_LINE_SEARCH.getOpt())) {
-      System.out.println("Coming soon!");
-//      BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(System.in));
-//      SenSeArch senSeArch = injector.getInstance(SenSeArchImpl.class);
-//       TODO: stop condition!
-//      String query;
-//      Gson gson = new Gson();
-//      while ((query = bufferedReader.readLine()) != null) {
-//        ResultPage page = senSeArch.search(query, 1, false, false);
-//        System.out.println(gson.toJson(page));
-//      }
-    } else {
-      injector.getInstance(SearchServer.class).start(injector);
-    }
+    injector.getInstance(SearchServer.class).start(injector);
   }
 
   @Override

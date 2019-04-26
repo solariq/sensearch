@@ -1,6 +1,6 @@
 package com.expleague.sensearch.cli.utils;
 
-import com.expleague.sensearch.cli.Command;
+import com.expleague.sensearch.cli.utils.CommandLineTools.CheckableOption;
 import com.expleague.sensearch.cli.utils.SingleArgPredicates.DoubleOptionPredicate;
 import com.expleague.sensearch.cli.utils.SingleArgPredicates.IntOptionPredicate;
 import com.expleague.sensearch.cli.utils.SingleArgPredicates.LongOptionPredicate;
@@ -20,22 +20,6 @@ import org.apache.commons.lang3.StringUtils;
 
 // TODO: tit should be possible to make any option optional
 public class SingleArgOptions {
-
-  public static void checkOptions(CommandLine commandLine, CheckableOption... options) {
-    for (CheckableOption option : options) {
-      option.check(commandLine);
-    }
-  }
-
-  private static String value(CommandLine commandLine, Option option) {
-    return option.getOpt() != null ? commandLine.getOptionValue(option.getOpt()) :
-        commandLine.getOptionValue(option.getLongOpt());
-  }
-
-  public interface CheckableOption {
-
-    void check(CommandLine commandLine);
-  }
 
   public static class IntOption implements CheckableOption {
 
@@ -120,8 +104,7 @@ public class SingleArgOptions {
     }
 
     public boolean hasOption(CommandLine commandLine) {
-      return option.getOpt() != null && commandLine.hasOption(option.getOpt()) ||
-          commandLine.hasOption(option.getLongOpt());
+      return CommandLineTools.hasOption(commandLine, option);
     }
 
     public void addToOptions(Options options) {
@@ -146,7 +129,7 @@ public class SingleArgOptions {
             + " Please, pass a value as an argument", option.getOpt()));
       }
       int value;
-      String stringValue = SingleArgOptions.value(commandLine, this.option);
+      String stringValue = CommandLineTools.value(commandLine, this.option);
       try {
         value = Integer.parseInt(stringValue);
       } catch (NullPointerException | NumberFormatException e) {
@@ -249,8 +232,7 @@ public class SingleArgOptions {
     }
 
     public boolean hasOption(CommandLine commandLine) {
-      return option.getOpt() != null && commandLine.hasOption(option.getOpt()) ||
-          commandLine.hasOption(option.getLongOpt());
+      return CommandLineTools.hasOption(commandLine, option);
     }
 
     public void addToOptions(Options options) {
@@ -274,7 +256,7 @@ public class SingleArgOptions {
             + " Please, pass a value as argument", option.getOpt()));
       }
 
-      String stringValue = SingleArgOptions.value(commandLine, this.option);
+      String stringValue = CommandLineTools.value(commandLine, this.option);
       double value;
       try {
         value = Double.parseDouble(stringValue);
@@ -381,8 +363,7 @@ public class SingleArgOptions {
     }
 
     public boolean hasOption(CommandLine commandLine) {
-      return option.getOpt() != null && commandLine.hasOption(option.getOpt()) ||
-          commandLine.hasOption(option.getLongOpt());
+      return CommandLineTools.hasOption(commandLine, option);
     }
 
     public void addToOptions(Options options) {
@@ -406,7 +387,7 @@ public class SingleArgOptions {
             + " Please, pass a value as argument", option.getOpt()));
       }
 
-      String stringValue = SingleArgOptions.value(commandLine, this.option);
+      String stringValue = CommandLineTools.value(commandLine, this.option);
       long value;
       try {
         value = Long.parseLong(stringValue);
@@ -512,8 +493,7 @@ public class SingleArgOptions {
     }
 
     public boolean hasOption(CommandLine commandLine) {
-      return option.getOpt() != null && commandLine.hasOption(option.getOpt()) ||
-          commandLine.hasOption(option.getLongOpt());
+      return CommandLineTools.hasOption(commandLine, option);
     }
 
     public void addToOptions(Options options) {
@@ -537,7 +517,7 @@ public class SingleArgOptions {
             + " Please, pass a value as an argument", option.getOpt()));
       }
 
-      String stringValue = SingleArgOptions.value(commandLine, this.option);
+      String stringValue = CommandLineTools.value(commandLine, this.option);
       for (StringOptionPredicate predicate : predicates) {
         if (!predicate.test(stringValue)) {
           throw new IllegalArgumentException(
@@ -641,8 +621,7 @@ public class SingleArgOptions {
     }
 
     public boolean hasOption(CommandLine commandLine) {
-      return option.getOpt() != null && commandLine.hasOption(option.getOpt()) ||
-          commandLine.hasOption(option.getLongOpt());
+      return CommandLineTools.hasOption(commandLine, option);
     }
 
     public void addToOptions(Options options) {
@@ -666,7 +645,7 @@ public class SingleArgOptions {
             + " Please, pass a value as an argument", option.getOpt()));
       }
 
-      String stringValue = SingleArgOptions.value(commandLine, this.option);
+      String stringValue = CommandLineTools.value(commandLine, this.option);
       Path value = Paths.get(stringValue);
       for (PathOptionPredicate predicate : predicates) {
         if (!predicate.test(value)) {
@@ -766,8 +745,7 @@ public class SingleArgOptions {
     }
 
     public boolean hasOption(CommandLine commandLine) {
-      return option.getOpt() != null && commandLine.hasOption(option.getOpt()) ||
-          commandLine.hasOption(option.getLongOpt());
+      return CommandLineTools.hasOption(commandLine, option);
     }
 
     public void addToOptions(Options options) {
@@ -792,7 +770,7 @@ public class SingleArgOptions {
             option.getOpt(), availableValusHint));
       }
 
-      String stringValue = SingleArgOptions.value(commandLine, this.option);
+      String stringValue = CommandLineTools.value(commandLine, this.option);
       T value;
       try {
         value = Enum.valueOf(enumType, stringValue);

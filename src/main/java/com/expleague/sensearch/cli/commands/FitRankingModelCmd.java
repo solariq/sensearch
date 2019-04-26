@@ -1,5 +1,7 @@
 package com.expleague.sensearch.cli.commands;
 
+import static com.expleague.sensearch.cli.utils.CommandLineTools.checkOptions;
+
 import com.expleague.commons.func.WeakListenerHolder;
 import com.expleague.commons.math.Func;
 import com.expleague.commons.math.Trans;
@@ -231,8 +233,7 @@ public class FitRankingModelCmd implements Command {
       return;
     }
 
-    SingleArgOptions
-        .checkOptions(commandLine, TRAIN_DATA, SEED, TEST_PROPORTION, DEPTH, STEP, ITERATIONS,
+    checkOptions(commandLine, TRAIN_DATA, SEED, TEST_PROPORTION, DEPTH, STEP, ITERATIONS,
             TARGET_LOSS, OUTPUT, PRINT_PERIOD);
 
     Path outputPath = OUTPUT.value(commandLine);

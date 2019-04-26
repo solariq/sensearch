@@ -1,5 +1,7 @@
 package com.expleague.sensearch.cli.commands;
 
+import static com.expleague.sensearch.cli.utils.CommandLineTools.checkOptions;
+
 import com.expleague.sensearch.cli.Command;
 import com.expleague.sensearch.cli.utils.SingleArgOptions;
 import com.expleague.sensearch.cli.utils.SingleArgOptions.PathOption;
@@ -72,7 +74,7 @@ public class TransformPoolDataCmd implements Command {
       return;
     }
 
-    SingleArgOptions.checkOptions(commandLine, SOURCE_POOL, OUTPUT_PATH);
+    checkOptions(commandLine, SOURCE_POOL, OUTPUT_PATH);
     new JoomCsvTransformer().transformData(SOURCE_POOL.value(commandLine),
         OUTPUT_PATH.value(commandLine));
   }

@@ -5,7 +5,8 @@ import com.expleague.sensearch.cli.commands.BuildIndexCmd;
 import com.expleague.sensearch.cli.commands.BuildRankingPoolCmd;
 import com.expleague.sensearch.cli.commands.FitRankingModelCmd;
 import com.expleague.sensearch.cli.commands.RebuildEmbeddingCmd;
-import com.expleague.sensearch.cli.commands.RunSearchCmd;
+import com.expleague.sensearch.cli.commands.RunCmdLineSearchCmd;
+import com.expleague.sensearch.cli.commands.RunServerCmd;
 import com.expleague.sensearch.cli.commands.TrainEmbeddingCmd;
 import com.expleague.sensearch.cli.commands.TransformPoolDataCmd;
 import java.nio.file.Files;
@@ -20,7 +21,7 @@ public class SenSeArchCli {
 
   private static final Map<String, Command> COMMANDS = new HashMap<String, Command>() {
     {
-      put(RunSearchCmd.commandName(), RunSearchCmd.instance());
+      put(RunServerCmd.commandName(), RunServerCmd.instance());
       put(TrainEmbeddingCmd.commandName(), TrainEmbeddingCmd.instance());
       put(BuildIndexCmd.commandName(), BuildIndexCmd.instance());
       put(FitRankingModelCmd.commandName(), FitRankingModelCmd.instance());
@@ -28,6 +29,7 @@ public class SenSeArchCli {
       put(BuildRankingPoolCmd.commandName(), BuildRankingPoolCmd.instance());
       put(RebuildEmbeddingCmd.commandName(), RebuildEmbeddingCmd.instance());
       put(TransformPoolDataCmd.commandName(), TransformPoolDataCmd.instance());
+      put(RunCmdLineSearchCmd.commandName(), RunCmdLineSearchCmd.instance());
     }
   };
 

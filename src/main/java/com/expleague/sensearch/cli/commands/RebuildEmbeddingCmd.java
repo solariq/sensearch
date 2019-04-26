@@ -1,5 +1,7 @@
 package com.expleague.sensearch.cli.commands;
 
+import static com.expleague.sensearch.cli.utils.CommandLineTools.checkOptions;
+
 import com.expleague.sensearch.AppModule;
 import com.expleague.sensearch.ConfigImpl;
 import com.expleague.sensearch.RebuildEmbedding;
@@ -75,7 +77,7 @@ public class RebuildEmbeddingCmd implements Command {
       return;
     }
 
-    SingleArgOptions.checkOptions(commandLine, INDEX_PATH, EMBEDDING_VECTORS);
+    checkOptions(commandLine, INDEX_PATH, EMBEDDING_VECTORS);
 
     ConfigImpl config = new ConfigImpl();
     config.setTemporaryIndex(INDEX_PATH.value(commandLine).toString());

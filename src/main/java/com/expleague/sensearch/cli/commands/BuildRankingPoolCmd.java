@@ -1,5 +1,7 @@
 package com.expleague.sensearch.cli.commands;
 
+import static com.expleague.sensearch.cli.utils.CommandLineTools.checkOptions;
+
 import com.expleague.sensearch.AppModule;
 import com.expleague.sensearch.ConfigImpl;
 import com.expleague.sensearch.cli.Command;
@@ -104,7 +106,7 @@ public class BuildRankingPoolCmd implements Command {
       return;
     }
 
-    SingleArgOptions.checkOptions(commandLine, INDEX_PATH, POOL_ITERATIONS, POOL_PATH);
+    checkOptions(commandLine, INDEX_PATH, POOL_ITERATIONS, POOL_PATH);
 
     ConfigImpl config = new ConfigImpl();
     config.setTemporaryIndex(INDEX_PATH.value(commandLine).toString());

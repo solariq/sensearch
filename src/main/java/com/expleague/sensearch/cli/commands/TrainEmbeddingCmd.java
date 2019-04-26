@@ -1,5 +1,7 @@
 package com.expleague.sensearch.cli.commands;
 
+import static com.expleague.sensearch.cli.utils.CommandLineTools.checkOptions;
+
 import com.expleague.commons.seq.CharSeq;
 import com.expleague.ml.embedding.impl.EmbeddingImpl;
 import com.expleague.sensearch.cli.Command;
@@ -102,7 +104,7 @@ public class TrainEmbeddingCmd implements Command {
       return;
     }
 
-    SingleArgOptions.checkOptions(commandLine, DATA_PATH, DATA_CRAWLER, VECTORS_LENGTH,
+    checkOptions(commandLine, DATA_PATH, DATA_CRAWLER, VECTORS_LENGTH,
         TMP_OUTPUT_PATH, OUTPUT_PATH);
 
     try (Writer w = Files.newBufferedWriter(OUTPUT_PATH.value(commandLine))) {
