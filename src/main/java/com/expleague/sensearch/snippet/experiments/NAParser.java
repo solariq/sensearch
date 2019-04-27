@@ -87,11 +87,11 @@ public class NAParser {
                         List<CharSequence> passages = tokenizer.toSentences(longAnsString).collect(Collectors.toList());
                         List<QueryAndPassages.PassageAndWeight> passageAndWeights = passages.stream()
                                 .filter(passage -> passage.toString().contains(shortAnsString))
-                                .map(passage -> new QueryAndPassages.PassageAndWeight(uri, passage.toString(), 1))
+                                .map(passage -> new QueryAndPassages.PassageAndWeight(passage.toString(), 1))
                                 .collect(Collectors.toList());
 
 
-                        queryAndPassages.add(new QueryAndPassages(query, passageAndWeights));
+                        queryAndPassages.add(new QueryAndPassages(query, uri, passageAndWeights));
                     }
                     break;
                 default:
