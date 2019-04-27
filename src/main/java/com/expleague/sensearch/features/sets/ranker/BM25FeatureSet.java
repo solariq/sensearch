@@ -91,7 +91,7 @@ public class BM25FeatureSet extends FeatureSet.Stub<QURLItem> implements TextFea
 //              lemma, terms.stream().mapToDouble(Entry::getValue).sum() / terms.size());
 //        });
 //
-//    contains = new BitSet(query.terms().size());
+    contains = new BitSet(query.terms().size());
   }
 
   @Override
