@@ -5,7 +5,6 @@ import com.expleague.ml.data.tools.FeatureSet;
 import com.expleague.ml.meta.FeatureMeta;
 import com.expleague.ml.meta.FeatureMeta.ValueType;
 import com.expleague.sensearch.core.Term;
-import com.expleague.sensearch.core.Term.TermAndDistance;
 import com.expleague.sensearch.features.QURLItem;
 import com.expleague.sensearch.features.sets.ranker.WeightedTextFeatureSet.WeightedTextFeatureAccumulator;
 import com.expleague.sensearch.query.Query;
@@ -16,9 +15,7 @@ import gnu.trove.map.hash.TObjectIntHashMap;
 import java.util.BitSet;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -30,9 +27,9 @@ public class BM25FeatureSet extends FeatureSet.Stub<QURLItem> implements TextFea
       FeatureMeta.create("bm25l", "Title + text bm25 by lemmas", ValueType.VEC);
   private static final FeatureMeta BM25S =
       FeatureMeta.create("bm25s", "Title + text bm25 by synonyms", ValueType.VEC);
-  private static final FeatureMeta BM25W =
-      FeatureMeta.create(
-          "bm25w", "Title + text bm25 by synonyms, weighted by cos dist", ValueType.VEC);
+//  private static final FeatureMeta BM25W =
+//      FeatureMeta.create(
+//          "bm25w", "Title + text bm25 by synonyms, weighted by cos dist", ValueType.VEC);
   private static final FeatureMeta BM25F =
       FeatureMeta.create("bm25f", "field-dependent bm25", ValueType.VEC);
   private static final FeatureMeta WORDS_SHARE =
@@ -58,7 +55,7 @@ public class BM25FeatureSet extends FeatureSet.Stub<QURLItem> implements TextFea
   private TextFeatureAccumulator bm25;
   private TextFeatureAccumulator bm25l;
   private TextFeatureAccumulator bm25s;
-  private WeightedTextFeatureAccumulator bm25w;
+//  private WeightedTextFeatureAccumulator bm25w;
   private BM25FAccumulator bm25f;
   private int collectionSize;
 
@@ -73,28 +70,28 @@ public class BM25FeatureSet extends FeatureSet.Stub<QURLItem> implements TextFea
     this.query = query;
     queryTerms = new HashSet<>(query.terms());
     queryLemmas = query.terms().stream().map(Term::lemma).collect(Collectors.toSet());
-    querySynWithWeight =
-        query
-            .synonymsWithDistance()
-            .values()
-            .stream()
-            .flatMap(List::stream)
-            .collect(
-                Collectors.toMap(TermAndDistance::term, TermAndDistance::distance, (x, y) -> x));
+//    querySynWithWeight =
+//        query
+//            .synonymsWithDistance()
+//            .values()
+//            .stream()
+//            .flatMap(List::stream)
+//            .collect(
+//                Collectors.toMap(TermAndDistance::term, TermAndDistance::distance, (x, y) -> x));
 
-    querySynLemmaWithWeight.clear();
-    Map<Term, List<Entry<Term, Double>>> synsByLemma =
-        querySynWithWeight
-            .entrySet()
-            .stream()
-            .collect(Collectors.groupingBy(x -> x.getKey().lemma()));
-    synsByLemma.forEach(
-        (lemma, terms) -> {
-          querySynLemmaWithWeight.put(
-              lemma, terms.stream().mapToDouble(Entry::getValue).sum() / terms.size());
-        });
-
-    contains = new BitSet(query.terms().size());
+//    querySynLemmaWithWeight.clear();
+//    Map<Term, List<Entry<Term, Double>>> synsByLemma =
+//        querySynWithWeight
+//            .entrySet()
+//            .stream()
+//            .collect(Collectors.groupingBy(x -> x.getKey().lemma()));
+//    synsByLemma.forEach(
+//        (lemma, terms) -> {
+//          querySynLemmaWithWeight.put(
+//              lemma, terms.stream().mapToDouble(Entry::getValue).sum() / terms.size());
+//        });
+//
+//    contains = new BitSet(query.terms().size());
   }
 
   @Override
@@ -102,7 +99,7 @@ public class BM25FeatureSet extends FeatureSet.Stub<QURLItem> implements TextFea
     set(BM25, bm25.value(TermType.TERM));
     set(BM25L, bm25l.value(TermType.LEMMA));
     set(BM25S, bm25s.value(TermType.LEMMA));
-    set(BM25W, bm25w.value(TermType.LEMMA));
+//    set(BM25W, bm25w.value(TermType.LEMMA));
     set(BM25F, bm25f.value(TermType.LEMMA));
     {
       final double totalIdf =
@@ -135,7 +132,7 @@ public class BM25FeatureSet extends FeatureSet.Stub<QURLItem> implements TextFea
     bm25 = new BM25Accumulator(totalLength, averageTotalLength);
     bm25l = new BM25Accumulator(totalLength, averageTotalLength);
     bm25s = new BM25Accumulator(totalLength, averageTotalLength);
-    bm25w = new BM25WeightedAccumulator(totalLength, averageTotalLength);
+//    bm25w = new BM25WeightedAccumulator(totalLength, averageTotalLength);
     bm25f =
         new BM25FAccumulator(contentLength, averageContentLength, titleLength, averageTitleLength);
   }
@@ -156,17 +153,17 @@ public class BM25FeatureSet extends FeatureSet.Stub<QURLItem> implements TextFea
       bm25.accept(term);
       bm25l.accept(termLemma);
       bm25s.accept(termLemma);
-      if (querySynWithWeight.containsKey(term)) {
-        bm25w.accept(termLemma, 1 - querySynWithWeight.get(term));
-      }
+//      if (querySynWithWeight.containsKey(term)) {
+//        bm25w.accept(termLemma, 1 - querySynWithWeight.get(term));
+//      }
     } else {
       if (queryLemmas.contains(termLemma)) {
         bm25l.accept(termLemma);
       }
-      if (querySynLemmaWithWeight.containsKey(termLemma)) {
-        bm25s.accept(termLemma);
-        bm25w.accept(termLemma, 1 - querySynLemmaWithWeight.get(termLemma));
-      }
+//      if (querySynLemmaWithWeight.containsKey(termLemma)) {
+//        bm25s.accept(termLemma);
+//        bm25w.accept(termLemma, 1 - querySynLemmaWithWeight.get(termLemma));
+//      }
     }
   }
 
