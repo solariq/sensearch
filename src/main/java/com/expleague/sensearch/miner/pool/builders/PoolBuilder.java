@@ -21,7 +21,7 @@ public abstract class PoolBuilder<DS> {
     mapper.enable(SerializationFeature.INDENT_OUTPUT);
   }
 
-  FeatureMeta[] metaData(FeatureSet features, FeatureSet targetFeatures) {
+    protected FeatureMeta[] metaData(FeatureSet features, FeatureSet targetFeatures) {
     FeatureMeta[] metas = new FeatureMeta[features.dim() + targetFeatures.dim()];
     for (int f = 0; f < features.dim(); f++) {
       metas[f] = features.meta(f);
@@ -32,7 +32,7 @@ public abstract class PoolBuilder<DS> {
     return metas;
   }
 
-  DS[] readData(Class<DS> cl, int iteration, Path dataPath) {
+    protected DS[] readData(Class<DS> cl, int iteration, Path dataPath) {
     DS[] empty = (DS[]) Array.newInstance(cl, 0);
     try {
       Path path = dataPath.resolve("DataIt" + iteration + ".json");
@@ -44,7 +44,7 @@ public abstract class PoolBuilder<DS> {
     }
   }
 
-  void saveNewIterationData(Path savePath, DS[] result, int iteration) {
+    protected void saveNewIterationData(Path savePath, DS[] result, int iteration) {
     try {
       Files.createDirectories(savePath);
       mapper.writeValue(savePath.resolve("DataIt" + iteration + ".json").toFile(), result);
