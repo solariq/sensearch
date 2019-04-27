@@ -20,7 +20,6 @@ import com.expleague.ml.cli.output.printers.ResultsPrinter;
 import com.expleague.ml.data.tools.Pool;
 import com.expleague.ml.methods.VecOptimization;
 import com.expleague.sensearch.cli.Command;
-import com.expleague.sensearch.cli.utils.SingleArgOptions;
 import com.expleague.sensearch.cli.utils.SingleArgOptions.DoubleOption;
 import com.expleague.sensearch.cli.utils.SingleArgOptions.EnumOption;
 import com.expleague.sensearch.cli.utils.SingleArgOptions.IntOption;
@@ -30,7 +29,7 @@ import com.expleague.sensearch.cli.utils.SingleArgPredicates.ExistingPath;
 import com.expleague.sensearch.cli.utils.SingleArgPredicates.NegativeLong;
 import com.expleague.sensearch.cli.utils.SingleArgPredicates.PositiveDouble;
 import com.expleague.sensearch.cli.utils.SingleArgPredicates.PositiveInteger;
-import com.expleague.sensearch.cli.utils.SingleArgPredicates.SegmentDouble;
+import com.expleague.sensearch.cli.utils.SingleArgPredicates.ClosedSegmentDouble;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
@@ -65,14 +64,14 @@ public class FitRankingModelCmd implements Command {
       .build();
   private static final DoubleOption TEST_PROPORTION = DoubleOption.builder()
       .shortOption("cv")
-      .longOption("test-prop")
+      .longOption("cross-val")
       .description(
           "Specify proportion of the data that will be used for the testing,"
               + " the rest will be used for training."
               + " Should be the number from (0; 1). Usually, 0.2 is enough."
               + " If no value is given all data will be used for training")
       .defaultValue(0.2)
-      .predicates(SegmentDouble.get(0.01, 1))
+      .predicates(ClosedSegmentDouble.get(0.0, 1))
       .build();
   // gradient boosting on oblivious trees specific arguments (L1, L2 ?)
   // also option for target function should be added

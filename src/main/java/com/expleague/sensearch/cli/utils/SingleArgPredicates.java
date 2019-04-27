@@ -149,15 +149,15 @@ public class SingleArgPredicates {
     }
   }
 
-  public static class SegmentDouble implements DoubleOptionPredicate {
+  public static class ClosedSegmentDouble implements DoubleOptionPredicate {
     private final double lower;
     private final double upper;
 
-    public static SegmentDouble get(double lower, double upper) {
-      return new SegmentDouble(lower, upper);
+    public static ClosedSegmentDouble get(double lower, double upper) {
+      return new ClosedSegmentDouble(lower, upper);
     }
 
-    private SegmentDouble(double lower, double upper) {
+    private ClosedSegmentDouble(double lower, double upper) {
       this.lower = lower;
       this.upper = upper;
     }
@@ -171,7 +171,7 @@ public class SingleArgPredicates {
     public boolean test(double value) {
       return value >= lower && value <= upper;
     }
-    // TODO: override hashCode and equals for the predictae
+    // TODO: override hashCode and equals for the predicate
   }
 
   public static class PositiveDouble implements DoubleOptionPredicate {
