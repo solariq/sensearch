@@ -7,14 +7,16 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import java.net.URI;
 import java.util.List;
 
-@JsonPropertyOrder({"query", "answers"})
+@JsonPropertyOrder({"query", "uri", "answers"})
 public class QueryAndPassages {
     private String query;
+    private URI uri;
     private PassageAndWeight[] answers;
 
     @JsonCreator
-    public QueryAndPassages(@JsonProperty("query") String query, @JsonProperty("answers") List<PassageAndWeight> answers) {
+    public QueryAndPassages(@JsonProperty("query") String query, @JsonProperty("uri") String uri, @JsonProperty("answers") List<PassageAndWeight> answers) {
         this.query = query;
+        this.uri = URI.create(uri);
         this.answers = answers.toArray(new PassageAndWeight[0]);
     }
 
@@ -23,7 +25,12 @@ public class QueryAndPassages {
         return query;
     }
 
-    @JsonProperty
+    @JsonProperty("uri")
+    public URI uri() {
+        return uri;
+    }
+
+    @JsonProperty("answers")
     public PassageAndWeight[] answers() {
         return answers;
     }
@@ -31,21 +38,13 @@ public class QueryAndPassages {
     @JsonPropertyOrder({"uri", "passage", "weight"})
     public static class PassageAndWeight {
 
-        private final URI uri;
         private final String passage;
         private final double weight;
 
         @JsonCreator
-        public PassageAndWeight(@JsonProperty("uri") String uri
-                , @JsonProperty("passage") String passage, @JsonProperty("weight") double weight) {
-            this.uri = URI.create(uri);
+        public PassageAndWeight(@JsonProperty("passage") String passage, @JsonProperty("weight") double weight) {
             this.passage = passage;
             this.weight = weight;
-        }
-
-        @JsonProperty("uri")
-        public URI uri() {
-            return uri;
         }
 
         @JsonProperty("passage")
