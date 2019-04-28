@@ -140,8 +140,11 @@ public class RankingPoolBuilder extends PoolBuilder<QueryAndResults> {
                               if (res != null) {
                                 return res;
                               }
+                              LOG.info("RankingPoolBuilder mining features");
+                              long time = System.nanoTime();
                               AFS.accept(new QURLItem(page, query));
-                              Vec all = AFS.advance();
+                              Vec all = AFS.advance();LOG.info(
+                              String.format("RankingPoolBuilder finished mining in %.3f seconds", (System.nanoTime() - time) / 1e9));
                               feat.put(page, all);
                               res = -model.trans(all).get(0);
                               computedValues.put(((PlainPage) page).id(), res);
