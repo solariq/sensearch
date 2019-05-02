@@ -8,13 +8,14 @@ import com.expleague.commons.math.vectors.VecTools;
 import com.expleague.commons.math.vectors.impl.vectors.ArrayVec;
 import com.expleague.commons.random.FastRandom;
 import com.expleague.commons.seq.CharSeq;
-import com.expleague.commons.seq.CharSeqTools;
 import com.expleague.ml.embedding.Embedding;
 import com.expleague.sensearch.core.IdUtils;
 import com.expleague.sensearch.core.Tokenizer;
 import com.expleague.sensearch.donkey.crawler.document.CrawlerDocument;
 import com.expleague.sensearch.donkey.utils.BrandNewIdGenerator;
+import com.expleague.sensearch.experiments.joom.QtCluster;
 import com.expleague.sensearch.index.plain.QuantLSHCosIndexDB;
+import gnu.trove.list.TIntList;
 import gnu.trove.map.TLongObjectMap;
 import gnu.trove.map.hash.TLongObjectHashMap;
 import gnu.trove.set.TLongSet;
@@ -23,6 +24,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 import org.apache.log4j.Logger;
 import org.iq80.leveldb.DB;
 
@@ -86,25 +88,24 @@ public class EmbeddingBuilder implements AutoCloseable {
     curPageTextId = IdUtils.toStartSecTextId(pageId);
   }
 
-  public void addSection(CrawlerDocument.Section section, long sectionId) {
-    final Vec titleVec = toVector(section.title());
-    if (titleVec != null) {
-      nnIdx.append(curPageTitleId++, titleVec);
-    }
+  FastRandom rnd = new FastRandom();
 
-    CharSequence[] s = CharSeqTools.split(section.title(), ' ');
-    for (CharSequence seq : s) {
-      Vec vec = jmllEmbedding.apply(CharSeq.create(CharSeqTools.toLowerCase(seq)));
-      if (vec != null) {
-        nnIdx.append(curPageTitleId++, vec);
-      }
-    }
+  public void addSection(CrawlerDocument.Section section, long sectionId) {
+//    final Vec titleVec = toVector(section.title());
+//    if (titleVec != null) {
+//      nnIdx.append(curPageTitleId++, titleVec);
+//    }
 
     final Vec textVec = toVector(section.text());
     if (textVec != null) {
       nnIdx.append(curPageTextId++, textVec);
     }
 
+    List<Vec> vecs = fiveGramVecs(section);
+    List<TIntList> cluster = new QtCluster(0.75).cluster(vecs);
+    cluster.forEach(c -> {
+      nnIdx.append(curPageTitleId++, vecs.get(c.get(rnd.nextInt(c.size()))));
+    });
     section
         .links()
         .forEach(
@@ -159,5 +160,41 @@ public class EmbeddingBuilder implements AutoCloseable {
 
   public void addTerm(long id, Vec vec) {
     nnIdx.append(id, vec);
+  }
+
+  private List<Vec> fiveGramVecs(CrawlerDocument.Section section) {
+    List<Vec> vecs = fiveGramVecs(section.title());
+    vecs.addAll(fiveGramVecs(section.text()));
+    return vecs;
+  }
+
+  private List<Vec> fiveGramVecs(CharSequence text) {
+    List<CharSequence> tokens = tokenizer.toWords(text).collect(Collectors.toList());
+
+    List<Vec> result = new ArrayList<>();
+
+    for (int i = 0; i < tokens.size() - 5; i++) {
+
+      Vec vec = vecWithIdf(tokens.subList(i, i + 5));
+      if (!VecTools.equals(vec, new ArrayVec(vec.dim()))) {
+        result.add(vec);
+      }
+    }
+
+    return result;
+  }
+
+  private Vec vecWithIdf(List<CharSequence> tokens) {
+    Vec vec = new ArrayVec(300);
+    tokens.forEach(
+        token -> {
+
+          Vec cur = jmllEmbedding.apply(CharSeq.create(token));
+          if (cur != null) {
+            VecTools.incscale(vec, cur, 1);
+          }
+          //              1.0 / Math.log(1.0 * (1 + token.documentFreq())));
+        });
+    return vec;
   }
 }

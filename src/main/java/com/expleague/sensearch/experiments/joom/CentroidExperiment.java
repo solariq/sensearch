@@ -12,6 +12,7 @@ import com.expleague.sensearch.core.impl.TokenizerImpl;
 import com.expleague.sensearch.index.Index;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
+import gnu.trove.list.TIntList;
 import java.io.IOException;
 import java.net.URI;
 import java.util.ArrayList;
@@ -57,7 +58,12 @@ public class CentroidExperiment {
         index.page(
             URI.create("https://www.joom.com/en/products/1461905219846984671-94-1-553-762024713"));
 
-    fiveGramVecs(goodPage2).forEach(System.out::println);
+    List<Vec> vecs = fiveGramVecs(goodPage2);
+    vecs.forEach(System.out::println);
+    List<TIntList> cluster = new QtCluster(0.75).cluster(vecs);
+    for (TIntList tIntList : cluster) {
+      System.out.println(tIntList);
+    }
     /*
     Stream<Vec> vecStream =
         index.allDocuments().map(this::fiveGramVecs).flatMap(Collection::stream);
