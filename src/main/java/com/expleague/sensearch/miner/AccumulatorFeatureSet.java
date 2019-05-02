@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class AccumulatorFeatureSet extends FeatureSet.Stub<QURLItem> {
 
@@ -40,8 +41,7 @@ public class AccumulatorFeatureSet extends FeatureSet.Stub<QURLItem> {
           linkFeatureSet,
           cosDistanceFeatureSet,
           docBasedFeatureSet,
-          quotationFeatureSet
-      );
+          quotationFeatureSet);
 
   private final List<TextFeatureSet> textFeatureSet =
       features
@@ -50,11 +50,9 @@ public class AccumulatorFeatureSet extends FeatureSet.Stub<QURLItem> {
           .filter(Objects::nonNull)
           .collect(Collectors.toList());
 
-
   public AccumulatorFeatureSet(Index index) {
     this.index = index;
   }
-
 
   @Override
   public void accept(QURLItem item) {
@@ -66,6 +64,9 @@ public class AccumulatorFeatureSet extends FeatureSet.Stub<QURLItem> {
 
     List<Term> titleTerms = index.parse(title).collect(Collectors.toList());
     List<Term> bodyTerms = index.parse(body).collect(Collectors.toList());
+
+    List<Vec> titleVecs = titleTerms.stream().map(Term::vec).collect(Collectors.toList());
+    List<Vec> bodyVecs = bodyTerms.stream().map(Term::vec).collect(Collectors.toList());
 
     { // Text features processing
       final int titleLength = titleTerms.size();
@@ -116,6 +117,14 @@ public class AccumulatorFeatureSet extends FeatureSet.Stub<QURLItem> {
             Vec passageVec = index.vecByTerms(sentenceTokens);
             cosDistanceFeatureSet.withPassage(passageVec);
           });
+
+      List<Vec> allVecs =
+          Stream.concat(titleVecs.stream(), bodyVecs.stream()).collect(Collectors.toList());
+      int[] termDocFreqs =
+          Stream.concat(titleTerms.stream(), bodyTerms.stream())
+              .mapToInt(Term::documentFreq)
+              .toArray();
+      cosDistanceFeatureSet.withTerms(allVecs, termDocFreqs);
     }
     { // Quotation
       pageSentenceTokens.forEach(quotationFeatureSet::withPassage);

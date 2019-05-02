@@ -1,8 +1,10 @@
 package com.expleague.sensearch.index.plain;
 
+import com.expleague.commons.math.vectors.Vec;
 import com.expleague.commons.seq.CharSeq;
 import com.expleague.sensearch.core.PartOfSpeech;
 import com.expleague.sensearch.core.Term;
+import java.util.Collections;
 import java.util.stream.Stream;
 import org.jetbrains.annotations.Nullable;
 
@@ -30,6 +32,11 @@ public class IndexTerm implements Term {
   @Override
   public Term lemma() {
     return lemma != null ? lemma : this;
+  }
+
+  @Override
+  public Vec vec() {
+    return owner.vecByTerms(Collections.singletonList(this));
   }
 
   @Override

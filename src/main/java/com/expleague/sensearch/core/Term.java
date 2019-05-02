@@ -1,5 +1,6 @@
 package com.expleague.sensearch.core;
 
+import com.expleague.commons.math.vectors.Vec;
 import java.util.stream.Stream;
 import org.jetbrains.annotations.Nullable;
 
@@ -8,6 +9,8 @@ public interface Term {
 
   // lemma of lemma == lemma
   Term lemma();
+
+  Vec vec();
 
   Stream<Term> synonyms();
 
