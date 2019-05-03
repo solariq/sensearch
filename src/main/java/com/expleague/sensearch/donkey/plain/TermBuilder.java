@@ -31,6 +31,7 @@ public class TermBuilder implements AutoCloseable {
       new WriteOptions().sync(true).snapshot(false);
 
   private final Map<Long, ParsedTerm> terms = new ConcurrentHashMap<>();
+  // TODO: terms cache should be outside of the term builder?
   private final Map<CharSeq, ParsedTerm> termsCache = new ConcurrentHashMap<>();
 
   private final DB termDb;

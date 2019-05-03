@@ -68,7 +68,6 @@ public class PlainIndexBuilder implements IndexBuilder {
   public static final String PAGE_ROOT = "page";
   public static final String TERM_ROOT = "term";
   public static final String EMBEDDING_ROOT = "embedding";
-  public static final String URI_MAPPING_ROOT = "uriMapping";
   public static final String LSH_METRIC_ROOT = "lsh_metric";
   public static final String LSH_ROOT = "lsh";
   public static final String TEMP_EMBEDDING_ROOT = "temp_embedding";
@@ -110,12 +109,6 @@ public class PlainIndexBuilder implements IndexBuilder {
           .compressionType(CompressionType.SNAPPY);
 
   private static final Options EMBEDDING_DB_OPTIONS =
-      new Options()
-          .createIfMissing(true)
-          .errorIfExists(true)
-          .compressionType(CompressionType.SNAPPY);
-
-  private static final Options URI_DB_OPTIONS =
       new Options()
           .createIfMissing(true)
           .errorIfExists(true)
@@ -284,7 +277,6 @@ public class PlainIndexBuilder implements IndexBuilder {
     Files.createDirectories(indexRoot.resolve(PAGE_ROOT));
     Files.createDirectories(indexRoot.resolve(TERM_STATISTICS_ROOT));
     Files.createDirectories(indexRoot.resolve(EMBEDDING_ROOT));
-    Files.createDirectories(indexRoot.resolve(URI_MAPPING_ROOT));
     Files.createDirectories(indexRoot.resolve(TERM_ROOT));
 
     final TLongSet knownPageIds = new TLongHashSet();
@@ -311,10 +303,7 @@ public class PlainIndexBuilder implements IndexBuilder {
                 indexRoot.resolve(EMBEDDING_ROOT),*/
                 jmllEmbedding,
                 tokenizer);
-        final UriMappingBuilder uriMappingBuilder =
-            new UriMappingBuilder(
-                JniDBFactory.factory.open(
-                    indexRoot.resolve(URI_MAPPING_ROOT).toFile(), URI_DB_OPTIONS))) {
+        final UriMappingsBuilder uriMappingBuilder = new UriMappingsBuilder(indexRoot)) {
 
       EmbeddingImpl<CharSeq> jmllEmbedding1 = (EmbeddingImpl<CharSeq>) jmllEmbedding;
       for (int i = 0; i < jmllEmbedding1.vocabSize(); i++) {
@@ -436,7 +425,6 @@ public class PlainIndexBuilder implements IndexBuilder {
         FileUtils.deleteDirectory(indexRoot.resolve(TERM_STATISTICS_ROOT).toFile());
         FileUtils.deleteDirectory(indexRoot.resolve(EMBEDDING_ROOT).toFile());
         FileUtils.deleteDirectory(indexRoot.resolve("suggest").toFile());
-        FileUtils.deleteDirectory(indexRoot.resolve(URI_MAPPING_ROOT).toFile());
         FileUtils.deleteDirectory(indexRoot.resolve(TERM_ROOT).toFile());
 
         throw new IOException(e);
