@@ -19,7 +19,7 @@ import com.expleague.commons.math.vectors.VecTools;
 import com.expleague.sensearch.core.Term;
 import com.expleague.sensearch.index.Index;
 
-public class OneWordLuceneSuggestor implements Suggestor{
+public class OneWordLuceneSuggestor implements Suggestor {
   public final int RETURN_LIMIT = 10;
 
   public final static String filePrefix = "prefix_sugg";
@@ -45,15 +45,15 @@ public class OneWordLuceneSuggestor implements Suggestor{
 
   };
 
-  public OneWordLuceneSuggestor(Index index, Path indexRoot) throws IOException {
+  public OneWordLuceneSuggestor(Index index, Path suggestIndexRoot) throws IOException {
     this.index = index;
     
     suggester = new AnalyzingSuggester(
-        FSDirectory.open(indexRoot.resolve(storePath).getParent()),
+        FSDirectory.open(suggestIndexRoot.resolve(storePath).getParent()),
         filePrefix,
         new StandardAnalyzer());
     
-    suggester.load(new FileInputStream(indexRoot.resolve(storePath).toFile()));
+    suggester.load(new FileInputStream(suggestIndexRoot.resolve(storePath).toFile()));
   }
 
   @Override
@@ -102,7 +102,7 @@ public class OneWordLuceneSuggestor implements Suggestor{
 
       Vec queryVec = index.vecByTerms(qc);
 
-      List<LookupResult> endingPhrases = suggester.lookup(termsToString(qt), false, 10000);
+      List<LookupResult> endingPhrases = suggester.lookup(termsToString(qt), false, 1000000);
       
       //System.out.println("number of selected phrases: " + endingPhrases.size());
       for (LookupResult p : endingPhrases) {

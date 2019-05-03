@@ -76,7 +76,8 @@ public class MetricsCounter {
         int pos = 1;
         for (String ms : mySugg) {
           for (String os : e.getValue()) {
-            if (ms.equals(os)) {
+            //if (ms.equals(os)) {
+            if (ms.contains(os) || os.contains(ms)) {
               matched[i]++;
               rrSum[i] += 1.0 / pos;
               System.out.format("Обработано %s / %s\n", cnt, map.size());
@@ -120,13 +121,13 @@ public class MetricsCounter {
     Index index = injector.getInstance(Index.class);
 
     MetricsCounter mc = new MetricsCounter(
-        //new BigramsBasedSuggestor(index),
+        new BigramsBasedSuggestor(index),
         new OneWordSuggestor(index),
-        //new RawLuceneSuggestor(suggestRoot),
+        new RawLuceneSuggestor(suggestRoot),
         new OneWordLuceneSuggestor(index, suggestRoot)
         );
 
-    mc.getSuggestsExamples("а", "б");
+    //mc.getSuggestsExamples("мир");
     //mc.getSuggestsExamples("миронов", "миронов а");
     mc.evaluate();
   }
