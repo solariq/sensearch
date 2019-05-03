@@ -303,7 +303,7 @@ public class FitRankingModelCmd implements Command {
     }
 
     public String metricName() {
-      return metricName();
+      return metricName;
     }
   }
 }
