@@ -108,12 +108,13 @@ public class SuggestInformationBuilder {
 
     @Override
     public BytesRef payload() {
-      return null;
+      double freqNorm = multigramFreqNorm.get(termsToIds(toTerms(iter.key().utf8ToString())));
+      return new BytesRef(Longs.toByteArray(Double.doubleToLongBits(freqNorm)));
     }
 
     @Override
     public boolean hasPayloads() {
-      return false;
+      return true;
     }
 
     @Override
@@ -275,7 +276,8 @@ public class SuggestInformationBuilder {
         } catch (IOException e) {
           throw new RuntimeException(e);
         }
-        multigramFreq.adjustOrPutValue(lIds, docIncomingLinks + 1, docIncomingLinks + 1);
+        //multigramFreq.adjustOrPutValue(lIds, docIncomingLinks + 1, docIncomingLinks + 1);
+        multigramFreq.adjustOrPutValue(lIds, 1, 1);
       }
     }
   }
@@ -298,8 +300,8 @@ public class SuggestInformationBuilder {
   }
 
   private double freqNorm(long[] l) {
-    //return multigramFreq.get(l) / Math.log(1 + avgOrderFreq[l.length - 1]);
-    return multigramFreq.get(l);
+    return multigramFreq.get(l) / Math.log(1 + avgOrderFreq[l.length - 1]);
+    //return multigramFreq.get(l);
   }
 
   private void computeFreqNorm() {
