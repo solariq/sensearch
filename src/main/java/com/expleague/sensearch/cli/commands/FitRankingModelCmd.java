@@ -294,7 +294,7 @@ public class FitRankingModelCmd implements Command {
   }
 
   private enum Metric {
-    NDCG("NormalizedDCG"),
+    NDCG("NormalizedDcg"),
     NONE("");
     private final String metricName;
 
