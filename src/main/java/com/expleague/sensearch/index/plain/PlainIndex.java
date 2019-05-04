@@ -14,6 +14,7 @@ import com.expleague.sensearch.core.Term.TermAndDistance;
 import com.expleague.sensearch.core.Tokenizer;
 import com.expleague.sensearch.core.impl.TokenizerImpl;
 import com.expleague.sensearch.donkey.plain.PlainIndexBuilder;
+import com.expleague.sensearch.donkey.plain.UriMappingsBuilder;
 import com.expleague.sensearch.features.Features;
 import com.expleague.sensearch.features.FeaturesForRequiredDocument;
 import com.expleague.sensearch.features.FeaturesImpl;
@@ -152,7 +153,7 @@ public class PlainIndex implements Index {
 
     uriMappingDb =
         JniDBFactory.factory.open(
-            indexRoot.resolve(PlainIndexBuilder.URI_MAPPING_ROOT).toFile(), DEFAULT_DB_OPTIONS);
+            indexRoot.resolve(UriMappingsBuilder.ROOT).toFile(), DEFAULT_DB_OPTIONS);
 
     tokenizer = new TokenizerImpl();
 

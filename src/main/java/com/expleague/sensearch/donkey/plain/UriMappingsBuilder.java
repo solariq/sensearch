@@ -11,6 +11,7 @@ import java.io.ObjectOutputStream;
 import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.apache.log4j.Logger;
@@ -34,6 +35,7 @@ public class UriMappingsBuilder implements AutoCloseable, IncrementalBuilder {
       new TObjectLongHashMap<>()
   );
   private final Path indexRoot;
+  private final List<UriMappingBuilderState> priorStates = new ArrayList<>();
 
   UriMappingsBuilder(Path indexRoot) {
     this.indexRoot = indexRoot;
@@ -44,7 +46,7 @@ public class UriMappingsBuilder implements AutoCloseable, IncrementalBuilder {
   }
 
   @Override
-  public void increment(BuilderState... increments) {
+  public void setStates(BuilderState... increments) {
     for (BuilderState state : increments) {
       if (!(state instanceof UriMappingBuilderState)) {
         throw new IllegalArgumentException("One of the received states is not a state of"
@@ -53,19 +55,17 @@ public class UriMappingsBuilder implements AutoCloseable, IncrementalBuilder {
     }
 
     for (BuilderState state : increments) {
-      UriMappingBuilderState uriMappingBuilderState = (UriMappingBuilderState) state;
-      this.uriMappings.putAll(uriMappingBuilderState.uriMappings);
+      priorStates.add((UriMappingBuilderState) state);
     }
+    resetState();
   }
 
   @Override
-  public UriMappingBuilderState state() {
-    return new UriMappingBuilderState(this);
-  }
-
-  @Override
-  public void resetState() {
-    uriMappings.clear();
+  public BuilderState state() {
+    UriMappingBuilderState state = new UriMappingBuilderState(this);
+    priorStates.add(state);
+    resetState();
+    return state;
   }
 
   @Override
@@ -73,35 +73,22 @@ public class UriMappingsBuilder implements AutoCloseable, IncrementalBuilder {
     if (!(state instanceof UriMappingBuilderState)) {
       throw new IllegalArgumentException("Received state is not a state of UriMappingsBuilder!");
     }
-    increment(state);
+    setStates(state);
   }
 
-  /**
-   * FIXME this is actually a crutch: in case of normal execution
-   * FIXME (and calling close() is a sign of it) we don't need to pass saved states
-   * @param states previously saved states to be included to the builder
-   * @throws IOException
-   */
-  public void closeWith(BuilderState... states) throws IOException {
-    LOG.info("Storing URI mapping...");
-    DB uriMappingDb = JniDBFactory.factory.open(indexRoot.resolve(ROOT).toFile(),
-        DEFAULT_DB_OPTIONS);
-    storeMappings(uriMappingDb, uriMappings);
-    for (BuilderState state : states) {
-      if (!(state instanceof  UriMappingBuilderState)) {
-        continue;
-      }
-      UriMappingBuilderState localState = (UriMappingBuilderState) state;
-      storeMappings(uriMappingDb, localState.mappings());
-    }
-    uriMappingDb.close();
+  private void resetState() {
+    uriMappings.clear();
   }
-
   @Override
   public void close() throws IOException {
     LOG.info("Storing URI mapping...");
     DB uriMappingDb = JniDBFactory.factory.open(indexRoot.resolve(ROOT).toFile(),
         DEFAULT_DB_OPTIONS);
+    if (!priorStates.isEmpty()) {
+      for (UriMappingBuilderState state : priorStates) {
+        storeMappings(uriMappingDb, state.mappings());
+      }
+    }
     storeMappings(uriMappingDb, uriMappings);
     uriMappingDb.close();
   }
@@ -140,6 +127,7 @@ public class UriMappingsBuilder implements AutoCloseable, IncrementalBuilder {
     private static final String MAPPINGS_FILE_PROP = "map";
 
     private TObjectLongMap<String> uriMappings;
+    private Path root;
     private StateMeta meta;
 
     private UriMappingBuilderState(UriMappingsBuilder builder) {
@@ -147,7 +135,8 @@ public class UriMappingsBuilder implements AutoCloseable, IncrementalBuilder {
       this.uriMappings.putAll(builder.uriMappings);
     }
 
-    private UriMappingBuilderState(StateMeta meta) {
+    private UriMappingBuilderState(Path root, StateMeta meta) {
+      this.root = root;
       this.meta = meta;
     }
 
@@ -156,7 +145,7 @@ public class UriMappingsBuilder implements AutoCloseable, IncrementalBuilder {
       if (uriMappings != null) {
         return uriMappings;
       }
-      Path pathToMappings = meta.getAsPath(MAPPINGS_FILE_PROP).toAbsolutePath();
+      Path pathToMappings = root.resolve(meta.get(MAPPINGS_FILE_PROP)).toAbsolutePath();
       try {
         ObjectInputStream deserializer = new ObjectInputStream(
             Files.newInputStream(pathToMappings));
@@ -187,7 +176,7 @@ public class UriMappingsBuilder implements AutoCloseable, IncrementalBuilder {
         try {
           StateMeta meta = StateMeta.readFrom(metaFile);
           if (meta.owner() == UriMappingBuilderState.class) {
-            return new UriMappingBuilderState(meta);
+            return new UriMappingBuilderState(from, meta);
           } else {
             LOG.warn(String.format("By given path [ %s ] was found meta file [ %s ]with"
                 + " unsuitable owner", from.toString(), metaFile.toString()));
@@ -221,7 +210,8 @@ public class UriMappingsBuilder implements AutoCloseable, IncrementalBuilder {
       serializer.writeObject(uriMappings);
       serializer.close();
 
-      uriMappings.clear();
+      root = to;
+      uriMappings = null;
     }
   }
 }

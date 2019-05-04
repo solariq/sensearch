@@ -188,7 +188,6 @@ public class FitRankingModelCmd implements Command {
     // TODO: configure pool reader from command line
     // TODO: determine type of the pool from command line
     dataBuilder.setReader(ReaderFactory.createJsonReader());
-
     return dataBuilder.create();
   }
 
@@ -206,7 +205,8 @@ public class FitRankingModelCmd implements Command {
     boostingBuilder.setWeak(weakBuilder.create());
     boostingBuilder.setIterations(ITERATIONS.value(commandLine));
     boostingBuilder.setStep(STEP.value(commandLine));
-    boostingBuilder.setLocal(TARGET_LOSS.value(commandLine).targetName());
+    // local loss is always MSE in case of ranking&
+    boostingBuilder.setLocal(Target.MSE.targetName());
 
     return boostingBuilder.create();
   }

@@ -80,10 +80,6 @@ public interface RecoverableBuilder {
         return properties.get(propertyName);
       }
 
-      public Path getAsPath(String propertyName) {
-        return Paths.get(get(propertyName));
-      }
-
       public String[] get(String propertyName, String delimiter) {
         return get(propertyName).split(delimiter);
       }
@@ -141,8 +137,6 @@ public interface RecoverableBuilder {
   }
 
   BuilderState state();
-
-  void resetState();
 
   void setState(BuilderState state);
 }
