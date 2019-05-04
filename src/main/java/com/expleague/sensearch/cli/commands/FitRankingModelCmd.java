@@ -206,7 +206,8 @@ public class FitRankingModelCmd implements Command {
     boostingBuilder.setWeak(weakBuilder.create());
     boostingBuilder.setIterations(ITERATIONS.value(commandLine));
     boostingBuilder.setStep(STEP.value(commandLine));
-    boostingBuilder.setLocal(TARGET_LOSS.value(commandLine).targetName());
+    // FIXME: QMSE !cannot! be used for local target loss
+    boostingBuilder.setLocal(Target.MSE.targetName());
 
     return boostingBuilder.create();
   }
