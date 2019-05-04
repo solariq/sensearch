@@ -37,7 +37,7 @@ public class TopViewed {
         }
 
         PrintWriter pw = new PrintWriter("./top-viewed");
-        mp.forEach((x, y) -> pw.write(x + " " + y));
+        mp.forEach((x, y) -> pw.write(x + " " + y + "\n"));
         br.close();
         pw.close();
     }
