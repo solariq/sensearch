@@ -178,7 +178,7 @@ public class FilterPoolBuilder extends PoolBuilder<QueryAndResults> {
 
     saveNewIterationData(dataPath, newData.toArray(new QueryAndResults[0]), iteration + 1);
 
-    System.out.format("Запомнено новых результатов %d\n", added.get());
+    LOG.info(String.format("Memorized %d new results\n", added.get()));
 
     Pool<QURLItem> pool = poolBuilder.create();
     try {

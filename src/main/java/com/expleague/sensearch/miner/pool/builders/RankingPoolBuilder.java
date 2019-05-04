@@ -140,11 +140,11 @@ public class RankingPoolBuilder extends PoolBuilder<QueryAndResults> {
                               if (res != null) {
                                 return res;
                               }
-                              LOG.info("RankingPoolBuilder mining features");
-                              long time = System.nanoTime();
+//                              LOG.info("RankingPoolBuilder mining features");
+//                              long time = System.nanoTime();
                               AFS.accept(new QURLItem(page, query));
-                              Vec all = AFS.advance();LOG.info(
-                              String.format("RankingPoolBuilder finished mining in %.3f seconds", (System.nanoTime() - time) / 1e9));
+                              Vec all = AFS.advance();
+//                              LOG.info(String.format("RankingPoolBuilder finished mining in %.3f seconds", (System.nanoTime() - time) / 1e9));
                               feat.put(page, all);
                               res = -model.trans(all).get(0);
                               computedValues.put(((PlainPage) page).id(), res);
@@ -177,7 +177,7 @@ public class RankingPoolBuilder extends PoolBuilder<QueryAndResults> {
 
     saveNewIterationData(dataPath, newData.toArray(new QueryAndResults[0]), iteration + 1);
 
-    System.out.format("Запомнено новых результатов %d\n", added.get());
+    LOG.info(String.format("Memorized %d new results\n", added.get()));
 
     Pool<QURLItem> pool = poolBuilder.create();
     try {
