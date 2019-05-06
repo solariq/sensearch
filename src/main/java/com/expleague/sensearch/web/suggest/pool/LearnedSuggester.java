@@ -10,6 +10,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
@@ -70,16 +71,16 @@ public class LearnedSuggester implements Suggestor {
     this.index = index;
 
     suggester = new AnalyzingSuggester(
-        FSDirectory.open(suggestIndexRoot.resolve(storePath).getParent()),
-        filePrefix,
+        //FSDirectory.open(suggestIndexRoot.resolve(storePath).getParent()),
+        //filePrefix,
         new StandardAnalyzer());
 
     suggester.load(new FileInputStream(suggestIndexRoot.resolve(storePath).toFile()));
 
-    if (Files.exists(SuggestRankingPoolBuilder.dataPath)) {
+    if (Files.exists(suggestIndexRoot.resolve(SuggestRankingPoolBuilder.dataPath))) {
       model = (Trans) DataTools.readModel(
           new InputStreamReader(
-              Files.newInputStream(suggestIndexRoot.resolve(SuggestRankingPoolBuilder.dataPath)), StandardCharsets.UTF_8)).getFirst();
+              Files.newInputStream(suggestIndexRoot.resolve("suggest_ranker.model")), StandardCharsets.UTF_8)).getFirst();
     } else {
       model = null;
     }
@@ -107,7 +108,7 @@ public class LearnedSuggester implements Suggestor {
 
   @Override
   public String getName() {
-    return "One Word Lucene";
+    return "Learned Suggester";
   }
 
   private String termsToString(Term[] terms) {
@@ -186,7 +187,7 @@ public class LearnedSuggester implements Suggestor {
     }
 
 
-    TreeSet<StringDoublePair> phraseProb = new TreeSet<>((p1, p2) -> -p1.compareTo(p2));
+    TreeSet<StringDoublePair> phraseProb = new TreeSet<>();
 
     List<QSUGItem> rawResults = getUnsortedSuggestions(terms);
 
@@ -194,13 +195,20 @@ public class LearnedSuggester implements Suggestor {
     for (QSUGItem p : rawResults) {
 
       featureSet.accept(p);
-      phraseProb.add(new StringDoublePair(p.suggestion, model.trans(featureSet.advance()).get(0)));
+      Vec v = featureSet.advance();
+      phraseProb.add(
+          new StringDoublePair(
+              p.suggestion,
+              model
+              .trans(v)
+              .get(0)));
 
       phraseProb.removeIf(it -> phraseProb.size() > RETURN_LIMIT);
     }
 
     return phraseProb.stream()
-        .sorted()
+        .sorted(Comparator.reverseOrder())
+        //.sorted()
         .map(p -> p.phrase)
         .collect(Collectors.toList());
   }

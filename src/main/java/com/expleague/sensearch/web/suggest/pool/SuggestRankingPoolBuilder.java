@@ -113,6 +113,10 @@ public class SuggestRankingPoolBuilder {
 
     int exmpNumberSum = 0;
     for(Entry<String, List<String>> qSugList : map.entrySet()) {
+      /*
+      if (qSugList.getKey().split(" ").length < 2)
+        continue;
+        */
       if (status.get() % 100 == 0) {
         System.err.println(status.get() + " queries completed");
       }
@@ -128,7 +132,7 @@ public class SuggestRankingPoolBuilder {
       }
     }
 
-    LOG.info("Avg. examples number: " + 1.0 * exmpNumberSum / map.size());
+    System.err.println("Avg. examples number: " + 1.0 * exmpNumberSum / map.size());
 
     Pool<QSUGItem> pool = poolBuilder.create();
     DataTools.writePoolTo(pool, Files.newBufferedWriter(suggestIndexRoot.resolve(dataPath)));

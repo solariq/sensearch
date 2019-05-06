@@ -141,6 +141,7 @@ public class SuggestInformationBuilder {
     luceneInfixSuggester.close();
 
     lucenePrefixSuggester.build(prefixPhrases);
+    Files.createDirectories(suggestIndexRoot.resolve(OneWordLuceneSuggestor.storePath).getParent());
     lucenePrefixSuggester.store(new FileOutputStream(suggestIndexRoot.resolve(OneWordLuceneSuggestor.storePath).toFile()));
   }
 
@@ -235,8 +236,8 @@ public class SuggestInformationBuilder {
         new StandardAnalyzer());
 
     lucenePrefixSuggester = new AnalyzingSuggester(
-        FSDirectory.open(Files.createDirectory(suggestIndexRoot.resolve(OneWordLuceneSuggestor.storePath.getParent()))), 
-        OneWordLuceneSuggestor.filePrefix, 
+        //FSDirectory.open(Files.createDirectory(suggestIndexRoot.resolve(OneWordLuceneSuggestor.storePath.getParent()))), 
+        //OneWordLuceneSuggestor.filePrefix, 
         new StandardAnalyzer());
 
   }

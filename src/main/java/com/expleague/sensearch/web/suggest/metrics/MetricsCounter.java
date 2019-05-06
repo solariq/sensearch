@@ -18,6 +18,7 @@ import com.expleague.sensearch.web.suggest.OneWordLuceneSuggestor;
 import com.expleague.sensearch.web.suggest.RawLuceneSuggestor;
 import com.expleague.sensearch.web.suggest.OneWordSuggestor;
 import com.expleague.sensearch.web.suggest.Suggestor;
+import com.expleague.sensearch.web.suggest.pool.LearnedSuggester;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Guice;
@@ -62,6 +63,10 @@ public class MetricsCounter {
     int[] matched = new int[nSugg];
 
     for (Entry<String, List<String>> e : map.entrySet()) {
+      /*
+      if (e.getKey().split(" ").length < 2)
+        continue;
+      */
       for (int i = 0; i < nSugg; i++) {
 
         long startTime = System.nanoTime();
@@ -121,14 +126,15 @@ public class MetricsCounter {
     Index index = injector.getInstance(Index.class);
 
     MetricsCounter mc = new MetricsCounter(
-        new BigramsBasedSuggestor(index),
-        new OneWordSuggestor(index),
+        //new BigramsBasedSuggestor(index),
+        //new OneWordSuggestor(index),
         new RawLuceneSuggestor(suggestRoot),
-        new OneWordLuceneSuggestor(index, suggestRoot)
+        new OneWordLuceneSuggestor(index, suggestRoot),
+        new LearnedSuggester(index, suggestRoot)
         );
 
     //mc.getSuggestsExamples("мир");
-    //mc.getSuggestsExamples("миронов", "миронов а");
-    mc.evaluate();
+    mc.getSuggestsExamples("миронов", "миронов а");
+    //mc.evaluate();
   }
 }
