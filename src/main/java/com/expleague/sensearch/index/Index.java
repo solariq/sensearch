@@ -33,6 +33,8 @@ public interface Index extends AutoCloseable {
   double averageSectionTitleSize();
 
   double averageLinkTargetTitleWordCount();
-  
+
+  Features filterFeatures(Query query, URI pageURI);
+
   SuggestInformationLoader getSuggestInformation();
 }

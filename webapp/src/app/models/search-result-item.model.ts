@@ -1,14 +1,13 @@
 export class SearchResultPageModel {
   query: string;
   results: SearchResultItemModel[];
-  googleResults: SearchResultItemModel[];
+  debugResults: SearchResultItemModel[];
 }
 
 export class SearchResultItemModel {
   reference: string;
   title: string;
   passages: Passage[];
-  score: number;
   debugInfo: DebugInfo;
   pageId: number;
 }
@@ -30,7 +29,16 @@ export class Passage {
 
 export class DebugInfo {
   uri: string;
-  rank: number;
-  features: number[];
-  featureIds: string[];
+
+  rankScore: number;
+  filterScore: number;
+
+  rankPlace: number;
+  filterPlace: number;
+
+  rankFeatures: number[];
+  rankFeatureIds: string[];
+
+  filterFeatures: number[];
+  filterFeatureIds: string[];
 }

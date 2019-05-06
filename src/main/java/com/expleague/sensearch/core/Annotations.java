@@ -91,7 +91,4 @@ public class Annotations {
   public @interface SnippetModel {
 
   }
-
-
-
 }

@@ -1,17 +1,29 @@
 <h3 class="search-result-item"><a href="{{searchItem.reference}}">{{searchItem.title}}</a></h3>
 
 <div class="result-item-debug" *ngIf="debug">
-  <div *ngIf="searchItem.debugInfo">Rank: {{searchItem.debugInfo.rank}}</div>
-  <div>Score: {{searchItem.score | number: '1.4-4'}}</div>
+  <div *ngIf="searchItem.debugInfo">Rank: {{searchItem.debugInfo.rankPlace}}</div>
+  <div>Rank score: {{searchItem.debugInfo.rankScore | number: '1.4-4'}}</div>
+  <div>Filter score: {{searchItem.debugInfo.filterScore | number: '1.4-4'}}</div>
 
   <div *ngIf="searchItem.debugInfo">
+    Rank features:
     <div class="result-item-debug-features">
       <div
-        *ngFor="let featureId of searchItem.debugInfo.featureIds; let i = index">
-        {{featureId}}: {{searchItem.debugInfo.features[i] | number : '1.3-3'}}
+        *ngFor="let featureId of searchItem.debugInfo.rankFeatureIds; let i = index">
+        {{featureId}}: {{searchItem.debugInfo.rankFeatures[i] | number : '1.3-3'}}
       </div>
 
     </div>
+
+    Filter features:
+    <div class="result-item-debug-features">
+      <div
+        *ngFor="let featureId of searchItem.debugInfo.filterFeatureIds; let i = index">
+        {{featureId}}: {{searchItem.debugInfo.filterFeatures[i] | number : '1.3-3'}}
+      </div>
+
+    </div>
+
     <button mat-button (click)="showSynonyms(searchItem.debugInfo.uri)">
       Show query synonyms
     </button>
