@@ -219,11 +219,6 @@ public class UnitMetricTest {
     }
 
     @Override
-    public double score() {
-      return 0;
-    }
-
-    @Override
     public ResultItemDebugInfo debugInfo() {
       return null;
     }

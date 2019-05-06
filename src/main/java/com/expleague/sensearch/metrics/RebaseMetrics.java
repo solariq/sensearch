@@ -33,13 +33,13 @@ public class RebaseMetrics {
       String line;
       ObjectMapper objectMapper = new ObjectMapper();
       while ((line = reader.readLine()) != null) {
-        ResultPage page = searcher.search(line, 0, false, true);
-        if (page.googleResults().length < 10) {
+        ResultPage page = searcher.search(line, 0, false, true, null);
+        if (page.debugResults().length < 10) {
           System.out.println(
               "Too few google results for query "
                   + line
                   + ", found "
-                  + page.googleResults().length);
+                  + page.debugResults().length);
         }
         objectMapper.writeValue(
             config.getPathToMetrics().resolve(line).resolve("PAGE.json").toFile(), page);

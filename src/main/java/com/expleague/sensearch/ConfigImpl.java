@@ -14,6 +14,8 @@ public class ConfigImpl implements Config {
   private String modelPath = "model";
   private String modelFilterPath = "model";
   private String snippetModelPath = "model";
+  private String groundTruthPath = "rankPool/DataIt1.json";
+
   private int pageSize = 10;
   private int maxFilterItems;
   private boolean buildIndexFlag = false;
@@ -76,6 +78,11 @@ public class ConfigImpl implements Config {
     return Paths.get(snippetModelPath);
   }
 
+  @Override
+  public Path getGroundTruthPath() {
+    return Paths.get(groundTruthPath);
+  }
+
   public void setModelPath(String path) {
     this.modelPath = path;
   }
@@ -90,6 +97,10 @@ public class ConfigImpl implements Config {
 
   public void setMaxFilterItems(int maxFilterItems) {
     this.maxFilterItems = maxFilterItems;
+  }
+
+  public void setGroundTruthPath(String groundTruthPath) {
+    this.groundTruthPath = groundTruthPath;
   }
 
   @Override

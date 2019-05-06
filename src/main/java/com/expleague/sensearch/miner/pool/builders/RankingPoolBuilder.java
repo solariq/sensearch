@@ -106,7 +106,7 @@ public class RankingPoolBuilder extends PoolBuilder {
                   pNw -> {
                     Page page = index.page(pNw.getUri());
                     if (page != PlainPage.EMPTY_PAGE) {
-                      double target = pNw.getWight();
+                      double target = pNw.getWeight();
                       synchronized (poolBuilder) {
                         poolBuilder.accept(new QURLItem(page, query));
                         poolBuilder

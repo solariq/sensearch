@@ -33,6 +33,7 @@ import com.expleague.sensearch.index.plain.EmbeddingImpl;
 import com.expleague.sensearch.index.plain.PlainIndex;
 import com.expleague.sensearch.metrics.RequestCrawler;
 import com.expleague.sensearch.metrics.WebCrawler;
+import com.expleague.sensearch.miner.pool.QueryAndResults;
 import com.expleague.sensearch.web.suggest.OneWordSuggestor;
 import com.expleague.sensearch.web.suggest.Suggestor;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -94,6 +95,7 @@ public class AppModule extends AbstractModule {
         .toInstance(config.getEmbeddingVectors());
     bind(Path.class).annotatedWith(DataZipPath.class).toInstance(config.getPathToZIP());
     bind(Path.class).annotatedWith(IndexRoot.class).toInstance(config.getIndexRoot());
+
     bindConstant().annotatedWith(UseLshFlag.class).to(config.getLshNearestFlag());
 
     Lemmer lemmer = Lemmer.getInstance();
@@ -207,5 +209,17 @@ public class AppModule extends AbstractModule {
             + config.getSnippetModelPath()
             + "], using empty model instead");
     return getModelStub();
+  }
+
+  @Provides
+  @Singleton
+  QueryAndResults[] getQueryAndResults() throws IOException {
+    if (config.getGroundTruthPath().toFile().exists()) {
+      ObjectMapper objectMapper = new ObjectMapper();
+      return objectMapper.readValue(
+          Files.newBufferedReader(config.getGroundTruthPath(), StandardCharsets.UTF_8),
+          QueryAndResults[].class);
+    }
+    return new QueryAndResults[0];
   }
 }

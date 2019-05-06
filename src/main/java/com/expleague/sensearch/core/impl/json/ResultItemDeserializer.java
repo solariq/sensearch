@@ -54,7 +54,7 @@ public class ResultItemDeserializer extends StdDeserializer<ResultItem> {
       //      int score = node.get("score").intValue();
       //      ResultItemDebugInfo debugInfo =
       //          codec.treeToValue(node.get("debugInfo"), ResultItemDebugInfo.class);
-      return new ResultItemImpl(reference, title, passages, 0, null);
+      return new ResultItemImpl(reference, title, passages, null);
     } catch (URISyntaxException e) {
       e.printStackTrace();
     }

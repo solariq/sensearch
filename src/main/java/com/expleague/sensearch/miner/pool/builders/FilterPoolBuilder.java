@@ -112,7 +112,7 @@ public class FilterPoolBuilder extends PoolBuilder {
                     Page page = index.page(pNw.getUri());
                     if (page != PlainPage.EMPTY_PAGE) {
                       double target = 0;
-                      if (pNw.getWight() > 0) {
+                      if (pNw.getWeight() > 0) {
                         target = 1;
                       }
 

@@ -13,5 +13,6 @@
   "maxFilterItems": "50",
   "modelPath": "joom_data/ranking.model",
   "modelFilterPath": "joom_data/filter.model",
-  "snippetModelPath": "joom_data/snippet.model"
+  "snippetModelPath": "joom_data/snippet.model",
+  "groundTruthPath": "joom_data/groundTruth.json"
 }

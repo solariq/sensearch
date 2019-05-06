@@ -25,7 +25,7 @@ public class ResultPageSerializer extends StdSerializer<ResultPage> {
     jsonGenerator.writeStringField("query", resultPage.query());
 
     jsonGenerator.writeObjectField("results", resultPage.results());
-    jsonGenerator.writeObjectField("googleResults", resultPage.googleResults());
+    jsonGenerator.writeObjectField("debugResults", resultPage.debugResults());
 
     jsonGenerator.writeEndObject();
   }
