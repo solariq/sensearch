@@ -82,6 +82,8 @@ public class SuggestInformationBuilder {
     private TObjectLongMap<BytesRef> refMap = new TObjectLongHashMap<>();
     private TObjectLongIterator<BytesRef> iter = null;
 
+    private int cnt = 0;
+
     public void add(BytesRef phrase, int weight) {
       refMap.adjustOrPutValue(phrase, weight, weight);
     }
@@ -97,6 +99,10 @@ public class SuggestInformationBuilder {
       }
 
       iter.advance();
+      cnt++;
+      if (cnt % 10000 == 0) {
+        LOG.info(cnt + " pushed to AnalyzingSuggester");
+      }
 
       return iter.key();
     }

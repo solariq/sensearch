@@ -88,7 +88,9 @@ public class SuggestRankingPoolBuilder {
               myMatched.cosine,
               true));
 
-          res.add(prefixMatched.get(rnd.nextInt(prefixMatched.size())));
+          QSUGItem negativeSample = prefixMatched.get(rnd.nextInt(prefixMatched.size()));
+          if (!negativeSample.suggestion.equals(myMatched.suggestion))
+            res.add(negativeSample);
         }
       }
     }
@@ -116,7 +118,7 @@ public class SuggestRankingPoolBuilder {
       /*
       if (qSugList.getKey().split(" ").length < 2)
         continue;
-        */
+       */
       if (status.get() % 100 == 0) {
         System.err.println(status.get() + " queries completed");
       }
