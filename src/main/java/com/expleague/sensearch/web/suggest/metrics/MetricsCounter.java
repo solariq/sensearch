@@ -134,7 +134,7 @@ public class MetricsCounter {
         );
 
     //mc.getSuggestsExamples("мир");
-    mc.getSuggestsExamples("миронов", "миронов а");
-    //mc.evaluate();
+    //mc.getSuggestsExamples("миронов", "миронов а");
+    mc.evaluate();
   }
 }

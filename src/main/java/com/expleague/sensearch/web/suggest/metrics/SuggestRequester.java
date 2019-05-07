@@ -34,7 +34,7 @@ public class SuggestRequester {
 	public static void main(String[] args) throws IOException {
 		SuggestRequester requester = new SuggestRequester();
 
-		for (String suggest : requester.getSuggests("майк та")) {
+		for (String suggest : requester.getSuggests("wiki алек")) {
 			System.out.println(suggest);
 		}
 		
