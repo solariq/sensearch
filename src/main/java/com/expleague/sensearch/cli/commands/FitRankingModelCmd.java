@@ -160,6 +160,7 @@ public class FitRankingModelCmd implements Command {
 
   static {
     TRAIN_DATA.addToOptions(OPTIONS);
+    DATA_FORMAT.addToOptions(OPTIONS);
     SEED.addToOptions(OPTIONS);
     TEST_PROPORTION.addToOptions(OPTIONS);
     DEPTH.addToOptions(OPTIONS);
