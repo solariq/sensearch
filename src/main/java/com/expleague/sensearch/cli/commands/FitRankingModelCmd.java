@@ -9,8 +9,11 @@ import com.expleague.commons.util.Pair;
 import com.expleague.commons.util.logging.Interval;
 import com.expleague.ml.TargetFunc;
 import com.expleague.ml.cli.builders.data.DataBuilder;
+import com.expleague.ml.cli.builders.data.PoolReader;
 import com.expleague.ml.cli.builders.data.ReaderFactory;
 import com.expleague.ml.cli.builders.data.impl.DataBuilderCrossValidation;
+import com.expleague.ml.cli.builders.data.impl.PoolReaderFeatureTxt;
+import com.expleague.ml.cli.builders.data.impl.PoolReaderJson;
 import com.expleague.ml.cli.builders.methods.grid.GridBuilder;
 import com.expleague.ml.cli.builders.methods.impl.GradientBoostingBuilder;
 import com.expleague.ml.cli.builders.methods.impl.GreedyObliviousTreeBuilder;
@@ -54,6 +57,11 @@ public class FitRankingModelCmd implements Command {
       .longOption("data")
       .description("Specify path to the train data")
       .predicates(ExistingPath.get())
+      .build();
+  private static final EnumOption<DataFormat> DATA_FORMAT = EnumOption.builder(DataFormat.class)
+      .longOption("data-format")
+      .description("Specify format of the train data. JSON and FTXT is available")
+      .defaultValue(DataFormat.JSON)
       .build();
   private static final LongOption SEED = LongOption.builder()
       .shortOption("r")
@@ -279,6 +287,25 @@ public class FitRankingModelCmd implements Command {
         .writeModel(result, trainPool);
   }
 
+  private enum DataFormat {
+    JSON(new PoolReaderJson()),
+    FTXT(new PoolReaderFeatureTxt());
+
+    private final PoolReader reader;
+    DataFormat(PoolReader reader) {
+      this.reader = reader;
+    }
+
+    public PoolReader reader() {
+      return reader;
+    }
+  }
+
+  // TODO:
+  private enum LocalLoss {
+
+  }
+
   private enum Target {
     QMSE("GroupedL2"),
     MSE("SatL2");
@@ -296,6 +323,7 @@ public class FitRankingModelCmd implements Command {
 
   private enum Metric {
     NDCG("NormalizedDcg"),
+    PFOUND("Pfound"),
     NONE("");
     private final String metricName;
 
