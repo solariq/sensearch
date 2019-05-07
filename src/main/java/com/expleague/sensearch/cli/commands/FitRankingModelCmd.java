@@ -196,7 +196,7 @@ public class FitRankingModelCmd implements Command {
     dataBuilder.setLearnPath(TRAIN_DATA.value(commandLine).toString());
     // TODO: configure pool reader from command line
     // TODO: determine type of the pool from command line
-    dataBuilder.setReader(ReaderFactory.createJsonReader());
+    dataBuilder.setReader(DATA_FORMAT.value(commandLine).reader());
 
     return dataBuilder.create();
   }
@@ -243,7 +243,7 @@ public class FitRankingModelCmd implements Command {
       return;
     }
 
-    checkOptions(commandLine, TRAIN_DATA, SEED, TEST_PROPORTION, DEPTH, STEP, ITERATIONS,
+    checkOptions(commandLine, TRAIN_DATA, DATA_FORMAT, SEED, TEST_PROPORTION, DEPTH, STEP, ITERATIONS,
             TARGET_LOSS, OUTPUT, PRINT_PERIOD);
 
     Path outputPath = OUTPUT.value(commandLine);
