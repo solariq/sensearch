@@ -12,19 +12,16 @@ public class ResultItemImpl implements ResultItem {
   private final URI reference;
   private final CharSequence title;
   private final List<Pair<CharSequence, List<Segment>>> passages;
-  private final double score;
   private final ResultItemDebugInfo debugInfo;
 
   public ResultItemImpl(
       URI reference,
       CharSequence title,
       List<Pair<CharSequence, List<Segment>>> passages,
-      double score,
       ResultItemDebugInfo debugInfo) {
     this.reference = reference;
     this.title = title;
     this.passages = passages;
-    this.score = score;
     this.debugInfo = debugInfo;
   }
 
@@ -41,11 +38,6 @@ public class ResultItemImpl implements ResultItem {
   @Override
   public List<Pair<CharSequence, List<Segment>>> passages() {
     return passages;
-  }
-
-  @Override
-  public double score() {
-    return score;
   }
 
   @Override

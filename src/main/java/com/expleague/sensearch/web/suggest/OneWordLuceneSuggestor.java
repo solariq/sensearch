@@ -49,8 +49,8 @@ public class OneWordLuceneSuggestor implements Suggestor {
     this.index = index;
     
     suggester = new AnalyzingSuggester(
-        FSDirectory.open(suggestIndexRoot.resolve(storePath).getParent()),
-        filePrefix,
+        //FSDirectory.open(suggestIndexRoot.resolve(storePath).getParent()),
+        //filePrefix,
         new StandardAnalyzer());
     
     suggester.load(new FileInputStream(suggestIndexRoot.resolve(storePath).toFile()));

@@ -28,7 +28,7 @@ public class RawLuceneSuggestor implements Suggestor {
 
   @Override
   public String getName() {
-    return "Lucene " + RawLuceneSuggestor.class.getSimpleName();
+    return RawLuceneSuggestor.class.getSimpleName();
   }
   
   @Override

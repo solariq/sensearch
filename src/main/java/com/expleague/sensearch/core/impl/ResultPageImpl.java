@@ -9,19 +9,19 @@ public class ResultPageImpl implements ResultPage {
   private final int number;
   private final int totalResults;
   private final ResultItem[] results;
-  private final ResultItem[] googleResults;
+  private final ResultItem[] debugResults;
 
   public ResultPageImpl(
       String query,
       int number,
       int totalResults,
       ResultItem[] results,
-      ResultItem[] googleResults) {
+      ResultItem[] debugResults) {
     this.query = query;
     this.number = number;
     this.totalResults = totalResults;
     this.results = results;
-    this.googleResults = googleResults;
+    this.debugResults = debugResults;
   }
 
   @Override
@@ -45,7 +45,7 @@ public class ResultPageImpl implements ResultPage {
   }
 
   @Override
-  public ResultItem[] googleResults() {
-    return googleResults;
+  public ResultItem[] debugResults() {
+    return debugResults;
   }
 }

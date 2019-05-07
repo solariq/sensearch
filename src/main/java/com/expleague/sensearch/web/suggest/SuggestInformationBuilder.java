@@ -82,6 +82,8 @@ public class SuggestInformationBuilder {
     private TObjectLongMap<BytesRef> refMap = new TObjectLongHashMap<>();
     private TObjectLongIterator<BytesRef> iter = null;
 
+    private int cnt = 0;
+
     public void add(BytesRef phrase, int weight) {
       refMap.adjustOrPutValue(phrase, weight, weight);
     }
@@ -97,6 +99,10 @@ public class SuggestInformationBuilder {
       }
 
       iter.advance();
+      cnt++;
+      if (cnt % 10000 == 0) {
+        LOG.info(cnt + " pushed to AnalyzingSuggester");
+      }
 
       return iter.key();
     }
@@ -141,6 +147,7 @@ public class SuggestInformationBuilder {
     luceneInfixSuggester.close();
 
     lucenePrefixSuggester.build(prefixPhrases);
+    Files.createDirectories(suggestIndexRoot.resolve(OneWordLuceneSuggestor.storePath).getParent());
     lucenePrefixSuggester.store(new FileOutputStream(suggestIndexRoot.resolve(OneWordLuceneSuggestor.storePath).toFile()));
   }
 
@@ -235,8 +242,8 @@ public class SuggestInformationBuilder {
         new StandardAnalyzer());
 
     lucenePrefixSuggester = new AnalyzingSuggester(
-        FSDirectory.open(Files.createDirectory(suggestIndexRoot.resolve(OneWordLuceneSuggestor.storePath.getParent()))), 
-        OneWordLuceneSuggestor.filePrefix, 
+        //FSDirectory.open(Files.createDirectory(suggestIndexRoot.resolve(OneWordLuceneSuggestor.storePath.getParent()))), 
+        //OneWordLuceneSuggestor.filePrefix, 
         new StandardAnalyzer());
 
   }

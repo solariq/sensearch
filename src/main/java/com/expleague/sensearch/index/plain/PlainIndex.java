@@ -408,6 +408,7 @@ public class PlainIndex implements Index {
         .map(c -> idToTerm.get(c.getId()));
   }
 
+  @Override
   public Features filterFeatures(Query query, URI pageURI) {
     double minTitle = 1;
     double minBody = 1;

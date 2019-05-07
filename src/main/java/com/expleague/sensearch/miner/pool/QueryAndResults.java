@@ -48,7 +48,7 @@ public class QueryAndResults {
     }
 
     @JsonProperty("weight")
-    public double getWight() {
+    public double getWeight() {
       return weight;
     }
   }
