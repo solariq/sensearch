@@ -5,8 +5,8 @@ import com.expleague.sensearch.protobuf.index.IndexUnits;
 import com.google.common.primitives.Longs;
 import com.google.protobuf.InvalidProtocolBufferException;
 import gnu.trove.map.TLongObjectMap;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.Collection;
 import org.apache.log4j.Logger;
 import org.iq80.leveldb.DB;
 import org.iq80.leveldb.DBIterator;
@@ -15,17 +15,14 @@ public class SuggestInformationLoader {
 
   private static final Logger LOG = Logger.getLogger(SuggestInformationLoader.class);
 
-  Map<Term, Double> unigramCoeff = new HashMap<>();
-  Map<Term[], Double> multigramFreqNorm = new HashMap<>();
+  Collection<MultigramWrapper> multigramFreqNorm = new ArrayList<>();
 
-  private final DB unigramCoeffDB;
   private final DB multigramFreqNormDB;
 
   private final TLongObjectMap<Term> idToTerm;
 
   public SuggestInformationLoader(
       DB unigramCoeffDB, DB multigramDB, TLongObjectMap<Term> idToTerm) {
-    this.unigramCoeffDB = unigramCoeffDB;
     this.multigramFreqNormDB = multigramDB;
 
     this.idToTerm = idToTerm;
@@ -36,16 +33,6 @@ public class SuggestInformationLoader {
   private void tryLoad() {
     LOG.info("Loading suggest...");
     long startTime = System.nanoTime();
-
-    {
-      DBIterator iter = unigramCoeffDB.iterator();
-      iter.seekToFirst();
-      iter.forEachRemaining(
-          item ->
-              unigramCoeff.put(
-                  idToTerm.get(Longs.fromByteArray(item.getKey())),
-                  Double.longBitsToDouble(Longs.fromByteArray(item.getValue()))));
-    }
 
     {
       DBIterator iter = multigramFreqNormDB.iterator();
@@ -64,8 +51,8 @@ public class SuggestInformationLoader {
               throw new RuntimeException(e);
             }
 
-            multigramFreqNorm.put(
-                terms, Double.longBitsToDouble(Longs.fromByteArray(item.getValue())));
+            multigramFreqNorm.add(
+                new MultigramWrapper(terms, Double.longBitsToDouble(Longs.fromByteArray(item.getValue()))));
           });
     }
 

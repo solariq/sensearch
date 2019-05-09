@@ -46,13 +46,30 @@ import org.iq80.leveldb.DB;
 import org.iq80.leveldb.WriteBatch;
 import org.iq80.leveldb.WriteOptions;
 
+class LongArrWrapper {
+  public final long[] val;
+  public LongArrWrapper(long[] val) {
+    this.val = val;
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    return Arrays.equals(val, ((LongArrWrapper)obj).val);
+  }
+
+  @Override
+  public int hashCode() {
+    return Arrays.hashCode(val);
+  }
+}
+
 public class SuggestInformationBuilder {
 
   private final int maxNgramsOrder = 3;
 
   private int ndocs;
 
-  private final TObjectIntMap<long[]> multigramFreq = new TObjectIntHashMap<>();
+  private final TObjectIntMap<LongArrWrapper> multigramFreq = new TObjectIntHashMap<>();
   private final TLongIntMap unigramFreq = new TLongIntHashMap();
 
   private final TLongIntMap unigramDF = new TLongIntHashMap();
@@ -65,7 +82,7 @@ public class SuggestInformationBuilder {
 
   // Maps, that used in suggestor
   private final TLongDoubleMap unigramCoeff = new TLongDoubleHashMap();
-  private final TObjectDoubleMap<long[]> multigramFreqNorm = new TObjectDoubleHashMap<>();
+  private final TObjectDoubleMap<LongArrWrapper> multigramFreqNorm = new TObjectDoubleHashMap<>();
 
   private final DB unigramCoeffDB;
   private final DB multigramFreqNormDB;
@@ -114,7 +131,10 @@ public class SuggestInformationBuilder {
 
     @Override
     public BytesRef payload() {
-      double freqNorm = multigramFreqNorm.get(termsToIds(toTerms(iter.key().utf8ToString())));
+      LongArrWrapper tids = new LongArrWrapper(termsToIds(toTerms(iter.key().utf8ToString())));
+
+      double freqNorm = multigramFreqNorm.get(tids);
+
       return new BytesRef(Longs.toByteArray(Double.doubleToLongBits(freqNorm)));
     }
 
@@ -159,7 +179,7 @@ public class SuggestInformationBuilder {
     .allDocuments()
     .forEach(d -> {
       CharSequence title = d.content(Page.SegmentType.FULL_TITLE);
-      accept(toTerms(title), d.incomingLinksCount(Page.LinkType.ALL_LINKS));
+      accept(toTerms(title.toString().toLowerCase()), d.incomingLinksCount(Page.LinkType.ALL_LINKS));
 
       cnt[0]++;
       if (cnt[0] % 10000 == 0) {
@@ -211,7 +231,7 @@ public class SuggestInformationBuilder {
       WriteBatch batch = multigramFreqNormDB.createWriteBatch();
       multigramFreqNorm.forEachEntry(
           (key, value) -> {
-            List<Long> l = Arrays.stream(key).boxed().collect(Collectors.toList());
+            List<Long> l = Arrays.stream(key.val).boxed().collect(Collectors.toList());
 
             batch.put(
                 IndexUnits.TermList.newBuilder().addAllTermList(l).build().toByteArray(),
@@ -279,12 +299,12 @@ public class SuggestInformationBuilder {
         try {
           BytesRef br = new BytesRef(termsToString(l));
           luceneInfixSuggester.add(br, null, docIncomingLinks, null);
-          prefixPhrases.add(br, docIncomingLinks + 1);
+          prefixPhrases.add(br, docIncomingLinks + 1);          
         } catch (IOException e) {
           throw new RuntimeException(e);
         }
         //multigramFreq.adjustOrPutValue(lIds, docIncomingLinks + 1, docIncomingLinks + 1);
-        multigramFreq.adjustOrPutValue(lIds, 1, 1);
+        multigramFreq.adjustOrPutValue(new LongArrWrapper(lIds), 1, 1);
       }
     }
   }
@@ -294,7 +314,7 @@ public class SuggestInformationBuilder {
 
     multigramFreq
     .forEachEntry((key, value) -> {
-      int idx = key.length - 1;
+      int idx = key.val.length - 1;
       countOfOrder[idx]++;
       avgOrderFreq[idx] += value;
       return true;
@@ -306,23 +326,24 @@ public class SuggestInformationBuilder {
     }
   }
 
-  private double freqNorm(long[] l) {
-    return multigramFreq.get(l) / Math.log(1 + avgOrderFreq[l.length - 1]);
+  private double freqNorm(LongArrWrapper l) {
+    return multigramFreq.get(l) / Math.log(1 + avgOrderFreq[l.val.length - 1]);
     //return multigramFreq.get(l);
   }
 
   private void computeFreqNorm() {
-    for (long[] l : multigramFreq.keySet()) {
+    for (LongArrWrapper l : multigramFreq.keySet()) {
       double fNorm = freqNorm(l);
-      for (long s : l) {
-        sumFreqNorm.putIfAbsent(s, 0.0);
-        sumFreqNorm.put(s, sumFreqNorm.get(s) + fNorm);
+      for (long s : l.val) {
+        sumFreqNorm.adjustOrPutValue(s, fNorm, 0.0);
       }
     }
   }
 
   private void computeTargetMaps() {
-    multigramFreq.keySet().forEach(mtgr -> multigramFreqNorm.put(mtgr, freqNorm(mtgr)));
+    multigramFreq.keySet().forEach(mtgr -> 
+    multigramFreqNorm.put(mtgr, freqNorm(mtgr)
+        ));
 
     unigramFreq
     .keySet()

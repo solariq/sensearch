@@ -65,8 +65,8 @@ public class MetricsCounter {
     for (Entry<String, List<String>> e : map.entrySet()) {
       /*
       if (e.getKey().split(" ").length < 2)
-        continue;
-      */
+        continue;*/
+      
       for (int i = 0; i < nSugg; i++) {
 
         long startTime = System.nanoTime();
@@ -127,10 +127,10 @@ public class MetricsCounter {
 
     MetricsCounter mc = new MetricsCounter(
         //new BigramsBasedSuggestor(index),
-        //new OneWordSuggestor(index),
+        new OneWordSuggestor(index),
         new RawLuceneSuggestor(suggestRoot),
-        new OneWordLuceneSuggestor(index, suggestRoot),
-        new LearnedSuggester(index, suggestRoot)
+        new OneWordLuceneSuggestor(index, suggestRoot)
+        //new LearnedSuggester(index, suggestRoot)
         );
 
     //mc.getSuggestsExamples("мир");

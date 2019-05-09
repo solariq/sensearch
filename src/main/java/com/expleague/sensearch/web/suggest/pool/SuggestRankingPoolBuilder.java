@@ -14,7 +14,10 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
+import java.io.BufferedWriter;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -113,6 +116,9 @@ public class SuggestRankingPoolBuilder {
 
     Pool.Builder<QSUGItem> poolBuilder = Pool.builder(meta, features, targetFeatures);
 
+    BufferedWriter tabWriter = new BufferedWriter(new PrintWriter(new FileOutputStream(suggestIndexRoot.resolve("ftable.txt").toFile())));
+    tabWriter.write("intersection links probCoef cosine target\n");
+
     int exmpNumberSum = 0;
     for(Entry<String, List<String>> qSugList : map.entrySet()) {
       /*
@@ -129,6 +135,13 @@ public class SuggestRankingPoolBuilder {
       List<QSUGItem> examples = generateExamples(query, qSugList.getValue());
       exmpNumberSum += examples.size();
       for (QSUGItem qsitem : examples) {
+        tabWriter.write(
+            String.format("%d %d %f %f %f\n",
+                qsitem.intersectionLength,
+                qsitem.incomingLinksCount,
+                qsitem.probabilisticCoeff,
+                qsitem.cosine,
+                qsitem.isPositive ? 1.0 : 0.0));
         poolBuilder.accept(qsitem);
         poolBuilder.advance();
       }
@@ -136,6 +149,7 @@ public class SuggestRankingPoolBuilder {
 
     System.err.println("Avg. examples number: " + 1.0 * exmpNumberSum / map.size());
 
+    tabWriter.close();
     Pool<QSUGItem> pool = poolBuilder.create();
     DataTools.writePoolTo(pool, Files.newBufferedWriter(suggestIndexRoot.resolve(dataPath)));
 

@@ -2,12 +2,13 @@ package com.expleague.sensearch.web.suggest;
 
 import java.util.Arrays;
 import java.util.stream.Collectors;
+import org.jetbrains.annotations.NotNull;
 import com.expleague.sensearch.core.Term;
 
 public class MultigramWrapper {
-  public Term[] phrase;
-  public double coeff;
-  public MultigramWrapper(Term[] phrase, double coeff) {
+  public final Term[] phrase;
+  public final double coeff;
+  public MultigramWrapper(@NotNull Term[] phrase, double coeff) {
     this.phrase = phrase;
     this.coeff = coeff;
   }

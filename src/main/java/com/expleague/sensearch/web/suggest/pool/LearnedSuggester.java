@@ -77,18 +77,19 @@ public class LearnedSuggester implements Suggestor {
 
     suggester.load(new FileInputStream(suggestIndexRoot.resolve(storePath).toFile()));
 
-    if (Files.exists(suggestIndexRoot.resolve(SuggestRankingPoolBuilder.dataPath))) {
+    if (Files.exists(suggestIndexRoot.resolve("suggest_ranker.model"))) {
       model = (Trans) DataTools.readModel(
           new InputStreamReader(
               Files.newInputStream(suggestIndexRoot.resolve("suggest_ranker.model")), StandardCharsets.UTF_8)).getFirst();
+
+      LOG.warn(
+          "Rank model can not be found at path ["
+              + SuggestRankingPoolBuilder.dataPath
+              + "], using empty model instead");
     } else {
       model = null;
     }
 
-    LOG.warn(
-        "Rank model can not be found at path ["
-            + SuggestRankingPoolBuilder.dataPath
-            + "], using empty model instead");
   }
 
   @Override
