@@ -2,6 +2,7 @@ package com.expleague.sensearch.web;
 
 import com.expleague.sensearch.SenSeArch;
 import com.expleague.sensearch.SenSeArch.ResultItem;
+import com.expleague.sensearch.clicks.ClickLogger;
 import com.expleague.sensearch.core.impl.ResultItemImpl;
 import com.expleague.sensearch.miner.pool.QueryAndResults;
 import com.expleague.sensearch.miner.pool.QueryAndResults.PageAndWeight;
@@ -18,11 +19,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
-import javax.ws.rs.DefaultValue;
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
+import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 
 @Path("/")
@@ -34,6 +31,7 @@ public class SearchEndpoint {
   private final Map<String, List<URI>> groundTruthData = new HashMap<>();
 
   //  private final Suggestor suggestor;
+  private final ClickLogger clickLogger = new ClickLogger();
 
   // Note: this is javax @Inject, not Guice's as Jersey uses HK2 DI under the hood
   @Inject
@@ -96,5 +94,14 @@ public class SearchEndpoint {
   //  public String index() throws IOException {
   //    return String.join("\n", Files.readAllLines(Paths.get(ConfigImpl.getMainPageHTML())));
   //  }
+
+  @POST
+  @Path("/clicks")
+  public void clicks(
+          @DefaultValue("") @QueryParam("session_id") String sessionId,
+          @DefaultValue("") @QueryParam("query") String query,
+          @DefaultValue("") @QueryParam("uri") String uri) throws IOException {
+    clickLogger.log(sessionId, query, uri);
+  }
 
 }
