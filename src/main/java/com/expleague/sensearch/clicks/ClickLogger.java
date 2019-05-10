@@ -29,7 +29,7 @@ public class ClickLogger {
         click.put("query", query);
         click.put("uri", uri);
 
-        bw.write(click.toString());
+        bw.write(click.toString() + "\n");
         bw.close();
     }
 }
