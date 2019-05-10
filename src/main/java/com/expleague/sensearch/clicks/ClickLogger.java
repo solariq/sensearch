@@ -1,5 +1,7 @@
 package com.expleague.sensearch.clicks;
 
+import org.json.JSONObject;
+
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
@@ -21,7 +23,13 @@ public class ClickLogger {
 
         File file = new File(cluster);
         BufferedWriter bw = new BufferedWriter(new FileWriter(file, true));
-        bw.write(sessionId + " " + query + " " + uri + "\n");
+
+        JSONObject click = new JSONObject();
+        click.put("sessionId", sessionId);
+        click.put("query", query);
+        click.put("uri", uri);
+
+        bw.write(click.toString());
         bw.close();
     }
 }
