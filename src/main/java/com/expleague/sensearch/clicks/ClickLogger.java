@@ -19,7 +19,7 @@ public class ClickLogger {
         int delta = minute >= 30 ? minute - 30 : minute;
         ldt = ldt.minusMinutes((long) delta);
 
-        String cluster = dataRoot + DateTimeFormatter.ofPattern("yyyy-MM-dd-HH-mm").format(ldt);
+        String cluster = dataRoot + "clicks-" + DateTimeFormatter.ofPattern("yyyy-MM-dd-HH-mm").format(ldt);
 
         File file = new File(cluster);
         BufferedWriter bw = new BufferedWriter(new FileWriter(file, true));
