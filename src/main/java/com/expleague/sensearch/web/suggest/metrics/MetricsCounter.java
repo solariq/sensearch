@@ -134,7 +134,7 @@ public class MetricsCounter {
 
     MetricsCounter mc = new MetricsCounter(
         //new BigramsBasedSuggestor(index),
-        //new OneWordSuggestor(index),
+        new OneWordSuggestor(index),
         new RawLuceneSuggestor(suggestRoot),
         new OneWordLuceneSuggestor(index, suggestRoot),
         new LearnedSuggester(index, suggestRoot),

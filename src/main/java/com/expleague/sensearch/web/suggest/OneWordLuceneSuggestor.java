@@ -18,6 +18,7 @@ import com.expleague.commons.math.vectors.Vec;
 import com.expleague.commons.math.vectors.VecTools;
 import com.expleague.sensearch.core.Term;
 import com.expleague.sensearch.index.Index;
+import com.google.inject.Inject;
 
 public class OneWordLuceneSuggestor implements Suggestor {
   public final int RETURN_LIMIT = 10;
@@ -45,6 +46,7 @@ public class OneWordLuceneSuggestor implements Suggestor {
 
   };
 
+  @Inject
   public OneWordLuceneSuggestor(Index index, Path suggestIndexRoot) throws IOException {
     this.index = index;
     
