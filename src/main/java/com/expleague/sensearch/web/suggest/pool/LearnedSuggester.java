@@ -12,6 +12,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 import org.apache.log4j.Logger;
@@ -22,9 +23,12 @@ import org.apache.lucene.store.FSDirectory;
 import com.expleague.commons.math.Trans;
 import com.expleague.commons.math.vectors.Vec;
 import com.expleague.commons.math.vectors.VecTools;
+import com.expleague.commons.math.vectors.impl.vectors.ArrayVec;
 import com.expleague.ml.data.tools.DataTools;
 import com.expleague.sensearch.core.Term;
 import com.expleague.sensearch.index.Index;
+import com.expleague.sensearch.index.plain.IndexTerm;
+import com.expleague.sensearch.index.plain.PlainIndex;
 import com.expleague.sensearch.miner.pool.builders.FilterPoolBuilder;
 import com.expleague.sensearch.web.suggest.Suggestor;
 import com.google.common.primitives.Longs;
@@ -36,17 +40,17 @@ public class LearnedSuggester implements Suggestor {
 
   public final static String filePrefix = "prefix_sugg";
 
-  private final AnalyzingSuggester suggester;
+  protected final AnalyzingSuggester suggester;
 
   private final Trans model;
 
   private final AccumulatorFeatureSet featureSet = new AccumulatorFeatureSet();
 
-  private final Index index;
+  protected final Index index;
 
   public final static Path storePath = Paths.get("luceneSuggestPrefix/store");
 
-  private class StringDoublePair  implements Comparable<StringDoublePair> {
+  public class StringDoublePair  implements Comparable<StringDoublePair> {
 
     public final String phrase;
     public final double coeff;
@@ -82,12 +86,12 @@ public class LearnedSuggester implements Suggestor {
           new InputStreamReader(
               Files.newInputStream(suggestIndexRoot.resolve("suggest_ranker.model")), StandardCharsets.UTF_8)).getFirst();
 
+    } else {
+      model = null;
       LOG.warn(
           "Rank model can not be found at path ["
               + SuggestRankingPoolBuilder.dataPath
               + "], using empty model instead");
-    } else {
-      model = null;
     }
 
   }
@@ -112,7 +116,7 @@ public class LearnedSuggester implements Suggestor {
     return "Learned Suggester";
   }
 
-  private String termsToString(Term[] terms) {
+  protected String termsToString(Term[] terms) {
     return Arrays.stream(terms).map(t -> t.text().toString())
         .collect(Collectors.joining(" "));
   }
@@ -124,7 +128,7 @@ public class LearnedSuggester implements Suggestor {
         .collect(Collectors.toList())
         );
   }
-
+  
   public List<QSUGItem> getUnsortedSuggestions(List<Term> terms) throws IOException {
 
     if (terms.isEmpty()) {
@@ -145,30 +149,31 @@ public class LearnedSuggester implements Suggestor {
       Term[] qt = terms.subList(terms.size() - intersectLength, terms.size()).toArray(new Term[0]);
 
       Vec queryVec = index.vecByTerms(qc);
+      Vec queryVecTfidf = ((PlainIndex) index).weightedVecByTerms(qc);
 
       List<LookupResult> endingPhrases = suggester.lookup(termsToString(qt), false, 1000000);
 
       //System.out.println("number of selected phrases: " + endingPhrases.size());
       for (LookupResult p : endingPhrases) {
         Term[] phrase = index.parse(p.key.toString().toLowerCase()).toArray(Term[]::new);
+
         if (phrase.length > intersectLength) {
           continue;
         }
-        /*
-        if (qc.size() > 0) {
-          phraseProb.add(new MultigramWrapper(phrase, VecTools.cosine(queryVec, index.vecByTerms(Arrays.asList(phrase)))));
-        } else {
-          phraseProb.add(new MultigramWrapper(phrase, p.value));
-        }
-        phraseProb.removeIf(it -> phraseProb.size() > RETURN_LIMIT);
-         */
-
+        
+        Vec phraseVec = index.vecByTerms(Arrays.asList(phrase));
+        Vec phraseVecTfidf = ((PlainIndex) index).weightedVecByTerms(Arrays.asList(phrase));
+        
         QSUGItem item = new QSUGItem(
-            qcText + " " + p.key.toString().toLowerCase(),
+            (qc.size() > 0 ? qcText + " " : "") + p.key.toString().toLowerCase(),
             intersectLength,
             Math.toIntExact(p.value),
             Double.longBitsToDouble(Longs.fromByteArray(p.payload.bytes)),
-            VecTools.cosine(queryVec, index.vecByTerms(Arrays.asList(phrase))),
+            VecTools.cosine(queryVec, phraseVec),
+            VecTools.cosine(phraseVecTfidf, queryVecTfidf),
+            Arrays.stream(phrase).mapToDouble(t -> ((PlainIndex )index).tfidf(t)).sum(),
+            0.,
+            VecTools.l2(phraseVec),
             false
             );
 
@@ -181,7 +186,7 @@ public class LearnedSuggester implements Suggestor {
     return res;
   }
 
-  private List<String> getSuggestions(List<Term> terms) throws IOException {
+  List<String> getSuggestions(List<Term> terms) throws IOException {
 
     if (terms.isEmpty()) {
       return Collections.emptyList();
@@ -200,9 +205,9 @@ public class LearnedSuggester implements Suggestor {
       phraseProb.add(
           new StringDoublePair(
               p.suggestion,
-              model
-              .trans(v)
-              .get(0)));
+              model.trans(v).get(0)
+              //Math.abs(p.cosine) < 1e-5 ? p.incomingLinksCount : p.cosine
+              ));
 
       phraseProb.removeIf(it -> phraseProb.size() > RETURN_LIMIT);
     }

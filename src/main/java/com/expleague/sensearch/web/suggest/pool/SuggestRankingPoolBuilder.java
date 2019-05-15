@@ -79,21 +79,15 @@ public class SuggestRankingPoolBuilder {
       throw new RuntimeException(e);
     }
 
-    for (QSUGItem myMatched : prefixMatched) {
+    raw:    for (QSUGItem myMatched : prefixMatched) {
 
       for (String rs : referenceSuggests) {
         if (match(myMatched.suggestion, rs)) {
-          res.add(new QSUGItem(
-              myMatched.suggestion,
-              myMatched.intersectionLength,
-              myMatched.incomingLinksCount,
-              myMatched.probabilisticCoeff,
-              myMatched.cosine,
-              true));
-
-          QSUGItem negativeSample = prefixMatched.get(rnd.nextInt(prefixMatched.size()));
-          if (!negativeSample.suggestion.equals(myMatched.suggestion))
-            res.add(negativeSample);
+          res.add(myMatched.asPositive());
+          continue raw;
+        }
+        if (prefixMatched.size() < 20 || rnd.nextInt(100) < 10) {
+          res.add(myMatched);
         }
       }
     }
@@ -117,7 +111,7 @@ public class SuggestRankingPoolBuilder {
     Pool.Builder<QSUGItem> poolBuilder = Pool.builder(meta, features, targetFeatures);
 
     BufferedWriter tabWriter = new BufferedWriter(new PrintWriter(new FileOutputStream(suggestIndexRoot.resolve("ftable.txt").toFile())));
-    tabWriter.write("intersection links probCoef cosine target\n");
+    tabWriter.write("intersection links probCoef cosine phraseLength target\n");
 
     int exmpNumberSum = 0;
     for(Entry<String, List<String>> qSugList : map.entrySet()) {
@@ -130,6 +124,8 @@ public class SuggestRankingPoolBuilder {
       }
       status.incrementAndGet();
 
+      //if (status.get() > 4000)
+      //  break;
       String query = qSugList.getKey();
 
       List<QSUGItem> examples = generateExamples(query, qSugList.getValue());
@@ -141,6 +137,7 @@ public class SuggestRankingPoolBuilder {
                 qsitem.incomingLinksCount,
                 qsitem.probabilisticCoeff,
                 qsitem.cosine,
+                qsitem.vectorSumLength,
                 qsitem.isPositive ? 1.0 : 0.0));
         poolBuilder.accept(qsitem);
         poolBuilder.advance();

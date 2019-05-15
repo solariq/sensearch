@@ -13,27 +13,31 @@ import com.expleague.sensearch.core.Term;
 public class SortedMultigramsArray {
   private final ArrayList<MultigramWrapper> sortedMultigrams = new ArrayList<>();
 
-  private final Comparator<Term[]> bsCmp = new BinSearchComparator();
-  private final Comparator<Term[]> sortCmp = new PhraseSortingComparator();
+  //private final Comparator<Term[]> bsCmp = new BinSearchComparator();
+  //private final Comparator<Term[]> sortCmp = new PhraseSortingComparator();
 
   public SortedMultigramsArray(Collection<MultigramWrapper> multList) {
     sortedMultigrams.addAll(multList);
     Collections.sort(sortedMultigrams,
-        (m1, m2) -> sortCmp.compare(m1.phrase, m2.phrase));
+        //(m1, m2) -> sortCmp.compare(m1.phrase, m2.phrase)
+        (m1, m2) -> m1.toString().compareTo(m2.toString()));
   }
 
   public SortedMultigramsArray(Map<Term[], Double> multList) {
     multList.forEach((t, d) -> sortedMultigrams.add(new MultigramWrapper(t, d)));
     Collections.sort(sortedMultigrams,
-        (m1, m2) -> sortCmp.compare(m1.phrase, m2.phrase));
+        //(m1, m2) -> sortCmp.compare(m1.phrase, m2.phrase)
+        (m1, m2) -> m1.toString().compareTo(m2.toString())
+        );
   }
 
   private int binSearchPosition(Term[] words, boolean upperBound) {
+    String words_s = new MultigramWrapper(words, 0).toString();
     int l = 0, r = sortedMultigrams.size();
     while (r - l > 1) {
       int m = (r - l) / 2 + l;
 
-      int c = bsCmp.compare(words, sortedMultigrams.get(m).phrase);
+      int c = words_s.compareTo(sortedMultigrams.get(m).toString());
       if (c > 0 || (upperBound && c == 0)) {
         l = m;
       } else {

@@ -19,6 +19,7 @@ import com.expleague.sensearch.web.suggest.RawLuceneSuggestor;
 import com.expleague.sensearch.web.suggest.OneWordSuggestor;
 import com.expleague.sensearch.web.suggest.Suggestor;
 import com.expleague.sensearch.web.suggest.pool.LearnedSuggester;
+import com.expleague.sensearch.web.suggest.pool.UnsortedSuggester;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Guice;
@@ -63,33 +64,39 @@ public class MetricsCounter {
     int[] matched = new int[nSugg];
 
     for (Entry<String, List<String>> e : map.entrySet()) {
-      /*
-      if (e.getKey().split(" ").length < 2)
-        continue;*/
-      
+
+      if (e.getKey().split(" ").length > 1)
+        continue;
+
       for (int i = 0; i < nSugg; i++) {
 
         long startTime = System.nanoTime();
         List<String> mySugg = suggestors[i].getSuggestions(e.getKey());
         long delta = System.nanoTime() - startTime;
         timeSum[i] += delta;
-        
+
         if (delta > timeMax[i]) {
           timeMax[i] = delta;
         }
 
         int pos = 1;
+        int maxPos = 0;
+        double currRRSum = 0;
         for (String ms : mySugg) {
           for (String os : e.getValue()) {
             //if (ms.equals(os)) {
-            if (ms.contains(os) || os.contains(ms)) {
+            if (ms.startsWith(os) || os.startsWith(ms)) {
               matched[i]++;
-              rrSum[i] += 1.0 / pos;
-              System.out.format("Обработано %s / %s\n", cnt, map.size());
+              currRRSum += 1.0 / pos;
+              maxPos = pos;
+              System.out.format("Обработано %s / %s, %s, %.4f\n", cnt, map.size(),
+                  suggestors[i].getName(), rrSum[i] / (cnt + 1));
+              break;
             }
           }
           pos++;
         }
+        rrSum[i] += maxPos > 0 ? currRRSum / maxPos : 0;
       }
       cnt++;
     }
@@ -127,14 +134,17 @@ public class MetricsCounter {
 
     MetricsCounter mc = new MetricsCounter(
         //new BigramsBasedSuggestor(index),
-        new OneWordSuggestor(index),
+        //new OneWordSuggestor(index),
         new RawLuceneSuggestor(suggestRoot),
-        new OneWordLuceneSuggestor(index, suggestRoot)
-        //new LearnedSuggester(index, suggestRoot)
+        new OneWordLuceneSuggestor(index, suggestRoot),
+        new LearnedSuggester(index, suggestRoot),
+        new DatasetSuggester("map"),
+        new DatasetSuggester("map_google"),
+        new UnsortedSuggester(index, suggestRoot)
         );
 
     //mc.getSuggestsExamples("мир");
-    //mc.getSuggestsExamples("миронов", "миронов а");
-    mc.evaluate();
+    mc.getSuggestsExamples("миронов а");
+    //mc.evaluate();
   }
 }

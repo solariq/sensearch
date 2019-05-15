@@ -5,12 +5,17 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
-@JsonPropertyOrder({"suggestion",
-  "isPositive",
+@JsonPropertyOrder({
+  "suggestion",
   "intersect",
   "links",
   "prob_coef",
-  "cosine"})
+  "cosine",
+  "tfIdfSum",
+  "tfIdfCosine",
+  "MalletCosine",
+  "vectorSumLength",
+  "isPositive",})
 public class QSUGItem extends GroupedDSItem.Stub {
   public final String suggestion;
 
@@ -19,6 +24,10 @@ public class QSUGItem extends GroupedDSItem.Stub {
   public final int incomingLinksCount;
   public final double probabilisticCoeff;
   public final double cosine;
+  public final double tfidfWeightedCosine;
+  public final double malletCosine;
+  public final double tfidfSum;
+  public final double vectorSumLength;
 
   @JsonCreator
   public QSUGItem(
@@ -27,6 +36,10 @@ public class QSUGItem extends GroupedDSItem.Stub {
       @JsonProperty("links") int links,
       @JsonProperty("prob_coef") double coef,
       @JsonProperty("cosine") double cosine,
+      @JsonProperty("tfIdfCosine") double tfIdfCosine,
+      @JsonProperty("tfIdfSum") double tfIdfSum,
+      @JsonProperty("MalletCosine") double malletCosine,
+      @JsonProperty("vectorSumLength") double vectorSumLength,
       @JsonProperty("isPositive") boolean isPositive) {
     super();
     this.suggestion = suggestion;
@@ -34,10 +47,38 @@ public class QSUGItem extends GroupedDSItem.Stub {
     this.incomingLinksCount = links;
     this.probabilisticCoeff = coef;
     this.cosine = cosine;
+    this.tfidfWeightedCosine = tfIdfCosine;
+    this.malletCosine = malletCosine;
+    this.tfidfSum = tfIdfSum;
+    this.vectorSumLength = vectorSumLength;
     
     this.isPositive = isPositive;
   }
 
+  @JsonProperty("tfIdfCosine")
+  public double getTfidfWeightedCosine() {
+    return tfidfWeightedCosine;
+  }
+
+  @JsonProperty("MalletCosine")
+  public double getMalletCosine() {
+    return malletCosine;
+  }
+
+  @JsonProperty("tfIdfSum")
+  public double getTfidfSum() {
+    return tfidfSum;
+  }
+
+  @JsonProperty("vectorSumLength")
+  public double getVectorSumLength() {
+    return vectorSumLength;
+  }
+
+  public QSUGItem asPositive() {
+    return new QSUGItem(suggestion, intersectionLength, incomingLinksCount, probabilisticCoeff, cosine, tfidfWeightedCosine, tfidfSum, malletCosine, vectorSumLength, true);
+  }
+  
   @JsonProperty("suggestion")
   public String getSuggestion() {
     return suggestion;
