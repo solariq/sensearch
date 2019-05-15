@@ -317,6 +317,33 @@ public class PlainIndex implements Index {
     return answerVec;
   }
 
+  public double tfidf(Term t1) {
+    IndexTerm t = (IndexTerm) t1;
+    return t.freq() * Math.log(1e9 / t.documentFreq());
+  }
+  
+  public Vec weightedVecByTerms(List<Term> terms) {
+    final ArrayVec answerVec = new ArrayVec(embedding.dim());
+    long cnt =
+        terms
+        .stream()
+        .map(t -> (IndexTerm) t)
+        .map(t -> {
+          Vec v1 = embedding.vec(t.id());
+          if (v1 == null) {
+            return null;
+          }
+          return VecTools.scale(v1, tfidf(t));
+        })
+        .filter(Objects::nonNull)
+        .peek(v -> VecTools.append(answerVec, v))
+        .count();
+    if (cnt > 0) {
+      answerVec.scale(1. / ((double) cnt));
+    }
+    return answerVec;
+  }
+  
   @Override
   public Stream<Page> allDocuments() {
     DBIterator iterator = pageBase.iterator();
