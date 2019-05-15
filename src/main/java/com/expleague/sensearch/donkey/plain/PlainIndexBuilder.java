@@ -80,7 +80,7 @@ public class PlainIndexBuilder implements IndexBuilder {
   public static final String SUGGEST_MULTIGRAMS_ROOT = "suggest/multigram_freq_norm";
 
   public static final String INDEX_META_FILE = "index.meta";
-  public static final int DEFAULT_VEC_SIZE = 130;
+  public static final int DEFAULT_VEC_SIZE = 192;
 
   private static final int NEIGHBORS_NUM = 50;
   private static final int NUM_OF_RANDOM_IDS = 100;

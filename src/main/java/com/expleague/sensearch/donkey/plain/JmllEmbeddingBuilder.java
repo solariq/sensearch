@@ -4,15 +4,13 @@ import com.expleague.commons.seq.CharSeq;
 import com.expleague.ml.embedding.Embedding;
 import com.expleague.ml.embedding.decomp.DecompBuilder;
 import com.expleague.sensearch.donkey.crawler.document.CrawlerDocument;
-import org.apache.commons.io.FileUtils;
-import org.apache.log4j.Logger;
-
 import java.io.IOException;
 import java.io.Writer;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.stream.Stream;
+import org.apache.log4j.Logger;
 
 public class JmllEmbeddingBuilder {
 
@@ -56,7 +54,7 @@ public class JmllEmbeddingBuilder {
     LOG.info("Training embedding...");
 
     DecompBuilder builder = (DecompBuilder) Embedding.builder(Embedding.Type.DECOMP);
-    final Embedding<CharSeq> result = builder.dimSym(vecSize).dimSkew(20).minWordCount(3).step(0.05).file(corpus).build();
+    final Embedding<CharSeq> result = builder.dimSym(vecSize).dimSkew(20).minWordCount(80).step(0.05).file(corpus).build();
 
     LOG.info("Jmll embedding trained");
     return result;
