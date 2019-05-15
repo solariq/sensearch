@@ -7,6 +7,7 @@ import com.expleague.sensearch.cli.commands.FitRankingModelCmd;
 import com.expleague.sensearch.cli.commands.RebuildEmbeddingCmd;
 import com.expleague.sensearch.cli.commands.RunCmdLineSearchCmd;
 import com.expleague.sensearch.cli.commands.RunServerCmd;
+import com.expleague.sensearch.cli.commands.RunViewEmbeddingCmd;
 import com.expleague.sensearch.cli.commands.TrainEmbeddingCmd;
 import com.expleague.sensearch.cli.commands.TransformPoolDataCmd;
 import java.nio.file.Files;
@@ -30,6 +31,7 @@ public class SenSeArchCli {
       put(RebuildEmbeddingCmd.commandName(), RebuildEmbeddingCmd.instance());
       put(TransformPoolDataCmd.commandName(), TransformPoolDataCmd.instance());
       put(RunCmdLineSearchCmd.commandName(), RunCmdLineSearchCmd.instance());
+      put(RunViewEmbeddingCmd.commandName(), RunViewEmbeddingCmd.instance());
     }
   };
 
