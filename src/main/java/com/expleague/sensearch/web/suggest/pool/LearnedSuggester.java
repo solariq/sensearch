@@ -50,7 +50,7 @@ public class LearnedSuggester implements Suggestor {
 
   public final static Path storePath = Paths.get("luceneSuggestPrefix/store");
 
-  public class StringDoublePair  implements Comparable<StringDoublePair> {
+  public static class StringDoublePair  implements Comparable<StringDoublePair> {
 
     public final String phrase;
     public final double coeff;
@@ -116,11 +116,10 @@ public class LearnedSuggester implements Suggestor {
     return "Learned Suggester";
   }
 
-  protected String termsToString(Term[] terms) {
+  public static String termsToString(Term[] terms) {
     return Arrays.stream(terms).map(t -> t.text().toString())
         .collect(Collectors.joining(" "));
   }
-
 
   public List<QSUGItem> getUnsortedEndings(String query) throws IOException {
     return getUnsortedSuggestions(
@@ -156,17 +155,18 @@ public class LearnedSuggester implements Suggestor {
       //System.out.println("number of selected phrases: " + endingPhrases.size());
       for (LookupResult p : endingPhrases) {
         Term[] phrase = index.parse(p.key.toString().toLowerCase()).toArray(Term[]::new);
-
+/*
         if (phrase.length > intersectLength) {
           continue;
         }
-        
+*/
         Vec phraseVec = index.vecByTerms(Arrays.asList(phrase));
         Vec phraseVecTfidf = ((PlainIndex) index).weightedVecByTerms(Arrays.asList(phrase));
         
         QSUGItem item = new QSUGItem(
             (qc.size() > 0 ? qcText + " " : "") + p.key.toString().toLowerCase(),
             intersectLength,
+            phrase.length,
             Math.toIntExact(p.value),
             Double.longBitsToDouble(Longs.fromByteArray(p.payload.bytes)),
             VecTools.cosine(queryVec, phraseVec),

@@ -15,10 +15,12 @@ import com.expleague.sensearch.ConfigImpl;
 import com.expleague.sensearch.index.Index;
 import com.expleague.sensearch.web.suggest.BigramsBasedSuggestor;
 import com.expleague.sensearch.web.suggest.OneWordLuceneSuggestor;
+import com.expleague.sensearch.web.suggest.OneWordLuceneTFIDF;
 import com.expleague.sensearch.web.suggest.RawLuceneSuggestor;
 import com.expleague.sensearch.web.suggest.OneWordSuggestor;
 import com.expleague.sensearch.web.suggest.Suggestor;
 import com.expleague.sensearch.web.suggest.pool.LearnedSuggester;
+import com.expleague.sensearch.web.suggest.pool.SuggestRankingPoolBuilder;
 import com.expleague.sensearch.web.suggest.pool.UnsortedSuggester;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -43,7 +45,7 @@ public class MetricsCounter {
         System.out.println("------------------------ " + suggestors[i].getName());
         List<String> suggests = suggestors[i].getSuggestions(query);
         for (String sugg : suggests) {
-          System.out.println(sugg);
+          System.out.println("|" + sugg + "|");
         }
       }
     }
@@ -59,15 +61,17 @@ public class MetricsCounter {
 
     int cnt = 0;
     double[] rrSum = new double[nSugg];
+    double[] mapSum = new double[nSugg];
     long[] timeSum = new long[nSugg];
     long[] timeMax = new long[nSugg];
     int[] matched = new int[nSugg];
 
     for (Entry<String, List<String>> e : map.entrySet()) {
-
-      if (e.getKey().split(" ").length > 1)
+/*
+      String[] words = e.getKey().split(" ");
+      if (words.length < 2 || words[1].length() > 3)
         continue;
-
+*/
       for (int i = 0; i < nSugg; i++) {
 
         long startTime = System.nanoTime();
@@ -80,23 +84,30 @@ public class MetricsCounter {
         }
 
         int pos = 1;
-        int maxPos = 0;
-        double currRRSum = 0;
+        boolean firstMatched = false;
+        int current_matched = 0;
         for (String ms : mySugg) {
           for (String os : e.getValue()) {
             //if (ms.equals(os)) {
-            if (ms.startsWith(os) || os.startsWith(ms)) {
+            //if (ms.startsWith(os) || os.startsWith(ms)) {
+            if (SuggestRankingPoolBuilder.match(ms, os)) {
               matched[i]++;
-              currRRSum += 1.0 / pos;
-              maxPos = pos;
-              System.out.format("Обработано %s / %s, %s, %.4f\n", cnt, map.size(),
-                  suggestors[i].getName(), rrSum[i] / (cnt + 1));
+              current_matched++;
+              if (!firstMatched) {
+                rrSum[i] += 1.0 / pos;
+              }
+              firstMatched = true;
+
               break;
             }
           }
           pos++;
         }
-        rrSum[i] += maxPos > 0 ? currRRSum / maxPos : 0;
+        mapSum[i] += mySugg.size() > 0 ? (current_matched / mySugg.size()) : 0;
+        System.out.format("Обработано %s / %s, %s, MRR: %.4f MAP %.4f\n", cnt, map.size(),
+            suggestors[i].getName(),
+            rrSum[i] / (cnt + 1),
+            mapSum[i] / (cnt + 1));
       }
       cnt++;
     }
@@ -107,12 +118,14 @@ public class MetricsCounter {
           "Метод %s\n" 
               + "совпадений подсказок %d\n" 
               + "MRR %.3f\n"
+              + "MAP %.3f\n"
               + "Avg. time %.3f\n"
               + "Max time %.3f\n"
               + "--------------------\n",
               suggestors[i].getName(),
               matched[i],
               rrSum[i] / cnt,
+              mapSum[i] / cnt,
               timeSum[i] / cnt / 1e9,
               timeMax[i] / 1e9);
     }
@@ -134,17 +147,18 @@ public class MetricsCounter {
 
     MetricsCounter mc = new MetricsCounter(
         //new BigramsBasedSuggestor(index),
-        new OneWordSuggestor(index),
-        new RawLuceneSuggestor(suggestRoot),
+        //new OneWordSuggestor(index),
+        //new RawLuceneSuggestor(suggestRoot),
         new OneWordLuceneSuggestor(index, suggestRoot),
+        new OneWordLuceneTFIDF(index, suggestRoot),
         new LearnedSuggester(index, suggestRoot),
         new DatasetSuggester("map"),
-        new DatasetSuggester("map_google"),
-        new UnsortedSuggester(index, suggestRoot)
+        new DatasetSuggester("map_google")
+        //new UnsortedSuggester(index, suggestRoot)
         );
 
-    //mc.getSuggestsExamples("мир");
+    mc.getSuggestsExamples("мир");
     mc.getSuggestsExamples("миронов а");
-    //mc.evaluate();
+    mc.evaluate();
   }
 }

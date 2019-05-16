@@ -63,8 +63,9 @@ public class SuggestRankingPoolBuilder {
     pb.build(0);
   }
 
-  public static boolean match(String s1, String s2) {
-    return s1.contains(s2) || s2.contains(s1);
+  public static boolean match(String mySugg, String reference) {
+    //return s1.contains(s2) || s2.contains(s1);
+    return reference.startsWith(mySugg);
   }
 
   public List<QSUGItem> generateExamples(String partial, List<String> referenceSuggests) {
