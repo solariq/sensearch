@@ -1,116 +1,107 @@
 package com.expleague.sensearch.donkey.plain;
 
-import static com.expleague.sensearch.donkey.utils.BrandNewIdGenerator.generateTermId;
 
-import com.expleague.commons.seq.CharSeq;
-import com.expleague.commons.text.lemmer.LemmaInfo;
-import com.expleague.commons.text.lemmer.MyStem;
-import com.expleague.commons.text.lemmer.WordInfo;
-import com.expleague.sensearch.core.PartOfSpeech;
-import com.expleague.sensearch.protobuf.index.IndexUnits;
+import com.expleague.sensearch.donkey.IncrementalBuilder;
+import com.expleague.sensearch.donkey.plain.PlainIndexBuilder.ParsedTerm;
 import com.expleague.sensearch.protobuf.index.IndexUnits.Term;
-import com.expleague.sensearch.protobuf.index.IndexUnits.Term.Builder;
+import com.expleague.sensearch.protobuf.index.IndexUnits.Term.PartOfSpeech;
 import com.google.common.primitives.Longs;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import org.apache.log4j.Logger;
+import java.util.Queue;
+import java.util.concurrent.ConcurrentLinkedDeque;
+import org.fusesource.leveldbjni.JniDBFactory;
+import org.iq80.leveldb.CompressionType;
 import org.iq80.leveldb.DB;
+import org.iq80.leveldb.Options;
 import org.iq80.leveldb.WriteBatch;
 import org.iq80.leveldb.WriteOptions;
-import org.jetbrains.annotations.NotNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-public class TermBuilder implements AutoCloseable {
+public class TermBuilder implements AutoCloseable, IncrementalBuilder {
 
-  private static final int TERM_BATCH_SIZE = 1024;
-
-  private static final Logger LOG = Logger.getLogger(TermBuilder.class);
-
-  private static final WriteOptions DEFAULT_TERM_WRITE_OPTIONS =
+  private static final Logger LOG = LoggerFactory.getLogger(TermBuilder.class);
+  private static final int TERM_BATCH_SIZE = 1 << 20;
+  private static final WriteOptions DEFAULT_WRITE_OPTIONS =
       new WriteOptions().sync(true).snapshot(false);
 
-  private final Map<Long, ParsedTerm> terms = new ConcurrentHashMap<>();
-  // TODO: terms cache should be outside of the term builder?
-  private final Map<CharSeq, ParsedTerm> termsCache = new ConcurrentHashMap<>();
+  private static final long DEFAULT_CACHE_SIZE = 1 << 20;
+  private static final int DEFAULT_BLOCK_SIZE = 1 << 20;
+  private static final Options TERM_DB_OPTIONS =
+      new Options()
+          .cacheSize(DEFAULT_CACHE_SIZE)
+          .blockSize(DEFAULT_BLOCK_SIZE) // 1 MB
+          .createIfMissing(true)
+          .errorIfExists(true)
+          .compressionType(CompressionType.SNAPPY);
 
-  private final DB termDb;
+  private final Queue<Term> terms = new ConcurrentLinkedDeque<>();
+  private final Path termBaseRoot;
 
-  private final MyStem myStem;
-
-  public TermBuilder(DB termDb, MyStem lemmer) {
-    this.termDb = termDb;
-    this.myStem = lemmer;
+  private final List<TermBuilderState> priorStates = new ArrayList<>();
+  TermBuilder(Path termBaseRoot) {
+    this.termBaseRoot = termBaseRoot;
   }
 
   /**
    * Adds term to the builder and returns its id as well as its lemma id. Lemma id will be equal to
    * term id if lemma equals to term or lemma cannot be parsed
    */
-  // TODO: do not store terms in memory as we have only write access to them
-  @NotNull
-  public ParsedTerm addTerm(CharSequence wordcs) {
-    CharSeq word = CharSeq.create(wordcs);
-    ParsedTerm parsedTerm = termsCache.get(CharSeq.create(word));
-    if (parsedTerm != null) {
-      return parsedTerm;
+  void addTerm(ParsedTerm parsedTerm) {
+    Term protoTerm = Term.newBuilder()
+        .setId(parsedTerm.wordId())
+        .setText(parsedTerm.word())
+        .setLemmaId(parsedTerm.lemmaId())
+        .setPartOfSpeech(
+            parsedTerm.posTag() != null ? Term.PartOfSpeech.valueOf(parsedTerm.posTag().name()) :
+                PartOfSpeech.UNKNOWN
+        )
+        .build();
+    terms.add(protoTerm);
+
+    if (!parsedTerm.hasLemma()) {
+      return;
     }
 
-    word = CharSeq.intern(word);
-
-    LemmaInfo lemma = null;
-    List<WordInfo> parse = myStem.parse(word);
-    if (parse.size() > 0) {
-      lemma = parse.get(0).lemma();
-    }
-
-    long wordId = generateTermId(word);
-
-    //noinspection EqualsBetweenInconvertibleTypes
-    if (lemma == null || lemma.lemma().equals(word)) {
-      final ParsedTerm value =
-          new ParsedTerm(
-              wordId, -1, word, lemma == null ? null : PartOfSpeech.valueOf(lemma.pos().name()));
-      termsCache.put(word, value);
-      terms.put(wordId, value);
-      return value;
-    }
-
-    long lemmaId = generateTermId(lemma.lemma());
-
-    parsedTerm = new ParsedTerm(wordId, lemmaId, word, PartOfSpeech.valueOf(lemma.pos().name()));
-    terms.put(wordId, parsedTerm);
-    termsCache.put(word, parsedTerm);
-    if (!terms.containsKey(lemmaId)) {
-      final ParsedTerm lemmaParsed =
-          new ParsedTerm(lemmaId, -1, lemma.lemma(), PartOfSpeech.valueOf(lemma.pos().name()));
-      terms.put(lemmaId, lemmaParsed);
-      termsCache.put(lemma.lemma(), lemmaParsed);
-    }
-
-    return parsedTerm;
+    Term protoLemma = Term.newBuilder()
+        .setId(parsedTerm.lemmaId())
+        .setText(parsedTerm.lemma())
+        .setPartOfSpeech(
+            parsedTerm.posTag() != null ? Term.PartOfSpeech.valueOf(parsedTerm.posTag().name()) :
+                PartOfSpeech.UNKNOWN
+        )
+        .build();
+    terms.add(protoLemma);
   }
 
   @Override
   public void close() throws IOException {
     LOG.info("Storing term-wise data...");
 
+    DB termDb = JniDBFactory.factory.open(termBaseRoot.toFile(), TERM_DB_OPTIONS);
+    for (TermBuilderState state : priorStates) {
+      writeTerms(state.terms(), termDb);
+    }
+    writeTerms(terms, termDb);
+    termDb.close();
+  }
+
+  private static void writeTerms(Iterable<Term> terms, DB termDb) throws IOException {
     WriteBatch[] batch = new WriteBatch[]{termDb.createWriteBatch()};
     int[] curBatchSize = new int[]{0};
 
     terms.forEach(
-        (id, term) -> {
-          Builder termBuilder =
-              Term.newBuilder().setId(id).setText(term.text.toString()).setLemmaId(term.lemmaId);
-
-          if (term.partOfSpeech != null) {
-            termBuilder.setPartOfSpeech(
-                IndexUnits.Term.PartOfSpeech.valueOf(term.partOfSpeech.name()));
-          }
-          batch[0].put(Longs.toByteArray(id), termBuilder.build().toByteArray());
+        t -> {
+          batch[0].put(Longs.toByteArray(t.getId()), t.toByteArray());
           curBatchSize[0]++;
           if (curBatchSize[0] >= TERM_BATCH_SIZE) {
-            termDb.write(batch[0], DEFAULT_TERM_WRITE_OPTIONS);
+            termDb.write(batch[0], DEFAULT_WRITE_OPTIONS);
             try {
               batch[0].close();
             } catch (IOException e) {
@@ -122,24 +113,93 @@ public class TermBuilder implements AutoCloseable {
         });
 
     if (curBatchSize[0] > 0) {
-      termDb.write(batch[0], DEFAULT_TERM_WRITE_OPTIONS);
+      termDb.write(batch[0], DEFAULT_WRITE_OPTIONS);
     }
-
-    termDb.close();
   }
 
-  public static class ParsedTerm {
+  @Override
+  public void setStates(BuilderState... increments) {
+    resetState();
+    priorStates.clear();
+    priorStates.addAll(IncrementalBuilder.accumulate(TermBuilderState.class, increments));
+  }
 
-    final long id;
-    final long lemmaId;
-    final CharSeq text;
-    final PartOfSpeech partOfSpeech;
+  @Override
+  public BuilderState state() {
+    TermBuilderState state = new TermBuilderState(this);
+    priorStates.add(state);
+    resetState();
+    return state;
+  }
 
-    public ParsedTerm(long id, long lemmaId, CharSeq text, PartOfSpeech partOfSpeech) {
-      this.id = id;
-      this.lemmaId = lemmaId;
-      this.text = text;
-      this.partOfSpeech = partOfSpeech;
+  private void resetState() {
+    terms.clear();
+  }
+
+  static final class TermBuilderState implements BuilderState {
+    private static final Logger LOG = LoggerFactory.getLogger(TermBuilderState.class);
+    private static final String TERMS_FILE_PROP = "tlist";
+
+    private Path root = null;
+    private StateMeta meta = null;
+    private List<Term> terms = null;
+
+    private TermBuilderState(TermBuilder builder) {
+      terms = new ArrayList<>();
+      terms.addAll(builder.terms);
+    }
+
+    private TermBuilderState(Path root, StateMeta meta) {
+      this.root = root;
+      this.meta = meta;
+    }
+
+    public static BuilderState loadFrom(Path from) throws IOException {
+      return BuilderState.loadFrom(from, TermBuilderState.class, LOG);
+    }
+
+    private List<Term> terms() {
+      if (terms != null) {
+        return terms;
+      }
+
+      if (meta == null || root == null) {
+        throw new IllegalStateException("Either terms list or meta file must be non null!");
+      }
+
+      Path termsFile = root.resolve(meta.get(TERMS_FILE_PROP)).toAbsolutePath();
+      terms = new ArrayList<>();
+      try (InputStream is = Files.newInputStream(termsFile)) {
+        terms.add(Term.parseDelimitedFrom(is));
+      } catch (IOException e) {
+        throw new RuntimeException(
+            String.format("Failed to read terms from file [ %s ]", termsFile.toString()), e);
+      }
+
+      return terms;
+    }
+
+    @Override
+    public void saveTo(Path to) throws IOException {
+      if (Files.exists(to)) {
+        throw new IOException(String.format("Path [ %s ] already exists!", to.toString()));
+      }
+
+      Files.createDirectories(to);
+      String mappingFileName = "terms.pbl";
+      meta = StateMeta.builder(TermBuilderState.class)
+          .addProperty(TERMS_FILE_PROP, mappingFileName)
+          .build();
+
+      meta.writeTo(to.resolve(META_FILE));
+      try (OutputStream os = Files.newOutputStream(to.resolve(mappingFileName))) {
+        for (Term t : terms) {
+          t.writeDelimitedTo(os);
+        }
+      }
+
+      root = to;
+      terms = null;
     }
   }
 }

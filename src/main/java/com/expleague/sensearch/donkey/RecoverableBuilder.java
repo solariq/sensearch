@@ -1,5 +1,6 @@
 package com.expleague.sensearch.donkey;
 
+import com.expleague.commons.system.RuntimeUtils;
 import com.google.gson.Gson;
 import com.google.gson.JsonIOException;
 import com.google.gson.JsonSyntaxException;
@@ -7,17 +8,62 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.Reader;
 import java.io.Writer;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public interface RecoverableBuilder {
 
   interface BuilderState {
+
+    String META_FILE = "meta";
+
+    static BuilderState loadFrom(Path from, Class<? extends BuilderState> stateClass,
+        Logger logger) throws IOException {
+      List<Path> metas = Files
+          .find(from, 1, (p, a) -> p.endsWith(META_FILE))
+          .collect(Collectors.toList());
+      for (Path metaFile : metas) {
+        try {
+          StateMeta meta = StateMeta.readFrom(metaFile);
+          if (meta.owner() == stateClass) {
+            for (final Constructor<?> constructor : stateClass.getConstructors()) {
+              final Class<?>[] params = constructor.getParameterTypes();
+              if (params.length != 2) {
+                continue;
+              }
+              if (!(params[0].isAssignableFrom(Path.class)
+                  && params[1].isAssignableFrom(StateMeta.class))) {
+                continue;
+              }
+              try {
+                constructor.setAccessible(true);
+                return (BuilderState) constructor.newInstance(from, meta);
+              } catch (InstantiationException | IllegalAccessException | InvocationTargetException e) {
+                throw new RuntimeException(e);
+              }
+            }
+          } else {
+            logger.warn(String.format("By given path [ %s ] was found meta file [ %s ]with"
+                + " unsuitable owner", from.toString(), metaFile.toString()));
+          }
+        } catch (IOException e) {
+          logger.warn(String.format("Failed to parse possible meta file: [ %s ]",
+              metaFile.toString()));
+        }
+      }
+
+      throw new IOException(
+          String.format("Could find meta files by given path [ %s ]", from.toString()));
+    }
 
     class StateMeta {
 
@@ -123,7 +169,8 @@ public interface RecoverableBuilder {
           return this;
         }
 
-        public StateMetaBuilder addProperty(String propertyName, String delimiter, String... values) {
+        public StateMetaBuilder addProperty(String propertyName, String delimiter,
+            String... values) {
           return addProperty(propertyName, String.join(delimiter, values));
         }
 

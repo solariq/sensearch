@@ -1,11 +1,14 @@
 package com.expleague.sensearch.donkey.plain;
 
 import static com.expleague.sensearch.donkey.utils.BrandNewIdGenerator.generatePageId;
+import static com.expleague.sensearch.donkey.utils.BrandNewIdGenerator.generateTermId;
 
 import com.expleague.commons.math.vectors.Vec;
 import com.expleague.commons.math.vectors.VecTools;
 import com.expleague.commons.seq.CharSeq;
 import com.expleague.commons.seq.CharSeqTools;
+import com.expleague.commons.text.lemmer.LemmaInfo;
+import com.expleague.commons.text.lemmer.WordInfo;
 import com.expleague.ml.embedding.Embedding;
 import com.expleague.ml.embedding.impl.EmbeddingImpl;
 import com.expleague.sensearch.AppModule;
@@ -13,13 +16,13 @@ import com.expleague.sensearch.Config;
 import com.expleague.sensearch.ConfigImpl;
 import com.expleague.sensearch.core.Annotations.EmbeddingVectorsPath;
 import com.expleague.sensearch.core.Annotations.IndexRoot;
+import com.expleague.sensearch.core.PartOfSpeech;
 import com.expleague.sensearch.core.Tokenizer;
 import com.expleague.sensearch.core.impl.TokenizerImpl;
 import com.expleague.sensearch.core.lemmer.Lemmer;
 import com.expleague.sensearch.donkey.IndexBuilder;
 import com.expleague.sensearch.donkey.crawler.Crawler;
 import com.expleague.sensearch.donkey.plain.IndexMetaBuilder.TermSegment;
-import com.expleague.sensearch.donkey.plain.TermBuilder.ParsedTerm;
 import com.expleague.sensearch.index.Index;
 import com.expleague.sensearch.index.plain.PlainIndex;
 import com.expleague.sensearch.web.suggest.SuggestInformationBuilder;
@@ -51,23 +54,19 @@ import java.util.Random;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.stream.Stream;
+import javax.annotation.Nullable;
 import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 import org.fusesource.leveldbjni.JniDBFactory;
-import org.iq80.leveldb.CompressionType;
 import org.iq80.leveldb.DB;
-import org.iq80.leveldb.Options;
 
 public class PlainIndexBuilder implements IndexBuilder {
 
-  private static final int STATISTICS_BLOCK_SIZE = 1 << 10;
-  private static final int PLAIN_PAGE_BLOCK_SIZE = 1 << 20;
-  private static final int PLAIN_TERM_BLOCK_SIZE = 1 << 20;
-
-  public static final String TERM_STATISTICS_ROOT = "stats";
-  public static final String PAGE_ROOT = "page";
-  public static final String TERM_ROOT = "term";
-  public static final String EMBEDDING_ROOT = "embedding";
+  public static final String URI_MAPPINGS_ROOT = "UriMappings";
+  public static final String TERM_STATISTICS_ROOT = "TermStatistics";
+  public static final String PAGE_BASE_ROOT = "PageBase";
+  public static final String TERM_BASE_ROOT = "TermBase";
+  public static final String EMBEDDING_ROOT = "Embeddings";
   public static final String LSH_METRIC_ROOT = "lsh_metric";
   public static final String LSH_ROOT = "lsh";
   public static final String TEMP_EMBEDDING_ROOT = "temp_embedding";
@@ -85,34 +84,6 @@ public class PlainIndexBuilder implements IndexBuilder {
   private static final int NUM_OF_RANDOM_IDS = 100;
 
   // DB configurations
-  private static final long DEFAULT_CACHE_SIZE = 1 << 10; // 1 KB
-  private static final Options STATS_DB_OPTIONS =
-      new Options()
-          .cacheSize(DEFAULT_CACHE_SIZE)
-          .blockSize(STATISTICS_BLOCK_SIZE) // 1 MB
-          .createIfMissing(true)
-          .errorIfExists(true)
-          .compressionType(CompressionType.SNAPPY);
-  private static final Options PAGE_DB_OPTIONS =
-      new Options()
-          .cacheSize(DEFAULT_CACHE_SIZE)
-          .blockRestartInterval(PLAIN_PAGE_BLOCK_SIZE)
-          .createIfMissing(true)
-          .errorIfExists(true)
-          .compressionType(CompressionType.SNAPPY);
-  private static final Options TERM_DB_OPTIONS =
-      new Options()
-          .cacheSize(DEFAULT_CACHE_SIZE)
-          .blockRestartInterval(PLAIN_TERM_BLOCK_SIZE)
-          .createIfMissing(true)
-          .errorIfExists(true)
-          .compressionType(CompressionType.SNAPPY);
-
-  private static final Options EMBEDDING_DB_OPTIONS =
-      new Options()
-          .createIfMissing(true)
-          .errorIfExists(true)
-          .compressionType(CompressionType.SNAPPY);
 
   private static final String[] REQUIRED_WORDS = new String[]{"путин", "медведев", "александр"};
 
@@ -274,24 +245,16 @@ public class PlainIndexBuilder implements IndexBuilder {
 
   private void buildIndexInternal(Embedding<CharSeq> jmllEmbedding) throws IOException {
     LOG.info("Creating database files...");
-    Files.createDirectories(indexRoot.resolve(PAGE_ROOT));
-    Files.createDirectories(indexRoot.resolve(TERM_STATISTICS_ROOT));
-    Files.createDirectories(indexRoot.resolve(EMBEDDING_ROOT));
-    Files.createDirectories(indexRoot.resolve(TERM_ROOT));
-
     final TLongSet knownPageIds = new TLongHashSet();
-    try (final PlainPageBuilder plainPageBuilder =
-        new PlainPageBuilder(
-            JniDBFactory.factory.open(indexRoot.resolve(PAGE_ROOT).toFile(), PAGE_DB_OPTIONS),
-            indexRoot.resolve(PAGE_ROOT).resolve("TMP"));
+    try (
+        final PlainPageBuilder plainPageBuilder =
+            new PlainPageBuilder(indexRoot.resolve(PAGE_BASE_ROOT));
         final TermBuilder termBuilder =
-            new TermBuilder(
-                JniDBFactory.factory.open(indexRoot.resolve(TERM_ROOT).toFile(), TERM_DB_OPTIONS),
-                lemmer);
+            new TermBuilder(indexRoot.resolve(TERM_BASE_ROOT));
         final StatisticsBuilder statisticsBuilder =
-            new StatisticsBuilder(
-                JniDBFactory.factory.open(
-                    indexRoot.resolve(TERM_STATISTICS_ROOT).toFile(), STATS_DB_OPTIONS));
+            new StatisticsBuilder(indexRoot.resolve(TERM_BASE_ROOT));
+        final UriMappingsBuilder uriMappingBuilder =
+            new UriMappingsBuilder(indexRoot.resolve(URI_MAPPINGS_ROOT))
         final EmbeddingBuilder embeddingBuilder =
             new EmbeddingBuilder(
                 JniDBFactory.factory.open(
@@ -302,8 +265,7 @@ public class PlainIndexBuilder implements IndexBuilder {
                     EMBEDDING_DB_OPTIONS),
                 indexRoot.resolve(EMBEDDING_ROOT),*/
                 jmllEmbedding,
-                tokenizer);
-        final UriMappingsBuilder uriMappingBuilder = new UriMappingsBuilder(indexRoot)) {
+                tokenizer)) {
 
       EmbeddingImpl<CharSeq> jmllEmbedding1 = (EmbeddingImpl<CharSeq>) jmllEmbedding;
       for (int i = 0; i < jmllEmbedding1.vocabSize(); i++) {
@@ -421,15 +383,82 @@ public class PlainIndexBuilder implements IndexBuilder {
         }
 
       } catch (Exception e) {
-        FileUtils.deleteDirectory(indexRoot.resolve(PAGE_ROOT).toFile());
+        FileUtils.deleteDirectory(indexRoot.resolve(PAGE_BASE_ROOT).toFile());
         FileUtils.deleteDirectory(indexRoot.resolve(TERM_STATISTICS_ROOT).toFile());
         FileUtils.deleteDirectory(indexRoot.resolve(EMBEDDING_ROOT).toFile());
         FileUtils.deleteDirectory(indexRoot.resolve("suggest").toFile());
-        FileUtils.deleteDirectory(indexRoot.resolve(TERM_ROOT).toFile());
+        FileUtils.deleteDirectory(indexRoot.resolve(TERM_BASE_ROOT).toFile());
 
         throw new IOException(e);
       }
     }
     LOG.info("Index built!");
+  }
+
+  static class ParsedTerm {
+    final long wordId;
+    final CharSeq word;
+
+    final long lemmaId;
+    final CharSeq lemma;
+
+    final PartOfSpeech posTag;
+
+    private ParsedTerm(long wordId, CharSeq word,
+        long lemmaId, CharSeq lemma,
+        PartOfSpeech posTag) {
+      this.wordId = wordId;
+      this.word = word;
+      this.lemmaId = lemmaId;
+      this.lemma = lemma;
+      this.posTag = posTag;
+    }
+
+    static ParsedTerm parse(CharSequence wordcs, Lemmer lemmer) {
+      CharSeq word = CharSeq.create(wordcs);
+      word = CharSeq.intern(word);
+
+      LemmaInfo lemma = null;
+      List<WordInfo> parse = lemmer.parse(word);
+      if (parse.size() > 0) {
+        lemma = parse.get(0).lemma();
+      }
+
+      long wordId = generateTermId(word);
+
+      //noinspection EqualsBetweenInconvertibleTypes
+      if (lemma == null || lemma.lemma().equals(word)) {
+        return new ParsedTerm(wordId, word, -1, null,
+            lemma == null ? null : PartOfSpeech.valueOf(lemma.pos().name()));
+      }
+
+      long lemmaId = generateTermId(lemma.lemma());
+      return new ParsedTerm(wordId, word, lemmaId, lemma.lemma(), PartOfSpeech.valueOf(lemma.pos().name()));
+    }
+
+    String lemma() {
+      return lemma.toString();
+    }
+
+    long lemmaId() {
+      return lemmaId;
+    }
+
+    String word() {
+      return word.toString();
+    }
+
+    long wordId() {
+      return wordId;
+    }
+
+    @Nullable
+    PartOfSpeech posTag() {
+      return posTag;
+    }
+
+    boolean hasLemma() {
+      return lemmaId != -1;
+    }
   }
 }

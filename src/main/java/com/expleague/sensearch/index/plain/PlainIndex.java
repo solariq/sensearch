@@ -144,11 +144,11 @@ public class PlainIndex implements Index {
 
     pageBase =
         JniDBFactory.factory.open(
-            indexRoot.resolve(PlainIndexBuilder.PAGE_ROOT).toFile(), DEFAULT_DB_OPTIONS);
+            indexRoot.resolve(PlainIndexBuilder.PAGE_BASE_ROOT).toFile(), DEFAULT_DB_OPTIONS);
 
     termBase =
         JniDBFactory.factory.open(
-            indexRoot.resolve(PlainIndexBuilder.TERM_ROOT).toFile(), DEFAULT_DB_OPTIONS);
+            indexRoot.resolve(PlainIndexBuilder.TERM_BASE_ROOT).toFile(), DEFAULT_DB_OPTIONS);
 
 
     uriMappingDb =

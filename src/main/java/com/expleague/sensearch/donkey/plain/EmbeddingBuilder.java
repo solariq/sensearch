@@ -23,7 +23,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import org.apache.log4j.Logger;
+import org.iq80.leveldb.CompressionType;
 import org.iq80.leveldb.DB;
+import org.iq80.leveldb.Options;
 
 public class EmbeddingBuilder implements AutoCloseable {
 
@@ -32,6 +34,12 @@ public class EmbeddingBuilder implements AutoCloseable {
   private static final int QUANT_DIM = 65;
   private static final int SKETCH_BITS_PER_QUANT = 96;
   private static final int BATCH_SIZE = 1000;
+
+  private static final Options EMBEDDING_DB_OPTIONS =
+      new Options()
+          .createIfMissing(true)
+          .errorIfExists(true)
+          .compressionType(CompressionType.SNAPPY);
 
   private final Tokenizer tokenizer;
   private final Embedding<CharSeq> jmllEmbedding;

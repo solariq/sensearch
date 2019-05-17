@@ -15,11 +15,15 @@ import gnu.trove.map.hash.TLongLongHashMap;
 import gnu.trove.map.hash.TLongObjectHashMap;
 import gnu.trove.set.hash.TLongHashSet;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
 import org.apache.log4j.Logger;
+import org.fusesource.leveldbjni.JniDBFactory;
+import org.iq80.leveldb.CompressionType;
 import org.iq80.leveldb.DB;
+import org.iq80.leveldb.Options;
 import org.iq80.leveldb.WriteBatch;
 import org.iq80.leveldb.WriteOptions;
 
@@ -27,6 +31,15 @@ public class StatisticsBuilder implements AutoCloseable {
 
   private static final Logger LOG = Logger.getLogger(StatisticsBuilder.class);
 
+  private static final long DEFAULT_CACHE_SIZE = 1 << 20;
+  private static final int DEFAULT_BLOCK_SIZE = 1 << 20;
+  private static final Options STATS_DB_OPTIONS =
+      new Options()
+          .cacheSize(DEFAULT_CACHE_SIZE)
+          .blockSize(DEFAULT_BLOCK_SIZE) // 1 MB
+          .createIfMissing(true)
+          .errorIfExists(true)
+          .compressionType(CompressionType.SNAPPY);
   private static final WriteOptions DEFAULT_WRITE_OPTIONS =
       new WriteOptions().sync(true).snapshot(false);
 
@@ -38,11 +51,11 @@ public class StatisticsBuilder implements AutoCloseable {
   private final TLongObjectMap<TLongIntMap> largeBigramsMap = new TLongObjectHashMap<>();
   private final TLongLongMap termToLemma = new TLongLongHashMap();
 
-  private final DB statisticsDb;
+  private final Path termStatisticsPath;
   private boolean isProcessingPage = false;
 
-  StatisticsBuilder(DB statisticsDb) {
-    this.statisticsDb = statisticsDb;
+  StatisticsBuilder(Path termStatisticsPath) {
+    this.termStatisticsPath = termStatisticsPath;
   }
 
   @VisibleForTesting
@@ -153,6 +166,7 @@ public class StatisticsBuilder implements AutoCloseable {
   @Override
   public void close() throws IOException {
     LOG.info("Storing statistics...");
+    DB statisticsDb = JniDBFactory.factory.open(termStatisticsPath.toFile(), STATS_DB_OPTIONS);
     WriteBatch writeBatch = statisticsDb.createWriteBatch();
     final TermStatistics.Builder tsBuilder = TermStatistics.newBuilder();
     wordFrequencyMap.forEachKey(

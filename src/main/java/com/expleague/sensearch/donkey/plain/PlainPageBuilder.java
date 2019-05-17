@@ -22,7 +22,10 @@ import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 import org.apache.commons.io.FileUtils;
+import org.fusesource.leveldbjni.JniDBFactory;
+import org.iq80.leveldb.CompressionType;
 import org.iq80.leveldb.DB;
+import org.iq80.leveldb.Options;
 import org.iq80.leveldb.WriteBatch;
 import org.iq80.leveldb.WriteOptions;
 import org.slf4j.Logger;
@@ -31,13 +34,21 @@ import org.slf4j.LoggerFactory;
 class PlainPageBuilder implements AutoCloseable {
 
   private static final Logger LOG = LoggerFactory.getLogger(PlainPageBuilder.class);
+  private static final long DEFAULT_CACHE_SIZE = 1 << 10; // 1 KB
+  private static final int PLAIN_PAGE_BLOCK_SIZE = 1 << 20;
+  private static final Options PAGE_DB_OPTIONS =
+      new Options()
+          .cacheSize(DEFAULT_CACHE_SIZE)
+          .blockSize(PLAIN_PAGE_BLOCK_SIZE)
+          .createIfMissing(true)
+          .errorIfExists(true)
+          .compressionType(CompressionType.SNAPPY);
 
   private static final String TEMP_INDEX_FILE = "TmpIndex";
 
   private static final WriteOptions DEFAULT_WRITE_OPTIONS =
       new WriteOptions().sync(true).snapshot(false);
 
-  private final DB plainDb;
   private final Path temporaryIndexRoot;
   private OutputStream temporaryIndexOs;
 
@@ -50,23 +61,17 @@ class PlainPageBuilder implements AutoCloseable {
       .withInitial(LinkedList::new);
   private ThreadLocal<Boolean> isProcessingPage = ThreadLocal.withInitial(() -> false);
   private ThreadLocal<Long> curPageId = new ThreadLocal<>();
-
+  private final Path plainPageBaseRoot;
   /**
    * PlainPageBuilder provides builder for the database of indexed pages. It processes each page
    * section-wise. To start processing new page call {@link #startPage}, To add sections of the page
    * call {@link #addSection} And to finish the page call {@link #endPage()}
-   *
-   * @param plainDb database where index pages will be stored
-   * @param tempFilesRoot root where temporary files while building will be stored if directory does
-   *     not exist it will be created. It will be deleted after build() is called
-   * @throws IOException if it is failed to create root directory
    */
-  PlainPageBuilder(DB plainDb, Path tempFilesRoot) throws IOException {
-    this.plainDb = plainDb;
-    this.temporaryIndexRoot = tempFilesRoot;
-
-    Files.createDirectories(tempFilesRoot);
-    temporaryIndexOs = Files.newOutputStream(tempFilesRoot.resolve(TEMP_INDEX_FILE));
+  PlainPageBuilder(Path plainPageBaseRoot, Path temporaryIndexRoot) throws IOException {
+    this.plainPageBaseRoot = plainPageBaseRoot;
+    this.temporaryIndexRoot = temporaryIndexRoot;
+    Files.createDirectories(temporaryIndexRoot);
+    temporaryIndexOs = Files.newOutputStream(temporaryIndexRoot.resolve(TEMP_INDEX_FILE));
   }
 
   /**
@@ -200,6 +205,7 @@ class PlainPageBuilder implements AutoCloseable {
 
     Page.Builder pageBuilder = Page.newBuilder();
     Page rawPage;
+    DB plainDb = JniDBFactory.factory.open(plainPageBaseRoot.toFile(), PAGE_DB_OPTIONS);
     WriteBatch writeBatch = plainDb.createWriteBatch();
     int maxPagesInBatch = 1000;
     int pagesInBatch = 0;
