@@ -6,23 +6,19 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.search.suggest.Lookup.LookupResult;
 import org.apache.lucene.search.suggest.analyzing.AnalyzingSuggester;
-import org.apache.lucene.store.FSDirectory;
-import com.expleague.commons.math.vectors.Vec;
-import com.expleague.commons.math.vectors.VecTools;
 import com.expleague.sensearch.core.Term;
 import com.expleague.sensearch.index.Index;
 import com.expleague.sensearch.index.plain.PlainIndex;
 import com.expleague.sensearch.web.suggest.pool.LearnedSuggester.StringDoublePair;
 import com.google.inject.Inject;
 
-public class OneWordLuceneTFIDF implements Suggestor {
+public class OneWordLuceneLinks implements Suggestor {
   public final int RETURN_LIMIT = 10;
 
   public final static String filePrefix = "prefix_sugg";
@@ -34,7 +30,7 @@ public class OneWordLuceneTFIDF implements Suggestor {
   public final static Path storePath = Paths.get("luceneSuggestPrefix/store");
   
   @Inject
-  public OneWordLuceneTFIDF(Index index, Path suggestIndexRoot) throws IOException {
+  public OneWordLuceneLinks(Index index, Path suggestIndexRoot) throws IOException {
     this.index = (PlainIndex) index;
     
     suggester = new AnalyzingSuggester(
@@ -62,7 +58,7 @@ public class OneWordLuceneTFIDF implements Suggestor {
   
   @Override
   public String getName() {
-    return "One Word Lucene TDIDF sum";
+    return "One Word Lucene Links";
   }
 
   private String termsToString(Term[] terms) {
@@ -95,14 +91,14 @@ public class OneWordLuceneTFIDF implements Suggestor {
       
       //System.out.println("number of selected phrases: " + endingPhrases.size());
       for (LookupResult p : endingPhrases) {
-        Term[] phrase = index.parse(p.key).toArray(Term[]::new);
+        //Term[] phrase = index.parse(p.key).toArray(Term[]::new);
 /*        if (phrase.length > intersectLength) {
           continue;
         }*/
         
         String suggestion = qcText.isEmpty() ? p.key.toString() : (qcText + " " + p.key);
         
-        phraseProb.add(new StringDoublePair(suggestion, -Arrays.stream(phrase).mapToDouble(t -> ((PlainIndex )index).tfidf(t)).sum()));
+        phraseProb.add(new StringDoublePair(suggestion, p.value));
         phraseProb.removeIf(it -> phraseProb.size() > RETURN_LIMIT);
 
       }

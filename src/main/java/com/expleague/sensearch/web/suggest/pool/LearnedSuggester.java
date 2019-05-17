@@ -127,7 +127,7 @@ public class LearnedSuggester implements Suggestor {
         .collect(Collectors.toList())
         );
   }
-  
+
   public List<QSUGItem> getUnsortedSuggestions(List<Term> terms) throws IOException {
 
     if (terms.isEmpty()) {
@@ -143,40 +143,49 @@ public class LearnedSuggester implements Suggestor {
         continue l;
       }
 
-      List<Term> qc = terms.subList(0, terms.size() - intersectLength);
-      String qcText = qc.stream().map(Term::text).collect(Collectors.joining(" "));
-      Term[] qt = terms.subList(terms.size() - intersectLength, terms.size()).toArray(new Term[0]);
+      List<Term> qcNonIntersect = terms.subList(0, terms.size() - intersectLength);
+      String qcNonIntersectText = qcNonIntersect.stream().map(Term::text).collect(Collectors.joining(" "));
+      Term[] qt = terms.subList(terms.size() - intersectLength, terms.size()).stream().toArray(Term[]::new);
 
+      List<Term> qc = terms.subList(0, terms.size() - 1);
       Vec queryVec = index.vecByTerms(qc);
       Vec queryVecTfidf = ((PlainIndex) index).weightedVecByTerms(qc);
+
 
       List<LookupResult> endingPhrases = suggester.lookup(termsToString(qt), false, 1000000);
 
       //System.out.println("number of selected phrases: " + endingPhrases.size());
       for (LookupResult p : endingPhrases) {
         Term[] phrase = index.parse(p.key.toString().toLowerCase()).toArray(Term[]::new);
-/*
+        /*
         if (phrase.length > intersectLength) {
           continue;
         }
-*/
+         */
         Vec phraseVec = index.vecByTerms(Arrays.asList(phrase));
         Vec phraseVecTfidf = ((PlainIndex) index).weightedVecByTerms(Arrays.asList(phrase));
-        
+
+        double cosine = VecTools.cosine(queryVec, phraseVec);
         QSUGItem item = new QSUGItem(
-            (qc.size() > 0 ? qcText + " " : "") + p.key.toString().toLowerCase(),
+            (qcNonIntersect.size() > 0 ? qcNonIntersectText + " " : "") + p.key.toString().toLowerCase(),
             intersectLength,
             phrase.length,
+            qcNonIntersect.size(),
             Math.toIntExact(p.value),
             Double.longBitsToDouble(Longs.fromByteArray(p.payload.bytes)),
-            VecTools.cosine(queryVec, phraseVec),
+            cosine,
             VecTools.cosine(phraseVecTfidf, queryVecTfidf),
             Arrays.stream(phrase).mapToDouble(t -> ((PlainIndex )index).tfidf(t)).sum(),
             0.,
             VecTools.l2(phraseVec),
             false
             );
-
+        //System.err.println("learned cosine: " + cosine);
+        /*
+        if (Double.isNaN(item.cosine)) {
+          throw new RuntimeException("Cosine is NaN. qc: |" + qcText + "| phrase: |" + p.key + "| " + item.vectorSumLength);
+        }
+         */       
         res.add(item);
 
       }

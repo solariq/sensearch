@@ -60,12 +60,13 @@ public class SuggestRankingPoolBuilder {
     Index index = injector.getInstance(Index.class);
 
     SuggestRankingPoolBuilder pb = new SuggestRankingPoolBuilder(index, config.getIndexRoot().resolve("suggest"));
-    pb.build(0);
+    pb.build();
   }
 
   public static boolean match(String mySugg, String reference) {
     //return s1.contains(s2) || s2.contains(s1);
-    return reference.startsWith(mySugg);
+    return reference.startsWith(mySugg) && (reference.length() <= mySugg.length() || reference.charAt(mySugg.length()) == ' ');
+    //return reference.equals(mySugg);
   }
 
   public List<QSUGItem> generateExamples(String partial, List<String> referenceSuggests) {
@@ -87,7 +88,7 @@ public class SuggestRankingPoolBuilder {
           res.add(myMatched.asPositive());
           continue raw;
         }
-        if (prefixMatched.size() < 20 || rnd.nextInt(100) < 10) {
+        if (prefixMatched.size() < 20 || rnd.nextInt(100) < 6) {
           res.add(myMatched);
         }
       }
@@ -96,7 +97,7 @@ public class SuggestRankingPoolBuilder {
     return res;
   }
 
-  public void build(int iteration) throws IOException {
+  public void build() throws IOException {
     LOG.info("SuggestPool build start");
     long startTime = System.nanoTime();
 
@@ -125,15 +126,13 @@ public class SuggestRankingPoolBuilder {
       }
       status.incrementAndGet();
 
-      //if (status.get() > 4000)
-      //  break;
       String query = qSugList.getKey();
 
       List<QSUGItem> examples = generateExamples(query, qSugList.getValue());
       exmpNumberSum += examples.size();
       for (QSUGItem qsitem : examples) {
         tabWriter.write(
-            String.format("%d %d %f %f %f\n",
+            String.format("%d %d %f %f %f %f\n",
                 qsitem.intersectionLength,
                 qsitem.incomingLinksCount,
                 qsitem.probabilisticCoeff,

@@ -101,14 +101,14 @@ public class OneWordLuceneSuggestor implements Suggestor {
         continue;
       }
 
-      List<Term> qc = terms.subList(0, terms.size() - intersectLength);
-      String qcText = qc.stream()
+      List<Term> qcNonIntersecting = terms.subList(0, terms.size() - intersectLength);
+      String qcText = qcNonIntersecting.stream()
           .map(Term::text)
           .collect(Collectors.joining(" "));
       
       Term[] qt = terms.subList(terms.size() - intersectLength, terms.size()).toArray(new Term[0]);
 
-      Vec queryVec = index.vecByTerms(qc);
+      Vec queryVec = index.vecByTerms(terms.subList(0, terms.size() - 1));
       //Vec wQueryVec = index.weightedVecByTerms(qc);
 
       List<LookupResult> endingPhrases = suggester.lookup(termsToString(qt), false, 1000000);
@@ -122,8 +122,10 @@ public class OneWordLuceneSuggestor implements Suggestor {
         
         String suggestion = qcText.isEmpty() ? p.key.toString() : (qcText + " " + p.key);
         
-        if (qc.size() > 0) {
-          phraseProb.add(new StringDoublePair(suggestion, VecTools.cosine(queryVec, index.vecByTerms(Arrays.asList(phrase)))));
+        if (qcNonIntersecting.size() > 0) {
+          double cosine = VecTools.cosine(queryVec, index.vecByTerms(Arrays.asList(phrase)));
+          phraseProb.add(new StringDoublePair(suggestion, cosine));
+          System.err.println("one word cosine: " + cosine);
           //phraseProb.add(new StringDoublePair(qcText + " " + p.key, VecTools.cosine(wQueryVec, index.weightedVecByTerms(Arrays.asList(phrase)))));
         } else {
           phraseProb.add(new StringDoublePair(suggestion, p.value));

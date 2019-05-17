@@ -9,6 +9,7 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
   "suggestion",
   "intersect",
   "usedPhraseLength",
+  "qc length",
   "links",
   "prob_coef",
   "cosine",
@@ -23,6 +24,7 @@ public class QSUGItem extends GroupedDSItem.Stub {
   public final boolean isPositive;
   public final int intersectionLength;
   public final int usedPhraseLength;
+  public final int qcLength;
   public final int incomingLinksCount;
   public final double probabilisticCoeff;
   public final double cosine;
@@ -36,6 +38,7 @@ public class QSUGItem extends GroupedDSItem.Stub {
       @JsonProperty("suggestion") String suggestion,
       @JsonProperty("intersect") int intersect,
       @JsonProperty("usedPhraseLength") int phraseLength,
+      @JsonProperty("qc length") int qcLength,
       @JsonProperty("links") int links,
       @JsonProperty("prob_coef") double coef,
       @JsonProperty("cosine") double cosine,
@@ -48,6 +51,7 @@ public class QSUGItem extends GroupedDSItem.Stub {
     this.suggestion = suggestion;
     this.intersectionLength = intersect;
     this.usedPhraseLength = phraseLength;
+    this.qcLength = qcLength;
     this.incomingLinksCount = links;
     this.probabilisticCoeff = coef;
     this.cosine = cosine;
@@ -80,7 +84,19 @@ public class QSUGItem extends GroupedDSItem.Stub {
   }
 
   public QSUGItem asPositive() {
-    return new QSUGItem(suggestion, intersectionLength, usedPhraseLength, incomingLinksCount, probabilisticCoeff, cosine, tfidfWeightedCosine, tfidfSum, malletCosine, vectorSumLength, true);
+    return new QSUGItem(
+        suggestion, 
+        intersectionLength, 
+        usedPhraseLength, 
+        qcLength, 
+        incomingLinksCount, 
+        probabilisticCoeff, 
+        cosine, 
+        tfidfWeightedCosine, 
+        tfidfSum, 
+        malletCosine, 
+        vectorSumLength, 
+        true);
   }
   
   @JsonProperty("suggestion")

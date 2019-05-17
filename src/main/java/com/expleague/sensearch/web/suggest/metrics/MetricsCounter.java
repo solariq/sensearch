@@ -14,6 +14,7 @@ import com.expleague.sensearch.Config;
 import com.expleague.sensearch.ConfigImpl;
 import com.expleague.sensearch.index.Index;
 import com.expleague.sensearch.web.suggest.BigramsBasedSuggestor;
+import com.expleague.sensearch.web.suggest.OneWordLuceneLinks;
 import com.expleague.sensearch.web.suggest.OneWordLuceneSuggestor;
 import com.expleague.sensearch.web.suggest.OneWordLuceneTFIDF;
 import com.expleague.sensearch.web.suggest.RawLuceneSuggestor;
@@ -67,11 +68,11 @@ public class MetricsCounter {
     int[] matched = new int[nSugg];
 
     for (Entry<String, List<String>> e : map.entrySet()) {
-/*
+
       String[] words = e.getKey().split(" ");
-      if (words.length < 2 || words[1].length() > 3)
+      if (words.length < 2)
         continue;
-*/
+
       for (int i = 0; i < nSugg; i++) {
 
         long startTime = System.nanoTime();
@@ -103,7 +104,7 @@ public class MetricsCounter {
           }
           pos++;
         }
-        mapSum[i] += mySugg.size() > 0 ? (current_matched / mySugg.size()) : 0;
+        mapSum[i] += mySugg.size() > 0 ? (1.0 * current_matched / mySugg.size()) : 0;
         System.out.format("Обработано %s / %s, %s, MRR: %.4f MAP %.4f\n", cnt, map.size(),
             suggestors[i].getName(),
             rrSum[i] / (cnt + 1),
@@ -150,10 +151,11 @@ public class MetricsCounter {
         //new OneWordSuggestor(index),
         //new RawLuceneSuggestor(suggestRoot),
         new OneWordLuceneSuggestor(index, suggestRoot),
-        new OneWordLuceneTFIDF(index, suggestRoot),
-        new LearnedSuggester(index, suggestRoot),
-        new DatasetSuggester("map"),
-        new DatasetSuggester("map_google")
+        //new OneWordLuceneTFIDF(index, suggestRoot),
+        //new OneWordLuceneLinks(index, suggestRoot),
+        new LearnedSuggester(index, suggestRoot)
+        //new DatasetSuggester("map"),
+        //new DatasetSuggester("map_google")
         //new UnsortedSuggester(index, suggestRoot)
         );
 
