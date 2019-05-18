@@ -82,36 +82,18 @@ public class SnippetPoolBuilder extends PoolBuilder<QueryAndPassages> {
                         List<QueryAndPassages.PassageAndWeight> answers = Arrays.asList(example.answers());
                         if (answers.isEmpty()) return;
 
-                        CharSequence positivePassage = answers.get(0).passage();
-                        double positiveWeight = answers.get(0).weight();
-
-                        List<CharSequence> sentences = page.sentences(Page.SegmentType.BODY).collect(Collectors.toList());
-                        CharSequence negativePassage = sentences.get(random.nextInt() % sentences.size());
-                        while (sentences.size() > 1 && negativePassage.equals(positivePassage)) {
-                            negativePassage = sentences.get(random.nextInt() % sentences.size());
-                        }
-                        double negativeWeight = 0;
-
-                        Passage positive = new Passage(positivePassage, index.parse(positivePassage).collect(Collectors.toList()), page);
-                        Passage negative = new Passage(negativePassage, index.parse(negativePassage).collect(Collectors.toList()), page);
-
-                        synchronized (poolBuilder) {
-                            poolBuilder.accept(new QPASItem(query, positive));
-                            poolBuilder
-                                    .features()
-                                    .map(Functions.cast(TargetFeatureSet.class))
-                                    .filter(Objects::nonNull)
-                                    .forEach(fs -> fs.withWeight(positiveWeight));
-                            poolBuilder.advance();
-
-                            poolBuilder.accept(new QPASItem(query, negative));
-                            poolBuilder
-                                    .features()
-                                    .map(Functions.cast(TargetFeatureSet.class))
-                                    .filter(Objects::nonNull)
-                                    .forEach(fs -> fs.withWeight(negativeWeight));
-                            poolBuilder.advance();
-                        }
+                        answers.forEach(paw -> {
+                            Passage passage = new Passage(paw.passage(), index.parse(paw.passage()).collect(Collectors.toList()), page);
+                            synchronized (poolBuilder) {
+                                poolBuilder.accept(new QPASItem(query, passage));
+                                poolBuilder
+                                        .features()
+                                        .map(Functions.cast(TargetFeatureSet.class))
+                                        .filter(Objects::nonNull)
+                                        .forEach(fs -> fs.withWeight(paw.weight()));
+                                poolBuilder.advance();
+                            }
+                        });
                     }
                 });
 
