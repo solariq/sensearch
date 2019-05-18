@@ -8,10 +8,14 @@ import com.expleague.ml.meta.FeatureMeta.ValueType;
 public class AccumulatorFeatureSet extends FeatureSet.Stub<QSUGItem>{
 
   private final static FeatureMeta COS_DISTANCE = FeatureMeta.create("cos dist",
-      "Cosine distance between qc and completing phrase", ValueType.VEC);
+      "Cosine between qc and completing phrase", ValueType.VEC);
 
   private final static FeatureMeta TFIDF_COS_DISTANCE = FeatureMeta.create("tfidf cos dist",
-      "Cosine distance between qc and completing phrase, tfidf weighted", ValueType.VEC);
+      "Cosine between qc and completing phrase, tfidf weighted", ValueType.VEC);
+  
+  private final static FeatureMeta L2_DISTANCE = FeatureMeta.create("l2 dist",
+      "L2 distance between qc and completing phrase, tfidf weighted", ValueType.VEC);
+
   /*
   private final static FeatureMeta MALLET_COSINE = FeatureMeta.create("mallet vec cos",
       "Cosine distance by Mallet vectors", ValueType.VEC);
@@ -32,10 +36,10 @@ public class AccumulatorFeatureSet extends FeatureSet.Stub<QSUGItem>{
       */
   private final static FeatureMeta QC_LENGTH = FeatureMeta.create("qc length",
       "Length of partial quary prefix, which not intersects with phrases", ValueType.VEC);
-/*
+
   private final static FeatureMeta INCOMING_LINKS = FeatureMeta.create("incoming_links",
       "Incoming links count", ValueType.VEC);
-*/
+
 /*
   private final static FeatureMeta PROB_COEF = FeatureMeta.create("probabilistic",
       "Coefficient from probabilistic model", ValueType.VEC);
@@ -54,10 +58,11 @@ public class AccumulatorFeatureSet extends FeatureSet.Stub<QSUGItem>{
   public Vec advance() {
     set(COS_DISTANCE, qSugItem.cosine);
     set(TFIDF_COS_DISTANCE, qSugItem.tfidfWeightedCosine);
+    set(L2_DISTANCE, qSugItem.l2Dist);
     //set(MALLET_COSINE, qSugItem.malletCosine);
     set(TF_IDF_SUM, qSugItem.tfidfSum);
     //set(VEC_LENGTH, qSugItem.vectorSumLength);
-    //set(INCOMING_LINKS, qSugItem.incomingLinksCount);
+    set(INCOMING_LINKS, qSugItem.incomingLinksCount);
     //set(INTERSECT_SIZE, qSugItem.intersectionLength);
     set(QC_LENGTH, qSugItem.qcLength);
     set(USED_PHRASE_LENGTH, qSugItem.usedPhraseLength);

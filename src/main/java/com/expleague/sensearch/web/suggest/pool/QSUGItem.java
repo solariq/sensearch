@@ -15,6 +15,7 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
   "cosine",
   "tfIdfSum",
   "tfIdfCosine",
+  "l2Dist",
   "MalletCosine",
   "vectorSumLength",
   "isPositive",})
@@ -29,6 +30,7 @@ public class QSUGItem extends GroupedDSItem.Stub {
   public final double probabilisticCoeff;
   public final double cosine;
   public final double tfidfWeightedCosine;
+  public final double l2Dist;
   public final double malletCosine;
   public final double tfidfSum;
   public final double vectorSumLength;
@@ -43,6 +45,7 @@ public class QSUGItem extends GroupedDSItem.Stub {
       @JsonProperty("prob_coef") double coef,
       @JsonProperty("cosine") double cosine,
       @JsonProperty("tfIdfCosine") double tfIdfCosine,
+      @JsonProperty("l2Dist") double l2Dist,
       @JsonProperty("tfIdfSum") double tfIdfSum,
       @JsonProperty("MalletCosine") double malletCosine,
       @JsonProperty("vectorSumLength") double vectorSumLength,
@@ -56,6 +59,7 @@ public class QSUGItem extends GroupedDSItem.Stub {
     this.probabilisticCoeff = coef;
     this.cosine = cosine;
     this.tfidfWeightedCosine = tfIdfCosine;
+    this.l2Dist = l2Dist;
     this.malletCosine = malletCosine;
     this.tfidfSum = tfIdfSum;
     this.vectorSumLength = vectorSumLength;
@@ -93,6 +97,7 @@ public class QSUGItem extends GroupedDSItem.Stub {
         probabilisticCoeff, 
         cosine, 
         tfidfWeightedCosine, 
+        l2Dist,
         tfidfSum, 
         malletCosine, 
         vectorSumLength, 

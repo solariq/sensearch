@@ -149,6 +149,8 @@ public class LearnedSuggester implements Suggestor {
 
       List<Term> qc = terms.subList(0, terms.size() - 1);
       Vec queryVec = index.vecByTerms(qc);
+      //VecTools.normalizeL1(queryVec);
+      
       Vec queryVecTfidf = ((PlainIndex) index).weightedVecByTerms(qc);
 
 
@@ -163,6 +165,8 @@ public class LearnedSuggester implements Suggestor {
         }
          */
         Vec phraseVec = index.vecByTerms(Arrays.asList(phrase));
+        //VecTools.normalizeL1(phraseVec);
+        
         Vec phraseVecTfidf = ((PlainIndex) index).weightedVecByTerms(Arrays.asList(phrase));
 
         double cosine = VecTools.cosine(queryVec, phraseVec);
@@ -175,6 +179,7 @@ public class LearnedSuggester implements Suggestor {
             Double.longBitsToDouble(Longs.fromByteArray(p.payload.bytes)),
             cosine,
             VecTools.cosine(phraseVecTfidf, queryVecTfidf),
+            VecTools.distanceL2(phraseVec, queryVec),
             Arrays.stream(phrase).mapToDouble(t -> ((PlainIndex )index).tfidf(t)).sum(),
             0.,
             VecTools.l2(phraseVec),

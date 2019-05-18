@@ -319,7 +319,7 @@ public class PlainIndex implements Index {
 
   public double tfidf(Term t1) {
     IndexTerm t = (IndexTerm) t1;
-    return t.freq() * Math.log(1e9 / t.documentFreq());
+    return t.freq() * Math.log(1.0 * size() / t.documentFreq());
   }
   
   public Vec weightedVecByTerms(List<Term> terms) {
@@ -333,6 +333,7 @@ public class PlainIndex implements Index {
           if (v1 == null) {
             return null;
           }
+          v1 = VecTools.copy(v1);
           return VecTools.scale(v1, tfidf(t));
         })
         .filter(Objects::nonNull)

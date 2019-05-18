@@ -70,8 +70,8 @@ public class MetricsCounter {
     for (Entry<String, List<String>> e : map.entrySet()) {
 
       String[] words = e.getKey().split(" ");
-      if (words.length < 2)
-        continue;
+      /*if (words.length > 1)
+        continue;*/
 
       for (int i = 0; i < nSugg; i++) {
 
@@ -105,10 +105,13 @@ public class MetricsCounter {
           pos++;
         }
         mapSum[i] += mySugg.size() > 0 ? (1.0 * current_matched / mySugg.size()) : 0;
-        System.out.format("Обработано %s / %s, %s, MRR: %.4f MAP %.4f\n", cnt, map.size(),
+        System.out.format("Обработано %s / %s, %s, MRR: %.4f, MAP %.4f, Совпадений %s\n",
+            cnt, 
+            map.size(),
             suggestors[i].getName(),
             rrSum[i] / (cnt + 1),
-            mapSum[i] / (cnt + 1));
+            mapSum[i] / (cnt + 1),
+            matched[i]);
       }
       cnt++;
     }
@@ -155,7 +158,7 @@ public class MetricsCounter {
         //new OneWordLuceneLinks(index, suggestRoot),
         new LearnedSuggester(index, suggestRoot)
         //new DatasetSuggester("map"),
-        //new DatasetSuggester("map_google")
+        //new DatasetSuggester("map_google"),
         //new UnsortedSuggester(index, suggestRoot)
         );
 
