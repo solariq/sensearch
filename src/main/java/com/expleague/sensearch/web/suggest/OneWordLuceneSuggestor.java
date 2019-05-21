@@ -32,7 +32,7 @@ public class OneWordLuceneSuggestor implements Suggestor {
   private final PlainIndex index;
   
   public final static Path storePath = Paths.get("luceneSuggestPrefix/store");
-  
+  /*
   private final Comparator<MultigramWrapper> mwCmp = new Comparator<MultigramWrapper>() {
 
     Comparator<Term[]> termsCmp = new PhraseSortingComparator();
@@ -46,7 +46,7 @@ public class OneWordLuceneSuggestor implements Suggestor {
       return termsCmp.compare(o1.phrase, o2.phrase);
     }
 
-  };
+  };*/
 
   @Inject
   public OneWordLuceneSuggestor(Index index, Path suggestIndexRoot) throws IOException {
@@ -58,6 +58,7 @@ public class OneWordLuceneSuggestor implements Suggestor {
         new StandardAnalyzer());
     
     suggester.load(new FileInputStream(suggestIndexRoot.resolve(storePath).toFile()));
+    System.err.println("Lucene suggester: " + suggester.getCount());
   }
 
   @Override
@@ -102,7 +103,7 @@ public class OneWordLuceneSuggestor implements Suggestor {
       }
 
       List<Term> qcNonIntersecting = terms.subList(0, terms.size() - intersectLength);
-      String qcText = qcNonIntersecting.stream()
+      String qcNonIntersectText = qcNonIntersecting.stream()
           .map(Term::text)
           .collect(Collectors.joining(" "));
       
@@ -122,20 +123,20 @@ public class OneWordLuceneSuggestor implements Suggestor {
           continue;
         }*/
         
-        String suggestion = qcText.isEmpty() ? p.key.toString() : (qcText + " " + p.key);
+        String suggestion = qcNonIntersectText.isEmpty() ? p.key.toString() : (qcNonIntersectText + " " + p.key);
         
         Vec phraseVec = index.vecByTerms(Arrays.asList(phrase));
         //normalizeL1(phraseVec);
         
         double cosine = VecTools.cosine(queryVec, phraseVec);
 
-        System.err.println("one word cosine: " + cosine + " " + VecTools.l1(queryVec) + " " + VecTools.l1(phraseVec));
+        //System.err.println("one word cosine: " + cosine + " " + VecTools.l1(queryVec) + " " + VecTools.l1(phraseVec));
 
-        if (qcNonIntersecting.size() > 0) {
+        if (terms.size() > 1) {
           phraseProb.add(new StringDoublePair(suggestion, cosine));
           //phraseProb.add(new StringDoublePair(qcText + " " + p.key, VecTools.cosine(wQueryVec, index.weightedVecByTerms(Arrays.asList(phrase)))));
         } else {
-          phraseProb.add(new StringDoublePair(suggestion, p.value));
+          phraseProb.add(new StringDoublePair(suggestion, -index.parse(p.key).mapToDouble(index::tfidf).sum()));
         }
         //phraseProb.add(new MultigramWrapper(phrase, Arrays.stream(phrase).mapToDouble(t -> ((PlainIndex )index).tfidf(t)).average().orElse(0)));
         phraseProb.removeIf(it -> phraseProb.size() > RETURN_LIMIT);

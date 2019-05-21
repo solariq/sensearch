@@ -22,6 +22,7 @@ public class SortedMultigramsArray {
         (m1, m2) -> sortCmp.compare(m1.phrase, m2.phrase)
         //(m1, m2) -> m1.toString().compareTo(m2.toString())
         );
+    System.err.println("sortedMultigrams: " + sortedMultigrams.size());
   }
 
   public SortedMultigramsArray(Map<Term[], Double> multList) {

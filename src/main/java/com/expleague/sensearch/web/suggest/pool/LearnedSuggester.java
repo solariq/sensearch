@@ -154,7 +154,7 @@ public class LearnedSuggester implements Suggestor {
       Vec queryVecTfidf = ((PlainIndex) index).weightedVecByTerms(qc);
 
 
-      List<LookupResult> endingPhrases = suggester.lookup(termsToString(qt), false, 1000000);
+      List<LookupResult> endingPhrases = suggester.lookup(termsToString(qt), false, 10000000);
 
       //System.out.println("number of selected phrases: " + endingPhrases.size());
       for (LookupResult p : endingPhrases) {
@@ -228,7 +228,7 @@ public class LearnedSuggester implements Suggestor {
 
     return phraseProb.stream()
         .sorted(Comparator.reverseOrder())
-        //.sorted()
+        //.peek(p -> System.err.println(p.coeff))
         .map(p -> p.phrase)
         .collect(Collectors.toList());
   }

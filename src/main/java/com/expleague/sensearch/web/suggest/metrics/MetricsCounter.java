@@ -9,10 +9,13 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Map.Entry;
 import org.apache.log4j.PropertyConfigurator;
+import com.expleague.commons.math.vectors.Vec;
+import com.expleague.commons.math.vectors.VecTools;
 import com.expleague.sensearch.AppModule;
 import com.expleague.sensearch.Config;
 import com.expleague.sensearch.ConfigImpl;
 import com.expleague.sensearch.index.Index;
+import com.expleague.sensearch.index.plain.PlainIndex;
 import com.expleague.sensearch.web.suggest.BigramsBasedSuggestor;
 import com.expleague.sensearch.web.suggest.OneWordLuceneLinks;
 import com.expleague.sensearch.web.suggest.OneWordLuceneSuggestor;
@@ -46,11 +49,24 @@ public class MetricsCounter {
         System.out.println("------------------------ " + suggestors[i].getName());
         List<String> suggests = suggestors[i].getSuggestions(query);
         for (String sugg : suggests) {
-          System.out.println("|" + sugg + "|");
+          System.out.println(sugg);
         }
       }
     }
     System.out.println("#######################");
+  }
+
+  private double getSigm(double sum, double sumSq, int N) {
+
+    if (N < 2) {
+      N = 2;
+    }
+
+    double mu = sum / N;
+
+    double sumDiffSq = mu * mu - 2 * mu * sum + sumSq;
+
+    return Math.sqrt(sumDiffSq / (N - 1));
   }
 
   public void evaluate() throws IOException {
@@ -62,16 +78,21 @@ public class MetricsCounter {
 
     int cnt = 0;
     double[] rrSum = new double[nSugg];
+    double[] rrSumSq = new double[nSugg];
+
     double[] mapSum = new double[nSugg];
+    double[] mapSumSq = new double[nSugg];
+
     long[] timeSum = new long[nSugg];
+
     long[] timeMax = new long[nSugg];
     int[] matched = new int[nSugg];
 
     for (Entry<String, List<String>> e : map.entrySet()) {
 
       String[] words = e.getKey().split(" ");
-      /*if (words.length > 1)
-        continue;*/
+      if (words.length > 1)
+        continue;
 
       for (int i = 0; i < nSugg; i++) {
 
@@ -95,23 +116,32 @@ public class MetricsCounter {
               matched[i]++;
               current_matched++;
               if (!firstMatched) {
-                rrSum[i] += 1.0 / pos;
+                double crr = 1.0 / pos;
+                rrSum[i] += crr;
+                rrSumSq[i] += crr*crr;
               }
               firstMatched = true;
 
               break;
             }
           }
+
           pos++;
         }
-        mapSum[i] += mySugg.size() > 0 ? (1.0 * current_matched / mySugg.size()) : 0;
-        System.out.format("Обработано %s / %s, %s, MRR: %.4f, MAP %.4f, Совпадений %s\n",
+        double cmap = mySugg.size() > 0 ? (1.0 * current_matched / mySugg.size()) : 0;
+        mapSum[i] += cmap;
+        mapSumSq[i] += cmap*cmap;
+
+        System.out.format("Обработано %s / %s, %s, MRR: %.4f, MRR sigma: %.3f, MAP %.4f, MAP sigma %.3f, Совпадений %s\n",
             cnt, 
             map.size(),
             suggestors[i].getName(),
             rrSum[i] / (cnt + 1),
+            getSigm(rrSum[i], rrSumSq[i], cnt + 1),
             mapSum[i] / (cnt + 1),
-            matched[i]);
+            getSigm(mapSum[i], mapSumSq[i], cnt + 1),
+            matched[i]
+            );
       }
       cnt++;
     }
@@ -122,14 +152,18 @@ public class MetricsCounter {
           "Метод %s\n" 
               + "совпадений подсказок %d\n" 
               + "MRR %.3f\n"
+              + "MRR sigma %.3f\n"
               + "MAP %.3f\n"
+              + "MAP sigma %.3f\n"
               + "Avg. time %.3f\n"
               + "Max time %.3f\n"
               + "--------------------\n",
               suggestors[i].getName(),
               matched[i],
               rrSum[i] / cnt,
+              getSigm(rrSum[i], rrSumSq[i], cnt + 1),
               mapSum[i] / cnt,
+              getSigm(mapSum[i], mapSumSq[i], cnt + 1),
               timeSum[i] / cnt / 1e9,
               timeMax[i] / 1e9);
     }
@@ -147,23 +181,41 @@ public class MetricsCounter {
     Injector injector = Guice.createInjector(new AppModule(config));
 
     Path suggestRoot = config.getIndexRoot().resolve("suggest");
-    Index index = injector.getInstance(Index.class);
+    PlainIndex index = (PlainIndex) injector.getInstance(Index.class);
 
     MetricsCounter mc = new MetricsCounter(
-        //new BigramsBasedSuggestor(index),
-        //new OneWordSuggestor(index),
+   /*     new OneWordSuggestor(index, (l1, l2) ->  {
+          Vec v1 = index.vecByTerms(l1);
+          Vec v2 = index.vecByTerms(l2);
+          return VecTools.cosine(v1, v2);
+        }, "Cosine" ),
+        new OneWordSuggestor(index, (l1, l2) ->  {
+          Vec v1 = index.weightedVecByTerms(l1);
+          Vec v2 = index.weightedVecByTerms(l2);
+          return VecTools.cosine(v1, v2);
+        }, "Cosine TF-IDF" ),
+        new OneWordSuggestor(index, (l1, l2) ->  {
+          Vec v1 = index.vecByTerms(l1);
+          Vec v2 = index.vecByTerms(l2);
+          return -VecTools.distanceL2(v1, v2);
+        }, "Euclid" ),*/
+        /*new OneWordSuggestor(index, (l1, l2) ->  {
+       
+          return l2.stream().mapToDouble(t -> ((PlainIndex )index).tfidf(t)).sum();
+        }, "TF-IDF" )*/
         //new RawLuceneSuggestor(suggestRoot),
-        new OneWordLuceneSuggestor(index, suggestRoot),
+        //new OneWordLuceneSuggestor(index, suggestRoot)
         //new OneWordLuceneTFIDF(index, suggestRoot),
         //new OneWordLuceneLinks(index, suggestRoot),
-        new LearnedSuggester(index, suggestRoot)
-        //new DatasetSuggester("map"),
-        //new DatasetSuggester("map_google"),
+        //new LearnedSuggester(index, suggestRoot),
+        new DatasetSuggester("map"),
+        new DatasetSuggester("map_google")
         //new UnsortedSuggester(index, suggestRoot)
         );
 
-    mc.getSuggestsExamples("мир");
-    mc.getSuggestsExamples("миронов а");
+    //mc.getSuggestsExamples("борис го");
+    //getSuggestsExamples("2 сезон наруто");
+    //mc.getSuggestsExamples("миронов а", "борис годун");
     mc.evaluate();
   }
 }
