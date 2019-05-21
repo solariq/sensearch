@@ -116,11 +116,6 @@ public class LearnedSuggester implements Suggester {
     return "Learned Suggester";
   }
 
-  public static String termsToString(Term[] terms) {
-    return Arrays.stream(terms).map(t -> t.text().toString())
-        .collect(Collectors.joining(" "));
-  }
-
   public List<QSUGItem> getUnsortedEndings(String query) throws IOException {
     return getUnsortedSuggestions(
         index.parse(query.toLowerCase())
