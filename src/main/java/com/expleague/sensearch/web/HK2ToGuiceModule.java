@@ -2,7 +2,7 @@ package com.expleague.sensearch.web;
 
 import com.expleague.sensearch.SenSeArch;
 import com.expleague.sensearch.miner.pool.QueryAndResults;
-import com.expleague.sensearch.web.suggest.Suggestor;
+import com.expleague.sensearch.web.suggest.Suggester;
 import com.google.inject.Injector;
 import org.glassfish.hk2.api.Factory;
 import org.glassfish.hk2.utilities.binding.AbstractBinder;
@@ -18,7 +18,7 @@ public class HK2ToGuiceModule extends AbstractBinder {
   @Override
   protected void configure() {
     bindFactory(new ServiceFactory<>(guiceInjector, SenSeArch.class)).to(SenSeArch.class);
-    bindFactory(new ServiceFactory<>(guiceInjector, Suggestor.class)).to(Suggestor.class);
+    bindFactory(new ServiceFactory<>(guiceInjector, Suggester.class)).to(Suggester.class);
     bindFactory(new ServiceFactory<>(guiceInjector, QueryAndResults[].class)).to(QueryAndResults[].class);
   }
 

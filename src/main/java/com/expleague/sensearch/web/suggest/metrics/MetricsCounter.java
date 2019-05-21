@@ -17,12 +17,13 @@ import com.expleague.sensearch.ConfigImpl;
 import com.expleague.sensearch.index.Index;
 import com.expleague.sensearch.index.plain.PlainIndex;
 import com.expleague.sensearch.web.suggest.BigramsBasedSuggestor;
+import com.expleague.sensearch.web.suggest.LinksSuggester;
 import com.expleague.sensearch.web.suggest.OneWordLuceneLinks;
 import com.expleague.sensearch.web.suggest.OneWordLuceneSuggestor;
 import com.expleague.sensearch.web.suggest.OneWordLuceneTFIDF;
 import com.expleague.sensearch.web.suggest.RawLuceneSuggestor;
-import com.expleague.sensearch.web.suggest.OneWordSuggestor;
-import com.expleague.sensearch.web.suggest.Suggestor;
+import com.expleague.sensearch.web.suggest.SortedArraySuggester;
+import com.expleague.sensearch.web.suggest.Suggester;
 import com.expleague.sensearch.web.suggest.pool.LearnedSuggester;
 import com.expleague.sensearch.web.suggest.pool.SuggestRankingPoolBuilder;
 import com.expleague.sensearch.web.suggest.pool.UnsortedSuggester;
@@ -33,10 +34,10 @@ import com.google.inject.Injector;
 
 public class MetricsCounter {
 
-  private final Suggestor[] suggestors;
+  private final Suggester[] suggestors;
   private final int nSugg;
 
-  public MetricsCounter(Suggestor... suggestors) {
+  public MetricsCounter(Suggester... suggestors) {
     this.suggestors = suggestors;
     nSugg = suggestors.length;
   }
@@ -91,8 +92,8 @@ public class MetricsCounter {
     for (Entry<String, List<String>> e : map.entrySet()) {
 
       String[] words = e.getKey().split(" ");
-      if (words.length > 1)
-        continue;
+     /* if (words.length < 2)
+        continue;*/
 
       for (int i = 0; i < nSugg; i++) {
 
@@ -208,8 +209,9 @@ public class MetricsCounter {
         //new OneWordLuceneTFIDF(index, suggestRoot),
         //new OneWordLuceneLinks(index, suggestRoot),
         //new LearnedSuggester(index, suggestRoot),
-        new DatasetSuggester("map"),
-        new DatasetSuggester("map_google")
+        //new DatasetSuggester("map"),
+        //new DatasetSuggester("map_google"),
+        new LinksSuggester(index)
         //new UnsortedSuggester(index, suggestRoot)
         );
 

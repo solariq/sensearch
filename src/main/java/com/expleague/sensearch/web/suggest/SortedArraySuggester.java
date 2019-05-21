@@ -16,7 +16,7 @@ import java.util.TreeSet;
 import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 
-public class OneWordSuggestor implements Suggestor {
+public class SortedArraySuggester implements Suggester {
 
   public final int RETURN_LIMIT = 10;
 
@@ -29,7 +29,7 @@ public class OneWordSuggestor implements Suggestor {
   private BiFunction<List<Term>, List<Term>, Double> similarity;
   
   @Inject
-  public OneWordSuggestor(Index index) {
+  public SortedArraySuggester(Index index) {
     this.index = (PlainIndex) index;
 
     SuggestInformationLoader provider = index.getSuggestInformation();
@@ -41,7 +41,7 @@ public class OneWordSuggestor implements Suggestor {
     similarity = (l1, l2) -> 1.0;
   }
   
-  public OneWordSuggestor(Index index, BiFunction<List<Term>, List<Term>, Double> similarity, String printName) {
+  public SortedArraySuggester(Index index, BiFunction<List<Term>, List<Term>, Double> similarity, String printName) {
     this(index);
     this.printName = printName;
     

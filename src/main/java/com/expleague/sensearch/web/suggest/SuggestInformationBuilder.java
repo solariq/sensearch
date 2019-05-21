@@ -303,8 +303,8 @@ public class SuggestInformationBuilder {
         } catch (IOException e) {
           throw new RuntimeException(e);
         }
-        //multigramFreq.adjustOrPutValue(lIds, docIncomingLinks + 1, docIncomingLinks + 1);
-        multigramFreq.adjustOrPutValue(new LongArrWrapper(lIds), 1, 1);
+        multigramFreq.adjustOrPutValue(new LongArrWrapper(lIds), docIncomingLinks + 1, docIncomingLinks + 1);
+        //multigramFreq.adjustOrPutValue(new LongArrWrapper(lIds), 1, 1);
       }
     }
   }

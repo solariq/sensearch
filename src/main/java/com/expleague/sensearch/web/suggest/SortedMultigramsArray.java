@@ -60,5 +60,17 @@ public class SortedMultigramsArray {
     //System.out.println(lowerBound + " " + upperBound + " " + sortedMultigrams.size());
     return sortedMultigrams.subList(lowerBound, upperBound);
   }
+  
+  public int[] getBounds(Term[] lastWords) {
+    int lowerBound = binSearchPosition(lastWords, false);
+
+    int upperBound = binSearchPosition(lastWords, true);
+    
+    return new int[] {lowerBound, upperBound};
+  }
+  
+  public MultigramWrapper get(int idx) {
+    return sortedMultigrams.get(idx);
+  }
 
 }

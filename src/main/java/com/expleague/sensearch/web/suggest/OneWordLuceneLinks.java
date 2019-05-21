@@ -18,7 +18,7 @@ import com.expleague.sensearch.index.plain.PlainIndex;
 import com.expleague.sensearch.web.suggest.pool.LearnedSuggester.StringDoublePair;
 import com.google.inject.Inject;
 
-public class OneWordLuceneLinks implements Suggestor {
+public class OneWordLuceneLinks implements Suggester {
   public final int RETURN_LIMIT = 10;
 
   public final static String filePrefix = "prefix_sugg";
@@ -61,10 +61,6 @@ public class OneWordLuceneLinks implements Suggestor {
     return "One Word Lucene Links";
   }
 
-  private String termsToString(Term[] terms) {
-    return Arrays.stream(terms).map(t -> t.text().toString())
-        .collect(Collectors.joining(" "));
-  }
   
   private List<String> getSuggestions(List<Term> terms) throws IOException {
 

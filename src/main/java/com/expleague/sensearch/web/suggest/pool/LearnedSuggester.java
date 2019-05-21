@@ -30,10 +30,10 @@ import com.expleague.sensearch.index.Index;
 import com.expleague.sensearch.index.plain.IndexTerm;
 import com.expleague.sensearch.index.plain.PlainIndex;
 import com.expleague.sensearch.miner.pool.builders.FilterPoolBuilder;
-import com.expleague.sensearch.web.suggest.Suggestor;
+import com.expleague.sensearch.web.suggest.Suggester;
 import com.google.common.primitives.Longs;
 
-public class LearnedSuggester implements Suggestor {
+public class LearnedSuggester implements Suggester {
   public final int RETURN_LIMIT = 10;
 
   private static final Logger LOG = Logger.getLogger(FilterPoolBuilder.class.getName());

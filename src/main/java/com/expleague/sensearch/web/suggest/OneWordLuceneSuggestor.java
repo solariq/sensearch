@@ -22,7 +22,7 @@ import com.expleague.sensearch.index.plain.PlainIndex;
 import com.expleague.sensearch.web.suggest.pool.LearnedSuggester.StringDoublePair;
 import com.google.inject.Inject;
 
-public class OneWordLuceneSuggestor implements Suggestor {
+public class OneWordLuceneSuggestor implements Suggester {
   public final int RETURN_LIMIT = 10;
 
   public final static String filePrefix = "prefix_sugg";
@@ -79,11 +79,6 @@ public class OneWordLuceneSuggestor implements Suggestor {
   @Override
   public String getName() {
     return "One Word Lucene: cosine and links";
-  }
-
-  private String termsToString(Term[] terms) {
-    return Arrays.stream(terms).map(t -> t.text().toString())
-        .collect(Collectors.joining(" "));
   }
   
   private List<String> getSuggestions(List<Term> terms) throws IOException {

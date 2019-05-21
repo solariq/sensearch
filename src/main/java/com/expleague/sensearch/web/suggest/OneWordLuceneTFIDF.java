@@ -22,7 +22,7 @@ import com.expleague.sensearch.index.plain.PlainIndex;
 import com.expleague.sensearch.web.suggest.pool.LearnedSuggester.StringDoublePair;
 import com.google.inject.Inject;
 
-public class OneWordLuceneTFIDF implements Suggestor {
+public class OneWordLuceneTFIDF implements Suggester {
   public final int RETURN_LIMIT = 10;
 
   public final static String filePrefix = "prefix_sugg";
@@ -63,11 +63,6 @@ public class OneWordLuceneTFIDF implements Suggestor {
   @Override
   public String getName() {
     return "One Word Lucene TDIDF sum";
-  }
-
-  private String termsToString(Term[] terms) {
-    return Arrays.stream(terms).map(t -> t.text().toString())
-        .collect(Collectors.joining(" "));
   }
   
   private List<String> getSuggestions(List<Term> terms) throws IOException {

@@ -11,7 +11,7 @@ import org.apache.lucene.search.suggest.analyzing.AnalyzingInfixSuggester;
 import org.apache.lucene.store.FSDirectory;
 
 
-public class RawLuceneSuggestor implements Suggestor {
+public class RawLuceneSuggestor implements Suggester {
 
   private final AnalyzingInfixSuggester luceneSuggestor;
 
