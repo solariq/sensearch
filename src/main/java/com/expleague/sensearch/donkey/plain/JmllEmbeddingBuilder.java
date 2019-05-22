@@ -32,7 +32,11 @@ public class JmllEmbeddingBuilder {
     if (!Files.exists(corpus)) {
       LOG.info("Creating corpus for embedding...");
       try (Writer to = Files.newBufferedWriter(corpus, StandardCharsets.UTF_8)) {
+        final int[] cnt = {0};
         documents.forEach(doc -> {
+          if (cnt[0] % 10_000 == 0) {
+            LOG.info("Write " + cnt[0] + " lines to corpus");
+          }
           try {
             String title = doc.title();
             for (char c : title.toCharArray()) {
@@ -44,6 +48,7 @@ public class JmllEmbeddingBuilder {
               to.write(filtrateChar(content.charAt(i)));
             }
             to.write('\n');
+            cnt[0]++;
           } catch (IOException e) {
             LOG.warn(e);
           }
