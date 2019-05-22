@@ -52,7 +52,7 @@ public class TokenizerImpl implements Tokenizer {
   public Stream<CharSequence> toSentences(CharSequence text) {
     DocumentPreprocessor dp = new DocumentPreprocessor(new CharSequenceReader(text));
     dp.setTokenizerFactory(PTBTokenizer.factory(new CoreLabelTokenFactory(), "ptb3Escaping=false, invertible=true"));
-    return StreamSupport.stream(dp.spliterator(), false).map(SentenceUtils::listToString);
+    return StreamSupport.stream(dp.spliterator(), false).map(SentenceUtils::listToOriginalTextString);
   }
 
   private int trimStart(int sentenceStart, CharSequence text) {
