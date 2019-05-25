@@ -7,6 +7,7 @@ import java.nio.file.Paths;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Random;
 import java.util.Map.Entry;
 import org.apache.log4j.PropertyConfigurator;
 import com.expleague.commons.math.vectors.Vec;
@@ -89,11 +90,16 @@ public class MetricsCounter {
     long[] timeMax = new long[nSugg];
     int[] matched = new int[nSugg];
 
+    Random splitter = new Random(0);
     for (Entry<String, List<String>> e : map.entrySet()) {
 
+      if (splitter.nextInt(7000) >= 2000) {
+        continue;
+      }
+      
       String[] words = e.getKey().split(" ");
-     /* if (words.length < 2)
-        continue;*/
+      if (words.length < 2)
+        continue;
 
       for (int i = 0; i < nSugg; i++) {
 
@@ -208,7 +214,7 @@ public class MetricsCounter {
         //new OneWordLuceneSuggestor(index, suggestRoot)
         //new OneWordLuceneTFIDF(index, suggestRoot),
         //new OneWordLuceneLinks(index, suggestRoot),
-        //new LearnedSuggester(index, suggestRoot),
+        new LearnedSuggester(index, suggestRoot),
         //new DatasetSuggester("map"),
         //new DatasetSuggester("map_google"),
         new LinksSuggester(index)

@@ -48,7 +48,7 @@ public class LinksSuggester implements Suggester {
 
   @Override
   public List<String> getSuggestions(String searchString) {
-    System.err.println("suggest for " + searchString + " requested");
+    //System.err.println("suggest for " + searchString + " requested");
     List<String> res = null;
     try {
       res = getSuggestions(index.parse(searchString.toLowerCase())

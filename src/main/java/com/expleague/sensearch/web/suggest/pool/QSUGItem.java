@@ -7,62 +7,62 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 @JsonPropertyOrder({
   "suggestion",
-  "intersect",
+  //"intersect",
   "usedPhraseLength",
   "qc length",
-  "links",
-  "prob_coef",
+  //"links",
+  //"prob_coef",
   "cosine",
-  "tfIdfSum",
+  //"tfIdfSum",
   "tfIdfCosine",
   "l2Dist",
-  "MalletCosine",
-  "vectorSumLength",
+  //"MalletCosine",
+  //"vectorSumLength",
   "isPositive",})
 public class QSUGItem extends GroupedDSItem.Stub {
   public final String suggestion;
 
   public final boolean isPositive;
-  public final int intersectionLength;
+  //public final int intersectionLength;
   public final int usedPhraseLength;
   public final int qcLength;
-  public final int incomingLinksCount;
-  public final double probabilisticCoeff;
+  //public final int incomingLinksCount;
+  //public final double probabilisticCoeff;
   public final double cosine;
   public final double tfidfWeightedCosine;
   public final double l2Dist;
-  public final double malletCosine;
-  public final double tfidfSum;
-  public final double vectorSumLength;
+  //public final double malletCosine;
+  //public final double tfidfSum;
+  //public final double vectorSumLength;
 
   @JsonCreator
   public QSUGItem(
       @JsonProperty("suggestion") String suggestion,
-      @JsonProperty("intersect") int intersect,
+      //@JsonProperty("intersect") int intersect,
       @JsonProperty("usedPhraseLength") int phraseLength,
       @JsonProperty("qc length") int qcLength,
-      @JsonProperty("links") int links,
-      @JsonProperty("prob_coef") double coef,
+      //@JsonProperty("links") int links,
+      //@JsonProperty("prob_coef") double coef,
       @JsonProperty("cosine") double cosine,
       @JsonProperty("tfIdfCosine") double tfIdfCosine,
       @JsonProperty("l2Dist") double l2Dist,
-      @JsonProperty("tfIdfSum") double tfIdfSum,
-      @JsonProperty("MalletCosine") double malletCosine,
-      @JsonProperty("vectorSumLength") double vectorSumLength,
+      //@JsonProperty("tfIdfSum") double tfIdfSum,
+      //@JsonProperty("MalletCosine") double malletCosine,
+      //@JsonProperty("vectorSumLength") double vectorSumLength,
       @JsonProperty("isPositive") boolean isPositive) {
     super();
     this.suggestion = suggestion;
-    this.intersectionLength = intersect;
+    //this.intersectionLength = intersect;
     this.usedPhraseLength = phraseLength;
     this.qcLength = qcLength;
-    this.incomingLinksCount = links;
-    this.probabilisticCoeff = coef;
+    //this.incomingLinksCount = links;
+    //this.probabilisticCoeff = coef;
     this.cosine = cosine;
     this.tfidfWeightedCosine = tfIdfCosine;
     this.l2Dist = l2Dist;
-    this.malletCosine = malletCosine;
-    this.tfidfSum = tfIdfSum;
-    this.vectorSumLength = vectorSumLength;
+    //this.malletCosine = malletCosine;
+    //this.tfidfSum = tfIdfSum;
+    //this.vectorSumLength = vectorSumLength;
     
     this.isPositive = isPositive;
   }
@@ -72,35 +72,21 @@ public class QSUGItem extends GroupedDSItem.Stub {
     return tfidfWeightedCosine;
   }
 
-  @JsonProperty("MalletCosine")
-  public double getMalletCosine() {
-    return malletCosine;
-  }
-
-  @JsonProperty("tfIdfSum")
-  public double getTfidfSum() {
-    return tfidfSum;
-  }
-
-  @JsonProperty("vectorSumLength")
-  public double getVectorSumLength() {
-    return vectorSumLength;
-  }
 
   public QSUGItem asPositive() {
     return new QSUGItem(
         suggestion, 
-        intersectionLength, 
+        //intersectionLength, 
         usedPhraseLength, 
         qcLength, 
-        incomingLinksCount, 
-        probabilisticCoeff, 
+        //incomingLinksCount, 
+        //probabilisticCoeff, 
         cosine, 
         tfidfWeightedCosine, 
         l2Dist,
-        tfidfSum, 
-        malletCosine, 
-        vectorSumLength, 
+        //tfidfSum, 
+        //malletCosine, 
+        //vectorSumLength, 
         true);
   }
   
@@ -112,21 +98,6 @@ public class QSUGItem extends GroupedDSItem.Stub {
   @JsonProperty("isPositive")
   public boolean isPositive() {
     return isPositive;
-  }
-
-  @JsonProperty("intersect")
-  public int getIntersectionLength() {
-    return intersectionLength;
-  }
-
-  @JsonProperty("links")
-  public int getIncomingLinksCount() {
-    return incomingLinksCount;
-  }
-
-  @JsonProperty("prob_coef")
-  public double getProbabilisticCoeff() {
-    return probabilisticCoeff;
   }
 
   @JsonProperty("cosine")

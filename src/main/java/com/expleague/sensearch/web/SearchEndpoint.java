@@ -6,6 +6,7 @@ import com.expleague.sensearch.clicks.ClickLogger;
 import com.expleague.sensearch.core.impl.ResultItemImpl;
 import com.expleague.sensearch.miner.pool.QueryAndResults;
 import com.expleague.sensearch.miner.pool.QueryAndResults.PageAndWeight;
+import com.expleague.sensearch.web.suggest.Suggester;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
@@ -30,12 +31,12 @@ public class SearchEndpoint {
   private final SenSeArch search;
   private final Map<String, List<URI>> groundTruthData = new HashMap<>();
 
-  //  private final Suggestor suggestor;
+  private final Suggester suggester;
   private final ClickLogger clickLogger = new ClickLogger();
 
   // Note: this is javax @Inject, not Guice's as Jersey uses HK2 DI under the hood
   @Inject
-  public SearchEndpoint(SenSeArch search, QueryAndResults[] queryAndResults) throws IOException {
+  public SearchEndpoint(SenSeArch search, QueryAndResults[] queryAndResults, Suggester suggester) throws IOException {
     this.search = search;
     for (QueryAndResults queryAndResult : queryAndResults) {
       PageAndWeight[] answers = queryAndResult.getAnswers();
@@ -46,7 +47,7 @@ public class SearchEndpoint {
               .collect(Collectors.toList());
       groundTruthData.put(queryAndResult.getQuery(), uris);
     }
-    //    this.suggestor = suggestor;
+    this.suggester = suggester;
   }
 
   @GET
@@ -54,8 +55,8 @@ public class SearchEndpoint {
   @Produces(MediaType.APPLICATION_JSON)
   public String suggest(@DefaultValue("") @QueryParam("query") String query)
       throws JsonProcessingException {
-    return "";
-    //    return mapper.writeValueAsString(suggestor.getSuggestions(query));
+    //return "";
+    return mapper.writeValueAsString(suggester.getSuggestions(query));
   }
 
   @GET

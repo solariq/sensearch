@@ -116,11 +116,17 @@ public class SuggestRankingPoolBuilder {
     tabWriter.write("intersection links probCoef cosine phraseLength target\n");
 
     int exmpNumberSum = 0;
+    Random splitter = new Random(0);
     for(Entry<String, List<String>> qSugList : map.entrySet()) {
       /*
       if (qSugList.getKey().split(" ").length < 2)
         continue;
        */
+      
+      if (splitter.nextInt(7000) < 2000) {
+        continue;
+      }
+      
       if (status.get() % 100 == 0) {
         System.err.println(status.get() + " queries completed");
       }
@@ -131,14 +137,14 @@ public class SuggestRankingPoolBuilder {
       List<QSUGItem> examples = generateExamples(query, qSugList.getValue());
       exmpNumberSum += examples.size();
       for (QSUGItem qsitem : examples) {
-        tabWriter.write(
+        /*tabWriter.write(
             String.format("%d %d %f %f %f %f\n",
                 qsitem.intersectionLength,
                 qsitem.incomingLinksCount,
                 qsitem.probabilisticCoeff,
                 qsitem.cosine,
                 qsitem.vectorSumLength,
-                qsitem.isPositive ? 1.0 : 0.0));
+                qsitem.isPositive ? 1.0 : 0.0));*/
         poolBuilder.accept(qsitem);
         poolBuilder.advance();
       }

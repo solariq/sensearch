@@ -167,17 +167,17 @@ public class LearnedSuggester implements Suggester {
         double cosine = VecTools.cosine(queryVec, phraseVec);
         QSUGItem item = new QSUGItem(
             (qcNonIntersect.size() > 0 ? qcNonIntersectText + " " : "") + p.key.toString().toLowerCase(),
-            intersectLength,
+            //intersectLength,
             phrase.length,
             qcNonIntersect.size(),
-            Math.toIntExact(p.value),
-            Double.longBitsToDouble(Longs.fromByteArray(p.payload.bytes)),
+            //Math.toIntExact(p.value),
+            //Double.longBitsToDouble(Longs.fromByteArray(p.payload.bytes)),
             cosine,
             VecTools.cosine(phraseVecTfidf, queryVecTfidf),
             VecTools.distanceL2(phraseVec, queryVec),
-            Arrays.stream(phrase).mapToDouble(t -> ((PlainIndex )index).tfidf(t)).sum(),
-            0.,
-            VecTools.l2(phraseVec),
+            //Arrays.stream(phrase).mapToDouble(t -> ((PlainIndex )index).tfidf(t)).sum(),
+            //0.,
+            //VecTools.l2(phraseVec),
             false
             );
         //System.err.println("learned cosine: " + cosine);
