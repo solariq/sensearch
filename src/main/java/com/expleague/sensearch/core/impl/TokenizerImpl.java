@@ -2,11 +2,13 @@ package com.expleague.sensearch.core.impl;
 
 import com.expleague.commons.seq.CharSeqTools;
 import com.expleague.sensearch.core.Tokenizer;
+import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.HasWord;
 import edu.stanford.nlp.ling.SentenceUtils;
 import edu.stanford.nlp.process.CoreLabelTokenFactory;
 import edu.stanford.nlp.process.DocumentPreprocessor;
 import edu.stanford.nlp.process.PTBTokenizer;
+import edu.stanford.nlp.process.TokenizerFactory;
 import org.apache.commons.io.input.CharSequenceReader;
 
 import java.util.ArrayList;
@@ -16,6 +18,8 @@ import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 public class TokenizerImpl implements Tokenizer {
+
+  private static TokenizerFactory<CoreLabel> PT = PTBTokenizer.factory(new CoreLabelTokenFactory(), "ptb3Escaping=false, invertible=true");
 
   public TokenizerImpl() {
   }
@@ -51,7 +55,7 @@ public class TokenizerImpl implements Tokenizer {
   @Override
   public Stream<CharSequence> toSentences(CharSequence text) {
     DocumentPreprocessor dp = new DocumentPreprocessor(new CharSequenceReader(text));
-    dp.setTokenizerFactory(PTBTokenizer.factory(new CoreLabelTokenFactory(), "ptb3Escaping=false, invertible=true"));
+    dp.setTokenizerFactory(PT);
     return StreamSupport.stream(dp.spliterator(), false).map(SentenceUtils::listToOriginalTextString);
   }
 
