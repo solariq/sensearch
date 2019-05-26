@@ -200,8 +200,8 @@ public class MetricsCounter {
           Vec v1 = index.weightedVecByTerms(l1);
           Vec v2 = index.weightedVecByTerms(l2);
           return VecTools.cosine(v1, v2);
-        }, "Cosine TF-IDF" ),
-        new OneWordSuggestor(index, (l1, l2) ->  {
+        }, "Cosine TF-IDF" ), */
+        /*new SortedArraySuggester(index, (l1, l2) ->  {
           Vec v1 = index.vecByTerms(l1);
           Vec v2 = index.vecByTerms(l2);
           return -VecTools.distanceL2(v1, v2);
@@ -214,16 +214,16 @@ public class MetricsCounter {
         //new OneWordLuceneSuggestor(index, suggestRoot)
         //new OneWordLuceneTFIDF(index, suggestRoot),
         //new OneWordLuceneLinks(index, suggestRoot),
-        new LearnedSuggester(index, suggestRoot),
+        //new LearnedSuggester(index, suggestRoot),
         //new DatasetSuggester("map"),
         //new DatasetSuggester("map_google"),
         new LinksSuggester(index)
         //new UnsortedSuggester(index, suggestRoot)
         );
 
-    //mc.getSuggestsExamples("борис го");
+    mc.getSuggestsExamples("б");
     //getSuggestsExamples("2 сезон наруто");
     //mc.getSuggestsExamples("миронов а", "борис годун");
-    mc.evaluate();
+    //mc.evaluate();
   }
 }

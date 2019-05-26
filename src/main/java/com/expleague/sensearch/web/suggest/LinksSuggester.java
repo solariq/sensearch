@@ -8,6 +8,7 @@ import com.google.inject.Inject;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Random;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 
@@ -17,25 +18,34 @@ public class LinksSuggester implements Suggester {
 
   private final SortedMultigramsArray multigrams;
   private final PlainIndex index;
+
+  private final NRMQ rmq;
+
+  private final Random rnd = new Random(0);
   
-  static class WeightIdxIntersect implements Comparable<WeightIdxIntersect>{
+  class WeightIdxIntersect implements Comparable<WeightIdxIntersect>{
     public final double weight;
     public final int idx;
     public final int intersect;
-    
+    public final int id;
+
     public WeightIdxIntersect(double weight, int idx, int intersect) {
       this.weight = weight;
       this.idx = idx;
       this.intersect = intersect;
+      id = rnd.nextInt();
     }
-    
+
     @Override
-    public int compareTo(WeightIdxIntersect o) {
-      return Double.compare(weight, o.weight);
+    public final int compareTo(WeightIdxIntersect o) {
+      int res = Double.compare(weight, o.weight);
+      if (res != 0)
+        return res;
+      return Integer.compare(id, o.id);
     }
-    
+
   }
-  
+
   @Inject
   public LinksSuggester(Index index) {
     this.index = (PlainIndex) index;
@@ -43,7 +53,10 @@ public class LinksSuggester implements Suggester {
     SuggestInformationLoader provider = index.getSuggestInformation();
 
     multigrams = new SortedMultigramsArray(provider.multigramFreqNorm);
-        
+
+    //System.err.println("Multigrams array was built");
+    rmq = new NRMQ(RETURN_LIMIT, provider.multigramFreqNorm.stream().mapToDouble(mw -> mw.coeff));
+    //System.err.println("RMQ was built");
   }
 
   @Override
@@ -61,7 +74,7 @@ public class LinksSuggester implements Suggester {
     //System.out.println("returning number suggestions: " + res.size());
     return res;
   }
-  
+
   @Override
   public String getName() {
     return "Links Suggester";
@@ -73,11 +86,10 @@ public class LinksSuggester implements Suggester {
       return Collections.emptyList();
     }
 
-    int workCounter = 0;
 
     TreeSet<WeightIdxIntersect> phraseProb = new TreeSet<>();
 
-    l:  for(int intersectLength = 3; intersectLength >= 1; intersectLength--) {
+    for(int intersectLength = 3; intersectLength >= 1; intersectLength--) {
 
       if (terms.size() < intersectLength) {
         continue;
@@ -85,31 +97,22 @@ public class LinksSuggester implements Suggester {
 
       Term[] qt = terms.subList(terms.size() - intersectLength, terms.size()).toArray(new Term[0]);
 
-      
       int[] bounds = multigrams.getBounds(qt);
-      //System.out.println("number of selected phrases: " + endingPhrases.size());
-      for (int i = bounds[0]; i < bounds[1]; i++) {
-        
-        double coeff = multigrams.get(i).coeff;
-        //System.err.println(coeff);
-        phraseProb.add(new WeightIdxIntersect(coeff, i, intersectLength));
-        phraseProb.removeIf(it -> phraseProb.size() > RETURN_LIMIT);
 
-        workCounter++;
-        if (workCounter > 1e6) {
-          System.err.println("Suggestor stopped by counter");
-          break l;
-        }
+      int[] maxIdxs = rmq.getMaximumIdxs(bounds[0], bounds[1]);
+      for (int i : maxIdxs) {
+        phraseProb.add(new WeightIdxIntersect(multigrams.get(i).coeff, i, intersectLength));
       }
 
     }
 
     return phraseProb.stream()
         .sorted(Comparator.reverseOrder())
+        .limit(RETURN_LIMIT)
         .map(p -> {
           String pref = termsToString(terms.subList(0, terms.size() - p.intersect));
           String suff = termsToString(multigrams.get(p.idx).phrase);
-         return wordsConcat(pref, suff);
+          return wordsConcat(pref, suff);
         })
         .collect(Collectors.toList());
   }
