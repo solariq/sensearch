@@ -18,6 +18,7 @@ import com.expleague.sensearch.ConfigImpl;
 import com.expleague.sensearch.index.Index;
 import com.expleague.sensearch.index.plain.PlainIndex;
 import com.expleague.sensearch.web.suggest.BigramsBasedSuggestor;
+import com.expleague.sensearch.web.suggest.FastSuggester;
 import com.expleague.sensearch.web.suggest.LinksSuggester;
 import com.expleague.sensearch.web.suggest.OneWordLuceneLinks;
 import com.expleague.sensearch.web.suggest.OneWordLuceneSuggestor;
@@ -217,13 +218,14 @@ public class MetricsCounter {
         //new LearnedSuggester(index, suggestRoot),
         //new DatasetSuggester("map"),
         //new DatasetSuggester("map_google"),
+        new FastSuggester(index),
         new LinksSuggester(index)
         //new UnsortedSuggester(index, suggestRoot)
         );
 
-    mc.getSuggestsExamples("б");
+    //mc.getSuggestsExamples("б");
     //getSuggestsExamples("2 сезон наруто");
     //mc.getSuggestsExamples("миронов а", "борис годун");
-    //mc.evaluate();
+    mc.evaluate();
   }
 }

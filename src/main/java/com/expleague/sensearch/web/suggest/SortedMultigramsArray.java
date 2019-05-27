@@ -72,5 +72,9 @@ public class SortedMultigramsArray {
   public MultigramWrapper get(int idx) {
     return sortedMultigrams.get(idx);
   }
+  
+  public List<MultigramWrapper> getList() {
+    return sortedMultigrams;
+  }
 
 }

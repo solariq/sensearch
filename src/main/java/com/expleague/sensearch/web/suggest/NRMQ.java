@@ -1,9 +1,6 @@
 package com.expleague.sensearch.web.suggest;
 
-import java.util.Arrays;
-import java.util.Comparator;
 import java.util.stream.DoubleStream;
-import java.util.stream.Stream;
 import org.apache.commons.lang3.ArrayUtils;
 
 public class NRMQ {

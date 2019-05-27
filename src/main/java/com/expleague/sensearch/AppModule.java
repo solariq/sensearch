@@ -34,7 +34,7 @@ import com.expleague.sensearch.index.plain.PlainIndex;
 import com.expleague.sensearch.metrics.RequestCrawler;
 import com.expleague.sensearch.metrics.WebCrawler;
 import com.expleague.sensearch.miner.pool.QueryAndResults;
-import com.expleague.sensearch.web.suggest.LinksSuggester;
+import com.expleague.sensearch.web.suggest.FastSuggester;
 import com.expleague.sensearch.web.suggest.SortedArraySuggester;
 import com.expleague.sensearch.web.suggest.Suggester;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -105,7 +105,7 @@ public class AppModule extends AbstractModule {
     bind(Filter.class).to(FilterImpl.class);
     bind(Index.class).to(PlainIndex.class).in(Singleton.class);
     bind(IndexBuilder.class).to(PlainIndexBuilder.class);
-    bind(Suggester.class).to(LinksSuggester.class).in(Singleton.class);
+    bind(Suggester.class).to(FastSuggester.class).in(Singleton.class);
     bind(SenSeArch.class).to(SenSeArchImpl.class);
     bind(WebCrawler.class).to(RequestCrawler.class);
 
