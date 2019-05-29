@@ -30,6 +30,7 @@ import org.iq80.leveldb.DBIterator;
 
 public class EmbeddingImpl implements Embedding {
 
+  private static final String kek = "kek";
   private static final Logger LOG = Logger.getLogger(EmbeddingImpl.class);
 
   private static final int CACHE_SIZE = 64 * (1 << 10); // 64K vecs, 64 * 128 * 8 = 64Mb
