@@ -1,5 +1,6 @@
 package com.expleague.sensearch.query;
 
+import com.expleague.commons.math.vectors.Vec;
 import com.expleague.sensearch.core.Term;
 import com.expleague.sensearch.core.Term.TermAndDistance;
 import com.expleague.sensearch.index.Index;
@@ -17,14 +18,17 @@ public class BaseQuery implements Query {
   private Map<Term, List<TermAndDistance>> synonyms;
   private final List<Term> terms;
   private final String text;
+  private final Vec vec;
 
-  private BaseQuery(String input, List<Term> terms) {
+  private BaseQuery(String input, List<Term> terms, Vec vec) {
     this.terms = terms;
     this.text = input;
+    this.vec = vec;
   }
 
   public static Query create(String input, Index index) {
-    return new BaseQuery(input, index.parse(input).collect(Collectors.toList()));
+    List<Term> terms = index.parse(input).collect(Collectors.toList());
+    return new BaseQuery(input, terms, index.vecByTerms(terms));
   }
 
   @Override
@@ -79,5 +83,10 @@ public class BaseQuery implements Query {
   @Override
   public String text() {
     return text;
+  }
+
+  @Override
+  public Vec vec() {
+    return vec;
   }
 }

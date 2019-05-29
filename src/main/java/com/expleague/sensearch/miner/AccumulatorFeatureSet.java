@@ -106,7 +106,7 @@ public class AccumulatorFeatureSet extends FeatureSet.Stub<QURLItem> {
             .map(sentence -> index.parse(sentence).collect(Collectors.toList()))
             .collect(Collectors.toList());
     { // Cos-Dist processing
-      Vec queryVec = index.vecByTerms(item.queryCache().terms());
+      Vec queryVec = item.queryCache().vec();
       Vec titleVec = index.vecByTerms(titleTerms);
 
       cosDistanceFeatureSet.withStats(queryVec, titleVec);

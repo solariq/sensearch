@@ -442,7 +442,7 @@ public class PlainIndex implements Index {
     double minBody = 1;
     double minLink = 1;
 
-    Vec queryVec = vecByTerms(query.terms());
+    Vec queryVec = query.vec();
     IndexedPage page = (IndexedPage) page(pageURI);
     long tmpID;
     // Title
@@ -478,8 +478,7 @@ public class PlainIndex implements Index {
     FilterFeatures filterFeatures = new FilterFeatures();
 
     List<Term> queryTerms = query.terms();
-
-    final Vec qVec = vecByTerms(queryTerms);
+    final Vec qVec = query.vec();
     TLongObjectMap<List<Candidate>> pageIdToCandidatesMap = new TLongObjectHashMap<>();
     filter
         .filtrate(qVec, PlainIndex::isSectionId, 0.5)

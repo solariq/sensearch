@@ -33,12 +33,12 @@ public class AccumulatorFeatureSet extends FeatureSet.Stub<QPASItem> {
     features.accept(item);
 
     { //COS DISTANCE
-      Vec queryVec = index.vecByTerms(item.queryCache().terms());
+      Vec queryVec = item.queryCache().vec();
       Vec passageVec = index.vecByTerms(item.passageCache().words().collect(Collectors.toList()));
       features.components()
-          .map(Functions.cast(CosDistanceFeatureSet.class))
-          .filter(Objects::nonNull)
-          .forEach(fs -> fs.withVecs(queryVec, passageVec));
+              .map(Functions.cast(CosDistanceFeatureSet.class))
+              .filter(Objects::nonNull)
+              .forEach(fs -> fs.withVecs(queryVec, passageVec));
     }
     super.accept(item);
   }
