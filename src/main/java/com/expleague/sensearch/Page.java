@@ -1,5 +1,7 @@
 package com.expleague.sensearch;
 
+import com.expleague.commons.math.vectors.Vec;
+
 import java.net.URI;
 import java.util.List;
 import java.util.stream.Stream;
@@ -68,6 +70,8 @@ public interface Page {
   Stream<Page> subpages();
 
   Stream<CharSequence> sentences(SegmentType type);
+
+  Vec titleVec();
 
   interface Link {
 

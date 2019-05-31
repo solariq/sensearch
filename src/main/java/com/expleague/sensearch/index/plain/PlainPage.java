@@ -1,5 +1,6 @@
 package com.expleague.sensearch.index.plain;
 
+import com.expleague.commons.math.vectors.Vec;
 import com.expleague.commons.seq.CharSeqTools;
 import com.expleague.commons.util.cache.CacheStrategy.Type;
 import com.expleague.commons.util.cache.impl.FixedSizeCache;
@@ -90,6 +91,11 @@ public class PlainPage implements IndexedPage {
         public Stream<CharSequence> sentences(SegmentType t) {
           return Stream.empty();
         }
+
+        @Override
+        public Vec titleVec() {
+          return Vec.EMPTY;
+        }
       };
 
   private static final Logger LOG = LoggerFactory.getLogger(PlainPage.class);
@@ -99,6 +105,7 @@ public class PlainPage implements IndexedPage {
   private final IndexUnits.Page protoPage;
   private final URI uri;
   private final boolean isEmpty;
+  private Vec titleVec;
 
   private PlainPage(IndexUnits.Page protoPage, PlainIndex index) {
     this.index = index;
@@ -307,6 +314,19 @@ public class PlainPage implements IndexedPage {
   @Override
   public Stream<CharSequence> sentences(SegmentType type) {
     return index.sentences(content(type));
+  }
+
+  @Override
+  public Vec titleVec() {
+    if (titleVec != null) {
+      return titleVec;
+    }
+    synchronized (this) {
+      if (titleVec == null) {
+        titleVec = index.vecByTerms(index.parse(content(SegmentType.SECTION_TITLE)).collect(Collectors.toList()));
+      }
+      return titleVec;
+    }
   }
 
   @Override
