@@ -9,6 +9,7 @@ import com.expleague.sensearch.AppModule;
 import com.expleague.sensearch.Config;
 import com.expleague.sensearch.ConfigImpl;
 import com.expleague.sensearch.index.Index;
+import com.expleague.sensearch.web.suggest.metrics.Splitter;
 import com.expleague.sensearch.web.suggest.metrics.SuggestsDatasetBuilder;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -27,6 +28,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Random;
+import java.util.TreeMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.apache.log4j.Logger;
 
@@ -40,7 +42,7 @@ public class SuggestRankingPoolBuilder {
 
   public final static Path dataPath = Paths.get("suggest_ranker.pool");
 
-  private final Map<String, List<String>> map;
+  private final TreeMap<String, List<String>> map;
 
   private final Random rnd = new Random(15);
 
@@ -50,7 +52,7 @@ public class SuggestRankingPoolBuilder {
 
     ObjectMapper mapper = new ObjectMapper();
 
-    map = mapper.readValue(SuggestsDatasetBuilder.f, new TypeReference<Map<String, List<String>>>() {});
+    map = mapper.readValue(SuggestsDatasetBuilder.f, new TypeReference<TreeMap<String, List<String>>>() {});
   }
 
   public static void main(String[] args) throws IOException {
@@ -116,23 +118,22 @@ public class SuggestRankingPoolBuilder {
     tabWriter.write("intersection links probCoef cosine phraseLength target\n");
 
     int exmpNumberSum = 0;
-    Random splitter = new Random(0);
+
+    Splitter splitter = new Splitter();
     for(Entry<String, List<String>> qSugList : map.entrySet()) {
-      /*
-      if (qSugList.getKey().split(" ").length < 2)
-        continue;
-       */
-      
-      if (splitter.nextInt(7000) < 2000) {
+
+      if (!splitter.isTrain()) {
         continue;
       }
-      
+
+      String query = qSugList.getKey();
+
       if (status.get() % 100 == 0) {
         System.err.println(status.get() + " queries completed");
       }
       status.incrementAndGet();
 
-      String query = qSugList.getKey();
+
 
       List<QSUGItem> examples = generateExamples(query, qSugList.getValue());
       exmpNumberSum += examples.size();

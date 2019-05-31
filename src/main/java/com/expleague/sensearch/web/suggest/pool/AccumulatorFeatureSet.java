@@ -6,7 +6,7 @@ import com.expleague.ml.meta.FeatureMeta;
 import com.expleague.ml.meta.FeatureMeta.ValueType;
 
 public class AccumulatorFeatureSet extends FeatureSet.Stub<QSUGItem>{
-
+/*
   private final static FeatureMeta COS_DISTANCE = FeatureMeta.create("cos dist",
       "Cosine between qc and completing phrase", ValueType.VEC);
 
@@ -15,7 +15,7 @@ public class AccumulatorFeatureSet extends FeatureSet.Stub<QSUGItem>{
   
   private final static FeatureMeta L2_DISTANCE = FeatureMeta.create("l2 dist",
       "L2 distance between qc and completing phrase, tfidf weighted", ValueType.VEC);
-
+*/
   /*
   private final static FeatureMeta MALLET_COSINE = FeatureMeta.create("mallet vec cos",
       "Cosine distance by Mallet vectors", ValueType.VEC);
@@ -23,9 +23,9 @@ public class AccumulatorFeatureSet extends FeatureSet.Stub<QSUGItem>{
 
   private final static FeatureMeta USED_PHRASE_LENGTH = FeatureMeta.create("used phrase length",
       "Length of phrase used to form suggestion", ValueType.VEC);
-/*
+
   private final static FeatureMeta TF_IDF_SUM = FeatureMeta.create("tf idf sum",
-      "tf idf sum of words", ValueType.VEC);*/
+      "tf idf sum of words", ValueType.VEC);
 /*
   private final static FeatureMeta VEC_LENGTH = FeatureMeta.create("phrase vec length",
       "Length of vector that represents phrase", ValueType.VEC);
@@ -56,11 +56,11 @@ public class AccumulatorFeatureSet extends FeatureSet.Stub<QSUGItem>{
 
   @Override
   public Vec advance() {
-    set(COS_DISTANCE, qSugItem.cosine);
-    set(TFIDF_COS_DISTANCE, qSugItem.tfidfWeightedCosine);
-    set(L2_DISTANCE, qSugItem.l2Dist);
+    //set(COS_DISTANCE, qSugItem.cosine);
+    //set(TFIDF_COS_DISTANCE, qSugItem.tfidfWeightedCosine);
+    //set(L2_DISTANCE, qSugItem.l2Dist);
     //set(MALLET_COSINE, qSugItem.malletCosine);
-    //set(TF_IDF_SUM, qSugItem.tfidfSum);
+    set(TF_IDF_SUM, qSugItem.tfidfSum);
     //set(VEC_LENGTH, qSugItem.vectorSumLength);
     //set(INCOMING_LINKS, qSugItem.incomingLinksCount);
     //set(INTERSECT_SIZE, qSugItem.intersectionLength);

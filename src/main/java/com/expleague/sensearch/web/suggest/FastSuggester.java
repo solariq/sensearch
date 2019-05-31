@@ -38,10 +38,12 @@ public class FastSuggester implements Suggester {
 
     @Override
     public final int compareTo(WeightIdxIntersect o) {
+      return Double.compare(weight, o.weight);
+      /*
       int res = Double.compare(weight, o.weight);
       if (res != 0)
         return res;
-      return Integer.compare(id, o.id);
+      return Integer.compare(id, o.id);*/
     }
 
   }

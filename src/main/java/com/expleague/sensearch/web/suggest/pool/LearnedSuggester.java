@@ -30,6 +30,8 @@ import com.expleague.sensearch.index.Index;
 import com.expleague.sensearch.index.plain.IndexTerm;
 import com.expleague.sensearch.index.plain.PlainIndex;
 import com.expleague.sensearch.miner.pool.builders.FilterPoolBuilder;
+import com.expleague.sensearch.web.suggest.MultigramWrapper;
+import com.expleague.sensearch.web.suggest.SortedMultigramsArray;
 import com.expleague.sensearch.web.suggest.Suggester;
 import com.google.common.primitives.Longs;
 
@@ -40,15 +42,16 @@ public class LearnedSuggester implements Suggester {
 
   public final static String filePrefix = "prefix_sugg";
 
-  protected final AnalyzingSuggester suggester;
-
+  //protected final AnalyzingSuggester suggester;
+  protected final SortedMultigramsArray multigrams;
+  
   private final Trans model;
 
   private final AccumulatorFeatureSet featureSet = new AccumulatorFeatureSet();
 
   protected final Index index;
 
-  public final static Path storePath = Paths.get("luceneSuggestPrefix/store");
+  //public final static Path storePath = Paths.get("luceneSuggestPrefix/store");
 
   public static class StringDoublePair  implements Comparable<StringDoublePair> {
 
@@ -73,14 +76,15 @@ public class LearnedSuggester implements Suggester {
 
   public LearnedSuggester(Index index, Path suggestIndexRoot) throws IOException {
     this.index = index;
-
+/*
     suggester = new AnalyzingSuggester(
         //FSDirectory.open(suggestIndexRoot.resolve(storePath).getParent()),
         //filePrefix,
         new StandardAnalyzer());
 
     suggester.load(new FileInputStream(suggestIndexRoot.resolve(storePath).toFile()));
-
+*/
+    multigrams = new SortedMultigramsArray(index.getSuggestInformation().multigramFreqNorm);
     if (Files.exists(suggestIndexRoot.resolve("suggest_ranker.model"))) {
       model = (Trans) DataTools.readModel(
           new InputStreamReader(
@@ -149,11 +153,13 @@ public class LearnedSuggester implements Suggester {
       Vec queryVecTfidf = ((PlainIndex) index).weightedVecByTerms(qc);
 
 
-      List<LookupResult> endingPhrases = suggester.lookup(termsToString(qt), false, 10000000);
+      //List<LookupResult> endingPhrases = suggester.lookup(termsToString(qt), false, 10000000);
 
-      //System.out.println("number of selected phrases: " + endingPhrases.size());
-      for (LookupResult p : endingPhrases) {
-        Term[] phrase = index.parse(p.key.toString().toLowerCase()).toArray(Term[]::new);
+      List<MultigramWrapper> endingPhrases = multigrams.getMatchingPhrases(qt);
+      
+      //System.out.println("number of selected phrases: " + endingPhrases.size() + " " + termsToString(qt));
+      for (MultigramWrapper p : endingPhrases) {
+        Term[] phrase = p.phrase;
         /*
         if (phrase.length > intersectLength) {
           continue;
@@ -166,16 +172,16 @@ public class LearnedSuggester implements Suggester {
 
         double cosine = VecTools.cosine(queryVec, phraseVec);
         QSUGItem item = new QSUGItem(
-            (qcNonIntersect.size() > 0 ? qcNonIntersectText + " " : "") + p.key.toString().toLowerCase(),
+            (qcNonIntersect.size() > 0 ? qcNonIntersectText + " " : "") + termsToString(p.phrase),
             //intersectLength,
             phrase.length,
             qcNonIntersect.size(),
-            //Math.toIntExact(p.value),
+            Math.toIntExact(Math.round(p.coeff)),
             //Double.longBitsToDouble(Longs.fromByteArray(p.payload.bytes)),
             cosine,
             VecTools.cosine(phraseVecTfidf, queryVecTfidf),
             VecTools.distanceL2(phraseVec, queryVec),
-            //Arrays.stream(phrase).mapToDouble(t -> ((PlainIndex )index).tfidf(t)).sum(),
+            Arrays.stream(phrase).mapToDouble(t -> ((PlainIndex )index).tfidf(t)).sum(),
             //0.,
             //VecTools.l2(phraseVec),
             false

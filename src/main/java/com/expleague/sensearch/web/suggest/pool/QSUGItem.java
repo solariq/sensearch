@@ -10,10 +10,10 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
   //"intersect",
   "usedPhraseLength",
   "qc length",
-  //"links",
+  "links",
   //"prob_coef",
   "cosine",
-  //"tfIdfSum",
+  "tfIdfSum",
   "tfIdfCosine",
   "l2Dist",
   //"MalletCosine",
@@ -26,13 +26,13 @@ public class QSUGItem extends GroupedDSItem.Stub {
   //public final int intersectionLength;
   public final int usedPhraseLength;
   public final int qcLength;
-  //public final int incomingLinksCount;
+  public final int incomingLinksCount;
   //public final double probabilisticCoeff;
   public final double cosine;
   public final double tfidfWeightedCosine;
   public final double l2Dist;
   //public final double malletCosine;
-  //public final double tfidfSum;
+  public final double tfidfSum;
   //public final double vectorSumLength;
 
   @JsonCreator
@@ -41,12 +41,12 @@ public class QSUGItem extends GroupedDSItem.Stub {
       //@JsonProperty("intersect") int intersect,
       @JsonProperty("usedPhraseLength") int phraseLength,
       @JsonProperty("qc length") int qcLength,
-      //@JsonProperty("links") int links,
+      @JsonProperty("links") int links,
       //@JsonProperty("prob_coef") double coef,
       @JsonProperty("cosine") double cosine,
       @JsonProperty("tfIdfCosine") double tfIdfCosine,
       @JsonProperty("l2Dist") double l2Dist,
-      //@JsonProperty("tfIdfSum") double tfIdfSum,
+      @JsonProperty("tfIdfSum") double tfIdfSum,
       //@JsonProperty("MalletCosine") double malletCosine,
       //@JsonProperty("vectorSumLength") double vectorSumLength,
       @JsonProperty("isPositive") boolean isPositive) {
@@ -55,13 +55,13 @@ public class QSUGItem extends GroupedDSItem.Stub {
     //this.intersectionLength = intersect;
     this.usedPhraseLength = phraseLength;
     this.qcLength = qcLength;
-    //this.incomingLinksCount = links;
+    this.incomingLinksCount = links;
     //this.probabilisticCoeff = coef;
     this.cosine = cosine;
     this.tfidfWeightedCosine = tfIdfCosine;
     this.l2Dist = l2Dist;
     //this.malletCosine = malletCosine;
-    //this.tfidfSum = tfIdfSum;
+    this.tfidfSum = tfIdfSum;
     //this.vectorSumLength = vectorSumLength;
     
     this.isPositive = isPositive;
@@ -79,12 +79,12 @@ public class QSUGItem extends GroupedDSItem.Stub {
         //intersectionLength, 
         usedPhraseLength, 
         qcLength, 
-        //incomingLinksCount, 
+        incomingLinksCount, 
         //probabilisticCoeff, 
         cosine, 
         tfidfWeightedCosine, 
         l2Dist,
-        //tfidfSum, 
+        tfidfSum, 
         //malletCosine, 
         //vectorSumLength, 
         true);

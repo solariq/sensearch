@@ -15,7 +15,7 @@ public class SuggestInformationLoader {
 
   private static final Logger LOG = Logger.getLogger(SuggestInformationLoader.class);
 
-  Collection<MultigramWrapper> multigramFreqNorm = new ArrayList<>();
+  public final Collection<MultigramWrapper> multigramFreqNorm = new ArrayList<>();
 
   private final DB multigramFreqNormDB;
 

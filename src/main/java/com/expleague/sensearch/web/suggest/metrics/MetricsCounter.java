@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Random;
+import java.util.TreeMap;
 import java.util.Map.Entry;
 import org.apache.log4j.PropertyConfigurator;
 import com.expleague.commons.math.vectors.Vec;
@@ -75,9 +76,9 @@ public class MetricsCounter {
   public void evaluate() throws IOException {
 
     ObjectMapper mapper = new ObjectMapper();
-    Map<String, List<String>> map = mapper.readValue(
+    TreeMap<String, List<String>> map = mapper.readValue(
         Paths.get("sugg_dataset/map").toFile(),
-        new TypeReference<Map<String, List<String>>>() {});
+        new TypeReference<TreeMap<String, List<String>>>() {});
 
     int cnt = 0;
     double[] rrSum = new double[nSugg];
@@ -91,16 +92,19 @@ public class MetricsCounter {
     long[] timeMax = new long[nSugg];
     int[] matched = new int[nSugg];
 
-    Random splitter = new Random(0);
+
+    Splitter splitter = new Splitter();
     for (Entry<String, List<String>> e : map.entrySet()) {
 
-      if (splitter.nextInt(7000) >= 2000) {
+      if (!splitter.isTest()) {
         continue;
       }
-      
+
+      //System.err.println(e.getKey());
       String[] words = e.getKey().split(" ");
-      if (words.length < 2)
+      if (words[words.length-1].length() < 2) {
         continue;
+      }
 
       for (int i = 0; i < nSugg; i++) {
 
@@ -140,7 +144,7 @@ public class MetricsCounter {
         mapSum[i] += cmap;
         mapSumSq[i] += cmap*cmap;
 
-        System.out.format("Обработано %s / %s, %s, MRR: %.4f, MRR sigma: %.3f, MAP %.4f, MAP sigma %.3f, Совпадений %s\n",
+        System.out.format("Обработано %s / %s, %s, MRR: %.4f, MRR sigma: %.3f, MAP %.4f, MAP sigma %.3f, Совпадений %s |%s|\n",
             cnt, 
             map.size(),
             suggestors[i].getName(),
@@ -148,7 +152,8 @@ public class MetricsCounter {
             getSigm(rrSum[i], rrSumSq[i], cnt + 1),
             mapSum[i] / (cnt + 1),
             getSigm(mapSum[i], mapSumSq[i], cnt + 1),
-            matched[i]
+            matched[i],
+            e.getKey()
             );
       }
       cnt++;
@@ -192,11 +197,11 @@ public class MetricsCounter {
     PlainIndex index = (PlainIndex) injector.getInstance(Index.class);
 
     MetricsCounter mc = new MetricsCounter(
-   /*     new OneWordSuggestor(index, (l1, l2) ->  {
+        /*new SortedArraySuggester(index, (l1, l2) ->  {
           Vec v1 = index.vecByTerms(l1);
           Vec v2 = index.vecByTerms(l2);
           return VecTools.cosine(v1, v2);
-        }, "Cosine" ),
+        }, "Cosine" ),/*
         new OneWordSuggestor(index, (l1, l2) ->  {
           Vec v1 = index.weightedVecByTerms(l1);
           Vec v2 = index.weightedVecByTerms(l2);
@@ -208,18 +213,18 @@ public class MetricsCounter {
           return -VecTools.distanceL2(v1, v2);
         }, "Euclid" ),*/
         /*new OneWordSuggestor(index, (l1, l2) ->  {
-       
+
           return l2.stream().mapToDouble(t -> ((PlainIndex )index).tfidf(t)).sum();
         }, "TF-IDF" )*/
         //new RawLuceneSuggestor(suggestRoot),
         //new OneWordLuceneSuggestor(index, suggestRoot)
         //new OneWordLuceneTFIDF(index, suggestRoot),
         //new OneWordLuceneLinks(index, suggestRoot),
-        //new LearnedSuggester(index, suggestRoot),
+        new LearnedSuggester(index, suggestRoot)
         //new DatasetSuggester("map"),
         //new DatasetSuggester("map_google"),
-        new FastSuggester(index),
-        new LinksSuggester(index)
+        //new FastSuggester(index)
+        //new LinksSuggester(index)
         //new UnsortedSuggester(index, suggestRoot)
         );
 

@@ -89,10 +89,11 @@ public class SuggestInformationBuilder {
 
   private final Index index;
   private final Path suggestIndexRoot;
-
+/*
   private final AnalyzingInfixSuggester luceneInfixSuggester;
   private final AnalyzingSuggester lucenePrefixSuggester;
-
+*/
+  /*
   private final MyInputIterator prefixPhrases = new MyInputIterator();
   private class MyInputIterator implements InputIterator {
 
@@ -153,7 +154,7 @@ public class SuggestInformationBuilder {
       return null;
     }
   };
-
+*/
   private static final Logger LOG = Logger.getLogger(SuggestInformationBuilder.class);
 
   public void build() throws IOException {
@@ -162,13 +163,14 @@ public class SuggestInformationBuilder {
     computeFreqNorm();
     computeTargetMaps();
     saveTargets();
-
+/*
     luceneInfixSuggester.commit();
     luceneInfixSuggester.close();
 
     lucenePrefixSuggester.build(prefixPhrases);
     Files.createDirectories(suggestIndexRoot.resolve(OneWordLuceneSuggestor.storePath).getParent());
     lucenePrefixSuggester.store(new FileOutputStream(suggestIndexRoot.resolve(OneWordLuceneSuggestor.storePath).toFile()));
+  */
   }
 
   private void useIndex() throws IOException {
@@ -256,7 +258,7 @@ public class SuggestInformationBuilder {
     this.multigramFreqNormDB = multigramFreqNormDB;
 
     this.suggestIndexRoot = indexRoot.resolve("suggest");
-
+/*
     luceneInfixSuggester =  new AnalyzingInfixSuggester(
         FSDirectory.open(Files.createDirectory(suggestIndexRoot.resolve(RawLuceneSuggestor.storePath))),
         new StandardAnalyzer());
@@ -265,7 +267,7 @@ public class SuggestInformationBuilder {
         //FSDirectory.open(Files.createDirectory(suggestIndexRoot.resolve(OneWordLuceneSuggestor.storePath.getParent()))), 
         //OneWordLuceneSuggestor.filePrefix, 
         new StandardAnalyzer());
-
+*/
   }
 
   private void computeUnigrams(long[] wordIds) {
@@ -296,13 +298,13 @@ public class SuggestInformationBuilder {
     for (int i = 1; i <= maxNgramsOrder; i++) {
       for(Term[] l : getNgrams(terms, i)) {
         long[] lIds = termsToIds(l);
-        try {
+        /*try {
           BytesRef br = new BytesRef(termsToString(l));
           luceneInfixSuggester.add(br, null, docIncomingLinks, null);
           prefixPhrases.add(br, docIncomingLinks + 1);          
         } catch (IOException e) {
           throw new RuntimeException(e);
-        }
+        }*/
         multigramFreq.adjustOrPutValue(new LongArrWrapper(lIds), docIncomingLinks + 1, docIncomingLinks + 1);
         //multigramFreq.adjustOrPutValue(new LongArrWrapper(lIds), 1, 1);
       }
@@ -327,8 +329,8 @@ public class SuggestInformationBuilder {
   }
 
   private double freqNorm(LongArrWrapper l) {
-    return multigramFreq.get(l) / Math.log(1 + avgOrderFreq[l.val.length - 1]);
-    //return multigramFreq.get(l);
+    //return multigramFreq.get(l) / Math.log(1 + avgOrderFreq[l.val.length - 1]);
+    return multigramFreq.get(l);
   }
 
   private void computeFreqNorm() {
