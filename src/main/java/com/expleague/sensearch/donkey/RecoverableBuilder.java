@@ -1,18 +1,18 @@
 package com.expleague.sensearch.donkey;
 
-import com.expleague.commons.system.RuntimeUtils;
 import com.google.gson.Gson;
 import com.google.gson.JsonIOException;
 import com.google.gson.JsonSyntaxException;
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.Reader;
+import java.io.InputStream;
+import java.io.ObjectInputStream;
 import java.io.Writer;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -25,6 +25,67 @@ public interface RecoverableBuilder {
   interface BuilderState {
 
     String META_FILE = "meta";
+
+    static <T> List<T> loadProtobufList(StateMeta meta, String property, Path root,
+        Class<T> clazz) {
+      if (!meta.hasProperty(property)) {
+        throw new IllegalStateException(
+            String.format("Meta file does not have a property with the name [ %s ]", property));
+      }
+      Method parserMethod;
+      try {
+        parserMethod = clazz.getMethod("parseDelimitedFrom", InputStream.class);
+      } catch (NoSuchMethodException | SecurityException e) {
+        throw new IllegalStateException(
+            String.format("String given class [ %s ] is not a protobuf class",
+                clazz.getSimpleName()), e);
+      }
+      Path protobufListFile = root.resolve(meta.get(property)).toAbsolutePath();
+      List<T> protobufList = new ArrayList<>();
+      try (InputStream is = Files.newInputStream(protobufListFile)) {
+        protobufList.add(clazz.cast(parserMethod.invoke(null, is)));
+      } catch (IOException e) {
+        throw new RuntimeException(
+            String.format("Failed to read terms from file [ %s ]", protobufListFile.toString()), e);
+      } catch (ClassCastException | IllegalAccessException | InvocationTargetException e) {
+        throw new IllegalStateException(
+            String.format("Failed to read protobufs with the type [ %s ] from the file [ %s ]."
+                    + " Probably recovery point is corrupted",
+                clazz.getSimpleName(), protobufListFile.toString()), e);
+      }
+      return protobufList;
+    }
+
+    static <T> T loadObject(StateMeta meta, String property, Path root,
+        Class<T> clazz) {
+      if (!meta.hasProperty(property)) {
+        throw new IllegalStateException(
+            String.format("Meta file does not have a property with the name [ %s ]", property));
+      }
+
+      Path pathToObject = root.resolve(meta.get(property)).toAbsolutePath();
+      try {
+        ObjectInputStream deserializer = new ObjectInputStream(
+            Files.newInputStream(pathToObject));
+        Object object = deserializer.readObject();
+        return clazz.cast(object);
+      } catch (ClassCastException e) {
+        throw new IllegalStateException(
+            String.format("Failed to read an object of the type [ %s ] from path [ %s ]."
+                    + " Probably recovery point is corrupted",
+                clazz.getSimpleName(), pathToObject.toString()), e);
+      } catch (IOException e) {
+        throw new IllegalStateException(
+            String.format("Failed to read an object from the path [ %s ]",
+                pathToObject.toString()), e
+        );
+      } catch (ClassNotFoundException e) {
+        throw new IllegalStateException(
+            String.format("Path [ %s ] does not contain an object!",
+                pathToObject.toString()), e
+        );
+      }
+    }
 
     static BuilderState loadFrom(Path from, Class<? extends BuilderState> stateClass,
         Logger logger) throws IOException {

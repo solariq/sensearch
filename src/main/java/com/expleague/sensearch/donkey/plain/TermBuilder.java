@@ -118,21 +118,21 @@ public class TermBuilder implements AutoCloseable, IncrementalBuilder {
   }
 
   @Override
-  public void setStates(BuilderState... increments) {
+  public synchronized void setStates(BuilderState... increments) {
     resetState();
     priorStates.clear();
     priorStates.addAll(IncrementalBuilder.accumulate(TermBuilderState.class, increments));
   }
 
   @Override
-  public BuilderState state() {
+  public synchronized BuilderState state() {
     TermBuilderState state = new TermBuilderState(this);
     priorStates.add(state);
     resetState();
     return state;
   }
 
-  private void resetState() {
+  private synchronized void resetState() {
     terms.clear();
   }
 
@@ -170,7 +170,10 @@ public class TermBuilder implements AutoCloseable, IncrementalBuilder {
       Path termsFile = root.resolve(meta.get(TERMS_FILE_PROP)).toAbsolutePath();
       terms = new ArrayList<>();
       try (InputStream is = Files.newInputStream(termsFile)) {
-        terms.add(Term.parseDelimitedFrom(is));
+        Term t;
+        while ((t = Term.parseDelimitedFrom(is)) != null) {
+          terms.add(t);
+        }
       } catch (IOException e) {
         throw new RuntimeException(
             String.format("Failed to read terms from file [ %s ]", termsFile.toString()), e);

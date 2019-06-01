@@ -44,21 +44,21 @@ public class UriMappingsBuilder implements AutoCloseable, IncrementalBuilder {
   }
 
   @Override
-  public void setStates(BuilderState... increments) {
+  public synchronized void setStates(BuilderState... increments) {
     resetState();
     priorStates.clear();
     priorStates.addAll(IncrementalBuilder.accumulate(UriMappingBuilderState.class, increments));
   }
 
   @Override
-  public BuilderState state() {
+  public synchronized BuilderState state() {
     UriMappingBuilderState state = new UriMappingBuilderState(this);
     priorStates.add(state);
     resetState();
     return state;
   }
 
-  private void resetState() {
+  private synchronized void resetState() {
     uriMappings.clear();
   }
 

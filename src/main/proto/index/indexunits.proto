@@ -56,10 +56,9 @@ message TermStatistics {
 
   optional int64 term_id = 1;
   optional int32 document_frequency = 2;
-  optional int32 document_lemma_frequency = 3;
-  optional int64 term_frequency = 4;
+  optional int64 term_frequency = 3;
 
-  repeated TermFrequency bigram_frequency = 5;
+  repeated TermFrequency bigram_frequency = 4;
 }
 
 message Term {

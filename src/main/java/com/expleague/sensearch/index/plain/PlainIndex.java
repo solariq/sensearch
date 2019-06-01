@@ -153,7 +153,7 @@ public class PlainIndex implements Index {
 
     uriMappingDb =
         JniDBFactory.factory.open(
-            indexRoot.resolve(UriMappingsBuilder.ROOT).toFile(), DEFAULT_DB_OPTIONS);
+            indexRoot.resolve(PlainIndexBuilder.URI_MAPPINGS_ROOT).toFile(), DEFAULT_DB_OPTIONS);
 
     tokenizer = new TokenizerImpl();
 
