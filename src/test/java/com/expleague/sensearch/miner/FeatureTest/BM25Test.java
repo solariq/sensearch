@@ -2,8 +2,8 @@ package com.expleague.sensearch.miner.FeatureTest;
 
 import com.expleague.commons.math.vectors.Vec;
 import com.expleague.sensearch.Page;
-import com.expleague.sensearch.features.sets.ranker.BM25FeatureSet;
 import com.expleague.sensearch.features.QURLItem;
+import com.expleague.sensearch.features.sets.ranker.BM25FeatureSet;
 import com.expleague.sensearch.features.sets.ranker.TextFeatureSet;
 import com.expleague.sensearch.features.sets.ranker.TextFeatureSet.Segment;
 import com.expleague.sensearch.query.BaseQuery;
@@ -159,6 +159,16 @@ public class BM25Test extends IndexBasedTestCase {
     }
 
     @Override
+    public int incomingLinksCount(LinkType type) {
+      return 0;
+    }
+
+    @Override
+    public int outgoingLinksCount(LinkType type) {
+      return 0;
+    }
+
+    @Override
     public Page parent() {
       return null;
     }
@@ -180,6 +190,11 @@ public class BM25Test extends IndexBasedTestCase {
 
     @Override
     public Stream<CharSequence> sentences(SegmentType type) {
+      return null;
+    }
+
+    @Override
+    public Vec titleVec() {
       return null;
     }
   }

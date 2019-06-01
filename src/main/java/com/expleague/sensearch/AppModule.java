@@ -11,6 +11,8 @@ import com.expleague.sensearch.core.Annotations.EmbeddingLshTablesDb;
 import com.expleague.sensearch.core.Annotations.EmbeddingVecsDb;
 import com.expleague.sensearch.core.Annotations.EmbeddingVectorsPath;
 import com.expleague.sensearch.core.Annotations.FilterMaxItems;
+import com.expleague.sensearch.core.Annotations.FilterMinerDocNum;
+import com.expleague.sensearch.core.Annotations.FilterRankDocNum;
 import com.expleague.sensearch.core.Annotations.IndexRoot;
 import com.expleague.sensearch.core.Annotations.MetricPath;
 import com.expleague.sensearch.core.Annotations.PageSize;
@@ -35,7 +37,6 @@ import com.expleague.sensearch.metrics.RequestCrawler;
 import com.expleague.sensearch.metrics.WebCrawler;
 import com.expleague.sensearch.miner.pool.QueryAndResults;
 import com.expleague.sensearch.web.suggest.FastSuggester;
-import com.expleague.sensearch.web.suggest.SortedArraySuggester;
 import com.expleague.sensearch.web.suggest.Suggester;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.AbstractModule;
@@ -97,6 +98,8 @@ public class AppModule extends AbstractModule {
     bind(Path.class).annotatedWith(IndexRoot.class).toInstance(config.getIndexRoot());
 
     bindConstant().annotatedWith(UseLshFlag.class).to(config.getLshNearestFlag());
+    bindConstant().annotatedWith(FilterMinerDocNum.class).to(config.filterMinerDocNum());
+    bindConstant().annotatedWith(FilterRankDocNum.class).to(config.filterRankDocNum());
 
     Lemmer lemmer = Lemmer.getInstance();
     bind(Lemmer.class).toInstance(lemmer);

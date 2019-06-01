@@ -32,6 +32,10 @@ public interface Config {
 
   int maxFilterItems();
 
+  int filterMinerDocNum();
+
+  int filterRankDocNum();
+
   Path getModelPath();
 
   Path getFilterModelPath();

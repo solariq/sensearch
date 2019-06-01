@@ -14,12 +14,12 @@ import com.expleague.ml.meta.FeatureMeta;
 import com.expleague.ml.meta.impl.JsonDataSetMeta;
 import com.expleague.sensearch.AppModule;
 import com.expleague.sensearch.Page;
+import com.expleague.sensearch.core.Annotations.FilterMinerDocNum;
 import com.expleague.sensearch.core.Annotations.RankModel;
 import com.expleague.sensearch.features.Features;
 import com.expleague.sensearch.features.QURLItem;
 import com.expleague.sensearch.features.sets.TargetFS;
 import com.expleague.sensearch.features.sets.TargetSet;
-import com.expleague.sensearch.filter.FilterMinerPhase;
 import com.expleague.sensearch.index.Index;
 import com.expleague.sensearch.index.plain.PlainPage;
 import com.expleague.sensearch.miner.AccumulatorFeatureSet;
@@ -56,11 +56,14 @@ public class RankingPoolBuilder extends PoolBuilder<QueryAndResults> {
   private static final int RANK_DOCUMENTS = 10;
   private final Index index;
   private final Trans model;
+  private final int filterDocNum;
 
   @Inject
-  public RankingPoolBuilder(Index index, @RankModel Pair<Function, FeatureMeta[]> rankModel) {
+  public RankingPoolBuilder(Index index, @RankModel Pair<Function, FeatureMeta[]> rankModel,
+      @FilterMinerDocNum int filterDocNum) {
     this.index = index;
     this.model = (Trans) rankModel.getFirst();
+    this.filterDocNum = filterDocNum;
   }
 
   public static void main(String[] args) throws IOException {
@@ -100,7 +103,7 @@ public class RankingPoolBuilder extends PoolBuilder<QueryAndResults> {
               List<PageAndWeight> res = Arrays.asList(qNr.getAnswers());
 
               Map<Page, Features> allDocs =
-                  index.fetchDocuments(query, FilterMinerPhase.FILTERED_DOC_NUMBER);
+                  index.fetchDocuments(query, filterDocNum);
 
               res.forEach(
                   pNw -> {
