@@ -73,6 +73,8 @@ public interface Page {
 
   Vec titleVec();
 
+  Vec sentenceVec(CharSequence sentence);
+
   interface Link {
 
     /**

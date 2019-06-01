@@ -7,16 +7,16 @@ import com.expleague.commons.util.cache.impl.FixedSizeCache;
 import com.expleague.sensearch.Page;
 import com.expleague.sensearch.index.IndexedPage;
 import com.expleague.sensearch.protobuf.index.IndexUnits;
+import com.google.common.base.Functions;
 import com.google.protobuf.InvalidProtocolBufferException;
 import java.net.URI;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.NoSuchElementException;
+import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 import javax.ws.rs.NotSupportedException;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -96,6 +96,11 @@ public class PlainPage implements IndexedPage {
         public Vec titleVec() {
           return Vec.EMPTY;
         }
+
+        @Override
+        public Vec sentenceVec(CharSequence sentence) {
+          return Vec.EMPTY;
+        }
       };
 
   private static final Logger LOG = LoggerFactory.getLogger(PlainPage.class);
@@ -106,6 +111,7 @@ public class PlainPage implements IndexedPage {
   private final URI uri;
   private final boolean isEmpty;
   private Vec titleVec;
+  private Map<CharSequence, Vec> sentenceVecs;
 
   private PlainPage(IndexUnits.Page protoPage, PlainIndex index) {
     this.index = index;
@@ -318,15 +324,27 @@ public class PlainPage implements IndexedPage {
 
   @Override
   public Vec titleVec() {
-    if (titleVec != null) {
-      return titleVec;
-    }
-    synchronized (this) {
-      if (titleVec == null) {
-        titleVec = index.vecByTerms(index.parse(content(SegmentType.SECTION_TITLE)).collect(Collectors.toList()));
+    if (titleVec == null) {
+      synchronized (this) {
+        if (titleVec == null) {
+          titleVec = index.vecByTerms(index.parse(content(SegmentType.SECTION_TITLE)).collect(Collectors.toList()));
+        }
       }
-      return titleVec;
     }
+    return titleVec;
+  }
+
+  @Override
+  public Vec sentenceVec(CharSequence sentence) {
+    if (sentenceVecs == null) {
+      synchronized (this) {
+        if (sentenceVecs == null) {
+          sentenceVecs = sentences(SegmentType.BODY)
+                  .collect(Collectors.toMap(Function.identity(), s -> index.vecByTerms(index.parse(s).collect(Collectors.toList()))));
+        }
+      }
+    }
+    return sentenceVecs.getOrDefault(sentence, Vec.EMPTY);
   }
 
   @Override
