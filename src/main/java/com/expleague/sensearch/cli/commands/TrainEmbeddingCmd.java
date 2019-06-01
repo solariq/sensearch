@@ -5,7 +5,6 @@ import static com.expleague.sensearch.cli.utils.CommandLineTools.checkOptions;
 import com.expleague.commons.seq.CharSeq;
 import com.expleague.ml.embedding.impl.EmbeddingImpl;
 import com.expleague.sensearch.cli.Command;
-import com.expleague.sensearch.cli.utils.SingleArgOptions;
 import com.expleague.sensearch.cli.utils.SingleArgOptions.EnumOption;
 import com.expleague.sensearch.cli.utils.SingleArgOptions.IntOption;
 import com.expleague.sensearch.cli.utils.SingleArgOptions.PathOption;
@@ -49,7 +48,7 @@ public class TrainEmbeddingCmd implements Command {
   private static final PathOption TMP_OUTPUT_PATH = PathOption.builder()
       .longOption("tmp-output")
       .defaultValue("Specify temporary output for embedding")
-      .predicates(ExistingPath.negated())
+      .predicates(ExistingPath.get())
       .build();
   private static final PathOption OUTPUT_PATH = PathOption.builder()
       .shortOption("o")

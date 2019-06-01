@@ -2,12 +2,24 @@ package com.expleague.sensearch.core.impl;
 
 import com.expleague.commons.seq.CharSeqTools;
 import com.expleague.sensearch.core.Tokenizer;
+import edu.stanford.nlp.ling.CoreLabel;
+import edu.stanford.nlp.ling.HasWord;
+import edu.stanford.nlp.ling.SentenceUtils;
+import edu.stanford.nlp.process.CoreLabelTokenFactory;
+import edu.stanford.nlp.process.DocumentPreprocessor;
+import edu.stanford.nlp.process.PTBTokenizer;
+import edu.stanford.nlp.process.TokenizerFactory;
+import org.apache.commons.io.input.CharSequenceReader;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 public class TokenizerImpl implements Tokenizer {
+
+  private static TokenizerFactory<CoreLabel> PT = PTBTokenizer.factory(new CoreLabelTokenFactory(), "ptb3Escaping=false, invertible=true");
 
   public TokenizerImpl() {
   }
@@ -42,51 +54,9 @@ public class TokenizerImpl implements Tokenizer {
 
   @Override
   public Stream<CharSequence> toSentences(CharSequence text) {
-    int endOfSentencePos = -1;
-    int sentenceStart = 0;
-    List<CharSequence> sentences = new ArrayList<>();
-
-    int length = text.length();
-    for (int i = 0; i < length; i++) {
-      char c = text.charAt(i);
-      if (c == '!' || c == '?' || c == '.') {
-        endOfSentencePos = i;
-      }
-      if (endOfSentencePos != -1 && endOfSentencePos == i - 1 && (c == '\'' || c == '"')) {
-        endOfSentencePos = i;
-      }
-      if (Character.isWhitespace(c)) {
-        continue;
-      }
-      boolean isUpperCase = isUpperCase(c);
-
-      if (endOfSentencePos != -1 && isUpperCase) {
-        if (sentenceStart == 0) {
-          sentenceStart = trimStart(sentenceStart, text);
-        }
-        sentences.add(text.subSequence(sentenceStart, endOfSentencePos + 1));
-        endOfSentencePos = -1;
-        sentenceStart = i;
-      }
-
-      if (endOfSentencePos != -1
-          && (c == '\'' || c == '"')
-          && i + 1 < text.length()
-          && isUpperCase(text.charAt(i + 1))) {
-
-        if (sentenceStart == 0) {
-          sentenceStart = trimStart(sentenceStart, text);
-        }
-
-        sentences.add(text.subSequence(sentenceStart, endOfSentencePos + 1));
-        endOfSentencePos = -1;
-        sentenceStart = i;
-      }
-    }
-
-    sentences.add(CharSeqTools.trim(text.subSequence(sentenceStart, text.length())));
-
-    return sentences.stream().filter(s -> s.length() > 0);
+    DocumentPreprocessor dp = new DocumentPreprocessor(new CharSequenceReader(text));
+    dp.setTokenizerFactory(PT);
+    return StreamSupport.stream(dp.spliterator(), false).map(SentenceUtils::listToOriginalTextString);
   }
 
   private int trimStart(int sentenceStart, CharSequence text) {

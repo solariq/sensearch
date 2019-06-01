@@ -19,9 +19,11 @@ import com.google.inject.Inject;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -42,7 +44,8 @@ public class SenSeArchImpl implements SenSeArch {
   }
 
   @Override
-  public ResultPage search(String query, int pageNo, boolean debug, boolean metric) {
+  public ResultPage search(
+      String query, int pageNo, boolean debug, boolean metric, List<ResultItem> dataToDebug) {
     final Whiteboard wb = new WhiteboardImpl(query, pageNo);
 
     final Set<SearchPhase> phases = new HashSet<>();
@@ -109,43 +112,72 @@ public class SenSeArchImpl implements SenSeArch {
       throw new RuntimeException("Failed to process query", searchException[0]);
     }
 
-    final com.expleague.sensearch.Page[] pages = Objects.requireNonNull(wb.results());
+    final Page[] pages = Objects.requireNonNull(wb.results());
     final Snippet[] snippets = wb.snippets();
     final ResultItem[] results = new ResultItem[snippets.length];
-    final ResultItem[] googleResults = wb.googleResults();
 
-    if (googleResults != null && debug) {
-      for (int i = 0; i < googleResults.length; i++) {
-        ResultItem res = googleResults[i];
+    List<Page> sortedRankedPages =
+        Objects.requireNonNull(wb.pageScores())
+            .entrySet()
+            .stream()
+            .sorted(Comparator.comparing(Entry::getValue))
+            .map(Entry::getKey)
+            .collect(Collectors.toList());
+    List<Page> sortedFilteredPages =
+        wb.pageFilterScores()
+            .entrySet()
+            .stream()
+            .sorted(Comparator.comparing(Entry::getValue))
+            .map(Entry::getKey)
+            .collect(Collectors.toList());
 
-        Page page =
-            Objects.requireNonNull(wb.pageScores())
-                .keySet()
-                .stream()
-                .filter(p -> p.content(SegmentType.SECTION_TITLE).equals(res.title()))
-                .findFirst()
-                .orElse(null);
-        googleResults[i] =
+    ResultItem[] debugDataResults = null;
+
+    if (dataToDebug != null && debug) {
+      debugDataResults = new ResultItem[dataToDebug.size()];
+      for (int i = 0; i < dataToDebug.size(); i++) {
+        ResultItem res = dataToDebug.get(i);
+
+        Page page = index.page(res.reference());
+        Features filterFeatures = wb.filterFeatures().get(0).get(page);
+        if (filterFeatures == null) {
+          filterFeatures = index.filterFeatures(BaseQuery.create(query, index), res.reference());
+        }
+        Features rankFeatures = wb.textFeatures().get(0).get(page);
+
+        ResultItemDebugInfo debugInfo =
+            new ResultItemDebugInfoImpl(
+                res.reference().toString(),
+                sortedRankedPages.indexOf(page),
+                sortedFilteredPages.indexOf(page),
+                wb.pageFilterScores().getOrDefault(page, -1.0),
+                Objects.requireNonNull(wb.pageScores()).getOrDefault(page, -1.0),
+                filterFeatures == null ? new double[0] : filterFeatures.features().toArray(),
+                getMetaArray(filterFeatures),
+                rankFeatures == null ? new double[0] : rankFeatures.features().toArray(),
+                getMetaArray(rankFeatures));
+
+        debugDataResults[i] =
             new ResultItemImpl(
-                res.reference(),
-                res.title(),
-                res.passages(),
-                page == null ? -1 : Objects.requireNonNull(wb.pageScores()).get(page),
-                null);
+                res.reference(), page.content(SegmentType.FULL_TITLE), res.passages(), debugInfo);
       }
     }
 
     for (int i = 0; i < snippets.length; i++) {
-      Features features = Objects.requireNonNull(wb.textFeatures()).get(0).get(pages[i]);
+      Features rankFeatures = Objects.requireNonNull(wb.textFeatures()).get(0).get(pages[i]);
+      Features filterFeatures = wb.filterFeatures().get(0).get(pages[i]);
       ResultItemDebugInfo debugInfo =
           debug
               ? new ResultItemDebugInfoImpl(
               pages[i].uri().toString(),
               i,
-              features.features().toArray(),
-              IntStream.range(0, features.dim())
-                  .mapToObj(id -> features.meta(id).id())
-                  .toArray(String[]::new))
+              sortedFilteredPages.indexOf(pages[i]),
+              wb.pageFilterScores().get(pages[i]),
+              Objects.requireNonNull(wb.pageScores()).get(pages[i]),
+              filterFeatures.features().toArray(),
+              getMetaArray(filterFeatures),
+              rankFeatures.features().toArray(),
+              getMetaArray(rankFeatures))
               : null;
 
       results[i] =
@@ -154,11 +186,19 @@ public class SenSeArchImpl implements SenSeArch {
               pages[i].content(SegmentType.SECTION_TITLE),
               Collections.singletonList(
                   Pair.create(snippets[i].getContent(), snippets[i].getSelection())),
-              Objects.requireNonNull(wb.pageScores()).get(pages[i]),
               debugInfo);
     }
 
-    return new ResultPageImpl(query, 0, snippets.length, results, googleResults);
+    return new ResultPageImpl(query, 0, snippets.length, results, debugDataResults);
+  }
+
+  private String[] getMetaArray(Features features) {
+    if (features == null) {
+      return new String[0];
+    }
+    return IntStream.range(0, features.dim())
+        .mapToObj(id -> features.meta(id).id())
+        .toArray(String[]::new);
   }
 
   @Override

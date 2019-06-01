@@ -9,8 +9,11 @@ import com.expleague.commons.util.Pair;
 import com.expleague.commons.util.logging.Interval;
 import com.expleague.ml.TargetFunc;
 import com.expleague.ml.cli.builders.data.DataBuilder;
+import com.expleague.ml.cli.builders.data.PoolReader;
 import com.expleague.ml.cli.builders.data.ReaderFactory;
 import com.expleague.ml.cli.builders.data.impl.DataBuilderCrossValidation;
+import com.expleague.ml.cli.builders.data.impl.PoolReaderFeatureTxt;
+import com.expleague.ml.cli.builders.data.impl.PoolReaderJson;
 import com.expleague.ml.cli.builders.methods.grid.GridBuilder;
 import com.expleague.ml.cli.builders.methods.impl.GradientBoostingBuilder;
 import com.expleague.ml.cli.builders.methods.impl.GreedyObliviousTreeBuilder;
@@ -54,6 +57,11 @@ public class FitRankingModelCmd implements Command {
       .longOption("data")
       .description("Specify path to the train data")
       .predicates(ExistingPath.get())
+      .build();
+  private static final EnumOption<DataFormat> DATA_FORMAT = EnumOption.builder(DataFormat.class)
+      .longOption("data-format")
+      .description("Specify format of the train data. JSON and FTXT is available")
+      .defaultValue(DataFormat.JSON)
       .build();
   private static final LongOption SEED = LongOption.builder()
       .shortOption("r")
@@ -152,6 +160,7 @@ public class FitRankingModelCmd implements Command {
 
   static {
     TRAIN_DATA.addToOptions(OPTIONS);
+    DATA_FORMAT.addToOptions(OPTIONS);
     SEED.addToOptions(OPTIONS);
     TEST_PROPORTION.addToOptions(OPTIONS);
     DEPTH.addToOptions(OPTIONS);
@@ -187,7 +196,7 @@ public class FitRankingModelCmd implements Command {
     dataBuilder.setLearnPath(TRAIN_DATA.value(commandLine).toString());
     // TODO: configure pool reader from command line
     // TODO: determine type of the pool from command line
-    dataBuilder.setReader(ReaderFactory.createJsonReader());
+    dataBuilder.setReader(DATA_FORMAT.value(commandLine).reader());
     return dataBuilder.create();
   }
 
@@ -205,7 +214,8 @@ public class FitRankingModelCmd implements Command {
     boostingBuilder.setWeak(weakBuilder.create());
     boostingBuilder.setIterations(ITERATIONS.value(commandLine));
     boostingBuilder.setStep(STEP.value(commandLine));
-    // local loss is always MSE in case of ranking&
+
+    // FIXME: QMSE !cannot! be used for local target loss
     boostingBuilder.setLocal(Target.MSE.targetName());
 
     return boostingBuilder.create();
@@ -233,7 +243,7 @@ public class FitRankingModelCmd implements Command {
       return;
     }
 
-    checkOptions(commandLine, TRAIN_DATA, SEED, TEST_PROPORTION, DEPTH, STEP, ITERATIONS,
+    checkOptions(commandLine, TRAIN_DATA, DATA_FORMAT, SEED, TEST_PROPORTION, DEPTH, STEP, ITERATIONS,
             TARGET_LOSS, OUTPUT, PRINT_PERIOD);
 
     Path outputPath = OUTPUT.value(commandLine);
@@ -278,6 +288,25 @@ public class FitRankingModelCmd implements Command {
         .writeModel(result, trainPool);
   }
 
+  private enum DataFormat {
+    JSON(new PoolReaderJson()),
+    FTXT(new PoolReaderFeatureTxt());
+
+    private final PoolReader reader;
+    DataFormat(PoolReader reader) {
+      this.reader = reader;
+    }
+
+    public PoolReader reader() {
+      return reader;
+    }
+  }
+
+  // TODO:
+  private enum LocalLoss {
+
+  }
+
   private enum Target {
     QMSE("GroupedL2"),
     MSE("SatL2");
@@ -294,7 +323,8 @@ public class FitRankingModelCmd implements Command {
   }
 
   private enum Metric {
-    NDCG("NormalizedDCG"),
+    NDCG("NormalizedDcg"),
+    PFOUND("Pfound"),
     NONE("");
     private final String metricName;
 

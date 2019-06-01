@@ -7,7 +7,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class BigramsBasedSuggestor implements Suggestor {
+public class BigramsBasedSuggestor implements Suggester {
 
   private final Index index;
 

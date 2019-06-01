@@ -1,7 +1,6 @@
 package com.expleague.sensearch;
 
 import com.expleague.commons.util.Pair;
-import com.expleague.sensearch.core.impl.json.ResultItemDebugInfoSerializer;
 import com.expleague.sensearch.core.impl.json.ResultItemDeserializer;
 import com.expleague.sensearch.core.impl.json.ResultItemSerializer;
 import com.expleague.sensearch.core.impl.json.ResultPageDeserializer;
@@ -15,7 +14,7 @@ import java.util.List;
 
 public interface SenSeArch {
 
-  ResultPage search(String query, int pageNo, boolean debug, boolean metric);
+  ResultPage search(String query, int pageNo, boolean debug, boolean metric, List<ResultItem> dataToDebug);
 
   List<SynonymInfo> synonyms(String uri, String query);
 
@@ -31,7 +30,7 @@ public interface SenSeArch {
 
     ResultItem[] results();
 
-    ResultItem[] googleResults();
+    ResultItem[] debugResults();
   }
 
   @JsonSerialize(using = ResultItemSerializer.class)
@@ -44,12 +43,9 @@ public interface SenSeArch {
 
     List<Pair<CharSequence, List<Segment>>> passages();
 
-    double score();
-
     ResultItemDebugInfo debugInfo();
   }
 
-  @JsonSerialize(using = ResultItemDebugInfoSerializer.class)
   interface ResultItemDebugInfo {
 
     String uri();
@@ -57,26 +53,32 @@ public interface SenSeArch {
     /**
      * @return rank of this result or -1 if it's filtered out
      */
+    int rankPlace();
 
-    int rank();
+    int filterPlace();
 
-    double[] features();
+    double rankScore();
 
+    double filterScore();
+
+    double[] rankFeatures();
     String[] featureIds();
+
+    double[] filterFeatures();
+
+    String[] filterFeatureIds();
   }
 
   @JsonSerialize(using = SynonymInfoSerializer.class)
   interface SynonymInfo {
 
     String queryWord();
-
     SynonymAndScore[] queryWordSynonyms();
   }
 
   interface SynonymAndScore {
 
     double score();
-
     String synonym();
   }
 

@@ -4,8 +4,7 @@ import com.expleague.commons.math.vectors.Vec;
 import com.expleague.commons.math.vectors.VecTools;
 import com.expleague.commons.math.vectors.impl.nn.NearestNeighbourIndex;
 import com.expleague.commons.util.ArrayTools;
-import com.expleague.commons.util.cache.CacheStrategy.Type;
-import com.expleague.commons.util.cache.impl.FixedSizeCache;
+import com.expleague.commons.util.cache.impl.FixedSizeCacheLong;
 import com.expleague.sensearch.core.Annotations.EmbeddingVecsDb;
 import com.expleague.sensearch.core.Annotations.UseLshFlag;
 import com.expleague.sensearch.donkey.plain.PlainIndexBuilder;
@@ -31,11 +30,12 @@ import org.iq80.leveldb.DBIterator;
 
 public class EmbeddingImpl implements Embedding {
 
+  private static final String kek = "kek";
   private static final Logger LOG = Logger.getLogger(EmbeddingImpl.class);
 
   private static final int CACHE_SIZE = 64 * (1 << 10); // 64K vecs, 64 * 128 * 8 = 64Mb
 
-  private final FixedSizeCache<Long, Vec> vecCache = new FixedSizeCache<>(CACHE_SIZE, Type.LRU);
+  private final FixedSizeCacheLong<Vec> vecCache = new FixedSizeCacheLong<>(CACHE_SIZE);
 
   private long[] allIds;
   private final boolean defaultLshFlag;

@@ -157,6 +157,9 @@ public class EmbeddingBuilder implements AutoCloseable {
   }
 
   public void addTerm(long id, Vec vec) {
-    nnIdx.append(id, vec);
+    if (!termIdsInDb.contains(id)) {
+      nnIdx.append(id, vec);
+      termIdsInDb.add(id);
+    }
   }
 }

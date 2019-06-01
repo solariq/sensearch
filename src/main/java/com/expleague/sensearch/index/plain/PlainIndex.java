@@ -318,6 +318,34 @@ public class PlainIndex implements Index {
     return answerVec;
   }
 
+  public double tfidf(Term t1) {
+    IndexTerm t = (IndexTerm) t1;
+    return t.freq() * Math.log(1.0 * size() / t.documentFreq());
+  }
+  
+  public Vec weightedVecByTerms(List<Term> terms) {
+    final ArrayVec answerVec = new ArrayVec(embedding.dim());
+    long cnt =
+        terms
+        .stream()
+        .map(t -> (IndexTerm) t)
+        .map(t -> {
+          Vec v1 = embedding.vec(t.id());
+          if (v1 == null) {
+            return null;
+          }
+          v1 = VecTools.copy(v1);
+          return VecTools.scale(v1, tfidf(t));
+        })
+        .filter(Objects::nonNull)
+        .peek(v -> VecTools.append(answerVec, v))
+        .count();
+    if (cnt > 0) {
+      answerVec.scale(1. / ((double) cnt));
+    }
+    return answerVec;
+  }
+  
   @Override
   public Stream<Page> allDocuments() {
     DBIterator iterator = pageBase.iterator();
@@ -409,12 +437,13 @@ public class PlainIndex implements Index {
         .map(c -> idToTerm.get(c.getId()));
   }
 
+  @Override
   public Features filterFeatures(Query query, URI pageURI) {
     double minTitle = 1;
     double minBody = 1;
     double minLink = 1;
 
-    Vec queryVec = vecByTerms(query.terms());
+    Vec queryVec = query.vec();
     IndexedPage page = (IndexedPage) page(pageURI);
     long tmpID;
     // Title
@@ -450,8 +479,7 @@ public class PlainIndex implements Index {
     FilterFeatures filterFeatures = new FilterFeatures();
 
     List<Term> queryTerms = query.terms();
-
-    final Vec qVec = vecByTerms(queryTerms);
+    final Vec qVec = query.vec();
     TLongObjectMap<List<Candidate>> pageIdToCandidatesMap = new TLongObjectHashMap<>();
     filter
         .filtrate(qVec, PlainIndex::isSectionId, 0.5)

@@ -18,8 +18,9 @@ import org.apache.commons.cli.Option.Builder;
 import org.apache.commons.cli.Options;
 import org.apache.commons.lang3.StringUtils;
 
-// TODO: tit should be possible to make any option optional
-public class SingleArgOptions {
+public final class SingleArgOptions {
+
+  private SingleArgOptions() {}
 
   public static class IntOption implements CheckableOption {
 

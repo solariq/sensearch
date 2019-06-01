@@ -35,7 +35,7 @@ public class QueryAndPassages {
         return answers;
     }
 
-    @JsonPropertyOrder({"uri", "passage", "weight"})
+  @JsonPropertyOrder({"passage", "weight"})
     public static class PassageAndWeight {
 
         private final String passage;

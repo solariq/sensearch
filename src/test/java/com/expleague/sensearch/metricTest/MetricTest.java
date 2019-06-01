@@ -41,7 +41,7 @@ public class MetricTest {
         BufferedReader readOld =
             Files.newBufferedReader(pathToMetric.resolve(line).resolve("METRIC"));
         System.err.println(readOld.readLine());
-        searcher.search(line, 0, false, true);
+        searcher.search(line, 0, false, true, null);
       }
     } catch (IOException e) {
       e.printStackTrace();

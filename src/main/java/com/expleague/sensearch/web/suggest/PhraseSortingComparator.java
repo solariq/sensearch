@@ -6,14 +6,14 @@ import com.expleague.sensearch.core.Term;
 public class PhraseSortingComparator implements Comparator<Term[]> {
 
   protected int compare(String[] words, String[] line) {
-
+/*
     if (words.length < line.length)
       return -1;
 
     if (words.length > line.length)
       return 1;
-
-    int len = words.length;
+*/
+    int len = Math.min(words.length, line.length);
 
     for (int i = 0; i < len; i++) {
       int r = words[i].compareTo(line[i]);
@@ -22,7 +22,7 @@ public class PhraseSortingComparator implements Comparator<Term[]> {
       }
     }
 
-    return 0;
+    return Integer.compare(words.length, line.length);
   }
 
   private String[] termsToStringArr(Term[] terms) {

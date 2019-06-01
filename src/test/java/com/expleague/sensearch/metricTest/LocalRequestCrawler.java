@@ -22,7 +22,7 @@ public class LocalRequestCrawler implements WebCrawler {
       ResultPage page =
           objectMapper.readValue(
               pathToMetric.resolve(query).resolve(MAP_FILE).toFile(), ResultPage.class);
-      return Arrays.asList(page.googleResults());
+      return Arrays.asList(page.debugResults());
     } catch (IOException e) {
       e.printStackTrace();
     }

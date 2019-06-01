@@ -18,18 +18,21 @@ import com.expleague.commons.math.vectors.Vec;
 import com.expleague.commons.math.vectors.VecTools;
 import com.expleague.sensearch.core.Term;
 import com.expleague.sensearch.index.Index;
+import com.expleague.sensearch.index.plain.PlainIndex;
+import com.expleague.sensearch.web.suggest.pool.LearnedSuggester.StringDoublePair;
+import com.google.inject.Inject;
 
-public class OneWordLuceneSuggestor implements Suggestor {
+public class OneWordLuceneSuggestor implements Suggester {
   public final int RETURN_LIMIT = 10;
 
   public final static String filePrefix = "prefix_sugg";
   
   private final AnalyzingSuggester suggester;
   
-  private final Index index;
+  private final PlainIndex index;
   
   public final static Path storePath = Paths.get("luceneSuggestPrefix/store");
-  
+  /*
   private final Comparator<MultigramWrapper> mwCmp = new Comparator<MultigramWrapper>() {
 
     Comparator<Term[]> termsCmp = new PhraseSortingComparator();
@@ -43,17 +46,19 @@ public class OneWordLuceneSuggestor implements Suggestor {
       return termsCmp.compare(o1.phrase, o2.phrase);
     }
 
-  };
+  };*/
 
+  @Inject
   public OneWordLuceneSuggestor(Index index, Path suggestIndexRoot) throws IOException {
-    this.index = index;
+    this.index = (PlainIndex) index;
     
     suggester = new AnalyzingSuggester(
-        FSDirectory.open(suggestIndexRoot.resolve(storePath).getParent()),
-        filePrefix,
+        //FSDirectory.open(suggestIndexRoot.resolve(storePath).getParent()),
+        //filePrefix,
         new StandardAnalyzer());
     
     suggester.load(new FileInputStream(suggestIndexRoot.resolve(storePath).toFile()));
+    System.err.println("Lucene suggester: " + suggester.getCount());
   }
 
   @Override
@@ -73,12 +78,7 @@ public class OneWordLuceneSuggestor implements Suggestor {
   
   @Override
   public String getName() {
-    return "One Word Lucene";
-  }
-
-  private String termsToString(Term[] terms) {
-    return Arrays.stream(terms).map(t -> t.text().toString())
-        .collect(Collectors.joining(" "));
+    return "One Word Lucene: cosine and links";
   }
   
   private List<String> getSuggestions(List<Term> terms) throws IOException {
@@ -87,9 +87,9 @@ public class OneWordLuceneSuggestor implements Suggestor {
       return Collections.emptyList();
     }
 
-    int workCounter = 0;
+    //TreeSet<MultigramWrapper> phraseProb = new TreeSet<>(mwCmp);
+    TreeSet<StringDoublePair> phraseProb = new TreeSet<>();
 
-    TreeSet<MultigramWrapper> phraseProb = new TreeSet<>(mwCmp);
 
     l:  for (int intersectLength = 3; intersectLength >= 1; intersectLength--) {
 
@@ -97,49 +97,52 @@ public class OneWordLuceneSuggestor implements Suggestor {
         continue;
       }
 
-      List<Term> qc = terms.subList(0, terms.size() - intersectLength);
+      List<Term> qcNonIntersecting = terms.subList(0, terms.size() - intersectLength);
+      String qcNonIntersectText = qcNonIntersecting.stream()
+          .map(Term::text)
+          .collect(Collectors.joining(" "));
+      
       Term[] qt = terms.subList(terms.size() - intersectLength, terms.size()).toArray(new Term[0]);
 
-      Vec queryVec = index.vecByTerms(qc);
+      Vec queryVec = index.vecByTerms(terms.subList(0, terms.size() - 1));
+      //VecTools.normalizeL1(queryVec);
+
+      //Vec wQueryVec = index.weightedVecByTerms(qc);
 
       List<LookupResult> endingPhrases = suggester.lookup(termsToString(qt), false, 1000000);
       
       //System.out.println("number of selected phrases: " + endingPhrases.size());
       for (LookupResult p : endingPhrases) {
         Term[] phrase = index.parse(p.key).toArray(Term[]::new);
-        if (phrase.length > intersectLength) {
+/*        if (phrase.length > intersectLength) {
           continue;
-        }
+        }*/
         
-        if (qc.size() > 0) {
-          phraseProb.add(new MultigramWrapper(phrase, VecTools.cosine(queryVec, index.vecByTerms(Arrays.asList(phrase)))));
+        String suggestion = qcNonIntersectText.isEmpty() ? p.key.toString() : (qcNonIntersectText + " " + p.key);
+        
+        Vec phraseVec = index.vecByTerms(Arrays.asList(phrase));
+        //normalizeL1(phraseVec);
+        
+        double cosine = VecTools.cosine(queryVec, phraseVec);
+
+        //System.err.println("one word cosine: " + cosine + " " + VecTools.l1(queryVec) + " " + VecTools.l1(phraseVec));
+
+        if (terms.size() > 1) {
+          phraseProb.add(new StringDoublePair(suggestion, cosine));
+          //phraseProb.add(new StringDoublePair(qcText + " " + p.key, VecTools.cosine(wQueryVec, index.weightedVecByTerms(Arrays.asList(phrase)))));
         } else {
-          phraseProb.add(new MultigramWrapper(phrase, p.value));
+          phraseProb.add(new StringDoublePair(suggestion, -index.parse(p.key).mapToDouble(index::tfidf).sum()));
         }
+        //phraseProb.add(new MultigramWrapper(phrase, Arrays.stream(phrase).mapToDouble(t -> ((PlainIndex )index).tfidf(t)).average().orElse(0)));
         phraseProb.removeIf(it -> phraseProb.size() > RETURN_LIMIT);
 
-        workCounter++;
-        if (workCounter > 1e6) {
-          System.err.println("Suggestor stopped by counter");
-          break l;
-        }
       }
-/*
-      if (phraseProb.size() > 5)
-        break l;
-*/
 
     }
 
     return phraseProb.stream()
         .sorted((m1, m2) -> -Double.compare(m1.coeff, m2.coeff))
-        .map(p -> {
-          String qcText = terms.subList(0, terms.size() - p.phrase.length)
-              .stream()
-              .map(Term::text)
-              .collect(Collectors.joining(" "));
-          return (qcText.isEmpty() ? p.toString() : qcText + " " + p);// + " " + p.coeff;
-        })
+        .map(p -> p.phrase)
         .collect(Collectors.toList());
   }
 }

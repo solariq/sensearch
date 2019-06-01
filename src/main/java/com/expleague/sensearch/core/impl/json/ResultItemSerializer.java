@@ -42,8 +42,6 @@ public class ResultItemSerializer extends StdSerializer<ResultItem> {
     }
     jsonGenerator.writeEndArray();
 
-    jsonGenerator.writeNumberField("score", resultItem.score());
-
     jsonGenerator.writeObjectField("debugInfo", resultItem.debugInfo());
 
     jsonGenerator.writeEndObject();

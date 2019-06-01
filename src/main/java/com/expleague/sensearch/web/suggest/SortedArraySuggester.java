@@ -5,6 +5,7 @@ import com.expleague.commons.math.vectors.VecTools;
 import com.expleague.sensearch.core.Term;
 import com.expleague.sensearch.index.Index;
 import com.expleague.sensearch.index.plain.PlainIndex;
+import com.expleague.sensearch.web.suggest.pool.LearnedSuggester.StringDoublePair;
 import com.google.inject.Inject;
 
 import java.util.Arrays;
@@ -12,36 +13,39 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.TreeSet;
+import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 
-public class OneWordSuggestor implements Suggestor {
+public class SortedArraySuggester implements Suggester {
 
   public final int RETURN_LIMIT = 10;
 
   private final SortedMultigramsArray multigrams;
   private final PlainIndex index;
-  private final Comparator<MultigramWrapper> mwCmp = new Comparator<MultigramWrapper>() {
+  
 
-    Comparator<Term[]> termsCmp = new PhraseSortingComparator();
-
-    @Override
-    public int compare(MultigramWrapper o1, MultigramWrapper o2) {
-      int res = Double.compare(o1.coeff, o2.coeff);
-      if (res != 0)
-        return res;
-
-      return termsCmp.compare(o1.phrase, o2.phrase);
-    }
-
-  };
-
+  private String printName;
+  
+  private BiFunction<List<Term>, List<Term>, Double> similarity;
+  
   @Inject
-  public OneWordSuggestor(Index index) {
+  public SortedArraySuggester(Index index) {
     this.index = (PlainIndex) index;
 
     SuggestInformationLoader provider = index.getSuggestInformation();
 
     multigrams = new SortedMultigramsArray(provider.multigramFreqNorm);
+    
+    printName = "Sorted Array";
+    
+    similarity = (l1, l2) -> 1.0;
+  }
+  
+  public SortedArraySuggester(Index index, BiFunction<List<Term>, List<Term>, Double> similarity, String printName) {
+    this(index);
+    this.printName = printName;
+    
+    this.similarity = similarity;
   }
 
   @Override
@@ -61,7 +65,7 @@ public class OneWordSuggestor implements Suggestor {
   
   @Override
   public String getName() {
-    return "One Word";
+    return printName;
   }
 
   private List<String> getSuggestions(List<Term> terms) {
@@ -72,7 +76,7 @@ public class OneWordSuggestor implements Suggestor {
 
     int workCounter = 0;
 
-    TreeSet<MultigramWrapper> phraseProb = new TreeSet<>(mwCmp);
+    TreeSet<StringDoublePair> phraseProb = new TreeSet<>();
 
     l:  for(int intersectLength = 3; intersectLength >= 1; intersectLength--) {
 
@@ -80,18 +84,29 @@ public class OneWordSuggestor implements Suggestor {
         continue;
       }
 
-      List<Term> qc = terms.subList(0, terms.size() - intersectLength);
+      List<Term> qcNonIntersect = terms.subList(0, terms.size() - intersectLength);
+      List<Term> qc = terms.subList(0, terms.size() - 1);
       Term[] qt = terms.subList(terms.size() - intersectLength, terms.size()).toArray(new Term[0]);
 
-      Vec queryVec = index.vecByTerms(qc);
-
+      String qcNonIntersectText = qcNonIntersect
+          .stream()
+          .map(Term::text)
+          .collect(Collectors.joining(" "));
+      
       List<MultigramWrapper> endingPhrases = multigrams.getMatchingPhrases(qt);
       //System.out.println("number of selected phrases: " + endingPhrases.size());
       for (MultigramWrapper p : endingPhrases) {
+        String phraseText = Arrays.asList(p.phrase).stream()
+            .map(Term::text)
+            .collect(Collectors.joining(" "));
+        
+        String suggestion = qcNonIntersectText.isEmpty() ? phraseText : (qcNonIntersectText + " " + phraseText);
+        
         if (qc.size() > 0) {
-          phraseProb.add(new MultigramWrapper(p.phrase, VecTools.cosine(queryVec, index.vecByTerms(Arrays.asList(p.phrase)))));
+          //phraseProb.add(new StringDoublePair(suggestion, VecTools.cosine(queryVec, index.vecByTerms(Arrays.asList(p.phrase)))));
+          phraseProb.add(new StringDoublePair(suggestion, similarity.apply(qc, Arrays.asList(p.phrase))));
         } else {
-          phraseProb.add(p);
+          phraseProb.add(new StringDoublePair(suggestion, -Arrays.stream(p.phrase).mapToDouble(index::tfidf).sum()));
         }
         phraseProb.removeIf(it -> phraseProb.size() > RETURN_LIMIT);
 
@@ -109,13 +124,7 @@ public class OneWordSuggestor implements Suggestor {
 
     return phraseProb.stream()
         .sorted((m1, m2) -> -Double.compare(m1.coeff, m2.coeff))
-        .map(p -> {
-          String qcText = terms.subList(0, terms.size() - p.phrase.length)
-              .stream()
-              .map(Term::text)
-              .collect(Collectors.joining(" "));
-          return (qcText.isEmpty() ? p.toString() : qcText + " " + p);// + " " + p.coeff;
-        })
+        .map(p -> p.phrase)
         .collect(Collectors.toList());
   }
 

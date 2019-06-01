@@ -10,7 +10,9 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 import org.apache.log4j.Logger;
@@ -21,31 +23,37 @@ import org.apache.lucene.store.FSDirectory;
 import com.expleague.commons.math.Trans;
 import com.expleague.commons.math.vectors.Vec;
 import com.expleague.commons.math.vectors.VecTools;
+import com.expleague.commons.math.vectors.impl.vectors.ArrayVec;
 import com.expleague.ml.data.tools.DataTools;
 import com.expleague.sensearch.core.Term;
 import com.expleague.sensearch.index.Index;
+import com.expleague.sensearch.index.plain.IndexTerm;
+import com.expleague.sensearch.index.plain.PlainIndex;
 import com.expleague.sensearch.miner.pool.builders.FilterPoolBuilder;
-import com.expleague.sensearch.web.suggest.Suggestor;
+import com.expleague.sensearch.web.suggest.MultigramWrapper;
+import com.expleague.sensearch.web.suggest.SortedMultigramsArray;
+import com.expleague.sensearch.web.suggest.Suggester;
 import com.google.common.primitives.Longs;
 
-public class LearnedSuggester implements Suggestor {
+public class LearnedSuggester implements Suggester {
   public final int RETURN_LIMIT = 10;
 
   private static final Logger LOG = Logger.getLogger(FilterPoolBuilder.class.getName());
 
   public final static String filePrefix = "prefix_sugg";
 
-  private final AnalyzingSuggester suggester;
-
+  //protected final AnalyzingSuggester suggester;
+  protected final SortedMultigramsArray multigrams;
+  
   private final Trans model;
 
   private final AccumulatorFeatureSet featureSet = new AccumulatorFeatureSet();
 
-  private final Index index;
+  protected final Index index;
 
-  public final static Path storePath = Paths.get("luceneSuggestPrefix/store");
+  //public final static Path storePath = Paths.get("luceneSuggestPrefix/store");
 
-  private class StringDoublePair  implements Comparable<StringDoublePair> {
+  public static class StringDoublePair  implements Comparable<StringDoublePair> {
 
     public final String phrase;
     public final double coeff;
@@ -68,26 +76,28 @@ public class LearnedSuggester implements Suggestor {
 
   public LearnedSuggester(Index index, Path suggestIndexRoot) throws IOException {
     this.index = index;
-
+/*
     suggester = new AnalyzingSuggester(
-        FSDirectory.open(suggestIndexRoot.resolve(storePath).getParent()),
-        filePrefix,
+        //FSDirectory.open(suggestIndexRoot.resolve(storePath).getParent()),
+        //filePrefix,
         new StandardAnalyzer());
 
     suggester.load(new FileInputStream(suggestIndexRoot.resolve(storePath).toFile()));
-
-    if (Files.exists(SuggestRankingPoolBuilder.dataPath)) {
+*/
+    multigrams = new SortedMultigramsArray(index.getSuggestInformation().multigramFreqNorm);
+    if (Files.exists(suggestIndexRoot.resolve("suggest_ranker.model"))) {
       model = (Trans) DataTools.readModel(
           new InputStreamReader(
-              Files.newInputStream(suggestIndexRoot.resolve(SuggestRankingPoolBuilder.dataPath)), StandardCharsets.UTF_8)).getFirst();
+              Files.newInputStream(suggestIndexRoot.resolve("suggest_ranker.model")), StandardCharsets.UTF_8)).getFirst();
+
     } else {
       model = null;
+      LOG.warn(
+          "Rank model can not be found at path ["
+              + SuggestRankingPoolBuilder.dataPath
+              + "], using empty model instead");
     }
 
-    LOG.warn(
-        "Rank model can not be found at path ["
-            + SuggestRankingPoolBuilder.dataPath
-            + "], using empty model instead");
   }
 
   @Override
@@ -107,14 +117,8 @@ public class LearnedSuggester implements Suggestor {
 
   @Override
   public String getName() {
-    return "One Word Lucene";
+    return "Learned Suggester";
   }
-
-  private String termsToString(Term[] terms) {
-    return Arrays.stream(terms).map(t -> t.text().toString())
-        .collect(Collectors.joining(" "));
-  }
-
 
   public List<QSUGItem> getUnsortedEndings(String query) throws IOException {
     return getUnsortedSuggestions(
@@ -138,38 +142,56 @@ public class LearnedSuggester implements Suggestor {
         continue l;
       }
 
-      List<Term> qc = terms.subList(0, terms.size() - intersectLength);
-      String qcText = qc.stream().map(Term::text).collect(Collectors.joining(" "));
-      Term[] qt = terms.subList(terms.size() - intersectLength, terms.size()).toArray(new Term[0]);
+      List<Term> qcNonIntersect = terms.subList(0, terms.size() - intersectLength);
+      String qcNonIntersectText = qcNonIntersect.stream().map(Term::text).collect(Collectors.joining(" "));
+      Term[] qt = terms.subList(terms.size() - intersectLength, terms.size()).stream().toArray(Term[]::new);
 
+      List<Term> qc = terms.subList(0, terms.size() - 1);
       Vec queryVec = index.vecByTerms(qc);
+      //VecTools.normalizeL1(queryVec);
+      
+      Vec queryVecTfidf = ((PlainIndex) index).weightedVecByTerms(qc);
 
-      List<LookupResult> endingPhrases = suggester.lookup(termsToString(qt), false, 1000000);
 
-      //System.out.println("number of selected phrases: " + endingPhrases.size());
-      for (LookupResult p : endingPhrases) {
-        Term[] phrase = index.parse(p.key.toString().toLowerCase()).toArray(Term[]::new);
+      //List<LookupResult> endingPhrases = suggester.lookup(termsToString(qt), false, 10000000);
+
+      List<MultigramWrapper> endingPhrases = multigrams.getMatchingPhrases(qt);
+      
+      //System.out.println("number of selected phrases: " + endingPhrases.size() + " " + termsToString(qt));
+      for (MultigramWrapper p : endingPhrases) {
+        Term[] phrase = p.phrase;
+        /*
         if (phrase.length > intersectLength) {
           continue;
         }
-        /*
-        if (qc.size() > 0) {
-          phraseProb.add(new MultigramWrapper(phrase, VecTools.cosine(queryVec, index.vecByTerms(Arrays.asList(phrase)))));
-        } else {
-          phraseProb.add(new MultigramWrapper(phrase, p.value));
-        }
-        phraseProb.removeIf(it -> phraseProb.size() > RETURN_LIMIT);
          */
+        Vec phraseVec = index.vecByTerms(Arrays.asList(phrase));
+        //VecTools.normalizeL1(phraseVec);
+        
+        Vec phraseVecTfidf = ((PlainIndex) index).weightedVecByTerms(Arrays.asList(phrase));
 
+        double cosine = VecTools.cosine(queryVec, phraseVec);
         QSUGItem item = new QSUGItem(
-            qcText + " " + p.key.toString().toLowerCase(),
-            intersectLength,
-            Math.toIntExact(p.value),
-            Double.longBitsToDouble(Longs.fromByteArray(p.payload.bytes)),
-            VecTools.cosine(queryVec, index.vecByTerms(Arrays.asList(phrase))),
+            (qcNonIntersect.size() > 0 ? qcNonIntersectText + " " : "") + termsToString(p.phrase),
+            //intersectLength,
+            phrase.length,
+            qcNonIntersect.size(),
+            Math.toIntExact(Math.round(p.coeff)),
+            //Double.longBitsToDouble(Longs.fromByteArray(p.payload.bytes)),
+            cosine,
+            VecTools.cosine(phraseVecTfidf, queryVecTfidf),
+            VecTools.distanceL2(phraseVec, queryVec),
+            Arrays.stream(phrase).mapToDouble(t -> ((PlainIndex )index).tfidf(t)).sum(),
+            //0.,
+            //VecTools.l2(phraseVec),
             false
             );
-
+        //System.err.println("learned cosine: " + cosine);
+        /*
+        if (Double.isNaN(item.cosine)) {
+          throw new RuntimeException("Cosine is NaN. qc: |" + qcText + "| phrase: |" + p.key + "| " + item.vectorSumLength);
+        }
+         */       
         res.add(item);
 
       }
@@ -179,14 +201,14 @@ public class LearnedSuggester implements Suggestor {
     return res;
   }
 
-  private List<String> getSuggestions(List<Term> terms) throws IOException {
+  List<String> getSuggestions(List<Term> terms) throws IOException {
 
     if (terms.isEmpty()) {
       return Collections.emptyList();
     }
 
 
-    TreeSet<StringDoublePair> phraseProb = new TreeSet<>((p1, p2) -> -p1.compareTo(p2));
+    TreeSet<StringDoublePair> phraseProb = new TreeSet<>();
 
     List<QSUGItem> rawResults = getUnsortedSuggestions(terms);
 
@@ -194,13 +216,20 @@ public class LearnedSuggester implements Suggestor {
     for (QSUGItem p : rawResults) {
 
       featureSet.accept(p);
-      phraseProb.add(new StringDoublePair(p.suggestion, model.trans(featureSet.advance()).get(0)));
+      Vec v = featureSet.advance();
+      phraseProb.add(
+          new StringDoublePair(
+              p.suggestion,
+              model.trans(v).get(0)
+              //Math.abs(p.cosine) < 1e-5 ? p.incomingLinksCount : p.cosine
+              ));
 
       phraseProb.removeIf(it -> phraseProb.size() > RETURN_LIMIT);
     }
 
     return phraseProb.stream()
-        .sorted()
+        .sorted(Comparator.reverseOrder())
+        //.peek(p -> System.err.println(p.coeff))
         .map(p -> p.phrase)
         .collect(Collectors.toList());
   }

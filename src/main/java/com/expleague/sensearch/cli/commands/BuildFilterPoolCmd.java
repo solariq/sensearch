@@ -5,10 +5,10 @@ import static com.expleague.sensearch.cli.utils.CommandLineTools.checkOptions;
 import com.expleague.sensearch.AppModule;
 import com.expleague.sensearch.ConfigImpl;
 import com.expleague.sensearch.cli.Command;
-import com.expleague.sensearch.cli.utils.SingleArgOptions;
 import com.expleague.sensearch.cli.utils.SingleArgOptions.IntOption;
 import com.expleague.sensearch.cli.utils.SingleArgOptions.PathOption;
 import com.expleague.sensearch.cli.utils.SingleArgPredicates.ExistingPath;
+import com.expleague.sensearch.cli.utils.SingleArgPredicates.NegativeInteger;
 import com.expleague.sensearch.cli.utils.SingleArgPredicates.PositiveInteger;
 import com.expleague.sensearch.miner.pool.builders.FilterPoolBuilder;
 import com.google.inject.Guice;
@@ -45,7 +45,7 @@ public class BuildFilterPoolCmd implements Command {
   private static final IntOption POOL_ITERATIONS = IntOption.builder()
       .longOption("pool-iters")
       .description("Specify iterations count")
-      .predicates(PositiveInteger.get())
+      .predicates(NegativeInteger.negated())
       .build();
   private static final PathOption POOL_PATH = PathOption.builder()
       .shortOption("p")

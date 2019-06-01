@@ -9,12 +9,16 @@ import com.expleague.sensearch.AppModule;
 import com.expleague.sensearch.Config;
 import com.expleague.sensearch.ConfigImpl;
 import com.expleague.sensearch.index.Index;
+import com.expleague.sensearch.web.suggest.metrics.Splitter;
 import com.expleague.sensearch.web.suggest.metrics.SuggestsDatasetBuilder;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
+import java.io.BufferedWriter;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -24,6 +28,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Random;
+import java.util.TreeMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.apache.log4j.Logger;
 
@@ -37,7 +42,7 @@ public class SuggestRankingPoolBuilder {
 
   public final static Path dataPath = Paths.get("suggest_ranker.pool");
 
-  private final Map<String, List<String>> map;
+  private final TreeMap<String, List<String>> map;
 
   private final Random rnd = new Random(15);
 
@@ -47,7 +52,7 @@ public class SuggestRankingPoolBuilder {
 
     ObjectMapper mapper = new ObjectMapper();
 
-    map = mapper.readValue(SuggestsDatasetBuilder.f, new TypeReference<Map<String, List<String>>>() {});
+    map = mapper.readValue(SuggestsDatasetBuilder.f, new TypeReference<TreeMap<String, List<String>>>() {});
   }
 
   public static void main(String[] args) throws IOException {
@@ -57,11 +62,13 @@ public class SuggestRankingPoolBuilder {
     Index index = injector.getInstance(Index.class);
 
     SuggestRankingPoolBuilder pb = new SuggestRankingPoolBuilder(index, config.getIndexRoot().resolve("suggest"));
-    pb.build(0);
+    pb.build();
   }
 
-  public static boolean match(String s1, String s2) {
-    return s1.contains(s2) || s2.contains(s1);
+  public static boolean match(String mySugg, String reference) {
+    //return s1.contains(s2) || s2.contains(s1);
+    return reference.startsWith(mySugg) && (reference.length() <= mySugg.length() || reference.charAt(mySugg.length()) == ' ');
+    //return reference.equals(mySugg);
   }
 
   public List<QSUGItem> generateExamples(String partial, List<String> referenceSuggests) {
@@ -76,19 +83,15 @@ public class SuggestRankingPoolBuilder {
       throw new RuntimeException(e);
     }
 
-    for (QSUGItem myMatched : prefixMatched) {
+    raw:    for (QSUGItem myMatched : prefixMatched) {
 
       for (String rs : referenceSuggests) {
         if (match(myMatched.suggestion, rs)) {
-          res.add(new QSUGItem(
-              myMatched.suggestion,
-              myMatched.intersectionLength,
-              myMatched.incomingLinksCount,
-              myMatched.probabilisticCoeff,
-              myMatched.cosine,
-              true));
-
-          res.add(prefixMatched.get(rnd.nextInt(prefixMatched.size())));
+          res.add(myMatched.asPositive());
+          continue raw;
+        }
+        if (prefixMatched.size() < 20 || rnd.nextInt(100) < 6) {
+          res.add(myMatched);
         }
       }
     }
@@ -96,7 +99,7 @@ public class SuggestRankingPoolBuilder {
     return res;
   }
 
-  public void build(int iteration) throws IOException {
+  public void build() throws IOException {
     LOG.info("SuggestPool build start");
     long startTime = System.nanoTime();
 
@@ -111,25 +114,46 @@ public class SuggestRankingPoolBuilder {
 
     Pool.Builder<QSUGItem> poolBuilder = Pool.builder(meta, features, targetFeatures);
 
+    BufferedWriter tabWriter = new BufferedWriter(new PrintWriter(new FileOutputStream(suggestIndexRoot.resolve("ftable.txt").toFile())));
+    tabWriter.write("intersection links probCoef cosine phraseLength target\n");
+
     int exmpNumberSum = 0;
+
+    Splitter splitter = new Splitter();
     for(Entry<String, List<String>> qSugList : map.entrySet()) {
+
+      if (!splitter.isTrain()) {
+        continue;
+      }
+
+      String query = qSugList.getKey();
+
       if (status.get() % 100 == 0) {
         System.err.println(status.get() + " queries completed");
       }
       status.incrementAndGet();
 
-      String query = qSugList.getKey();
+
 
       List<QSUGItem> examples = generateExamples(query, qSugList.getValue());
       exmpNumberSum += examples.size();
       for (QSUGItem qsitem : examples) {
+        /*tabWriter.write(
+            String.format("%d %d %f %f %f %f\n",
+                qsitem.intersectionLength,
+                qsitem.incomingLinksCount,
+                qsitem.probabilisticCoeff,
+                qsitem.cosine,
+                qsitem.vectorSumLength,
+                qsitem.isPositive ? 1.0 : 0.0));*/
         poolBuilder.accept(qsitem);
         poolBuilder.advance();
       }
     }
 
-    LOG.info("Avg. examples number: " + 1.0 * exmpNumberSum / map.size());
+    System.err.println("Avg. examples number: " + 1.0 * exmpNumberSum / map.size());
 
+    tabWriter.close();
     Pool<QSUGItem> pool = poolBuilder.create();
     DataTools.writePoolTo(pool, Files.newBufferedWriter(suggestIndexRoot.resolve(dataPath)));
 
