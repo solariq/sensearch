@@ -197,6 +197,11 @@ public class BM25Test extends IndexBasedTestCase {
     public Vec titleVec() {
       return null;
     }
+
+    @Override
+    public Vec sentenceVec(CharSequence sentence) {
+      return Vec.EMPTY;
+    }
   }
 
 }
