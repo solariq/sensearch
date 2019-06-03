@@ -60,8 +60,8 @@ public interface Whiteboard {
 
   int queriesNumber();
 
-  void putGoogleResults(ResultItem[] googleResults);
+  void putGroundTruthResults(ResultItem[] groundTruthResults);
 
   @Nullable
-  ResultItem[] googleResults();
+  ResultItem[] groundTruthResults();
 }

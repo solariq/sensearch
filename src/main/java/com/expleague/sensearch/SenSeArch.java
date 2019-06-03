@@ -1,6 +1,7 @@
 package com.expleague.sensearch;
 
 import com.expleague.commons.util.Pair;
+import com.expleague.sensearch.core.Whiteboard;
 import com.expleague.sensearch.core.impl.json.ResultItemDeserializer;
 import com.expleague.sensearch.core.impl.json.ResultItemSerializer;
 import com.expleague.sensearch.core.impl.json.ResultPageDeserializer;
@@ -11,10 +12,17 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import java.net.URI;
 import java.util.List;
+import java.util.function.Consumer;
 
 public interface SenSeArch {
 
-  ResultPage search(String query, int pageNo, boolean debug, boolean metric, List<ResultItem> dataToDebug);
+  ResultPage search(
+      String query,
+      int pageNo,
+      boolean debug,
+      boolean metric,
+      List<? extends ResultItem> groundTruthData,
+      Consumer<Whiteboard> debugInfoCollector);
 
   List<SynonymInfo> synonyms(String uri, String query);
 

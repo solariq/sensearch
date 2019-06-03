@@ -98,8 +98,6 @@ public class AppModule extends AbstractModule {
     bind(Path.class).annotatedWith(IndexRoot.class).toInstance(config.getIndexRoot());
 
     bindConstant().annotatedWith(UseLshFlag.class).to(config.getLshNearestFlag());
-    bindConstant().annotatedWith(FilterMinerDocNum.class).to(config.filterMinerDocNum());
-    bindConstant().annotatedWith(FilterRankDocNum.class).to(config.filterRankDocNum());
 
     Lemmer lemmer = Lemmer.getInstance();
     bind(Lemmer.class).toInstance(lemmer);
@@ -224,5 +222,19 @@ public class AppModule extends AbstractModule {
           QueryAndResults[].class);
     }
     return new QueryAndResults[0];
+  }
+
+  // TODO Purpose of having a provider instead of binding is to be able to change these constants on-the-fly  which is
+  //  needed for evaluation. It looks a bit hacky and should be refactored in the future
+  @Provides
+  @FilterMinerDocNum
+  int getFilterMinerDocNum() {
+    return config.filterMinerDocNum();
+  }
+
+  @Provides
+  @FilterRankDocNum
+  int getFilterRankDocNum() {
+    return config.filterRankDocNum();
   }
 }

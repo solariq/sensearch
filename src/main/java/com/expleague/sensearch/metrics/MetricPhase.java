@@ -21,7 +21,7 @@ public class MetricPhase implements SearchPhase {
     LOG.info("Metric phase started");
     long startTime = System.nanoTime();
 
-    whiteboard.putGoogleResults(metric.calculate(whiteboard.input(), whiteboard.results()));
+    whiteboard.putGroundTruthResults(metric.calculate(whiteboard.input(), whiteboard.results()));
 
     LOG.info(
         String.format(
