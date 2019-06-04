@@ -6,6 +6,7 @@ public interface StreamPage {
 
   /**
    * Utility class, just syntax sugar
+   *
    * @return {@link IntStream}
    */
   IntStream stream();
