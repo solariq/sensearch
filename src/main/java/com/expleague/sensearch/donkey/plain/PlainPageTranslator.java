@@ -2,6 +2,7 @@ package com.expleague.sensearch.donkey.plain;
 
 import com.expleague.commons.seq.CharSeq;
 import com.expleague.sensearch.Page;
+import com.expleague.sensearch.Page.SegmentType;
 import com.expleague.sensearch.donkey.PageTranslator;
 import com.expleague.sensearch.donkey.StreamPage;
 import com.expleague.sensearch.donkey.crawler.document.CrawlerDocument;
@@ -26,7 +27,7 @@ public class PlainPageTranslator implements PageTranslator {
   private static int ID = 0;
   private final static CharSeq END_OF_PARAGRAPH = CharSeq.create("777@END@777");
   private final int END_ID;
-  private final static CharSeq END_OF_TITLE = CharSeq.create("|@|");
+  private final static CharSeq END_OF_TITLE = CharSeq.create(Page.TITLE_DELIMETER);
   private final int END_TITLE;
   private final static int FIRST_UPPERCASE = 0x00000080;
   private final static int ALL_UPPERCASE = 0x00000040;
@@ -143,8 +144,41 @@ public class PlainPageTranslator implements PageTranslator {
     return new PlainStreamPage(res);
   }
 
+  private TIntList parseFullTitle(CharSequence titles) {
+    TIntList res = new TIntArrayList();
+    for (String title : titles.toString().split(" # ")) {
+      parser.parse(CharSeq.create(title)).forEach(token -> {
+        int id = addToken(token);
+        res.add(id);
+      });
+      res.add(END_TITLE);
+    }
+    return res;
+  }
+
   private StreamPage PageToStream() {
-    return null;
+    TIntList res = new TIntArrayList();
+
+    res.addAll(parseFullTitle(page.content(SegmentType.FULL_TITLE)));
+    res.add(END_ID);
+    parser.parse(CharSeq.create(page.content(SegmentType.SUB_BODY)))
+        .forEach(token -> {
+          int id = addToken(token);
+          res.add(id);
+        });
+    res.add(END_ID);
+    page.subpages().forEach(subPage -> {
+      res.addAll(parseFullTitle(subPage.content(SegmentType.FULL_TITLE)));
+      res.add(END_ID);
+      parser.parse(CharSeq.create(subPage.content(SegmentType.SUB_BODY)))
+          .forEach(token -> {
+            int id = addToken(token);
+            res.add(id);
+          });
+      res.add(END_ID);
+    });
+
+    return new PlainStreamPage(res);
   }
 
   private Page StreamToPage() {
