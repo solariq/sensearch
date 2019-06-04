@@ -289,8 +289,9 @@ public class UnitMetricTest {
     }
 
     @Override
-    public Vec sentenceVec(CharSequence sentence) {
-      return Vec.EMPTY;
+    public Stream<Vec> sentenceVecs() {
+      return Stream.empty();
     }
+
   }
 }

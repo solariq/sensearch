@@ -195,13 +195,14 @@ public class BM25Test extends IndexBasedTestCase {
 
     @Override
     public Vec titleVec() {
-      return null;
+      return Vec.EMPTY;
     }
 
     @Override
-    public Vec sentenceVec(CharSequence sentence) {
-      return Vec.EMPTY;
+    public Stream<Vec> sentenceVecs() {
+      return Stream.empty();
     }
+
   }
 
 }
