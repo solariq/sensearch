@@ -19,7 +19,7 @@ import java.util.stream.StreamSupport;
 
 public class TokenizerImpl implements Tokenizer {
 
-  private static TokenizerFactory<CoreLabel> PT = PTBTokenizer.factory(new CoreLabelTokenFactory(), "ptb3Escaping=false, invertible=true");
+  private static TokenizerFactory<CoreLabel> PT = PTBTokenizer.factory(new CoreLabelTokenFactory(), "ptb3Escaping=false, invertible=true, untokenizable=noneKeep");
 
   public TokenizerImpl() {
   }

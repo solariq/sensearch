@@ -340,7 +340,7 @@ public class PlainPage implements IndexedPage {
       synchronized (this) {
         if (sentenceVecs == null) {
           sentenceVecs = sentences(SegmentType.BODY)
-                  .collect(Collectors.toMap(Function.identity(), s -> index.vecByTerms(index.parse(s).collect(Collectors.toList()))));
+                  .collect(Collectors.toMap(Function.identity(), s -> index.vecByTerms(index.parse(s).collect(Collectors.toList())), (x, y) -> x));
         }
       }
     }
