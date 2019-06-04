@@ -110,8 +110,8 @@ public class PlainPage implements IndexedPage {
   private final IndexUnits.Page protoPage;
   private final URI uri;
   private final boolean isEmpty;
-  private Vec titleVec;
-  private Map<CharSequence, Vec> sentenceVecs;
+  private volatile Vec titleVec;
+  private volatile Map<CharSequence, Vec> sentenceVecs;
 
   private PlainPage(IndexUnits.Page protoPage, PlainIndex index) {
     this.index = index;
