@@ -24,6 +24,20 @@ public class PageParserTest {
 
 
   @Test
+  public void RussianTest() {
+    PageParser parser = new PageParser();
+    String text = "Привет, пёс!";
+    List<CharSeq> expected = new ArrayList<>();
+    expected.add(CharSeq.create("Привет"));
+    expected.add(CharSeq.create(","));
+    expected.add(CharSeq.create(" "));
+    expected.add(CharSeq.create("пёс"));
+    expected.add(CharSeq.create("!"));
+    List<CharSeq> ans = parser.parse(CharSeq.create(text));
+    Assert.assertEquals(expected, ans);
+  }
+
+  @Test
   public void HardTest() {
     PageParser parser = new PageParser();
     String text = "\"heLLo, privEt!23xyi,_ %@()\\\".;@ kl\t \\n wo'w\"";
