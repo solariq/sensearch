@@ -3,7 +3,6 @@ package com.expleague.sensearch.donkey.utils;
 import static com.expleague.sensearch.core.IdUtils.BITS_FOR_FEATURES;
 
 import com.expleague.commons.seq.CharSeq;
-import com.expleague.sensearch.Page;
 import com.google.common.base.Charsets;
 import com.google.common.hash.HashFunction;
 import com.google.common.hash.Hashing;
@@ -13,33 +12,25 @@ import gnu.trove.map.hash.TIntObjectHashMap;
 import gnu.trove.map.hash.TObjectIntHashMap;
 import java.net.URI;
 
+/**
+ * НЕ ТРЭД-СЭЙФ (C)Ментор
+ */
 public class BrandNewIdGenerator {
 
-  private static BrandNewIdGenerator instance;
-
-  static {
-    instance = new BrandNewIdGenerator();
-  }
+  private static final BrandNewIdGenerator instance = new BrandNewIdGenerator();
 
   private static final int DEFAULT_SEED = 42;
   private static final HashFunction MURMUR = Hashing.murmur3_128(DEFAULT_SEED);
 
   private TObjectIntMap<CharSeq> termToIntMap = new TObjectIntHashMap<>();
   private TIntObjectMap<CharSeq> intToTermMap = new TIntObjectHashMap<>();
-  private final PageParser parser = new PageParser();
 
   private static int ID = 0;
-  public final static CharSeq END_OF_PARAGRAPH = CharSeq.create("777@END@777");
-  private final int END_ID;
-  public final static CharSeq END_OF_TITLE = CharSeq.create(Page.TITLE_DELIMETER);
-  private final int END_TITLE;
-  public final static int FIRST_UPPERCASE = 0x00000008;
-  public final static int ALL_UPPERCASE = 0x00000004;
+  public final static int BITS_FOR_META = 4;
+  private final static int FIRST_UPPERCASE = 0x00000008;
+  private final static int ALL_UPPERCASE = 0x00000004;
 
-  private BrandNewIdGenerator() {
-    END_ID = addToken(END_OF_PARAGRAPH) >>> 4;
-    END_TITLE = addToken(END_OF_TITLE) >>> 4;
-  }
+  private BrandNewIdGenerator() {}
 
   public long generatePageId(URI uri) {
     long hash = MURMUR.hashString(uri.toString(), Charsets.UTF_8).asInt();
@@ -78,7 +69,8 @@ public class BrandNewIdGenerator {
     return s;
   }
 
-  private int addToken(CharSeq token) {
+
+  private int addToken(CharSeq token) throws Exception {
     boolean firstUp = false;
     final boolean[] allUp = {true};
     int id;
@@ -98,9 +90,11 @@ public class BrandNewIdGenerator {
       termToIntMap.put(lowToken, id);
       intToTermMap.put(id, lowToken);
       ID++;
-      assert (ID < (1 << 29));
+      if (ID >= (1 << 29)) {
+        throw new Exception("Token limit::" + token.toString());
+      }
     }
-    id = id << 8;
+    id = id << BITS_FOR_META;
     if (firstUp) {
       id |= FIRST_UPPERCASE;
     }
