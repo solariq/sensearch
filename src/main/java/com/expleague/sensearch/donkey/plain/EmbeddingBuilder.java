@@ -1,7 +1,6 @@
 package com.expleague.sensearch.donkey.plain;
 
 import static com.expleague.sensearch.donkey.plain.PlainIndexBuilder.DEFAULT_VEC_SIZE;
-import static com.expleague.sensearch.donkey.utils.BrandNewIdGenerator.generateTermId;
 
 import com.expleague.commons.math.vectors.Vec;
 import com.expleague.commons.math.vectors.VecTools;
@@ -86,6 +85,7 @@ public class EmbeddingBuilder implements AutoCloseable {
   }
 
   public void addSection(CrawlerDocument.Section section, long sectionId) {
+    BrandNewIdGenerator idGenerator = BrandNewIdGenerator.getInstance();
     final Vec titleVec = toVector(section.title());
     if (titleVec != null) {
       nnIdx.append(curPageTitleId++, titleVec);
@@ -100,7 +100,7 @@ public class EmbeddingBuilder implements AutoCloseable {
         .links()
         .forEach(
             link -> {
-              final long targetId = BrandNewIdGenerator.generatePageId(link.targetUri());
+              final long targetId = idGenerator.generatePageId(link.targetUri());
               if (!pageIdToIncomingLinkTexts.containsKey(targetId)) {
                 pageIdToIncomingLinkTexts.put(targetId, new ArrayList<>());
               }
@@ -112,7 +112,7 @@ public class EmbeddingBuilder implements AutoCloseable {
         .map(word -> word.toString().toLowerCase())
         .forEach(
             word -> {
-              long id = generateTermId(word);
+              long id = idGenerator.generateTermId(word);
               if (termIdsInDb.contains(id)) {
                 return;
               }

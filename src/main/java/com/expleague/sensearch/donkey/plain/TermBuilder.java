@@ -1,12 +1,12 @@
 package com.expleague.sensearch.donkey.plain;
 
-import static com.expleague.sensearch.donkey.utils.BrandNewIdGenerator.generateTermId;
 
 import com.expleague.commons.seq.CharSeq;
 import com.expleague.commons.text.lemmer.LemmaInfo;
 import com.expleague.commons.text.lemmer.MyStem;
 import com.expleague.commons.text.lemmer.WordInfo;
 import com.expleague.sensearch.core.PartOfSpeech;
+import com.expleague.sensearch.donkey.utils.BrandNewIdGenerator;
 import com.expleague.sensearch.protobuf.index.IndexUnits;
 import com.expleague.sensearch.protobuf.index.IndexUnits.Term;
 import com.expleague.sensearch.protobuf.index.IndexUnits.Term.Builder;
@@ -36,6 +36,7 @@ public class TermBuilder implements AutoCloseable {
   private final DB termDb;
 
   private final MyStem myStem;
+  private BrandNewIdGenerator idGenerator = BrandNewIdGenerator.getInstance();
 
   public TermBuilder(DB termDb, MyStem lemmer) {
     this.termDb = termDb;
@@ -63,7 +64,7 @@ public class TermBuilder implements AutoCloseable {
       lemma = parse.get(0).lemma();
     }
 
-    long wordId = generateTermId(word);
+    long wordId = idGenerator.generateTermId(word);
 
     //noinspection EqualsBetweenInconvertibleTypes
     if (lemma == null || lemma.lemma().equals(word)) {
@@ -75,7 +76,7 @@ public class TermBuilder implements AutoCloseable {
       return value;
     }
 
-    long lemmaId = generateTermId(lemma.lemma());
+    long lemmaId = idGenerator.generateTermId(lemma.lemma());
 
     parsedTerm = new ParsedTerm(wordId, lemmaId, word, PartOfSpeech.valueOf(lemma.pos().name()));
     terms.put(wordId, parsedTerm);

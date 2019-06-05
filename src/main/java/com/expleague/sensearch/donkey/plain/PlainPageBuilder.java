@@ -123,8 +123,9 @@ class PlainPageBuilder implements AutoCloseable {
             .setUri(section.uri().toString())
             .addAllCategories(categories.get());
 
+    BrandNewIdGenerator idGenerator = BrandNewIdGenerator.getInstance();
     for (Link link : section.links()) {
-      long targetId = BrandNewIdGenerator.generatePageId(link.targetUri());
+      long targetId = idGenerator.generatePageId(link.targetUri());
       if (targetId == curPageId.get()) {
         // Ignoring self-links
         continue;

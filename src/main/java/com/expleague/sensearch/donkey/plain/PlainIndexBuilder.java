@@ -1,7 +1,5 @@
 package com.expleague.sensearch.donkey.plain;
 
-import static com.expleague.sensearch.donkey.utils.BrandNewIdGenerator.generatePageId;
-
 import com.expleague.commons.math.vectors.Vec;
 import com.expleague.commons.math.vectors.VecTools;
 import com.expleague.commons.seq.CharSeq;
@@ -20,6 +18,7 @@ import com.expleague.sensearch.donkey.IndexBuilder;
 import com.expleague.sensearch.donkey.crawler.Crawler;
 import com.expleague.sensearch.donkey.plain.IndexMetaBuilder.TermSegment;
 import com.expleague.sensearch.donkey.plain.TermBuilder.ParsedTerm;
+import com.expleague.sensearch.donkey.utils.BrandNewIdGenerator;
 import com.expleague.sensearch.index.Index;
 import com.expleague.sensearch.index.plain.PlainIndex;
 import com.expleague.sensearch.web.suggest.SuggestInformationBuilder;
@@ -329,6 +328,7 @@ public class PlainIndexBuilder implements IndexBuilder {
       
       try {
         LOG.info("Parsing pages...");
+        BrandNewIdGenerator idGenerator = BrandNewIdGenerator.getInstance();
         int[] docCnt = {0};
         crawler
             .makeStream()
@@ -339,7 +339,7 @@ public class PlainIndexBuilder implements IndexBuilder {
                   if (docCnt[0] % 10_000 == 0) {
                     LOG.debug(docCnt[0] + " documents processed...");
                   }
-                  long pageId = generatePageId(doc.uri());
+                  long pageId = idGenerator.generatePageId(doc.uri());
                   // We don't add uri to the knownPageIds as we need first section to have the
                   // same Id
                   // knownPageIds.add(uri);
@@ -352,7 +352,7 @@ public class PlainIndexBuilder implements IndexBuilder {
                   doc.sections()
                       .forEachOrdered(
                           s -> {
-                            long sectionId = generatePageId(s.uri());
+                            long sectionId = idGenerator.generatePageId(s.uri());
                             knownPageIds.add(sectionId);
 
                             s.links().forEach(indexMetaBuilder::addLink);

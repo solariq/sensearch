@@ -25,12 +25,12 @@ public class PlainPageTranslator implements PageTranslator {
   private final PageParser parser = new PageParser();
 
   private static int ID = 0;
-  private final static CharSeq END_OF_PARAGRAPH = CharSeq.create("777@END@777");
+  public final static CharSeq END_OF_PARAGRAPH = CharSeq.create("777@END@777");
   private final int END_ID;
   private final static CharSeq END_OF_TITLE = CharSeq.create(Page.TITLE_DELIMETER);
   private final int END_TITLE;
-  private final static int FIRST_UPPERCASE = 0x00000080;
-  private final static int ALL_UPPERCASE = 0x00000040;
+  public final static int FIRST_UPPERCASE = 0x00000080;
+  public final static int ALL_UPPERCASE = 0x00000040;
 
   public PlainPageTranslator() {
     END_ID = addToken(END_OF_PARAGRAPH);
@@ -141,7 +141,7 @@ public class PlainPageTranslator implements PageTranslator {
           res.add(END_ID);
         });
 
-    return new PlainStreamPage(res);
+    return null;
   }
 
   private TIntList parseFullTitle(CharSequence titles) {
@@ -178,7 +178,7 @@ public class PlainPageTranslator implements PageTranslator {
       res.add(END_ID);
     });
 
-    return new PlainStreamPage(res);
+    return null;
   }
 
   private Page StreamToPage() {
