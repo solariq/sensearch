@@ -67,6 +67,17 @@ public class BrandNewIdGenerator {
   }
 
 
+  public CharSeq token(int id) {
+    CharSeq s = intToTermMap.get(id >>> 4);
+    if ((id & ALL_UPPERCASE) > 0) {
+      s = CharSeq.create(s.toString().toUpperCase());
+    } else if ((id & FIRST_UPPERCASE) > 0) {
+      String res = Character.toUpperCase(s.charAt(0)) + s.subSequence(1).toString();
+      s = CharSeq.create(res);
+    }
+    return s;
+  }
+
   private int addToken(CharSeq token) {
     boolean firstUp = false;
     final boolean[] allUp = {true};
@@ -87,6 +98,7 @@ public class BrandNewIdGenerator {
       termToIntMap.put(lowToken, id);
       intToTermMap.put(id, lowToken);
       ID++;
+      assert (ID < (1 << 29));
     }
     id = id << 8;
     if (firstUp) {
