@@ -3,6 +3,7 @@ package com.expleague.sensearch.cli;
 import com.expleague.sensearch.cli.commands.BuildFilterPoolCmd;
 import com.expleague.sensearch.cli.commands.BuildIndexCmd;
 import com.expleague.sensearch.cli.commands.BuildRankingPoolCmd;
+import com.expleague.sensearch.cli.commands.EvalCmd;
 import com.expleague.sensearch.cli.commands.FitRankingModelCmd;
 import com.expleague.sensearch.cli.commands.RebuildEmbeddingCmd;
 import com.expleague.sensearch.cli.commands.RunCmdLineSearchCmd;
@@ -32,6 +33,7 @@ public class SenSeArchCli {
       put(TransformPoolDataCmd.commandName(), TransformPoolDataCmd.instance());
       put(RunCmdLineSearchCmd.commandName(), RunCmdLineSearchCmd.instance());
       put(RunViewEmbeddingCmd.commandName(), RunViewEmbeddingCmd.instance());
+      put(EvalCmd.commandName(), EvalCmd.instance());
     }
   };
 

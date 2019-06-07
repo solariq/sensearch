@@ -91,4 +91,18 @@ public class Annotations {
   public @interface SnippetModel {
 
   }
+
+  @Retention(RetentionPolicy.RUNTIME)
+  @Target({ElementType.FIELD, ElementType.PARAMETER, ElementType.METHOD})
+  @BindingAnnotation
+  public @interface FilterMinerDocNum {
+
+  }
+
+  @Retention(RetentionPolicy.RUNTIME)
+  @Target({ElementType.FIELD, ElementType.PARAMETER, ElementType.METHOD})
+  @BindingAnnotation
+  public @interface FilterRankDocNum {
+
+  }
 }

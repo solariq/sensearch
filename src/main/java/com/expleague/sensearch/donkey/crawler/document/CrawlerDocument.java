@@ -8,7 +8,7 @@ import javax.validation.constraints.NotNull;
 public interface CrawlerDocument {
 
   /**
-   * @return Page content
+   * @return All page content without Titles
    */
   @NotNull
   CharSequence content();

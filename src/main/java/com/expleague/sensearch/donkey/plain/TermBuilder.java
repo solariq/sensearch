@@ -68,7 +68,6 @@ public class TermBuilder implements AutoCloseable, IncrementalBuilder {
     if (!parsedTerm.hasLemma()) {
       return;
     }
-
     Term protoLemma = Term.newBuilder()
         .setId(parsedTerm.lemmaId())
         .setText(parsedTerm.lemma())

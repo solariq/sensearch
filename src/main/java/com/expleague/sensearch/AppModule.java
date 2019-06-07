@@ -11,6 +11,8 @@ import com.expleague.sensearch.core.Annotations.EmbeddingLshTablesDb;
 import com.expleague.sensearch.core.Annotations.EmbeddingVecsDb;
 import com.expleague.sensearch.core.Annotations.EmbeddingVectorsPath;
 import com.expleague.sensearch.core.Annotations.FilterMaxItems;
+import com.expleague.sensearch.core.Annotations.FilterMinerDocNum;
+import com.expleague.sensearch.core.Annotations.FilterRankDocNum;
 import com.expleague.sensearch.core.Annotations.IndexRoot;
 import com.expleague.sensearch.core.Annotations.MetricPath;
 import com.expleague.sensearch.core.Annotations.PageSize;
@@ -35,7 +37,6 @@ import com.expleague.sensearch.metrics.RequestCrawler;
 import com.expleague.sensearch.metrics.WebCrawler;
 import com.expleague.sensearch.miner.pool.QueryAndResults;
 import com.expleague.sensearch.web.suggest.FastSuggester;
-import com.expleague.sensearch.web.suggest.SortedArraySuggester;
 import com.expleague.sensearch.web.suggest.Suggester;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.AbstractModule;
@@ -221,5 +222,19 @@ public class AppModule extends AbstractModule {
           QueryAndResults[].class);
     }
     return new QueryAndResults[0];
+  }
+
+  // TODO Purpose of having a provider instead of binding is to be able to change these constants on-the-fly  which is
+  //  needed for evaluation. It looks a bit hacky and should be refactored in the future
+  @Provides
+  @FilterMinerDocNum
+  int getFilterMinerDocNum() {
+    return config.filterMinerDocNum();
+  }
+
+  @Provides
+  @FilterRankDocNum
+  int getFilterRankDocNum() {
+    return config.filterRankDocNum();
   }
 }

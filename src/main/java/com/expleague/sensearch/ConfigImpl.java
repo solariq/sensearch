@@ -21,6 +21,8 @@ public class ConfigImpl implements Config {
   private boolean buildIndexFlag = false;
   private boolean trainEmbeddingFlag = false;
   private boolean lshNearestFlag = true;
+  private int filterMinerDocNum = 5000;
+  private int filterRankDocNum = 500;
 
   @Override
   public int getPageSize() {
@@ -61,6 +63,24 @@ public class ConfigImpl implements Config {
   @Override
   public int maxFilterItems() {
     return maxFilterItems;
+  }
+
+  @Override
+  public int filterMinerDocNum() {
+    return filterMinerDocNum;
+  }
+
+  public void setFilterMinerDocNum(int filterMinerDocNum) {
+    this.filterMinerDocNum = filterMinerDocNum;
+  }
+
+  @Override
+  public int filterRankDocNum() {
+    return filterRankDocNum;
+  }
+
+  public void setFilterRankDocNum(int filterRankDocNum) {
+    this.filterRankDocNum = filterRankDocNum;
   }
 
   @Override

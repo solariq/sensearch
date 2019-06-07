@@ -59,10 +59,11 @@ public class IndexMetaBuilder {
   }
 
   public void addLink(Link link) {
+    BrandNewIdGenerator idGenerator = BrandNewIdGenerator.getInstance();
     localState
         .get()
         .incomingLinksCounts
-        .adjustOrPutValue(BrandNewIdGenerator.generatePageId(link.targetUri()), 1, 1);
+        .adjustOrPutValue(idGenerator.generatePageId(link.targetUri()), 1, 1);
   }
 
   public void endPage() {

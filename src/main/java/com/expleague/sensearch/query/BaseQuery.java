@@ -15,7 +15,7 @@ public class BaseQuery implements Query {
   public static final double SYNONYM_THRESHOLD = 0.75;
   public static final int MAX_SYNONYMS = 300;
 
-  private Map<Term, List<TermAndDistance>> synonyms;
+  private volatile Map<Term, List<TermAndDistance>> synonyms;
   private final List<Term> terms;
   private final String text;
   private final Vec vec;

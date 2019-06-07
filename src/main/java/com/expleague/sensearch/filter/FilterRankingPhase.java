@@ -4,6 +4,7 @@ import com.expleague.commons.math.Trans;
 import com.expleague.commons.util.Pair;
 import com.expleague.ml.meta.FeatureMeta;
 import com.expleague.sensearch.Page;
+import com.expleague.sensearch.core.Annotations.FilterRankDocNum;
 import com.expleague.sensearch.core.Annotations.RankFilterModel;
 import com.expleague.sensearch.core.SearchPhase;
 import com.expleague.sensearch.core.Whiteboard;
@@ -20,18 +21,21 @@ import org.apache.log4j.Logger;
 public class FilterRankingPhase implements SearchPhase {
 
 
-  private static final int FILTERED_DOC_NUMBER = 500;
   private static final Logger LOG = Logger.getLogger(Filter.class.getName());
 
   private final int phaseId;
 
   private final Trans model;
   private final FeatureMeta[] featuresInModel;
+  private final int filterRankDocNum;
 
   @Inject
-  public FilterRankingPhase(@Assisted int phaseId,
+  public FilterRankingPhase(
+      @Assisted int phaseId,
+      @FilterRankDocNum int filterRankDocNum,
       @RankFilterModel Pair<Function, FeatureMeta[]> rankModel) {
     this.phaseId = phaseId;
+    this.filterRankDocNum = filterRankDocNum;
     this.model = (Trans) rankModel.getFirst();
     this.featuresInModel = rankModel.getSecond();
   }
@@ -63,7 +67,7 @@ public class FilterRankingPhase implements SearchPhase {
             .map(p -> Pair.create(p.getKey(), rank(p.getValue())))
             .sorted(Comparator.<Pair<Page, Double>>comparingDouble(Pair::getSecond).reversed())
             .map(Pair::getFirst)
-            .limit(FILTERED_DOC_NUMBER)
+            .limit(filterRankDocNum)
             .toArray(Page[]::new),
         phaseId);
 

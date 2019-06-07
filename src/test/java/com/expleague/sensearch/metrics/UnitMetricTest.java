@@ -1,5 +1,6 @@
 package com.expleague.sensearch.metrics;
 
+import com.expleague.commons.math.vectors.Vec;
 import com.expleague.commons.util.Pair;
 import com.expleague.sensearch.Page;
 import com.expleague.sensearch.SenSeArch.ResultItem;
@@ -281,5 +282,16 @@ public class UnitMetricTest {
     public Stream<CharSequence> sentences(SegmentType type) {
       return null;
     }
+
+    @Override
+    public Vec titleVec() {
+      return Vec.EMPTY;
+    }
+
+    @Override
+    public Stream<Vec> sentenceVecs() {
+      return Stream.empty();
+    }
+
   }
 }

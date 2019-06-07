@@ -29,18 +29,18 @@ public class ResultPageDeserializer extends StdDeserializer<ResultPage> {
     JsonNode node = codec.readTree(jsonParser);
 
     List<ResultItem> results = new ArrayList<>();
-    List<ResultItem> googleResults = new ArrayList<>();
+    List<ResultItem> groundTruth = new ArrayList<>();
 
     for (JsonNode result : node.get("results")) {
       results.add(codec.treeToValue(result, ResultItem.class));
     }
 
-    for (JsonNode result : node.get("googleResults")) {
-      googleResults.add(codec.treeToValue(result, ResultItem.class));
+    for (JsonNode result : node.get("groundTruthResults")) {
+      groundTruth.add(codec.treeToValue(result, ResultItem.class));
     }
 
     // TODO: null
     return new ResultPageImpl(
-        null, 0, 0, results.toArray(new ResultItem[0]), googleResults.toArray(new ResultItem[0]));
+        null, 0, 0, results.toArray(new ResultItem[0]), groundTruth.toArray(new ResultItem[0]));
   }
 }

@@ -124,13 +124,13 @@ public class WhiteboardImpl implements Whiteboard {
 
   @Nullable
   @Override
-  public ResultItem[] googleResults() {
+  public ResultItem[] groundTruthResults() {
     return googleResults;
   }
 
   @Override
-  public void putGoogleResults(ResultItem[] googleResults) {
-    this.googleResults = googleResults;
+  public void putGroundTruthResults(ResultItem[] groundTruthResults) {
+    this.googleResults = groundTruthResults;
   }
 
   /*==============================================================================================*/

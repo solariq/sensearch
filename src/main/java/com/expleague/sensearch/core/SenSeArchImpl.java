@@ -29,6 +29,7 @@ import java.util.Set;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -45,7 +46,12 @@ public class SenSeArchImpl implements SenSeArch {
 
   @Override
   public ResultPage search(
-      String query, int pageNo, boolean debug, boolean metric, List<ResultItem> dataToDebug) {
+      String query,
+      int pageNo,
+      boolean debug,
+      boolean metric,
+      List<? extends ResultItem> groundTruthData,
+      Consumer<Whiteboard> debugInfoCollector) {
     final Whiteboard wb = new WhiteboardImpl(query, pageNo);
 
     final Set<SearchPhase> phases = new HashSet<>();
@@ -60,7 +66,11 @@ public class SenSeArchImpl implements SenSeArch {
     }
 
     if (metric) {
-      phases.add(searchPhaseFactory.createMetricPhase());
+      if (groundTruthData == null || groundTruthData.isEmpty()) {
+        phases.add(searchPhaseFactory.createMetricPhase());
+      } else {
+        wb.putGroundTruthResults(groundTruthData.toArray(new ResultItem[0]));
+      }
     }
     phases.add(searchPhaseFactory.createMergePhase());
 
@@ -75,7 +85,7 @@ public class SenSeArchImpl implements SenSeArch {
     boolean[] hasError = new boolean[1];
     Exception[] searchException = new Exception[1];
 
-    while (!hasError[0] && (wb.snippets() == null || (metric && wb.googleResults() == null))) {
+    while (!hasError[0] && (wb.snippets() == null || (metric && wb.groundTruthResults() == null))) {
       List<SearchPhase> curPhases = new ArrayList<>(phases);
       phases.clear();
       for (final SearchPhase phase : curPhases) {
@@ -107,6 +117,7 @@ public class SenSeArchImpl implements SenSeArch {
         }
       }
     }
+    executor.shutdown();
 
     if (hasError[0]) {
       throw new RuntimeException("Failed to process query", searchException[0]);
@@ -133,10 +144,10 @@ public class SenSeArchImpl implements SenSeArch {
 
     ResultItem[] debugDataResults = null;
 
-    if (dataToDebug != null && debug) {
-      debugDataResults = new ResultItem[dataToDebug.size()];
-      for (int i = 0; i < dataToDebug.size(); i++) {
-        ResultItem res = dataToDebug.get(i);
+    if (groundTruthData != null && debug) {
+      debugDataResults = new ResultItem[groundTruthData.size()];
+      for (int i = 0; i < groundTruthData.size(); i++) {
+        ResultItem res = groundTruthData.get(i);
 
         Page page = index.page(res.reference());
         Features filterFeatures = wb.filterFeatures().get(0).get(page);
@@ -189,6 +200,9 @@ public class SenSeArchImpl implements SenSeArch {
               debugInfo);
     }
 
+    if (debugInfoCollector != null) {
+      debugInfoCollector.accept(wb);
+    }
     return new ResultPageImpl(query, 0, snippets.length, results, debugDataResults);
   }
 

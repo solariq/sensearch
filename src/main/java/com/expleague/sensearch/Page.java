@@ -73,6 +73,8 @@ public interface Page {
 
   Vec titleVec();
 
+  Stream<Vec> sentenceVecs();
+
   interface Link {
 
     /**

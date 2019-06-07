@@ -12,6 +12,8 @@
   "trainEmbeddingFlag": "false",
   "lshNearestFlag": "true",
   "maxFilterItems": "50",
+  "filterMinerDocNum": "5000",
+  "filterRankDocNum": "500",
   "modelPath": "src/main/resources/models/ranking.model",
   "modelFilterPath": "src/main/resources/models/filter.model",
   "snippetModelPath": "src/main/resources/models/snippet.model",

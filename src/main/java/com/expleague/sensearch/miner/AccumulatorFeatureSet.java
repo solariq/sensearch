@@ -17,6 +17,7 @@ import com.expleague.sensearch.features.sets.ranker.QuotationFeatureSet;
 import com.expleague.sensearch.features.sets.ranker.TextFeatureSet;
 import com.expleague.sensearch.features.sets.ranker.TextFeatureSet.Segment;
 import com.expleague.sensearch.index.Index;
+
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Consumer;
@@ -34,21 +35,21 @@ public class AccumulatorFeatureSet extends FeatureSet.Stub<QURLItem> {
   private final QuotationFeatureSet quotationFeatureSet = new QuotationFeatureSet();
 
   private final FeatureSet<QURLItem> features =
-      FeatureSet.join(
-          bm25FeatureSet,
-          hhFeatureSet,
-          linkFeatureSet,
-          cosDistanceFeatureSet,
-          docBasedFeatureSet,
-          quotationFeatureSet
-      );
+          FeatureSet.join(
+                  bm25FeatureSet,
+                  hhFeatureSet,
+                  linkFeatureSet,
+                  cosDistanceFeatureSet,
+                  docBasedFeatureSet,
+                  quotationFeatureSet
+          );
 
   private final List<TextFeatureSet> textFeatureSet =
-      features
-          .components()
-          .map(Functions.cast(TextFeatureSet.class))
-          .filter(Objects::nonNull)
-          .collect(Collectors.toList());
+          features
+                  .components()
+                  .map(Functions.cast(TextFeatureSet.class))
+                  .filter(Objects::nonNull)
+                  .collect(Collectors.toList());
 
 
   public AccumulatorFeatureSet(Index index) {
@@ -73,22 +74,22 @@ public class AccumulatorFeatureSet extends FeatureSet.Stub<QURLItem> {
       final int totalLength = titleLength + contentLength;
 
       textFeatureSet.forEach(
-          fs ->
-              fs.withStats(
-                  totalLength,
-                  index.averageSectionTitleSize() + index.averagePageSize(),
-                  titleLength,
-                  index.averageSectionTitleSize(),
-                  contentLength,
-                  index.averagePageSize(),
-                  index.size()));
+              fs ->
+                      fs.withStats(
+                              totalLength,
+                              index.averageSectionTitleSize() + index.averagePageSize(),
+                              titleLength,
+                              index.averageSectionTitleSize(),
+                              contentLength,
+                              index.averagePageSize(),
+                              index.size()));
       { // Title processing
         // features.components().map(Functions.cast(TextFeatureSet.class)).filter(Objects::nonNull)
         //    .forEach(fs -> fs.withSegment(TextFeatureSet.Segment.FULL_TITLE, titleLength));
         TermConsumer termConsumer = new TermConsumer();
         titleTerms.forEach(termConsumer);
         titleTerms.forEach(
-            term -> textFeatureSet.forEach(fs -> fs.withSegment(Segment.TITLE, term)));
+                term -> textFeatureSet.forEach(fs -> fs.withSegment(Segment.TITLE, term)));
       }
       { // Content processing
         // features.components().map(Functions.cast(TextFeatureSet.class)).filter(Objects::nonNull)
@@ -101,24 +102,16 @@ public class AccumulatorFeatureSet extends FeatureSet.Stub<QURLItem> {
     }
     { // Link Processing
     }
-    List<List<Term>> pageSentenceTokens =
-        page.sentences(SegmentType.BODY)
-            .map(sentence -> index.parse(sentence).collect(Collectors.toList()))
-            .collect(Collectors.toList());
     { // Cos-Dist processing
       Vec queryVec = item.queryCache().vec();
-      Vec titleVec = index.vecByTerms(titleTerms);
-
+      Vec titleVec = page.titleVec();
       cosDistanceFeatureSet.withStats(queryVec, titleVec);
-
-      pageSentenceTokens.forEach(
-          sentenceTokens -> {
-            Vec passageVec = index.vecByTerms(sentenceTokens);
-            cosDistanceFeatureSet.withPassage(passageVec);
-          });
+      page.sentenceVecs().forEach(cosDistanceFeatureSet::withPassage);
     }
     { // Quotation
-      pageSentenceTokens.forEach(quotationFeatureSet::withPassage);
+      page.sentences(SegmentType.BODY)
+              .map(sentence -> index.parse(sentence).collect(Collectors.toList()))
+              .forEach(quotationFeatureSet::withPassage);
     }
   }
 

@@ -13,13 +13,13 @@ import com.expleague.ml.meta.FeatureMeta;
 import com.expleague.ml.meta.impl.JsonDataSetMeta;
 import com.expleague.sensearch.AppModule;
 import com.expleague.sensearch.Page;
+import com.expleague.sensearch.core.Annotations.FilterMinerDocNum;
 import com.expleague.sensearch.core.Annotations.RankFilterModel;
 import com.expleague.sensearch.features.Features;
 import com.expleague.sensearch.features.QURLItem;
 import com.expleague.sensearch.features.sets.TargetFS;
 import com.expleague.sensearch.features.sets.TargetSet;
 import com.expleague.sensearch.features.sets.filter.FilterFeatures;
-import com.expleague.sensearch.filter.FilterMinerPhase;
 import com.expleague.sensearch.index.Index;
 import com.expleague.sensearch.index.plain.PlainIndex;
 import com.expleague.sensearch.index.plain.PlainPage;
@@ -53,6 +53,7 @@ public class FilterPoolBuilder extends PoolBuilder<QueryAndResults> {
   */
 
   private static final Logger LOG = Logger.getLogger(FilterPoolBuilder.class.getName());
+  private final int filterDocNum;
   private int SAVE_SIZE = 5;
 
   private static final int FILTER_SIZE = 10;
@@ -60,10 +61,14 @@ public class FilterPoolBuilder extends PoolBuilder<QueryAndResults> {
   private final Trans model;
 
   @Inject
-  public FilterPoolBuilder(Index index, @RankFilterModel Pair<Function, FeatureMeta[]> rankModel) {
+  public FilterPoolBuilder(
+      Index index,
+      @RankFilterModel Pair<Function, FeatureMeta[]> rankModel,
+      @FilterMinerDocNum int filterDocNum) {
     super();
     this.index = index;
     this.model = (Trans) rankModel.getFirst();
+    this.filterDocNum = filterDocNum;
   }
 
   public static void main(String[] args) throws IOException {
@@ -106,7 +111,7 @@ public class FilterPoolBuilder extends PoolBuilder<QueryAndResults> {
               }
               status.incrementAndGet();
               Map<Page, Features> allDocs =
-                  index.fetchDocuments(query, FilterMinerPhase.FILTERED_DOC_NUMBER);
+                  index.fetchDocuments(query, filterDocNum);
 
               res.forEach(
                   pNw -> {
