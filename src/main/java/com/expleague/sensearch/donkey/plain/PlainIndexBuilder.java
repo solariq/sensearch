@@ -47,8 +47,10 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Random;
 import java.util.Set;
@@ -93,6 +95,8 @@ public class PlainIndexBuilder implements IndexBuilder {
   private final Tokenizer tokenizer = new TokenizerImpl();
   private final Path indexRoot;
   private final Path embeddingVectorsPath;
+
+  private final Map<String, ParsedTerm> termsCache = new HashMap<>();
 
   @Inject
   public PlainIndexBuilder(
@@ -207,7 +211,8 @@ public class PlainIndexBuilder implements IndexBuilder {
     long startTime = System.nanoTime();
     buildIndexInternal(jmllEmbedding);
     buildSuggestAfterIndex();
-    LOG.info(String.format("Index build in [%.3f] seconds", (System.nanoTime() - startTime) / 1e9));
+    LOG.info(String.format("Index build in [%.3f] seconds",
+        (System.nanoTime() - startTime) / 1e9));
   }
 
   public void buildSuggestAfterIndex() throws IOException {
@@ -230,12 +235,14 @@ public class PlainIndexBuilder implements IndexBuilder {
         LOG.info("Building suggest...");
         long start = System.nanoTime();
         SuggestInformationBuilder suggestBuilder =
-            new SuggestInformationBuilder(index, config.getIndexRoot(), suggestUnigramDb, suggestMultigramDb);
+            new SuggestInformationBuilder(index, config.getIndexRoot(),
+                suggestUnigramDb, suggestMultigramDb);
 
         suggestBuilder.build();
 
 
-        LOG.info(String.format("Suggest index was built in %.1f sec", (System.nanoTime() - start) / 1e9));
+        LOG.info(String.format("Suggest index was built in %.1f sec",
+            (System.nanoTime() - start) / 1e9));
       } catch (Exception e) {
         e.printStackTrace();
       }
@@ -254,7 +261,7 @@ public class PlainIndexBuilder implements IndexBuilder {
         final StatisticsBuilder statisticsBuilder =
             new StatisticsBuilder(indexRoot.resolve(TERM_BASE_ROOT));
         final UriMappingsBuilder uriMappingBuilder =
-            new UriMappingsBuilder(indexRoot.resolve(URI_MAPPINGS_ROOT))
+            new UriMappingsBuilder(indexRoot.resolve(URI_MAPPINGS_ROOT));
         final EmbeddingBuilder embeddingBuilder =
             new EmbeddingBuilder(
                 JniDBFactory.factory.open(
@@ -327,7 +334,6 @@ public class PlainIndexBuilder implements IndexBuilder {
                                 .map(CharSeqTools::toLowerCase)
                                 .forEach(
                                     word -> {
-                                      
                                       if (word == TITLE_STOP) {
                                         isTitle[0] = false;
                                       }
@@ -425,15 +431,13 @@ public class PlainIndexBuilder implements IndexBuilder {
       }
 
       long wordId = generateTermId(word);
-
-      //noinspection EqualsBetweenInconvertibleTypes
-      if (lemma == null || lemma.lemma().equals(word)) {
-        return new ParsedTerm(wordId, word, -1, null,
-            lemma == null ? null : PartOfSpeech.valueOf(lemma.pos().name()));
+      if (lemma == null) {
+        return new ParsedTerm(wordId, word, -1, null, null);
       }
 
-      long lemmaId = generateTermId(lemma.lemma());
-      return new ParsedTerm(wordId, word, lemmaId, lemma.lemma(), PartOfSpeech.valueOf(lemma.pos().name()));
+      long lemmaId = lemma.lemma().equals(word) ? 0 : generateTermId(lemma.lemma());
+      return new ParsedTerm(wordId, word, lemmaId, lemma.lemma(),
+          PartOfSpeech.valueOf(lemma.pos().name()));
     }
 
     String lemma() {
