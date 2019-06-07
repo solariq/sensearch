@@ -21,6 +21,8 @@ import com.expleague.sensearch.donkey.IndexBuilder;
 import com.expleague.sensearch.donkey.crawler.Crawler;
 import com.expleague.sensearch.donkey.plain.IndexMetaBuilder.TermSegment;
 import com.expleague.sensearch.donkey.utils.BrandNewIdGenerator;
+import com.expleague.sensearch.donkey.utils.TermsCache;
+import com.expleague.sensearch.donkey.utils.TermsCache.ParsedTerm;
 import com.expleague.sensearch.index.Index;
 import com.expleague.sensearch.index.plain.PlainIndex;
 import com.expleague.sensearch.web.suggest.SuggestInformationBuilder;
@@ -58,7 +60,9 @@ import javax.annotation.Nullable;
 import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 import org.fusesource.leveldbjni.JniDBFactory;
+import org.iq80.leveldb.CompressionType;
 import org.iq80.leveldb.DB;
+import org.iq80.leveldb.Options;
 
 public class PlainIndexBuilder implements IndexBuilder {
 
@@ -73,7 +77,7 @@ public class PlainIndexBuilder implements IndexBuilder {
   public static final String VECS_ROOT = "vecs";
 
   public static final Path RARE_INV_IDX_FILE = Paths.get("rare_iidx").resolve("iidx");
-  
+
   public static final String SUGGEST_UNIGRAM_ROOT = "suggest/unigram_coeff";
   public static final String SUGGEST_MULTIGRAMS_ROOT = "suggest/multigram_freq_norm";
 
@@ -82,6 +86,13 @@ public class PlainIndexBuilder implements IndexBuilder {
 
   private static final int NEIGHBORS_NUM = 50;
   private static final int NUM_OF_RANDOM_IDS = 100;
+  private static final Options STATS_DB_OPTIONS =
+      new Options()
+          .cacheSize(1 << 20)
+          .blockSize(1 << 20) // 1 MB
+          .createIfMissing(true)
+          .errorIfExists(true)
+          .compressionType(CompressionType.SNAPPY);
 
   // DB configurations
 
@@ -93,8 +104,7 @@ public class PlainIndexBuilder implements IndexBuilder {
   private final Tokenizer tokenizer = new TokenizerImpl();
   private final Path indexRoot;
   private final Path embeddingVectorsPath;
-
-  private final Map<String, ParsedTerm> termsCache = new HashMap<>();
+  private final TermsCache termsCache;
 
   @Inject
   public PlainIndexBuilder(
@@ -105,23 +115,8 @@ public class PlainIndexBuilder implements IndexBuilder {
     this.crawler = crawler;
     this.indexRoot = indexRoot;
     this.embeddingVectorsPath = embeddingVectorsPath;
-
     this.lemmer = lemmer;
-  }
-
-  /**
-   * Tokenizes given text and adds it to the @code{termBuilder}.
-   *
-   * @param text text to be parsed and converted to ids
-   * @return array of term ids returned by @code{termBuilder}
-   */
-  private long[] toTermIds(String text, TermBuilder termBuilder) {
-    return tokenizer
-        .parseTextToWords(text)
-        .map(s -> s.toString().toLowerCase())
-        .map(word -> termBuilder.addTerm(word).id)
-        .mapToLong(i -> i)
-        .toArray();
+    this.termsCache = new TermsCache(lemmer, (int) 1e6);
   }
 
   private Comparator<Vec> comparator(Vec main) {
@@ -223,7 +218,7 @@ public class PlainIndexBuilder implements IndexBuilder {
         final DB suggestMultigramDb =
             JniDBFactory.factory.open(
                 indexRoot.resolve(SUGGEST_MULTIGRAMS_ROOT).toFile(), STATS_DB_OPTIONS);
-        ) {
+    ) {
       Config config =
           new ObjectMapper().readValue(Paths.get("./config.json").toFile(), ConfigImpl.class);
       Injector injector = Guice.createInjector(new AppModule(config));
@@ -237,7 +232,6 @@ public class PlainIndexBuilder implements IndexBuilder {
                 suggestUnigramDb, suggestMultigramDb);
 
         suggestBuilder.build();
-
 
         LOG.info(String.format("Suggest index was built in %.1f sec",
             (System.nanoTime() - start) / 1e9));
@@ -262,9 +256,7 @@ public class PlainIndexBuilder implements IndexBuilder {
             new UriMappingsBuilder(indexRoot.resolve(URI_MAPPINGS_ROOT));
         final EmbeddingBuilder embeddingBuilder =
             new EmbeddingBuilder(
-                JniDBFactory.factory.open(
-                    indexRoot.resolve(EMBEDDING_ROOT).resolve(VECS_ROOT).toFile(),
-                    EMBEDDING_DB_OPTIONS),
+                indexRoot.resolve(EMBEDDING_ROOT),
                 /*JniDBFactory.factory.open(
                     indexRoot.resolve(EMBEDDING_ROOT).resolve(LSH_ROOT).toFile(),
                     EMBEDDING_DB_OPTIONS),
@@ -274,15 +266,16 @@ public class PlainIndexBuilder implements IndexBuilder {
 
       EmbeddingImpl<CharSeq> jmllEmbedding1 = (EmbeddingImpl<CharSeq>) jmllEmbedding;
       for (int i = 0; i < jmllEmbedding1.vocabSize(); i++) {
-        ParsedTerm parsedTerm = termBuilder.addTerm(jmllEmbedding1.getObj(i));
-        embeddingBuilder.addTerm(parsedTerm.id, jmllEmbedding1.apply(parsedTerm.text));
+        ParsedTerm parsedTerm = termsCache.parsedTerm(jmllEmbedding1.getObj(i));
+        embeddingBuilder.addTerm(parsedTerm.wordId(), jmllEmbedding1.apply(parsedTerm.word()));
+        termBuilder.addTerm(parsedTerm);
       }
       IndexMetaBuilder indexMetaBuilder = new IndexMetaBuilder(PlainIndex.VERSION);
 
       LOG.info("Creating mappings from wiki ids to raw index ids...");
 
       final TLongObjectMap<TLongList> rareTermsInvIdx = new TLongObjectHashMap<>();
-      
+
       try {
         LOG.info("Parsing pages...");
         BrandNewIdGenerator idGenerator = BrandNewIdGenerator.getInstance();
@@ -291,7 +284,7 @@ public class PlainIndexBuilder implements IndexBuilder {
             .makeStream()
             .filter(Objects::nonNull)
             .forEach(
-                doc -> {                  
+                doc -> {
                   docCnt[0]++;
                   if (docCnt[0] % 10_000 == 0) {
                     LOG.debug(docCnt[0] + " documents processed...");
@@ -328,7 +321,8 @@ public class PlainIndexBuilder implements IndexBuilder {
                             Stream.concat(
                                 Stream.concat(
                                     tokenizer.parseTextToWords(sectionTitle),
-                                    Stream.of(TITLE_STOP)),
+                                    Stream.of(TITLE_STOP)
+                                ),
                                 tokenizer.parseTextToWords(s.text()))
                                 .map(CharSeqTools::toLowerCase)
                                 .forEach(
@@ -336,9 +330,7 @@ public class PlainIndexBuilder implements IndexBuilder {
                                       if (word == TITLE_STOP) {
                                         isTitle[0] = false;
                                       }
-                                      TermBuilder.ParsedTerm termLemmaId =
-                                          termBuilder.addTerm(word);
-
+                                      ParsedTerm parsedTerm = termsCache.parsedTerm(word);
                                       // TODO: uncomment it
                                       /*
                                       if (jmllEmbedding.apply(CharSeq.compact(word)) == null) {
@@ -347,14 +339,10 @@ public class PlainIndexBuilder implements IndexBuilder {
                                         rareTermsInvIdx.get(termLemmaId.id).add(pageId);
                                       }
                                       */
-                                      
-                                      long lemmaId =
-                                          termLemmaId.lemmaId == -1
-                                              ? termLemmaId.id
-                                              : termLemmaId.lemmaId;
-                                      statisticsBuilder.enrich(termLemmaId.id, lemmaId);
+
+                                      statisticsBuilder.enrich(parsedTerm);
                                       indexMetaBuilder.addTerm(
-                                          termLemmaId.id,
+                                          parsedTerm.wordId(),
                                           isTitle[0]
                                               ? TermSegment.SECTION_TITLE
                                               : TermSegment.TEXT);
@@ -398,70 +386,5 @@ public class PlainIndexBuilder implements IndexBuilder {
       }
     }
     LOG.info("Index built!");
-  }
-
-  static class ParsedTerm {
-    final long wordId;
-    final CharSeq word;
-
-    final long lemmaId;
-    final CharSeq lemma;
-
-    final PartOfSpeech posTag;
-
-    private ParsedTerm(long wordId, CharSeq word,
-        long lemmaId, CharSeq lemma,
-        PartOfSpeech posTag) {
-      this.wordId = wordId;
-      this.word = word;
-      this.lemmaId = lemmaId;
-      this.lemma = lemma;
-      this.posTag = posTag;
-    }
-
-    static ParsedTerm parse(CharSequence wordcs, Lemmer lemmer) {
-      CharSeq word = CharSeq.create(wordcs);
-      word = CharSeq.intern(word);
-
-      LemmaInfo lemma = null;
-      List<WordInfo> parse = lemmer.parse(word);
-      if (parse.size() > 0) {
-        lemma = parse.get(0).lemma();
-      }
-
-      long wordId = generateTermId(word);
-      if (lemma == null) {
-        return new ParsedTerm(wordId, word, -1, null, null);
-      }
-
-      long lemmaId = lemma.lemma().equals(word) ? 0 : generateTermId(lemma.lemma());
-      return new ParsedTerm(wordId, word, lemmaId, lemma.lemma(),
-          PartOfSpeech.valueOf(lemma.pos().name()));
-    }
-
-    String lemma() {
-      return lemma.toString();
-    }
-
-    long lemmaId() {
-      return lemmaId;
-    }
-
-    String word() {
-      return word.toString();
-    }
-
-    long wordId() {
-      return wordId;
-    }
-
-    @Nullable
-    PartOfSpeech posTag() {
-      return posTag;
-    }
-
-    boolean hasLemma() {
-      return lemmaId != -1;
-    }
   }
 }

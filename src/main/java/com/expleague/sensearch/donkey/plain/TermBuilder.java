@@ -2,7 +2,7 @@ package com.expleague.sensearch.donkey.plain;
 
 
 import com.expleague.sensearch.donkey.IncrementalBuilder;
-import com.expleague.sensearch.donkey.plain.PlainIndexBuilder.ParsedTerm;
+import com.expleague.sensearch.donkey.utils.TermsCache.ParsedTerm;
 import com.expleague.sensearch.protobuf.index.IndexUnits.Term;
 import com.expleague.sensearch.protobuf.index.IndexUnits.Term.PartOfSpeech;
 import com.google.common.primitives.Longs;
@@ -45,6 +45,7 @@ public class TermBuilder implements AutoCloseable, IncrementalBuilder {
   private final Path termBaseRoot;
 
   private final List<TermBuilderState> priorStates = new ArrayList<>();
+
   TermBuilder(Path termBaseRoot) {
     this.termBaseRoot = termBaseRoot;
   }
@@ -56,10 +57,10 @@ public class TermBuilder implements AutoCloseable, IncrementalBuilder {
   void addTerm(ParsedTerm parsedTerm) {
     Term protoTerm = Term.newBuilder()
         .setId(parsedTerm.wordId())
-        .setText(parsedTerm.word())
+        .setText(parsedTerm.word().toString())
         .setLemmaId(parsedTerm.lemmaId())
         .setPartOfSpeech(
-            parsedTerm.posTag() != null ? Term.PartOfSpeech.valueOf(parsedTerm.posTag().name()) :
+            parsedTerm.hasPosTag() ? Term.PartOfSpeech.valueOf(parsedTerm.posTag().name()) :
                 PartOfSpeech.UNKNOWN
         )
         .build();
@@ -70,7 +71,7 @@ public class TermBuilder implements AutoCloseable, IncrementalBuilder {
     }
     Term protoLemma = Term.newBuilder()
         .setId(parsedTerm.lemmaId())
-        .setText(parsedTerm.lemma())
+        .setText(parsedTerm.lemma().toString())
         .setPartOfSpeech(
             parsedTerm.posTag() != null ? Term.PartOfSpeech.valueOf(parsedTerm.posTag().name()) :
                 PartOfSpeech.UNKNOWN
@@ -136,6 +137,7 @@ public class TermBuilder implements AutoCloseable, IncrementalBuilder {
   }
 
   static final class TermBuilderState implements BuilderState {
+
     private static final Logger LOG = LoggerFactory.getLogger(TermBuilderState.class);
     private static final String TERMS_FILE_PROP = "tlist";
 

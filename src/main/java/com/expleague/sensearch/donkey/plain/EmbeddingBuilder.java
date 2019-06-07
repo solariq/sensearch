@@ -1,6 +1,7 @@
 package com.expleague.sensearch.donkey.plain;
 
 import static com.expleague.sensearch.donkey.plain.PlainIndexBuilder.DEFAULT_VEC_SIZE;
+import static com.expleague.sensearch.donkey.plain.PlainIndexBuilder.VECS_ROOT;
 
 import com.expleague.commons.math.vectors.Vec;
 import com.expleague.commons.math.vectors.VecTools;
@@ -18,10 +19,12 @@ import gnu.trove.map.hash.TLongObjectHashMap;
 import gnu.trove.set.TLongSet;
 import gnu.trove.set.hash.TLongHashSet;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import org.apache.log4j.Logger;
+import org.fusesource.leveldbjni.JniDBFactory;
 import org.iq80.leveldb.CompressionType;
 import org.iq80.leveldb.DB;
 import org.iq80.leveldb.Options;
@@ -48,7 +51,8 @@ public class EmbeddingBuilder implements AutoCloseable {
       new TLongObjectHashMap<>();
   private final TLongSet existingPageIds = new TLongHashSet();
 
-  public EmbeddingBuilder(DB vecDb, Embedding<CharSeq> jmllEmbedding, Tokenizer tokenizer) {
+  public EmbeddingBuilder(Path embeddingRoot, Embedding<CharSeq> jmllEmbedding, Tokenizer tokenizer)
+      throws IOException {
     this.jmllEmbedding = jmllEmbedding;
     this.tokenizer = tokenizer;
     nnIdx =
@@ -58,7 +62,8 @@ public class EmbeddingBuilder implements AutoCloseable {
             QUANT_DIM,
             SKETCH_BITS_PER_QUANT,
             BATCH_SIZE,
-            vecDb);
+            JniDBFactory.factory.open(embeddingRoot.resolve(VECS_ROOT).toFile(),
+                EMBEDDING_DB_OPTIONS));
   }
 
   @Override

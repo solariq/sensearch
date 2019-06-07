@@ -2,6 +2,7 @@ package com.expleague.sensearch.donkey.plain;
 
 import com.expleague.sensearch.donkey.IncrementalBuilder;
 import com.expleague.sensearch.donkey.RecoverableBuilder.BuilderState;
+import com.expleague.sensearch.donkey.utils.TermsCache.ParsedTerm;
 import com.expleague.sensearch.protobuf.index.IndexUnits.TermStatistics;
 import com.expleague.sensearch.protobuf.index.IndexUnits.TermStatistics.TermFrequency;
 import com.google.common.annotations.VisibleForTesting;
@@ -164,9 +165,11 @@ public class StatisticsBuilder implements AutoCloseable, IncrementalBuilder {
   }
 
   // TODO: save lemma statistics
-  void enrich(long termId, long lemmaId) {
-    pageTermsSequence.get().add(termId);
-    pageLemmasSequence.get().add(lemmaId);
+  void enrich(ParsedTerm parsedTerm) {
+    pageTermsSequence.get().add(parsedTerm.wordId());
+    if (parsedTerm.hasLemma()) {
+      pageLemmasSequence.get().add(parsedTerm.lemmaId());
+    }
   }
 
   private static void writeStatistics(TLongLongMap wordFreq, TLongIntMap docFreq,
