@@ -16,15 +16,15 @@ public class PageParser {
         token.append(c);
       } else {
         if (isProcessingWord[0]) {
-          result.add(CharSeq.create(token.toString()));
+          result.add(CharSeq.intern(token.toString()));
           token.delete(0, token.length());
           isProcessingWord[0] = false;
         }
-        result.add(CharSeq.create(c.toString()));
+        result.add(CharSeq.intern(c.toString()));
       }
     });
     if (token.length() != 0) {
-      result.add(CharSeq.create(token.toString()));
+      result.add(CharSeq.intern(token.toString()));
     }
 
     return result;

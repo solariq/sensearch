@@ -25,10 +25,11 @@ public class BrandNewIdGenerator {
   private TObjectIntMap<CharSeq> termToIntMap = new TObjectIntHashMap<>();
   private TIntObjectMap<CharSeq> intToTermMap = new TIntObjectHashMap<>();
 
-  private static int ID = 0;
-  public final static int BITS_FOR_META = 4;
-  private final static int FIRST_UPPERCASE = 0x00000008;
-  private final static int ALL_UPPERCASE = 0x00000004;
+  public static int ID = 0;
+  private final static int BITS_FOR_META = 8;
+  private final static int FIRST_UPPERCASE = 0x00000008; //0000'0000'0000'0000'0000'0000'0000'1000
+  private final static int ALL_UPPERCASE = 0x00000004;   //0000'0000'0000'0000'0000'0000'0000'0100
+  private final static int PUNCTUATION = 0x00000002;     //0000'0000'0000'0000'0000'0000'0000'0010
 
   private BrandNewIdGenerator() {}
 
@@ -61,28 +62,32 @@ public class BrandNewIdGenerator {
   public CharSeq token(int id) {
     CharSeq s = intToTermMap.get(id >>> 4);
     if ((id & ALL_UPPERCASE) > 0) {
-      s = CharSeq.create(s.toString().toUpperCase());
+      s = CharSeq.intern(s.toString().toUpperCase());
     } else if ((id & FIRST_UPPERCASE) > 0) {
       String res = Character.toUpperCase(s.charAt(0)) + s.subSequence(1).toString();
-      s = CharSeq.create(res);
+      s = CharSeq.intern(res);
     }
     return s;
   }
 
 
-  private int addToken(CharSeq token) throws Exception {
+  public int addToken(CharSeq token) throws Exception {
     boolean firstUp = false;
+    boolean punkt = true;
     final boolean[] allUp = {true};
     int id;
     if (Character.isUpperCase(token.at(0))) {
       firstUp = true;
+    }
+    if (Character.isLetterOrDigit(token.at(0))) {
+      punkt = false;
     }
     token.forEach(c -> {
       if (Character.isLowerCase(c)) {
         allUp[0] = false;
       }
     });
-    CharSeq lowToken = CharSeq.create(token.toString().toLowerCase());
+    CharSeq lowToken = CharSeq.intern(token.toString().toLowerCase());
     if (termToIntMap.containsKey(lowToken)) {
       id = termToIntMap.get(lowToken);
     } else {
@@ -100,6 +105,9 @@ public class BrandNewIdGenerator {
     }
     if (allUp[0]) {
       id |= ALL_UPPERCASE;
+    }
+    if (punkt) {
+      id |= PUNCTUATION;
     }
     return id;
   }
