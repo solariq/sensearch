@@ -132,13 +132,16 @@ public class StatisticsBuilder implements AutoCloseable, IncrementalBuilder {
         (id, freq) -> {
           wordFreq.adjustOrPutValue(id, freq, freq);
           docFreq.adjustOrPutValue(id, 1, 1);
+          bigramsFreq.putIfAbsent(id, new TLongIntHashMap());
           TLongIntMap neighFreq = bigramsFreq.get(id);
-          localBigrams.get(id).forEachEntry(
-              (nId, nFreq) -> {
-                neighFreq.adjustOrPutValue(nId, nFreq, nFreq);
-                return true;
-              }
-          );
+          if (localBigrams.containsKey(id)) {
+            localBigrams.get(id).forEachEntry(
+                (nId, nFreq) -> {
+                  neighFreq.adjustOrPutValue(nId, nFreq, nFreq);
+                  return true;
+                }
+            );
+          }
           return true;
         }
     );

@@ -95,7 +95,7 @@ public class StatisticsBuilderTest extends SensearchTestCase {
           });
     }
 
-    assertEquals(8, termStatistics.size());
+    assertEquals(12, termStatistics.size());
 
     TermStatistics term1 = termStatistics.get(1L);
     assertEquals(1, term1.getTermId());
