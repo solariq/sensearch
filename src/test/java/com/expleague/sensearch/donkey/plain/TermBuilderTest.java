@@ -9,6 +9,9 @@ import com.expleague.commons.text.lemmer.LemmaInfo;
 import com.expleague.commons.text.lemmer.MyStem;
 import com.expleague.commons.text.lemmer.PartOfSpeech;
 import com.expleague.commons.text.lemmer.WordInfo;
+import com.expleague.sensearch.core.lemmer.Lemmer;
+import com.expleague.sensearch.donkey.utils.TermsCache;
+import com.expleague.sensearch.donkey.utils.TermsCache.ParsedTerm;
 import com.expleague.sensearch.protobuf.index.IndexUnits;
 import com.expleague.sensearch.protobuf.index.IndexUnits.Term;
 import com.google.common.primitives.Longs;
@@ -88,18 +91,16 @@ public class TermBuilderTest {
               throw new IllegalArgumentException("Unexpected token " + charSequence);
           }
         };
-
+    TermsCache termsCache = new TermsCache((Lemmer)fakeMyStem, 1000);
     Map<String, Long> wordToReturnedTermId = new HashMap<>();
     Map<String, Long> wordToReturnedLemmaId = new HashMap<>();
     try (TermBuilder termBuilder =
-        new TermBuilder(
-            JniDBFactory.factory.open(TERM_DB_PATH.toFile(), new Options().errorIfExists(true)),
-            fakeMyStem)) {
+        new TermBuilder(TERM_DB_PATH)) {
 
       for (String word : words) {
-        TermBuilder.ParsedTerm termAndLemmaIdPair = termBuilder.addTerm(word);
-        wordToReturnedTermId.put(word, termAndLemmaIdPair.id);
-        wordToReturnedLemmaId.put(word, termAndLemmaIdPair.lemmaId);
+        ParsedTerm termAndLemmaIdPair = termsCache.parsedTerm(word);
+        wordToReturnedTermId.put(word, termAndLemmaIdPair.wordId());
+        wordToReturnedLemmaId.put(word, termAndLemmaIdPair.lemmaId());
       }
     }
 
