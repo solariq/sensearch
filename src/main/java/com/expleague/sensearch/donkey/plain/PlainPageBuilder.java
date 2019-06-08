@@ -152,6 +152,7 @@ class PlainPageBuilder implements AutoCloseable {
     parentPagesStackLocal.addLast(pageBuilder);
   }
 
+  //Mb it's still appendable
   /**
    * Signals the end of the page. Does necessary aggregation of sections. Clears all temporary
    * information about the page

@@ -26,6 +26,7 @@ public class BrandNewIdGenerator {
   private TIntObjectMap<CharSeq> intToTermMap = new TIntObjectHashMap<>();
 
   public static int ID = 0;
+//  public static int META = 0;
   private final static int BITS_FOR_META = 8;
   private final static int FIRST_UPPERCASE = 0x00000008; //0000'0000'0000'0000'0000'0000'0000'1000
   private final static int ALL_UPPERCASE = 0x00000004;   //0000'0000'0000'0000'0000'0000'0000'0100
@@ -95,6 +96,7 @@ public class BrandNewIdGenerator {
       termToIntMap.put(lowToken, id);
       intToTermMap.put(id, lowToken);
       ID++;
+//      if (punkt) META++;
       if (ID >= (1 << 29)) {
         throw new Exception("Token limit::" + token.toString());
       }

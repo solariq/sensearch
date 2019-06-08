@@ -63,6 +63,8 @@ public class PlainIndexBuilder implements IndexBuilder {
   private static final int PLAIN_PAGE_BLOCK_SIZE = 1 << 20;
   private static final int PLAIN_TERM_BLOCK_SIZE = 1 << 20;
 
+  static final int BATCH_SIZE = 1_000;
+
   public static final String TERM_STATISTICS_ROOT = "stats";
   public static final String PAGE_ROOT = "page";
   public static final String TERM_ROOT = "term";
