@@ -543,7 +543,11 @@ public class PlainIndex implements Index {
 
   int documentLemmaFrequency(IndexTerm term) {
     try {
-      return termStatistics((term).id()).getDocumentLemmaFrequency();
+      if (term.lemma() != term) {
+        return termStatistics(((IndexTerm) term.lemma()).id()).getDocumentFrequency();
+      } else {
+        return termStatistics(term.id()).getDocumentFrequency();
+      }
     } catch (DBException | NoSuchElementException | NullPointerException e) {
       return 0;
     } catch (InvalidProtocolBufferException e) {

@@ -51,8 +51,7 @@ public class RebuildEmbedding {
     Path vecTmpDir = indexRoot.resolve(EMBEDDING_ROOT + "_tmp").resolve(VECS_ROOT);
 
     try (final EmbeddingBuilder embeddingBuilder =
-        new EmbeddingBuilder(
-            JniDBFactory.factory.open(vecTmpDir.toFile(), new Options()),
+        new EmbeddingBuilder(vecTmpDir,
             jmllEmbedding,
             new TokenizerImpl())) {
       index

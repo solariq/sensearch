@@ -44,7 +44,7 @@ public class TermsCache {
 
     final PartOfSpeech posTag;
 
-    private ParsedTerm(long wordId, CharSeq word,
+    protected ParsedTerm(long wordId, CharSeq word,
         long lemmaId, CharSeq lemma,
         PartOfSpeech posTag) {
       this.wordId = wordId;
