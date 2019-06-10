@@ -5,9 +5,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
-import java.util.Map;
 import java.util.Properties;
-import java.util.Random;
 import java.util.TreeMap;
 import java.util.Map.Entry;
 import org.apache.log4j.PropertyConfigurator;
@@ -68,7 +66,7 @@ public class MetricsCounter {
 
     double mu = sum / N;
 
-    double sumDiffSq = mu * mu - 2 * mu * sum + sumSq;
+    double sumDiffSq = N * mu * mu - 2 * mu * sum + sumSq;
 
     return Math.sqrt(sumDiffSq / (N - 1));
   }
@@ -96,15 +94,15 @@ public class MetricsCounter {
     Splitter splitter = new Splitter();
     for (Entry<String, List<String>> e : map.entrySet()) {
 
-      if (!splitter.isTest()) {
+      /*if (!splitter.isTest()) {
         continue;
-      }
+      }*/
 
       //System.err.println(e.getKey());
       String[] words = e.getKey().split(" ");
-      if (words[words.length-1].length() < 2) {
-        continue;
-      }
+      //if (words[words.length-1].length() < 2) {
+        //continue;
+      //}
 
       for (int i = 0; i < nSugg; i++) {
 
@@ -122,8 +120,6 @@ public class MetricsCounter {
         int current_matched = 0;
         for (String ms : mySugg) {
           for (String os : e.getValue()) {
-            //if (ms.equals(os)) {
-            //if (ms.startsWith(os) || os.startsWith(ms)) {
             if (SuggestRankingPoolBuilder.match(ms, os)) {
               matched[i]++;
               current_matched++;
@@ -144,7 +140,7 @@ public class MetricsCounter {
         mapSum[i] += cmap;
         mapSumSq[i] += cmap*cmap;
 
-        System.out.format("Обработано %s / %s, %s, MRR: %.4f, MRR sigma: %.3f, MAP %.4f, MAP sigma %.3f, Совпадений %s |%s|\n",
+        System.out.format("Обработано %s / %s, %s, MRR: %.4f, MRR sigma: %.3f, MAP %.4f, MAP sigma %.3f, Совпадений %s\n",
             cnt, 
             map.size(),
             suggestors[i].getName(),
@@ -152,8 +148,7 @@ public class MetricsCounter {
             getSigm(rrSum[i], rrSumSq[i], cnt + 1),
             mapSum[i] / (cnt + 1),
             getSigm(mapSum[i], mapSumSq[i], cnt + 1),
-            matched[i],
-            e.getKey()
+            matched[i]
             );
       }
       cnt++;
@@ -168,8 +163,8 @@ public class MetricsCounter {
               + "MRR sigma %.3f\n"
               + "MAP %.3f\n"
               + "MAP sigma %.3f\n"
-              + "Avg. time %.3f\n"
-              + "Max time %.3f\n"
+              + "Avg. time %.5f\n"
+              + "Max time %.5f\n"
               + "--------------------\n",
               suggestors[i].getName(),
               matched[i],
@@ -220,10 +215,10 @@ public class MetricsCounter {
         //new OneWordLuceneSuggestor(index, suggestRoot)
         //new OneWordLuceneTFIDF(index, suggestRoot),
         //new OneWordLuceneLinks(index, suggestRoot),
-        new LearnedSuggester(index, suggestRoot)
+        //new LearnedSuggester(index, suggestRoot)
         //new DatasetSuggester("map"),
         //new DatasetSuggester("map_google"),
-        //new FastSuggester(index)
+        new FastSuggester(index)
         //new LinksSuggester(index)
         //new UnsortedSuggester(index, suggestRoot)
         );
