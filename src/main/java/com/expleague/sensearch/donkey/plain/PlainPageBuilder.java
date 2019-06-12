@@ -58,7 +58,7 @@ class PlainPageBuilder implements AutoCloseable {
    *
    * @param plainDb database where index pages will be stored
    * @param tempFilesRoot root where temporary files while building will be stored if directory does
-   *     not exist it will be created. It will be deleted after build() is called
+   * not exist it will be created. It will be deleted after build() is called
    * @throws IOException if it is failed to create root directory
    */
   PlainPageBuilder(DB plainDb, Path tempFilesRoot) throws IOException {
@@ -153,6 +153,7 @@ class PlainPageBuilder implements AutoCloseable {
   }
 
   //Mb it's still appendable
+
   /**
    * Signals the end of the page. Does necessary aggregation of sections. Clears all temporary
    * information about the page
@@ -168,6 +169,16 @@ class PlainPageBuilder implements AutoCloseable {
       builtPages.add(Objects.requireNonNull(parentPagesStackLocal.pollLast()).build());
     }
 
+    if (builtPages.size() >= PlainIndexBuilder.BATCH_SIZE) {
+      writeBatch();
+    }
+
+    categories.get().clear();
+    parentPagesStackLocal.clear();
+  }
+
+  private void writeBatch() {
+    LOG.info("Save batch:: " + builtPages.size() + "to tmpIndex");
     builtPages.forEach(
         p -> {
           try {
@@ -191,12 +202,11 @@ class PlainPageBuilder implements AutoCloseable {
     }
 
     builtPages.clear();
-    parentPagesStackLocal.clear();
-    categories.get().clear();
   }
 
   @Override
   public void close() throws IOException {
+    writeBatch();
     LOG.info("Storing page links...");
     temporaryIndexOs.close();
 
