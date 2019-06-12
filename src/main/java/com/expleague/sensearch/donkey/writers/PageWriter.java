@@ -1,11 +1,10 @@
-package com.expleague.sensearch.donkey.plain;
+package com.expleague.sensearch.donkey.writers;
 
 import com.expleague.sensearch.donkey.crawler.document.CrawlerDocument;
 import com.expleague.sensearch.donkey.crawler.document.CrawlerDocument.Link;
 import com.expleague.sensearch.donkey.crawler.document.CrawlerDocument.Section;
 import com.expleague.sensearch.donkey.utils.BrandNewIdGenerator;
 import com.expleague.sensearch.protobuf.index.IndexUnits.Page;
-import com.expleague.sensearch.protobuf.index.IndexUnits.Page.Builder;
 import com.google.common.primitives.Longs;
 import java.io.Closeable;
 import java.io.Flushable;
@@ -40,7 +39,7 @@ public class PageWriter implements Closeable, Flushable {
   private final Path root;
   private WriteBatch writeBatch;
 
-  PageWriter(Path root) {
+  public PageWriter(Path root) {
     this.root = root;
     try {
       pageDb = JniDBFactory.factory.open(root.toFile(), DB_OPTIONS);
@@ -50,7 +49,7 @@ public class PageWriter implements Closeable, Flushable {
     }
   }
 
-  void writeDocument(CrawlerDocument document) {
+  public void writeDocument(CrawlerDocument document) {
     long pageId = idGenerator.generatePageId(document.uri());
     List<String> categories = document.categories();
     List<Page> builtPages = new ArrayList<>();

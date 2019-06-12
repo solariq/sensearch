@@ -1,4 +1,4 @@
-package com.expleague.sensearch.donkey.plain;
+package com.expleague.sensearch.donkey.writers;
 
 import com.expleague.sensearch.donkey.crawler.document.CrawlerDocument;
 import com.expleague.sensearch.donkey.crawler.document.CrawlerDocument.Section;
