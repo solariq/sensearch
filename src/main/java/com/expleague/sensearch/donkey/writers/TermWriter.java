@@ -17,7 +17,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class TermWriter implements Closeable, Flushable {
-  private static final Logger LOGGER  = LoggerFactory.getLogger(PageWriter.class);
+
+  private static final Logger LOGGER = LoggerFactory.getLogger(PageWriter.class);
   private static final Options DB_OPTIONS = new Options()
       .blockSize(1 << 20)
       .cacheSize(1 << 20)
@@ -30,6 +31,7 @@ public class TermWriter implements Closeable, Flushable {
   private final DB termsDb;
   private final Path root;
   private WriteBatch writeBatch;
+
   public TermWriter(Path root) {
     this.root = root;
     try {
@@ -41,7 +43,7 @@ public class TermWriter implements Closeable, Flushable {
   }
 
   public void writeTerm(ParsedTerm parsedTerm) {
-    Term.Builder builder  = Term.newBuilder();
+    Term.Builder builder = Term.newBuilder();
 
     if (parsedTerm.hasLemma()) {
       builder.setText(parsedTerm.lemma().toString());

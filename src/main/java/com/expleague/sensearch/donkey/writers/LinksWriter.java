@@ -19,6 +19,7 @@ import org.slf4j.LoggerFactory;
 
 // TODO: make thread safe
 public class LinksWriter implements Flushable, Closeable {
+
   private static final Logger LOGGER = LoggerFactory.getLogger(LinksWriter.class);
 
   private static final Options DB_OPTIONS = new Options()
