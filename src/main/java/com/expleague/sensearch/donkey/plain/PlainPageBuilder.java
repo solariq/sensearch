@@ -178,7 +178,7 @@ class PlainPageBuilder implements AutoCloseable {
   }
 
   private void writeBatch() {
-    LOG.info("Save batch:: " + builtPages.size() + "to tmpIndex");
+    LOG.info("Save batch:: " + builtPages.size() + " to tmpIndex");
     builtPages.forEach(
         p -> {
           try {

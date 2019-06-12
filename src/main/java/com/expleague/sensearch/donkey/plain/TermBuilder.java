@@ -31,9 +31,12 @@ public class TermBuilder implements AutoCloseable {
       new WriteOptions().sync(true).snapshot(false);
 
   private final Map<Long, ParsedTerm> terms = new ConcurrentHashMap<>();
+  private final Map<Long, ParsedTerm> termBatch = new ConcurrentHashMap<>();
   private final Map<CharSeq, ParsedTerm> termsCache = new ConcurrentHashMap<>();
 
   private final DB termDb;
+  private final WriteBatch[] batch;
+
 
   private final MyStem myStem;
   private BrandNewIdGenerator idGenerator = BrandNewIdGenerator.getInstance();
@@ -41,6 +44,7 @@ public class TermBuilder implements AutoCloseable {
   public TermBuilder(DB termDb, MyStem lemmer) {
     this.termDb = termDb;
     this.myStem = lemmer;
+    this.batch = new WriteBatch[]{termDb.createWriteBatch()};
   }
 
   /**
@@ -80,6 +84,7 @@ public class TermBuilder implements AutoCloseable {
 
     parsedTerm = new ParsedTerm(wordId, lemmaId, word, PartOfSpeech.valueOf(lemma.pos().name()));
     terms.put(wordId, parsedTerm);
+    termBatch.put(wordId, parsedTerm);
     termsCache.put(word, parsedTerm);
     if (!terms.containsKey(lemmaId)) {
       final ParsedTerm lemmaParsed =
@@ -88,17 +93,19 @@ public class TermBuilder implements AutoCloseable {
       termsCache.put(lemma.lemma(), lemmaParsed);
     }
 
+    if (termBatch.size() >= PlainIndexBuilder.BATCH_SIZE) {
+      writeBatch();
+    }
+
     return parsedTerm;
   }
 
-  @Override
-  public void close() throws IOException {
-    LOG.info("Storing term-wise data...");
+  private void writeBatch() {
+    LOG.info("Save batch:: " + termBatch.size() + " to term info");
 
-    WriteBatch[] batch = new WriteBatch[]{termDb.createWriteBatch()};
     int[] curBatchSize = new int[]{0};
 
-    terms.forEach(
+    termBatch.forEach(
         (id, term) -> {
           Builder termBuilder =
               Term.newBuilder().setId(id).setText(term.text.toString()).setLemmaId(term.lemmaId);
@@ -124,7 +131,14 @@ public class TermBuilder implements AutoCloseable {
     if (curBatchSize[0] > 0) {
       termDb.write(batch[0], DEFAULT_TERM_WRITE_OPTIONS);
     }
+    termBatch.clear();
+  }
 
+  @Override
+  public void close() throws IOException {
+    LOG.info("Storing term-wise data...");
+
+    writeBatch();
     termDb.close();
   }
 
