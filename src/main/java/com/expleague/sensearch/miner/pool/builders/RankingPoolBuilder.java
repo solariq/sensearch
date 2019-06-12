@@ -22,7 +22,7 @@ import com.expleague.sensearch.features.sets.TargetFS;
 import com.expleague.sensearch.features.sets.TargetSet;
 import com.expleague.sensearch.index.Index;
 import com.expleague.sensearch.index.plain.PlainPage;
-import com.expleague.sensearch.miner.AccumulatorFeatureSet;
+import com.expleague.sensearch.miner.AccumulatorMinerFeatureSet;
 import com.expleague.sensearch.miner.pool.QueryAndResults;
 import com.expleague.sensearch.miner.pool.QueryAndResults.PageAndWeight;
 import com.expleague.sensearch.query.BaseQuery;
@@ -79,7 +79,7 @@ public class RankingPoolBuilder extends PoolBuilder<QueryAndResults> {
     DataSetMeta meta =
         new JsonDataSetMeta(
             "Google", "sensearch", new Date(), QURLItem.class, rand.nextBase64String(32));
-    AccumulatorFeatureSet features = new AccumulatorFeatureSet(index);
+    AccumulatorMinerFeatureSet features = new AccumulatorMinerFeatureSet(index);
     TargetSet targetFeatures = new TargetFS();
     FeatureMeta[] metas = metaData(features, targetFeatures);
     Pool.Builder<QURLItem> poolBuilder = Pool.builder(meta, features, targetFeatures);
@@ -126,7 +126,7 @@ public class RankingPoolBuilder extends PoolBuilder<QueryAndResults> {
               List<PageAndWeight> newRes = new ArrayList<>(res);
 
               Map<Page, Vec> feat = new HashMap<>();
-              AccumulatorFeatureSet AFS = new AccumulatorFeatureSet(index);
+              AccumulatorMinerFeatureSet AFS = new AccumulatorMinerFeatureSet(index);
 
               int[] cnt = {0};
               allDocs

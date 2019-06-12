@@ -19,7 +19,7 @@ import com.expleague.sensearch.features.Features;
 import com.expleague.sensearch.features.QURLItem;
 import com.expleague.sensearch.features.sets.TargetFS;
 import com.expleague.sensearch.features.sets.TargetSet;
-import com.expleague.sensearch.features.sets.filter.FilterFeatures;
+import com.expleague.sensearch.filter.AccumulatorFilterFeatureSet;
 import com.expleague.sensearch.index.Index;
 import com.expleague.sensearch.index.plain.PlainIndex;
 import com.expleague.sensearch.index.plain.PlainPage;
@@ -73,7 +73,7 @@ public class FilterPoolBuilder extends PoolBuilder<QueryAndResults> {
 
   public static void main(String[] args) throws IOException {
     Injector injector = Guice.createInjector(new AppModule());
-    injector.getInstance(FilterPoolBuilder.class).build(Paths.get("./PoolData/filter/"), 0);
+    injector.getInstance(FilterPoolBuilder.class).build(Paths.get("./PoolData/filter/"), 1);
   }
 
   public void build(Path dataPath, int iteration) {
@@ -83,7 +83,7 @@ public class FilterPoolBuilder extends PoolBuilder<QueryAndResults> {
     DataSetMeta meta =
         new JsonDataSetMeta(
             "Google", "sensearch", new Date(), QURLItem.class, rand.nextBase64String(32));
-    FilterFeatures features = new FilterFeatures();
+    AccumulatorFilterFeatureSet features = new AccumulatorFilterFeatureSet();
     TargetSet targetFeatures = new TargetFS();
     FeatureMeta[] metas = metaData(features, targetFeatures);
     Pool.Builder<QURLItem> poolBuilder = Pool.builder(meta, features, targetFeatures);
@@ -102,6 +102,7 @@ public class FilterPoolBuilder extends PoolBuilder<QueryAndResults> {
 
     data.entrySet()
         .parallelStream()
+        .limit(200)
         .forEach(
             entry -> {
               Query query = entry.getKey();
@@ -132,13 +133,8 @@ public class FilterPoolBuilder extends PoolBuilder<QueryAndResults> {
                                 fs -> {
                                   if (fs instanceof TargetFS) {
                                     ((TargetFS) fs).acceptTargetValue(finalTarget);
-                                  } else if (fs instanceof FilterFeatures) {
-                                    ((FilterFeatures) fs)
-                                        .withBody(feat.features(FilterFeatures.SECTION).get(0));
-                                    ((FilterFeatures) fs)
-                                        .withLink(feat.features(FilterFeatures.LINK).get(0));
-                                    ((FilterFeatures) fs)
-                                        .withTitle(feat.features(FilterFeatures.TITLE).get(0));
+                                  } else if (fs instanceof AccumulatorFilterFeatureSet) {
+                                    ((AccumulatorFilterFeatureSet) fs).withFilterDistFeatures(feat);
                                   }
                                 });
                         poolBuilder.advance();
@@ -163,8 +159,10 @@ public class FilterPoolBuilder extends PoolBuilder<QueryAndResults> {
                           return;
                         }
 
-                        Vec vec = feat.features();
-                        vec = VecTools.concat(vec, new ArrayVec(0.0));
+                        AccumulatorFilterFeatureSet accumulatorFilterFs = new AccumulatorFilterFeatureSet();
+                        accumulatorFilterFs.accept(new QURLItem(page, query));
+                        accumulatorFilterFs.withFilterDistFeatures(feat);
+                        final Vec vec = VecTools.concat(accumulatorFilterFs.advance(), new ArrayVec(0.0));
 
                         if (cnt[0] < FILTER_SIZE) {
                           synchronized (poolBuilder) {

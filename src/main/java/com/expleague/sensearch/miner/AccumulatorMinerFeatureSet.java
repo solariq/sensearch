@@ -17,13 +17,12 @@ import com.expleague.sensearch.features.sets.ranker.QuotationFeatureSet;
 import com.expleague.sensearch.features.sets.ranker.TextFeatureSet;
 import com.expleague.sensearch.features.sets.ranker.TextFeatureSet.Segment;
 import com.expleague.sensearch.index.Index;
-
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
-public class AccumulatorFeatureSet extends FeatureSet.Stub<QURLItem> {
+public class AccumulatorMinerFeatureSet extends FeatureSet.Stub<QURLItem> {
 
   private final Index index;
 
@@ -52,7 +51,7 @@ public class AccumulatorFeatureSet extends FeatureSet.Stub<QURLItem> {
                   .collect(Collectors.toList());
 
 
-  public AccumulatorFeatureSet(Index index) {
+  public AccumulatorMinerFeatureSet(Index index) {
     this.index = index;
   }
 

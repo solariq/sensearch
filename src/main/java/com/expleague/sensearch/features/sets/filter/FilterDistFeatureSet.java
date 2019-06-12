@@ -5,7 +5,7 @@ import com.expleague.ml.data.tools.FeatureSet;
 import com.expleague.ml.meta.FeatureMeta;
 import com.expleague.sensearch.features.QURLItem;
 
-public class FilterFeatures extends FeatureSet.Stub<QURLItem> implements EmbeddingFeatures {
+public class FilterDistFeatureSet extends FeatureSet.Stub<QURLItem> implements EmbeddingFeatures {
     public final static FeatureMeta TITLE = FeatureMeta
             .create("dist-title", "cos distance between Query and Title", FeatureMeta.ValueType.VEC);
     public final static FeatureMeta SECTION = FeatureMeta

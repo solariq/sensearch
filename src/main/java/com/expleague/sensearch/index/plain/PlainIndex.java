@@ -18,7 +18,7 @@ import com.expleague.sensearch.features.Features;
 import com.expleague.sensearch.features.FeaturesForRequiredDocument;
 import com.expleague.sensearch.features.FeaturesImpl;
 import com.expleague.sensearch.features.QURLItem;
-import com.expleague.sensearch.features.sets.filter.FilterFeatures;
+import com.expleague.sensearch.features.sets.filter.FilterDistFeatureSet;
 import com.expleague.sensearch.filter.Filter;
 import com.expleague.sensearch.index.Embedding;
 import com.expleague.sensearch.index.Index;
@@ -334,7 +334,7 @@ public class PlainIndex implements Index {
             return null;
           }
           v1 = VecTools.copy(v1);
-          return VecTools.scale(v1, tfidf(t));
+          return VecTools.scale(v1, 1.0 / t.documentFreq());
         })
         .filter(Objects::nonNull)
         .peek(v -> VecTools.append(answerVec, v))
@@ -470,12 +470,12 @@ public class PlainIndex implements Index {
       pageVec = embedding.vec(tmpID);
     }
 
-    return new FeaturesImpl(new FilterFeatures(), new ArrayVec(minTitle, minBody, minLink));
+    return new FeaturesImpl(new FilterDistFeatureSet(), new ArrayVec(minTitle, minBody, minLink));
   }
 
   @Override
   public Map<Page, Features> fetchDocuments(Query query, int num) {
-    FilterFeatures filterFeatures = new FilterFeatures();
+    FilterDistFeatureSet filterDistFs = new FilterDistFeatureSet();
 
     List<Term> queryTerms = query.terms();
     final Vec qVec = query.vec();
@@ -495,20 +495,20 @@ public class PlainIndex implements Index {
     pageIdToCandidatesMap.forEachEntry(
         (pageId, candidates) -> {
           Page page = PlainPage.create(pageId, this);
-          filterFeatures.accept(new QURLItem(page, query));
+          filterDistFs.accept(new QURLItem(page, query));
           candidates.forEach(
               candidate -> {
                 long id = candidate.getId();
                 if (IdUtils.isSecTitleId(id)) {
-                  filterFeatures.withTitle(candidate.getDist());
+                  filterDistFs.withTitle(candidate.getDist());
                 } else if (IdUtils.isSecTextId(id)) {
-                  filterFeatures.withBody(candidate.getDist());
+                  filterDistFs.withBody(candidate.getDist());
                 } else if (IdUtils.isLinkId(id)) {
-                  filterFeatures.withLink(candidate.getDist());
+                  filterDistFs.withLink(candidate.getDist());
                 }
               });
-          Vec vec = filterFeatures.advance();
-          allFilterFeatures.put(page, new FeaturesImpl(filterFeatures, vec));
+          Vec vec = filterDistFs.advance();
+          allFilterFeatures.put(page, new FeaturesImpl(filterDistFs, vec));
           return true;
         });
 

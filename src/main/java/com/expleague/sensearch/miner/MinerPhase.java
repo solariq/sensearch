@@ -52,12 +52,12 @@ public class MinerPhase implements SearchPhase {
         .parallel()
         .forEach(
             new Consumer<Page>() {
-              ThreadLocal<AccumulatorFeatureSet> features =
-                  ThreadLocal.withInitial(() -> new AccumulatorFeatureSet(index));
+              ThreadLocal<AccumulatorMinerFeatureSet> features =
+                  ThreadLocal.withInitial(() -> new AccumulatorMinerFeatureSet(index));
 
               @Override
               public void accept(Page page) {
-                AccumulatorFeatureSet features = this.features.get();
+                AccumulatorMinerFeatureSet features = this.features.get();
 //                features.acceptFilterFeatures(whiteboard.filterFeatures().get(phaseId));
                 features.accept(new QURLItem(page, query));
                 Vec all = features.advance();

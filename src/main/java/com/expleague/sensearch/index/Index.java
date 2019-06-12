@@ -24,6 +24,7 @@ public interface Index extends AutoCloseable {
   Stream<Term> mostFrequentNeighbours(Term term);
   Vec vecByTerms(List<Term> terms);
 
+  Vec weightedVecByTerms(List<Term> terms);
   Page page(URI reference);
 
   int size();
