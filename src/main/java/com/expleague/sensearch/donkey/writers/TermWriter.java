@@ -1,5 +1,9 @@
 package com.expleague.sensearch.donkey.writers;
 
+import com.expleague.sensearch.donkey.utils.ParsedTerm;
+import com.expleague.sensearch.protobuf.index.IndexUnits.Term;
+import com.expleague.sensearch.protobuf.index.IndexUnits.Term.PartOfSpeech;
+import com.google.common.primitives.Longs;
 import java.io.Closeable;
 import java.io.Flushable;
 import java.io.IOException;
@@ -36,8 +40,27 @@ public class TermWriter implements Closeable, Flushable {
     }
   }
 
-  public void writeTerm() {
+  public void writeTerm(ParsedTerm parsedTerm) {
+    Term.Builder builder  = Term.newBuilder();
 
+    if (parsedTerm.hasLemma()) {
+      builder.setText(parsedTerm.lemma().toString());
+      builder.setId(parsedTerm.lemmaId());
+      builder.setPartOfSpeech(PartOfSpeech.UNKNOWN);
+      builder.setLemmaId(parsedTerm.lemmaId());
+      writeBatch.put(Longs.toByteArray(parsedTerm.lemmaId()), builder.build().toByteArray());
+    }
+
+    builder.clear();
+    builder.setText(parsedTerm.word().toString());
+    builder.setId(parsedTerm.wordId());
+    builder.setPartOfSpeech(parsedTerm.hasPosTag() ?
+        Term.PartOfSpeech.valueOf(parsedTerm.posTag().name()) :
+        PartOfSpeech.UNKNOWN);
+    builder.setLemmaId(parsedTerm.lemmaId());
+    writeBatch.put(Longs.toByteArray(parsedTerm.wordId()), builder.build().toByteArray());
+    termsDb.write(writeBatch, WRITE_OPTIONS);
+    writeBatch = termsDb.createWriteBatch();
   }
 
   @Override
