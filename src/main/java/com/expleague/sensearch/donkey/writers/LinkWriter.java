@@ -48,7 +48,7 @@ public class LinkWriter implements Flushable, Closeable {
   }
 
   // TODO: there should be preprocessed page?
-  public void writeLinks(CrawlerDocument document) throws IOException {
+  public void writeLinks(CrawlerDocument document) {
     final long pageId = idGenerator.generatePageId(document.uri());
     final Link.Builder linkBuilder = Link.newBuilder();
     document.sections()
@@ -72,7 +72,7 @@ public class LinkWriter implements Flushable, Closeable {
   }
 
   @Override
-  public void flush() throws IOException {
+  public void flush() {
     linksDb.write(writeBatch, WRITE_OPTIONS);
     writeBatch = linksDb.createWriteBatch();
   }
