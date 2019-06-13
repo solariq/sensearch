@@ -12,13 +12,19 @@ import java.util.stream.Collectors;
 
 
 public class Lemmer implements MyStem {
-  private final RussianLemmer russianLemmer = new RussianLemmer();
-  private final EnglishLemmer englishLemmer = new EnglishLemmer();
+  private final RussianLemmer russianLemmer;
+  private final EnglishLemmer englishLemmer;
   private static final Lemmer LEMMER = new Lemmer();
   private Tokenizer tokenizer = new TokenizerImpl();
 
 
   public Lemmer() {
+    this(new RussianLemmer(),  new EnglishLemmer());
+  }
+
+  public Lemmer(RussianLemmer russianLemmer, EnglishLemmer englishLemmer) {
+    this.russianLemmer = russianLemmer;
+    this.englishLemmer = englishLemmer;
   }
 
   public static Lemmer getInstance() {
