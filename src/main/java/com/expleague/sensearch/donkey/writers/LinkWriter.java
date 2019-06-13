@@ -37,7 +37,7 @@ public class LinkWriter implements Flushable, Closeable {
   private final BrandNewIdGenerator idGenerator = BrandNewIdGenerator.getInstance();
   private WriteBatch writeBatch;
 
-  LinkWriter(Path root) {
+  public LinkWriter(Path root) {
     this.root = root;
     try {
       linksDb = JniDBFactory.factory.open(root.toFile(), DB_OPTIONS);
@@ -48,7 +48,7 @@ public class LinkWriter implements Flushable, Closeable {
   }
 
   // TODO: there should be preprocessed page?
-  void writeLinks(CrawlerDocument document) throws IOException {
+  public void writeLinks(CrawlerDocument document) throws IOException {
     final long pageId = idGenerator.generatePageId(document.uri());
     final Link.Builder linkBuilder = Link.newBuilder();
     document.sections()
