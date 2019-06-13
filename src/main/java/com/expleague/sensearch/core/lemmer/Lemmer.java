@@ -18,7 +18,7 @@ public class Lemmer implements MyStem {
   private Tokenizer tokenizer = new TokenizerImpl();
 
 
-  private Lemmer() {
+  public Lemmer() {
   }
 
   public static Lemmer getInstance() {
