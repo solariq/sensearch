@@ -112,7 +112,7 @@ public abstract class SensearchTestCase {
     LOG.debug("Cleaning up...");
     LOG.debug(
         String.format(
-            "Will delete tes output directory %s", testOutputRoot.toAbsolutePath().toString()));
+            "Will delete test output directory %s", testOutputRoot.toAbsolutePath().toString()));
     clearOutputRoot();
   }
 
