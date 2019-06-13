@@ -20,6 +20,8 @@ import com.expleague.sensearch.donkey.plain.IndexMetaBuilder.TermSegment;
 import com.expleague.sensearch.donkey.utils.BrandNewIdGenerator;
 import com.expleague.sensearch.donkey.utils.CachedTermParser;
 import com.expleague.sensearch.donkey.utils.ParsedTerm;
+import com.expleague.sensearch.donkey.writers.LinkWriter;
+import com.expleague.sensearch.donkey.writers.PageWriter;
 import com.expleague.sensearch.donkey.writers.TermWriter;
 import com.expleague.sensearch.index.Index;
 import com.expleague.sensearch.index.plain.PlainIndex;
@@ -67,9 +69,12 @@ public class PlainIndexBuilder implements IndexBuilder {
 
   static final int BATCH_SIZE = 1_000;
 
-  public static final String TERM_STATISTICS_ROOT = "stats";
   public static final String PAGE_ROOT = "page";
   public static final String TERM_ROOT = "term";
+  public static final String LINK_ROOT = "link";
+
+  public static final String TERM_STATISTICS_ROOT = "stats";
+
   public static final String EMBEDDING_ROOT = "embedding";
   public static final String URI_MAPPING_ROOT = "uriMapping";
   public static final String LSH_METRIC_ROOT = "lsh_metric";
@@ -282,6 +287,32 @@ public class PlainIndexBuilder implements IndexBuilder {
     }
   }
 
+  private void buildRawIndex() throws IOException {
+    CachedTermParser termParser = new CachedTermParser(lemmer, 1_000_000);
+    try (
+        StatisticsBuilder statisticsBuilder =
+            new StatisticsBuilder(indexRoot.resolve(TERM_STATISTICS_ROOT));
+        TermWriter termWriter = new TermWriter(indexRoot.resolve(TERM_ROOT));
+        PageWriter pageWriter = new PageWriter(indexRoot.resolve(PAGE_ROOT));
+        LinkWriter linkWriter = new LinkWriter(indexRoot.resolve(LINK_ROOT))
+        ) {
+      crawler.makeStream().forEach(d -> {
+        // TODO: there should be some sort of page preprocessing?
+        linkWriter.writeLinks(d);
+        pageWriter.writeDocument(d);
+        statisticsBuilder.startPage();
+        d.sections()
+            .flatMap(s -> Stream.concat(
+                tokenizer.parseTextToWords(s.title()),
+                tokenizer.parseTextToWords(s.text())
+            ))
+            .map(termParser::parseTerm)
+            .peek(termWriter::writeTerm)
+            .forEach(statisticsBuilder::enrich);
+        statisticsBuilder.endPage();
+      });
+    }
+  }
 
   private void buildIndexInternal(Embedding<CharSeq> jmllEmbedding) throws IOException {
     LOG.info("Creating database files...");
@@ -292,16 +323,14 @@ public class PlainIndexBuilder implements IndexBuilder {
     Files.createDirectories(indexRoot.resolve(TERM_ROOT));
 
     final TLongSet knownPageIds = new TLongHashSet();
-    final CachedTermParser termParser = new CachedTermParser(lemmer, 100_000);
+    final CachedTermParser termParser = new CachedTermParser(lemmer, 1_000_000);
     try (final PlainPageBuilder plainPageBuilder =
         new PlainPageBuilder(
             JniDBFactory.factory.open(indexRoot.resolve(PAGE_ROOT).toFile(), PAGE_DB_OPTIONS),
             indexRoot.resolve(PAGE_ROOT).resolve("TMP"));
         final TermWriter termWriter = new TermWriter(indexRoot.resolve(TERM_ROOT));
         final StatisticsBuilder statisticsBuilder =
-            new StatisticsBuilder(
-                JniDBFactory.factory.open(
-                    indexRoot.resolve(TERM_STATISTICS_ROOT).toFile(), STATS_DB_OPTIONS));
+            new StatisticsBuilder(indexRoot.resolve(TERM_STATISTICS_ROOT));
         final EmbeddingBuilder embeddingBuilder =
             new EmbeddingBuilder(
                 JniDBFactory.factory.open(
