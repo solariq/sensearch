@@ -3,7 +3,7 @@ package com.expleague.sensearch.donkey.plain;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 
-import com.expleague.sensearch.donkey.utils.TermsCache.ParsedTerm;
+import com.expleague.sensearch.donkey.utils.ParsedTerm;
 import com.expleague.sensearch.protobuf.index.IndexUnits.TermStatistics;
 import com.expleague.sensearch.protobuf.index.IndexUnits.TermStatistics.TermFrequency;
 import com.expleague.sensearch.utils.SensearchTestCase;
@@ -24,6 +24,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import org.apache.commons.io.FileUtils;
 import org.fusesource.leveldbjni.JniDBFactory;
+import org.iq80.leveldb.CompressionType;
 import org.iq80.leveldb.DB;
 import org.iq80.leveldb.DBIterator;
 import org.iq80.leveldb.Options;
@@ -35,6 +36,14 @@ import org.junit.Test;
 
 // TODO: add test where lemmaId is not present in termIds
 public class StatisticsBuilderTest extends SensearchTestCase {
+
+  private static final Options STATS_DB_OPTIONS =
+      new Options()
+          .cacheSize(1 << 20)
+          .blockSize(1 << 20) // 1 MB
+          .createIfMissing(true)
+          .errorIfExists(true)
+          .compressionType(CompressionType.SNAPPY);
 
   private static final Path STATS_DB_PATH = Paths.get("testStatsDbPath");
 
@@ -56,7 +65,8 @@ public class StatisticsBuilderTest extends SensearchTestCase {
 
   @Test
   public void test() throws IOException {
-    try (StatisticsBuilder statisticsBuilder = new StatisticsBuilder(STATS_DB_PATH)) {
+    try (StatisticsBuilder statisticsBuilder = new StatisticsBuilder(
+        JniDBFactory.factory.open(STATS_DB_PATH.toFile(), STATS_DB_OPTIONS))) {
 
       statisticsBuilder.startPage();
 
