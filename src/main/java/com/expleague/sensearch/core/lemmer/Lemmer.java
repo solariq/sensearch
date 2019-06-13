@@ -14,7 +14,7 @@ import java.util.stream.Collectors;
 public class Lemmer implements MyStem {
   private final RussianLemmer russianLemmer;
   private final EnglishLemmer englishLemmer;
-  private static final Lemmer LEMMER = new Lemmer();
+//  private static final Lemmer LEMMER = new Lemmer();
   private Tokenizer tokenizer = new TokenizerImpl();
 
 
@@ -28,7 +28,7 @@ public class Lemmer implements MyStem {
   }
 
   public static Lemmer getInstance() {
-    return LEMMER;
+    return new Lemmer();
   }
 
   @Override
