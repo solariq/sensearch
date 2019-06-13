@@ -6,11 +6,11 @@ import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import java.util.concurrent.ExecutionException;
 
-public class CachedTermsParser {
+public class CachedTermParser {
   // TODO: make sure this character wil NEVER appear in the word
   private final LoadingCache<CharSequence, ParsedTerm> cache;
   private final Lemmer lemmer;
-  public CachedTermsParser(Lemmer lemmer, int maxCacheSize) {
+  public CachedTermParser(Lemmer lemmer, int maxCacheSize) {
     this.lemmer = lemmer;
     this.cache = CacheBuilder.newBuilder()
         .maximumSize(maxCacheSize)
