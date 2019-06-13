@@ -17,8 +17,10 @@ import com.expleague.sensearch.core.lemmer.Lemmer;
 import com.expleague.sensearch.donkey.IndexBuilder;
 import com.expleague.sensearch.donkey.crawler.Crawler;
 import com.expleague.sensearch.donkey.plain.IndexMetaBuilder.TermSegment;
-import com.expleague.sensearch.donkey.plain.TermBuilder.ParsedTerm;
 import com.expleague.sensearch.donkey.utils.BrandNewIdGenerator;
+import com.expleague.sensearch.donkey.utils.CachedTermParser;
+import com.expleague.sensearch.donkey.utils.ParsedTerm;
+import com.expleague.sensearch.donkey.writers.TermWriter;
 import com.expleague.sensearch.index.Index;
 import com.expleague.sensearch.index.plain.PlainIndex;
 import com.expleague.sensearch.web.suggest.SuggestInformationBuilder;
@@ -76,7 +78,7 @@ public class PlainIndexBuilder implements IndexBuilder {
   public static final String VECS_ROOT = "vecs";
 
   public static final Path RARE_INV_IDX_FILE = Paths.get("rare_iidx").resolve("iidx");
-  
+
   public static final String SUGGEST_UNIGRAM_ROOT = "suggest/unigram_coeff";
   public static final String SUGGEST_MULTIGRAMS_ROOT = "suggest/multigram_freq_norm";
 
@@ -257,7 +259,7 @@ public class PlainIndexBuilder implements IndexBuilder {
         final DB suggestMultigramDb =
             JniDBFactory.factory.open(
                 indexRoot.resolve(SUGGEST_MULTIGRAMS_ROOT).toFile(), STATS_DB_OPTIONS);
-        ) {
+    ) {
       Config config =
           new ObjectMapper().readValue(Paths.get("./config.json").toFile(), ConfigImpl.class);
       Injector injector = Guice.createInjector(new AppModule(config));
@@ -267,12 +269,13 @@ public class PlainIndexBuilder implements IndexBuilder {
         LOG.info("Building suggest...");
         long start = System.nanoTime();
         SuggestInformationBuilder suggestBuilder =
-            new SuggestInformationBuilder(index, config.getIndexRoot(), suggestUnigramDb, suggestMultigramDb);
+            new SuggestInformationBuilder(index, config.getIndexRoot(), suggestUnigramDb,
+                suggestMultigramDb);
 
         suggestBuilder.build();
 
-
-        LOG.info(String.format("Suggest index was built in %.1f sec", (System.nanoTime() - start) / 1e9));
+        LOG.info(String
+            .format("Suggest index was built in %.1f sec", (System.nanoTime() - start) / 1e9));
       } catch (Exception e) {
         e.printStackTrace();
       }
@@ -289,14 +292,12 @@ public class PlainIndexBuilder implements IndexBuilder {
     Files.createDirectories(indexRoot.resolve(TERM_ROOT));
 
     final TLongSet knownPageIds = new TLongHashSet();
+    final CachedTermParser termParser = new CachedTermParser(lemmer, 100_000);
     try (final PlainPageBuilder plainPageBuilder =
         new PlainPageBuilder(
             JniDBFactory.factory.open(indexRoot.resolve(PAGE_ROOT).toFile(), PAGE_DB_OPTIONS),
             indexRoot.resolve(PAGE_ROOT).resolve("TMP"));
-        final TermBuilder termBuilder =
-            new TermBuilder(
-                JniDBFactory.factory.open(indexRoot.resolve(TERM_ROOT).toFile(), TERM_DB_OPTIONS),
-                lemmer);
+        final TermWriter termWriter = new TermWriter(indexRoot.resolve(TERM_ROOT));
         final StatisticsBuilder statisticsBuilder =
             new StatisticsBuilder(
                 JniDBFactory.factory.open(
@@ -319,15 +320,14 @@ public class PlainIndexBuilder implements IndexBuilder {
 
       EmbeddingImpl<CharSeq> jmllEmbedding1 = (EmbeddingImpl<CharSeq>) jmllEmbedding;
       for (int i = 0; i < jmllEmbedding1.vocabSize(); i++) {
-        ParsedTerm parsedTerm = termBuilder.addTerm(jmllEmbedding1.getObj(i));
-        embeddingBuilder.addTerm(parsedTerm.id, jmllEmbedding1.apply(parsedTerm.text));
+        ParsedTerm parsedTerm = termParser.parseTerm(jmllEmbedding1.getObj(i));
+        embeddingBuilder.addTerm(parsedTerm.wordId(), jmllEmbedding1.apply(parsedTerm.word()));
       }
       IndexMetaBuilder indexMetaBuilder = new IndexMetaBuilder(PlainIndex.VERSION);
 
       LOG.info("Creating mappings from wiki ids to raw index ids...");
 
       final TLongObjectMap<TLongList> rareTermsInvIdx = new TLongObjectHashMap<>();
-      
       try {
         LOG.info("Parsing pages...");
         BrandNewIdGenerator idGenerator = BrandNewIdGenerator.getInstance();
@@ -336,7 +336,7 @@ public class PlainIndexBuilder implements IndexBuilder {
             .makeStream()
             .filter(Objects::nonNull)
             .forEach(
-                doc -> {                  
+                doc -> {
                   docCnt[0]++;
                   if (docCnt[0] % 10_000 == 0) {
                     LOG.debug(docCnt[0] + " documents processed...");
@@ -350,7 +350,6 @@ public class PlainIndexBuilder implements IndexBuilder {
                   indexMetaBuilder.startPage(
                       pageId, (int) tokenizer.parseTextToWords(doc.title()).count());
                   embeddingBuilder.startPage(pageId);
-
                   doc.sections()
                       .forEachOrdered(
                           s -> {
@@ -378,13 +377,11 @@ public class PlainIndexBuilder implements IndexBuilder {
                                 .map(CharSeqTools::toLowerCase)
                                 .forEach(
                                     word -> {
-                                      
                                       if (word == TITLE_STOP) {
                                         isTitle[0] = false;
                                       }
-                                      TermBuilder.ParsedTerm termLemmaId =
-                                          termBuilder.addTerm(word);
-
+                                      ParsedTerm parsedTerm = termParser.parseTerm(word);
+                                      termWriter.writeTerm(parsedTerm);
                                       // TODO: uncomment it
                                       /*
                                       if (jmllEmbedding.apply(CharSeq.compact(word)) == null) {
@@ -393,14 +390,9 @@ public class PlainIndexBuilder implements IndexBuilder {
                                         rareTermsInvIdx.get(termLemmaId.id).add(pageId);
                                       }
                                       */
-                                      
-                                      long lemmaId =
-                                          termLemmaId.lemmaId == -1
-                                              ? termLemmaId.id
-                                              : termLemmaId.lemmaId;
-                                      statisticsBuilder.enrich(termLemmaId.id, lemmaId);
+                                      statisticsBuilder.enrich(parsedTerm);
                                       indexMetaBuilder.addTerm(
-                                          termLemmaId.id,
+                                          parsedTerm.wordId(),
                                           isTitle[0]
                                               ? TermSegment.SECTION_TITLE
                                               : TermSegment.TEXT);

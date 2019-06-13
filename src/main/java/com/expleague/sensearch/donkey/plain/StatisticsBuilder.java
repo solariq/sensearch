@@ -1,5 +1,6 @@
 package com.expleague.sensearch.donkey.plain;
 
+import com.expleague.sensearch.donkey.utils.ParsedTerm;
 import com.expleague.sensearch.protobuf.index.IndexUnits.TermStatistics;
 import com.expleague.sensearch.protobuf.index.IndexUnits.TermStatistics.TermFrequency;
 import com.google.common.annotations.VisibleForTesting;
@@ -137,7 +138,9 @@ public class StatisticsBuilder implements AutoCloseable {
   }
 
   // TODO: save lemma statistics
-  void enrich(long termId, long lemmaId) {
+  void enrich(ParsedTerm parsedTerm) {
+    long termId = parsedTerm.wordId();
+    long lemmaId = parsedTerm.lemmaId();
     pageTokens.add(termId);
     pageLemmas.add(lemmaId);
 
