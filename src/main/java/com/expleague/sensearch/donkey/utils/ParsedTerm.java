@@ -12,13 +12,13 @@ public class ParsedTerm {
   private static final String LEMMA_SUFFIX = "$";
   private static final BrandNewIdGenerator ID_GENERATOR = BrandNewIdGenerator.getInstance();
 
-  final long wordId;
-  final CharSeq word;
+  private final long wordId;
+  private final CharSeq word;
 
-  final long lemmaId;
-  final CharSeq lemma;
+  private final long lemmaId;
+  private final CharSeq lemma;
 
-  final PartOfSpeech posTag;
+  private final PartOfSpeech posTag;
 
   private ParsedTerm(long wordId, CharSeq word,
       long lemmaId, CharSeq lemma,
