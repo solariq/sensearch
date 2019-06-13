@@ -18,9 +18,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 // TODO: make thread safe
-public class LinksWriter implements Flushable, Closeable {
+public class LinkWriter implements Flushable, Closeable {
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(LinksWriter.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(LinkWriter.class);
 
   private static final Options DB_OPTIONS = new Options()
       .blockSize(1 << 20)
@@ -37,7 +37,7 @@ public class LinksWriter implements Flushable, Closeable {
   private final BrandNewIdGenerator idGenerator = BrandNewIdGenerator.getInstance();
   private WriteBatch writeBatch;
 
-  LinksWriter(Path root) {
+  LinkWriter(Path root) {
     this.root = root;
     try {
       linksDb = JniDBFactory.factory.open(root.toFile(), DB_OPTIONS);

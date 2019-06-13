@@ -124,7 +124,6 @@ public class IndexMetaBuilder {
   }
 
   private class IndexMetaBuilderState {
-
     int titleTokensCount = 0;
     int titlesCount = 0;
     int totalTokenCount = 0;
