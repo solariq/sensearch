@@ -6,6 +6,7 @@ import com.expleague.sensearch.protobuf.index.IndexUnits.TermStatistics.TermFreq
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.MinMaxPriorityQueue;
 import com.google.common.primitives.Longs;
+import gnu.trove.TCollections;
 import gnu.trove.list.TLongList;
 import gnu.trove.list.array.TLongArrayList;
 import gnu.trove.map.TLongIntMap;
@@ -14,36 +15,59 @@ import gnu.trove.map.TLongObjectMap;
 import gnu.trove.map.hash.TLongIntHashMap;
 import gnu.trove.map.hash.TLongLongHashMap;
 import gnu.trove.map.hash.TLongObjectHashMap;
-import gnu.trove.set.hash.TLongHashSet;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
-import org.apache.log4j.Logger;
+import org.fusesource.leveldbjni.JniDBFactory;
+import org.iq80.leveldb.CompressionType;
 import org.iq80.leveldb.DB;
+import org.iq80.leveldb.Options;
 import org.iq80.leveldb.WriteBatch;
 import org.iq80.leveldb.WriteOptions;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class StatisticsBuilder implements AutoCloseable {
 
-  private static final Logger LOG = Logger.getLogger(StatisticsBuilder.class);
+  private static final Logger LOG = LoggerFactory.getLogger(StatisticsBuilder.class);
 
+  private static final long DEFAULT_CACHE_SIZE = 1 << 20;
+  private static final int DEFAULT_BLOCK_SIZE = 1 << 20;
+  private static final Options STATS_DB_OPTIONS =
+      new Options()
+          .cacheSize(DEFAULT_CACHE_SIZE)
+          .blockSize(DEFAULT_BLOCK_SIZE) // 1 MB
+          .createIfMissing(true)
+          .errorIfExists(true)
+          .compressionType(CompressionType.SNAPPY);
   private static final WriteOptions DEFAULT_WRITE_OPTIONS =
       new WriteOptions().sync(true).snapshot(false);
 
   private static final int MOST_FREQUENT_BIGRAMS_COUNT = 10;
 
-  private final TLongLongMap wordFrequencyMap = new TLongLongHashMap();
-  private final TLongIntMap documentFrequencyMap = new TLongIntHashMap();
-  private final TLongIntMap documentFrequencyByLemmaMap = new TLongIntHashMap();
-  private final TLongObjectMap<TLongIntMap> largeBigramsMap = new TLongObjectHashMap<>();
-  private final TLongLongMap termToLemma = new TLongLongHashMap();
+  private final TLongLongMap termFrequency = TCollections
+      .synchronizedMap(new TLongLongHashMap());
+  private final TLongIntMap termDocFrequency = TCollections
+      .synchronizedMap(new TLongIntHashMap());
+  private final TLongObjectMap<TLongIntMap> termsBigrams = TCollections
+      .synchronizedMap(new TLongObjectHashMap<>());
 
-  private final DB statisticsDb;
-  private boolean isProcessingPage = false;
+  // page-local states
+  // TODO: this is a correct usage of thread locals?
+  private final ThreadLocal<Boolean> isProcessingPage = ThreadLocal
+      .withInitial(() -> false);
+  private final ThreadLocal<TLongList> pageTermsSequence = ThreadLocal
+      .withInitial(TLongArrayList::new);
+  private final ThreadLocal<TLongList> pageLemmasSequence = ThreadLocal
+      .withInitial(TLongArrayList::new);
 
-  StatisticsBuilder(DB statisticsDb) {
-    this.statisticsDb = statisticsDb;
+  private final Path termStatisticsPath;
+
+  StatisticsBuilder(Path termStatisticsPath) {
+    this.termStatisticsPath = termStatisticsPath;
+    this.isProcessingPage.set(false);
   }
 
   @VisibleForTesting
@@ -76,125 +100,105 @@ public class StatisticsBuilder implements AutoCloseable {
     return termFrequencies;
   }
 
-  private final TLongList pageTokens = new TLongArrayList();
-  private final TLongList pageLemmas = new TLongArrayList();
-
-  public void startPage() {
-    if (isProcessingPage) {
-      throw new IllegalStateException("Duplicate startPage call: page is already being processed");
-    }
-    isProcessingPage = true;
-  }
-
-  public void endPage() {
-    if (!isProcessingPage) {
-      throw new IllegalStateException("Illegal call to endPage: no page is being processed");
-    }
-    isProcessingPage = false;
-
-    TLongIntMap termFreqMap = new TLongIntHashMap();
-    TLongObjectMap<TLongIntMap> bigramFreqMap = new TLongObjectHashMap<>();
-
-    if (pageTokens.isEmpty()) {
+  /**
+   * Sync-friendly
+   */
+  @VisibleForTesting
+  static void incrementStatsFromSequence(final TLongList wordSequence, final TLongLongMap wordFreq,
+      final TLongIntMap docFreq, final TLongObjectMap<TLongIntMap> bigramsFreq) {
+    if (wordSequence.isEmpty()) {
+      LOG.warn("Tried to increment stats form empty sequence");
       return;
     }
 
-    termFreqMap.adjustOrPutValue(pageTokens.get(0), 1, 1);
-    for (int i = 1; i < pageTokens.size(); ++i) {
-      termFreqMap.adjustOrPutValue(pageTokens.get(i), 1, 1);
-
-      bigramFreqMap.putIfAbsent(pageTokens.get(i - 1), new TLongIntHashMap());
-      bigramFreqMap.get(pageTokens.get(i - 1)).adjustOrPutValue(pageTokens.get(i), 1, 1);
+    TLongLongMap localWordFreq = new TLongLongHashMap();
+    TLongObjectMap<TLongIntMap> localBigrams = new TLongObjectHashMap<>();
+    localWordFreq.adjustOrPutValue(wordSequence.get(0), 1, 1);
+    int seqLen = wordSequence.size();
+    for (int i = 1; i < seqLen; i++) {
+      long prevWordId = wordSequence.get(i - 1);
+      long curWordId = wordSequence.get(i);
+      localWordFreq.adjustOrPutValue(curWordId, 1, 1);
+      localBigrams.putIfAbsent(prevWordId, new TLongIntHashMap());
+      localBigrams.get(prevWordId).adjustOrPutValue(curWordId, 1, 1);
     }
 
-    termFreqMap.forEachEntry(
-        (tok, freq) -> {
-          wordFrequencyMap.adjustOrPutValue(tok, freq, freq);
-          documentFrequencyMap.adjustOrPutValue(tok, 1, 1);
+    localWordFreq.forEachEntry(
+        (id, freq) -> {
+          wordFreq.adjustOrPutValue(id, freq, freq);
+          docFreq.adjustOrPutValue(id, 1, 1);
+          bigramsFreq.putIfAbsent(id, new TLongIntHashMap());
+          TLongIntMap neighFreq = bigramsFreq.get(id);
+          if (localBigrams.containsKey(id)) {
+            localBigrams.get(id).forEachEntry(
+                (nId, nFreq) -> {
+                  neighFreq.adjustOrPutValue(nId, nFreq, nFreq);
+                  return true;
+                }
+            );
+          }
           return true;
-        });
+        }
+    );
+  }
 
-    bigramFreqMap.forEachEntry(
-        (tId, neigh) -> {
-          largeBigramsMap.putIfAbsent(tId, new TLongIntHashMap());
-          TLongIntMap existingNeighStats = largeBigramsMap.get(tId);
-          neigh.forEachEntry(
-              (nId, freq) -> {
-                existingNeighStats.adjustOrPutValue(nId, freq, freq);
-                return true;
-              });
-          return true;
-        });
+  public void startPage() {
+    if (isProcessingPage.get()) {
+      throw new IllegalStateException("Duplicate startPage call: page is already being processed");
+    }
+    isProcessingPage.set(true);
+  }
 
-    TLongHashSet lemmaSet = new TLongHashSet(pageLemmas);
-    lemmaSet.forEach(
-        lemmaId -> {
-          documentFrequencyByLemmaMap.adjustOrPutValue(lemmaId, 1, 1);
-          return true;
-        });
-
-    pageTokens.clear();
-    pageLemmas.clear();
+  public void endPage() {
+    if (!isProcessingPage.get()) {
+      throw new IllegalStateException("Illegal call to endPage: no page is being processed");
+    }
+    isProcessingPage.set(false);
+    incrementStatsFromSequence(pageTermsSequence.get(), termFrequency,
+        termDocFrequency, termsBigrams);
+    incrementStatsFromSequence(pageLemmasSequence.get(), termFrequency,
+        termDocFrequency, termsBigrams);
+    pageTermsSequence.get().clear();
+    pageLemmasSequence.get().clear();
   }
 
   // TODO: save lemma statistics
   void enrich(ParsedTerm parsedTerm) {
-    long termId = parsedTerm.wordId();
-    long lemmaId = parsedTerm.lemmaId();
-    pageTokens.add(termId);
-    pageLemmas.add(lemmaId);
-
-    if (termToLemma.containsKey(termId) && termToLemma.get(termId) != lemmaId) {
-      throw new IllegalArgumentException(
-          String.format(
-              "Cannot add term [%d] with lemma [%d] to statistics: term already has lemma [%d]",
-              termId, lemmaId, termToLemma.get(termId)));
+    pageTermsSequence.get().add(parsedTerm.wordId());
+    if (parsedTerm.hasLemma()) {
+      pageLemmasSequence.get().add(parsedTerm.lemmaId());
     }
-    termToLemma.put(termId, lemmaId);
+  }
+
+  private static void writeStatistics(TLongLongMap wordFreq, TLongIntMap docFreq,
+      TLongObjectMap<TLongIntMap> bigramsMap, DB statisticsDb) {
+    WriteBatch writeBatch = statisticsDb.createWriteBatch();
+    final TermStatistics.Builder tsBuilder = TermStatistics.newBuilder();
+    wordFreq.forEachEntry((id, freq) -> {
+      writeBatch.put(
+          Longs.toByteArray(id),
+          tsBuilder
+              .setTermId(id)
+              .setTermFrequency(freq)
+              .setDocumentFrequency(docFreq.get(id))
+              .addAllBigramFrequency(
+                  mostFrequentBigrams(bigramsMap.get(id), MOST_FREQUENT_BIGRAMS_COUNT)
+              )
+              .build()
+              .toByteArray());
+
+      tsBuilder.clear();
+      return true;
+    });
+    statisticsDb.write(writeBatch, DEFAULT_WRITE_OPTIONS);
   }
 
   @Override
+  // TODO: check that all pages are ended!
   public void close() throws IOException {
     LOG.info("Storing statistics...");
-    WriteBatch writeBatch = statisticsDb.createWriteBatch();
-    final TermStatistics.Builder tsBuilder = TermStatistics.newBuilder();
-    wordFrequencyMap.forEachKey(
-        k -> {
-          long lemmaId = termToLemma.get(k);
-
-          writeBatch.put(
-              Longs.toByteArray(k),
-              tsBuilder
-                  .setTermId(k)
-                  .setTermFrequency(wordFrequencyMap.get(k))
-                  .setDocumentFrequency(documentFrequencyMap.get(k))
-                  .setDocumentLemmaFrequency(documentFrequencyByLemmaMap.get(lemmaId))
-                  .addAllBigramFrequency(
-                      mostFrequentBigrams(largeBigramsMap.get(k), MOST_FREQUENT_BIGRAMS_COUNT))
-                  .build()
-                  .toByteArray());
-
-          tsBuilder.clear();
-
-          // TODO: write lemma only once
-          writeBatch.put(
-              Longs.toByteArray(lemmaId),
-              tsBuilder
-                  .setTermId(lemmaId)
-                  .setTermFrequency(wordFrequencyMap.get(lemmaId))
-                  .setDocumentFrequency(documentFrequencyMap.get(lemmaId))
-                  .setDocumentLemmaFrequency(documentFrequencyByLemmaMap.get(lemmaId))
-                  .addAllBigramFrequency(
-                      mostFrequentBigrams(largeBigramsMap.get(lemmaId),
-                          MOST_FREQUENT_BIGRAMS_COUNT))
-                  .build()
-                  .toByteArray());
-
-          tsBuilder.clear();
-          return true;
-        });
-
-    statisticsDb.write(writeBatch, DEFAULT_WRITE_OPTIONS);
+    DB statisticsDb = JniDBFactory.factory.open(termStatisticsPath.toFile(), STATS_DB_OPTIONS);
+    writeStatistics(termFrequency, termDocFrequency, termsBigrams, statisticsDb);
     statisticsDb.close();
   }
 
