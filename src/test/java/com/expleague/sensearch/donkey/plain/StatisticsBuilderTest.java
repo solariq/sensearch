@@ -65,8 +65,7 @@ public class StatisticsBuilderTest extends SensearchTestCase {
 
   @Test
   public void test() throws IOException {
-    try (StatisticsBuilder statisticsBuilder = new StatisticsBuilder(
-        JniDBFactory.factory.open(STATS_DB_PATH.toFile(), STATS_DB_OPTIONS))) {
+    try (StatisticsBuilder statisticsBuilder = new StatisticsBuilder(STATS_DB_PATH)) {
 
       statisticsBuilder.startPage();
 
