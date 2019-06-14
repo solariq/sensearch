@@ -18,4 +18,9 @@ public class TermIndex extends LevelDbBasedIndex<Page.Link> {
       throw new RuntimeException(e);
     }
   }
+
+  @Override
+  protected byte[] encodeValue(Page.Link value) {
+    return value.toByteArray();
+  }
 }

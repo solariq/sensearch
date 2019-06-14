@@ -17,4 +17,9 @@ public class PageIndex extends LevelDbBasedIndex<Page>{
       throw new RuntimeException(e);
     }
   }
+
+  @Override
+  protected byte[] encodeValue(Page value) {
+    return value.toByteArray();
+  }
 }

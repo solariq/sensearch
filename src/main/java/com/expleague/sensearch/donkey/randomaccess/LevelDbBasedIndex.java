@@ -40,7 +40,14 @@ public abstract class LevelDbBasedIndex<T> implements Iterable<T>, Closeable, Au
     return decodeValue(bytes);
   }
 
+  public void put(long id, T value) {
+    // TODO: support operation
+    throw new UnsupportedOperationException();
+  }
+
   protected abstract T decodeValue(byte[] bytes);
+
+  protected abstract byte[] encodeValue(T value);
 
   @NotNull
   @Override

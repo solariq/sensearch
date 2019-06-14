@@ -1,5 +1,6 @@
 package com.expleague.sensearch.donkey.randomaccess;
 
+import com.expleague.sensearch.protobuf.index.IndexUnits.Page;
 import com.expleague.sensearch.protobuf.index.IndexUnits.Term;
 import com.expleague.sensearch.protobuf.index.IndexUnits.TermStatistics;
 import com.google.protobuf.InvalidProtocolBufferException;
@@ -17,5 +18,10 @@ public class TermStatisticsIndex extends LevelDbBasedIndex<TermStatistics> {
     } catch (InvalidProtocolBufferException e) {
       throw new RuntimeException(e);
     }
+  }
+
+  @Override
+  protected byte[] encodeValue(TermStatistics value) {
+    return value.toByteArray();
   }
 }
