@@ -36,7 +36,7 @@ public class LinkReader implements Closeable, AutoCloseable {
   public Link read() {
     if (iterator.hasNext()) {
       try {
-        return Page.Link.parseFrom(iterator.next().getValue());
+        return Page.Link.parseFrom(iterator.next().getKey());
       } catch (InvalidProtocolBufferException e) {
         throw new RuntimeException(e);
       }
