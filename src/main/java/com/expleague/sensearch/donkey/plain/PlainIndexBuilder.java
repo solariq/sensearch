@@ -288,6 +288,11 @@ public class PlainIndexBuilder implements IndexBuilder {
   }
 
   private void buildRawIndex() throws IOException {
+    Files.createDirectories(indexRoot.resolve(TERM_STATISTICS_ROOT));
+    Files.createDirectories(indexRoot.resolve(TERM_ROOT));
+    Files.createDirectories(indexRoot.resolve(PAGE_ROOT));
+    Files.createDirectories(indexRoot.resolve(LINK_ROOT));
+
     CachedTermParser termParser = new CachedTermParser(lemmer, 1_000_000);
     try (
         StatisticsBuilder statisticsBuilder =
@@ -313,6 +318,8 @@ public class PlainIndexBuilder implements IndexBuilder {
       });
     }
   }
+
+
 
   private void buildIndexInternal(Embedding<CharSeq> jmllEmbedding) throws IOException {
     LOG.info("Creating database files...");
