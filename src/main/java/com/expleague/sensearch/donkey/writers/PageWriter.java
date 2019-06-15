@@ -6,48 +6,22 @@ import com.expleague.sensearch.donkey.crawler.document.CrawlerDocument.Section;
 import com.expleague.sensearch.donkey.utils.BrandNewIdGenerator;
 import com.expleague.sensearch.protobuf.index.IndexUnits.Page;
 import com.google.common.primitives.Longs;
-import java.io.Closeable;
-import java.io.Flushable;
-import java.io.IOException;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Deque;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
-import org.fusesource.leveldbjni.JniDBFactory;
-import org.iq80.leveldb.DB;
-import org.iq80.leveldb.Options;
-import org.iq80.leveldb.WriteBatch;
-import org.iq80.leveldb.WriteOptions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class PageWriter implements Closeable, Flushable {
+public class PageWriter extends LevelDbBasedWriter {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(PageWriter.class);
-  private static final Options DB_OPTIONS = new Options()
-      .blockSize(1 << 20)
-      .cacheSize(1 << 20)
-      .createIfMissing(true)
-      .writeBufferSize(1 << 10);
-  private static final WriteOptions WRITE_OPTIONS = new WriteOptions()
-      .sync(true);
-  private static final int BATCH_SIZE = 1000;
 
-  private final BrandNewIdGenerator idGenerator = BrandNewIdGenerator.getInstance();
-  private final DB pageDb;
-  private final Path root;
-  private WriteBatch writeBatch;
 
   public PageWriter(Path root) {
-    this.root = root;
-    try {
-      pageDb = JniDBFactory.factory.open(root.toFile(), DB_OPTIONS);
-      writeBatch = pageDb.createWriteBatch();
-    } catch (IOException e) {
-      throw new RuntimeException(e);
-    }
+    super(root);
   }
 
   public void writeDocument(CrawlerDocument document) {
@@ -64,8 +38,8 @@ public class PageWriter implements Closeable, Flushable {
     builtPages.forEach(
         p -> writeBatch.put(Longs.toByteArray(p.getPageId()), p.toByteArray())
     );
-    pageDb.write(writeBatch, WRITE_OPTIONS);
-    writeBatch = pageDb.createWriteBatch();
+    rootDb.write(writeBatch, WRITE_OPTIONS);
+    writeBatch = rootDb.createWriteBatch();
   }
 
 
@@ -125,15 +99,4 @@ public class PageWriter implements Closeable, Flushable {
     parentPagesStack.addLast(pageBuilder);
   }
 
-  @Override
-  public void close() throws IOException {
-    pageDb.write(writeBatch, WRITE_OPTIONS);
-    pageDb.close();
-  }
-
-  @Override
-  public void flush() throws IOException {
-    pageDb.write(writeBatch, WRITE_OPTIONS);
-    writeBatch = pageDb.createWriteBatch();
-  }
 }

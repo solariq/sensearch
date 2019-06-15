@@ -4,7 +4,8 @@ import com.expleague.sensearch.protobuf.index.IndexUnits.Page;
 import com.google.protobuf.InvalidProtocolBufferException;
 import java.nio.file.Path;
 
-public class PageIndex extends LevelDbBasedIndex<Page>{
+public class PageIndex extends LevelDbBasedIndex<Page> {
+
   public PageIndex(Path root) {
     super(root);
   }
