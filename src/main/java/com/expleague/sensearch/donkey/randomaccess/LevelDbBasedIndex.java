@@ -41,8 +41,9 @@ public abstract class LevelDbBasedIndex<T> implements Iterable<T>, Closeable, Au
   }
 
   public void put(long id, T value) {
-    // TODO: support operation
-    throw new UnsupportedOperationException();
+    byte[] keyBytes = Longs.toByteArray(id);
+    byte[] valueBytes = encodeValue(value);
+    dataBase.put(keyBytes, valueBytes);
   }
 
   protected abstract T decodeValue(byte[] bytes);
