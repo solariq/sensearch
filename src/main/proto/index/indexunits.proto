@@ -22,8 +22,12 @@ message IndexMeta {
 }
 
 message Page {
+  message SerializedText {
+    repeated int32 token_ids = 1;
+  }
+
   message Link {
-    optional string text = 1;
+    optional SerializedText text = 1;
     // might be missing if link redirects to an image or page
     // which is not int the index
     optional int64 target_page_id = 2;
@@ -34,8 +38,8 @@ message Page {
   optional int64 page_id = 1;
   optional string uri = 2;
   // only section title
-  optional string title = 3;
-  optional string content = 4;
+  optional SerializedText title = 3;
+  optional SerializedText content = 4;
   // Link structure
   repeated Link outgoing_links = 5;
   repeated Link incoming_links = 6;
