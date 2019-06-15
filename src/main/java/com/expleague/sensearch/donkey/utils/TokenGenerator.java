@@ -5,7 +5,7 @@ import gnu.trove.map.TObjectIntMap;
 import java.util.ArrayList;
 import java.util.List;
 
-public class TokenIdGenerator {
+public class TokenGenerator {
 
   private TObjectIntMap<CharSeq> termToIntMap;
 
@@ -16,7 +16,7 @@ public class TokenIdGenerator {
   private final static int PUNCTUATION = 0x00000002;     //0000'0000'0000'0000'0000'0000'0000'0010
   private final PageParser parser = new PageParser();
 
-  public TokenIdGenerator(TObjectIntMap<CharSeq> map) {
+  public TokenGenerator(TObjectIntMap<CharSeq> map) {
     termToIntMap = map;
     ID += termToIntMap.size();
   }
@@ -83,14 +83,23 @@ public class TokenIdGenerator {
       this.id = id;
     }
 
+    /**
+     * @return id without META-data
+     */
     public int id() {
       return (id >>> BITS_FOR_META);
     }
 
+    /**
+     * @return id with META-data
+     */
     public int formId() {
       return id;
     }
 
+    /**
+     * @return text without changes
+     */
     public CharSeq text() {
       return text;
     }
