@@ -17,6 +17,10 @@ import com.expleague.sensearch.core.lemmer.Lemmer;
 import com.expleague.sensearch.donkey.IndexBuilder;
 import com.expleague.sensearch.donkey.crawler.Crawler;
 import com.expleague.sensearch.donkey.plain.IndexMetaBuilder.TermSegment;
+import com.expleague.sensearch.donkey.randomaccess.LevelDbBasedIndex;
+import com.expleague.sensearch.donkey.randomaccess.PageIndex;
+import com.expleague.sensearch.donkey.readers.LinkReader;
+import com.expleague.sensearch.donkey.readers.Reader;
 import com.expleague.sensearch.donkey.utils.BrandNewIdGenerator;
 import com.expleague.sensearch.donkey.utils.CachedTermParser;
 import com.expleague.sensearch.donkey.utils.ParsedTerm;
@@ -25,6 +29,8 @@ import com.expleague.sensearch.donkey.writers.PageWriter;
 import com.expleague.sensearch.donkey.writers.TermWriter;
 import com.expleague.sensearch.index.Index;
 import com.expleague.sensearch.index.plain.PlainIndex;
+import com.expleague.sensearch.protobuf.index.IndexUnits.Page;
+import com.expleague.sensearch.protobuf.index.IndexUnits.Page.Link;
 import com.expleague.sensearch.web.suggest.SuggestInformationBuilder;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Guice;
@@ -313,7 +319,29 @@ public class PlainIndexBuilder implements IndexBuilder {
     }
   }
 
+  private void buildLinks() {
+    TLongObjectMap<Page.Builder> pagesCache = new TLongObjectHashMap<>();
+    Reader<Link> linkReader = new LinkReader(indexRoot.resolve(LINK_ROOT));
+    LevelDbBasedIndex<Page> pageIndex = new PageIndex(indexRoot.resolve(PAGE_ROOT));
+    Link link;
 
+    while ((link = linkReader.read()) != null) {
+      long targetId = link.getTargetPageId();
+      if (!pagesCache.containsKey(targetId)) {
+        Page.Builder page = Page.newBuilder(pageIndex.getValue(targetId));
+        pagesCache.put(targetId, page);
+      }
+      pagesCache.get(targetId).addIncomingLinks(link);
+
+      if (pagesCache.size() >= 10_000) {
+        pagesCache.forEachEntry((k, v) -> {
+          pageIndex.put(k, v.build());
+          return true;
+        });
+        pagesCache = new TLongObjectHashMap<>();
+      }
+    }
+  }
 
   private void buildIndexInternal(Embedding<CharSeq> jmllEmbedding) throws IOException {
     LOG.info("Creating database files...");
