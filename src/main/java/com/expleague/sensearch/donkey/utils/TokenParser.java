@@ -26,7 +26,7 @@ public class TokenParser {
     ID += termToIntMap.size();
   }
 
-  public List<Token> parseTokens(CharSequence text) {
+  public List<Token> parse(CharSequence text) {
     List<Token> result = new ArrayList<>();
     parser.parse(text).forEach(t -> {
       try {
@@ -91,7 +91,7 @@ public class TokenParser {
     /**
      * @return id without META-data
      */
-    public int id() {
+    public long id() {
       return (id >>> BITS_FOR_META);
     }
 
@@ -105,7 +105,7 @@ public class TokenParser {
     /**
      * @return text without changes
      */
-    public CharSeq text() {
+    public CharSequence text() {
       return text;
     }
 
