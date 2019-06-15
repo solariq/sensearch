@@ -288,15 +288,12 @@ public class PlainIndexBuilder implements IndexBuilder {
   }
 
   private void buildRawIndex() throws IOException {
-    Files.createDirectories(indexRoot.resolve(TERM_STATISTICS_ROOT));
     Files.createDirectories(indexRoot.resolve(TERM_ROOT));
     Files.createDirectories(indexRoot.resolve(PAGE_ROOT));
     Files.createDirectories(indexRoot.resolve(LINK_ROOT));
 
     CachedTermParser termParser = new CachedTermParser(lemmer, 1_000_000);
     try (
-        StatisticsBuilder statisticsBuilder =
-            new StatisticsBuilder(indexRoot.resolve(TERM_STATISTICS_ROOT));
         TermWriter termWriter = new TermWriter(indexRoot.resolve(TERM_ROOT));
         PageWriter pageWriter = new PageWriter(indexRoot.resolve(PAGE_ROOT));
         LinkWriter linkWriter = new LinkWriter(indexRoot.resolve(LINK_ROOT))
@@ -305,16 +302,13 @@ public class PlainIndexBuilder implements IndexBuilder {
         // TODO: there should be some sort of page preprocessing?
         linkWriter.writeLinks(d);
         pageWriter.writeDocument(d);
-        statisticsBuilder.startPage();
         d.sections()
             .flatMap(s -> Stream.concat(
                 tokenizer.parseTextToWords(s.title()),
                 tokenizer.parseTextToWords(s.text())
             ))
             .map(termParser::parseTerm)
-            .peek(termWriter::writeTerm)
-            .forEach(statisticsBuilder::enrich);
-        statisticsBuilder.endPage();
+            .forEach(termWriter::writeTerm);
       });
     }
   }
