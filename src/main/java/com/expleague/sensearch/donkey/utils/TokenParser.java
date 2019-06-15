@@ -2,10 +2,11 @@ package com.expleague.sensearch.donkey.utils;
 
 import com.expleague.commons.seq.CharSeq;
 import gnu.trove.map.TObjectIntMap;
+import gnu.trove.map.hash.TObjectIntHashMap;
 import java.util.ArrayList;
 import java.util.List;
 
-public class TokenGenerator {
+public class TokenParser {
 
   private TObjectIntMap<CharSeq> termToIntMap;
 
@@ -16,7 +17,11 @@ public class TokenGenerator {
   private final static int PUNCTUATION = 0x00000002;     //0000'0000'0000'0000'0000'0000'0000'0010
   private final PageParser parser = new PageParser();
 
-  public TokenGenerator(TObjectIntMap<CharSeq> map) {
+  public TokenParser() {
+    termToIntMap = new TObjectIntHashMap<>();
+  }
+
+  public TokenParser(TObjectIntMap<CharSeq> map) {
     termToIntMap = map;
     ID += termToIntMap.size();
   }
