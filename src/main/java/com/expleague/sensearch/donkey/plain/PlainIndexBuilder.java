@@ -306,6 +306,7 @@ public class PlainIndexBuilder implements IndexBuilder {
         ) {
       crawler.makeStream().forEach(d -> {
         // TODO: there should be some sort of page preprocessing?
+        // doc -> TermStream??
         linkWriter.writeLinks(d);
         pageWriter.writeDocument(d);
         d.sections()

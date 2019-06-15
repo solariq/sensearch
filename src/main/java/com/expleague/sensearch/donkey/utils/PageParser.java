@@ -6,8 +6,8 @@ import java.util.List;
 
 public class PageParser {
 
-  public List<CharSeq> parse(CharSeq text) {
-    List<CharSeq> result = new ArrayList<>();
+  List<CharSeq> parse(CharSeq text) {
+    List<CharSeq> result  = new ArrayList<>();
     StringBuilder token = new StringBuilder();
     final boolean[] isProcessingWord = {false};
     text.forEach(c -> {
