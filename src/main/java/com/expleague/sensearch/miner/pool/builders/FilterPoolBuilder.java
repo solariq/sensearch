@@ -16,6 +16,7 @@ import com.expleague.sensearch.Page;
 import com.expleague.sensearch.core.Annotations.FilterMinerDocNum;
 import com.expleague.sensearch.core.Annotations.RankFilterModel;
 import com.expleague.sensearch.features.Features;
+import com.expleague.sensearch.features.FeaturesImpl;
 import com.expleague.sensearch.features.QURLItem;
 import com.expleague.sensearch.features.sets.TargetFS;
 import com.expleague.sensearch.features.sets.TargetSet;
@@ -41,6 +42,7 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -111,9 +113,21 @@ public class FilterPoolBuilder extends PoolBuilder<QueryAndResults> {
                 System.err.println(status.get() + " queries completed");
               }
               status.incrementAndGet();
-              Map<Page, Features> allDocs =
-                  index.fetchDocuments(query, filterDocNum);
+              Map<Page, Features> allDocs;
 
+              {
+                AccumulatorFilterFeatureSet accumulatorFilterFs = new AccumulatorFilterFeatureSet();
+                allDocs =
+                    index.fetchDocuments(query, filterDocNum).entrySet().stream()
+                        .collect(Collectors.toMap(Entry::getKey, curEntry -> {
+                          Page page = curEntry.getKey();
+                          Features pageFeatures = curEntry.getValue();
+                          accumulatorFilterFs.accept(new QURLItem(page, query));
+                          accumulatorFilterFs.withFilterDistFeatures(pageFeatures);
+                          Vec featureVec = accumulatorFilterFs.advance();
+                          return new FeaturesImpl(accumulatorFilterFs, featureVec);
+                        }));
+              }
               res.forEach(
                   pNw -> {
                     Page page = index.page(pNw.getUri());
