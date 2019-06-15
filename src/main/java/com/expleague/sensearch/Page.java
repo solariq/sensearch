@@ -2,6 +2,7 @@ package com.expleague.sensearch;
 
 import com.expleague.commons.math.vectors.Vec;
 
+import com.expleague.sensearch.core.Term;
 import java.net.URI;
 import java.util.List;
 import java.util.stream.Stream;
@@ -30,15 +31,13 @@ public interface Page {
   URI uri();
 
   @NotNull
-  CharSequence content(SegmentType... types);
+  Stream<Term> content(SegmentType... types);
 
   @NotNull
-  List<CharSequence> categories();
+  List<List<Term>> categories();
 
   @NotNull
   Stream<Link> outgoingLinks(LinkType type);
-
-  // TODO: discuss about semantics there
 
   /**
    * All links lead only to the root page. Sections have no incoming links. If {@param type} is
@@ -69,7 +68,7 @@ public interface Page {
 
   Stream<Page> subpages();
 
-  Stream<CharSequence> sentences(SegmentType type);
+  Stream<List<Term>> sentences(SegmentType type);
 
   Vec titleVec();
 
@@ -80,12 +79,12 @@ public interface Page {
     /**
      * @return Title of Target {@code Page}.
      */
-    CharSequence targetTitle();
+    Stream<Term> targetTitle();
 
     /**
      * @return Text which is displayed for this link.
      */
-    CharSequence text();
+    Stream<Term> text();
 
     /**
      * @return {@code true} if Target {@code Page} exists; {@code false} if Target {@code Page} dose
