@@ -12,7 +12,7 @@ import org.iq80.leveldb.DB;
 import org.iq80.leveldb.DBIterator;
 import org.iq80.leveldb.Options;
 
-public class LinkReader implements Closeable, AutoCloseable {
+public class LinkReader implements Reader<Page.Link> {
 
   private static final Options DB_OPTIONS = new Options()
       .createIfMissing(false)
