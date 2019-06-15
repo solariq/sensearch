@@ -1043,7 +1043,7 @@ public final class IndexUnits {
         getUriBytes();
 
     /**
-     * <code>optional string title = 3;</code>
+     * <code>optional .index.Page.SerializedText title = 3;</code>
      *
      * <pre>
      * only section title
@@ -1051,36 +1051,34 @@ public final class IndexUnits {
      */
     boolean hasTitle();
     /**
-     * <code>optional string title = 3;</code>
+     * <code>optional .index.Page.SerializedText title = 3;</code>
      *
      * <pre>
      * only section title
      * </pre>
      */
-    java.lang.String getTitle();
+    com.expleague.sensearch.protobuf.index.IndexUnits.Page.SerializedText getTitle();
     /**
-     * <code>optional string title = 3;</code>
+     * <code>optional .index.Page.SerializedText title = 3;</code>
      *
      * <pre>
      * only section title
      * </pre>
      */
-    com.google.protobuf.ByteString
-        getTitleBytes();
+    com.expleague.sensearch.protobuf.index.IndexUnits.Page.SerializedTextOrBuilder getTitleOrBuilder();
 
     /**
-     * <code>optional string content = 4;</code>
+     * <code>optional .index.Page.SerializedText content = 4;</code>
      */
     boolean hasContent();
     /**
-     * <code>optional string content = 4;</code>
+     * <code>optional .index.Page.SerializedText content = 4;</code>
      */
-    java.lang.String getContent();
+    com.expleague.sensearch.protobuf.index.IndexUnits.Page.SerializedText getContent();
     /**
-     * <code>optional string content = 4;</code>
+     * <code>optional .index.Page.SerializedText content = 4;</code>
      */
-    com.google.protobuf.ByteString
-        getContentBytes();
+    com.expleague.sensearch.protobuf.index.IndexUnits.Page.SerializedTextOrBuilder getContentOrBuilder();
 
     /**
      * <code>repeated .index.Page.Link outgoing_links = 5;</code>
@@ -1265,15 +1263,29 @@ public final class IndexUnits {
               break;
             }
             case 26: {
-              com.google.protobuf.ByteString bs = input.readBytes();
+              com.expleague.sensearch.protobuf.index.IndexUnits.Page.SerializedText.Builder subBuilder = null;
+              if (((bitField0_ & 0x00000004) == 0x00000004)) {
+                subBuilder = title_.toBuilder();
+              }
+              title_ = input.readMessage(com.expleague.sensearch.protobuf.index.IndexUnits.Page.SerializedText.PARSER, extensionRegistry);
+              if (subBuilder != null) {
+                subBuilder.mergeFrom(title_);
+                title_ = subBuilder.buildPartial();
+              }
               bitField0_ |= 0x00000004;
-              title_ = bs;
               break;
             }
             case 34: {
-              com.google.protobuf.ByteString bs = input.readBytes();
+              com.expleague.sensearch.protobuf.index.IndexUnits.Page.SerializedText.Builder subBuilder = null;
+              if (((bitField0_ & 0x00000008) == 0x00000008)) {
+                subBuilder = content_.toBuilder();
+              }
+              content_ = input.readMessage(com.expleague.sensearch.protobuf.index.IndexUnits.Page.SerializedText.PARSER, extensionRegistry);
+              if (subBuilder != null) {
+                subBuilder.mergeFrom(content_);
+                content_ = subBuilder.buildPartial();
+              }
               bitField0_ |= 0x00000008;
-              content_ = bs;
               break;
             }
             case 42: {
@@ -1378,23 +1390,493 @@ public final class IndexUnits {
       return PARSER;
     }
 
+    public interface SerializedTextOrBuilder extends
+        // @@protoc_insertion_point(interface_extends:index.Page.SerializedText)
+        com.google.protobuf.MessageOrBuilder {
+
+      /**
+       * <code>repeated int32 token_ids = 1;</code>
+       */
+      java.util.List<java.lang.Integer> getTokenIdsList();
+      /**
+       * <code>repeated int32 token_ids = 1;</code>
+       */
+      int getTokenIdsCount();
+      /**
+       * <code>repeated int32 token_ids = 1;</code>
+       */
+      int getTokenIds(int index);
+    }
+    /**
+     * Protobuf type {@code index.Page.SerializedText}
+     */
+    public static final class SerializedText extends
+        com.google.protobuf.GeneratedMessage implements
+        // @@protoc_insertion_point(message_implements:index.Page.SerializedText)
+        SerializedTextOrBuilder {
+      // Use SerializedText.newBuilder() to construct.
+      private SerializedText(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
+        super(builder);
+        this.unknownFields = builder.getUnknownFields();
+      }
+      private SerializedText(boolean noInit) { this.unknownFields = com.google.protobuf.UnknownFieldSet.getDefaultInstance(); }
+
+      private static final SerializedText defaultInstance;
+      public static SerializedText getDefaultInstance() {
+        return defaultInstance;
+      }
+
+      public SerializedText getDefaultInstanceForType() {
+        return defaultInstance;
+      }
+
+      private final com.google.protobuf.UnknownFieldSet unknownFields;
+      @java.lang.Override
+      public final com.google.protobuf.UnknownFieldSet
+          getUnknownFields() {
+        return this.unknownFields;
+      }
+      private SerializedText(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        initFields();
+        int mutable_bitField0_ = 0;
+        com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+            com.google.protobuf.UnknownFieldSet.newBuilder();
+        try {
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              default: {
+                if (!parseUnknownField(input, unknownFields,
+                                       extensionRegistry, tag)) {
+                  done = true;
+                }
+                break;
+              }
+              case 8: {
+                if (!((mutable_bitField0_ & 0x00000001) == 0x00000001)) {
+                  tokenIds_ = new java.util.ArrayList<java.lang.Integer>();
+                  mutable_bitField0_ |= 0x00000001;
+                }
+                tokenIds_.add(input.readInt32());
+                break;
+              }
+              case 10: {
+                int length = input.readRawVarint32();
+                int limit = input.pushLimit(length);
+                if (!((mutable_bitField0_ & 0x00000001) == 0x00000001) && input.getBytesUntilLimit() > 0) {
+                  tokenIds_ = new java.util.ArrayList<java.lang.Integer>();
+                  mutable_bitField0_ |= 0x00000001;
+                }
+                while (input.getBytesUntilLimit() > 0) {
+                  tokenIds_.add(input.readInt32());
+                }
+                input.popLimit(limit);
+                break;
+              }
+            }
+          }
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(this);
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(
+              e.getMessage()).setUnfinishedMessage(this);
+        } finally {
+          if (((mutable_bitField0_ & 0x00000001) == 0x00000001)) {
+            tokenIds_ = java.util.Collections.unmodifiableList(tokenIds_);
+          }
+          this.unknownFields = unknownFields.build();
+          makeExtensionsImmutable();
+        }
+      }
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return com.expleague.sensearch.protobuf.index.IndexUnits.internal_static_index_Page_SerializedText_descriptor;
+      }
+
+      protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return com.expleague.sensearch.protobuf.index.IndexUnits.internal_static_index_Page_SerializedText_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                com.expleague.sensearch.protobuf.index.IndexUnits.Page.SerializedText.class, com.expleague.sensearch.protobuf.index.IndexUnits.Page.SerializedText.Builder.class);
+      }
+
+      public static com.google.protobuf.Parser<SerializedText> PARSER =
+          new com.google.protobuf.AbstractParser<SerializedText>() {
+        public SerializedText parsePartialFrom(
+            com.google.protobuf.CodedInputStream input,
+            com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+            throws com.google.protobuf.InvalidProtocolBufferException {
+          return new SerializedText(input, extensionRegistry);
+        }
+      };
+
+      @java.lang.Override
+      public com.google.protobuf.Parser<SerializedText> getParserForType() {
+        return PARSER;
+      }
+
+      public static final int TOKEN_IDS_FIELD_NUMBER = 1;
+      private java.util.List<java.lang.Integer> tokenIds_;
+      /**
+       * <code>repeated int32 token_ids = 1;</code>
+       */
+      public java.util.List<java.lang.Integer>
+          getTokenIdsList() {
+        return tokenIds_;
+      }
+      /**
+       * <code>repeated int32 token_ids = 1;</code>
+       */
+      public int getTokenIdsCount() {
+        return tokenIds_.size();
+      }
+      /**
+       * <code>repeated int32 token_ids = 1;</code>
+       */
+      public int getTokenIds(int index) {
+        return tokenIds_.get(index);
+      }
+
+      private void initFields() {
+        tokenIds_ = java.util.Collections.emptyList();
+      }
+      private byte memoizedIsInitialized = -1;
+      public final boolean isInitialized() {
+        byte isInitialized = memoizedIsInitialized;
+        if (isInitialized == 1) return true;
+        if (isInitialized == 0) return false;
+
+        memoizedIsInitialized = 1;
+        return true;
+      }
+
+      public void writeTo(com.google.protobuf.CodedOutputStream output)
+                          throws java.io.IOException {
+        getSerializedSize();
+        for (int i = 0; i < tokenIds_.size(); i++) {
+          output.writeInt32(1, tokenIds_.get(i));
+        }
+        getUnknownFields().writeTo(output);
+      }
+
+      private int memoizedSerializedSize = -1;
+      public int getSerializedSize() {
+        int size = memoizedSerializedSize;
+        if (size != -1) return size;
+
+        size = 0;
+        {
+          int dataSize = 0;
+          for (int i = 0; i < tokenIds_.size(); i++) {
+            dataSize += com.google.protobuf.CodedOutputStream
+              .computeInt32SizeNoTag(tokenIds_.get(i));
+          }
+          size += dataSize;
+          size += 1 * getTokenIdsList().size();
+        }
+        size += getUnknownFields().getSerializedSize();
+        memoizedSerializedSize = size;
+        return size;
+      }
+
+      private static final long serialVersionUID = 0L;
+      @java.lang.Override
+      protected java.lang.Object writeReplace()
+          throws java.io.ObjectStreamException {
+        return super.writeReplace();
+      }
+
+      public static com.expleague.sensearch.protobuf.index.IndexUnits.Page.SerializedText parseFrom(
+          com.google.protobuf.ByteString data)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return PARSER.parseFrom(data);
+      }
+      public static com.expleague.sensearch.protobuf.index.IndexUnits.Page.SerializedText parseFrom(
+          com.google.protobuf.ByteString data,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return PARSER.parseFrom(data, extensionRegistry);
+      }
+      public static com.expleague.sensearch.protobuf.index.IndexUnits.Page.SerializedText parseFrom(byte[] data)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return PARSER.parseFrom(data);
+      }
+      public static com.expleague.sensearch.protobuf.index.IndexUnits.Page.SerializedText parseFrom(
+          byte[] data,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return PARSER.parseFrom(data, extensionRegistry);
+      }
+      public static com.expleague.sensearch.protobuf.index.IndexUnits.Page.SerializedText parseFrom(java.io.InputStream input)
+          throws java.io.IOException {
+        return PARSER.parseFrom(input);
+      }
+      public static com.expleague.sensearch.protobuf.index.IndexUnits.Page.SerializedText parseFrom(
+          java.io.InputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        return PARSER.parseFrom(input, extensionRegistry);
+      }
+      public static com.expleague.sensearch.protobuf.index.IndexUnits.Page.SerializedText parseDelimitedFrom(java.io.InputStream input)
+          throws java.io.IOException {
+        return PARSER.parseDelimitedFrom(input);
+      }
+      public static com.expleague.sensearch.protobuf.index.IndexUnits.Page.SerializedText parseDelimitedFrom(
+          java.io.InputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        return PARSER.parseDelimitedFrom(input, extensionRegistry);
+      }
+      public static com.expleague.sensearch.protobuf.index.IndexUnits.Page.SerializedText parseFrom(
+          com.google.protobuf.CodedInputStream input)
+          throws java.io.IOException {
+        return PARSER.parseFrom(input);
+      }
+      public static com.expleague.sensearch.protobuf.index.IndexUnits.Page.SerializedText parseFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        return PARSER.parseFrom(input, extensionRegistry);
+      }
+
+      public static Builder newBuilder() { return Builder.create(); }
+      public Builder newBuilderForType() { return newBuilder(); }
+      public static Builder newBuilder(com.expleague.sensearch.protobuf.index.IndexUnits.Page.SerializedText prototype) {
+        return newBuilder().mergeFrom(prototype);
+      }
+      public Builder toBuilder() { return newBuilder(this); }
+
+      @java.lang.Override
+      protected Builder newBuilderForType(
+          com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+        Builder builder = new Builder(parent);
+        return builder;
+      }
+      /**
+       * Protobuf type {@code index.Page.SerializedText}
+       */
+      public static final class Builder extends
+          com.google.protobuf.GeneratedMessage.Builder<Builder> implements
+          // @@protoc_insertion_point(builder_implements:index.Page.SerializedText)
+          com.expleague.sensearch.protobuf.index.IndexUnits.Page.SerializedTextOrBuilder {
+        public static final com.google.protobuf.Descriptors.Descriptor
+            getDescriptor() {
+          return com.expleague.sensearch.protobuf.index.IndexUnits.internal_static_index_Page_SerializedText_descriptor;
+        }
+
+        protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+            internalGetFieldAccessorTable() {
+          return com.expleague.sensearch.protobuf.index.IndexUnits.internal_static_index_Page_SerializedText_fieldAccessorTable
+              .ensureFieldAccessorsInitialized(
+                  com.expleague.sensearch.protobuf.index.IndexUnits.Page.SerializedText.class, com.expleague.sensearch.protobuf.index.IndexUnits.Page.SerializedText.Builder.class);
+        }
+
+        // Construct using com.expleague.sensearch.protobuf.index.IndexUnits.Page.SerializedText.newBuilder()
+        private Builder() {
+          maybeForceBuilderInitialization();
+        }
+
+        private Builder(
+            com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+          super(parent);
+          maybeForceBuilderInitialization();
+        }
+        private void maybeForceBuilderInitialization() {
+          if (com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders) {
+          }
+        }
+        private static Builder create() {
+          return new Builder();
+        }
+
+        public Builder clear() {
+          super.clear();
+          tokenIds_ = java.util.Collections.emptyList();
+          bitField0_ = (bitField0_ & ~0x00000001);
+          return this;
+        }
+
+        public Builder clone() {
+          return create().mergeFrom(buildPartial());
+        }
+
+        public com.google.protobuf.Descriptors.Descriptor
+            getDescriptorForType() {
+          return com.expleague.sensearch.protobuf.index.IndexUnits.internal_static_index_Page_SerializedText_descriptor;
+        }
+
+        public com.expleague.sensearch.protobuf.index.IndexUnits.Page.SerializedText getDefaultInstanceForType() {
+          return com.expleague.sensearch.protobuf.index.IndexUnits.Page.SerializedText.getDefaultInstance();
+        }
+
+        public com.expleague.sensearch.protobuf.index.IndexUnits.Page.SerializedText build() {
+          com.expleague.sensearch.protobuf.index.IndexUnits.Page.SerializedText result = buildPartial();
+          if (!result.isInitialized()) {
+            throw newUninitializedMessageException(result);
+          }
+          return result;
+        }
+
+        public com.expleague.sensearch.protobuf.index.IndexUnits.Page.SerializedText buildPartial() {
+          com.expleague.sensearch.protobuf.index.IndexUnits.Page.SerializedText result = new com.expleague.sensearch.protobuf.index.IndexUnits.Page.SerializedText(this);
+          int from_bitField0_ = bitField0_;
+          if (((bitField0_ & 0x00000001) == 0x00000001)) {
+            tokenIds_ = java.util.Collections.unmodifiableList(tokenIds_);
+            bitField0_ = (bitField0_ & ~0x00000001);
+          }
+          result.tokenIds_ = tokenIds_;
+          onBuilt();
+          return result;
+        }
+
+        public Builder mergeFrom(com.google.protobuf.Message other) {
+          if (other instanceof com.expleague.sensearch.protobuf.index.IndexUnits.Page.SerializedText) {
+            return mergeFrom((com.expleague.sensearch.protobuf.index.IndexUnits.Page.SerializedText)other);
+          } else {
+            super.mergeFrom(other);
+            return this;
+          }
+        }
+
+        public Builder mergeFrom(com.expleague.sensearch.protobuf.index.IndexUnits.Page.SerializedText other) {
+          if (other == com.expleague.sensearch.protobuf.index.IndexUnits.Page.SerializedText.getDefaultInstance()) return this;
+          if (!other.tokenIds_.isEmpty()) {
+            if (tokenIds_.isEmpty()) {
+              tokenIds_ = other.tokenIds_;
+              bitField0_ = (bitField0_ & ~0x00000001);
+            } else {
+              ensureTokenIdsIsMutable();
+              tokenIds_.addAll(other.tokenIds_);
+            }
+            onChanged();
+          }
+          this.mergeUnknownFields(other.getUnknownFields());
+          return this;
+        }
+
+        public final boolean isInitialized() {
+          return true;
+        }
+
+        public Builder mergeFrom(
+            com.google.protobuf.CodedInputStream input,
+            com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+            throws java.io.IOException {
+          com.expleague.sensearch.protobuf.index.IndexUnits.Page.SerializedText parsedMessage = null;
+          try {
+            parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+            parsedMessage = (com.expleague.sensearch.protobuf.index.IndexUnits.Page.SerializedText) e.getUnfinishedMessage();
+            throw e;
+          } finally {
+            if (parsedMessage != null) {
+              mergeFrom(parsedMessage);
+            }
+          }
+          return this;
+        }
+        private int bitField0_;
+
+        private java.util.List<java.lang.Integer> tokenIds_ = java.util.Collections.emptyList();
+        private void ensureTokenIdsIsMutable() {
+          if (!((bitField0_ & 0x00000001) == 0x00000001)) {
+            tokenIds_ = new java.util.ArrayList<java.lang.Integer>(tokenIds_);
+            bitField0_ |= 0x00000001;
+           }
+        }
+        /**
+         * <code>repeated int32 token_ids = 1;</code>
+         */
+        public java.util.List<java.lang.Integer>
+            getTokenIdsList() {
+          return java.util.Collections.unmodifiableList(tokenIds_);
+        }
+        /**
+         * <code>repeated int32 token_ids = 1;</code>
+         */
+        public int getTokenIdsCount() {
+          return tokenIds_.size();
+        }
+        /**
+         * <code>repeated int32 token_ids = 1;</code>
+         */
+        public int getTokenIds(int index) {
+          return tokenIds_.get(index);
+        }
+        /**
+         * <code>repeated int32 token_ids = 1;</code>
+         */
+        public Builder setTokenIds(
+            int index, int value) {
+          ensureTokenIdsIsMutable();
+          tokenIds_.set(index, value);
+          onChanged();
+          return this;
+        }
+        /**
+         * <code>repeated int32 token_ids = 1;</code>
+         */
+        public Builder addTokenIds(int value) {
+          ensureTokenIdsIsMutable();
+          tokenIds_.add(value);
+          onChanged();
+          return this;
+        }
+        /**
+         * <code>repeated int32 token_ids = 1;</code>
+         */
+        public Builder addAllTokenIds(
+            java.lang.Iterable<? extends java.lang.Integer> values) {
+          ensureTokenIdsIsMutable();
+          com.google.protobuf.AbstractMessageLite.Builder.addAll(
+              values, tokenIds_);
+          onChanged();
+          return this;
+        }
+        /**
+         * <code>repeated int32 token_ids = 1;</code>
+         */
+        public Builder clearTokenIds() {
+          tokenIds_ = java.util.Collections.emptyList();
+          bitField0_ = (bitField0_ & ~0x00000001);
+          onChanged();
+          return this;
+        }
+
+        // @@protoc_insertion_point(builder_scope:index.Page.SerializedText)
+      }
+
+      static {
+        defaultInstance = new SerializedText(true);
+        defaultInstance.initFields();
+      }
+
+      // @@protoc_insertion_point(class_scope:index.Page.SerializedText)
+    }
+
     public interface LinkOrBuilder extends
         // @@protoc_insertion_point(interface_extends:index.Page.Link)
         com.google.protobuf.MessageOrBuilder {
 
       /**
-       * <code>optional string text = 1;</code>
+       * <code>optional .index.Page.SerializedText text = 1;</code>
        */
       boolean hasText();
       /**
-       * <code>optional string text = 1;</code>
+       * <code>optional .index.Page.SerializedText text = 1;</code>
        */
-      java.lang.String getText();
+      com.expleague.sensearch.protobuf.index.IndexUnits.Page.SerializedText getText();
       /**
-       * <code>optional string text = 1;</code>
+       * <code>optional .index.Page.SerializedText text = 1;</code>
        */
-      com.google.protobuf.ByteString
-          getTextBytes();
+      com.expleague.sensearch.protobuf.index.IndexUnits.Page.SerializedTextOrBuilder getTextOrBuilder();
 
       /**
        * <code>optional int64 target_page_id = 2;</code>
@@ -1486,9 +1968,16 @@ public final class IndexUnits {
                 break;
               }
               case 10: {
-                com.google.protobuf.ByteString bs = input.readBytes();
+                com.expleague.sensearch.protobuf.index.IndexUnits.Page.SerializedText.Builder subBuilder = null;
+                if (((bitField0_ & 0x00000001) == 0x00000001)) {
+                  subBuilder = text_.toBuilder();
+                }
+                text_ = input.readMessage(com.expleague.sensearch.protobuf.index.IndexUnits.Page.SerializedText.PARSER, extensionRegistry);
+                if (subBuilder != null) {
+                  subBuilder.mergeFrom(text_);
+                  text_ = subBuilder.buildPartial();
+                }
                 bitField0_ |= 0x00000001;
-                text_ = bs;
                 break;
               }
               case 16: {
@@ -1547,45 +2036,24 @@ public final class IndexUnits {
 
       private int bitField0_;
       public static final int TEXT_FIELD_NUMBER = 1;
-      private java.lang.Object text_;
+      private com.expleague.sensearch.protobuf.index.IndexUnits.Page.SerializedText text_;
       /**
-       * <code>optional string text = 1;</code>
+       * <code>optional .index.Page.SerializedText text = 1;</code>
        */
       public boolean hasText() {
         return ((bitField0_ & 0x00000001) == 0x00000001);
       }
       /**
-       * <code>optional string text = 1;</code>
+       * <code>optional .index.Page.SerializedText text = 1;</code>
        */
-      public java.lang.String getText() {
-        java.lang.Object ref = text_;
-        if (ref instanceof java.lang.String) {
-          return (java.lang.String) ref;
-        } else {
-          com.google.protobuf.ByteString bs = 
-              (com.google.protobuf.ByteString) ref;
-          java.lang.String s = bs.toStringUtf8();
-          if (bs.isValidUtf8()) {
-            text_ = s;
-          }
-          return s;
-        }
+      public com.expleague.sensearch.protobuf.index.IndexUnits.Page.SerializedText getText() {
+        return text_;
       }
       /**
-       * <code>optional string text = 1;</code>
+       * <code>optional .index.Page.SerializedText text = 1;</code>
        */
-      public com.google.protobuf.ByteString
-          getTextBytes() {
-        java.lang.Object ref = text_;
-        if (ref instanceof java.lang.String) {
-          com.google.protobuf.ByteString b = 
-              com.google.protobuf.ByteString.copyFromUtf8(
-                  (java.lang.String) ref);
-          text_ = b;
-          return b;
-        } else {
-          return (com.google.protobuf.ByteString) ref;
-        }
+      public com.expleague.sensearch.protobuf.index.IndexUnits.Page.SerializedTextOrBuilder getTextOrBuilder() {
+        return text_;
       }
 
       public static final int TARGET_PAGE_ID_FIELD_NUMBER = 2;
@@ -1644,7 +2112,7 @@ public final class IndexUnits {
       }
 
       private void initFields() {
-        text_ = "";
+        text_ = com.expleague.sensearch.protobuf.index.IndexUnits.Page.SerializedText.getDefaultInstance();
         targetPageId_ = 0L;
         position_ = 0L;
         sourcePageId_ = 0L;
@@ -1663,7 +2131,7 @@ public final class IndexUnits {
                           throws java.io.IOException {
         getSerializedSize();
         if (((bitField0_ & 0x00000001) == 0x00000001)) {
-          output.writeBytes(1, getTextBytes());
+          output.writeMessage(1, text_);
         }
         if (((bitField0_ & 0x00000002) == 0x00000002)) {
           output.writeInt64(2, targetPageId_);
@@ -1685,7 +2153,7 @@ public final class IndexUnits {
         size = 0;
         if (((bitField0_ & 0x00000001) == 0x00000001)) {
           size += com.google.protobuf.CodedOutputStream
-            .computeBytesSize(1, getTextBytes());
+            .computeMessageSize(1, text_);
         }
         if (((bitField0_ & 0x00000002) == 0x00000002)) {
           size += com.google.protobuf.CodedOutputStream
@@ -1808,6 +2276,7 @@ public final class IndexUnits {
         }
         private void maybeForceBuilderInitialization() {
           if (com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders) {
+            getTextFieldBuilder();
           }
         }
         private static Builder create() {
@@ -1816,7 +2285,11 @@ public final class IndexUnits {
 
         public Builder clear() {
           super.clear();
-          text_ = "";
+          if (textBuilder_ == null) {
+            text_ = com.expleague.sensearch.protobuf.index.IndexUnits.Page.SerializedText.getDefaultInstance();
+          } else {
+            textBuilder_.clear();
+          }
           bitField0_ = (bitField0_ & ~0x00000001);
           targetPageId_ = 0L;
           bitField0_ = (bitField0_ & ~0x00000002);
@@ -1855,7 +2328,11 @@ public final class IndexUnits {
           if (((from_bitField0_ & 0x00000001) == 0x00000001)) {
             to_bitField0_ |= 0x00000001;
           }
-          result.text_ = text_;
+          if (textBuilder_ == null) {
+            result.text_ = text_;
+          } else {
+            result.text_ = textBuilder_.build();
+          }
           if (((from_bitField0_ & 0x00000002) == 0x00000002)) {
             to_bitField0_ |= 0x00000002;
           }
@@ -1885,9 +2362,7 @@ public final class IndexUnits {
         public Builder mergeFrom(com.expleague.sensearch.protobuf.index.IndexUnits.Page.Link other) {
           if (other == com.expleague.sensearch.protobuf.index.IndexUnits.Page.Link.getDefaultInstance()) return this;
           if (other.hasText()) {
-            bitField0_ |= 0x00000001;
-            text_ = other.text_;
-            onChanged();
+            mergeText(other.getText());
           }
           if (other.hasTargetPageId()) {
             setTargetPageId(other.getTargetPageId());
@@ -1925,80 +2400,120 @@ public final class IndexUnits {
         }
         private int bitField0_;
 
-        private java.lang.Object text_ = "";
+        private com.expleague.sensearch.protobuf.index.IndexUnits.Page.SerializedText text_ = com.expleague.sensearch.protobuf.index.IndexUnits.Page.SerializedText.getDefaultInstance();
+        private com.google.protobuf.SingleFieldBuilder<
+            com.expleague.sensearch.protobuf.index.IndexUnits.Page.SerializedText, com.expleague.sensearch.protobuf.index.IndexUnits.Page.SerializedText.Builder, com.expleague.sensearch.protobuf.index.IndexUnits.Page.SerializedTextOrBuilder> textBuilder_;
         /**
-         * <code>optional string text = 1;</code>
+         * <code>optional .index.Page.SerializedText text = 1;</code>
          */
         public boolean hasText() {
           return ((bitField0_ & 0x00000001) == 0x00000001);
         }
         /**
-         * <code>optional string text = 1;</code>
+         * <code>optional .index.Page.SerializedText text = 1;</code>
          */
-        public java.lang.String getText() {
-          java.lang.Object ref = text_;
-          if (!(ref instanceof java.lang.String)) {
-            com.google.protobuf.ByteString bs =
-                (com.google.protobuf.ByteString) ref;
-            java.lang.String s = bs.toStringUtf8();
-            if (bs.isValidUtf8()) {
-              text_ = s;
+        public com.expleague.sensearch.protobuf.index.IndexUnits.Page.SerializedText getText() {
+          if (textBuilder_ == null) {
+            return text_;
+          } else {
+            return textBuilder_.getMessage();
+          }
+        }
+        /**
+         * <code>optional .index.Page.SerializedText text = 1;</code>
+         */
+        public Builder setText(com.expleague.sensearch.protobuf.index.IndexUnits.Page.SerializedText value) {
+          if (textBuilder_ == null) {
+            if (value == null) {
+              throw new NullPointerException();
             }
-            return s;
+            text_ = value;
+            onChanged();
           } else {
-            return (java.lang.String) ref;
+            textBuilder_.setMessage(value);
           }
+          bitField0_ |= 0x00000001;
+          return this;
         }
         /**
-         * <code>optional string text = 1;</code>
-         */
-        public com.google.protobuf.ByteString
-            getTextBytes() {
-          java.lang.Object ref = text_;
-          if (ref instanceof String) {
-            com.google.protobuf.ByteString b = 
-                com.google.protobuf.ByteString.copyFromUtf8(
-                    (java.lang.String) ref);
-            text_ = b;
-            return b;
-          } else {
-            return (com.google.protobuf.ByteString) ref;
-          }
-        }
-        /**
-         * <code>optional string text = 1;</code>
+         * <code>optional .index.Page.SerializedText text = 1;</code>
          */
         public Builder setText(
-            java.lang.String value) {
-          if (value == null) {
-    throw new NullPointerException();
-  }
-  bitField0_ |= 0x00000001;
-          text_ = value;
-          onChanged();
+            com.expleague.sensearch.protobuf.index.IndexUnits.Page.SerializedText.Builder builderForValue) {
+          if (textBuilder_ == null) {
+            text_ = builderForValue.build();
+            onChanged();
+          } else {
+            textBuilder_.setMessage(builderForValue.build());
+          }
+          bitField0_ |= 0x00000001;
           return this;
         }
         /**
-         * <code>optional string text = 1;</code>
+         * <code>optional .index.Page.SerializedText text = 1;</code>
+         */
+        public Builder mergeText(com.expleague.sensearch.protobuf.index.IndexUnits.Page.SerializedText value) {
+          if (textBuilder_ == null) {
+            if (((bitField0_ & 0x00000001) == 0x00000001) &&
+                text_ != com.expleague.sensearch.protobuf.index.IndexUnits.Page.SerializedText.getDefaultInstance()) {
+              text_ =
+                com.expleague.sensearch.protobuf.index.IndexUnits.Page.SerializedText.newBuilder(text_).mergeFrom(value).buildPartial();
+            } else {
+              text_ = value;
+            }
+            onChanged();
+          } else {
+            textBuilder_.mergeFrom(value);
+          }
+          bitField0_ |= 0x00000001;
+          return this;
+        }
+        /**
+         * <code>optional .index.Page.SerializedText text = 1;</code>
          */
         public Builder clearText() {
+          if (textBuilder_ == null) {
+            text_ = com.expleague.sensearch.protobuf.index.IndexUnits.Page.SerializedText.getDefaultInstance();
+            onChanged();
+          } else {
+            textBuilder_.clear();
+          }
           bitField0_ = (bitField0_ & ~0x00000001);
-          text_ = getDefaultInstance().getText();
-          onChanged();
           return this;
         }
         /**
-         * <code>optional string text = 1;</code>
+         * <code>optional .index.Page.SerializedText text = 1;</code>
          */
-        public Builder setTextBytes(
-            com.google.protobuf.ByteString value) {
-          if (value == null) {
-    throw new NullPointerException();
-  }
-  bitField0_ |= 0x00000001;
-          text_ = value;
+        public com.expleague.sensearch.protobuf.index.IndexUnits.Page.SerializedText.Builder getTextBuilder() {
+          bitField0_ |= 0x00000001;
           onChanged();
-          return this;
+          return getTextFieldBuilder().getBuilder();
+        }
+        /**
+         * <code>optional .index.Page.SerializedText text = 1;</code>
+         */
+        public com.expleague.sensearch.protobuf.index.IndexUnits.Page.SerializedTextOrBuilder getTextOrBuilder() {
+          if (textBuilder_ != null) {
+            return textBuilder_.getMessageOrBuilder();
+          } else {
+            return text_;
+          }
+        }
+        /**
+         * <code>optional .index.Page.SerializedText text = 1;</code>
+         */
+        private com.google.protobuf.SingleFieldBuilder<
+            com.expleague.sensearch.protobuf.index.IndexUnits.Page.SerializedText, com.expleague.sensearch.protobuf.index.IndexUnits.Page.SerializedText.Builder, com.expleague.sensearch.protobuf.index.IndexUnits.Page.SerializedTextOrBuilder> 
+            getTextFieldBuilder() {
+          if (textBuilder_ == null) {
+            textBuilder_ = new com.google.protobuf.SingleFieldBuilder<
+                com.expleague.sensearch.protobuf.index.IndexUnits.Page.SerializedText, com.expleague.sensearch.protobuf.index.IndexUnits.Page.SerializedText.Builder, com.expleague.sensearch.protobuf.index.IndexUnits.Page.SerializedTextOrBuilder>(
+                    getText(),
+                    getParentForChildren(),
+                    isClean());
+            text_ = null;
+          }
+          return textBuilder_;
         }
 
         private long targetPageId_ ;
@@ -2187,9 +2702,9 @@ public final class IndexUnits {
     }
 
     public static final int TITLE_FIELD_NUMBER = 3;
-    private java.lang.Object title_;
+    private com.expleague.sensearch.protobuf.index.IndexUnits.Page.SerializedText title_;
     /**
-     * <code>optional string title = 3;</code>
+     * <code>optional .index.Page.SerializedText title = 3;</code>
      *
      * <pre>
      * only section title
@@ -2199,87 +2714,45 @@ public final class IndexUnits {
       return ((bitField0_ & 0x00000004) == 0x00000004);
     }
     /**
-     * <code>optional string title = 3;</code>
+     * <code>optional .index.Page.SerializedText title = 3;</code>
      *
      * <pre>
      * only section title
      * </pre>
      */
-    public java.lang.String getTitle() {
-      java.lang.Object ref = title_;
-      if (ref instanceof java.lang.String) {
-        return (java.lang.String) ref;
-      } else {
-        com.google.protobuf.ByteString bs = 
-            (com.google.protobuf.ByteString) ref;
-        java.lang.String s = bs.toStringUtf8();
-        if (bs.isValidUtf8()) {
-          title_ = s;
-        }
-        return s;
-      }
+    public com.expleague.sensearch.protobuf.index.IndexUnits.Page.SerializedText getTitle() {
+      return title_;
     }
     /**
-     * <code>optional string title = 3;</code>
+     * <code>optional .index.Page.SerializedText title = 3;</code>
      *
      * <pre>
      * only section title
      * </pre>
      */
-    public com.google.protobuf.ByteString
-        getTitleBytes() {
-      java.lang.Object ref = title_;
-      if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b = 
-            com.google.protobuf.ByteString.copyFromUtf8(
-                (java.lang.String) ref);
-        title_ = b;
-        return b;
-      } else {
-        return (com.google.protobuf.ByteString) ref;
-      }
+    public com.expleague.sensearch.protobuf.index.IndexUnits.Page.SerializedTextOrBuilder getTitleOrBuilder() {
+      return title_;
     }
 
     public static final int CONTENT_FIELD_NUMBER = 4;
-    private java.lang.Object content_;
+    private com.expleague.sensearch.protobuf.index.IndexUnits.Page.SerializedText content_;
     /**
-     * <code>optional string content = 4;</code>
+     * <code>optional .index.Page.SerializedText content = 4;</code>
      */
     public boolean hasContent() {
       return ((bitField0_ & 0x00000008) == 0x00000008);
     }
     /**
-     * <code>optional string content = 4;</code>
+     * <code>optional .index.Page.SerializedText content = 4;</code>
      */
-    public java.lang.String getContent() {
-      java.lang.Object ref = content_;
-      if (ref instanceof java.lang.String) {
-        return (java.lang.String) ref;
-      } else {
-        com.google.protobuf.ByteString bs = 
-            (com.google.protobuf.ByteString) ref;
-        java.lang.String s = bs.toStringUtf8();
-        if (bs.isValidUtf8()) {
-          content_ = s;
-        }
-        return s;
-      }
+    public com.expleague.sensearch.protobuf.index.IndexUnits.Page.SerializedText getContent() {
+      return content_;
     }
     /**
-     * <code>optional string content = 4;</code>
+     * <code>optional .index.Page.SerializedText content = 4;</code>
      */
-    public com.google.protobuf.ByteString
-        getContentBytes() {
-      java.lang.Object ref = content_;
-      if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b = 
-            com.google.protobuf.ByteString.copyFromUtf8(
-                (java.lang.String) ref);
-        content_ = b;
-        return b;
-      } else {
-        return (com.google.protobuf.ByteString) ref;
-      }
+    public com.expleague.sensearch.protobuf.index.IndexUnits.Page.SerializedTextOrBuilder getContentOrBuilder() {
+      return content_;
     }
 
     public static final int OUTGOING_LINKS_FIELD_NUMBER = 5;
@@ -2451,8 +2924,8 @@ public final class IndexUnits {
     private void initFields() {
       pageId_ = 0L;
       uri_ = "";
-      title_ = "";
-      content_ = "";
+      title_ = com.expleague.sensearch.protobuf.index.IndexUnits.Page.SerializedText.getDefaultInstance();
+      content_ = com.expleague.sensearch.protobuf.index.IndexUnits.Page.SerializedText.getDefaultInstance();
       outgoingLinks_ = java.util.Collections.emptyList();
       incomingLinks_ = java.util.Collections.emptyList();
       categories_ = com.google.protobuf.LazyStringArrayList.EMPTY;
@@ -2479,10 +2952,10 @@ public final class IndexUnits {
         output.writeBytes(2, getUriBytes());
       }
       if (((bitField0_ & 0x00000004) == 0x00000004)) {
-        output.writeBytes(3, getTitleBytes());
+        output.writeMessage(3, title_);
       }
       if (((bitField0_ & 0x00000008) == 0x00000008)) {
-        output.writeBytes(4, getContentBytes());
+        output.writeMessage(4, content_);
       }
       for (int i = 0; i < outgoingLinks_.size(); i++) {
         output.writeMessage(5, outgoingLinks_.get(i));
@@ -2518,11 +2991,11 @@ public final class IndexUnits {
       }
       if (((bitField0_ & 0x00000004) == 0x00000004)) {
         size += com.google.protobuf.CodedOutputStream
-          .computeBytesSize(3, getTitleBytes());
+          .computeMessageSize(3, title_);
       }
       if (((bitField0_ & 0x00000008) == 0x00000008)) {
         size += com.google.protobuf.CodedOutputStream
-          .computeBytesSize(4, getContentBytes());
+          .computeMessageSize(4, content_);
       }
       for (int i = 0; i < outgoingLinks_.size(); i++) {
         size += com.google.protobuf.CodedOutputStream
@@ -2663,6 +3136,8 @@ public final class IndexUnits {
       }
       private void maybeForceBuilderInitialization() {
         if (com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders) {
+          getTitleFieldBuilder();
+          getContentFieldBuilder();
           getOutgoingLinksFieldBuilder();
           getIncomingLinksFieldBuilder();
         }
@@ -2677,9 +3152,17 @@ public final class IndexUnits {
         bitField0_ = (bitField0_ & ~0x00000001);
         uri_ = "";
         bitField0_ = (bitField0_ & ~0x00000002);
-        title_ = "";
+        if (titleBuilder_ == null) {
+          title_ = com.expleague.sensearch.protobuf.index.IndexUnits.Page.SerializedText.getDefaultInstance();
+        } else {
+          titleBuilder_.clear();
+        }
         bitField0_ = (bitField0_ & ~0x00000004);
-        content_ = "";
+        if (contentBuilder_ == null) {
+          content_ = com.expleague.sensearch.protobuf.index.IndexUnits.Page.SerializedText.getDefaultInstance();
+        } else {
+          contentBuilder_.clear();
+        }
         bitField0_ = (bitField0_ & ~0x00000008);
         if (outgoingLinksBuilder_ == null) {
           outgoingLinks_ = java.util.Collections.emptyList();
@@ -2738,11 +3221,19 @@ public final class IndexUnits {
         if (((from_bitField0_ & 0x00000004) == 0x00000004)) {
           to_bitField0_ |= 0x00000004;
         }
-        result.title_ = title_;
+        if (titleBuilder_ == null) {
+          result.title_ = title_;
+        } else {
+          result.title_ = titleBuilder_.build();
+        }
         if (((from_bitField0_ & 0x00000008) == 0x00000008)) {
           to_bitField0_ |= 0x00000008;
         }
-        result.content_ = content_;
+        if (contentBuilder_ == null) {
+          result.content_ = content_;
+        } else {
+          result.content_ = contentBuilder_.build();
+        }
         if (outgoingLinksBuilder_ == null) {
           if (((bitField0_ & 0x00000010) == 0x00000010)) {
             outgoingLinks_ = java.util.Collections.unmodifiableList(outgoingLinks_);
@@ -2800,14 +3291,10 @@ public final class IndexUnits {
           onChanged();
         }
         if (other.hasTitle()) {
-          bitField0_ |= 0x00000004;
-          title_ = other.title_;
-          onChanged();
+          mergeTitle(other.getTitle());
         }
         if (other.hasContent()) {
-          bitField0_ |= 0x00000008;
-          content_ = other.content_;
-          onChanged();
+          mergeContent(other.getContent());
         }
         if (outgoingLinksBuilder_ == null) {
           if (!other.outgoingLinks_.isEmpty()) {
@@ -3019,9 +3506,11 @@ public final class IndexUnits {
         return this;
       }
 
-      private java.lang.Object title_ = "";
+      private com.expleague.sensearch.protobuf.index.IndexUnits.Page.SerializedText title_ = com.expleague.sensearch.protobuf.index.IndexUnits.Page.SerializedText.getDefaultInstance();
+      private com.google.protobuf.SingleFieldBuilder<
+          com.expleague.sensearch.protobuf.index.IndexUnits.Page.SerializedText, com.expleague.sensearch.protobuf.index.IndexUnits.Page.SerializedText.Builder, com.expleague.sensearch.protobuf.index.IndexUnits.Page.SerializedTextOrBuilder> titleBuilder_;
       /**
-       * <code>optional string title = 3;</code>
+       * <code>optional .index.Page.SerializedText title = 3;</code>
        *
        * <pre>
        * only section title
@@ -3031,168 +3520,258 @@ public final class IndexUnits {
         return ((bitField0_ & 0x00000004) == 0x00000004);
       }
       /**
-       * <code>optional string title = 3;</code>
+       * <code>optional .index.Page.SerializedText title = 3;</code>
        *
        * <pre>
        * only section title
        * </pre>
        */
-      public java.lang.String getTitle() {
-        java.lang.Object ref = title_;
-        if (!(ref instanceof java.lang.String)) {
-          com.google.protobuf.ByteString bs =
-              (com.google.protobuf.ByteString) ref;
-          java.lang.String s = bs.toStringUtf8();
-          if (bs.isValidUtf8()) {
-            title_ = s;
+      public com.expleague.sensearch.protobuf.index.IndexUnits.Page.SerializedText getTitle() {
+        if (titleBuilder_ == null) {
+          return title_;
+        } else {
+          return titleBuilder_.getMessage();
+        }
+      }
+      /**
+       * <code>optional .index.Page.SerializedText title = 3;</code>
+       *
+       * <pre>
+       * only section title
+       * </pre>
+       */
+      public Builder setTitle(com.expleague.sensearch.protobuf.index.IndexUnits.Page.SerializedText value) {
+        if (titleBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
           }
-          return s;
+          title_ = value;
+          onChanged();
         } else {
-          return (java.lang.String) ref;
+          titleBuilder_.setMessage(value);
         }
+        bitField0_ |= 0x00000004;
+        return this;
       }
       /**
-       * <code>optional string title = 3;</code>
-       *
-       * <pre>
-       * only section title
-       * </pre>
-       */
-      public com.google.protobuf.ByteString
-          getTitleBytes() {
-        java.lang.Object ref = title_;
-        if (ref instanceof String) {
-          com.google.protobuf.ByteString b = 
-              com.google.protobuf.ByteString.copyFromUtf8(
-                  (java.lang.String) ref);
-          title_ = b;
-          return b;
-        } else {
-          return (com.google.protobuf.ByteString) ref;
-        }
-      }
-      /**
-       * <code>optional string title = 3;</code>
+       * <code>optional .index.Page.SerializedText title = 3;</code>
        *
        * <pre>
        * only section title
        * </pre>
        */
       public Builder setTitle(
-          java.lang.String value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  bitField0_ |= 0x00000004;
-        title_ = value;
-        onChanged();
+          com.expleague.sensearch.protobuf.index.IndexUnits.Page.SerializedText.Builder builderForValue) {
+        if (titleBuilder_ == null) {
+          title_ = builderForValue.build();
+          onChanged();
+        } else {
+          titleBuilder_.setMessage(builderForValue.build());
+        }
+        bitField0_ |= 0x00000004;
         return this;
       }
       /**
-       * <code>optional string title = 3;</code>
+       * <code>optional .index.Page.SerializedText title = 3;</code>
+       *
+       * <pre>
+       * only section title
+       * </pre>
+       */
+      public Builder mergeTitle(com.expleague.sensearch.protobuf.index.IndexUnits.Page.SerializedText value) {
+        if (titleBuilder_ == null) {
+          if (((bitField0_ & 0x00000004) == 0x00000004) &&
+              title_ != com.expleague.sensearch.protobuf.index.IndexUnits.Page.SerializedText.getDefaultInstance()) {
+            title_ =
+              com.expleague.sensearch.protobuf.index.IndexUnits.Page.SerializedText.newBuilder(title_).mergeFrom(value).buildPartial();
+          } else {
+            title_ = value;
+          }
+          onChanged();
+        } else {
+          titleBuilder_.mergeFrom(value);
+        }
+        bitField0_ |= 0x00000004;
+        return this;
+      }
+      /**
+       * <code>optional .index.Page.SerializedText title = 3;</code>
        *
        * <pre>
        * only section title
        * </pre>
        */
       public Builder clearTitle() {
+        if (titleBuilder_ == null) {
+          title_ = com.expleague.sensearch.protobuf.index.IndexUnits.Page.SerializedText.getDefaultInstance();
+          onChanged();
+        } else {
+          titleBuilder_.clear();
+        }
         bitField0_ = (bitField0_ & ~0x00000004);
-        title_ = getDefaultInstance().getTitle();
-        onChanged();
         return this;
       }
       /**
-       * <code>optional string title = 3;</code>
+       * <code>optional .index.Page.SerializedText title = 3;</code>
        *
        * <pre>
        * only section title
        * </pre>
        */
-      public Builder setTitleBytes(
-          com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  bitField0_ |= 0x00000004;
-        title_ = value;
+      public com.expleague.sensearch.protobuf.index.IndexUnits.Page.SerializedText.Builder getTitleBuilder() {
+        bitField0_ |= 0x00000004;
         onChanged();
-        return this;
+        return getTitleFieldBuilder().getBuilder();
+      }
+      /**
+       * <code>optional .index.Page.SerializedText title = 3;</code>
+       *
+       * <pre>
+       * only section title
+       * </pre>
+       */
+      public com.expleague.sensearch.protobuf.index.IndexUnits.Page.SerializedTextOrBuilder getTitleOrBuilder() {
+        if (titleBuilder_ != null) {
+          return titleBuilder_.getMessageOrBuilder();
+        } else {
+          return title_;
+        }
+      }
+      /**
+       * <code>optional .index.Page.SerializedText title = 3;</code>
+       *
+       * <pre>
+       * only section title
+       * </pre>
+       */
+      private com.google.protobuf.SingleFieldBuilder<
+          com.expleague.sensearch.protobuf.index.IndexUnits.Page.SerializedText, com.expleague.sensearch.protobuf.index.IndexUnits.Page.SerializedText.Builder, com.expleague.sensearch.protobuf.index.IndexUnits.Page.SerializedTextOrBuilder> 
+          getTitleFieldBuilder() {
+        if (titleBuilder_ == null) {
+          titleBuilder_ = new com.google.protobuf.SingleFieldBuilder<
+              com.expleague.sensearch.protobuf.index.IndexUnits.Page.SerializedText, com.expleague.sensearch.protobuf.index.IndexUnits.Page.SerializedText.Builder, com.expleague.sensearch.protobuf.index.IndexUnits.Page.SerializedTextOrBuilder>(
+                  getTitle(),
+                  getParentForChildren(),
+                  isClean());
+          title_ = null;
+        }
+        return titleBuilder_;
       }
 
-      private java.lang.Object content_ = "";
+      private com.expleague.sensearch.protobuf.index.IndexUnits.Page.SerializedText content_ = com.expleague.sensearch.protobuf.index.IndexUnits.Page.SerializedText.getDefaultInstance();
+      private com.google.protobuf.SingleFieldBuilder<
+          com.expleague.sensearch.protobuf.index.IndexUnits.Page.SerializedText, com.expleague.sensearch.protobuf.index.IndexUnits.Page.SerializedText.Builder, com.expleague.sensearch.protobuf.index.IndexUnits.Page.SerializedTextOrBuilder> contentBuilder_;
       /**
-       * <code>optional string content = 4;</code>
+       * <code>optional .index.Page.SerializedText content = 4;</code>
        */
       public boolean hasContent() {
         return ((bitField0_ & 0x00000008) == 0x00000008);
       }
       /**
-       * <code>optional string content = 4;</code>
+       * <code>optional .index.Page.SerializedText content = 4;</code>
        */
-      public java.lang.String getContent() {
-        java.lang.Object ref = content_;
-        if (!(ref instanceof java.lang.String)) {
-          com.google.protobuf.ByteString bs =
-              (com.google.protobuf.ByteString) ref;
-          java.lang.String s = bs.toStringUtf8();
-          if (bs.isValidUtf8()) {
-            content_ = s;
+      public com.expleague.sensearch.protobuf.index.IndexUnits.Page.SerializedText getContent() {
+        if (contentBuilder_ == null) {
+          return content_;
+        } else {
+          return contentBuilder_.getMessage();
+        }
+      }
+      /**
+       * <code>optional .index.Page.SerializedText content = 4;</code>
+       */
+      public Builder setContent(com.expleague.sensearch.protobuf.index.IndexUnits.Page.SerializedText value) {
+        if (contentBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
           }
-          return s;
+          content_ = value;
+          onChanged();
         } else {
-          return (java.lang.String) ref;
+          contentBuilder_.setMessage(value);
         }
+        bitField0_ |= 0x00000008;
+        return this;
       }
       /**
-       * <code>optional string content = 4;</code>
-       */
-      public com.google.protobuf.ByteString
-          getContentBytes() {
-        java.lang.Object ref = content_;
-        if (ref instanceof String) {
-          com.google.protobuf.ByteString b = 
-              com.google.protobuf.ByteString.copyFromUtf8(
-                  (java.lang.String) ref);
-          content_ = b;
-          return b;
-        } else {
-          return (com.google.protobuf.ByteString) ref;
-        }
-      }
-      /**
-       * <code>optional string content = 4;</code>
+       * <code>optional .index.Page.SerializedText content = 4;</code>
        */
       public Builder setContent(
-          java.lang.String value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  bitField0_ |= 0x00000008;
-        content_ = value;
-        onChanged();
+          com.expleague.sensearch.protobuf.index.IndexUnits.Page.SerializedText.Builder builderForValue) {
+        if (contentBuilder_ == null) {
+          content_ = builderForValue.build();
+          onChanged();
+        } else {
+          contentBuilder_.setMessage(builderForValue.build());
+        }
+        bitField0_ |= 0x00000008;
         return this;
       }
       /**
-       * <code>optional string content = 4;</code>
+       * <code>optional .index.Page.SerializedText content = 4;</code>
+       */
+      public Builder mergeContent(com.expleague.sensearch.protobuf.index.IndexUnits.Page.SerializedText value) {
+        if (contentBuilder_ == null) {
+          if (((bitField0_ & 0x00000008) == 0x00000008) &&
+              content_ != com.expleague.sensearch.protobuf.index.IndexUnits.Page.SerializedText.getDefaultInstance()) {
+            content_ =
+              com.expleague.sensearch.protobuf.index.IndexUnits.Page.SerializedText.newBuilder(content_).mergeFrom(value).buildPartial();
+          } else {
+            content_ = value;
+          }
+          onChanged();
+        } else {
+          contentBuilder_.mergeFrom(value);
+        }
+        bitField0_ |= 0x00000008;
+        return this;
+      }
+      /**
+       * <code>optional .index.Page.SerializedText content = 4;</code>
        */
       public Builder clearContent() {
+        if (contentBuilder_ == null) {
+          content_ = com.expleague.sensearch.protobuf.index.IndexUnits.Page.SerializedText.getDefaultInstance();
+          onChanged();
+        } else {
+          contentBuilder_.clear();
+        }
         bitField0_ = (bitField0_ & ~0x00000008);
-        content_ = getDefaultInstance().getContent();
-        onChanged();
         return this;
       }
       /**
-       * <code>optional string content = 4;</code>
+       * <code>optional .index.Page.SerializedText content = 4;</code>
        */
-      public Builder setContentBytes(
-          com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  bitField0_ |= 0x00000008;
-        content_ = value;
+      public com.expleague.sensearch.protobuf.index.IndexUnits.Page.SerializedText.Builder getContentBuilder() {
+        bitField0_ |= 0x00000008;
         onChanged();
-        return this;
+        return getContentFieldBuilder().getBuilder();
+      }
+      /**
+       * <code>optional .index.Page.SerializedText content = 4;</code>
+       */
+      public com.expleague.sensearch.protobuf.index.IndexUnits.Page.SerializedTextOrBuilder getContentOrBuilder() {
+        if (contentBuilder_ != null) {
+          return contentBuilder_.getMessageOrBuilder();
+        } else {
+          return content_;
+        }
+      }
+      /**
+       * <code>optional .index.Page.SerializedText content = 4;</code>
+       */
+      private com.google.protobuf.SingleFieldBuilder<
+          com.expleague.sensearch.protobuf.index.IndexUnits.Page.SerializedText, com.expleague.sensearch.protobuf.index.IndexUnits.Page.SerializedText.Builder, com.expleague.sensearch.protobuf.index.IndexUnits.Page.SerializedTextOrBuilder> 
+          getContentFieldBuilder() {
+        if (contentBuilder_ == null) {
+          contentBuilder_ = new com.google.protobuf.SingleFieldBuilder<
+              com.expleague.sensearch.protobuf.index.IndexUnits.Page.SerializedText, com.expleague.sensearch.protobuf.index.IndexUnits.Page.SerializedText.Builder, com.expleague.sensearch.protobuf.index.IndexUnits.Page.SerializedTextOrBuilder>(
+                  getContent(),
+                  getParentForChildren(),
+                  isClean());
+          content_ = null;
+        }
+        return contentBuilder_;
       }
 
       private java.util.List<com.expleague.sensearch.protobuf.index.IndexUnits.Page.Link> outgoingLinks_ =
@@ -7892,6 +8471,11 @@ public final class IndexUnits {
     com.google.protobuf.GeneratedMessage.FieldAccessorTable
       internal_static_index_Page_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_index_Page_SerializedText_descriptor;
+  private static
+    com.google.protobuf.GeneratedMessage.FieldAccessorTable
+      internal_static_index_Page_SerializedText_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
     internal_static_index_Page_Link_descriptor;
   private static
     com.google.protobuf.GeneratedMessage.FieldAccessorTable
@@ -7941,31 +8525,34 @@ public final class IndexUnits {
       "\006 \001(\005\022,\n$average_link_target_title_word_" +
       "count\030\007 \001(\001\022\034\n\024section_titles_count\030\010 \001(" +
       "\005\022\"\n\032average_section_title_size\030\t \001(\001\022\027\n" +
-      "\017vocabulary_size\030\004 \001(\005\"\255\002\n\004Page\022\017\n\007page_" +
-      "id\030\001 \001(\003\022\013\n\003uri\030\002 \001(\t\022\r\n\005title\030\003 \001(\t\022\017\n\007" +
-      "content\030\004 \001(\t\022(\n\016outgoing_links\030\005 \003(\0132\020." +
-      "index.Page.Link\022(\n\016incoming_links\030\006 \003(\0132",
-      "\020.index.Page.Link\022\022\n\ncategories\030\t \003(\t\022\021\n" +
-      "\tparent_id\030\007 \001(\003\022\024\n\014subpages_ids\030\010 \003(\003\032V" +
-      "\n\004Link\022\014\n\004text\030\001 \001(\t\022\026\n\016target_page_id\030\002" +
-      " \001(\003\022\020\n\010position\030\003 \001(\003\022\026\n\016source_page_id" +
-      "\030\004 \001(\003\"\360\001\n\016TermStatistics\022\017\n\007term_id\030\001 \001" +
-      "(\003\022\032\n\022document_frequency\030\002 \001(\005\022 \n\030docume" +
-      "nt_lemma_frequency\030\003 \001(\005\022\026\n\016term_frequen" +
-      "cy\030\004 \001(\003\022=\n\020bigram_frequency\030\005 \003(\0132#.ind" +
-      "ex.TermStatistics.TermFrequency\0328\n\rTermF" +
-      "requency\022\017\n\007term_id\030\001 \001(\003\022\026\n\016term_freque",
-      "ncy\030\002 \001(\005\"\202\002\n\004Term\022\n\n\002id\030\001 \001(\003\022\020\n\010lemma_" +
-      "id\030\002 \001(\003\022\014\n\004text\030\003 \001(\t\0220\n\016part_of_speech" +
-      "\030\004 \001(\0162\030.index.Term.PartOfSpeech\"\233\001\n\014Par" +
-      "tOfSpeech\022\013\n\007UNKNOWN\020\000\022\005\n\001A\020\001\022\007\n\003ADV\020\002\022\n" +
-      "\n\006ADVPRO\020\003\022\010\n\004ANUM\020\004\022\010\n\004APRO\020\005\022\007\n\003COM\020\006\022" +
-      "\010\n\004CONJ\020\007\022\010\n\004INTJ\020\010\022\007\n\003NUM\020\t\022\010\n\004PART\020\n\022\006" +
-      "\n\002PR\020\013\022\005\n\001S\020\014\022\010\n\004SPRO\020\r\022\005\n\001V\020\016\"\034\n\010TermLi" +
-      "st\022\020\n\010termList\030\001 \003(\003\"\036\n\013IntegerList\022\017\n\007i" +
-      "ntList\030\001 \003(\005\".\n\016UriPageMapping\022\013\n\003uri\030\001 " +
-      "\001(\t\022\017\n\007page_id\030\002 \001(\003B4\n&com.expleague.se",
-      "nsearch.protobuf.indexB\nIndexUnits"
+      "\017vocabulary_size\030\004 \001(\005\"\246\003\n\004Page\022\017\n\007page_" +
+      "id\030\001 \001(\003\022\013\n\003uri\030\002 \001(\t\022)\n\005title\030\003 \001(\0132\032.i" +
+      "ndex.Page.SerializedText\022+\n\007content\030\004 \001(" +
+      "\0132\032.index.Page.SerializedText\022(\n\016outgoin",
+      "g_links\030\005 \003(\0132\020.index.Page.Link\022(\n\016incom" +
+      "ing_links\030\006 \003(\0132\020.index.Page.Link\022\022\n\ncat" +
+      "egories\030\t \003(\t\022\021\n\tparent_id\030\007 \001(\003\022\024\n\014subp" +
+      "ages_ids\030\010 \003(\003\032#\n\016SerializedText\022\021\n\ttoke" +
+      "n_ids\030\001 \003(\005\032r\n\004Link\022(\n\004text\030\001 \001(\0132\032.inde" +
+      "x.Page.SerializedText\022\026\n\016target_page_id\030" +
+      "\002 \001(\003\022\020\n\010position\030\003 \001(\003\022\026\n\016source_page_i" +
+      "d\030\004 \001(\003\"\360\001\n\016TermStatistics\022\017\n\007term_id\030\001 " +
+      "\001(\003\022\032\n\022document_frequency\030\002 \001(\005\022 \n\030docum" +
+      "ent_lemma_frequency\030\003 \001(\005\022\026\n\016term_freque",
+      "ncy\030\004 \001(\003\022=\n\020bigram_frequency\030\005 \003(\0132#.in" +
+      "dex.TermStatistics.TermFrequency\0328\n\rTerm" +
+      "Frequency\022\017\n\007term_id\030\001 \001(\003\022\026\n\016term_frequ" +
+      "ency\030\002 \001(\005\"\202\002\n\004Term\022\n\n\002id\030\001 \001(\003\022\020\n\010lemma" +
+      "_id\030\002 \001(\003\022\014\n\004text\030\003 \001(\t\0220\n\016part_of_speec" +
+      "h\030\004 \001(\0162\030.index.Term.PartOfSpeech\"\233\001\n\014Pa" +
+      "rtOfSpeech\022\013\n\007UNKNOWN\020\000\022\005\n\001A\020\001\022\007\n\003ADV\020\002\022" +
+      "\n\n\006ADVPRO\020\003\022\010\n\004ANUM\020\004\022\010\n\004APRO\020\005\022\007\n\003COM\020\006" +
+      "\022\010\n\004CONJ\020\007\022\010\n\004INTJ\020\010\022\007\n\003NUM\020\t\022\010\n\004PART\020\n\022" +
+      "\006\n\002PR\020\013\022\005\n\001S\020\014\022\010\n\004SPRO\020\r\022\005\n\001V\020\016\"\034\n\010TermL",
+      "ist\022\020\n\010termList\030\001 \003(\003\"\036\n\013IntegerList\022\017\n\007" +
+      "intList\030\001 \003(\005\".\n\016UriPageMapping\022\013\n\003uri\030\001" +
+      " \001(\t\022\017\n\007page_id\030\002 \001(\003B4\n&com.expleague.s" +
+      "ensearch.protobuf.indexB\nIndexUnits"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
         new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
@@ -7991,8 +8578,14 @@ public final class IndexUnits {
       com.google.protobuf.GeneratedMessage.FieldAccessorTable(
         internal_static_index_Page_descriptor,
         new java.lang.String[] { "PageId", "Uri", "Title", "Content", "OutgoingLinks", "IncomingLinks", "Categories", "ParentId", "SubpagesIds", });
-    internal_static_index_Page_Link_descriptor =
+    internal_static_index_Page_SerializedText_descriptor =
       internal_static_index_Page_descriptor.getNestedTypes().get(0);
+    internal_static_index_Page_SerializedText_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessage.FieldAccessorTable(
+        internal_static_index_Page_SerializedText_descriptor,
+        new java.lang.String[] { "TokenIds", });
+    internal_static_index_Page_Link_descriptor =
+      internal_static_index_Page_descriptor.getNestedTypes().get(1);
     internal_static_index_Page_Link_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessage.FieldAccessorTable(
         internal_static_index_Page_Link_descriptor,
