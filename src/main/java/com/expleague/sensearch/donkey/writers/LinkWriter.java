@@ -1,14 +1,11 @@
 package com.expleague.sensearch.donkey.writers;
 
-import com.expleague.sensearch.donkey.crawler.document.CrawlerDocument;
-import com.expleague.sensearch.donkey.crawler.document.CrawlerDocument.Section;
 import com.expleague.sensearch.donkey.utils.BrandNewIdGenerator;
-import com.expleague.sensearch.protobuf.index.IndexUnits.Page.Link;
+import com.expleague.sensearch.protobuf.index.IndexUnits.Page;
 import java.io.Closeable;
 import java.io.Flushable;
 import java.io.IOException;
 import java.nio.file.Path;
-import java.util.List;
 import org.fusesource.leveldbjni.JniDBFactory;
 import org.iq80.leveldb.DB;
 import org.iq80.leveldb.Options;
@@ -48,20 +45,8 @@ public class LinkWriter implements Flushable, Closeable {
   }
 
   // TODO: there should be preprocessed page?
-  public void writeLinks(CrawlerDocument document) {
-    final long pageId = idGenerator.generatePageId(document.uri());
-    final Link.Builder linkBuilder = Link.newBuilder();
-    document.sections()
-        .map(Section::links)
-        .flatMap(List::stream)
-        .forEach(link -> {
-          linkBuilder.clear();
-          linkBuilder.setSourcePageId(pageId);
-          linkBuilder.setTargetPageId(idGenerator.generatePageId(link.targetUri()));
-          linkBuilder.setPosition(link.textOffset());
-          linkBuilder.setText(link.text().toString());
-          writeBatch.put(linkBuilder.build().toByteArray(), EMPTY_VALUE);
-        });
+  public void writeLink(Page.Link link) {
+    writeBatch.put(link.toByteArray(), EMPTY_VALUE);
     flush();
   }
 

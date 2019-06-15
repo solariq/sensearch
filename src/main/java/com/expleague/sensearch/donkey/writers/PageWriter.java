@@ -1,10 +1,15 @@
 package com.expleague.sensearch.donkey.writers;
 
+import com.expleague.sensearch.core.lemmer.Lemmer;
 import com.expleague.sensearch.donkey.crawler.document.CrawlerDocument;
 import com.expleague.sensearch.donkey.crawler.document.CrawlerDocument.Link;
 import com.expleague.sensearch.donkey.crawler.document.CrawlerDocument.Section;
 import com.expleague.sensearch.donkey.utils.BrandNewIdGenerator;
+import com.expleague.sensearch.donkey.utils.CachedTermParser;
+import com.expleague.sensearch.donkey.utils.TokenParser;
+import com.expleague.sensearch.donkey.utils.TokenParser.Token;
 import com.expleague.sensearch.protobuf.index.IndexUnits.Page;
+import com.expleague.sensearch.protobuf.index.IndexUnits.Page.SerializedText;
 import com.google.common.primitives.Longs;
 import java.io.Closeable;
 import java.io.Flushable;
@@ -15,6 +20,8 @@ import java.util.Deque;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Stream;
+import org.apache.commons.lang3.tuple.Pair;
 import org.fusesource.leveldbjni.JniDBFactory;
 import org.iq80.leveldb.DB;
 import org.iq80.leveldb.Options;
@@ -36,12 +43,19 @@ public class PageWriter implements Closeable, Flushable {
   private static final int BATCH_SIZE = 1000;
 
   private final BrandNewIdGenerator idGenerator = BrandNewIdGenerator.getInstance();
+  private final TokenParser tokenParser;
+  private final TermWriter termWriter;
+  private final LinkWriter linkWriter;
   private final DB pageDb;
   private final Path root;
+
   private WriteBatch writeBatch;
 
-  public PageWriter(Path root) {
+  public PageWriter(Path root, TokenParser tokenParser, TermWriter termWriter, LinkWriter linkWriter) {
     this.root = root;
+    this.termWriter = termWriter;
+    this.linkWriter = linkWriter;
+    this.tokenParser = tokenParser;
     try {
       pageDb = JniDBFactory.factory.open(root.toFile(), DB_OPTIONS);
       writeBatch = pageDb.createWriteBatch();
@@ -55,8 +69,8 @@ public class PageWriter implements Closeable, Flushable {
     List<String> categories = document.categories();
     List<Page> builtPages = new ArrayList<>();
     Deque<Page.Builder> parentPagesStack = new LinkedList<>();
-    document.sections().forEachOrdered(s -> addSection(
-        s, pageId, categories, parentPagesStack, builtPages, idGenerator
+    document.sections().forEachOrdered(s -> writeSection(
+        s, pageId, categories, parentPagesStack, builtPages
     ));
     while (!parentPagesStack.isEmpty()) {
       builtPages.add(Objects.requireNonNull(parentPagesStack.pollLast()).build());
@@ -68,12 +82,14 @@ public class PageWriter implements Closeable, Flushable {
     writeBatch = pageDb.createWriteBatch();
   }
 
+  private static SerializedText toSerializedText(List<Token> tokens) {
+    SerializedText.Builder builder = SerializedText.newBuilder();
+    tokens.stream().map(Token::formId).forEach(builder::addTokenIds);
+    return builder.build();
+  }
 
-  private static void addSection(Section section, // data for processing
-      long currentPageId, List<String> categories, // static state
-      Deque<Page.Builder> parentPagesStack, List<Page> builtPages, // dynamic state
-      BrandNewIdGenerator idGenerator
-  ) {
+  private void writeSection(Section section, long currentPageId, List<String> categories,
+      Deque<Page.Builder> parentPagesStack, List<Page> builtPages) {
     List<? extends CharSequence> sectionTitleSeq = section.titles();
     int sectionDepth = sectionTitleSeq.size();
     long sectionId = idGenerator.generatePageId(section.uri());
@@ -91,31 +107,34 @@ public class PageWriter implements Closeable, Flushable {
     while (parentPagesStack.size() >= sectionDepth) {
       builtPages.add(Objects.requireNonNull(parentPagesStack.pollLast()).build());
     }
-
     CharSequence sectionTitle = sectionTitleSeq.get(sectionDepth - 1);
+    List<Token> textTokens = tokenParser.parse(section.text());
+    List<Token> titleTokens = tokenParser.parse(sectionTitle);
     Page.Builder pageBuilder =
         Page.newBuilder()
             .setPageId(sectionId)
-            .setContent(section.text().toString())
-            .setTitle(sectionTitle.toString())
+            .setContent(toSerializedText(textTokens))
+            .setTitle(toSerializedText(titleTokens))
             .setUri(section.uri().toString())
             .addAllCategories(categories);
+    Stream.concat(textTokens.stream(), titleTokens.stream()).forEach(termWriter::writeTerm);
 
-    for (Link link : section.links()) {
-      long targetId = idGenerator.generatePageId(link.targetUri());
-      if (targetId == currentPageId) {
-        // Ignoring self-links
-        continue;
-      }
-      Page.Link dbLink =
-          Page.Link.newBuilder()
-              .setPosition(link.textOffset())
-              .setText(link.text().toString())
+    section.links().stream()
+        .filter(l -> idGenerator.generatePageId(l.targetUri()) != currentPageId)
+        .map(l -> {
+          List<Token> linkTokens = tokenParser.parse(l.text());
+          Page.Link builtLink = Page.Link.newBuilder()
+              .setPosition(l.textOffset())
+              .setText(toSerializedText(linkTokens))
               .setSourcePageId(sectionId)
-              .setTargetPageId(targetId)
+              .setTargetPageId(idGenerator.generatePageId(l.targetUri()))
               .build();
-      pageBuilder.addOutgoingLinks(dbLink);
-    }
+          return Pair.of(linkTokens, builtLink);
+        })
+        .peek(p -> pageBuilder.addOutgoingLinks(p.getRight()))
+        .peek(p -> linkWriter.writeLink(p.getRight()))
+        .flatMap(p -> p.getLeft().stream())
+        .forEach(termWriter::writeTerm);
 
     if (!parentPagesStack.isEmpty()) {
       pageBuilder.setParentId(parentPagesStack.peekLast().getPageId());
@@ -128,6 +147,8 @@ public class PageWriter implements Closeable, Flushable {
   @Override
   public void close() throws IOException {
     pageDb.write(writeBatch, WRITE_OPTIONS);
+    termWriter.close();
+    linkWriter.close();
     pageDb.close();
   }
 
@@ -135,5 +156,7 @@ public class PageWriter implements Closeable, Flushable {
   public void flush() throws IOException {
     pageDb.write(writeBatch, WRITE_OPTIONS);
     writeBatch = pageDb.createWriteBatch();
+    termWriter.flush();
+    linkWriter.flush();
   }
 }

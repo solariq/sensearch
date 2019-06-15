@@ -24,6 +24,7 @@ import com.expleague.sensearch.donkey.readers.Reader;
 import com.expleague.sensearch.donkey.utils.BrandNewIdGenerator;
 import com.expleague.sensearch.donkey.utils.CachedTermParser;
 import com.expleague.sensearch.donkey.utils.ParsedTerm;
+import com.expleague.sensearch.donkey.utils.TokenParser;
 import com.expleague.sensearch.donkey.writers.LinkWriter;
 import com.expleague.sensearch.donkey.writers.PageWriter;
 import com.expleague.sensearch.donkey.writers.TermWriter;
@@ -298,25 +299,14 @@ public class PlainIndexBuilder implements IndexBuilder {
     Files.createDirectories(indexRoot.resolve(PAGE_ROOT));
     Files.createDirectories(indexRoot.resolve(LINK_ROOT));
 
-    CachedTermParser termParser = new CachedTermParser(lemmer, 1_000_000);
     try (
-        TermWriter termWriter = new TermWriter(indexRoot.resolve(TERM_ROOT));
-        PageWriter pageWriter = new PageWriter(indexRoot.resolve(PAGE_ROOT));
-        LinkWriter linkWriter = new LinkWriter(indexRoot.resolve(LINK_ROOT))
+        TermWriter termWriter = new TermWriter(indexRoot.resolve(TERM_ROOT),
+            new CachedTermParser(lemmer, 1_000_000));
+        LinkWriter linkWriter = new LinkWriter(indexRoot.resolve(LINK_ROOT));
+        PageWriter pageWriter =
+            new PageWriter(indexRoot.resolve(PAGE_ROOT), new TokenParser(), termWriter, linkWriter);
         ) {
-      crawler.makeStream().forEach(d -> {
-        // TODO: there should be some sort of page preprocessing?
-        // doc -> TermStream??
-        linkWriter.writeLinks(d);
-        pageWriter.writeDocument(d);
-        d.sections()
-            .flatMap(s -> Stream.concat(
-                tokenizer.parseTextToWords(s.title()),
-                tokenizer.parseTextToWords(s.text())
-            ))
-            .map(termParser::parseTerm)
-            .forEach(termWriter::writeTerm);
-      });
+      crawler.makeStream().forEach(pageWriter::writeDocument);
     }
   }
 
