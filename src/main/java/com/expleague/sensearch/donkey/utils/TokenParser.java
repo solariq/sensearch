@@ -26,7 +26,7 @@ public class TokenParser {
     ID += termToIntMap.size();
   }
 
-  public List<Token> parseTokens(CharSeq text) {
+  public List<Token> parseTokens(CharSequence text) {
     List<Token> result = new ArrayList<>();
     parser.parse(text).forEach(t -> {
       try {
@@ -38,7 +38,7 @@ public class TokenParser {
     return result;
   }
 
-  public Token addToken(CharSeq token) throws Exception {
+  private Token addToken(CharSeq token) throws Exception {
     boolean firstUp = false;
     boolean punkt = true;
     final boolean[] allUp = {true};

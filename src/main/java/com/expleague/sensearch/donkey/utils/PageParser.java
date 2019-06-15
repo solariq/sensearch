@@ -6,11 +6,11 @@ import java.util.List;
 
 public class PageParser {
 
-  List<CharSeq> parse(CharSeq text) {
+  List<CharSeq> parse(CharSequence text) {
     List<CharSeq> result  = new ArrayList<>();
     StringBuilder token = new StringBuilder();
     final boolean[] isProcessingWord = {false};
-    text.forEach(c -> {
+    CharSeq.create(text).forEach(c -> {
       if (Character.isAlphabetic(c) || Character.isDigit(c)) {
         isProcessingWord[0] = true;
         token.append(c);
