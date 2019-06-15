@@ -38,6 +38,19 @@ public class TokenParser {
     return result;
   }
 
+
+  public boolean isWord(int id) {
+    return (id &  PUNCTUATION) == 0;
+  }
+
+  public boolean allUpperCase(int id) {
+    return (id &  ALL_UPPERCASE) != 0;
+  }
+
+  public boolean firstUpperCase(int id) {
+    return (id & FIRST_UPPERCASE) != 0;
+  }
+
   private Token addToken(CharSeq token) throws Exception {
     boolean firstUp = false;
     boolean punkt = true;
