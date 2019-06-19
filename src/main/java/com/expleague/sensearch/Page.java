@@ -1,7 +1,6 @@
 package com.expleague.sensearch;
 
 import com.expleague.commons.math.vectors.Vec;
-
 import com.expleague.sensearch.core.Term;
 import java.net.URI;
 import java.util.List;
@@ -31,10 +30,10 @@ public interface Page {
   URI uri();
 
   @NotNull
-  Stream<Term> content(SegmentType... types);
+  Stream<Term> content(boolean punct, SegmentType... types);
 
   @NotNull
-  List<List<Term>> categories();
+  List<CharSequence> categories();
 
   @NotNull
   Stream<Link> outgoingLinks(LinkType type);
@@ -88,7 +87,7 @@ public interface Page {
 
     /**
      * @return {@code true} if Target {@code Page} exists; {@code false} if Target {@code Page} dose
-     *     not exist.
+     * not exist.
      */
     boolean targetExists();
 
@@ -96,7 +95,9 @@ public interface Page {
 
     Page sourcePage();
 
-    /** @return offset by symbols */
+    /**
+     * @return offset by symbols
+     */
     long position();
   }
 }

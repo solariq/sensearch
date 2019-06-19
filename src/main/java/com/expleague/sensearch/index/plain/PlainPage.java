@@ -5,6 +5,8 @@ import com.expleague.commons.seq.CharSeqTools;
 import com.expleague.commons.util.cache.CacheStrategy.Type;
 import com.expleague.commons.util.cache.impl.FixedSizeCache;
 import com.expleague.sensearch.Page;
+import com.expleague.sensearch.core.Term;
+import com.expleague.sensearch.donkey.utils.TokenParser;
 import com.expleague.sensearch.index.IndexedPage;
 import com.expleague.sensearch.protobuf.index.IndexUnits;
 import com.google.common.base.Functions;
@@ -13,6 +15,7 @@ import com.google.protobuf.InvalidProtocolBufferException;
 import java.net.URI;
 import java.util.*;
 import java.util.function.Function;
+import java.util.stream.Collector;
 import java.util.stream.Collectors;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
@@ -152,6 +155,16 @@ public class PlainPage implements IndexedPage {
             });
   }
 
+  private List<Term> tokenToTerm(List<Integer> tokenIds, boolean punct) {
+    if (punct) {
+      return tokenIds.stream().map(id -> index.term(TokenParser.toId(id)))
+          .collect(Collectors.toList());
+    } else {
+      return tokenIds.stream().filter(TokenParser::isWord).map(id -> index.term(TokenParser.toId(id)))
+          .collect(Collectors.toList());
+    }
+  }
+
   @Override
   public long id() {
     if (isEmpty) {
@@ -186,40 +199,35 @@ public class PlainPage implements IndexedPage {
     return uri;
   }
 
-  private CharSequence content(SegmentType type) {
+  private Stream<Term> content(SegmentType type, boolean punct) {
     switch (type) {
       case BODY:
-        String subpagesContent =
-                subpages().map(p -> p.content(SegmentType.BODY)).collect(Collectors.joining("\n"));
-        if (subpagesContent.isEmpty()) {
-          return content(SegmentType.SUB_BODY);
-        }
-        return CharSeqTools.concat(content(SegmentType.SUB_BODY), "\n", subpagesContent);
+        Stream<Term> subpagesContent = subpages().map(p -> p.content(punct, SegmentType.BODY))
+            .flatMap(s -> s);
+        return Stream.concat(content(SegmentType.SUB_BODY, punct), subpagesContent);
       case FULL_TITLE:
         Page p = this;
-        CharSequence res = "";
+        Stream<Term> res = content(SegmentType.SECTION_TITLE, punct);
         while (p.parent() != p) {
-          res =
-                  CharSeqTools.concat(
-                          p.parent().content(SegmentType.SECTION_TITLE), TITLE_DELIMETER, res);
+          res = Stream.concat(p.parent().content(punct, SegmentType.SECTION_TITLE), res);
           p = p.parent();
         }
-        res = CharSeqTools.concat(res, content(SegmentType.SECTION_TITLE));
         return res;
       case SUB_BODY:
-        return protoPage.getContent();
+        return tokenToTerm(protoPage.getContent().getTokenIdsList(), punct).stream();
       case SECTION_TITLE:
-        return protoPage.getTitle();
+        return tokenToTerm(protoPage.getTitle().getTokenIdsList(), punct).stream();
       default:
-        return "";
+        return Stream.empty();
     }
   }
 
   @Override
-  public CharSequence content(SegmentType... types) {
-    return Arrays.stream(types).map(this::content).collect(Collectors.joining("\n"));
+  public Stream<Term> content(boolean punct, SegmentType... types) {
+    return Arrays.stream(types).map(t -> content(t, punct)).flatMap(s -> s);
   }
 
+  //TODO: still not parse categories(((
   @Override
   public List<CharSequence> categories() {
     return protoPage
@@ -319,8 +327,8 @@ public class PlainPage implements IndexedPage {
   }
 
   @Override
-  public Stream<CharSequence> sentences(SegmentType type) {
-    return index.sentences(content(type));
+  public Stream<List<Term>> sentences(SegmentType type) {
+    return index.sentences(content(true, type));
   }
 
   @Override
@@ -328,7 +336,7 @@ public class PlainPage implements IndexedPage {
     if (titleVec == null) {
       synchronized (this) {
         if (titleVec == null) {
-          titleVec = index.vecByTerms(index.parse(content(SegmentType.SECTION_TITLE)).collect(Collectors.toList()));
+          titleVec = index.vecByTerms(content(false, SegmentType.SECTION_TITLE).collect(Collectors.toList()));
         }
       }
     }
@@ -401,16 +409,16 @@ public class PlainPage implements IndexedPage {
     }
 
     @Override
-    public CharSequence targetTitle() {
+    public Stream<Term> targetTitle() {
       if (targetPage == EMPTY_PAGE) {
-        return "";
+        return Stream.empty();
       }
-      return targetPage.content(SegmentType.SECTION_TITLE);
+      return targetPage.content(false, SegmentType.SECTION_TITLE);
     }
 
     @Override
-    public CharSequence text() {
-      return protoLink.getText();
+    public Stream<Term> text() {
+      return ((PlainPage)sourcePage).tokenToTerm(protoLink.getText().getTokenIdsList(), false).stream();
     }
 
     @Override

@@ -47,15 +47,19 @@ public class TokenParser {
     return null;
   }
 
-  public boolean isWord(int id) {
+  public static int toId(int id) {
+    return id >>> BITS_FOR_META;
+  }
+
+  public static boolean isWord(int id) {
     return (id &  PUNCTUATION) == 0;
   }
 
-  public boolean allUpperCase(int id) {
+  public static boolean allUpperCase(int id) {
     return (id &  ALL_UPPERCASE) != 0;
   }
 
-  public boolean firstUpperCase(int id) {
+  public static boolean firstUpperCase(int id) {
     return (id & FIRST_UPPERCASE) != 0;
   }
 

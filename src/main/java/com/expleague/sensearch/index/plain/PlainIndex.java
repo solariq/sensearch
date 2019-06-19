@@ -360,6 +360,10 @@ public class PlainIndex implements Index {
     return wordToTerms.get(CharSeq.create(normalized));
   }
 
+  Term term(long id) {
+    return idToTerm.get(id);
+  }
+
   @Override
   public Stream<CharSequence> sentences(CharSequence sequence) {
     return tokenizer.toSentences(sequence);
