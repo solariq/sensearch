@@ -9,13 +9,12 @@ import java.util.concurrent.ExecutionException;
 public class CachedTermParser {
   // TODO: make sure this character wil NEVER appear in the word
   private final LoadingCache<CharSequence, ParsedTerm> cache;
-  private final Lemmer lemmer;
-  public CachedTermParser(Lemmer lemmer, int maxCacheSize) {
-    this.lemmer = lemmer;
+
+  public CachedTermParser(TokenParser parser, Lemmer lemmer, int maxCacheSize) {
     this.cache = CacheBuilder.newBuilder()
         .maximumSize(maxCacheSize)
         .concurrencyLevel(1000)
-        .build(CacheLoader.from(cs -> ParsedTerm.parse(cs, lemmer)));
+        .build(CacheLoader.from(cs -> ParsedTerm.parse(cs, lemmer, parser)));
   }
 
   public ParsedTerm parseTerm(CharSequence word) {

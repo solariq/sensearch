@@ -47,10 +47,6 @@ public class TermWriter implements Closeable, Flushable {
   }
 
   public void writeTerm(Token token) {
-    if (!token.isWord()) {
-      return;
-    }
-
     ParsedTerm parsedTerm = termParser.parseTerm(token.text());
     Term.Builder builder = Term.newBuilder();
 

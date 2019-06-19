@@ -299,12 +299,13 @@ public class PlainIndexBuilder implements IndexBuilder {
     Files.createDirectories(indexRoot.resolve(PAGE_ROOT));
     Files.createDirectories(indexRoot.resolve(LINK_ROOT));
 
+    TokenParser parser = new TokenParser();
     try (
         TermWriter termWriter = new TermWriter(indexRoot.resolve(TERM_ROOT),
-            new CachedTermParser(lemmer, 1_000_000));
+            new CachedTermParser(parser, lemmer, 1_000_000));
         LinkWriter linkWriter = new LinkWriter(indexRoot.resolve(LINK_ROOT));
         PageWriter pageWriter =
-            new PageWriter(indexRoot.resolve(PAGE_ROOT), new TokenParser(), termWriter, linkWriter);
+            new PageWriter(indexRoot.resolve(PAGE_ROOT), parser, termWriter, linkWriter);
         ) {
       crawler.makeStream().forEach(pageWriter::writeDocument);
     }
@@ -343,12 +344,13 @@ public class PlainIndexBuilder implements IndexBuilder {
     Files.createDirectories(indexRoot.resolve(TERM_ROOT));
 
     final TLongSet knownPageIds = new TLongHashSet();
-    final CachedTermParser termParser = new CachedTermParser(lemmer, 1_000_000);
+    final TokenParser parser = new TokenParser();
+    final CachedTermParser termParser = new CachedTermParser(parser, lemmer, 1_000_000);
     try (final PlainPageBuilder plainPageBuilder =
         new PlainPageBuilder(
             JniDBFactory.factory.open(indexRoot.resolve(PAGE_ROOT).toFile(), PAGE_DB_OPTIONS),
             indexRoot.resolve(PAGE_ROOT).resolve("TMP"));
-        final TermWriter termWriter = new TermWriter(indexRoot.resolve(TERM_ROOT));
+        final TermWriter termWriter = new TermWriter(indexRoot.resolve(TERM_ROOT), termParser);
         final StatisticsBuilder statisticsBuilder =
             new StatisticsBuilder(indexRoot.resolve(TERM_STATISTICS_ROOT));
         final EmbeddingBuilder embeddingBuilder =
@@ -430,7 +432,7 @@ public class PlainIndexBuilder implements IndexBuilder {
                                         isTitle[0] = false;
                                       }
                                       ParsedTerm parsedTerm = termParser.parseTerm(word);
-                                      termWriter.writeTerm(parsedTerm);
+                                      termWriter.writeTerm(parser.addToken(word));
                                       // TODO: uncomment it
                                       /*
                                       if (jmllEmbedding.apply(CharSeq.compact(word)) == null) {

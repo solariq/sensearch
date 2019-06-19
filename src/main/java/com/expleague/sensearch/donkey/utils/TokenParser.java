@@ -38,6 +38,14 @@ public class TokenParser {
     return result;
   }
 
+  public Token addToken(CharSequence token) {
+    try {
+      return addToken(CharSeq.intern(token));
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+    return null;
+  }
 
   public boolean isWord(int id) {
     return (id &  PUNCTUATION) == 0;

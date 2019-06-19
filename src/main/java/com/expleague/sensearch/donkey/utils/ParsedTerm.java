@@ -10,7 +10,6 @@ import javax.annotation.Nullable;
 
 public class ParsedTerm {
   private static final String LEMMA_SUFFIX = "$";
-  private static final BrandNewIdGenerator ID_GENERATOR = BrandNewIdGenerator.getInstance();
 
   private final long wordId;
   private final CharSeq word;
@@ -30,7 +29,7 @@ public class ParsedTerm {
     this.posTag = posTag;
   }
 
-  public static ParsedTerm parse(CharSequence wordcs, Lemmer lemmer) {
+  public static ParsedTerm parse(CharSequence wordcs, Lemmer lemmer, TokenParser parser) {
     CharSeq word = CharSeq.create(wordcs);
     word = CharSeq.intern(word);
 
@@ -40,12 +39,12 @@ public class ParsedTerm {
       lemma = parse.get(0).lemma();
     }
 
-    long wordId = ID_GENERATOR.generateTermId(word);
+    long wordId = parser.addToken(CharSeq.create(wordcs)).id();
     if (lemma == null) {
       return new ParsedTerm(wordId, word, -1, null, null);
     }
 
-    long lemmaId = ID_GENERATOR.generateTermId(lemma.lemma() + LEMMA_SUFFIX);
+    long lemmaId = parser.addToken(lemma.lemma() + LEMMA_SUFFIX).id();
     return new ParsedTerm(wordId, word, lemmaId, lemma.lemma(),
         PartOfSpeech.valueOf(lemma.pos().name()));
   }
