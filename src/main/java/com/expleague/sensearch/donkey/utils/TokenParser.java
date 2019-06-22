@@ -1,14 +1,18 @@
 package com.expleague.sensearch.donkey.utils;
 
 import com.expleague.commons.seq.CharSeq;
+import gnu.trove.map.TIntObjectMap;
 import gnu.trove.map.TObjectIntMap;
+import gnu.trove.map.hash.TIntObjectHashMap;
 import gnu.trove.map.hash.TObjectIntHashMap;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Stream;
 
 public class TokenParser {
 
   private TObjectIntMap<CharSeq> termToIntMap;
+  private TIntObjectMap<CharSeq> intToTermMap;
 
   public static int ID = 0;
   private final static int BITS_FOR_META = 8;
@@ -19,32 +23,75 @@ public class TokenParser {
 
   public TokenParser() {
     termToIntMap = new TObjectIntHashMap<>();
+    intToTermMap = new TIntObjectHashMap<>();
   }
 
   public TokenParser(TObjectIntMap<CharSeq> map) {
     termToIntMap = map;
+    intToTermMap = new TIntObjectHashMap<>();
+    map.forEachEntry((cs, i) ->  {
+      intToTermMap.put(i, cs);
+      return true;
+    });
     ID += termToIntMap.size();
   }
 
-  public List<Token> parse(CharSequence text) {
+  public boolean check(CharSequence originalText, int[] ids) {
+    boolean check = true;
+    boolean upper;
+
+    int id = 0;
+    CharSequence w = formatedText(ids[id]);
+    int j = 0;
+    for (int i = 0 ; i < originalText.length(); i++) {
+      upper = firstUpperCase(ids[id]);
+      if (w.charAt(j) != originalText.charAt(i)) {
+        if (!upper || j == 0 || Character.toUpperCase(w.charAt(j)) != originalText.charAt(i)) {
+          check = false;
+          break;
+        }
+      }
+      j++;
+      if (j == w.length()) {
+        j = 0;
+        id++;
+        if (id == ids.length && i != originalText.length()) {
+          check = false;
+          break;
+        }
+        if (id < ids.length) {
+          w = formatedText(ids[id]);
+        }
+      }
+    }
+    if (j != 0 || id != ids.length) {
+      check = false;
+    }
+
+    return check;
+  }
+
+  private CharSequence formatedText(int id) {
+    CharSequence t = intToTermMap.get(toId(id));
+    if (allUpperCase(id)) {
+      t = t.toString().toUpperCase();
+    } else if (firstUpperCase(id)) {
+      CharSequence cp = t.subSequence(1, t.length());
+      t = String.valueOf(Character.toUpperCase(t.charAt(0))) + cp;
+    }
+    return t;
+  }
+
+  public Stream<Token> parse(CharSequence text) {
     List<Token> result = new ArrayList<>();
     parser.parse(text).forEach(t -> {
-      try {
-        result.add(addToken(t));
-      } catch (Exception e) {
-        e.printStackTrace();
-      }
+      result.add(addToken(t));
     });
-    return result;
+    return result.stream();
   }
 
   public Token addToken(CharSequence token) {
-    try {
-      return addToken(CharSeq.intern(token));
-    } catch (Exception e) {
-      e.printStackTrace();
-    }
-    return null;
+    return addToken(CharSeq.intern(token));
   }
 
   public static int toId(int id) {
@@ -52,18 +99,18 @@ public class TokenParser {
   }
 
   public static boolean isWord(int id) {
-    return (id &  PUNCTUATION) == 0;
+    return (id & PUNCTUATION) == 0;
   }
 
   public static boolean allUpperCase(int id) {
-    return (id &  ALL_UPPERCASE) != 0;
+    return (id & ALL_UPPERCASE) != 0;
   }
 
   public static boolean firstUpperCase(int id) {
     return (id & FIRST_UPPERCASE) != 0;
   }
 
-  private Token addToken(CharSeq token) throws Exception {
+  private Token addToken(CharSeq token) {
     boolean firstUp = false;
     boolean punkt = true;
     final boolean[] allUp = {true};
@@ -85,9 +132,10 @@ public class TokenParser {
     } else {
       id = ID;
       termToIntMap.put(lowToken, id);
+      intToTermMap.put(id, lowToken);
       ID++;
       if (ID >= (1 << 29)) {
-        throw new Exception("Token limit::" + token.toString());
+        throw new RuntimeException("Token limit::" + token.toString());
       }
     }
     id = id << BITS_FOR_META;
@@ -135,11 +183,11 @@ public class TokenParser {
     }
 
     public boolean isWord() {
-      return (id &  PUNCTUATION) == 0;
+      return (id & PUNCTUATION) == 0;
     }
 
     public boolean allUpperCase() {
-      return (id &  ALL_UPPERCASE) != 0;
+      return (id & ALL_UPPERCASE) != 0;
     }
 
     public boolean firstUpperCase() {
