@@ -1,12 +1,12 @@
 package com.expleague.sensearch.features.sets.filter;
 
 import com.expleague.commons.math.vectors.Vec;
-import com.expleague.commons.seq.CharSeq;
 import com.expleague.ml.data.tools.FeatureSet;
 import com.expleague.ml.meta.FeatureMeta.ValueType;
 import com.expleague.ml.meta.TargetMeta;
 import com.expleague.sensearch.Page;
 import com.expleague.sensearch.Page.SegmentType;
+import com.expleague.sensearch.core.Term;
 import com.expleague.sensearch.core.impl.ResultItemImpl;
 import com.expleague.sensearch.features.QURLItem;
 import com.expleague.sensearch.query.Query;
@@ -18,6 +18,7 @@ import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class TargetFeatureSet extends FeatureSet.Stub<QURLItem> {
 
@@ -26,7 +27,7 @@ public class TargetFeatureSet extends FeatureSet.Stub<QURLItem> {
 
   private Query query;
   private Page page;
-  private Set<CharSeq> validTitles;
+  private Set<CharSequence> validTitles;
 
   @Override
   public void accept(QURLItem item) {
@@ -40,7 +41,7 @@ public class TargetFeatureSet extends FeatureSet.Stub<QURLItem> {
       ObjectMapper objectMapper = new ObjectMapper();
       validTitles = Arrays.stream(objectMapper.readValue(reader, ResultItemImpl[].class))
           .map(ResultItemImpl::title)
-          .map(CharSeq::create)
+          .map(ch -> ch.toString().toLowerCase())
           .collect(Collectors.toSet());
     } catch (IOException ignored) {
     }
@@ -48,10 +49,15 @@ public class TargetFeatureSet extends FeatureSet.Stub<QURLItem> {
     this.query = query;
   }
 
+  CharSequence toCS(Stream<Term> texts) {
+    StringBuilder builder = new StringBuilder();
+    texts.forEach(builder::append);
+    return builder.toString();
+  }
 
   @Override
   public Vec advance() {
-    set(TARGET_META, validTitles.contains(CharSeq.create(page.content(SegmentType.SECTION_TITLE))) ? 1 : 0);
+    set(TARGET_META, validTitles.contains(toCS(page.content(true, SegmentType.SECTION_TITLE))) ? 1 : 0);
     return super.advance();
   }
 }
