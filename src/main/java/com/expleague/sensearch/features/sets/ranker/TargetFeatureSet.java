@@ -7,6 +7,7 @@ import com.expleague.ml.meta.TargetMeta;
 import com.expleague.sensearch.Page;
 import com.expleague.sensearch.Page.SegmentType;
 import com.expleague.sensearch.SenSeArch.ResultItem;
+import com.expleague.sensearch.core.Term;
 import com.expleague.sensearch.core.impl.ResultItemImpl;
 import com.expleague.sensearch.features.QURLItem;
 import com.expleague.sensearch.query.Query;
@@ -17,6 +18,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class TargetFeatureSet extends FeatureSet.Stub<QURLItem> {
 
@@ -35,6 +37,12 @@ public class TargetFeatureSet extends FeatureSet.Stub<QURLItem> {
     this.query = query;
   }
 
+  private boolean textEq(CharSequence text, List<CharSequence> texts) {
+    String lowText = text.toString().toLowerCase();
+    StringBuilder merge = new StringBuilder();
+    texts.forEach(merge::append);
+    return lowText.equals(merge.toString());
+  }
 
   @Override
   public Vec advance() {
@@ -44,7 +52,8 @@ public class TargetFeatureSet extends FeatureSet.Stub<QURLItem> {
       List<ResultItem> res = Arrays.asList(objectMapper.readValue(reader, ResultItemImpl[].class));
       ResultItem resultItem = res
           .stream()
-          .filter(item -> item.title().equals(page.content(SegmentType.SECTION_TITLE)))
+          .filter(item -> textEq(item.title(),
+              page.content(true, SegmentType.SECTION_TITLE).map(Term::text).collect(Collectors.toList())))
           .findFirst().orElse(null);
       if (resultItem != null) {
         vec = res.indexOf(resultItem) + 1;
