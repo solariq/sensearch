@@ -1,8 +1,8 @@
 package com.expleague.sensearch.core.impl;
 
 import com.expleague.commons.seq.CharSeqTools;
+import com.expleague.sensearch.core.Term;
 import com.expleague.sensearch.core.Tokenizer;
-import com.expleague.sensearch.donkey.utils.TokenParser.Token;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.SentenceUtils;
 import edu.stanford.nlp.process.CoreLabelTokenFactory;
@@ -12,7 +12,6 @@ import edu.stanford.nlp.process.TokenizerFactory;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Stack;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 import org.apache.commons.io.input.CharSequenceReader;
@@ -61,35 +60,8 @@ public class StanfordTokenizer implements Tokenizer {
   }
 
   @Override
-  public Stream<List<Token>> toSentences(List<Token> text) {
-
-    Stack<String> braces = new Stack<>();
-    List<List<Token>> sentences = new ArrayList<>();
-    List<Token> sentence = new ArrayList<>();
-
-    text.forEach(token -> {
-      String c = String.valueOf(token);
-      if (c.equals("!") || c.equals("?") || c.equals(".")) {
-        if (sentence.size() > 0 && braces.empty()) {
-          sentences.add(sentence);
-          sentence.clear();
-        } else {
-          sentence.add(token);
-        }
-      } else if (c.equals("'") || c.equals("\"")) {
-        if (braces.empty() || !braces.peek().equals(c)) {
-          braces.push(c);
-        } else {
-          braces.pop();
-        }
-        sentence.add(token);
-      } else {
-        sentence.add(token);
-      }
-    });
-
-
-    return sentences.stream().filter(s -> s.size() > 0);
+  public Stream<List<Term>> toSentences(List<Integer> intText, List<Term> termText) {
+    return null;
   }
 
   private int trimStart(int sentenceStart, CharSequence text) {
