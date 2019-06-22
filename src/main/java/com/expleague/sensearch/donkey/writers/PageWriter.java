@@ -28,7 +28,6 @@ import java.util.function.BinaryOperator;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collector;
-import org.apache.commons.lang3.tuple.Pair;
 import org.fusesource.leveldbjni.JniDBFactory;
 import org.iq80.leveldb.DB;
 import org.iq80.leveldb.Options;
@@ -70,32 +69,57 @@ public class PageWriter implements Closeable, Flushable {
   }
 
   public void writeDocument(CrawlerDocument document) {
-    long pageId = idGenerator.generatePageId(document.uri());
-    List<String> categories = document.categories();
+    final long pageId = idGenerator.generatePageId(document.uri());
+    final List<String> categories = document.categories();
     final List<Page> builtPages = new ArrayList<>();
     final Stack<Builder> parentPagesStack = new Stack<>();
+    final List<CharSequence> parentTitles = new ArrayList<>();
+
     document.sections().forEachOrdered(s -> {
-      processSection(s, pageId, categories);
-      if (sectionDepth - parentPagesStack.size() > 1) {
-        LOGGER.error(
-            String.format(
-                "Received page (id [ %d ] section id [ %d ] with the depth [ %d ], when current depth is [ %d ]."
-                    + " Probably some sections are missing or sections order is incorrect. Index may become corrupted",
-                currentPageId, sectionId, sectionDepth, parentPagesStack.size()));
+      long sectionId = idGenerator.generatePageId(s.uri());
+      Page.Builder section = processSection(s, pageId, sectionId, categories);
+      List<CharSequence> sectionTitles = s.titles();
+
+      int commonPrefix = commonPrefix(sectionTitles, parentTitles);
+      if (commonPrefix == 0) {
+        // We encountered a case when a single page consists of two level-1 titles
+        // which is abnormal
+        // TODO: how should we handle this situation?
+        LOGGER.error(String.format(
+            "Received page with id [ %s ] and uri [ %s ] has at least two first-level titles."
+                + " Normally this should never happen. Probably page is corrupted",
+            pageId, document.uri()
+        ));
+      }
+
+      while (parentPagesStack.size() >= commonPrefix) {
+        builtPages.add(parentPagesStack.pop().build());
+      }
+
+      int depthDiff = sectionTitles.size() - parentPagesStack.size();
+      if (depthDiff > 1) {
+        LOGGER.error(String.format(
+            "Received page with id [ %d ] and uri [ %s ] which probably has missing sections."
+                + " Previous section titles: [ %s ]. Current section titles: [ %s ]."
+                + " Depth difference: [ %d ]. Index might be corrupted!",
+            pageId, document.uri(), parentTitles.toString(), sectionTitles.toString(), depthDiff));
         // TODO: if there were a missing section then we should add it to the stack otherwise parents
         // might become incorrect
       }
 
+      // normally this should never happen!
       if (!parentPagesStack.isEmpty()) {
-        pageBuilder.setParentId(parentPagesStack.peekLast().getPageId());
-        parentPagesStack.peekLast().addSubpagesIds(sectionId);
+        section.setParentId(parentPagesStack.peek().getPageId());
+        parentPagesStack.peek().addSubpagesIds(sectionId);
       }
-
-      parentPagesStack.addLast(pageBuilder);
-
+      parentPagesStack.push(section);
+      // TODO: probably should do it more intelligently
+      parentTitles.clear();
+      parentTitles.addAll(sectionTitles);
     });
+
     while (!parentPagesStack.isEmpty()) {
-      builtPages.add(Objects.requireNonNull(parentPagesStack.).build());
+      builtPages.add(Objects.requireNonNull(parentPagesStack.pop()).build());
     }
     builtPages.forEach(
         p -> writeBatch.put(Longs.toByteArray(p.getPageId()), p.toByteArray())
@@ -104,7 +128,7 @@ public class PageWriter implements Closeable, Flushable {
     writeBatch = pageDb.createWriteBatch();
   }
 
-  private void processSection(Section section, long currentPageId, long sectionId,
+  private Page.Builder processSection(Section section, long currentPageId, long sectionId,
       List<String> categories) {
 
     SerializedText sectionContent = tokenParser.parse(section.text())
@@ -142,6 +166,7 @@ public class PageWriter implements Closeable, Flushable {
         .peek(pageBuilder::addOutgoingLinks)
         .forEach(linkWriter::writeLink);
 
+    return pageBuilder;
   }
 
   @Override
@@ -155,9 +180,16 @@ public class PageWriter implements Closeable, Flushable {
   public void flush() throws IOException {
     pageDb.write(writeBatch, WRITE_OPTIONS);
     writeBatch = pageDb.createWriteBatch();
-    termWriter.flush();
     linkWriter.flush();
-    SerializedText serializedText;
+  }
+
+  private static int commonPrefix(List<CharSequence> list1, List<CharSequence> list2) {
+    int minSize = Math.min(list1.size(), list2.size());
+    int cmnPref = 0;
+    for (; cmnPref < minSize && list1.get(cmnPref) == list2.get(cmnPref); ++cmnPref) {
+      ;
+    }
+    return cmnPref;
   }
 
   private static int[] toIntArray(SerializedText serializedText) {
