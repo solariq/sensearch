@@ -44,7 +44,6 @@ public class LinkWriter implements Flushable, Closeable {
     }
   }
 
-  // TODO: there should be preprocessed page?
   public void writeLink(Page.Link link) {
     writeBatch.put(link.toByteArray(), EMPTY_VALUE);
     flush();

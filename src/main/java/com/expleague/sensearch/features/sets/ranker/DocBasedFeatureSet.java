@@ -39,13 +39,13 @@ public class DocBasedFeatureSet extends FeatureSet.Stub<QURLItem> {
     }
   }
 
-  private boolean isInterrogative(CharSequence s) {
-    return s.charAt(s.length() - 1) == '?';
+  private boolean isInterrogative(List<Term> s) {
+    return s.get(s.size() - 1).text() == "?";
   }
 
   @Override
   public Vec advance() {
-    List<CharSequence> sentencesList =
+    List<List<Term>> sentencesList =
         page.sentences(SegmentType.BODY).collect(Collectors.toList());
     long sentences = sentencesList.size();
     set(PASSAGES_COUNT, (double) sentences);

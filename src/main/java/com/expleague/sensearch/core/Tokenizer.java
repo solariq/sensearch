@@ -1,5 +1,6 @@
 package com.expleague.sensearch.core;
 
+import java.util.List;
 import java.util.stream.Stream;
 
 public interface Tokenizer {
@@ -18,6 +19,12 @@ public interface Tokenizer {
    * @return Sentences of the content
    */
   Stream<CharSequence> toSentences(CharSequence text);
+
+  /**
+   * Splits content to sentences
+   * @return Sentences of the content
+   */
+  Stream<List<Term>> toSentences(List<Integer> intText, List<Term> termText);
 
   /**
    * Splits text to paragraphs.

@@ -1,6 +1,7 @@
 package com.expleague.sensearch.core.impl;
 
 import com.expleague.commons.seq.CharSeqTools;
+import com.expleague.sensearch.core.Term;
 import com.expleague.sensearch.core.Tokenizer;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.SentenceUtils;
@@ -56,6 +57,11 @@ public class StanfordTokenizer implements Tokenizer {
     DocumentPreprocessor dp = new DocumentPreprocessor(new CharSequenceReader(text));
     dp.setTokenizerFactory(PT);
     return StreamSupport.stream(dp.spliterator(), false).map(SentenceUtils::listToOriginalTextString);
+  }
+
+  @Override
+  public Stream<List<Term>> toSentences(List<Integer> intText, List<Term> termText) {
+    return null;
   }
 
   private int trimStart(int sentenceStart, CharSequence text) {

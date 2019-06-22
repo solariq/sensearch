@@ -1,11 +1,8 @@
 package com.expleague.sensearch.donkey.writers;
 
-import com.expleague.sensearch.core.lemmer.Lemmer;
 import com.expleague.sensearch.donkey.crawler.document.CrawlerDocument;
-import com.expleague.sensearch.donkey.crawler.document.CrawlerDocument.Link;
 import com.expleague.sensearch.donkey.crawler.document.CrawlerDocument.Section;
 import com.expleague.sensearch.donkey.utils.BrandNewIdGenerator;
-import com.expleague.sensearch.donkey.utils.CachedTermParser;
 import com.expleague.sensearch.donkey.utils.TokenParser;
 import com.expleague.sensearch.donkey.utils.TokenParser.Token;
 import com.expleague.sensearch.protobuf.index.IndexUnits.Page;
@@ -69,7 +66,7 @@ public class PageWriter implements Closeable, Flushable {
     List<String> categories = document.categories();
     List<Page> builtPages = new ArrayList<>();
     Deque<Page.Builder> parentPagesStack = new LinkedList<>();
-    document.sections().forEachOrdered(s -> writeSection(
+    document.sections().forEachOrdered(s -> processSection(
         s, pageId, categories, parentPagesStack, builtPages
     ));
     while (!parentPagesStack.isEmpty()) {
@@ -88,7 +85,7 @@ public class PageWriter implements Closeable, Flushable {
     return builder.build();
   }
 
-  private void writeSection(Section section, long currentPageId, List<String> categories,
+  private void processSection(Section section, long currentPageId, List<String> categories,
       Deque<Page.Builder> parentPagesStack, List<Page> builtPages) {
     List<? extends CharSequence> sectionTitleSeq = section.titles();
     int sectionDepth = sectionTitleSeq.size();
