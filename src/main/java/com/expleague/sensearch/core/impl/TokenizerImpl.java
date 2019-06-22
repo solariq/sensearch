@@ -1,6 +1,7 @@
 package com.expleague.sensearch.core.impl;
 
 import com.expleague.commons.seq.CharSeqTools;
+import com.expleague.sensearch.core.Term;
 import com.expleague.sensearch.core.Tokenizer;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -87,6 +88,11 @@ public class TokenizerImpl implements Tokenizer {
     sentences.add(CharSeqTools.trim(text.subSequence(sentenceStart, text.length())));
 
     return sentences.stream().filter(s -> s.length() > 0);
+  }
+
+  @Override
+  public Stream<List<Term>> toSentences(List<Integer> intText, List<Term> termText) {
+    return null;
   }
 
   private int trimStart(int sentenceStart, CharSequence text) {

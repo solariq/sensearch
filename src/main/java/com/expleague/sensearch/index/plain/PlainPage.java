@@ -1,7 +1,6 @@
 package com.expleague.sensearch.index.plain;
 
 import com.expleague.commons.math.vectors.Vec;
-import com.expleague.commons.seq.CharSeqTools;
 import com.expleague.commons.util.cache.CacheStrategy.Type;
 import com.expleague.commons.util.cache.impl.FixedSizeCache;
 import com.expleague.sensearch.Page;
@@ -9,103 +8,101 @@ import com.expleague.sensearch.core.Term;
 import com.expleague.sensearch.donkey.utils.TokenParser;
 import com.expleague.sensearch.index.IndexedPage;
 import com.expleague.sensearch.protobuf.index.IndexUnits;
-import com.google.common.base.Functions;
 import com.google.protobuf.InvalidProtocolBufferException;
-
 import java.net.URI;
-import java.util.*;
-import java.util.function.Function;
-import java.util.stream.Collector;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 import javax.ws.rs.NotSupportedException;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class PlainPage implements IndexedPage {
 
   public static final IndexedPage EMPTY_PAGE =
-          new IndexedPage() {
-            private final URI DEFAULT_URI = URI.create("https://www.wikipedia.org/");
-            private static final String EMPTY_STRING = "";
+      new IndexedPage() {
+        private final URI DEFAULT_URI = URI.create("https://www.wikipedia.org/");
+        private static final String EMPTY_STRING = "";
 
-            @Override
-            public long id() {
-              throw new NotSupportedException("Id is not determined for an EmptyPage");
-            }
+        @Override
+        public long id() {
+          throw new NotSupportedException("Id is not determined for an EmptyPage");
+        }
 
-            @Override
-            public long parentId() {
-              throw new NotSupportedException("Parent id is not determined for an EmptyPage");
-            }
+        @Override
+        public long parentId() {
+          throw new NotSupportedException("Parent id is not determined for an EmptyPage");
+        }
 
-            @Override
-            public LongStream subpagesIds() {
-              return LongStream.empty();
-            }
+        @Override
+        public LongStream subpagesIds() {
+          return LongStream.empty();
+        }
 
-            @Override
-            public URI uri() {
-              return DEFAULT_URI;
-            }
+        @Override
+        public URI uri() {
+          return DEFAULT_URI;
+        }
 
-            @Override
-            public CharSequence content(SegmentType... types) {
-              return EMPTY_STRING;
-            }
+        @Override
+        public Stream<Term> content(boolean punct, SegmentType... types) {
+          return Stream.empty();
+        }
 
-            @Override
-            public List<CharSequence> categories() {
-              return Collections.emptyList();
-            }
+        @Override
+        public List<CharSequence> categories() {
+          return Collections.emptyList();
+        }
 
-            @Override
-            public Stream<Link> outgoingLinks(LinkType type) {
-              return Stream.empty();
-            }
+        @Override
+        public Stream<Link> outgoingLinks(LinkType type) {
+          return Stream.empty();
+        }
 
-            @Override
-            public Stream<Link> incomingLinks(LinkType type) {
-              return Stream.empty();
-            }
+        @Override
+        public Stream<Link> incomingLinks(LinkType type) {
+          return Stream.empty();
+        }
 
-            @Override
-            public Page parent() {
-              return this;
-            }
+        @Override
+        public Page parent() {
+          return this;
+        }
 
-            @Override
-            public Page root() {
-              return this;
-            }
+        @Override
+        public Page root() {
+          return this;
+        }
 
-            @Override
-            public boolean isRoot() {
-              return true;
-            }
+        @Override
+        public boolean isRoot() {
+          return true;
+        }
 
-            @Override
-            public Stream<Page> subpages() {
-              return Stream.empty();
-            }
+        @Override
+        public Stream<Page> subpages() {
+          return Stream.empty();
+        }
 
-            @Override
-            public Stream<CharSequence> sentences(SegmentType t) {
-              return Stream.empty();
-            }
+        @Override
+        public Stream<List<Term>> sentences(SegmentType t) {
+          return Stream.empty();
+        }
 
-            @Override
-            public Vec titleVec() {
-              return Vec.EMPTY;
-            }
+        @Override
+        public Vec titleVec() {
+          return Vec.EMPTY;
+        }
 
-            @Override
-            public Stream<Vec> sentenceVecs() {
-              return Stream.empty();
-            }
-          };
+        @Override
+        public Stream<Vec> sentenceVecs() {
+          return Stream.empty();
+        }
+      };
 
   private static final Logger LOG = LoggerFactory.getLogger(PlainPage.class);
 
@@ -129,40 +126,30 @@ public class PlainPage implements IndexedPage {
   private static final int CACHE_SIZE = 4 * (1 << 10); // 4K pages
 
   private static final FixedSizeCache<Long, IndexedPage> vecCache =
-          new FixedSizeCache<>(CACHE_SIZE, Type.LRU);
+      new FixedSizeCache<>(CACHE_SIZE, Type.LRU);
 
   public static IndexedPage create(long id, PlainIndex plainIndex) {
     return vecCache.get(
-            id,
-            (id1) -> {
-              try {
-                IndexUnits.Page protoPage = plainIndex.protoPageLoad(id);
-                return new PlainPage(protoPage, plainIndex);
-              } catch (NoSuchElementException e) {
-                LOG.warn(
-                        String.format(
-                                "No page was found in the index by given id [ %d ]." + " Returned empty page",
-                                id));
-                return EMPTY_PAGE;
-              } catch (InvalidProtocolBufferException e) {
-                LOG.warn(
-                        String.format(
-                                "Encountered invalid protobuf for the page with id [ %d ]."
-                                        + " Empty page is returned. Cause: %s",
-                                id, e.toString()));
-                return EMPTY_PAGE;
-              }
-            });
-  }
-
-  private List<Term> tokenToTerm(List<Integer> tokenIds, boolean punct) {
-    if (punct) {
-      return tokenIds.stream().map(id -> index.term(TokenParser.toId(id)))
-          .collect(Collectors.toList());
-    } else {
-      return tokenIds.stream().filter(TokenParser::isWord).map(id -> index.term(TokenParser.toId(id)))
-          .collect(Collectors.toList());
-    }
+        id,
+        (id1) -> {
+          try {
+            IndexUnits.Page protoPage = plainIndex.protoPageLoad(id);
+            return new PlainPage(protoPage, plainIndex);
+          } catch (NoSuchElementException e) {
+            LOG.warn(
+                String.format(
+                    "No page was found in the index by given id [ %d ]." + " Returned empty page",
+                    id));
+            return EMPTY_PAGE;
+          } catch (InvalidProtocolBufferException e) {
+            LOG.warn(
+                String.format(
+                    "Encountered invalid protobuf for the page with id [ %d ]."
+                        + " Empty page is returned. Cause: %s",
+                    id, e.toString()));
+            return EMPTY_PAGE;
+          }
+        });
   }
 
   @Override
@@ -199,42 +186,59 @@ public class PlainPage implements IndexedPage {
     return uri;
   }
 
-  private Stream<Term> content(SegmentType type, boolean punct) {
+  private Stream<Term> tokenToTerm(Stream<Integer> tokenIds) {
+    return tokenIds.map(id -> index.term(TokenParser.toId(id)));
+  }
+
+  private Stream<Integer> intContent(SegmentType type, boolean punct) {
     switch (type) {
+      case SECTION_TITLE:
+        if (punct) {
+          return protoPage.getTitle().getTokenIdsList().stream();
+        } else {
+          return protoPage.getTitle().getTokenIdsList().stream().filter(TokenParser::isWord);
+        }
+      case SUB_BODY:
+        if (punct) {
+          return protoPage.getContent().getTokenIdsList().stream();
+        } else {
+          return protoPage.getContent().getTokenIdsList().stream().filter(TokenParser::isWord);
+        }
       case BODY:
-        Stream<Term> subpagesContent = subpages().map(p -> p.content(punct, SegmentType.BODY))
-            .flatMap(s -> s);
-        return Stream.concat(content(SegmentType.SUB_BODY, punct), subpagesContent);
+        Stream<Integer> subpagesContent = subpages()
+            .flatMap(p -> ((PlainPage) p).intContent(type, punct));
+        return Stream.concat(intContent(SegmentType.SUB_BODY, punct), subpagesContent);
       case FULL_TITLE:
         Page p = this;
-        Stream<Term> res = content(SegmentType.SECTION_TITLE, punct);
+        Stream<Integer> res = intContent(SegmentType.SECTION_TITLE, punct);
         while (p.parent() != p) {
-          res = Stream.concat(p.parent().content(punct, SegmentType.SECTION_TITLE), res);
+          res = Stream
+              .concat(((PlainPage) p.parent()).intContent(SegmentType.SECTION_TITLE, punct), res);
           p = p.parent();
         }
         return res;
-      case SUB_BODY:
-        return tokenToTerm(protoPage.getContent().getTokenIdsList(), punct).stream();
-      case SECTION_TITLE:
-        return tokenToTerm(protoPage.getTitle().getTokenIdsList(), punct).stream();
       default:
         return Stream.empty();
     }
   }
 
+  private Stream<Term> content(SegmentType type, boolean punct) {
+    return tokenToTerm(intContent(type, punct));
+  }
+
   @Override
   public Stream<Term> content(boolean punct, SegmentType... types) {
-    return Arrays.stream(types).map(t -> content(t, punct)).flatMap(s -> s);
+    return Arrays.stream(types).flatMap(t -> content(t, punct));
   }
 
   //TODO: still not parse categories(((
   @Override
   public List<CharSequence> categories() {
     return protoPage
-            .getCategoriesList()
-            .stream()
-            .map(CharSequence.class::cast)
-            .collect(Collectors.toList());
+        .getCategoriesList()
+        .stream()
+        .map(CharSequence.class::cast)
+        .collect(Collectors.toList());
   }
 
   @Override
@@ -259,7 +263,7 @@ public class PlainPage implements IndexedPage {
 
       case ALL_LINKS:
         return protoPage.getOutgoingLinksList().size()
-                + subpages().mapToInt(page -> page.outgoingLinksCount(LinkType.ALL_LINKS)).sum();
+            + subpages().mapToInt(page -> page.outgoingLinksCount(LinkType.ALL_LINKS)).sum();
       default:
         return 0;
     }
@@ -270,17 +274,17 @@ public class PlainPage implements IndexedPage {
     switch (type) {
       case SECTION_LINKS:
         return protoPage
-                .getOutgoingLinksList()
-                .stream()
-                .map(l -> PlainLink.withSource(l, index, this));
+            .getOutgoingLinksList()
+            .stream()
+            .map(l -> PlainLink.withSource(l, index, this));
 
       case ALL_LINKS:
         return Stream.concat(
-                protoPage
-                        .getOutgoingLinksList()
-                        .stream()
-                        .map(l -> PlainLink.withSource(l, index, this)),
-                subpages().flatMap(page -> page.outgoingLinks(LinkType.ALL_LINKS)));
+            protoPage
+                .getOutgoingLinksList()
+                .stream()
+                .map(l -> PlainLink.withSource(l, index, this)),
+            subpages().flatMap(page -> page.outgoingLinks(LinkType.ALL_LINKS)));
       default:
         return Stream.empty();
     }
@@ -291,9 +295,9 @@ public class PlainPage implements IndexedPage {
     switch (type) {
       case SECTION_LINKS:
         return protoPage
-                .getIncomingLinksList()
-                .stream()
-                .map(l -> PlainLink.withTarget(l, index, this));
+            .getIncomingLinksList()
+            .stream()
+            .map(l -> PlainLink.withTarget(l, index, this));
 
       case ALL_LINKS:
         return root().incomingLinks(LinkType.SECTION_LINKS);
@@ -328,7 +332,7 @@ public class PlainPage implements IndexedPage {
 
   @Override
   public Stream<List<Term>> sentences(SegmentType type) {
-    return index.sentences(content(true, type));
+    return index.sentences(intContent(type, true));
   }
 
   @Override
@@ -336,7 +340,8 @@ public class PlainPage implements IndexedPage {
     if (titleVec == null) {
       synchronized (this) {
         if (titleVec == null) {
-          titleVec = index.vecByTerms(content(false, SegmentType.SECTION_TITLE).collect(Collectors.toList()));
+          titleVec = index
+              .vecByTerms(content(false, SegmentType.SECTION_TITLE).collect(Collectors.toList()));
         }
       }
     }
@@ -349,8 +354,8 @@ public class PlainPage implements IndexedPage {
       synchronized (this) {
         if (sentenceVecs == null) {
           sentenceVecs = sentences(SegmentType.BODY)
-                  .map(s -> index.vecByTerms(index.parse(s).collect(Collectors.toList())))
-                  .toArray(Vec[]::new);
+              .map(index::vecByTerms)
+              .toArray(Vec[]::new);
         }
       }
     }
@@ -368,6 +373,7 @@ public class PlainPage implements IndexedPage {
   }
 
   static class PlainLink implements Page.Link {
+
     private final IndexUnits.Page.Link protoLink;
     private final IndexedPage sourcePage;
     private final IndexedPage targetPage;
@@ -379,28 +385,28 @@ public class PlainPage implements IndexedPage {
     }
 
     static PlainLink withTarget(
-            IndexUnits.Page.Link protoLink, PlainIndex index, PlainPage targetPage) {
+        IndexUnits.Page.Link protoLink, PlainIndex index, PlainPage targetPage) {
       return new PlainLink(
-              protoLink, PlainPage.create(protoLink.getSourcePageId(), index), targetPage);
+          protoLink, PlainPage.create(protoLink.getSourcePageId(), index), targetPage);
     }
 
     static PlainLink withSource(
-            IndexUnits.Page.Link protoLink, PlainIndex index, PlainPage sourcePage) {
+        IndexUnits.Page.Link protoLink, PlainIndex index, PlainPage sourcePage) {
       return new PlainLink(
-              protoLink,
-              sourcePage,
-              protoLink.hasTargetPageId()
-                      ? PlainPage.create(protoLink.getTargetPageId(), index)
-                      : PlainPage.EMPTY_PAGE);
+          protoLink,
+          sourcePage,
+          protoLink.hasTargetPageId()
+              ? PlainPage.create(protoLink.getTargetPageId(), index)
+              : PlainPage.EMPTY_PAGE);
     }
 
     static PlainLink fromProtoLinkOnly(IndexUnits.Page.Link protoLink, PlainIndex index) {
       return new PlainLink(
-              protoLink,
-              PlainPage.create(protoLink.getSourcePageId(), index),
-              protoLink.hasTargetPageId()
-                      ? PlainPage.create(protoLink.getTargetPageId(), index)
-                      : PlainPage.EMPTY_PAGE);
+          protoLink,
+          PlainPage.create(protoLink.getSourcePageId(), index),
+          protoLink.hasTargetPageId()
+              ? PlainPage.create(protoLink.getTargetPageId(), index)
+              : PlainPage.EMPTY_PAGE);
     }
 
     @Override
@@ -418,7 +424,7 @@ public class PlainPage implements IndexedPage {
 
     @Override
     public Stream<Term> text() {
-      return ((PlainPage)sourcePage).tokenToTerm(protoLink.getText().getTokenIdsList(), false).stream();
+      return ((PlainPage) sourcePage).tokenToTerm(protoLink.getText().getTokenIdsList().stream().filter(TokenParser::isWord));
     }
 
     @Override

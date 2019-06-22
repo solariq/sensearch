@@ -19,7 +19,7 @@ public interface Index extends AutoCloseable {
 
   @Nullable
   Term term(CharSequence seq);
-  Stream<CharSequence> sentences(CharSequence sequence);
+  Stream<List<Term>> sentences(Stream<Integer> sequence);
   Stream<Term> parse(CharSequence sequence);
   Stream<Term> mostFrequentNeighbours(Term term);
   Vec vecByTerms(List<Term> terms);

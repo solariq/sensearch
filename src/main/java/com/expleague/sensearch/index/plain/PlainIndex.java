@@ -46,6 +46,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Objects;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.apache.log4j.Logger;
 import org.fusesource.leveldbjni.JniDBFactory;
@@ -365,8 +366,10 @@ public class PlainIndex implements Index {
   }
 
   @Override
-  public Stream<CharSequence> sentences(CharSequence sequence) {
-    return tokenizer.toSentences(sequence);
+  public Stream<List<Term>> sentences(Stream<Integer> text) {
+    List<Integer> intText = text.collect(Collectors.toList());
+    List<Term> termText = intText.stream().map(this::term).collect(Collectors.toList());
+    return tokenizer.toSentences(intText, termText);
   }
 
   @Override
