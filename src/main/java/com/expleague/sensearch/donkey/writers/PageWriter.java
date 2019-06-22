@@ -8,18 +8,29 @@ import com.expleague.sensearch.donkey.utils.TokenParser.Token;
 import com.expleague.sensearch.protobuf.index.IndexUnits.Page;
 import com.expleague.sensearch.protobuf.index.IndexUnits.Page.SerializedText;
 import com.google.common.primitives.Longs;
+import gnu.trove.TCollections;
+import gnu.trove.list.TIntList;
+import gnu.trove.list.array.TIntArrayList;
 import java.io.Closeable;
 import java.io.Flushable;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Deque;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
+import java.util.function.BiConsumer;
+import java.util.function.BinaryOperator;
+import java.util.function.Function;
+import java.util.function.Supplier;
+import java.util.stream.Collector;
 import java.util.stream.Stream;
 import org.apache.commons.lang3.tuple.Pair;
 import org.fusesource.leveldbjni.JniDBFactory;
+import org.glassfish.jersey.internal.guava.Sets;
 import org.iq80.leveldb.DB;
 import org.iq80.leveldb.Options;
 import org.iq80.leveldb.WriteBatch;
@@ -48,7 +59,8 @@ public class PageWriter implements Closeable, Flushable {
 
   private WriteBatch writeBatch;
 
-  public PageWriter(Path root, TokenParser tokenParser, TermWriter termWriter, LinkWriter linkWriter) {
+  public PageWriter(Path root, TokenParser tokenParser, TermWriter termWriter,
+      LinkWriter linkWriter) {
     this.root = root;
     this.termWriter = termWriter;
     this.linkWriter = linkWriter;
@@ -155,5 +167,52 @@ public class PageWriter implements Closeable, Flushable {
     writeBatch = pageDb.createWriteBatch();
     termWriter.flush();
     linkWriter.flush();
+  }
+
+  private static class SerializedTextCollector implements Collector<Token, TIntList, SerializedText> {
+
+    private static final SerializedTextCollector INSTANCE = new SerializedTextCollector();
+    private static final Set<Characteristics> CHARACTERISTICS = new HashSet<Characteristics>() {{
+      add(Characteristics.CONCURRENT);
+    }};
+    public static SerializedTextCollector instance() {
+      return INSTANCE;
+    }
+
+    @Override
+    public Supplier<TIntList> supplier() {
+      return () -> TCollections.synchronizedList(new TIntArrayList());
+    }
+
+    @Override
+    public BiConsumer<TIntList, Token> accumulator() {
+      return (l, t) -> l.add(t.formId());
+    }
+
+    @Override
+    public BinaryOperator<TIntList> combiner() {
+      return (l1, l2) -> {
+        l1.addAll(l2);
+        return l1;
+      };
+    }
+
+    @Override
+    public Function<TIntList, SerializedText> finisher() {
+      return list -> {
+        SerializedText.Builder builder = SerializedText.newBuilder();
+        //because TIntList is not iterable!
+        list.forEach(t -> {
+          builder.addTokenIds(t);
+          return true;
+        });
+        return builder.build();
+      };
+    }
+
+    @Override
+    public Set<Characteristics> characteristics() {
+      return CHARACTERISTICS;
+    }
   }
 }
