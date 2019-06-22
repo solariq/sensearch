@@ -1,11 +1,13 @@
 package com.expleague.sensearch.donkey.writers;
 
 import com.expleague.sensearch.donkey.crawler.document.CrawlerDocument;
+import com.expleague.sensearch.donkey.crawler.document.CrawlerDocument.Link;
 import com.expleague.sensearch.donkey.crawler.document.CrawlerDocument.Section;
 import com.expleague.sensearch.donkey.utils.BrandNewIdGenerator;
 import com.expleague.sensearch.donkey.utils.TokenParser;
 import com.expleague.sensearch.donkey.utils.TokenParser.Token;
 import com.expleague.sensearch.protobuf.index.IndexUnits.Page;
+import com.expleague.sensearch.protobuf.index.IndexUnits.Page.Builder;
 import com.expleague.sensearch.protobuf.index.IndexUnits.Page.SerializedText;
 import com.google.common.primitives.Longs;
 import gnu.trove.TCollections;
@@ -16,18 +18,16 @@ import java.io.Flushable;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.Deque;
 import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+import java.util.Stack;
 import java.util.function.BiConsumer;
 import java.util.function.BinaryOperator;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collector;
-import java.util.stream.Stream;
 import org.apache.commons.lang3.tuple.Pair;
 import org.fusesource.leveldbjni.JniDBFactory;
 import org.iq80.leveldb.DB;
@@ -51,17 +51,14 @@ public class PageWriter implements Closeable, Flushable {
 
   private final BrandNewIdGenerator idGenerator = BrandNewIdGenerator.getInstance();
   private final TokenParser tokenParser;
-  private final TermWriter termWriter;
   private final LinkWriter linkWriter;
   private final DB pageDb;
   private final Path root;
 
   private WriteBatch writeBatch;
 
-  public PageWriter(Path root, TokenParser tokenParser, TermWriter termWriter,
-      LinkWriter linkWriter) {
+  public PageWriter(Path root, TokenParser tokenParser, LinkWriter linkWriter) {
     this.root = root;
-    this.termWriter = termWriter;
     this.linkWriter = linkWriter;
     this.tokenParser = tokenParser;
     try {
@@ -75,13 +72,30 @@ public class PageWriter implements Closeable, Flushable {
   public void writeDocument(CrawlerDocument document) {
     long pageId = idGenerator.generatePageId(document.uri());
     List<String> categories = document.categories();
-    List<Page> builtPages = new ArrayList<>();
-    Deque<Page.Builder> parentPagesStack = new LinkedList<>();
-    document.sections().forEachOrdered(s -> processSection(
-        s, pageId, categories, parentPagesStack, builtPages
-    ));
+    final List<Page> builtPages = new ArrayList<>();
+    final Stack<Builder> parentPagesStack = new Stack<>();
+    document.sections().forEachOrdered(s -> {
+      processSection(s, pageId, categories);
+      if (sectionDepth - parentPagesStack.size() > 1) {
+        LOGGER.error(
+            String.format(
+                "Received page (id [ %d ] section id [ %d ] with the depth [ %d ], when current depth is [ %d ]."
+                    + " Probably some sections are missing or sections order is incorrect. Index may become corrupted",
+                currentPageId, sectionId, sectionDepth, parentPagesStack.size()));
+        // TODO: if there were a missing section then we should add it to the stack otherwise parents
+        // might become incorrect
+      }
+
+      if (!parentPagesStack.isEmpty()) {
+        pageBuilder.setParentId(parentPagesStack.peekLast().getPageId());
+        parentPagesStack.peekLast().addSubpagesIds(sectionId);
+      }
+
+      parentPagesStack.addLast(pageBuilder);
+
+    });
     while (!parentPagesStack.isEmpty()) {
-      builtPages.add(Objects.requireNonNull(parentPagesStack.pollLast()).build());
+      builtPages.add(Objects.requireNonNull(parentPagesStack.).build());
     }
     builtPages.forEach(
         p -> writeBatch.put(Longs.toByteArray(p.getPageId()), p.toByteArray())
@@ -90,72 +104,49 @@ public class PageWriter implements Closeable, Flushable {
     writeBatch = pageDb.createWriteBatch();
   }
 
-  private static SerializedText toSerializedText(List<Token> tokens) {
-    SerializedText.Builder builder = SerializedText.newBuilder();
-    tokens.stream().map(Token::formId).forEach(builder::addTokenIds);
-    return builder.build();
-  }
+  private void processSection(Section section, long currentPageId, long sectionId,
+      List<String> categories) {
 
-  private void processSection(Section section, long currentPageId, List<String> categories,
-      Deque<Page.Builder> parentPagesStack, List<Page> builtPages) {
-    List<? extends CharSequence> sectionTitleSeq = section.titles();
-    int sectionDepth = sectionTitleSeq.size();
-    long sectionId = idGenerator.generatePageId(section.uri());
-    if (sectionDepth - parentPagesStack.size() > 1) {
-      LOGGER.error(
-          String.format(
-              "Received page (id [ %d ] section id [ %d ] with the depth [ %d ], when current depth is [ %d ]."
-                  + " Probably some sections are missing or sections order is incorrect. Index may become corrupted",
-              currentPageId, sectionId, sectionDepth, parentPagesStack.size()));
-      // TODO: if there were a missing section then we should add it to the stack otherwise parents
-      // might become incorrect
-    }
+    SerializedText sectionContent = tokenParser.parse(section.text())
+        .collect(SerializedTextCollector.instance());
+    tokenParser.check(section.text(), toIntArray(sectionContent));
 
-    // section depth is always greater than 1
-    while (parentPagesStack.size() >= sectionDepth) {
-      builtPages.add(Objects.requireNonNull(parentPagesStack.pollLast()).build());
-    }
-    CharSequence sectionTitle = sectionTitleSeq.get(sectionDepth - 1);
-    List<Token> textTokens = tokenParser.parse(section.text());
-    List<Token> titleTokens = tokenParser.parse(sectionTitle);
+    SerializedText sectionTitle = tokenParser.parse(section.title())
+        .collect(SerializedTextCollector.instance());
+    tokenParser.check(section.title(), toIntArray(sectionTitle));
+
     Page.Builder pageBuilder =
         Page.newBuilder()
             .setPageId(sectionId)
-            .setContent(toSerializedText(textTokens))
-            .setTitle(toSerializedText(titleTokens))
+            .setContent(sectionContent)
+            .setTitle(sectionTitle)
             .setUri(section.uri().toString())
             .addAllCategories(categories);
-    Stream.concat(textTokens.stream(), titleTokens.stream()).forEach(termWriter::writeTerm);
 
     section.links().stream()
-        .filter(l -> idGenerator.generatePageId(l.targetUri()) != currentPageId)
+        .map(l -> new TargetIdLinkPair(idGenerator.generatePageId(l.targetUri()), l))
+        .filter(l -> l.targetId() != currentPageId)
         .map(l -> {
-          List<Token> linkTokens = tokenParser.parse(l.text());
-          Page.Link builtLink = Page.Link.newBuilder()
-              .setPosition(l.textOffset())
-              .setText(toSerializedText(linkTokens))
+          SerializedText sectionLink = tokenParser.parse(l.link().text())
+              .collect(SerializedTextCollector.instance());
+          tokenParser.check(l.link.text(), toIntArray(sectionLink));
+
+          // TODO: remove offsets maybe?
+          return Page.Link.newBuilder()
+              .setPosition(l.link().textOffset())
+              .setText(sectionLink)
               .setSourcePageId(sectionId)
-              .setTargetPageId(idGenerator.generatePageId(l.targetUri()))
+              .setTargetPageId(l.targetId())
               .build();
-          return Pair.of(linkTokens, builtLink);
         })
-        .peek(p -> pageBuilder.addOutgoingLinks(p.getRight()))
-        .peek(p -> linkWriter.writeLink(p.getRight()))
-        .flatMap(p -> p.getLeft().stream())
-        .forEach(termWriter::writeTerm);
+        .peek(pageBuilder::addOutgoingLinks)
+        .forEach(linkWriter::writeLink);
 
-    if (!parentPagesStack.isEmpty()) {
-      pageBuilder.setParentId(parentPagesStack.peekLast().getPageId());
-      parentPagesStack.peekLast().addSubpagesIds(sectionId);
-    }
-
-    parentPagesStack.addLast(pageBuilder);
   }
 
   @Override
   public void close() throws IOException {
     pageDb.write(writeBatch, WRITE_OPTIONS);
-    termWriter.close();
     linkWriter.close();
     pageDb.close();
   }
@@ -166,14 +157,40 @@ public class PageWriter implements Closeable, Flushable {
     writeBatch = pageDb.createWriteBatch();
     termWriter.flush();
     linkWriter.flush();
+    SerializedText serializedText;
   }
 
-  private static class SerializedTextCollector implements Collector<Token, TIntList, SerializedText> {
+  private static int[] toIntArray(SerializedText serializedText) {
+    return serializedText.getTokenIdsList().stream().mapToInt(Integer::intValue).toArray();
+  }
+
+  private static class TargetIdLinkPair {
+
+    final long targetId;
+    final Link link;
+
+    TargetIdLinkPair(long targetId, Link link) {
+      this.targetId = targetId;
+      this.link = link;
+    }
+
+    long targetId() {
+      return targetId;
+    }
+
+    Link link() {
+      return link;
+    }
+  }
+
+  private static class SerializedTextCollector implements
+      Collector<Token, TIntList, SerializedText> {
 
     private static final SerializedTextCollector INSTANCE = new SerializedTextCollector();
     private static final Set<Characteristics> CHARACTERISTICS = new HashSet<Characteristics>() {{
       add(Characteristics.CONCURRENT);
     }};
+
     public static SerializedTextCollector instance() {
       return INSTANCE;
     }
