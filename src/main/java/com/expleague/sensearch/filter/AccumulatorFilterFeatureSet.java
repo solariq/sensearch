@@ -7,6 +7,7 @@ import com.expleague.sensearch.features.Features;
 import com.expleague.sensearch.features.QURLItem;
 import com.expleague.sensearch.features.sets.filter.FilterDistFeatureSet;
 import com.expleague.sensearch.features.sets.filter.QueryFeatureSet;
+import com.expleague.sensearch.index.Index;
 
 public class AccumulatorFilterFeatureSet extends FeatureSet.Stub<QURLItem> {
 
@@ -17,6 +18,13 @@ public class AccumulatorFilterFeatureSet extends FeatureSet.Stub<QURLItem> {
       filterDistFs,
       queryFs
   );
+
+  private final Index index;
+
+  public AccumulatorFilterFeatureSet(Index index) {
+    this.index = index;
+    queryFs.withIndex(index);
+  }
 
   @Override
   public void accept(QURLItem item) {

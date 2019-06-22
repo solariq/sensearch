@@ -85,7 +85,7 @@ public class FilterPoolBuilder extends PoolBuilder<QueryAndResults> {
     DataSetMeta meta =
         new JsonDataSetMeta(
             "Google", "sensearch", new Date(), QURLItem.class, rand.nextBase64String(32));
-    AccumulatorFilterFeatureSet features = new AccumulatorFilterFeatureSet();
+    AccumulatorFilterFeatureSet features = new AccumulatorFilterFeatureSet(index);
     TargetSet targetFeatures = new TargetFS();
     FeatureMeta[] metas = metaData(features, targetFeatures);
     Pool.Builder<QURLItem> poolBuilder = Pool.builder(meta, features, targetFeatures);
@@ -116,7 +116,7 @@ public class FilterPoolBuilder extends PoolBuilder<QueryAndResults> {
               Map<Page, Features> allDocs;
 
               {
-                AccumulatorFilterFeatureSet accumulatorFilterFs = new AccumulatorFilterFeatureSet();
+                AccumulatorFilterFeatureSet accumulatorFilterFs = new AccumulatorFilterFeatureSet(index);
                 allDocs =
                     index.fetchDocuments(query, filterDocNum).entrySet().stream()
                         .collect(Collectors.toMap(Entry::getKey, curEntry -> {
@@ -173,7 +173,7 @@ public class FilterPoolBuilder extends PoolBuilder<QueryAndResults> {
                           return;
                         }
 
-                        AccumulatorFilterFeatureSet accumulatorFilterFs = new AccumulatorFilterFeatureSet();
+                        AccumulatorFilterFeatureSet accumulatorFilterFs = new AccumulatorFilterFeatureSet(index);
                         accumulatorFilterFs.accept(new QURLItem(page, query));
                         accumulatorFilterFs.withFilterDistFeatures(feat);
                         final Vec vec = VecTools.concat(accumulatorFilterFs.advance(), new ArrayVec(0.0));

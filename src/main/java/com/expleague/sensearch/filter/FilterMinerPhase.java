@@ -44,7 +44,7 @@ public class FilterMinerPhase implements SearchPhase {
     LOG.info("FilterMiner phase started");
     long startTime = System.nanoTime();
 
-    AccumulatorFilterFeatureSet accumulatorFilterFs = new AccumulatorFilterFeatureSet();
+    AccumulatorFilterFeatureSet accumulatorFilterFs = new AccumulatorFilterFeatureSet(index);
     Query query = Objects.requireNonNull(whiteboard.query()).get(phaseId);
 
     Map<Page, Features> filterFeatures = index.fetchDocuments(query, filterDocNum).entrySet().stream()
