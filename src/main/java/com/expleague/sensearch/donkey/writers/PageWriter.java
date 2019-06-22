@@ -13,8 +13,6 @@ import com.google.common.primitives.Longs;
 import gnu.trove.TCollections;
 import gnu.trove.list.TIntList;
 import gnu.trove.list.array.TIntArrayList;
-import java.io.Closeable;
-import java.io.Flushable;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -36,7 +34,7 @@ import org.iq80.leveldb.WriteOptions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class PageWriter implements Closeable, Flushable {
+public class PageWriter implements Writer<CrawlerDocument> {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(PageWriter.class);
   private static final Options DB_OPTIONS = new Options()
@@ -68,7 +66,7 @@ public class PageWriter implements Closeable, Flushable {
     }
   }
 
-  public void writeDocument(CrawlerDocument document) {
+  public void write(CrawlerDocument document) {
     final long pageId = idGenerator.generatePageId(document.uri());
     final List<String> categories = document.categories();
     final List<Page> builtPages = new ArrayList<>();
@@ -164,7 +162,7 @@ public class PageWriter implements Closeable, Flushable {
               .build();
         })
         .peek(pageBuilder::addOutgoingLinks)
-        .forEach(linkWriter::writeLink);
+        .forEach(linkWriter::write);
 
     return pageBuilder;
   }

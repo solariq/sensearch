@@ -83,7 +83,7 @@ public class TermWriterTest extends SensearchTestCase {
       ParsedTerm parsedTerm = ParsedTerm.parse(word, lemmerStub);
       wordIds.add(parsedTerm.wordId());
       wordIds.add(parsedTerm.lemmaId());
-      termWriter.writeTerm(parsedTerm);
+      termWriter.write(parsedTerm);
     }
     termWriter.close();
     DB termDb = JniDBFactory.factory.open(termWriterRoot.toFile(), dbOpenOptions());

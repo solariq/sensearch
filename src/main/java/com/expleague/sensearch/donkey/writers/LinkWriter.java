@@ -2,8 +2,6 @@ package com.expleague.sensearch.donkey.writers;
 
 import com.expleague.sensearch.donkey.utils.BrandNewIdGenerator;
 import com.expleague.sensearch.protobuf.index.IndexUnits.Page;
-import java.io.Closeable;
-import java.io.Flushable;
 import java.io.IOException;
 import java.nio.file.Path;
 import org.fusesource.leveldbjni.JniDBFactory;
@@ -15,7 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 // TODO: make thread safe
-public class LinkWriter implements Flushable, Closeable {
+public class LinkWriter implements Writer<Page.Link> {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(LinkWriter.class);
 
@@ -44,7 +42,7 @@ public class LinkWriter implements Flushable, Closeable {
     }
   }
 
-  public void writeLink(Page.Link link) {
+  public void write(Page.Link link) {
     writeBatch.put(link.toByteArray(), EMPTY_VALUE);
     flush();
   }

@@ -6,8 +6,6 @@ import com.expleague.sensearch.donkey.utils.TokenParser.Token;
 import com.expleague.sensearch.protobuf.index.IndexUnits.Term;
 import com.expleague.sensearch.protobuf.index.IndexUnits.Term.PartOfSpeech;
 import com.google.common.primitives.Longs;
-import java.io.Closeable;
-import java.io.Flushable;
 import java.io.IOException;
 import java.nio.file.Path;
 import org.fusesource.leveldbjni.JniDBFactory;
@@ -18,7 +16,7 @@ import org.iq80.leveldb.WriteOptions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class TermWriter implements Closeable, Flushable {
+public class TermWriter implements Writer<Token> {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(PageWriter.class);
   private static final Options DB_OPTIONS = new Options()
@@ -46,7 +44,7 @@ public class TermWriter implements Closeable, Flushable {
     }
   }
 
-  public void writeTerm(Token token) {
+  public void write(Token token) {
     ParsedTerm parsedTerm = termParser.parseTerm(token.text());
     Term.Builder builder = Term.newBuilder();
 

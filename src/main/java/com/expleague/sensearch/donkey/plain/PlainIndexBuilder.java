@@ -307,7 +307,7 @@ public class PlainIndexBuilder implements IndexBuilder {
         PageWriter pageWriter =
             new PageWriter(indexRoot.resolve(PAGE_ROOT), parser, termWriter, linkWriter);
         ) {
-      crawler.makeStream().forEach(pageWriter::writeDocument);
+      crawler.makeStream().forEach(pageWriter::write);
     }
   }
 
@@ -432,7 +432,7 @@ public class PlainIndexBuilder implements IndexBuilder {
                                         isTitle[0] = false;
                                       }
                                       ParsedTerm parsedTerm = termParser.parseTerm(word);
-                                      termWriter.writeTerm(parser.addToken(word));
+                                      termWriter.write(parser.addToken(word));
                                       // TODO: uncomment it
                                       /*
                                       if (jmllEmbedding.apply(CharSeq.compact(word)) == null) {
