@@ -30,7 +30,6 @@ import java.util.stream.Collector;
 import java.util.stream.Stream;
 import org.apache.commons.lang3.tuple.Pair;
 import org.fusesource.leveldbjni.JniDBFactory;
-import org.glassfish.jersey.internal.guava.Sets;
 import org.iq80.leveldb.DB;
 import org.iq80.leveldb.Options;
 import org.iq80.leveldb.WriteBatch;
