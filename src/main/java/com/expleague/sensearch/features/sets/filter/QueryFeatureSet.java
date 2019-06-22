@@ -58,10 +58,12 @@ public class QueryFeatureSet extends FeatureSet.Stub<QURLItem> {
 
     ToDoubleFunction<Term> f = t -> (1 + Math.log(t.freq())) * (t.documentFreq() == 0 ? 1.0 : Math.log(1 + index.size() / t.documentFreq()));
     double sqc = query.terms().stream().mapToDouble(f).sum();
+    long n = query.terms().stream().filter(t -> t.freq() > 0).count();
     OptionalDouble maxSQC = query.terms().stream().mapToDouble(f).max();
     set(SQC, sqc);
-    set(NSQC, sqc / query.terms().stream().filter(t -> t.freq() > 0).count());
+    set(NSQC, n == 0 ? 0.0 : sqc / n);
     set(MAX_SQC, maxSQC.isPresent() ? maxSQC.getAsDouble() : 0.0);
+
     return super.advance();
   }
 
