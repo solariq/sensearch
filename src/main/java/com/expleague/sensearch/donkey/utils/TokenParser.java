@@ -14,7 +14,9 @@ public class TokenParser {
   private TObjectIntMap<CharSeq> termToIntMap;
   private TIntObjectMap<CharSeq> intToTermMap;
 
-  public static int ID = 0;
+  private static int ID = 5_000;
+  private static int PUNCT_ID = 0;
+  private static final int PUNCTUATION_SIZE = 5_000;
   private final static int BITS_FOR_META = 8;
   private final static int FIRST_UPPERCASE = 0x00000008; //0000'0000'0000'0000'0000'0000'0000'1000
   private final static int ALL_UPPERCASE = 0x00000004;   //0000'0000'0000'0000'0000'0000'0000'0100
@@ -102,6 +104,14 @@ public class TokenParser {
     return (id & PUNCTUATION) == 0;
   }
 
+  /**
+   * @param id real id
+   * @return true if id in punctuation
+   */
+  public static boolean isPunct(int id) {
+    return id < PUNCTUATION_SIZE;
+  }
+
   public static boolean allUpperCase(int id) {
     return (id & ALL_UPPERCASE) != 0;
   }
@@ -130,12 +140,20 @@ public class TokenParser {
     if (termToIntMap.containsKey(lowToken)) {
       id = termToIntMap.get(lowToken);
     } else {
-      id = ID;
+      if (punkt) {
+        id = PUNCT_ID;
+        PUNCT_ID++;
+      } else {
+        id = ID;
+        ID++;
+      }
       termToIntMap.put(lowToken, id);
       intToTermMap.put(id, lowToken);
-      ID++;
       if (ID >= (1 << 29)) {
         throw new RuntimeException("Token limit::" + token.toString());
+      }
+      if (PUNCT_ID == PUNCTUATION_SIZE) {
+        throw new RuntimeException("Punctuation limit::" + token.toString());
       }
     }
     id = id << BITS_FOR_META;
