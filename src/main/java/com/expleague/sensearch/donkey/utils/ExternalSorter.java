@@ -5,8 +5,10 @@ import com.expleague.sensearch.donkey.readers.Reader;
 import com.expleague.sensearch.donkey.writers.sequential.SequentialWriter;
 import java.io.Closeable;
 import java.io.IOException;
+import java.nio.file.CopyOption;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -26,25 +28,45 @@ public class ExternalSorter<T> {
       Comparator<T> comparator,
       Function<Path, SequentialWriter<T>> writerSupplier,
       Function<Path, Reader<T>> readerSupplier,
-      Path outputRoot) throws IOException {
-    Path tmpChunksPath = Files.createTempDirectory(outputRoot, "TmpChunks");
+      Path outputPath) {
+    Path outputRoot = outputPath.normalize().getParent();
+    Path tmpOutputRoot;
+    try {
+      tmpOutputRoot = Files.createTempDirectory(outputPath, ".SorterTmp");
+      Files.createDirectories(tmpOutputRoot);
+    } catch (IOException e) {
+      throw new RuntimeException(
+          String.format("External sorting crushed: failed to create temporary directory"
+              + " by the path: [ %s ]", outputRoot.toAbsolutePath().toString()), e);
+    }
+
+    Path chunksRoot;
+    try {
+      chunksRoot = tmpOutputRoot.resolve("Chunks");
+      Files.createDirectories(chunksRoot);
+    } catch (IOException e) {
+      throw new RuntimeException(
+          String.format("External sorting crushed: failed to create directory: [ %s ]",
+              tmpOutputRoot.resolve("Chunks").toAbsolutePath().toString()), e);
+    }
     List<T> objectsList;
     int chunkIndex = 0;
     while (!(objectsList = readObjects(source, DEFAULT_READ_BLOCK_SIZE)).isEmpty()) {
       objectsList.sort(comparator);
-      try (SequentialWriter<T> writer = writerSupplier
-          .apply(chunkPath(tmpChunksPath, chunkIndex++))) {
+      try (SequentialWriter<T> writer = writerSupplier.apply(chunkPath(chunksRoot, chunkIndex++))) {
         objectsList.forEach(writer::append);
+      } catch (IOException e) {
+        throw new RuntimeException(e);
       }
     }
 
     // TODO: check chunks count not to be too large
     List<Reader<T>> chunkReaders = IntStream.range(0, chunkIndex)
-        .mapToObj(i -> chunkPath(tmpChunksPath, i))
+        .mapToObj(i -> chunkPath(chunksRoot, i))
         .map(readerSupplier)
         .collect(Collectors.toList());
 
-    Path tmpOutput = randomPath(outputRoot);
+    Path tmpOutput = tmpOutputRoot.resolve("Output");
     try (
         SortedReaderCombiner<T> sortedReaderCombiner =
             new SortedReaderCombiner<>(chunkReaders, comparator);
@@ -54,18 +76,20 @@ public class ExternalSorter<T> {
       while ((object = sortedReaderCombiner.next()) != null) {
         resultWriter.append(object);
       }
+    } catch (IOException e) {
+      throw new RuntimeException("External sorting crushed: failed to merge chunks", e);
     }
-    FileUtils.deleteDirectory(tmpChunksPath.toFile());
-    tmpOutput.toFile().renameTo(outputRoot.toFile());
-  }
 
-  private static Path randomPath(Path root) {
-    Random random = new Random();
-    long pathName = random.nextLong();
-    while (Files.exists(root.resolve(Long.toString(pathName)))) {
-      pathName = random.nextLong();
+    try {
+      FileUtils.deleteDirectory(chunksRoot.toFile());
+      Files.move(tmpOutput, outputPath, StandardCopyOption.REPLACE_EXISTING);
+      FileUtils.deleteDirectory(tmpOutputRoot.toFile());
+    } catch (IOException e) {
+      throw new RuntimeException(
+          String.format("External sorting crushed: failed to move temporary output from"
+              + " the temporary path [ %s ] to the destination path [ %s ]",
+              tmpOutput.toAbsolutePath().toString(), outputPath.toString()), e);
     }
-    return root.resolve(Long.toString(pathName));
   }
 
   private static Path chunkPath(Path root, int chunkIndex) {
