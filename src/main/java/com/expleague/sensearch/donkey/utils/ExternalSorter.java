@@ -5,7 +5,6 @@ import com.expleague.sensearch.donkey.readers.Reader;
 import com.expleague.sensearch.donkey.writers.sequential.SequentialWriter;
 import java.io.Closeable;
 import java.io.IOException;
-import java.nio.file.CopyOption;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
@@ -13,22 +12,30 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.PriorityQueue;
-import java.util.Random;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import org.apache.commons.io.FileUtils;
 
 // TODO: make thread safe
-public class ExternalSorter<T> {
+public class ExternalSorter {
 
   private static final int DEFAULT_READ_BLOCK_SIZE = 100_000;
 
   public static <T> void sort(Reader<T> source,
+      Path outputPath,
       Comparator<T> comparator,
       Function<Path, SequentialWriter<T>> writerSupplier,
-      Function<Path, Reader<T>> readerSupplier,
-      Path outputPath) {
+      Function<Path, Reader<T>> readerSupplier) {
+    sort(source, outputPath, DEFAULT_READ_BLOCK_SIZE, comparator, writerSupplier, readerSupplier);
+  }
+
+  public static <T> void sort(Reader<T> source,
+      Path outputPath,
+      int maxSortBlockSize,
+      Comparator<T> comparator,
+      Function<Path, SequentialWriter<T>> writerSupplier,
+      Function<Path, Reader<T>> readerSupplier) {
     Path outputRoot = outputPath.normalize().getParent();
     Path tmpOutputRoot;
     try {
@@ -51,7 +58,7 @@ public class ExternalSorter<T> {
     }
     List<T> objectsList;
     int chunkIndex = 0;
-    while (!(objectsList = readObjects(source, DEFAULT_READ_BLOCK_SIZE)).isEmpty()) {
+    while (!(objectsList = readObjects(source, maxSortBlockSize)).isEmpty()) {
       objectsList.sort(comparator);
       try (SequentialWriter<T> writer = writerSupplier.apply(chunkPath(chunksRoot, chunkIndex++))) {
         objectsList.forEach(writer::append);
