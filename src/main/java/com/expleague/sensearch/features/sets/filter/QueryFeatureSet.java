@@ -6,14 +6,11 @@ import com.expleague.ml.meta.FeatureMeta;
 import com.expleague.ml.meta.FeatureMeta.ValueType;
 import com.expleague.sensearch.core.Term;
 import com.expleague.sensearch.core.Term.TermAndDistance;
-import com.expleague.sensearch.experiments.Main;
 import com.expleague.sensearch.features.QURLItem;
 import com.expleague.sensearch.index.Index;
 import com.expleague.sensearch.query.Query;
 import java.util.Collection;
-import java.util.Optional;
 import java.util.OptionalDouble;
-import java.util.function.Function;
 import java.util.function.ToDoubleFunction;
 
 public class QueryFeatureSet extends FeatureSet.Stub<QURLItem> {
