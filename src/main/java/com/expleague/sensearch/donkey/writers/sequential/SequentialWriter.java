@@ -1,7 +1,12 @@
 package com.expleague.sensearch.donkey.writers.sequential;
 
-import java.io.Closeable;
+import com.expleague.sensearch.donkey.writers.Writer;
 
-public interface SequentialWriter<T> extends Closeable {
+public interface SequentialWriter<T> extends Writer<T> {
   void append(T object);
+
+  @Override
+  default void write(T object) {
+    append(object);
+  }
 }
