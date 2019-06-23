@@ -3,7 +3,6 @@ package com.expleague.sensearch.donkey.utils;
 import com.expleague.commons.util.Pair;
 import com.expleague.sensearch.donkey.readers.Reader;
 import com.expleague.sensearch.donkey.writers.sequential.SequentialWriter;
-import com.google.common.collect.MinMaxPriorityQueue;
 import java.io.Closeable;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -11,6 +10,7 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.PriorityQueue;
 import java.util.Random;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -83,17 +83,13 @@ public class ExternalSorter<T> {
 
   static class SortedReaderCombiner<T> implements Closeable {
 
-    private final MinMaxPriorityQueue<Pair<T, Reader<T>>> sortedSupplier;
+    private final PriorityQueue<Pair<T, Reader<T>>> sortedSupplier;
     private final List<Reader<T>> readers;
 
     SortedReaderCombiner(List<Reader<T>> readers, Comparator<T> comparator) {
       this.readers = readers;
-      sortedSupplier = MinMaxPriorityQueue
-          .<Pair<T, Reader<T>>>orderedBy(
-              (p1, p2) -> comparator.compare(p1.getFirst(), p2.getFirst()))
-          .expectedSize(readers.size())
-          .maximumSize(readers.size())
-          .create();
+      sortedSupplier = new PriorityQueue<>(readers.size(), (p1, p2) ->
+          comparator.compare(p1.getFirst(), p2.getFirst()));
       readers.stream()
           .map(r -> Pair.create(r.read(), r))
           .filter(p -> p.getFirst() != null)
