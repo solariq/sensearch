@@ -183,6 +183,7 @@ public class TokenParser implements AutoCloseable {
 
   @Override
   public void close() {
+    dictionary.close();
   }
 
   public static class Token {

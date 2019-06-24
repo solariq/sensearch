@@ -172,6 +172,7 @@ public class PageWriter implements Writer<CrawlerDocument> {
     pageDb.write(writeBatch, WRITE_OPTIONS);
     linkWriter.close();
     pageDb.close();
+    tokenParser.close();
   }
 
   @Override

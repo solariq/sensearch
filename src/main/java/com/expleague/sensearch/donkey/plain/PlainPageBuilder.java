@@ -102,8 +102,10 @@ class PlainPageBuilder implements AutoCloseable {
     if (sectionDepth - parentPagesStackLocal.size() > 1) {
       LOG.error(
           String.format(
-              "Received page (id [ %d ] section id [ %d ] with the depth [ %d ], when current depth is [ %d ]."
-                  + " Probably some sections are missing or sections order is incorrect. Index may become corrupted",
+              "Received page (id [ %d ] section id [ %d ] with the depth [ %d ],"
+                  + " when current depth is [ %d ]."
+                  + " Probably some sections are missing or sections order is incorrect."
+                  + " Index may become corrupted",
               curPageId, sectionId, sectionDepth, parentPagesStackLocal.size()));
       // TODO: if there were a missing section then we should add it to the stack otherwise parents
       // might become incorrect

@@ -2,24 +2,27 @@ package com.expleague.sensearch.donkey.utils;
 
 import com.expleague.commons.seq.CharSeq;
 import com.expleague.sensearch.donkey.writers.TermWriter;
+import com.expleague.sensearch.donkey.writers.Writer;
+import com.expleague.sensearch.protobuf.index.IndexUnits.Term;
 import gnu.trove.map.TIntObjectMap;
 import gnu.trove.map.TObjectIntMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import gnu.trove.map.hash.TObjectIntHashMap;
+import java.io.IOException;
 
 public class Dictionary implements AutoCloseable {
 
-  private TermWriter termWriter;
+  private Writer<ParsedTerm> termWriter;
   private TObjectIntMap<CharSeq> termToIntMap;
   private TIntObjectMap<CharSeq> intToTermMap;
 
-  public Dictionary(TermWriter termWriter) {
+  public Dictionary(Writer<ParsedTerm> termWriter) {
     this.termWriter = termWriter;
     this.termToIntMap = new TObjectIntHashMap<>();
     this.intToTermMap = new TIntObjectHashMap<>();
   }
 
-  public Dictionary(TermWriter termWriter, TObjectIntMap<CharSeq> termToIntMap,
+  public Dictionary(Writer<ParsedTerm> termWriter, TObjectIntMap<CharSeq> termToIntMap,
       TIntObjectMap<CharSeq> intToTermMap) {
     this.termWriter = termWriter;
     this.termToIntMap = termToIntMap;
@@ -48,6 +51,10 @@ public class Dictionary implements AutoCloseable {
 
   @Override
   public void close() {
-
+    try {
+      termWriter.close();
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
   }
 }

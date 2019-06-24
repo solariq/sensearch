@@ -282,11 +282,11 @@ public class PlainIndexBuilder implements IndexBuilder {
     Files.createDirectories(indexRoot.resolve(RAW_LINK_ROOT));
 
     try (
-        TermWriter termWriter = new TermWriter(indexRoot.resolve(TERM_ROOT));
-        Dictionary dictionary = new Dictionary(termWriter);
-        TokenParser parser = new TokenParser(dictionary, lemmer);
-        LevelDbLinkWriter linkWriter = new LevelDbLinkWriter(indexRoot.resolve(RAW_LINK_ROOT));
-        PageWriter pageWriter = new PageWriter(indexRoot.resolve(PAGE_ROOT), parser, linkWriter);
+        PageWriter pageWriter = new PageWriter(
+            indexRoot.resolve(PAGE_ROOT),
+            new TokenParser(new Dictionary(new TermWriter(indexRoot.resolve(TERM_ROOT))), lemmer),
+            new LevelDbLinkWriter(indexRoot.resolve(RAW_LINK_ROOT))
+        )
     ) {
       crawler.makeStream().forEach(pageWriter::write);
     }
