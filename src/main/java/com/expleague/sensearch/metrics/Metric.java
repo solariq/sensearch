@@ -29,7 +29,7 @@ public class Metric {
 
     List<String> ourTitles = new ArrayList<>();
     for (Page r : resultItems) {
-      ourTitles.add(r.content(SegmentType.SECTION_TITLE).toString());
+      ourTitles.add(r.content(false, SegmentType.SECTION_TITLE).toString());
     }
     Path tmpPath = pathToMetrics.resolve(query);
     List<ResultItem> googleResults;

@@ -8,16 +8,15 @@ public class ParsedTerm {
 
   private static final String LEMMA_SUFFIX = "$";
 
-  private final long wordId;
+  private final int wordId;
   private final CharSeq word;
 
-  private final long lemmaId;
+  private final int lemmaId;
   private final CharSeq lemma;
 
   private final PartOfSpeech posTag;
 
-  protected ParsedTerm(long wordId, CharSeq word,
-      long lemmaId, CharSeq lemma, PartOfSpeech posTag) {
+  protected ParsedTerm(int wordId, CharSeq word, int lemmaId, CharSeq lemma, PartOfSpeech posTag) {
     this.wordId = wordId;
     this.word = word;
     this.lemmaId = lemmaId;
@@ -25,8 +24,7 @@ public class ParsedTerm {
     this.posTag = posTag;
   }
 
-  public static ParsedTerm create(long wordId, CharSeq word,
-      long lemmaId, CharSeq lemma, PartOfSpeech posTag) {
+  public static ParsedTerm create(int wordId, CharSeq word, int lemmaId, CharSeq lemma, PartOfSpeech posTag) {
     return new ParsedTerm(wordId, word, lemmaId, lemma, posTag);
   }
 
@@ -34,7 +32,7 @@ public class ParsedTerm {
     return lemma;
   }
 
-  public long lemmaId() {
+  public int lemmaId() {
     return lemmaId;
   }
 
@@ -42,7 +40,7 @@ public class ParsedTerm {
     return word;
   }
 
-  public long wordId() {
+  public int wordId() {
     return wordId;
   }
 

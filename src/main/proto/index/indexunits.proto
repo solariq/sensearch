@@ -54,11 +54,11 @@ message Page {
 message TermStatistics {
 
   message TermFrequency {
-    optional int64 term_id = 1;
+    optional int32 term_id = 1;
     optional int32 term_frequency = 2;
   }
 
-  optional int64 term_id = 1;
+  optional int32 term_id = 1;
   optional int32 document_frequency = 2;
   optional int32 document_lemma_frequency = 3;
   optional int64 term_frequency = 4;
@@ -67,9 +67,9 @@ message TermStatistics {
 }
 
 message Term {
-  optional int64 id = 1;
+  optional int32 id = 1;
   // Equals to -1 if lemma can not be extracted or lemma equals to this term
-  optional int64 lemma_id = 2;
+  optional int32 lemma_id = 2;
 
   optional string text = 3;
   optional PartOfSpeech part_of_speech = 4;
@@ -94,7 +94,7 @@ message Term {
 }
 
 message TermList {
-	repeated int64 termList = 1;
+  repeated int32 termList = 1;
 }
 
 message IntegerList {

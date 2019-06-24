@@ -9,6 +9,7 @@ import com.expleague.sensearch.web.suggest.SuggestInformationLoader;
 import java.net.URI;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 import org.jetbrains.annotations.Nullable;
 
@@ -19,7 +20,8 @@ public interface Index extends AutoCloseable {
 
   @Nullable
   Term term(CharSequence seq);
-  Stream<List<Term>> sentences(Stream<Integer> sequence);
+
+  Stream<List<Term>> sentences(IntStream sequence);
   Stream<Term> parse(CharSequence sequence);
   Stream<Term> mostFrequentNeighbours(Term term);
   Vec vecByTerms(List<Term> terms);

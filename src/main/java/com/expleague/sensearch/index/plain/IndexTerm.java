@@ -3,18 +3,19 @@ package com.expleague.sensearch.index.plain;
 import com.expleague.commons.seq.CharSeq;
 import com.expleague.sensearch.core.PartOfSpeech;
 import com.expleague.sensearch.core.Term;
+import com.expleague.sensearch.donkey.utils.TokenParser;
 import java.util.stream.Stream;
 import org.jetbrains.annotations.Nullable;
 
 public class IndexTerm implements Term {
+
   private final PlainIndex owner;
   private final CharSeq text;
   private final IndexTerm lemma;
-  private final long id;
+  private final int id;
   private final PartOfSpeech partOfSpeech;
 
-  public IndexTerm(
-      PlainIndex owner, CharSeq text, long id, IndexTerm lemma, PartOfSpeech partOfSpeech) {
+  public IndexTerm(PlainIndex owner, CharSeq text, int id, IndexTerm lemma, PartOfSpeech partOfSpeech) {
     this.owner = owner;
     this.text = text;
     this.id = id;
@@ -30,6 +31,11 @@ public class IndexTerm implements Term {
   @Override
   public Term lemma() {
     return lemma != null ? lemma : this;
+  }
+
+  @Override
+  public boolean isPunctuation() {
+    return TokenParser.isPunct(id);
   }
 
   @Override

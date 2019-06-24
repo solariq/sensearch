@@ -33,6 +33,9 @@ public interface Page {
   Stream<Term> content(boolean punct, SegmentType... types);
 
   @NotNull
+  CharSequence rawContent(SegmentType... types);
+
+  @NotNull
   List<CharSequence> categories();
 
   @NotNull
@@ -67,7 +70,7 @@ public interface Page {
 
   Stream<Page> subpages();
 
-  Stream<List<Term>> sentences(SegmentType type);
+  Stream<List<Term>> sentences(boolean punct, SegmentType type);
 
   Vec titleVec();
 

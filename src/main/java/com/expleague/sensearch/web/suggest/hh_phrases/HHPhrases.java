@@ -172,7 +172,7 @@ public class HHPhrases {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		CharSequence content = p.content(SegmentType.BODY);
+    CharSequence content = p.rawContent(SegmentType.BODY);
 		System.out.println("Content length " + content.length());
 		terms = index.parse(content)
 				//.map(t -> t.lemma())

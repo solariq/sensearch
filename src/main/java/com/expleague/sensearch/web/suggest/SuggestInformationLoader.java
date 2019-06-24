@@ -4,7 +4,7 @@ import com.expleague.sensearch.core.Term;
 import com.expleague.sensearch.protobuf.index.IndexUnits;
 import com.google.common.primitives.Longs;
 import com.google.protobuf.InvalidProtocolBufferException;
-import gnu.trove.map.TLongObjectMap;
+import gnu.trove.map.TIntObjectMap;
 import java.util.ArrayList;
 import java.util.Collection;
 import org.apache.log4j.Logger;
@@ -19,10 +19,10 @@ public class SuggestInformationLoader {
 
   private final DB multigramFreqNormDB;
 
-  private final TLongObjectMap<Term> idToTerm;
+  private final TIntObjectMap<Term> idToTerm;
 
   public SuggestInformationLoader(
-      DB unigramCoeffDB, DB multigramDB, TLongObjectMap<Term> idToTerm) {
+      DB unigramCoeffDB, DB multigramDB, TIntObjectMap<Term> idToTerm) {
     this.multigramFreqNormDB = multigramDB;
 
     this.idToTerm = idToTerm;

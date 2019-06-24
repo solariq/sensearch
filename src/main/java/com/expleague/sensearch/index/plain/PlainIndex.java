@@ -30,11 +30,14 @@ import com.expleague.sensearch.protobuf.index.IndexUnits.TermStatistics.TermFreq
 import com.expleague.sensearch.query.Query;
 import com.expleague.sensearch.web.suggest.SuggestInformationLoader;
 import com.google.common.collect.Streams;
+import com.google.common.primitives.Ints;
 import com.google.common.primitives.Longs;
 import com.google.inject.Inject;
 import com.google.protobuf.InvalidProtocolBufferException;
-import gnu.trove.list.TLongList;
+import gnu.trove.list.TIntList;
+import gnu.trove.map.TIntObjectMap;
 import gnu.trove.map.TLongObjectMap;
+import gnu.trove.map.hash.TIntObjectHashMap;
 import gnu.trove.map.hash.TLongObjectHashMap;
 import java.io.IOException;
 import java.net.URI;
@@ -47,6 +50,7 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 import org.apache.log4j.Logger;
 import org.fusesource.leveldbjni.JniDBFactory;
@@ -77,7 +81,7 @@ public class PlainIndex implements Index {
   private static final int SYNONYMS_COUNT = 50;
 
   private final Map<CharSeq, Term> wordToTerms = new HashMap<>();
-  private final TLongObjectMap<Term> idToTerm = new TLongObjectHashMap<>();
+  private final TIntObjectMap<Term> idToTerm = new TIntObjectHashMap<>();
 
   private final DB termStatisticsBase;
   private final DB pageBase;
@@ -106,7 +110,7 @@ public class PlainIndex implements Index {
 
   private SuggestInformationLoader suggestLoader;
 
-  private final Map<Term, TLongList> rareTermsInvIdx;
+  private final Map<Term, TIntList> rareTermsInvIdx;
 
   private final Path indexRoot;
   @Override
@@ -197,7 +201,7 @@ public class PlainIndex implements Index {
 
             final IndexTerm lemmaTerm;
 
-            final long lemmaId = protoTerm.getLemmaId();
+            final int lemmaId = protoTerm.getLemmaId();
             if (lemmaId == -1) {
               lemmaTerm = null;
             } else {
@@ -206,7 +210,7 @@ public class PlainIndex implements Index {
               } else {
                 CharSeq lemmaText =
                     CharSeq.intern(
-                        IndexUnits.Term.parseFrom(termBase.get(Longs.toByteArray(lemmaId)))
+                        IndexUnits.Term.parseFrom(termBase.get(Ints.toByteArray(lemmaId)))
                             .getText());
 
                 lemmaTerm = new IndexTerm(this, lemmaText, lemmaId, null, pos);
@@ -275,7 +279,7 @@ public class PlainIndex implements Index {
       return termStatistics(((IndexTerm) term).id())
           .getBigramFrequencyList()
           .stream()
-          .mapToLong(TermFrequency::getTermId)
+          .mapToInt(TermFrequency::getTermId)
           .mapToObj(idToTerm::get);
     } catch (InvalidProtocolBufferException e) {
       LOG.warn(
@@ -361,13 +365,13 @@ public class PlainIndex implements Index {
     return wordToTerms.get(CharSeq.create(normalized));
   }
 
-  Term term(long id) {
+  Term term(int id) {
     return idToTerm.get(id);
   }
 
   @Override
-  public Stream<List<Term>> sentences(Stream<Integer> text) {
-    List<Integer> intText = text.collect(Collectors.toList());
+  public Stream<List<Term>> sentences(IntStream text) {
+    List<Integer> intText = text.boxed().collect(Collectors.toList());
     List<Term> termText = intText.stream().map(this::term).collect(Collectors.toList());
     return tokenizer.toSentences(intText, termText);
   }
@@ -420,7 +424,7 @@ public class PlainIndex implements Index {
     return filter
         .filtrate(termVec, PlainIndex::isWordId, synonymThreshold)
         .filter(Objects::nonNull)
-        .map(c -> new IndexTerm.IndexTermAndDistance(idToTerm.get(c.getId()), c.getDist()));
+        .map(c -> new IndexTerm.IndexTermAndDistance(idToTerm.get((int) c.getId()), c.getDist()));
   }
 
   Stream<TermAndDistance> synonymsWithDistance(Term term) {
@@ -433,14 +437,14 @@ public class PlainIndex implements Index {
     return filter
         .filtrate(termVec, PlainIndex::isWordId, SYNONYMS_COUNT)
         .filter(Objects::nonNull)
-        .map(c -> new IndexTerm.IndexTermAndDistance(idToTerm.get(c.getId()), c.getDist()));
+        .map(c -> new IndexTerm.IndexTermAndDistance(idToTerm.get((int) c.getId()), c.getDist()));
   }
 
   public Stream<Term> nearestTerms(Vec vec) {
     return embedding
         .nearest(vec, PlainIndex::isWordId)
         .filter(Objects::nonNull)
-        .map(c -> idToTerm.get(c.getId()));
+        .map(c -> idToTerm.get((int) c.getId()));
   }
 
   @Override

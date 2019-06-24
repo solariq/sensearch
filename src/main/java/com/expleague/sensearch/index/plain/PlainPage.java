@@ -15,6 +15,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 import javax.ws.rs.NotSupportedException;
@@ -54,6 +55,11 @@ public class PlainPage implements IndexedPage {
         }
 
         @Override
+        public CharSequence rawContent(SegmentType... types) {
+          return "";
+        }
+
+        @Override
         public List<CharSequence> categories() {
           return Collections.emptyList();
         }
@@ -89,7 +95,7 @@ public class PlainPage implements IndexedPage {
         }
 
         @Override
-        public Stream<List<Term>> sentences(SegmentType t) {
+        public Stream<List<Term>> sentences(boolean punct, SegmentType t) {
           return Stream.empty();
         }
 
@@ -186,49 +192,54 @@ public class PlainPage implements IndexedPage {
     return uri;
   }
 
-  private Stream<Term> tokenToTerm(Stream<Integer> tokenIds) {
-    return tokenIds.map(id -> index.term(TokenParser.toId(id)));
+  private Term tokenIdToTerm(int tokenId) {
+    return index.term(TokenParser.toId(tokenId));
   }
 
-  private Stream<Integer> intContent(SegmentType type, boolean punct) {
+  private IntStream intContent(SegmentType type, boolean punct) {
     switch (type) {
       case SECTION_TITLE:
         if (punct) {
-          return protoPage.getTitle().getTokenIdsList().stream();
+          return protoPage.getTitle().getTokenIdsList().stream().mapToInt(i -> i);
         } else {
-          return protoPage.getTitle().getTokenIdsList().stream().filter(TokenParser::isWord);
+          return protoPage.getTitle().getTokenIdsList().stream().mapToInt(i -> i).filter(TokenParser::isWord);
         }
       case SUB_BODY:
         if (punct) {
-          return protoPage.getContent().getTokenIdsList().stream();
+          return protoPage.getContent().getTokenIdsList().stream().mapToInt(i -> i);
         } else {
-          return protoPage.getContent().getTokenIdsList().stream().filter(TokenParser::isWord);
+          return protoPage.getContent().getTokenIdsList().stream().mapToInt(i -> i).filter(TokenParser::isWord);
         }
       case BODY:
-        Stream<Integer> subpagesContent = subpages()
-            .flatMap(p -> ((PlainPage) p).intContent(type, punct));
-        return Stream.concat(intContent(SegmentType.SUB_BODY, punct), subpagesContent);
+        IntStream subpagesContent = subpages()
+            .flatMapToInt(p -> ((PlainPage) p).intContent(type, punct));
+        return IntStream.concat(intContent(SegmentType.SUB_BODY, punct), subpagesContent);
       case FULL_TITLE:
         Page p = this;
-        Stream<Integer> res = intContent(SegmentType.SECTION_TITLE, punct);
+        IntStream res = intContent(SegmentType.SECTION_TITLE, punct);
         while (p.parent() != p) {
-          res = Stream
+          res = IntStream
               .concat(((PlainPage) p.parent()).intContent(SegmentType.SECTION_TITLE, punct), res);
           p = p.parent();
         }
         return res;
       default:
-        return Stream.empty();
+        return IntStream.empty();
     }
   }
 
   private Stream<Term> content(SegmentType type, boolean punct) {
-    return tokenToTerm(intContent(type, punct));
+    return intContent(type, punct).mapToObj(this::tokenIdToTerm);
   }
 
   @Override
   public Stream<Term> content(boolean punct, SegmentType... types) {
     return Arrays.stream(types).flatMap(t -> content(t, punct));
+  }
+
+  @Override
+  public CharSequence rawContent(SegmentType... types) {
+    return content(true, types).map(Term::text).collect(Collectors.joining(" "));
   }
 
   //TODO: still not parse categories(((
@@ -331,8 +342,9 @@ public class PlainPage implements IndexedPage {
   }
 
   @Override
-  public Stream<List<Term>> sentences(SegmentType type) {
-    return index.sentences(intContent(type, true));
+  public Stream<List<Term>> sentences(boolean punct, SegmentType type) {
+    return index.sentences(intContent(type, true))
+        .map(terms -> terms.stream().filter(t -> !t.isPunctuation()).collect(Collectors.toList()));
   }
 
   @Override
@@ -353,7 +365,7 @@ public class PlainPage implements IndexedPage {
     if (sentenceVecs == null) {
       synchronized (this) {
         if (sentenceVecs == null) {
-          sentenceVecs = sentences(SegmentType.BODY)
+          sentenceVecs = sentences(false, SegmentType.BODY)
               .map(index::vecByTerms)
               .toArray(Vec[]::new);
         }
@@ -424,7 +436,11 @@ public class PlainPage implements IndexedPage {
 
     @Override
     public Stream<Term> text() {
-      return ((PlainPage) sourcePage).tokenToTerm(protoLink.getText().getTokenIdsList().stream().filter(TokenParser::isWord));
+      PlainPage page = (PlainPage) sourcePage;
+      return protoLink.getText().getTokenIdsList().stream()
+          .mapToInt(n -> n)
+          .filter(TokenParser::isWord)
+          .mapToObj(page::tokenIdToTerm);
     }
 
     @Override

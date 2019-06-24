@@ -4553,13 +4553,13 @@ public final class IndexUnits {
       com.google.protobuf.MessageOrBuilder {
 
     /**
-     * <code>optional int64 term_id = 1;</code>
+     * <code>optional int32 term_id = 1;</code>
      */
     boolean hasTermId();
     /**
-     * <code>optional int64 term_id = 1;</code>
+     * <code>optional int32 term_id = 1;</code>
      */
-    long getTermId();
+    int getTermId();
 
     /**
      * <code>optional int32 document_frequency = 2;</code>
@@ -4666,7 +4666,7 @@ public final class IndexUnits {
             }
             case 8: {
               bitField0_ |= 0x00000001;
-              termId_ = input.readInt64();
+              termId_ = input.readInt32();
               break;
             }
             case 16: {
@@ -4739,13 +4739,13 @@ public final class IndexUnits {
         com.google.protobuf.MessageOrBuilder {
 
       /**
-       * <code>optional int64 term_id = 1;</code>
+       * <code>optional int32 term_id = 1;</code>
        */
       boolean hasTermId();
       /**
-       * <code>optional int64 term_id = 1;</code>
+       * <code>optional int32 term_id = 1;</code>
        */
-      long getTermId();
+      int getTermId();
 
       /**
        * <code>optional int32 term_frequency = 2;</code>
@@ -4810,7 +4810,7 @@ public final class IndexUnits {
               }
               case 8: {
                 bitField0_ |= 0x00000001;
-                termId_ = input.readInt64();
+                termId_ = input.readInt32();
                 break;
               }
               case 16: {
@@ -4859,17 +4859,17 @@ public final class IndexUnits {
 
       private int bitField0_;
       public static final int TERM_ID_FIELD_NUMBER = 1;
-      private long termId_;
+      private int termId_;
       /**
-       * <code>optional int64 term_id = 1;</code>
+       * <code>optional int32 term_id = 1;</code>
        */
       public boolean hasTermId() {
         return ((bitField0_ & 0x00000001) == 0x00000001);
       }
       /**
-       * <code>optional int64 term_id = 1;</code>
+       * <code>optional int32 term_id = 1;</code>
        */
-      public long getTermId() {
+      public int getTermId() {
         return termId_;
       }
 
@@ -4889,7 +4889,7 @@ public final class IndexUnits {
       }
 
       private void initFields() {
-        termId_ = 0L;
+        termId_ = 0;
         termFrequency_ = 0;
       }
       private byte memoizedIsInitialized = -1;
@@ -4906,7 +4906,7 @@ public final class IndexUnits {
                           throws java.io.IOException {
         getSerializedSize();
         if (((bitField0_ & 0x00000001) == 0x00000001)) {
-          output.writeInt64(1, termId_);
+          output.writeInt32(1, termId_);
         }
         if (((bitField0_ & 0x00000002) == 0x00000002)) {
           output.writeInt32(2, termFrequency_);
@@ -4922,7 +4922,7 @@ public final class IndexUnits {
         size = 0;
         if (((bitField0_ & 0x00000001) == 0x00000001)) {
           size += com.google.protobuf.CodedOutputStream
-            .computeInt64Size(1, termId_);
+              .computeInt32Size(1, termId_);
         }
         if (((bitField0_ & 0x00000002) == 0x00000002)) {
           size += com.google.protobuf.CodedOutputStream
@@ -5045,7 +5045,7 @@ public final class IndexUnits {
 
         public Builder clear() {
           super.clear();
-          termId_ = 0L;
+          termId_ = 0;
           bitField0_ = (bitField0_ & ~0x00000001);
           termFrequency_ = 0;
           bitField0_ = (bitField0_ & ~0x00000002);
@@ -5134,34 +5134,34 @@ public final class IndexUnits {
         }
         private int bitField0_;
 
-        private long termId_ ;
+        private int termId_;
         /**
-         * <code>optional int64 term_id = 1;</code>
+         * <code>optional int32 term_id = 1;</code>
          */
         public boolean hasTermId() {
           return ((bitField0_ & 0x00000001) == 0x00000001);
         }
         /**
-         * <code>optional int64 term_id = 1;</code>
+         * <code>optional int32 term_id = 1;</code>
          */
-        public long getTermId() {
+        public int getTermId() {
           return termId_;
         }
         /**
-         * <code>optional int64 term_id = 1;</code>
+         * <code>optional int32 term_id = 1;</code>
          */
-        public Builder setTermId(long value) {
+        public Builder setTermId(int value) {
           bitField0_ |= 0x00000001;
           termId_ = value;
           onChanged();
           return this;
         }
         /**
-         * <code>optional int64 term_id = 1;</code>
+         * <code>optional int32 term_id = 1;</code>
          */
         public Builder clearTermId() {
           bitField0_ = (bitField0_ & ~0x00000001);
-          termId_ = 0L;
+          termId_ = 0;
           onChanged();
           return this;
         }
@@ -5211,17 +5211,17 @@ public final class IndexUnits {
 
     private int bitField0_;
     public static final int TERM_ID_FIELD_NUMBER = 1;
-    private long termId_;
+    private int termId_;
     /**
-     * <code>optional int64 term_id = 1;</code>
+     * <code>optional int32 term_id = 1;</code>
      */
     public boolean hasTermId() {
       return ((bitField0_ & 0x00000001) == 0x00000001);
     }
     /**
-     * <code>optional int64 term_id = 1;</code>
+     * <code>optional int32 term_id = 1;</code>
      */
-    public long getTermId() {
+    public int getTermId() {
       return termId_;
     }
 
@@ -5306,7 +5306,7 @@ public final class IndexUnits {
     }
 
     private void initFields() {
-      termId_ = 0L;
+      termId_ = 0;
       documentFrequency_ = 0;
       documentLemmaFrequency_ = 0;
       termFrequency_ = 0L;
@@ -5326,7 +5326,7 @@ public final class IndexUnits {
                         throws java.io.IOException {
       getSerializedSize();
       if (((bitField0_ & 0x00000001) == 0x00000001)) {
-        output.writeInt64(1, termId_);
+        output.writeInt32(1, termId_);
       }
       if (((bitField0_ & 0x00000002) == 0x00000002)) {
         output.writeInt32(2, documentFrequency_);
@@ -5351,7 +5351,7 @@ public final class IndexUnits {
       size = 0;
       if (((bitField0_ & 0x00000001) == 0x00000001)) {
         size += com.google.protobuf.CodedOutputStream
-          .computeInt64Size(1, termId_);
+            .computeInt32Size(1, termId_);
       }
       if (((bitField0_ & 0x00000002) == 0x00000002)) {
         size += com.google.protobuf.CodedOutputStream
@@ -5487,7 +5487,7 @@ public final class IndexUnits {
 
       public Builder clear() {
         super.clear();
-        termId_ = 0L;
+        termId_ = 0;
         bitField0_ = (bitField0_ & ~0x00000001);
         documentFrequency_ = 0;
         bitField0_ = (bitField0_ & ~0x00000002);
@@ -5635,34 +5635,34 @@ public final class IndexUnits {
       }
       private int bitField0_;
 
-      private long termId_ ;
+      private int termId_;
       /**
-       * <code>optional int64 term_id = 1;</code>
+       * <code>optional int32 term_id = 1;</code>
        */
       public boolean hasTermId() {
         return ((bitField0_ & 0x00000001) == 0x00000001);
       }
       /**
-       * <code>optional int64 term_id = 1;</code>
+       * <code>optional int32 term_id = 1;</code>
        */
-      public long getTermId() {
+      public int getTermId() {
         return termId_;
       }
       /**
-       * <code>optional int64 term_id = 1;</code>
+       * <code>optional int32 term_id = 1;</code>
        */
-      public Builder setTermId(long value) {
+      public Builder setTermId(int value) {
         bitField0_ |= 0x00000001;
         termId_ = value;
         onChanged();
         return this;
       }
       /**
-       * <code>optional int64 term_id = 1;</code>
+       * <code>optional int32 term_id = 1;</code>
        */
       public Builder clearTermId() {
         bitField0_ = (bitField0_ & ~0x00000001);
-        termId_ = 0L;
+        termId_ = 0;
         onChanged();
         return this;
       }
@@ -6019,16 +6019,16 @@ public final class IndexUnits {
       com.google.protobuf.MessageOrBuilder {
 
     /**
-     * <code>optional int64 id = 1;</code>
+     * <code>optional int32 id = 1;</code>
      */
     boolean hasId();
     /**
-     * <code>optional int64 id = 1;</code>
+     * <code>optional int32 id = 1;</code>
      */
-    long getId();
+    int getId();
 
     /**
-     * <code>optional int64 lemma_id = 2;</code>
+     * <code>optional int32 lemma_id = 2;</code>
      *
      * <pre>
      * Equals to -1 if lemma can not be extracted or lemma equals to this term
@@ -6036,13 +6036,13 @@ public final class IndexUnits {
      */
     boolean hasLemmaId();
     /**
-     * <code>optional int64 lemma_id = 2;</code>
+     * <code>optional int32 lemma_id = 2;</code>
      *
      * <pre>
      * Equals to -1 if lemma can not be extracted or lemma equals to this term
      * </pre>
      */
-    long getLemmaId();
+    int getLemmaId();
 
     /**
      * <code>optional string text = 3;</code>
@@ -6121,12 +6121,12 @@ public final class IndexUnits {
             }
             case 8: {
               bitField0_ |= 0x00000001;
-              id_ = input.readInt64();
+              id_ = input.readInt32();
               break;
             }
             case 16: {
               bitField0_ |= 0x00000002;
-              lemmaId_ = input.readInt64();
+              lemmaId_ = input.readInt32();
               break;
             }
             case 26: {
@@ -6386,24 +6386,24 @@ public final class IndexUnits {
 
     private int bitField0_;
     public static final int ID_FIELD_NUMBER = 1;
-    private long id_;
+    private int id_;
     /**
-     * <code>optional int64 id = 1;</code>
+     * <code>optional int32 id = 1;</code>
      */
     public boolean hasId() {
       return ((bitField0_ & 0x00000001) == 0x00000001);
     }
     /**
-     * <code>optional int64 id = 1;</code>
+     * <code>optional int32 id = 1;</code>
      */
-    public long getId() {
+    public int getId() {
       return id_;
     }
 
     public static final int LEMMA_ID_FIELD_NUMBER = 2;
-    private long lemmaId_;
+    private int lemmaId_;
     /**
-     * <code>optional int64 lemma_id = 2;</code>
+     * <code>optional int32 lemma_id = 2;</code>
      *
      * <pre>
      * Equals to -1 if lemma can not be extracted or lemma equals to this term
@@ -6413,13 +6413,13 @@ public final class IndexUnits {
       return ((bitField0_ & 0x00000002) == 0x00000002);
     }
     /**
-     * <code>optional int64 lemma_id = 2;</code>
+     * <code>optional int32 lemma_id = 2;</code>
      *
      * <pre>
      * Equals to -1 if lemma can not be extracted or lemma equals to this term
      * </pre>
      */
-    public long getLemmaId() {
+    public int getLemmaId() {
       return lemmaId_;
     }
 
@@ -6481,8 +6481,8 @@ public final class IndexUnits {
     }
 
     private void initFields() {
-      id_ = 0L;
-      lemmaId_ = 0L;
+      id_ = 0;
+      lemmaId_ = 0;
       text_ = "";
       partOfSpeech_ = com.expleague.sensearch.protobuf.index.IndexUnits.Term.PartOfSpeech.UNKNOWN;
     }
@@ -6500,10 +6500,10 @@ public final class IndexUnits {
                         throws java.io.IOException {
       getSerializedSize();
       if (((bitField0_ & 0x00000001) == 0x00000001)) {
-        output.writeInt64(1, id_);
+        output.writeInt32(1, id_);
       }
       if (((bitField0_ & 0x00000002) == 0x00000002)) {
-        output.writeInt64(2, lemmaId_);
+        output.writeInt32(2, lemmaId_);
       }
       if (((bitField0_ & 0x00000004) == 0x00000004)) {
         output.writeBytes(3, getTextBytes());
@@ -6522,11 +6522,11 @@ public final class IndexUnits {
       size = 0;
       if (((bitField0_ & 0x00000001) == 0x00000001)) {
         size += com.google.protobuf.CodedOutputStream
-          .computeInt64Size(1, id_);
+            .computeInt32Size(1, id_);
       }
       if (((bitField0_ & 0x00000002) == 0x00000002)) {
         size += com.google.protobuf.CodedOutputStream
-          .computeInt64Size(2, lemmaId_);
+            .computeInt32Size(2, lemmaId_);
       }
       if (((bitField0_ & 0x00000004) == 0x00000004)) {
         size += com.google.protobuf.CodedOutputStream
@@ -6653,9 +6653,9 @@ public final class IndexUnits {
 
       public Builder clear() {
         super.clear();
-        id_ = 0L;
+        id_ = 0;
         bitField0_ = (bitField0_ & ~0x00000001);
-        lemmaId_ = 0L;
+        lemmaId_ = 0;
         bitField0_ = (bitField0_ & ~0x00000002);
         text_ = "";
         bitField0_ = (bitField0_ & ~0x00000004);
@@ -6762,41 +6762,41 @@ public final class IndexUnits {
       }
       private int bitField0_;
 
-      private long id_ ;
+      private int id_;
       /**
-       * <code>optional int64 id = 1;</code>
+       * <code>optional int32 id = 1;</code>
        */
       public boolean hasId() {
         return ((bitField0_ & 0x00000001) == 0x00000001);
       }
       /**
-       * <code>optional int64 id = 1;</code>
+       * <code>optional int32 id = 1;</code>
        */
-      public long getId() {
+      public int getId() {
         return id_;
       }
       /**
-       * <code>optional int64 id = 1;</code>
+       * <code>optional int32 id = 1;</code>
        */
-      public Builder setId(long value) {
+      public Builder setId(int value) {
         bitField0_ |= 0x00000001;
         id_ = value;
         onChanged();
         return this;
       }
       /**
-       * <code>optional int64 id = 1;</code>
+       * <code>optional int32 id = 1;</code>
        */
       public Builder clearId() {
         bitField0_ = (bitField0_ & ~0x00000001);
-        id_ = 0L;
+        id_ = 0;
         onChanged();
         return this;
       }
 
-      private long lemmaId_ ;
+      private int lemmaId_;
       /**
-       * <code>optional int64 lemma_id = 2;</code>
+       * <code>optional int32 lemma_id = 2;</code>
        *
        * <pre>
        * Equals to -1 if lemma can not be extracted or lemma equals to this term
@@ -6806,30 +6806,30 @@ public final class IndexUnits {
         return ((bitField0_ & 0x00000002) == 0x00000002);
       }
       /**
-       * <code>optional int64 lemma_id = 2;</code>
+       * <code>optional int32 lemma_id = 2;</code>
        *
        * <pre>
        * Equals to -1 if lemma can not be extracted or lemma equals to this term
        * </pre>
        */
-      public long getLemmaId() {
+      public int getLemmaId() {
         return lemmaId_;
       }
       /**
-       * <code>optional int64 lemma_id = 2;</code>
+       * <code>optional int32 lemma_id = 2;</code>
        *
        * <pre>
        * Equals to -1 if lemma can not be extracted or lemma equals to this term
        * </pre>
        */
-      public Builder setLemmaId(long value) {
+      public Builder setLemmaId(int value) {
         bitField0_ |= 0x00000002;
         lemmaId_ = value;
         onChanged();
         return this;
       }
       /**
-       * <code>optional int64 lemma_id = 2;</code>
+       * <code>optional int32 lemma_id = 2;</code>
        *
        * <pre>
        * Equals to -1 if lemma can not be extracted or lemma equals to this term
@@ -6837,7 +6837,7 @@ public final class IndexUnits {
        */
       public Builder clearLemmaId() {
         bitField0_ = (bitField0_ & ~0x00000002);
-        lemmaId_ = 0L;
+        lemmaId_ = 0;
         onChanged();
         return this;
       }
@@ -6969,17 +6969,17 @@ public final class IndexUnits {
       com.google.protobuf.MessageOrBuilder {
 
     /**
-     * <code>repeated int64 termList = 1;</code>
+     * <code>repeated int32 termList = 1;</code>
      */
-    java.util.List<java.lang.Long> getTermListList();
+    java.util.List<java.lang.Integer> getTermListList();
     /**
-     * <code>repeated int64 termList = 1;</code>
+     * <code>repeated int32 termList = 1;</code>
      */
     int getTermListCount();
     /**
-     * <code>repeated int64 termList = 1;</code>
+     * <code>repeated int32 termList = 1;</code>
      */
-    long getTermList(int index);
+    int getTermList(int index);
   }
   /**
    * Protobuf type {@code index.TermList}
@@ -7035,21 +7035,21 @@ public final class IndexUnits {
             }
             case 8: {
               if (!((mutable_bitField0_ & 0x00000001) == 0x00000001)) {
-                termList_ = new java.util.ArrayList<java.lang.Long>();
+                termList_ = new java.util.ArrayList<java.lang.Integer>();
                 mutable_bitField0_ |= 0x00000001;
               }
-              termList_.add(input.readInt64());
+              termList_.add(input.readInt32());
               break;
             }
             case 10: {
               int length = input.readRawVarint32();
               int limit = input.pushLimit(length);
               if (!((mutable_bitField0_ & 0x00000001) == 0x00000001) && input.getBytesUntilLimit() > 0) {
-                termList_ = new java.util.ArrayList<java.lang.Long>();
+                termList_ = new java.util.ArrayList<java.lang.Integer>();
                 mutable_bitField0_ |= 0x00000001;
               }
               while (input.getBytesUntilLimit() > 0) {
-                termList_.add(input.readInt64());
+                termList_.add(input.readInt32());
               }
               input.popLimit(limit);
               break;
@@ -7097,24 +7097,24 @@ public final class IndexUnits {
     }
 
     public static final int TERMLIST_FIELD_NUMBER = 1;
-    private java.util.List<java.lang.Long> termList_;
+    private java.util.List<java.lang.Integer> termList_;
     /**
-     * <code>repeated int64 termList = 1;</code>
+     * <code>repeated int32 termList = 1;</code>
      */
-    public java.util.List<java.lang.Long>
+    public java.util.List<java.lang.Integer>
         getTermListList() {
       return termList_;
     }
     /**
-     * <code>repeated int64 termList = 1;</code>
+     * <code>repeated int32 termList = 1;</code>
      */
     public int getTermListCount() {
       return termList_.size();
     }
     /**
-     * <code>repeated int64 termList = 1;</code>
+     * <code>repeated int32 termList = 1;</code>
      */
-    public long getTermList(int index) {
+    public int getTermList(int index) {
       return termList_.get(index);
     }
 
@@ -7135,7 +7135,7 @@ public final class IndexUnits {
                         throws java.io.IOException {
       getSerializedSize();
       for (int i = 0; i < termList_.size(); i++) {
-        output.writeInt64(1, termList_.get(i));
+        output.writeInt32(1, termList_.get(i));
       }
       getUnknownFields().writeTo(output);
     }
@@ -7150,7 +7150,7 @@ public final class IndexUnits {
         int dataSize = 0;
         for (int i = 0; i < termList_.size(); i++) {
           dataSize += com.google.protobuf.CodedOutputStream
-            .computeInt64SizeNoTag(termList_.get(i));
+              .computeInt32SizeNoTag(termList_.get(i));
         }
         size += dataSize;
         size += 1 * getTermListList().size();
@@ -7358,56 +7358,56 @@ public final class IndexUnits {
       }
       private int bitField0_;
 
-      private java.util.List<java.lang.Long> termList_ = java.util.Collections.emptyList();
+      private java.util.List<java.lang.Integer> termList_ = java.util.Collections.emptyList();
       private void ensureTermListIsMutable() {
         if (!((bitField0_ & 0x00000001) == 0x00000001)) {
-          termList_ = new java.util.ArrayList<java.lang.Long>(termList_);
+          termList_ = new java.util.ArrayList<java.lang.Integer>(termList_);
           bitField0_ |= 0x00000001;
          }
       }
       /**
-       * <code>repeated int64 termList = 1;</code>
+       * <code>repeated int32 termList = 1;</code>
        */
-      public java.util.List<java.lang.Long>
+      public java.util.List<java.lang.Integer>
           getTermListList() {
         return java.util.Collections.unmodifiableList(termList_);
       }
       /**
-       * <code>repeated int64 termList = 1;</code>
+       * <code>repeated int32 termList = 1;</code>
        */
       public int getTermListCount() {
         return termList_.size();
       }
       /**
-       * <code>repeated int64 termList = 1;</code>
+       * <code>repeated int32 termList = 1;</code>
        */
-      public long getTermList(int index) {
+      public int getTermList(int index) {
         return termList_.get(index);
       }
       /**
-       * <code>repeated int64 termList = 1;</code>
+       * <code>repeated int32 termList = 1;</code>
        */
       public Builder setTermList(
-          int index, long value) {
+          int index, int value) {
         ensureTermListIsMutable();
         termList_.set(index, value);
         onChanged();
         return this;
       }
       /**
-       * <code>repeated int64 termList = 1;</code>
+       * <code>repeated int32 termList = 1;</code>
        */
-      public Builder addTermList(long value) {
+      public Builder addTermList(int value) {
         ensureTermListIsMutable();
         termList_.add(value);
         onChanged();
         return this;
       }
       /**
-       * <code>repeated int64 termList = 1;</code>
+       * <code>repeated int32 termList = 1;</code>
        */
       public Builder addAllTermList(
-          java.lang.Iterable<? extends java.lang.Long> values) {
+          java.lang.Iterable<? extends java.lang.Integer> values) {
         ensureTermListIsMutable();
         com.google.protobuf.AbstractMessageLite.Builder.addAll(
             values, termList_);
@@ -7415,7 +7415,7 @@ public final class IndexUnits {
         return this;
       }
       /**
-       * <code>repeated int64 termList = 1;</code>
+       * <code>repeated int32 termList = 1;</code>
        */
       public Builder clearTermList() {
         termList_ = java.util.Collections.emptyList();
@@ -8537,19 +8537,19 @@ public final class IndexUnits {
       "x.Page.SerializedText\022\026\n\016target_page_id\030" +
       "\002 \001(\003\022\020\n\010position\030\003 \001(\003\022\026\n\016source_page_i" +
       "d\030\004 \001(\003\"\360\001\n\016TermStatistics\022\017\n\007term_id\030\001 " +
-      "\001(\003\022\032\n\022document_frequency\030\002 \001(\005\022 \n\030docum" +
+          "\001(\005\022\032\n\022document_frequency\030\002 \001(\005\022 \n\030docum" +
       "ent_lemma_frequency\030\003 \001(\005\022\026\n\016term_freque",
       "ncy\030\004 \001(\003\022=\n\020bigram_frequency\030\005 \003(\0132#.in" +
       "dex.TermStatistics.TermFrequency\0328\n\rTerm" +
-      "Frequency\022\017\n\007term_id\030\001 \001(\003\022\026\n\016term_frequ" +
-      "ency\030\002 \001(\005\"\202\002\n\004Term\022\n\n\002id\030\001 \001(\003\022\020\n\010lemma" +
-      "_id\030\002 \001(\003\022\014\n\004text\030\003 \001(\t\0220\n\016part_of_speec" +
+          "Frequency\022\017\n\007term_id\030\001 \001(\005\022\026\n\016term_frequ" +
+          "ency\030\002 \001(\005\"\202\002\n\004Term\022\n\n\002id\030\001 \001(\005\022\020\n\010lemma" +
+          "_id\030\002 \001(\005\022\014\n\004text\030\003 \001(\t\0220\n\016part_of_speec" +
       "h\030\004 \001(\0162\030.index.Term.PartOfSpeech\"\233\001\n\014Pa" +
       "rtOfSpeech\022\013\n\007UNKNOWN\020\000\022\005\n\001A\020\001\022\007\n\003ADV\020\002\022" +
       "\n\n\006ADVPRO\020\003\022\010\n\004ANUM\020\004\022\010\n\004APRO\020\005\022\007\n\003COM\020\006" +
       "\022\010\n\004CONJ\020\007\022\010\n\004INTJ\020\010\022\007\n\003NUM\020\t\022\010\n\004PART\020\n\022" +
       "\006\n\002PR\020\013\022\005\n\001S\020\014\022\010\n\004SPRO\020\r\022\005\n\001V\020\016\"\034\n\010TermL",
-      "ist\022\020\n\010termList\030\001 \003(\003\"\036\n\013IntegerList\022\017\n\007" +
+        "ist\022\020\n\010termList\030\001 \003(\005\"\036\n\013IntegerList\022\017\n\007" +
       "intList\030\001 \003(\005\".\n\016UriPageMapping\022\013\n\003uri\030\001" +
       " \001(\t\022\017\n\007page_id\030\002 \001(\003B4\n&com.expleague.s" +
       "ensearch.protobuf.indexB\nIndexUnits"

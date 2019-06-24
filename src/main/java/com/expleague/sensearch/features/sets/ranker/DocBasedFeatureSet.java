@@ -46,7 +46,7 @@ public class DocBasedFeatureSet extends FeatureSet.Stub<QURLItem> {
   @Override
   public Vec advance() {
     List<List<Term>> sentencesList =
-        page.sentences(SegmentType.BODY).collect(Collectors.toList());
+        page.sentences(true, SegmentType.BODY).collect(Collectors.toList());
     long sentences = sentencesList.size();
     set(PASSAGES_COUNT, (double) sentences);
     set(

@@ -110,7 +110,7 @@ public class AccumulatorMinerFeatureSet extends FeatureSet.Stub<QURLItem> {
       page.sentenceVecs().forEach(cosDistanceFeatureSet::withPassage);
     }
     { // Quotation
-      page.sentences(SegmentType.BODY)
+      page.sentences(false, SegmentType.BODY)
 //              .map(sentence -> index.parse(sentence).collect(Collectors.toList()))
               .forEach(quotationFeatureSet::withPassage);
     }

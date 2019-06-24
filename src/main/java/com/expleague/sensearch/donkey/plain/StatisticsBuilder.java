@@ -7,14 +7,14 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.MinMaxPriorityQueue;
 import com.google.common.primitives.Longs;
 import gnu.trove.TCollections;
-import gnu.trove.list.TLongList;
-import gnu.trove.list.array.TLongArrayList;
-import gnu.trove.map.TLongIntMap;
-import gnu.trove.map.TLongLongMap;
-import gnu.trove.map.TLongObjectMap;
-import gnu.trove.map.hash.TLongIntHashMap;
-import gnu.trove.map.hash.TLongLongHashMap;
-import gnu.trove.map.hash.TLongObjectHashMap;
+import gnu.trove.list.TIntList;
+import gnu.trove.list.array.TIntArrayList;
+import gnu.trove.map.TIntIntMap;
+import gnu.trove.map.TIntLongMap;
+import gnu.trove.map.TIntObjectMap;
+import gnu.trove.map.hash.TIntIntHashMap;
+import gnu.trove.map.hash.TIntLongHashMap;
+import gnu.trove.map.hash.TIntObjectHashMap;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Comparator;
@@ -47,21 +47,21 @@ public class StatisticsBuilder implements AutoCloseable {
 
   private static final int MOST_FREQUENT_BIGRAMS_COUNT = 10;
 
-  private final TLongLongMap termFrequency = TCollections
-      .synchronizedMap(new TLongLongHashMap());
-  private final TLongIntMap termDocFrequency = TCollections
-      .synchronizedMap(new TLongIntHashMap());
-  private final TLongObjectMap<TLongIntMap> termsBigrams = TCollections
-      .synchronizedMap(new TLongObjectHashMap<>());
+  private final TIntLongMap termFrequency = TCollections
+      .synchronizedMap(new TIntLongHashMap());
+  private final TIntIntMap termDocFrequency = TCollections
+      .synchronizedMap(new TIntIntHashMap());
+  private final TIntObjectMap<TIntIntMap> termsBigrams = TCollections
+      .synchronizedMap(new TIntObjectHashMap<>());
 
   // page-local states
   // TODO: this is a correct usage of thread locals?
   private final ThreadLocal<Boolean> isProcessingPage = ThreadLocal
       .withInitial(() -> false);
-  private final ThreadLocal<TLongList> pageTermsSequence = ThreadLocal
-      .withInitial(TLongArrayList::new);
-  private final ThreadLocal<TLongList> pageLemmasSequence = ThreadLocal
-      .withInitial(TLongArrayList::new);
+  private final ThreadLocal<TIntList> pageTermsSequence = ThreadLocal
+      .withInitial(TIntArrayList::new);
+  private final ThreadLocal<TIntList> pageLemmasSequence = ThreadLocal
+      .withInitial(TIntArrayList::new);
 
   private final Path termStatisticsPath;
 
@@ -71,8 +71,7 @@ public class StatisticsBuilder implements AutoCloseable {
   }
 
   @VisibleForTesting
-  static Iterable<TermStatistics.TermFrequency> mostFrequentBigrams(
-      TLongIntMap neighbours, int keep) {
+  static Iterable<TermStatistics.TermFrequency> mostFrequentBigrams(TIntIntMap neighbours, int keep) {
     if (neighbours == null || neighbours.isEmpty()) {
       return new LinkedList<>();
     }
@@ -104,22 +103,22 @@ public class StatisticsBuilder implements AutoCloseable {
    * Sync-friendly
    */
   @VisibleForTesting
-  static void incrementStatsFromSequence(final TLongList wordSequence, final TLongLongMap wordFreq,
-      final TLongIntMap docFreq, final TLongObjectMap<TLongIntMap> bigramsFreq) {
+  static void incrementStatsFromSequence(final TIntList wordSequence, final TIntLongMap wordFreq,
+      final TIntIntMap docFreq, final TIntObjectMap<TIntIntMap> bigramsFreq) {
     if (wordSequence.isEmpty()) {
       LOG.warn("Tried to increment stats form empty sequence");
       return;
     }
 
-    TLongLongMap localWordFreq = new TLongLongHashMap();
-    TLongObjectMap<TLongIntMap> localBigrams = new TLongObjectHashMap<>();
+    TIntLongMap localWordFreq = new TIntLongHashMap();
+    TIntObjectMap<TIntIntMap> localBigrams = new TIntObjectHashMap<>();
     localWordFreq.adjustOrPutValue(wordSequence.get(0), 1, 1);
     int seqLen = wordSequence.size();
     for (int i = 1; i < seqLen; i++) {
-      long prevWordId = wordSequence.get(i - 1);
-      long curWordId = wordSequence.get(i);
+      int prevWordId = wordSequence.get(i - 1);
+      int curWordId = wordSequence.get(i);
       localWordFreq.adjustOrPutValue(curWordId, 1, 1);
-      localBigrams.putIfAbsent(prevWordId, new TLongIntHashMap());
+      localBigrams.putIfAbsent(prevWordId, new TIntIntHashMap());
       localBigrams.get(prevWordId).adjustOrPutValue(curWordId, 1, 1);
     }
 
@@ -127,8 +126,8 @@ public class StatisticsBuilder implements AutoCloseable {
         (id, freq) -> {
           wordFreq.adjustOrPutValue(id, freq, freq);
           docFreq.adjustOrPutValue(id, 1, 1);
-          bigramsFreq.putIfAbsent(id, new TLongIntHashMap());
-          TLongIntMap neighFreq = bigramsFreq.get(id);
+          bigramsFreq.putIfAbsent(id, new TIntIntHashMap());
+          TIntIntMap neighFreq = bigramsFreq.get(id);
           if (localBigrams.containsKey(id)) {
             localBigrams.get(id).forEachEntry(
                 (nId, nFreq) -> {
@@ -170,8 +169,11 @@ public class StatisticsBuilder implements AutoCloseable {
     }
   }
 
-  private static void writeStatistics(TLongLongMap wordFreq, TLongIntMap docFreq,
-      TLongObjectMap<TLongIntMap> bigramsMap, DB statisticsDb) {
+  private static void writeStatistics(
+      TIntLongMap wordFreq,
+      TIntIntMap docFreq,
+      TIntObjectMap<TIntIntMap> bigramsMap,
+      DB statisticsDb) {
     WriteBatch writeBatch = statisticsDb.createWriteBatch();
     final TermStatistics.Builder tsBuilder = TermStatistics.newBuilder();
     wordFreq.forEachEntry((id, freq) -> {
@@ -204,15 +206,15 @@ public class StatisticsBuilder implements AutoCloseable {
 
   private static class IdFrequencyPair {
 
-    final long termId;
+    final int termId;
     final int frequency;
 
-    IdFrequencyPair(long termId, int frequency) {
+    IdFrequencyPair(int termId, int frequency) {
       this.termId = termId;
       this.frequency = frequency;
     }
 
-    long termId() {
+    int termId() {
       return termId;
     }
 

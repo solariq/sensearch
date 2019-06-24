@@ -147,12 +147,12 @@ public class TokenParser implements AutoCloseable {
       lemma = parse.get(0).lemma();
     }
 
-    long wordId = token.id();
+    int wordId = token.id();
     if (lemma == null) {
       dictionary.addTerm(ParsedTerm.create(wordId, word, -1, null, null));
     }
 
-    long lemmaId = addToken(lemma.lemma() + LEMMA_SUFFIX).id();
+    int lemmaId = addToken(lemma.lemma() + LEMMA_SUFFIX).id();
     dictionary.addTerm(ParsedTerm.create(wordId, word, lemmaId, lemma.lemma(),
         PartOfSpeech.valueOf(lemma.pos().name())));
   }
@@ -198,7 +198,7 @@ public class TokenParser implements AutoCloseable {
     /**
      * @return id without META-data
      */
-    public long id() {
+    public int id() {
       return (id >>> BITS_FOR_META);
     }
 

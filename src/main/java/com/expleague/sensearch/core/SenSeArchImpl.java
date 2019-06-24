@@ -170,7 +170,7 @@ public class SenSeArchImpl implements SenSeArch {
 
         debugDataResults[i] =
             new ResultItemImpl(
-                res.reference(), page.content(SegmentType.FULL_TITLE), res.passages(), debugInfo);
+                res.reference(), page.rawContent(SegmentType.FULL_TITLE), res.passages(), debugInfo);
       }
     }
 
@@ -194,7 +194,7 @@ public class SenSeArchImpl implements SenSeArch {
       results[i] =
           new ResultItemImpl(
               pages[i].uri(),
-              pages[i].content(SegmentType.SECTION_TITLE),
+              pages[i].rawContent(SegmentType.SECTION_TITLE),
               Collections.singletonList(
                   Pair.create(snippets[i].getContent(), snippets[i].getSelection())),
               debugInfo);
@@ -220,7 +220,7 @@ public class SenSeArchImpl implements SenSeArch {
     Page page = index.page(URI.create(uri));
     List<Term> content =
         index
-            .parse(page.content(SegmentType.FULL_TITLE, SegmentType.BODY))
+            .parse(page.rawContent(SegmentType.FULL_TITLE, SegmentType.BODY))
             .collect(Collectors.toList());
     List<Term> queryTerms = index.parse(query).collect(Collectors.toList());
 

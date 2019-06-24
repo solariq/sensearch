@@ -1,12 +1,5 @@
 package com.expleague.sensearch.web.suggest.metrics;
 
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.stream.Collectors;
-import org.apache.commons.compress.archivers.dump.DumpArchiveConstants.SEGMENT_TYPE;
 import com.expleague.sensearch.AppModule;
 import com.expleague.sensearch.Config;
 import com.expleague.sensearch.ConfigImpl;
@@ -18,6 +11,11 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.nio.file.Paths;
+import java.util.stream.Collectors;
 
 public class TitlesLister {
   public static void main(String[] args) throws JsonParseException, JsonMappingException, IOException {
@@ -31,7 +29,7 @@ public class TitlesLister {
       index.allDocuments()
       .forEach(d -> {
         out.println(
-            index.parse(d.content(Page.SegmentType.SUB_BODY))
+            index.parse(d.rawContent(Page.SegmentType.SUB_BODY))
             .skip(50)
             .limit(10)
             .map(Term::text)

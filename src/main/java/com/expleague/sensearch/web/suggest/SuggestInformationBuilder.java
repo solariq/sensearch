@@ -7,41 +7,25 @@ import com.expleague.sensearch.index.plain.IndexTerm;
 import com.expleague.sensearch.protobuf.index.IndexUnits;
 import com.google.common.primitives.Longs;
 import com.google.inject.Inject;
-import gnu.trove.iterator.TObjectLongIterator;
 import gnu.trove.map.TLongDoubleMap;
 import gnu.trove.map.TLongIntMap;
 import gnu.trove.map.TObjectDoubleMap;
 import gnu.trove.map.TObjectIntMap;
-import gnu.trove.map.TObjectLongMap;
 import gnu.trove.map.hash.TLongDoubleHashMap;
 import gnu.trove.map.hash.TLongIntHashMap;
 import gnu.trove.map.hash.TObjectDoubleHashMap;
 import gnu.trove.map.hash.TObjectIntHashMap;
-import gnu.trove.map.hash.TObjectLongHashMap;
-import java.io.DataOutputStream;
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
-import java.util.Set;
 import java.util.stream.Collectors;
 import org.apache.log4j.Logger;
 import org.apache.log4j.PropertyConfigurator;
-import org.apache.lucene.analysis.standard.StandardAnalyzer;
-import org.apache.lucene.search.suggest.InputIterator;
-import org.apache.lucene.search.suggest.analyzing.AnalyzingInfixSuggester;
-import org.apache.lucene.search.suggest.analyzing.AnalyzingSuggester;
-import org.apache.lucene.store.FSDirectory;
-import org.apache.lucene.util.BytesRef;
 import org.iq80.leveldb.DB;
 import org.iq80.leveldb.WriteBatch;
 import org.iq80.leveldb.WriteOptions;
@@ -180,7 +164,7 @@ public class SuggestInformationBuilder {
     index
     .allDocuments()
     .forEach(d -> {
-      CharSequence title = d.content(Page.SegmentType.FULL_TITLE);
+      CharSequence title = d.rawContent(Page.SegmentType.FULL_TITLE);
       accept(toTerms(title.toString().toLowerCase()), d.incomingLinksCount(Page.LinkType.ALL_LINKS));
 
       cnt[0]++;
@@ -233,7 +217,7 @@ public class SuggestInformationBuilder {
       WriteBatch batch = multigramFreqNormDB.createWriteBatch();
       multigramFreqNorm.forEachEntry(
           (key, value) -> {
-            List<Long> l = Arrays.stream(key.val).boxed().collect(Collectors.toList());
+            List<Integer> l = Arrays.stream(key.val).mapToInt(i -> (int) i).boxed().collect(Collectors.toList());
 
             batch.put(
                 IndexUnits.TermList.newBuilder().addAllTermList(l).build().toByteArray(),

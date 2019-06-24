@@ -10,12 +10,12 @@ public interface Term {
   Term lemma();
 
   Stream<Term> synonyms();
-
   Stream<Term> synonyms(double synonymThreshold);
 
   Stream<TermAndDistance> synonymsWithDistance(double synonymThreshold);
-
   Stream<TermAndDistance> synonymsWithDistance();
+
+  boolean isPunctuation();
 
   int documentFreq();
 
