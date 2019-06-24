@@ -1,7 +1,6 @@
 package com.expleague.sensearch.donkey.randomaccess;
 
 import com.google.common.primitives.Longs;
-import java.io.Closeable;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Iterator;
@@ -14,7 +13,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 // TODO: support batch reading
-public abstract class LevelDbBasedIndex<T> implements Iterable<T>, Closeable, AutoCloseable {
+public abstract class LevelDbBasedIndex<T> implements RandomAccess<T> {
   static final Options DB_OPTIONS = new Options()
       .createIfMissing(false)
       .cacheSize(1 << 25)
