@@ -32,7 +32,7 @@ public abstract class LevelDbBasedIndex<T> implements Iterable<T>, Closeable, Au
   }
 
   @Nullable
-  public T getValue(long id) {
+  public T value(long id) {
     byte[] bytes = dataBase.get(Longs.toByteArray(id));
     if (bytes == null || bytes.length == 0) {
       return null;

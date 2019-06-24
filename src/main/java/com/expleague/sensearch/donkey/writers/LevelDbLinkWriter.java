@@ -13,9 +13,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 // TODO: make thread safe
-public class LinkWriter implements Writer<Page.Link> {
+public class LevelDbLinkWriter implements Writer<Page.Link> {
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(LinkWriter.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(LevelDbLinkWriter.class);
 
   private static final Options DB_OPTIONS = new Options()
       .blockSize(1 << 20)
@@ -32,7 +32,7 @@ public class LinkWriter implements Writer<Page.Link> {
   private final BrandNewIdGenerator idGenerator = BrandNewIdGenerator.getInstance();
   private WriteBatch writeBatch;
 
-  public LinkWriter(Path outputPath) {
+  public LevelDbLinkWriter(Path outputPath) {
     this.root = outputPath;
     try {
       linksDb = JniDBFactory.factory.open(outputPath.toFile(), DB_OPTIONS);

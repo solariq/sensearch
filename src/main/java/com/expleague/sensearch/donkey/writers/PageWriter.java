@@ -48,13 +48,13 @@ public class PageWriter implements Writer<CrawlerDocument> {
 
   private final BrandNewIdGenerator idGenerator = BrandNewIdGenerator.getInstance();
   private final TokenParser tokenParser;
-  private final LinkWriter linkWriter;
+  private final Writer<Page.Link> linkWriter;
   private final DB pageDb;
   private final Path root;
 
   private WriteBatch writeBatch;
 
-  public PageWriter(Path outputPath, TokenParser tokenParser, LinkWriter linkWriter) {
+  public PageWriter(Path outputPath, TokenParser tokenParser, Writer<Page.Link> linkWriter) {
     this.root = outputPath;
     this.linkWriter = linkWriter;
     this.tokenParser = tokenParser;

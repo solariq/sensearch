@@ -19,15 +19,18 @@ import com.expleague.sensearch.donkey.crawler.Crawler;
 import com.expleague.sensearch.donkey.plain.IndexMetaBuilder.TermSegment;
 import com.expleague.sensearch.donkey.randomaccess.LevelDbBasedIndex;
 import com.expleague.sensearch.donkey.randomaccess.PageIndex;
-import com.expleague.sensearch.donkey.readers.LinkReader;
+import com.expleague.sensearch.donkey.readers.LevelDbLinkReader;
 import com.expleague.sensearch.donkey.readers.Reader;
+import com.expleague.sensearch.donkey.readers.SequentialLinkReader;
 import com.expleague.sensearch.donkey.utils.BrandNewIdGenerator;
 import com.expleague.sensearch.donkey.utils.Dictionary;
+import com.expleague.sensearch.donkey.utils.ExternalSorter;
 import com.expleague.sensearch.donkey.utils.ParsedTerm;
 import com.expleague.sensearch.donkey.utils.TokenParser;
-import com.expleague.sensearch.donkey.writers.LinkWriter;
+import com.expleague.sensearch.donkey.writers.LevelDbLinkWriter;
 import com.expleague.sensearch.donkey.writers.PageWriter;
 import com.expleague.sensearch.donkey.writers.TermWriter;
+import com.expleague.sensearch.donkey.writers.sequential.SequentialLinkWriter;
 import com.expleague.sensearch.index.Index;
 import com.expleague.sensearch.index.plain.PlainIndex;
 import com.expleague.sensearch.protobuf.index.IndexUnits.Page;
@@ -78,7 +81,8 @@ public class PlainIndexBuilder implements IndexBuilder {
 
   public static final String PAGE_ROOT = "page";
   public static final String TERM_ROOT = "term";
-  public static final String LINK_ROOT = "link";
+  public static final String RAW_LINK_ROOT = "RawLinks";
+  public static final String SORTED_LINKS = "SortedLinks";
 
   public static final String TERM_STATISTICS_ROOT = "stats";
 
@@ -113,13 +117,6 @@ public class PlainIndexBuilder implements IndexBuilder {
       new Options()
           .cacheSize(DEFAULT_CACHE_SIZE)
           .blockRestartInterval(PLAIN_PAGE_BLOCK_SIZE)
-          .createIfMissing(true)
-          .errorIfExists(true)
-          .compressionType(CompressionType.SNAPPY);
-  private static final Options TERM_DB_OPTIONS =
-      new Options()
-          .cacheSize(DEFAULT_CACHE_SIZE)
-          .blockRestartInterval(PLAIN_TERM_BLOCK_SIZE)
           .createIfMissing(true)
           .errorIfExists(true)
           .compressionType(CompressionType.SNAPPY);
@@ -279,43 +276,64 @@ public class PlainIndexBuilder implements IndexBuilder {
     }
   }
 
-  private void buildRawIndex() throws IOException {
+  private void buildPageIndex() throws IOException {
     Files.createDirectories(indexRoot.resolve(TERM_ROOT));
     Files.createDirectories(indexRoot.resolve(PAGE_ROOT));
-    Files.createDirectories(indexRoot.resolve(LINK_ROOT));
+    Files.createDirectories(indexRoot.resolve(RAW_LINK_ROOT));
 
     try (
         TermWriter termWriter = new TermWriter(indexRoot.resolve(TERM_ROOT));
         Dictionary dictionary = new Dictionary(termWriter);
         TokenParser parser = new TokenParser(dictionary, lemmer);
-        LinkWriter linkWriter = new LinkWriter(indexRoot.resolve(LINK_ROOT));
+        LevelDbLinkWriter linkWriter = new LevelDbLinkWriter(indexRoot.resolve(RAW_LINK_ROOT));
         PageWriter pageWriter = new PageWriter(indexRoot.resolve(PAGE_ROOT), parser, linkWriter);
-        ) {
+    ) {
       crawler.makeStream().forEach(pageWriter::write);
     }
   }
 
-  private void buildLinks() {
-    TLongObjectMap<Page.Builder> pagesCache = new TLongObjectHashMap<>();
-    Reader<Link> linkReader = new LinkReader(indexRoot.resolve(LINK_ROOT));
-    LevelDbBasedIndex<Page> pageIndex = new PageIndex(indexRoot.resolve(PAGE_ROOT));
-    Link link;
+  private void sortLinksByTargetId() {
+    ExternalSorter.sort(
+        new LevelDbLinkReader(indexRoot.resolve(RAW_LINK_ROOT)),
+        indexRoot.resolve(SORTED_LINKS),
+        Comparator.comparingLong(Link::getTargetPageId),
+        SequentialLinkWriter::new,
+        SequentialLinkReader::new
+    );
+    try {
+      FileUtils.forceDelete(indexRoot.resolve(RAW_LINK_ROOT).toFile());
+    } catch (IOException e) {
+      LOG.warn(String.format(
+          "Failed to remove temporary links files by given path [ %s ]",
+          indexRoot.resolve(RAW_LINK_ROOT).toAbsolutePath().toString())
+      );
+    }
+  }
 
-    while ((link = linkReader.read()) != null) {
-      long targetId = link.getTargetPageId();
-      if (!pagesCache.containsKey(targetId)) {
-        Page.Builder page = Page.newBuilder(pageIndex.getValue(targetId));
-        pagesCache.put(targetId, page);
+  private void resolveIncomingLinks() {
+    try (
+        Reader<Link> sequentialReader = new SequentialLinkReader(indexRoot.resolve(SORTED_LINKS));
+        LevelDbBasedIndex<Page> pageIndex = new PageIndex(indexRoot.resolve(PAGE_ROOT));
+    ) {
+      Link link = sequentialReader.read();
+      if (link == null) {
+        throw new RuntimeException("No sorted links was found!");
       }
-      pagesCache.get(targetId).addIncomingLinks(link);
 
-      if (pagesCache.size() >= 10_000) {
-        pagesCache.forEachEntry((k, v) -> {
-          pageIndex.put(k, v.build());
-          return true;
-        });
-        pagesCache = new TLongObjectHashMap<>();
+      long currentTargetId = link.getTargetPageId();
+      Page.Builder currentTargetPage = Page.newBuilder(pageIndex.value(currentTargetId));
+      currentTargetPage.addIncomingLinks(link);
+      while ((link = sequentialReader.read()) != null) {
+        if (link.getTargetPageId() != currentTargetId) {
+          pageIndex.put(currentTargetId, currentTargetPage.build());
+          currentTargetId = link.getTargetPageId();
+          currentTargetPage = Page.newBuilder(pageIndex.value(currentTargetId));
+        }
+        currentTargetPage.addIncomingLinks(link);
       }
+      FileUtils.forceDelete(indexRoot.resolve(SORTED_LINKS).toFile());
+    } catch (IOException e) {
+      throw new RuntimeException(e);
     }
   }
 

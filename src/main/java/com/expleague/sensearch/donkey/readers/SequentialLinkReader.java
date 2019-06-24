@@ -33,7 +33,11 @@ public class SequentialLinkReader implements Reader<Link> {
   }
 
   @Override
-  public void close() throws IOException {
-    inputStream.close();
+  public void close() {
+    try {
+      inputStream.close();
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
   }
 }
