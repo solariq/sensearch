@@ -21,6 +21,8 @@ public interface Index extends AutoCloseable {
   @Nullable
   Term term(CharSequence seq);
 
+  CharSequence text(List<Term> text);
+
   Stream<List<Term>> sentences(IntStream sequence);
   Stream<Term> parse(CharSequence sequence);
   Stream<Term> mostFrequentNeighbours(Term term);
