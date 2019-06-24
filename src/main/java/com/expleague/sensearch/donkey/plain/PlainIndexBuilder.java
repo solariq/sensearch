@@ -158,21 +158,6 @@ public class PlainIndexBuilder implements IndexBuilder {
     this.lemmer = lemmer;
   }
 
-  /**
-   * Tokenizes given text and adds it to the @code{termBuilder}.
-   *
-   * @param text text to be parsed and converted to ids
-   * @return array of term ids returned by @code{termBuilder}
-   */
-  private long[] toTermIds(String text, TermBuilder termBuilder) {
-    return tokenizer
-        .parseTextToWords(text)
-        .map(s -> s.toString().toLowerCase())
-        .map(word -> termBuilder.addTerm(word).id)
-        .mapToLong(i -> i)
-        .toArray();
-  }
-
   private Comparator<Vec> comparator(Vec main) {
     return (v1, v2) -> {
       double val1 = 1. - VecTools.cosine(v1, main);
