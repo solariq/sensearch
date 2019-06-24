@@ -1,8 +1,6 @@
 package com.expleague.sensearch.donkey.writers;
 
-import com.expleague.sensearch.donkey.utils.CachedTermParser;
 import com.expleague.sensearch.donkey.utils.ParsedTerm;
-import com.expleague.sensearch.donkey.utils.TokenParser.Token;
 import com.expleague.sensearch.protobuf.index.IndexUnits.Term;
 import com.expleague.sensearch.protobuf.index.IndexUnits.Term.PartOfSpeech;
 import com.google.common.primitives.Longs;
@@ -16,7 +14,7 @@ import org.iq80.leveldb.WriteOptions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class TermWriter implements Writer<Token> {
+public class TermWriter implements Writer<ParsedTerm> {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(PageWriter.class);
   private static final Options DB_OPTIONS = new Options()
@@ -30,12 +28,10 @@ public class TermWriter implements Writer<Token> {
 
   private final DB termsDb;
   private final Path root;
-  private final CachedTermParser termParser;
   private WriteBatch writeBatch;
 
-  public TermWriter(Path root, CachedTermParser termParser) {
+  public TermWriter(Path root) {
     this.root = root;
-    this.termParser = termParser;
     try {
       termsDb = JniDBFactory.factory.open(root.toFile(), DB_OPTIONS);
       writeBatch = termsDb.createWriteBatch();
@@ -44,8 +40,7 @@ public class TermWriter implements Writer<Token> {
     }
   }
 
-  public void write(Token token) {
-    ParsedTerm parsedTerm = termParser.parseTerm(token.text());
+  public void write(ParsedTerm parsedTerm) {
     Term.Builder builder = Term.newBuilder();
 
     if (parsedTerm.hasLemma()) {

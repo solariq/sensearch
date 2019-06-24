@@ -23,6 +23,7 @@ import com.expleague.sensearch.donkey.readers.LinkReader;
 import com.expleague.sensearch.donkey.readers.Reader;
 import com.expleague.sensearch.donkey.utils.BrandNewIdGenerator;
 import com.expleague.sensearch.donkey.utils.CachedTermParser;
+import com.expleague.sensearch.donkey.utils.Dictionary;
 import com.expleague.sensearch.donkey.utils.ParsedTerm;
 import com.expleague.sensearch.donkey.utils.TokenParser;
 import com.expleague.sensearch.donkey.writers.LinkWriter;
@@ -299,13 +300,12 @@ public class PlainIndexBuilder implements IndexBuilder {
     Files.createDirectories(indexRoot.resolve(PAGE_ROOT));
     Files.createDirectories(indexRoot.resolve(LINK_ROOT));
 
-    TokenParser parser = new TokenParser();
     try (
-        TermWriter termWriter = new TermWriter(indexRoot.resolve(TERM_ROOT),
-            new CachedTermParser(parser, lemmer, 1_000_000));
+        TermWriter termWriter = new TermWriter(indexRoot.resolve(TERM_ROOT));
+        Dictionary dictionary = new Dictionary(termWriter);
+        TokenParser parser = new TokenParser(dictionary, lemmer);
         LinkWriter linkWriter = new LinkWriter(indexRoot.resolve(LINK_ROOT));
-        PageWriter pageWriter =
-            new PageWriter(indexRoot.resolve(PAGE_ROOT), parser, termWriter, linkWriter);
+        PageWriter pageWriter = new PageWriter(indexRoot.resolve(PAGE_ROOT), parser, linkWriter);
         ) {
       crawler.makeStream().forEach(pageWriter::write);
     }
@@ -344,13 +344,11 @@ public class PlainIndexBuilder implements IndexBuilder {
     Files.createDirectories(indexRoot.resolve(TERM_ROOT));
 
     final TLongSet knownPageIds = new TLongHashSet();
-    final TokenParser parser = new TokenParser();
-    final CachedTermParser termParser = new CachedTermParser(parser, lemmer, 1_000_000);
     try (final PlainPageBuilder plainPageBuilder =
         new PlainPageBuilder(
             JniDBFactory.factory.open(indexRoot.resolve(PAGE_ROOT).toFile(), PAGE_DB_OPTIONS),
             indexRoot.resolve(PAGE_ROOT).resolve("TMP"));
-        final TermWriter termWriter = new TermWriter(indexRoot.resolve(TERM_ROOT), termParser);
+        final TermWriter termWriter = new TermWriter(indexRoot.resolve(TERM_ROOT));
         final StatisticsBuilder statisticsBuilder =
             new StatisticsBuilder(indexRoot.resolve(TERM_STATISTICS_ROOT));
         final EmbeddingBuilder embeddingBuilder =

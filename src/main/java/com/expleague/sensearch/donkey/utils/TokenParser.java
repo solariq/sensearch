@@ -1,41 +1,33 @@
 package com.expleague.sensearch.donkey.utils;
 
 import com.expleague.commons.seq.CharSeq;
-import gnu.trove.map.TIntObjectMap;
-import gnu.trove.map.TObjectIntMap;
-import gnu.trove.map.hash.TIntObjectHashMap;
-import gnu.trove.map.hash.TObjectIntHashMap;
+import com.expleague.commons.text.lemmer.LemmaInfo;
+import com.expleague.commons.text.lemmer.WordInfo;
+import com.expleague.sensearch.core.PartOfSpeech;
+import com.expleague.sensearch.core.lemmer.Lemmer;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
 
-public class TokenParser {
+public class TokenParser implements AutoCloseable {
 
-  private TObjectIntMap<CharSeq> termToIntMap;
-  private TIntObjectMap<CharSeq> intToTermMap;
+  private static final String LEMMA_SUFFIX = "$";
 
-  private static int ID = 5_000;
+  private Dictionary dictionary;
+
   private static int PUNCT_ID = 0;
   private static final int PUNCTUATION_SIZE = 5_000;
+  private static int ID = PUNCTUATION_SIZE;
   private final static int BITS_FOR_META = 8;
   private final static int FIRST_UPPERCASE = 0x00000008; //0000'0000'0000'0000'0000'0000'0000'1000
   private final static int ALL_UPPERCASE = 0x00000004;   //0000'0000'0000'0000'0000'0000'0000'0100
   private final static int PUNCTUATION = 0x00000002;     //0000'0000'0000'0000'0000'0000'0000'0010
   private final PageParser parser = new PageParser();
+  private final Lemmer lemmer;
 
-  public TokenParser() {
-    termToIntMap = new TObjectIntHashMap<>();
-    intToTermMap = new TIntObjectHashMap<>();
-  }
-
-  public TokenParser(TObjectIntMap<CharSeq> map) {
-    termToIntMap = map;
-    intToTermMap = new TIntObjectHashMap<>();
-    map.forEachEntry((cs, i) ->  {
-      intToTermMap.put(i, cs);
-      return true;
-    });
-    ID += termToIntMap.size();
+  public TokenParser(Dictionary dictionary, Lemmer lemmer) {
+    this.dictionary = dictionary;
+    this.lemmer = lemmer;
   }
 
   public boolean check(CharSequence originalText, int[] ids) {
@@ -45,7 +37,7 @@ public class TokenParser {
     int id = 0;
     CharSequence w = formatedText(ids[id]);
     int j = 0;
-    for (int i = 0 ; i < originalText.length(); i++) {
+    for (int i = 0; i < originalText.length(); i++) {
       upper = firstUpperCase(ids[id]);
       if (w.charAt(j) != originalText.charAt(i)) {
         if (!upper || j == 0 || Character.toUpperCase(w.charAt(j)) != originalText.charAt(i)) {
@@ -74,7 +66,7 @@ public class TokenParser {
   }
 
   private CharSequence formatedText(int id) {
-    CharSequence t = intToTermMap.get(toId(id));
+    CharSequence t = dictionary.get(toId(id));
     if (allUpperCase(id)) {
       t = t.toString().toUpperCase();
     } else if (firstUpperCase(id)) {
@@ -94,6 +86,75 @@ public class TokenParser {
 
   public Token addToken(CharSequence token) {
     return addToken(CharSeq.intern(token));
+  }
+
+  private Token addToken(CharSeq token) {
+    boolean firstUp = false;
+    boolean punkt = true;
+    final boolean[] allUp = {true};
+    int id;
+
+    if (Character.isUpperCase(token.at(0))) {
+      firstUp = true;
+    }
+    if (Character.isLetterOrDigit(token.at(0))) {
+      punkt = false;
+    }
+    token.forEach(c -> {
+      if (Character.isLowerCase(c)) {
+        allUp[0] = false;
+      }
+    });
+
+    CharSeq lowToken = CharSeq.intern(token.toString().toLowerCase());
+    if (dictionary.contains(lowToken)) {
+      id = dictionary.get(lowToken);
+    } else {
+      if (punkt) {
+        id = PUNCT_ID;
+        PUNCT_ID++;
+      } else {
+        id = ID;
+        ID++;
+      }
+      if (ID >= (1 << 29)) {
+        throw new RuntimeException("Token limit::" + token.toString());
+      }
+      if (PUNCT_ID == PUNCTUATION_SIZE) {
+        throw new RuntimeException("Punctuation limit::" + token.toString());
+      }
+    }
+    id = id << BITS_FOR_META;
+    if (firstUp) {
+      id |= FIRST_UPPERCASE;
+    }
+    if (allUp[0]) {
+      id |= ALL_UPPERCASE;
+    }
+    if (punkt) {
+      id |= PUNCTUATION;
+    }
+    Token res = new Token(lowToken, id);
+    newTerm(res);
+    return res;
+  }
+
+  private void newTerm(Token token) {
+    CharSeq word = CharSeq.intern(token.text());
+    LemmaInfo lemma = null;
+    List<WordInfo> parse = lemmer.parse(word);
+    if (parse.size() > 0) {
+      lemma = parse.get(0).lemma();
+    }
+
+    long wordId = token.id();
+    if (lemma == null) {
+      dictionary.addTerm(ParsedTerm.create(wordId, word, -1, null, null));
+    }
+
+    long lemmaId = addToken(lemma.lemma() + LEMMA_SUFFIX).id();
+    dictionary.addTerm(ParsedTerm.create(wordId, word, lemmaId, lemma.lemma(),
+        PartOfSpeech.valueOf(lemma.pos().name())));
   }
 
   public static int toId(int id) {
@@ -120,53 +181,8 @@ public class TokenParser {
     return (id & FIRST_UPPERCASE) != 0;
   }
 
-  private Token addToken(CharSeq token) {
-    boolean firstUp = false;
-    boolean punkt = true;
-    final boolean[] allUp = {true};
-    int id;
-    if (Character.isUpperCase(token.at(0))) {
-      firstUp = true;
-    }
-    if (Character.isLetterOrDigit(token.at(0))) {
-      punkt = false;
-    }
-    token.forEach(c -> {
-      if (Character.isLowerCase(c)) {
-        allUp[0] = false;
-      }
-    });
-    CharSeq lowToken = CharSeq.intern(token.toString().toLowerCase());
-    if (termToIntMap.containsKey(lowToken)) {
-      id = termToIntMap.get(lowToken);
-    } else {
-      if (punkt) {
-        id = PUNCT_ID;
-        PUNCT_ID++;
-      } else {
-        id = ID;
-        ID++;
-      }
-      termToIntMap.put(lowToken, id);
-      intToTermMap.put(id, lowToken);
-      if (ID >= (1 << 29)) {
-        throw new RuntimeException("Token limit::" + token.toString());
-      }
-      if (PUNCT_ID == PUNCTUATION_SIZE) {
-        throw new RuntimeException("Punctuation limit::" + token.toString());
-      }
-    }
-    id = id << BITS_FOR_META;
-    if (firstUp) {
-      id |= FIRST_UPPERCASE;
-    }
-    if (allUp[0]) {
-      id |= ALL_UPPERCASE;
-    }
-    if (punkt) {
-      id |= PUNCTUATION;
-    }
-    return new Token(token, id);
+  @Override
+  public void close() {
   }
 
   public static class Token {
@@ -194,7 +210,7 @@ public class TokenParser {
     }
 
     /**
-     * @return text without changes
+     * @return lowercase text
      */
     public CharSequence text() {
       return text;

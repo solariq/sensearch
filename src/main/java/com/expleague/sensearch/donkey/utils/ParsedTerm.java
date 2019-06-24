@@ -1,14 +1,11 @@
 package com.expleague.sensearch.donkey.utils;
 
 import com.expleague.commons.seq.CharSeq;
-import com.expleague.commons.text.lemmer.LemmaInfo;
-import com.expleague.commons.text.lemmer.WordInfo;
 import com.expleague.sensearch.core.PartOfSpeech;
-import com.expleague.sensearch.core.lemmer.Lemmer;
-import java.util.List;
 import javax.annotation.Nullable;
 
 public class ParsedTerm {
+
   private static final String LEMMA_SUFFIX = "$";
 
   private final long wordId;
@@ -20,8 +17,7 @@ public class ParsedTerm {
   private final PartOfSpeech posTag;
 
   protected ParsedTerm(long wordId, CharSeq word,
-      long lemmaId, CharSeq lemma,
-      PartOfSpeech posTag) {
+      long lemmaId, CharSeq lemma, PartOfSpeech posTag) {
     this.wordId = wordId;
     this.word = word;
     this.lemmaId = lemmaId;
@@ -29,24 +25,9 @@ public class ParsedTerm {
     this.posTag = posTag;
   }
 
-  public static ParsedTerm parse(CharSequence wordcs, Lemmer lemmer, TokenParser parser) {
-    CharSeq word = CharSeq.create(wordcs);
-    word = CharSeq.intern(word);
-
-    LemmaInfo lemma = null;
-    List<WordInfo> parse = lemmer.parse(word);
-    if (parse.size() > 0) {
-      lemma = parse.get(0).lemma();
-    }
-
-    long wordId = parser.addToken(CharSeq.create(wordcs)).id();
-    if (lemma == null) {
-      return new ParsedTerm(wordId, word, -1, null, null);
-    }
-
-    long lemmaId = parser.addToken(lemma.lemma() + LEMMA_SUFFIX).id();
-    return new ParsedTerm(wordId, word, lemmaId, lemma.lemma(),
-        PartOfSpeech.valueOf(lemma.pos().name()));
+  public static ParsedTerm create(long wordId, CharSeq word,
+      long lemmaId, CharSeq lemma, PartOfSpeech posTag) {
+    return new ParsedTerm(wordId, word, lemmaId, lemma, posTag);
   }
 
   public CharSeq lemma() {
