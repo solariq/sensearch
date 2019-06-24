@@ -54,12 +54,12 @@ public class PageWriter implements Writer<CrawlerDocument> {
 
   private WriteBatch writeBatch;
 
-  public PageWriter(Path root, TokenParser tokenParser, LinkWriter linkWriter) {
-    this.root = root;
+  public PageWriter(Path outputPath, TokenParser tokenParser, LinkWriter linkWriter) {
+    this.root = outputPath;
     this.linkWriter = linkWriter;
     this.tokenParser = tokenParser;
     try {
-      pageDb = JniDBFactory.factory.open(root.toFile(), DB_OPTIONS);
+      pageDb = JniDBFactory.factory.open(outputPath.toFile(), DB_OPTIONS);
       writeBatch = pageDb.createWriteBatch();
     } catch (IOException e) {
       throw new RuntimeException(e);

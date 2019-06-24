@@ -6,8 +6,8 @@ import com.google.protobuf.InvalidProtocolBufferException;
 import java.nio.file.Path;
 
 public class TermIndex extends LevelDbBasedIndex<Page.Link> {
-  public TermIndex(Path root) {
-    super(root);
+  public TermIndex(Path path) {
+    super(path);
   }
 
   @Override

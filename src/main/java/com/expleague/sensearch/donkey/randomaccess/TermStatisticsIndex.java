@@ -7,8 +7,8 @@ import com.google.protobuf.InvalidProtocolBufferException;
 import java.nio.file.Path;
 
 public class TermStatisticsIndex extends LevelDbBasedIndex<TermStatistics> {
-  public TermStatisticsIndex(Path root) {
-    super(root);
+  public TermStatisticsIndex(Path path) {
+    super(path);
   }
 
   @Override

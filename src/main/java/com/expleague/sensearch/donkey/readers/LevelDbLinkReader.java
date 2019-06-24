@@ -12,7 +12,7 @@ import org.iq80.leveldb.DB;
 import org.iq80.leveldb.DBIterator;
 import org.iq80.leveldb.Options;
 
-public class LinkReader implements Reader<Page.Link> {
+public class LevelDbLinkReader implements Reader<Page.Link> {
 
   private static final Options DB_OPTIONS = new Options()
       .createIfMissing(false)
@@ -22,10 +22,10 @@ public class LinkReader implements Reader<Page.Link> {
   private final DB linkDb;
   private final DBIterator iterator;
 
-  public LinkReader(Path root) {
-    this.root = root;
+  public LevelDbLinkReader(Path outputPath) {
+    this.root = outputPath;
     try {
-      linkDb = JniDBFactory.factory.open(root.toFile(), DB_OPTIONS);
+      linkDb = JniDBFactory.factory.open(outputPath.toFile(), DB_OPTIONS);
       iterator = linkDb.iterator();
       iterator.seekToFirst();
     } catch (IOException e) {

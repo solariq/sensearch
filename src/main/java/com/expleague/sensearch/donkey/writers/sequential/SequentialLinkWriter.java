@@ -9,17 +9,14 @@ import java.nio.file.Path;
 
 public class SequentialLinkWriter implements SequentialWriter<Link> {
 
-  private static final String LINKS_FILE = "links.pb";
-  private final Path root;
-  private final Path outputFile;
+  private final Path outputPath;
   private final OutputStream outputStream;
 
-  public SequentialLinkWriter(Path root) {
-    this.root = root;
-    this.outputFile = root.resolve(LINKS_FILE);
+  public SequentialLinkWriter(Path outputPath) {
+    this.outputPath = outputPath;
     try {
-      Files.createDirectories(root);
-      this.outputStream = new BufferedOutputStream(Files.newOutputStream(outputFile));
+      Files.createDirectories(outputPath.getParent());
+      this.outputStream = new BufferedOutputStream(Files.newOutputStream(outputPath));
     } catch (IOException e) {
       throw new RuntimeException(e);
     }

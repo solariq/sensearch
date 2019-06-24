@@ -30,10 +30,10 @@ public class TermWriter implements Writer<ParsedTerm> {
   private final Path root;
   private WriteBatch writeBatch;
 
-  public TermWriter(Path root) {
-    this.root = root;
+  public TermWriter(Path outputPath) {
+    this.root = outputPath;
     try {
-      termsDb = JniDBFactory.factory.open(root.toFile(), DB_OPTIONS);
+      termsDb = JniDBFactory.factory.open(outputPath.toFile(), DB_OPTIONS);
       writeBatch = termsDb.createWriteBatch();
     } catch (IOException e) {
       throw new RuntimeException(e);

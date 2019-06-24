@@ -32,10 +32,10 @@ public class LinkWriter implements Writer<Page.Link> {
   private final BrandNewIdGenerator idGenerator = BrandNewIdGenerator.getInstance();
   private WriteBatch writeBatch;
 
-  public LinkWriter(Path root) {
-    this.root = root;
+  public LinkWriter(Path outputPath) {
+    this.root = outputPath;
     try {
-      linksDb = JniDBFactory.factory.open(root.toFile(), DB_OPTIONS);
+      linksDb = JniDBFactory.factory.open(outputPath.toFile(), DB_OPTIONS);
       writeBatch = linksDb.createWriteBatch();
     } catch (IOException e) {
       throw new RuntimeException(e);
