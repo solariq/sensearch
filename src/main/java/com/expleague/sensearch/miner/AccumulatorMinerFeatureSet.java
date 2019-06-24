@@ -65,9 +65,9 @@ public class AccumulatorMinerFeatureSet extends FeatureSet.Stub<QURLItem> {
 //    CharSequence title = page.content(SegmentType.SECTION_TITLE);
 
 //    List<Term> titleTerms = index.parse(title).collect(Collectors.toList());
-    List<Term> titleTerms = page.content(false, SegmentType.SECTION_TITLE).collect(Collectors.toList());
+    List<Term> titleTerms = page.content(SegmentType.SECTION_TITLE).collect(Collectors.toList());
 //    List<Term> bodyTerms = index.parse(body).collect(Collectors.toList());
-    List<Term> bodyTerms = page.content(false, SegmentType.BODY).collect(Collectors.toList());
+    List<Term> bodyTerms = page.content(SegmentType.BODY).collect(Collectors.toList());
 
     { // Text features processing
       final int titleLength = titleTerms.size();
@@ -110,7 +110,7 @@ public class AccumulatorMinerFeatureSet extends FeatureSet.Stub<QURLItem> {
       page.sentenceVecs().forEach(cosDistanceFeatureSet::withPassage);
     }
     { // Quotation
-      page.sentences(false, SegmentType.BODY)
+      page.sentences(SegmentType.BODY)
 //              .map(sentence -> index.parse(sentence).collect(Collectors.toList()))
               .forEach(quotationFeatureSet::withPassage);
     }

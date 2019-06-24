@@ -41,7 +41,7 @@ public class SnippetsCreator {
   }
 
   public Snippet getSnippet(Page page, Query query) {
-    CharSequence title = page.content(SegmentType.SECTION_TITLE);
+    CharSequence title = page.rawContent(SegmentType.SECTION_TITLE);
 
     List<Passage> passages = page
         .sentences(SegmentType.SUB_BODY)

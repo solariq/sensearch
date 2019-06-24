@@ -30,7 +30,7 @@ public interface Page {
   URI uri();
 
   @NotNull
-  Stream<Term> content(boolean punct, SegmentType... types);
+  Stream<Term> content(SegmentType... types);
 
   @NotNull
   CharSequence rawContent(SegmentType... types);
@@ -70,7 +70,7 @@ public interface Page {
 
   Stream<Page> subpages();
 
-  Stream<List<Term>> sentences(boolean punct, SegmentType type);
+  Stream<List<Term>> sentences(SegmentType type);
 
   Vec titleVec();
 

@@ -50,7 +50,7 @@ public class PlainPage implements IndexedPage {
         }
 
         @Override
-        public Stream<Term> content(boolean punct, SegmentType... types) {
+        public Stream<Term> content(SegmentType... types) {
           return Stream.empty();
         }
 
@@ -95,7 +95,7 @@ public class PlainPage implements IndexedPage {
         }
 
         @Override
-        public Stream<List<Term>> sentences(boolean punct, SegmentType t) {
+        public Stream<List<Term>> sentences(SegmentType t) {
           return Stream.empty();
         }
 
@@ -233,7 +233,11 @@ public class PlainPage implements IndexedPage {
   }
 
   @Override
-  public Stream<Term> content(boolean punct, SegmentType... types) {
+  public Stream<Term> content(SegmentType... types) {
+    return Arrays.stream(types).flatMap(t -> content(t, false));
+  }
+
+  private Stream<Term> content(boolean punct, SegmentType... types) {
     return Arrays.stream(types).flatMap(t -> content(t, punct));
   }
 
@@ -342,9 +346,13 @@ public class PlainPage implements IndexedPage {
   }
 
   @Override
+  public Stream<List<Term>> sentences(SegmentType type) {
+    return sentences(false, type);
+  }
+
   public Stream<List<Term>> sentences(boolean punct, SegmentType type) {
-    return index.sentences(intContent(type, true))
-        .map(terms -> terms.stream().filter(t -> !t.isPunctuation()).collect(Collectors.toList()));
+    // TODO: test this
+    return index.sentences(intContent(type, punct));
   }
 
   @Override
@@ -431,7 +439,7 @@ public class PlainPage implements IndexedPage {
       if (targetPage == EMPTY_PAGE) {
         return Stream.empty();
       }
-      return targetPage.content(false, SegmentType.SECTION_TITLE);
+      return targetPage.content(SegmentType.SECTION_TITLE);
     }
 
     @Override

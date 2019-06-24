@@ -9,6 +9,8 @@ import com.expleague.sensearch.Page.SegmentType;
 import com.expleague.sensearch.core.PartOfSpeech;
 import com.expleague.sensearch.core.Term;
 import com.expleague.sensearch.features.QURLItem;
+import com.expleague.sensearch.index.IndexedPage;
+import com.expleague.sensearch.index.plain.PlainPage;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -45,8 +47,9 @@ public class DocBasedFeatureSet extends FeatureSet.Stub<QURLItem> {
 
   @Override
   public Vec advance() {
-    List<List<Term>> sentencesList =
-        page.sentences(true, SegmentType.BODY).collect(Collectors.toList());
+    // FIXME: do NOT cast page down to 'PlainPage'
+    List<List<Term>> sentencesList = ((PlainPage) page).sentences(true, SegmentType.BODY)
+        .collect(Collectors.toList());
     long sentences = sentencesList.size();
     set(PASSAGES_COUNT, (double) sentences);
     set(

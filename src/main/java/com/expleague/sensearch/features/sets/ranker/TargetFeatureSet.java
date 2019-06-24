@@ -37,11 +37,9 @@ public class TargetFeatureSet extends FeatureSet.Stub<QURLItem> {
     this.query = query;
   }
 
-  private boolean textEq(CharSequence text, List<CharSequence> texts) {
-    String lowText = text.toString().toLowerCase();
-    StringBuilder merge = new StringBuilder();
-    texts.forEach(merge::append);
-    return lowText.equals(merge.toString());
+  // fixme: check if it works as intended
+  private boolean textEq(CharSequence text1, CharSequence text2) {
+    return text1.toString().toLowerCase().equals(text2.toString().toLowerCase());
   }
 
   @Override
@@ -52,8 +50,8 @@ public class TargetFeatureSet extends FeatureSet.Stub<QURLItem> {
       List<ResultItem> res = Arrays.asList(objectMapper.readValue(reader, ResultItemImpl[].class));
       ResultItem resultItem = res
           .stream()
-          .filter(item -> textEq(item.title(),
-              page.content(true, SegmentType.SECTION_TITLE).map(Term::text).collect(Collectors.toList())))
+          // fixme: page.content even with punctuation should NOT contain whitespaces
+          .filter(item -> textEq(item.title(), page.rawContent(SegmentType.SECTION_TITLE)))
           .findFirst().orElse(null);
       if (resultItem != null) {
         vec = res.indexOf(resultItem) + 1;
