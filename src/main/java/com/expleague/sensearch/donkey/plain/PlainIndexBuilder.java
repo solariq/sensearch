@@ -17,8 +17,7 @@ import com.expleague.sensearch.core.lemmer.Lemmer;
 import com.expleague.sensearch.donkey.IndexBuilder;
 import com.expleague.sensearch.donkey.crawler.Crawler;
 import com.expleague.sensearch.donkey.plain.IndexMetaBuilder.TermSegment;
-import com.expleague.sensearch.donkey.randomaccess.LevelDbBasedIndex;
-import com.expleague.sensearch.donkey.randomaccess.PageIndex;
+import com.expleague.sensearch.donkey.randomaccess.ProtobufIndex;
 import com.expleague.sensearch.donkey.randomaccess.RandomAccess;
 import com.expleague.sensearch.donkey.readers.LevelDbLinkReader;
 import com.expleague.sensearch.donkey.readers.Reader;
@@ -314,7 +313,7 @@ public class PlainIndexBuilder implements IndexBuilder {
   private void resolveIncomingLinks() {
     try (
         Reader<Link> sequentialReader = new SequentialLinkReader(indexRoot.resolve(SORTED_LINKS));
-        RandomAccess<Page> pageIndex = new PageIndex(indexRoot.resolve(PAGE_ROOT));
+        RandomAccess<Page> pageIndex = new ProtobufIndex<>(indexRoot.resolve(PAGE_ROOT), Page.class)
     ) {
       Link link = sequentialReader.read();
       if (link == null) {
