@@ -34,6 +34,8 @@ public class TokenParser implements AutoCloseable {
     boolean check = true;
     boolean upper;
 
+    StringBuilder res = new StringBuilder();
+
     int id = 0;
     CharSequence w = "";
     if (id < ids.length) {
@@ -50,9 +52,10 @@ public class TokenParser implements AutoCloseable {
       }
       j++;
       if (j == w.length()) {
+        res.append(w);
         j = 0;
         id++;
-        if (id == ids.length && i != originalText.length()) {
+        if (id == ids.length && i != originalText.length() - 1) {
           check = false;
           break;
         }
@@ -66,7 +69,7 @@ public class TokenParser implements AutoCloseable {
     }
 
     if (!check) {
-      throw new RuntimeException("Parsed text aren't equal original text::" + originalText);
+      throw new RuntimeException("Parsed text::\n" + res + "\nAren't equal original text::\n" + originalText);
     }
   }
 
