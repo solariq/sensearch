@@ -11,7 +11,7 @@ import java.util.stream.Stream;
 
 public class TokenParser implements AutoCloseable {
 
-  private static final String LEMMA_SUFFIX = "$";
+  private static final char LEMMA_SUFFIX = '$';
 
   private Dictionary dictionary;
 
@@ -150,9 +150,17 @@ public class TokenParser implements AutoCloseable {
     int wordId = token.id();
     if (lemma == null) {
       dictionary.addTerm(ParsedTerm.create(wordId, word, -1, null, null));
+      return;
     }
 
-    int lemmaId = addToken(lemma.lemma() + LEMMA_SUFFIX).id();
+    int lemmaId;
+    if (dictionary.contains(lemma.lemma())) {
+      lemmaId = dictionary.get(lemma.lemma());
+    } else if (token.text.last() == LEMMA_SUFFIX) {
+      lemmaId = token.id();
+    } else {
+      lemmaId = addToken(lemma.lemma() + String.valueOf(LEMMA_SUFFIX)).id();
+    }
     dictionary.addTerm(ParsedTerm.create(wordId, word, lemmaId, lemma.lemma(),
         PartOfSpeech.valueOf(lemma.pos().name())));
   }
