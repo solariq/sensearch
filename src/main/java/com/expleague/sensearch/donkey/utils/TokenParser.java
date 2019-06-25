@@ -93,6 +93,9 @@ public class TokenParser implements AutoCloseable {
   }
 
   public Token addToken(CharSequence token) {
+    if (token.length() == 0) {
+      throw new IllegalArgumentException("Empty token encountered");
+    }
     return addToken(CharSeq.intern(token));
   }
 
