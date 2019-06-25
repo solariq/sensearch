@@ -37,7 +37,7 @@ public class TokenParser implements AutoCloseable {
     int id = 0;
     CharSequence w = "";
     if (id < ids.length) {
-      w = formatedText(ids[id]);
+      w = formattedText(ids[id]);
     }
     int j = 0;
     for (int i = 0; i < originalText.length(); i++) {
@@ -57,7 +57,7 @@ public class TokenParser implements AutoCloseable {
           break;
         }
         if (id < ids.length) {
-          w = formatedText(ids[id]);
+          w = formattedText(ids[id]);
         }
       }
     }
@@ -70,7 +70,7 @@ public class TokenParser implements AutoCloseable {
     }
   }
 
-  private CharSequence formatedText(int id) {
+  private CharSequence formattedText(int id) {
     CharSequence t = dictionary.get(toId(id));
     if (allUpperCase(id)) {
       t = t.toString().toUpperCase();
@@ -130,15 +130,17 @@ public class TokenParser implements AutoCloseable {
       }
     }
     id = id << BITS_FOR_META;
-    if (firstUp) {
-      id |= FIRST_UPPERCASE;
-    }
-    if (allUp[0]) {
-      id |= ALL_UPPERCASE;
-    }
     if (punkt) {
       id |= PUNCTUATION;
+    } else {
+      if (firstUp) {
+        id |= FIRST_UPPERCASE;
+      }
+      if (allUp[0]) {
+        id |= ALL_UPPERCASE;
+      }
     }
+
     Token res = new Token(lowToken, id);
     newTerm(res);
     return res;
