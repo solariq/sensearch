@@ -67,6 +67,7 @@ public class PageWriter implements Writer<CrawlerDocument> {
   }
 
   public void write(CrawlerDocument document) {
+//    LOGGER.info("write document::" + document.title());
     final long pageId = idGenerator.generatePageId(document.uri());
     final List<String> categories = document.categories();
     final List<Page> builtPages = new ArrayList<>();
