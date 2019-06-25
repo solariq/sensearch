@@ -2,6 +2,7 @@ package com.expleague.sensearch.miner.FeatureTest;
 
 import com.expleague.commons.math.vectors.Vec;
 import com.expleague.sensearch.Page;
+import com.expleague.sensearch.core.Term;
 import com.expleague.sensearch.features.QURLItem;
 import com.expleague.sensearch.features.sets.ranker.BM25FeatureSet;
 import com.expleague.sensearch.features.sets.ranker.TextFeatureSet;
@@ -9,11 +10,12 @@ import com.expleague.sensearch.features.sets.ranker.TextFeatureSet.Segment;
 import com.expleague.sensearch.query.BaseQuery;
 import com.expleague.sensearch.query.Query;
 import com.expleague.sensearch.utils.IndexBasedTestCase;
+import org.junit.Assert;
+import org.junit.Test;
+
 import java.net.URI;
 import java.util.List;
 import java.util.stream.Stream;
-import org.junit.Assert;
-import org.junit.Test;
 
 public class BM25Test extends IndexBasedTestCase {
 
@@ -139,7 +141,12 @@ public class BM25Test extends IndexBasedTestCase {
     }
 
     @Override
-    public CharSequence content(SegmentType... types) {
+    public Stream<Term> content(SegmentType... types) {
+      return null;
+    }
+
+    @Override
+    public CharSequence rawContent(SegmentType... types) {
       return null;
     }
 
@@ -189,7 +196,7 @@ public class BM25Test extends IndexBasedTestCase {
     }
 
     @Override
-    public Stream<CharSequence> sentences(SegmentType type) {
+    public Stream<List<Term>> sentences(SegmentType type) {
       return null;
     }
 

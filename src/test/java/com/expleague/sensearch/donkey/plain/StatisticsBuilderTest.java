@@ -1,8 +1,5 @@
 package com.expleague.sensearch.donkey.plain;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-
 import com.expleague.sensearch.donkey.utils.ParsedTerm;
 import com.expleague.sensearch.protobuf.index.IndexUnits.TermStatistics;
 import com.expleague.sensearch.protobuf.index.IndexUnits.TermStatistics.TermFrequency;
@@ -10,18 +7,8 @@ import com.expleague.sensearch.utils.SensearchTestCase;
 import com.google.common.collect.Lists;
 import com.google.common.primitives.Longs;
 import com.google.protobuf.InvalidProtocolBufferException;
-import gnu.trove.map.TLongIntMap;
-import gnu.trove.map.hash.TLongIntHashMap;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
+import gnu.trove.map.TIntIntMap;
+import gnu.trove.map.hash.TIntIntHashMap;
 import org.apache.commons.io.FileUtils;
 import org.fusesource.leveldbjni.JniDBFactory;
 import org.iq80.leveldb.CompressionType;
@@ -32,6 +19,16 @@ import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.*;
+import java.util.stream.Collectors;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 
 
 // TODO: add test where lemmaId is not present in termIds
@@ -49,7 +46,7 @@ public class StatisticsBuilderTest extends SensearchTestCase {
 
   private static final class ParsedTermStub extends ParsedTerm {
     ParsedTermStub(long wordId, long lemmaId) {
-      super(wordId, null, lemmaId, null, null);
+      super((int) wordId, null, (int) lemmaId, null, null);
     }
   }
 
@@ -173,7 +170,7 @@ public class StatisticsBuilderTest extends SensearchTestCase {
     Map<Long, Integer> freqMap =
         bigramFrequencyList
             .stream()
-            .collect(Collectors.toMap(TermFrequency::getTermId, TermFrequency::getTermFrequency));
+                .collect(Collectors.toMap(t -> (long) t.getTermId(), TermFrequency::getTermFrequency));
 
     // Check that there are no extra bigrams
     for (int i = 0; i < bigrams.size(); i++) {
@@ -188,7 +185,7 @@ public class StatisticsBuilderTest extends SensearchTestCase {
 
   @Test
   public void mostFrequentBigramsTest() {
-    TLongIntMap neighboursFreq = new TLongIntHashMap();
+    TIntIntMap neighboursFreq = new TIntIntHashMap();
     neighboursFreq.put(1, 1);
     neighboursFreq.put(2, 3);
     neighboursFreq.put(3, 5);
@@ -209,7 +206,7 @@ public class StatisticsBuilderTest extends SensearchTestCase {
 
   @Test
   public void mostFreqSameFreqTest() {
-    TLongIntMap neighboursFreq = new TLongIntHashMap();
+    TIntIntMap neighboursFreq = new TIntIntHashMap();
     neighboursFreq.put(1, 8);
     neighboursFreq.put(2, 8);
     neighboursFreq.put(3, 8);

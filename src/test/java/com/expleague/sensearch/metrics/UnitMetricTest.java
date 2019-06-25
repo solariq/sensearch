@@ -5,7 +5,14 @@ import com.expleague.commons.util.Pair;
 import com.expleague.sensearch.Page;
 import com.expleague.sensearch.SenSeArch.ResultItem;
 import com.expleague.sensearch.SenSeArch.ResultItemDebugInfo;
+import com.expleague.sensearch.core.Term;
 import com.expleague.sensearch.snippet.Segment;
+import org.apache.commons.io.FileUtils;
+import org.junit.After;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.net.URI;
@@ -15,11 +22,6 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
-import org.apache.commons.io.FileUtils;
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
 
 public class UnitMetricTest {
 
@@ -239,7 +241,12 @@ public class UnitMetricTest {
     }
 
     @Override
-    public CharSequence content(SegmentType... types) {
+    public Stream<Term> content(SegmentType... types) {
+      return Stream.empty();
+    }
+
+    @Override
+    public CharSequence rawContent(SegmentType... types) {
       return title;
     }
 
@@ -279,7 +286,7 @@ public class UnitMetricTest {
     }
 
     @Override
-    public Stream<CharSequence> sentences(SegmentType type) {
+    public Stream<List<Term>> sentences(SegmentType type) {
       return null;
     }
 

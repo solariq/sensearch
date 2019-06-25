@@ -2,16 +2,13 @@ package com.expleague.sensearch.utils;
 
 import com.expleague.commons.text.lemmer.MyStem;
 import com.expleague.sensearch.ConfigImpl;
-import com.expleague.sensearch.core.lemmer.Lemmer;
+import com.expleague.sensearch.core.lemmer.MultiLangLemmer;
 import com.expleague.sensearch.donkey.plain.PlainIndexBuilder;
+import com.expleague.sensearch.filter.FilterImpl;
 import com.expleague.sensearch.index.Embedding;
 import com.expleague.sensearch.index.Index;
 import com.expleague.sensearch.index.plain.EmbeddingImpl;
-import com.expleague.sensearch.filter.FilterImpl;
 import com.expleague.sensearch.index.plain.PlainIndex;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import org.apache.commons.io.FileUtils;
 import org.fusesource.leveldbjni.JniDBFactory;
 import org.iq80.leveldb.Options;
@@ -19,6 +16,10 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 public abstract class IndexBasedTestCase extends CrawlerBasedTestCase {
 
@@ -75,7 +76,7 @@ public abstract class IndexBasedTestCase extends CrawlerBasedTestCase {
     LOG.info("Rebuilding index...");
     MyStem myStem = myStemForTest("IndexBasedTestCase", "initIndex");
     new PlainIndexBuilder(crawler(), indexConfig.getIndexRoot(), indexConfig.getEmbeddingVectors(),
-        Lemmer.getInstance())
+            MultiLangLemmer.getInstance())
         .buildIndexAndEmbedding();
   }
 
