@@ -1,5 +1,6 @@
 package com.expleague.sensearch.core.impl;
 
+import com.expleague.commons.seq.CharSeq;
 import com.expleague.commons.seq.CharSeqTools;
 import com.expleague.sensearch.core.Term;
 import com.expleague.sensearch.core.Tokenizer;
@@ -14,26 +15,28 @@ public class TokenizerImpl implements Tokenizer {
   }
 
   @Override
-  public Stream<CharSequence> toWords(CharSequence sentence) {
-    List<CharSequence> words = new ArrayList<>();
-    int wordStart = -1;
-    int length = sentence.length();
-    for (int i = 0; i < length; i++) {
-      char c = sentence.charAt(i);
-      if (wordStart == -1 && (Character.isDigit(c) || isAlpha(c))) {
-        wordStart = i;
+  public Stream<CharSequence> toWords(CharSequence text) {
+    List<CharSequence> result = new ArrayList<>();
+    StringBuilder token = new StringBuilder();
+    final boolean[] isProcessingWord = {false};
+    CharSeq.create(text).forEach(c -> {
+      if (Character.isAlphabetic(c) || Character.isDigit(c)) {
+        isProcessingWord[0] = true;
+        token.append(c);
+      } else {
+        if (isProcessingWord[0]) {
+          result.add(CharSeq.intern(token.toString()));
+          token.delete(0, token.length());
+          isProcessingWord[0] = false;
+        }
+        result.add(CharSeq.intern(c.toString()));
       }
-      if (wordStart != -1 && !Character.isDigit(c) && !isAlpha(c)) {
-        words.add(sentence.subSequence(wordStart, i));
-        wordStart = -1;
-      }
+    });
+    if (token.length() != 0) {
+      result.add(CharSeq.intern(token.toString()));
     }
 
-    if (wordStart != -1) {
-      words.add(sentence.subSequence(wordStart, length));
-    }
-
-    return words.stream();
+    return result.stream();
   }
 
   @Override
@@ -108,8 +111,6 @@ public class TokenizerImpl implements Tokenizer {
     if (sentenceStart != length) {
       sentences.add(termText.subList(sentenceStart, length));
     }
-
-
 
 //    for (int i = 0; i < length; i++) {
 //      String c = String.valueOf(termText.get(i).text());

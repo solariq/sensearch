@@ -8,6 +8,7 @@ import com.expleague.commons.seq.CharSeq;
 import com.expleague.commons.text.lemmer.LemmaInfo;
 import com.expleague.commons.text.lemmer.PartOfSpeech;
 import com.expleague.commons.text.lemmer.WordInfo;
+import com.expleague.sensearch.core.impl.TokenizerImpl;
 import com.expleague.sensearch.core.lemmer.Lemmer;
 import com.expleague.sensearch.donkey.utils.TokenParser.Token;
 import com.expleague.sensearch.donkey.writers.Writer;
@@ -48,7 +49,7 @@ public class TokenParserTest {
 
   @Test
   public void testAddToken() {
-    TokenParser tokenParser = new TokenParser(new Dictionary(dummyWriter), dummyLemmer);
+    TokenParser tokenParser = new TokenParser(new Dictionary(dummyWriter), dummyLemmer, new TokenizerImpl());
     Token cats = tokenParser.addToken("Cats");
     Token cat = tokenParser.addToken("CAT");
     Token trash = tokenParser.addToken("trash");
@@ -130,7 +131,7 @@ public class TokenParserTest {
 
   @Test(expected = IllegalArgumentException.class)
   public void testAddToken_empty() {
-    TokenParser tokenParser = new TokenParser(new Dictionary(dummyWriter), dummyLemmer);
+    TokenParser tokenParser = new TokenParser(new Dictionary(dummyWriter), dummyLemmer, new TokenizerImpl());
     tokenParser.addToken("");
   }
 }

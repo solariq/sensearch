@@ -4,6 +4,7 @@ import com.expleague.commons.seq.CharSeq;
 import com.expleague.commons.text.lemmer.LemmaInfo;
 import com.expleague.commons.text.lemmer.WordInfo;
 import com.expleague.sensearch.core.PartOfSpeech;
+import com.expleague.sensearch.core.Tokenizer;
 import com.expleague.sensearch.core.lemmer.Lemmer;
 import java.util.ArrayList;
 import java.util.List;
@@ -22,12 +23,13 @@ public class TokenParser implements AutoCloseable {
   private final static int FIRST_UPPERCASE = 0x00000008; //0000'0000'0000'0000'0000'0000'0000'1000
   private final static int ALL_UPPERCASE = 0x00000004;   //0000'0000'0000'0000'0000'0000'0000'0100
   private final static int PUNCTUATION = 0x00000002;     //0000'0000'0000'0000'0000'0000'0000'0010
-  private final PageParser parser = new PageParser();
+  private final Tokenizer tokenizer;
   private final Lemmer lemmer;
 
-  public TokenParser(Dictionary dictionary, Lemmer lemmer) {
+  public TokenParser(Dictionary dictionary, Lemmer lemmer, Tokenizer tokenizer) {
     this.dictionary = dictionary;
     this.lemmer = lemmer;
+    this.tokenizer = tokenizer;
   }
 
   public void check(CharSequence originalText, int[] ids) {
@@ -86,7 +88,7 @@ public class TokenParser implements AutoCloseable {
 
   public Stream<Token> parse(CharSequence text) {
     List<Token> result = new ArrayList<>();
-    parser.parse(text).forEach(t -> {
+    tokenizer.toWords(text).forEach(t -> {
       result.add(addToken(t));
     });
     return result.stream();

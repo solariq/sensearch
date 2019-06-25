@@ -3,11 +3,15 @@ package com.expleague.sensearch.core.impl;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+import com.expleague.commons.seq.CharSeq;
 import com.expleague.commons.seq.CharSeqTools;
+import com.expleague.sensearch.core.Tokenizer;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import org.junit.Assert;
 import org.junit.Test;
 
 public class TokenizerImplTest {
@@ -38,12 +42,84 @@ public class TokenizerImplTest {
   }
 
   @Test
-  public void testToWords() {
+  public void testToWordsStrange() {
     TokenizerImpl tokenizer = new TokenizerImpl();
-    String text =
-        " Some text... В нем есть русский! Ё-маЁ?! \"Что-то в кавычках...\" кек. "
-            + "Кек. И Он сказал: 'хрень.' Ч. т. д. 'Мда'... The end ";
-    assertEquals(tokenizer.toWords(text).collect(Collectors.toList()), parseToWordsRegexp(text));
+    String text = "!@#$%№^&*()_+=-1234567890 \n \t qwer-tyuiop[]asd1fghjkl;'zxcv0bnm,./";
+    List<CharSeq> expected = new ArrayList<>();
+    expected.add(CharSeq.create("!"));
+    expected.add(CharSeq.create("@"));
+    expected.add(CharSeq.create("#"));
+    expected.add(CharSeq.create("$"));
+    expected.add(CharSeq.create("%"));
+    expected.add(CharSeq.create("№"));
+    expected.add(CharSeq.create("^"));
+    expected.add(CharSeq.create("&"));
+    expected.add(CharSeq.create("*"));
+    expected.add(CharSeq.create("("));
+    expected.add(CharSeq.create(")"));
+    expected.add(CharSeq.create("_"));
+    expected.add(CharSeq.create("+"));
+    expected.add(CharSeq.create("="));
+    expected.add(CharSeq.create("-"));
+    expected.add(CharSeq.create("1234567890"));
+    expected.add(CharSeq.create(" "));
+    expected.add(CharSeq.create("\n"));
+    expected.add(CharSeq.create(" "));
+    expected.add(CharSeq.create("\t"));
+    expected.add(CharSeq.create(" "));
+    expected.add(CharSeq.create("qwer"));
+    expected.add(CharSeq.create("-"));
+    expected.add(CharSeq.create("tyuiop"));
+    expected.add(CharSeq.create("["));
+    expected.add(CharSeq.create("]"));
+    expected.add(CharSeq.create("asd1fghjkl"));
+    expected.add(CharSeq.create(";"));
+    expected.add(CharSeq.create("'"));
+    expected.add(CharSeq.create("zxcv0bnm"));
+    expected.add(CharSeq.create(","));
+    expected.add(CharSeq.create("."));
+    expected.add(CharSeq.create("/"));
+    List<CharSequence> ans = tokenizer.toWords(CharSeq.create(text)).collect(Collectors.toList());
+    Assert.assertEquals(expected, ans);
+  }
+
+  @Test
+  public void testToWords() {
+    Tokenizer tokenizer = new TokenizerImpl();
+    String text = "\"heLLo, privEt!23xyi,_ %@()\\\".;@ kl\t \\n wo'w\"";
+    List<CharSeq> expected = new ArrayList<>();
+    expected.add(CharSeq.create("\""));
+    expected.add(CharSeq.create("heLLo"));
+    expected.add(CharSeq.create(","));
+    expected.add(CharSeq.create(" "));
+    expected.add(CharSeq.create("privEt"));
+    expected.add(CharSeq.create("!"));
+    expected.add(CharSeq.create("23xyi"));
+    expected.add(CharSeq.create(","));
+    expected.add(CharSeq.create("_"));
+    expected.add(CharSeq.create(" "));
+    expected.add(CharSeq.create("%"));
+    expected.add(CharSeq.create("@"));
+    expected.add(CharSeq.create("("));
+    expected.add(CharSeq.create(")"));
+    expected.add(CharSeq.create("\\"));
+    expected.add(CharSeq.create("\""));
+    expected.add(CharSeq.create("."));
+    expected.add(CharSeq.create(";"));
+    expected.add(CharSeq.create("@"));
+    expected.add(CharSeq.create(" "));
+    expected.add(CharSeq.create("kl"));
+    expected.add(CharSeq.create("\t"));
+    expected.add(CharSeq.create(" "));
+    expected.add(CharSeq.create("\\"));
+    expected.add(CharSeq.create("n"));
+    expected.add(CharSeq.create(" "));
+    expected.add(CharSeq.create("wo"));
+    expected.add(CharSeq.create("'"));
+    expected.add(CharSeq.create("w"));
+    expected.add(CharSeq.create("\""));
+    List<CharSequence> ans = tokenizer.toWords(CharSeq.create(text)).collect(Collectors.toList());
+    Assert.assertEquals(expected, ans);
   }
 
   @Test

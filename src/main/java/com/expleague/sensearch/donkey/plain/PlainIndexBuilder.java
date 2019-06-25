@@ -284,7 +284,7 @@ public class PlainIndexBuilder implements IndexBuilder {
     try (
         PageWriter pageWriter = new PageWriter(
             indexRoot.resolve(PAGE_ROOT),
-            new TokenParser(new Dictionary(new TermWriter(indexRoot.resolve(TERM_ROOT))), lemmer),
+            new TokenParser(new Dictionary(new TermWriter(indexRoot.resolve(TERM_ROOT))), lemmer, new TokenizerImpl()),
             new LevelDbLinkWriter(indexRoot.resolve(RAW_LINK_ROOT))
         )
     ) {
