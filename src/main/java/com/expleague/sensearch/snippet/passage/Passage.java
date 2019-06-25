@@ -3,6 +3,7 @@ package com.expleague.sensearch.snippet.passage;
 import com.expleague.sensearch.Page;
 import com.expleague.sensearch.core.Term;
 import java.util.List;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
@@ -10,13 +11,11 @@ import java.util.stream.Stream;
  */
 public class Passage {
 
-  private final CharSequence sentence;
   private final List<Term> words;
   private final Page owner;
   private int id;
 
-  public Passage(CharSequence sentence, List<Term> terms, Page owner) {
-    this.sentence = sentence;
+  public Passage(List<Term> terms, Page owner) {
     this.words = terms;
     this.owner = owner;
   }
@@ -29,12 +28,14 @@ public class Passage {
     this.id = id;
   }
 
-  public CharSequence sentence() {
-    return sentence;
-  }
-
   public Stream<Term> words() {
     return words.stream();
+  }
+
+  public CharSequence sentence() {
+    StringBuilder res = new StringBuilder();
+    words.forEach(t -> res.append(t.text()));
+    return res;
   }
 
   public Page owner() {

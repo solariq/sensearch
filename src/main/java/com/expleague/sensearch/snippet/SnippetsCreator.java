@@ -45,7 +45,7 @@ public class SnippetsCreator {
 
     List<Passage> passages = page
         .sentences(SegmentType.SUB_BODY)
-        .map(x -> new Passage(x, index.parse(x).collect(Collectors.toList()), page))
+            .map(x -> new Passage(x, page))
         .collect(Collectors.toList());
 
     for (int i = 0; i < passages.size(); i++) {

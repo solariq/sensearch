@@ -50,7 +50,7 @@ public class SRWFeatureSet extends FeatureSet.Stub<QPASItem> {
   private void createKeywords() {
     List<Passage> passages = owner
         .sentences(SegmentType.SUB_BODY)
-        .map(x -> new Passage(x, index.parse(x).collect(Collectors.toList()), owner))
+            .map(x -> new Passage(x, owner))
         .collect(Collectors.toList());
 
     Set<KeyWord> uniqueWords = passages

@@ -1,5 +1,7 @@
 package com.expleague.sensearch.snippet.experiments;
 
+import com.expleague.commons.seq.CharSeq;
+import com.expleague.commons.seq.CharSeqTools;
 import com.expleague.sensearch.core.Tokenizer;
 import com.expleague.sensearch.core.impl.TokenizerImpl;
 import com.expleague.sensearch.miner.pool.QueryAndResults;
@@ -15,10 +17,7 @@ import java.io.File;
 import java.net.URI;
 import java.net.URLEncoder;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class NAParser {
@@ -86,10 +85,17 @@ public class NAParser {
 
                         List<CharSequence> passages = tokenizer.toSentences(longAnsString).collect(Collectors.toList());
                         List<QueryAndPassages.PassageAndWeight> passageAndWeights = passages.stream()
-                                .filter(passage -> passage.toString().contains(shortAnsString))
-                                .map(passage -> new QueryAndPassages.PassageAndWeight(passage.toString(), 1))
+                                .map(passage -> {
+                                  if (passage.toString().contains(shortAnsString)) {
+                                    return new QueryAndPassages.PassageAndWeight(passage.toString(), 1);
+                                  } else if (longAnsString.contains(passage)) {
+                                    return new QueryAndPassages.PassageAndWeight(passage.toString(), 0.5);
+                                  } else {
+                                    return null;
+                                  }
+                                })
+                                .filter(Objects::nonNull)
                                 .collect(Collectors.toList());
-
 
                         queryAndPassages.add(new QueryAndPassages(query, uri, passageAndWeights));
                     }

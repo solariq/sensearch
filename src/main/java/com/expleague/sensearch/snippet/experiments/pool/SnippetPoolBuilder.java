@@ -10,6 +10,8 @@ import com.expleague.ml.meta.DataSetMeta;
 import com.expleague.ml.meta.FeatureMeta;
 import com.expleague.ml.meta.impl.JsonDataSetMeta;
 import com.expleague.sensearch.AppModule;
+import com.expleague.sensearch.Config;
+import com.expleague.sensearch.ConfigImpl;
 import com.expleague.sensearch.Page;
 import com.expleague.sensearch.core.Annotations;
 import com.expleague.sensearch.index.Index;
@@ -51,7 +53,12 @@ public class SnippetPoolBuilder extends PoolBuilder<QueryAndPassages> {
     }
 
     public static void main(String[] args) throws IOException {
-        Injector injector = Guice.createInjector(new AppModule());
+        ConfigImpl config = new ConfigImpl();
+        config.setTemporaryIndex(args[0]);
+        if (args.length > 1) {
+            config.setSnippetModelPath(args[1]);
+        }
+        Injector injector = Guice.createInjector(new AppModule(config));
         injector.getInstance(SnippetPoolBuilder.class).build(Paths.get("./PoolData/snippet/"), 0);
     }
 
@@ -83,7 +90,7 @@ public class SnippetPoolBuilder extends PoolBuilder<QueryAndPassages> {
                         if (answers.isEmpty()) return;
 
                         answers.forEach(paw -> {
-                            Passage passage = new Passage(paw.passage(), index.parse(paw.passage()).collect(Collectors.toList()), page);
+                            Passage passage = new Passage(index.parse(paw.passage()).collect(Collectors.toList()), page);
                             synchronized (poolBuilder) {
                                 poolBuilder.accept(new QPASItem(query, passage));
                                 poolBuilder

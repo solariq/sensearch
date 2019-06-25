@@ -21,15 +21,14 @@ public class AccumulatorFeatureSet extends FeatureSet.Stub<QPASItem> {
 
   public AccumulatorFeatureSet(Index index) {
     this.index = index;
+    features.components()
+            .map(Functions.cast(SRWFeatureSet.class))
+            .filter(Objects::nonNull)
+            .forEach(fs -> fs.withIndex(index));
   }
 
   @Override
   public void accept(QPASItem item) {
-    features.components()
-        .map(Functions.cast(SRWFeatureSet.class))
-        .filter(Objects::nonNull)
-        .forEach(fs -> fs.withIndex(index));
-
     features.accept(item);
 
     { //COS DISTANCE
