@@ -35,7 +35,10 @@ public class TokenParser implements AutoCloseable {
     boolean upper;
 
     int id = 0;
-    CharSequence w = formatedText(ids[id]);
+    CharSequence w = "";
+    if (id < ids.length) {
+      w = formatedText(ids[id]);
+    }
     int j = 0;
     for (int i = 0; i < originalText.length(); i++) {
       upper = firstUpperCase(ids[id]);

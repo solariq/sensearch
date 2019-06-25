@@ -78,37 +78,40 @@ public class PageWriter implements Writer<CrawlerDocument> {
       Page.Builder section = processSection(s, pageId, sectionId, categories);
       List<CharSequence> sectionTitles = s.titles();
 
-      int commonPrefix = commonPrefix(sectionTitles, parentTitles);
-      if (commonPrefix == 0) {
-        // We encountered a case when a single page consists of two level-1 titles
-        // which is abnormal
-        // TODO: how should we handle this situation?
-        LOGGER.error(String.format(
-            "Received page with id [ %s ] and uri [ %s ] has at least two first-level titles."
-                + " Normally this should never happen. Probably page is corrupted",
-            pageId, document.uri()
-        ));
-      }
+      if (!parentPagesStack.empty()) {
+        int commonPrefix = commonPrefix(sectionTitles, parentTitles);
+        if (commonPrefix == 0) {
+          // We encountered a case when a single page consists of two level-1 titles
+          // which is abnormal
+          // TODO: how should we handle this situation?
+          LOGGER.error(String.format(
+              "Received page with id [ %s ] and uri [ %s ] has at least two first-level titles."
+                  + " Normally this should never happen. Probably page is corrupted",
+              pageId, document.uri()
+          ));
+        }
 
-      while (parentPagesStack.size() >= commonPrefix) {
-        builtPages.add(parentPagesStack.pop().build());
-      }
+        while (parentPagesStack.size() > commonPrefix) {
+          builtPages.add(parentPagesStack.pop().build());
+        }
 
-      int depthDiff = sectionTitles.size() - parentPagesStack.size();
-      if (depthDiff > 1) {
-        LOGGER.error(String.format(
-            "Received page with id [ %d ] and uri [ %s ] which probably has missing sections."
-                + " Previous section titles: [ %s ]. Current section titles: [ %s ]."
-                + " Depth difference: [ %d ]. Index might be corrupted!",
-            pageId, document.uri(), parentTitles.toString(), sectionTitles.toString(), depthDiff));
-        // TODO: if there were a missing section then we should add it to the stack otherwise parents
-        // might become incorrect
-      }
+        int depthDiff = sectionTitles.size() - parentPagesStack.size();
+        if (depthDiff > 1) {
+          LOGGER.error(String.format(
+              "Received page with id [ %d ] and uri [ %s ] which probably has missing sections."
+                  + " Previous section titles: [ %s ]. Current section titles: [ %s ]."
+                  + " Depth difference: [ %d ]. Index might be corrupted!",
+              pageId, document.uri(), parentTitles.toString(), sectionTitles.toString(),
+              depthDiff));
+          // TODO: if there were a missing section then we should add it to the stack otherwise parents
+          // might become incorrect
+        }
 
-      // normally this should never happen!
-      if (!parentPagesStack.isEmpty()) {
-        section.setParentId(parentPagesStack.peek().getPageId());
-        parentPagesStack.peek().addSubpagesIds(sectionId);
+        // normally this should never happen!
+        if (!parentPagesStack.isEmpty()) {
+          section.setParentId(parentPagesStack.peek().getPageId());
+          parentPagesStack.peek().addSubpagesIds(sectionId);
+        }
       }
       parentPagesStack.push(section);
       // TODO: probably should do it more intelligently
@@ -185,7 +188,7 @@ public class PageWriter implements Writer<CrawlerDocument> {
   private static int commonPrefix(List<CharSequence> list1, List<CharSequence> list2) {
     int minSize = Math.min(list1.size(), list2.size());
     int cmnPref = 0;
-    for (; cmnPref < minSize && list1.get(cmnPref) == list2.get(cmnPref); ++cmnPref) {
+    for (; cmnPref < minSize && list1.get(cmnPref).equals(list2.get(cmnPref)); ++cmnPref) {
       ;
     }
     return cmnPref;

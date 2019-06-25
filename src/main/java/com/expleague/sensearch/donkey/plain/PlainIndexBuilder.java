@@ -276,7 +276,7 @@ public class PlainIndexBuilder implements IndexBuilder {
     }
   }
 
-  private void buildPageIndex() throws IOException {
+  public void buildPageIndex() throws IOException {
     Files.createDirectories(indexRoot.resolve(TERM_ROOT));
     Files.createDirectories(indexRoot.resolve(PAGE_ROOT));
     Files.createDirectories(indexRoot.resolve(RAW_LINK_ROOT));
@@ -371,8 +371,8 @@ public class PlainIndexBuilder implements IndexBuilder {
 
       EmbeddingImpl<CharSeq> jmllEmbedding1 = (EmbeddingImpl<CharSeq>) jmllEmbedding;
       for (int i = 0; i < jmllEmbedding1.vocabSize(); i++) {
-        ParsedTerm parsedTerm = termParser.parseTerm(jmllEmbedding1.getObj(i));
-        embeddingBuilder.addTerm(parsedTerm.wordId(), jmllEmbedding1.apply(parsedTerm.word()));
+//        ParsedTerm parsedTerm = termParser.parseTerm(jmllEmbedding1.getObj(i));
+//        embeddingBuilder.addTerm(parsedTerm.wordId(), jmllEmbedding1.apply(parsedTerm.word()));
       }
       IndexMetaBuilder indexMetaBuilder = new IndexMetaBuilder(PlainIndex.VERSION);
 
@@ -431,8 +431,8 @@ public class PlainIndexBuilder implements IndexBuilder {
                                       if (word == TITLE_STOP) {
                                         isTitle[0] = false;
                                       }
-                                      ParsedTerm parsedTerm = termParser.parseTerm(word);
-                                      termWriter.write(parser.addToken(word));
+                                      ParsedTerm parsedTerm = null; //termParser.parseTerm(word);
+//                                      termWriter.write(parser.addToken(word));
                                       // TODO: uncomment it
                                       /*
                                       if (jmllEmbedding.apply(CharSeq.compact(word)) == null) {

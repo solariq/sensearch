@@ -5,7 +5,6 @@ import com.expleague.ml.data.tools.FeatureSet;
 import com.expleague.ml.meta.FeatureMeta.ValueType;
 import com.expleague.ml.meta.TargetMeta;
 import com.expleague.sensearch.Page;
-import com.expleague.sensearch.Page.SegmentType;
 import com.expleague.sensearch.core.Term;
 import com.expleague.sensearch.core.impl.ResultItemImpl;
 import com.expleague.sensearch.features.QURLItem;
@@ -57,7 +56,7 @@ public class TargetFeatureSet extends FeatureSet.Stub<QURLItem> {
 
   @Override
   public Vec advance() {
-    set(TARGET_META, validTitles.contains(toCS(page.content(true, SegmentType.SECTION_TITLE))) ? 1 : 0);
+//    set(TARGET_META, validTitles.contains(toCS(page.content(true, SegmentType.SECTION_TITLE))) ? 1 : 0);
     return super.advance();
   }
 }

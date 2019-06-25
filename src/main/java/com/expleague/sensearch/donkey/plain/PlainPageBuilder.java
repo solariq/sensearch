@@ -120,8 +120,8 @@ class PlainPageBuilder implements AutoCloseable {
     Page.Builder pageBuilder =
         Page.newBuilder()
             .setPageId(sectionId)
-            .setContent(section.text().toString())
-            .setTitle(sectionTitle.toString())
+//            .setContent(section.text().toString())
+//            .setTitle(sectionTitle.toString())
             .setUri(section.uri().toString())
             .addAllCategories(categories.get());
 
@@ -135,7 +135,7 @@ class PlainPageBuilder implements AutoCloseable {
       Page.Link dbLink =
           Page.Link.newBuilder()
               .setPosition(link.textOffset())
-              .setText(link.text().toString())
+//              .setText(link.text().toString())
               .setSourcePageId(sectionId)
               .setTargetPageId(targetId)
               .build();
