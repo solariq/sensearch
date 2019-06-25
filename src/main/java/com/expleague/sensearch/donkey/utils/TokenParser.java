@@ -30,7 +30,7 @@ public class TokenParser implements AutoCloseable {
     this.lemmer = lemmer;
   }
 
-  public boolean check(CharSequence originalText, int[] ids) {
+  public void check(CharSequence originalText, int[] ids) {
     boolean check = true;
     boolean upper;
 
@@ -65,7 +65,9 @@ public class TokenParser implements AutoCloseable {
       check = false;
     }
 
-    return check;
+    if (!check) {
+      throw new RuntimeException("Parsed text aren't equal original text::" + originalText);
+    }
   }
 
   private CharSequence formatedText(int id) {
