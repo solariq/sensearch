@@ -8,6 +8,7 @@ import edu.mit.jwi.Dictionary;
 import edu.mit.jwi.IDictionary;
 import edu.mit.jwi.item.POS;
 import edu.mit.jwi.morph.WordnetStemmer;
+
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -58,6 +59,7 @@ public class EnglishLemmer implements Lemmer {
     }
   }
 
+  @Override
   public WordInfo parse(CharSequence cs) {
 
     String word = cs.toString();
@@ -82,7 +84,7 @@ public class EnglishLemmer implements Lemmer {
     }
 
     return new WordInfo(
-        CharSeq.create(word),
-        Collections.singletonList(new LemmaInfo(CharSeq.create(lemma), 1, convert(partOfSpeech))));
+            CharSeq.create(word),
+            Collections.singletonList(new LemmaInfo(CharSeq.create(lemma), 1, convert(partOfSpeech))));
   }
 }
