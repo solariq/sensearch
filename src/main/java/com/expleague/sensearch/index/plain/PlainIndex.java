@@ -365,13 +365,6 @@ public class PlainIndex implements Index {
     return wordToTerms.get(CharSeq.create(normalized));
   }
 
-  @Override
-  public CharSequence text(List<Term> text) {
-    StringBuilder res = new StringBuilder();
-    text.forEach(t -> res.append(t.text()));
-    return res;
-  }
-
   Term term(int id) {
     return idToTerm.get(id);
   }
