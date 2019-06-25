@@ -1,10 +1,11 @@
 package com.expleague.sensearch.donkey.randomaccess;
 
+import com.google.protobuf.GeneratedMessage;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.nio.file.Path;
 
-public final class ProtobufIndex<T> extends LevelDbBasedIndex<T> {
+public final class ProtobufIndex<T extends GeneratedMessage> extends LevelDbBasedIndex<T> {
   private static final String DECODER_METHOD_NAME = "parseFrom";
   private static final String ENCODER_METHOD_NAME = "toByteArray";
 

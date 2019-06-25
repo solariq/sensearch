@@ -10,22 +10,14 @@ import com.expleague.sensearch.protobuf.index.IndexUnits.Page;
 import com.expleague.sensearch.protobuf.index.IndexUnits.Page.Builder;
 import com.expleague.sensearch.protobuf.index.IndexUnits.Page.SerializedText;
 import com.google.common.primitives.Longs;
-import gnu.trove.TCollections;
-import gnu.trove.list.TIntList;
-import gnu.trove.list.array.TIntArrayList;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
-import java.util.Set;
 import java.util.Stack;
-import java.util.function.BiConsumer;
-import java.util.function.BinaryOperator;
-import java.util.function.Function;
-import java.util.function.Supplier;
-import java.util.stream.Collector;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import org.fusesource.leveldbjni.JniDBFactory;
 import org.iq80.leveldb.DB;
 import org.iq80.leveldb.Options;
@@ -130,15 +122,13 @@ public class PageWriter implements Writer<CrawlerDocument> {
     writeBatch = pageDb.createWriteBatch();
   }
 
-  private Page.Builder processSection(Section section, long currentPageId, long sectionId,
-      List<String> categories) {
+  private Page.Builder processSection(Section section, long currentPageId, long sectionId, List<String> categories) {
 
-    SerializedText sectionContent = tokenParser.parse(section.text())
-        .collect(SerializedTextCollector.instance());
+    SerializedText sectionContent = serializeText(tokenParser.parse(section.text()));
     tokenParser.check(section.text(), toIntArray(sectionContent));
 
-    SerializedText sectionTitle = tokenParser.parse(section.title())
-        .collect(SerializedTextCollector.instance());
+    SerializedText sectionTitle = serializeText(tokenParser.parse(section.title()));
+
     tokenParser.check(section.title(), toIntArray(sectionTitle));
 
     Page.Builder pageBuilder =
@@ -153,8 +143,7 @@ public class PageWriter implements Writer<CrawlerDocument> {
         .map(l -> new TargetIdLinkPair(idGenerator.generatePageId(l.targetUri()), l))
         .filter(l -> l.targetId() != currentPageId)
         .map(l -> {
-          SerializedText sectionLink = tokenParser.parse(l.link().text())
-              .collect(SerializedTextCollector.instance());
+          SerializedText sectionLink = serializeText(tokenParser.parse(l.link().text()));
           tokenParser.check(l.link.text(), toIntArray(sectionLink));
 
           // TODO: remove offsets maybe?
@@ -169,6 +158,12 @@ public class PageWriter implements Writer<CrawlerDocument> {
         .forEach(linkWriter::write);
 
     return pageBuilder;
+  }
+
+  private SerializedText serializeText(Stream<Token> parse) {
+    return SerializedText.newBuilder()
+        .addAllTokenIds(parse.map(Token::formId).collect(Collectors.toList()))
+        .build();
   }
 
   @Override
@@ -218,52 +213,4 @@ public class PageWriter implements Writer<CrawlerDocument> {
     }
   }
 
-  private static class SerializedTextCollector implements
-      Collector<Token, TIntList, SerializedText> {
-
-    private static final SerializedTextCollector INSTANCE = new SerializedTextCollector();
-    private static final Set<Characteristics> CHARACTERISTICS = new HashSet<Characteristics>() {{
-      add(Characteristics.CONCURRENT);
-    }};
-
-    public static SerializedTextCollector instance() {
-      return INSTANCE;
-    }
-
-    @Override
-    public Supplier<TIntList> supplier() {
-      return () -> TCollections.synchronizedList(new TIntArrayList());
-    }
-
-    @Override
-    public BiConsumer<TIntList, Token> accumulator() {
-      return (l, t) -> l.add(t.formId());
-    }
-
-    @Override
-    public BinaryOperator<TIntList> combiner() {
-      return (l1, l2) -> {
-        l1.addAll(l2);
-        return l1;
-      };
-    }
-
-    @Override
-    public Function<TIntList, SerializedText> finisher() {
-      return list -> {
-        SerializedText.Builder builder = SerializedText.newBuilder();
-        //because TIntList is not iterable!
-        list.forEach(t -> {
-          builder.addTokenIds(t);
-          return true;
-        });
-        return builder.build();
-      };
-    }
-
-    @Override
-    public Set<Characteristics> characteristics() {
-      return CHARACTERISTICS;
-    }
-  }
 }

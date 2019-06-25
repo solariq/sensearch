@@ -311,7 +311,7 @@
       <artifactId>guava</artifactId>
       <version>27.0-jre</version>
     </dependency>
- 
+
     <dependency>
       <groupId>org.languagetool</groupId>
       <artifactId>languagetool-core</artifactId>
