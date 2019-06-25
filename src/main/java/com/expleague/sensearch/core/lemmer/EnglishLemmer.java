@@ -16,7 +16,7 @@ import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.List;
 
-public class EnglishLemmer {
+public class EnglishLemmer implements Lemmer {
   private WordnetStemmer wordnetStemmer;
 
   public EnglishLemmer() {
@@ -53,7 +53,6 @@ public class EnglishLemmer {
       case ADJECTIVE:
         return PartOfSpeech.A;
       case ADVERB:
-        return PartOfSpeech.ADV;
       default:
         return PartOfSpeech.ADV;
     }

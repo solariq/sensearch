@@ -23,6 +23,7 @@ import com.expleague.sensearch.core.Annotations.UseLshFlag;
 import com.expleague.sensearch.core.SearchPhaseFactory;
 import com.expleague.sensearch.core.SenSeArchImpl;
 import com.expleague.sensearch.core.lemmer.Lemmer;
+import com.expleague.sensearch.core.lemmer.MultiLangLemmer;
 import com.expleague.sensearch.donkey.IndexBuilder;
 import com.expleague.sensearch.donkey.crawler.Crawler;
 import com.expleague.sensearch.donkey.plain.PlainIndexBuilder;
@@ -99,7 +100,7 @@ public class AppModule extends AbstractModule {
 
     bindConstant().annotatedWith(UseLshFlag.class).to(config.getLshNearestFlag());
 
-    Lemmer lemmer = Lemmer.getInstance();
+    Lemmer lemmer = MultiLangLemmer.getInstance();
     bind(Lemmer.class).toInstance(lemmer);
     bind(Crawler.class).to(crawler);
     bind(Embedding.class).to(EmbeddingImpl.class).in(Singleton.class);

@@ -1,9 +1,7 @@
 package com.expleague.sensearch.donkey.utils;
 
 import com.expleague.commons.seq.CharSeq;
-import com.expleague.sensearch.donkey.writers.TermWriter;
 import com.expleague.sensearch.donkey.writers.Writer;
-import com.expleague.sensearch.protobuf.index.IndexUnits.Term;
 import gnu.trove.map.TIntObjectMap;
 import gnu.trove.map.TObjectIntMap;
 import gnu.trove.map.hash.TIntObjectHashMap;

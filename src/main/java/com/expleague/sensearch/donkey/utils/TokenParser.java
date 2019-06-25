@@ -146,11 +146,8 @@ public class TokenParser implements AutoCloseable {
 
   private void newTerm(Token token) {
     CharSeq word = CharSeq.intern(token.text());
-    LemmaInfo lemma = null;
-    List<WordInfo> parse = lemmer.parse(word);
-    if (parse.size() > 0) {
-      lemma = parse.get(0).lemma();
-    }
+    WordInfo parse = lemmer.parse(word);
+    LemmaInfo lemma = parse.lemma();
 
     int wordId = token.id();
     if (lemma == null) {

@@ -5,7 +5,7 @@ import com.expleague.commons.text.lemmer.MyStemImpl;
 import com.expleague.commons.text.lemmer.WordInfo;
 import java.nio.file.Paths;
 
-public class RussianLemmer {
+public class RussianLemmer implements Lemmer {
 
   private MyStem myStem;
 
