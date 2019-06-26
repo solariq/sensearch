@@ -45,8 +45,8 @@ public class StatisticsBuilderTest extends SensearchTestCase {
   private static final Path STATS_DB_PATH = Paths.get("testStatsDbPath");
 
   private static final class ParsedTermStub extends ParsedTerm {
-    ParsedTermStub(long wordId, long lemmaId) {
-      super((int) wordId, null, (int) lemmaId, null, null);
+    ParsedTermStub(int wordId, int lemmaId) {
+      super(wordId, null, lemmaId, null, null);
     }
   }
 
@@ -71,8 +71,8 @@ public class StatisticsBuilderTest extends SensearchTestCase {
       // 6 -> 1
       // 4 -> 2
       // 8 -> 5
-      for (long[] ids :
-          new long[][]{
+      for (int[] ids :
+              new int[][]{
               {1, 10}, {3, 20}, {2, 20}, {4, 20}, {3, 20}, {3, 20}, {2, 20}, {3, 20}, {1, 10}, {5, 50}
           }) {
         statisticsBuilder.enrich(new ParsedTermStub(ids[0], ids[1]));
@@ -80,7 +80,7 @@ public class StatisticsBuilderTest extends SensearchTestCase {
       statisticsBuilder.endPage();
 
       statisticsBuilder.startPage();
-      for (long[] ids : new long[][]{{6, 10}, {7, 70}, {8, 50}, {8, 50}, {2, 20}, {7, 70}, {3, 20}}) {
+      for (int[] ids : new int[][]{{6, 10}, {7, 70}, {8, 50}, {8, 50}, {2, 20}, {7, 70}, {3, 20}}) {
         statisticsBuilder.enrich(new ParsedTermStub(ids[0], ids[1]));
       }
       statisticsBuilder.endPage();
