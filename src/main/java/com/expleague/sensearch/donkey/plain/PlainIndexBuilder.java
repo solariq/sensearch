@@ -31,10 +31,12 @@ import com.expleague.sensearch.donkey.writers.LevelDbLinkWriter;
 import com.expleague.sensearch.donkey.writers.PageWriter;
 import com.expleague.sensearch.donkey.writers.TermWriter;
 import com.expleague.sensearch.donkey.writers.sequential.SequentialLinkWriter;
+import com.expleague.sensearch.donkey.builders.StatisticsBuilder2;
 import com.expleague.sensearch.index.Index;
 import com.expleague.sensearch.index.plain.PlainIndex;
 import com.expleague.sensearch.protobuf.index.IndexUnits.Page;
 import com.expleague.sensearch.protobuf.index.IndexUnits.Page.Link;
+import com.expleague.sensearch.protobuf.index.IndexUnits.Term;
 import com.expleague.sensearch.web.suggest.SuggestInformationBuilder;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Guice;
@@ -284,7 +286,8 @@ public class PlainIndexBuilder implements IndexBuilder {
     try (
         PageWriter pageWriter = new PageWriter(
             indexRoot.resolve(PAGE_ROOT),
-            new TokenParser(new Dictionary(new TermWriter(indexRoot.resolve(TERM_ROOT))), lemmer, new TokenizerImpl()),
+            new TokenParser(new Dictionary(new TermWriter(indexRoot.resolve(TERM_ROOT))), lemmer,
+                new TokenizerImpl()),
             new LevelDbLinkWriter(indexRoot.resolve(RAW_LINK_ROOT))
         )
     ) {
@@ -332,6 +335,21 @@ public class PlainIndexBuilder implements IndexBuilder {
         currentTargetPage.addIncomingLinks(link);
       }
       FileUtils.forceDelete(indexRoot.resolve(SORTED_LINKS).toFile());
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  private void buildStatistics() {
+    try (
+        RandomAccess<Page> pageIndex =
+            new ProtobufIndex<>(indexRoot.resolve(PAGE_ROOT), Page.class);
+        RandomAccess<Term> termIndex =
+            new ProtobufIndex<>(indexRoot.resolve(TERM_ROOT), Term.class);
+    ) {
+      StatisticsBuilder2 statisticsBuilder = new StatisticsBuilder2(termIndex);
+      pageIndex.forEach(statisticsBuilder::addPage);
+      // now we build statistics and save it! Its not ready yet
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
