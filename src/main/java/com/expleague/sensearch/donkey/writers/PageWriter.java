@@ -134,6 +134,7 @@ public class PageWriter implements Writer<CrawlerDocument> {
     Page.Builder pageBuilder =
         Page.newBuilder()
             .setPageId(sectionId)
+            .setRootId(currentPageId)
             .setContent(sectionContent)
             .setTitle(sectionTitle)
             .setUri(section.uri().toString())
@@ -161,9 +162,9 @@ public class PageWriter implements Writer<CrawlerDocument> {
   }
 
   private SerializedText serializeText(Stream<Token> parse) {
-    return SerializedText.newBuilder()
-        .addAllTokenIds(parse.map(Token::formId).collect(Collectors.toList()))
-        .build();
+    SerializedText.Builder builder = SerializedText.newBuilder();
+    parse.mapToInt(Token::formId).forEach(builder::addTokenIds);
+    return builder.build();
   }
 
   @Override
