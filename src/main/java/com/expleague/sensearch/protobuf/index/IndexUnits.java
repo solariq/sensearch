@@ -1198,6 +1198,15 @@ public final class IndexUnits {
      * <code>repeated int64 subpages_ids = 8;</code>
      */
     long getSubpagesIds(int index);
+
+    /**
+     * <code>optional int64 root_id = 10;</code>
+     */
+    boolean hasRootId();
+    /**
+     * <code>optional int64 root_id = 10;</code>
+     */
+    long getRootId();
   }
   /**
    * Protobuf type {@code index.Page}
@@ -1337,6 +1346,11 @@ public final class IndexUnits {
                 mutable_bitField0_ |= 0x00000040;
               }
               categories_.add(bs);
+              break;
+            }
+            case 80: {
+              bitField0_ |= 0x00000020;
+              rootId_ = input.readInt64();
               break;
             }
           }
@@ -2921,6 +2935,21 @@ public final class IndexUnits {
       return subpagesIds_.get(index);
     }
 
+    public static final int ROOT_ID_FIELD_NUMBER = 10;
+    private long rootId_;
+    /**
+     * <code>optional int64 root_id = 10;</code>
+     */
+    public boolean hasRootId() {
+      return ((bitField0_ & 0x00000020) == 0x00000020);
+    }
+    /**
+     * <code>optional int64 root_id = 10;</code>
+     */
+    public long getRootId() {
+      return rootId_;
+    }
+
     private void initFields() {
       pageId_ = 0L;
       uri_ = "";
@@ -2931,6 +2960,7 @@ public final class IndexUnits {
       categories_ = com.google.protobuf.LazyStringArrayList.EMPTY;
       parentId_ = 0L;
       subpagesIds_ = java.util.Collections.emptyList();
+      rootId_ = 0L;
     }
     private byte memoizedIsInitialized = -1;
     public final boolean isInitialized() {
@@ -2971,6 +3001,9 @@ public final class IndexUnits {
       }
       for (int i = 0; i < categories_.size(); i++) {
         output.writeBytes(9, categories_.getByteString(i));
+      }
+      if (((bitField0_ & 0x00000020) == 0x00000020)) {
+        output.writeInt64(10, rootId_);
       }
       getUnknownFields().writeTo(output);
     }
@@ -3026,6 +3059,10 @@ public final class IndexUnits {
         }
         size += dataSize;
         size += 1 * getCategoriesList().size();
+      }
+      if (((bitField0_ & 0x00000020) == 0x00000020)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt64Size(10, rootId_);
       }
       size += getUnknownFields().getSerializedSize();
       memoizedSerializedSize = size;
@@ -3182,6 +3219,8 @@ public final class IndexUnits {
         bitField0_ = (bitField0_ & ~0x00000080);
         subpagesIds_ = java.util.Collections.emptyList();
         bitField0_ = (bitField0_ & ~0x00000100);
+        rootId_ = 0L;
+        bitField0_ = (bitField0_ & ~0x00000200);
         return this;
       }
 
@@ -3266,6 +3305,10 @@ public final class IndexUnits {
           bitField0_ = (bitField0_ & ~0x00000100);
         }
         result.subpagesIds_ = subpagesIds_;
+        if (((from_bitField0_ & 0x00000200) == 0x00000200)) {
+          to_bitField0_ |= 0x00000020;
+        }
+        result.rootId_ = rootId_;
         result.bitField0_ = to_bitField0_;
         onBuilt();
         return result;
@@ -3370,6 +3413,9 @@ public final class IndexUnits {
             subpagesIds_.addAll(other.subpagesIds_);
           }
           onChanged();
+        }
+        if (other.hasRootId()) {
+          setRootId(other.getRootId());
         }
         this.mergeUnknownFields(other.getUnknownFields());
         return this;
@@ -4537,6 +4583,38 @@ public final class IndexUnits {
         return this;
       }
 
+      private long rootId_ ;
+      /**
+       * <code>optional int64 root_id = 10;</code>
+       */
+      public boolean hasRootId() {
+        return ((bitField0_ & 0x00000200) == 0x00000200);
+      }
+      /**
+       * <code>optional int64 root_id = 10;</code>
+       */
+      public long getRootId() {
+        return rootId_;
+      }
+      /**
+       * <code>optional int64 root_id = 10;</code>
+       */
+      public Builder setRootId(long value) {
+        bitField0_ |= 0x00000200;
+        rootId_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional int64 root_id = 10;</code>
+       */
+      public Builder clearRootId() {
+        bitField0_ = (bitField0_ & ~0x00000200);
+        rootId_ = 0L;
+        onChanged();
+        return this;
+      }
+
       // @@protoc_insertion_point(builder_scope:index.Page)
     }
 
@@ -4922,7 +5000,7 @@ public final class IndexUnits {
         size = 0;
         if (((bitField0_ & 0x00000001) == 0x00000001)) {
           size += com.google.protobuf.CodedOutputStream
-              .computeInt32Size(1, termId_);
+            .computeInt32Size(1, termId_);
         }
         if (((bitField0_ & 0x00000002) == 0x00000002)) {
           size += com.google.protobuf.CodedOutputStream
@@ -5134,7 +5212,7 @@ public final class IndexUnits {
         }
         private int bitField0_;
 
-        private int termId_;
+        private int termId_ ;
         /**
          * <code>optional int32 term_id = 1;</code>
          */
@@ -5351,7 +5429,7 @@ public final class IndexUnits {
       size = 0;
       if (((bitField0_ & 0x00000001) == 0x00000001)) {
         size += com.google.protobuf.CodedOutputStream
-            .computeInt32Size(1, termId_);
+          .computeInt32Size(1, termId_);
       }
       if (((bitField0_ & 0x00000002) == 0x00000002)) {
         size += com.google.protobuf.CodedOutputStream
@@ -5635,7 +5713,7 @@ public final class IndexUnits {
       }
       private int bitField0_;
 
-      private int termId_;
+      private int termId_ ;
       /**
        * <code>optional int32 term_id = 1;</code>
        */
@@ -6522,11 +6600,11 @@ public final class IndexUnits {
       size = 0;
       if (((bitField0_ & 0x00000001) == 0x00000001)) {
         size += com.google.protobuf.CodedOutputStream
-            .computeInt32Size(1, id_);
+          .computeInt32Size(1, id_);
       }
       if (((bitField0_ & 0x00000002) == 0x00000002)) {
         size += com.google.protobuf.CodedOutputStream
-            .computeInt32Size(2, lemmaId_);
+          .computeInt32Size(2, lemmaId_);
       }
       if (((bitField0_ & 0x00000004) == 0x00000004)) {
         size += com.google.protobuf.CodedOutputStream
@@ -6762,7 +6840,7 @@ public final class IndexUnits {
       }
       private int bitField0_;
 
-      private int id_;
+      private int id_ ;
       /**
        * <code>optional int32 id = 1;</code>
        */
@@ -6794,7 +6872,7 @@ public final class IndexUnits {
         return this;
       }
 
-      private int lemmaId_;
+      private int lemmaId_ ;
       /**
        * <code>optional int32 lemma_id = 2;</code>
        *
@@ -7150,7 +7228,7 @@ public final class IndexUnits {
         int dataSize = 0;
         for (int i = 0; i < termList_.size(); i++) {
           dataSize += com.google.protobuf.CodedOutputStream
-              .computeInt32SizeNoTag(termList_.get(i));
+            .computeInt32SizeNoTag(termList_.get(i));
         }
         size += dataSize;
         size += 1 * getTermListList().size();
@@ -8525,34 +8603,35 @@ public final class IndexUnits {
       "\006 \001(\005\022,\n$average_link_target_title_word_" +
       "count\030\007 \001(\001\022\034\n\024section_titles_count\030\010 \001(" +
       "\005\022\"\n\032average_section_title_size\030\t \001(\001\022\027\n" +
-      "\017vocabulary_size\030\004 \001(\005\"\246\003\n\004Page\022\017\n\007page_" +
+      "\017vocabulary_size\030\004 \001(\005\"\267\003\n\004Page\022\017\n\007page_" +
       "id\030\001 \001(\003\022\013\n\003uri\030\002 \001(\t\022)\n\005title\030\003 \001(\0132\032.i" +
       "ndex.Page.SerializedText\022+\n\007content\030\004 \001(" +
       "\0132\032.index.Page.SerializedText\022(\n\016outgoin",
       "g_links\030\005 \003(\0132\020.index.Page.Link\022(\n\016incom" +
       "ing_links\030\006 \003(\0132\020.index.Page.Link\022\022\n\ncat" +
       "egories\030\t \003(\t\022\021\n\tparent_id\030\007 \001(\003\022\024\n\014subp" +
-      "ages_ids\030\010 \003(\003\032#\n\016SerializedText\022\021\n\ttoke" +
-      "n_ids\030\001 \003(\005\032r\n\004Link\022(\n\004text\030\001 \001(\0132\032.inde" +
-      "x.Page.SerializedText\022\026\n\016target_page_id\030" +
-      "\002 \001(\003\022\020\n\010position\030\003 \001(\003\022\026\n\016source_page_i" +
-      "d\030\004 \001(\003\"\360\001\n\016TermStatistics\022\017\n\007term_id\030\001 " +
-          "\001(\005\022\032\n\022document_frequency\030\002 \001(\005\022 \n\030docum" +
-      "ent_lemma_frequency\030\003 \001(\005\022\026\n\016term_freque",
-      "ncy\030\004 \001(\003\022=\n\020bigram_frequency\030\005 \003(\0132#.in" +
-      "dex.TermStatistics.TermFrequency\0328\n\rTerm" +
-          "Frequency\022\017\n\007term_id\030\001 \001(\005\022\026\n\016term_frequ" +
-          "ency\030\002 \001(\005\"\202\002\n\004Term\022\n\n\002id\030\001 \001(\005\022\020\n\010lemma" +
-          "_id\030\002 \001(\005\022\014\n\004text\030\003 \001(\t\0220\n\016part_of_speec" +
-      "h\030\004 \001(\0162\030.index.Term.PartOfSpeech\"\233\001\n\014Pa" +
-      "rtOfSpeech\022\013\n\007UNKNOWN\020\000\022\005\n\001A\020\001\022\007\n\003ADV\020\002\022" +
-      "\n\n\006ADVPRO\020\003\022\010\n\004ANUM\020\004\022\010\n\004APRO\020\005\022\007\n\003COM\020\006" +
-      "\022\010\n\004CONJ\020\007\022\010\n\004INTJ\020\010\022\007\n\003NUM\020\t\022\010\n\004PART\020\n\022" +
-      "\006\n\002PR\020\013\022\005\n\001S\020\014\022\010\n\004SPRO\020\r\022\005\n\001V\020\016\"\034\n\010TermL",
-        "ist\022\020\n\010termList\030\001 \003(\005\"\036\n\013IntegerList\022\017\n\007" +
-      "intList\030\001 \003(\005\".\n\016UriPageMapping\022\013\n\003uri\030\001" +
-      " \001(\t\022\017\n\007page_id\030\002 \001(\003B4\n&com.expleague.s" +
-      "ensearch.protobuf.indexB\nIndexUnits"
+      "ages_ids\030\010 \003(\003\022\017\n\007root_id\030\n \001(\003\032#\n\016Seria" +
+      "lizedText\022\021\n\ttoken_ids\030\001 \003(\005\032r\n\004Link\022(\n\004" +
+      "text\030\001 \001(\0132\032.index.Page.SerializedText\022\026" +
+      "\n\016target_page_id\030\002 \001(\003\022\020\n\010position\030\003 \001(\003" +
+      "\022\026\n\016source_page_id\030\004 \001(\003\"\360\001\n\016TermStatist" +
+      "ics\022\017\n\007term_id\030\001 \001(\005\022\032\n\022document_frequen" +
+      "cy\030\002 \001(\005\022 \n\030document_lemma_frequency\030\003 \001",
+      "(\005\022\026\n\016term_frequency\030\004 \001(\003\022=\n\020bigram_fre" +
+      "quency\030\005 \003(\0132#.index.TermStatistics.Term" +
+      "Frequency\0328\n\rTermFrequency\022\017\n\007term_id\030\001 " +
+      "\001(\005\022\026\n\016term_frequency\030\002 \001(\005\"\202\002\n\004Term\022\n\n\002" +
+      "id\030\001 \001(\005\022\020\n\010lemma_id\030\002 \001(\005\022\014\n\004text\030\003 \001(\t" +
+      "\0220\n\016part_of_speech\030\004 \001(\0162\030.index.Term.Pa" +
+      "rtOfSpeech\"\233\001\n\014PartOfSpeech\022\013\n\007UNKNOWN\020\000" +
+      "\022\005\n\001A\020\001\022\007\n\003ADV\020\002\022\n\n\006ADVPRO\020\003\022\010\n\004ANUM\020\004\022\010" +
+      "\n\004APRO\020\005\022\007\n\003COM\020\006\022\010\n\004CONJ\020\007\022\010\n\004INTJ\020\010\022\007\n" +
+      "\003NUM\020\t\022\010\n\004PART\020\n\022\006\n\002PR\020\013\022\005\n\001S\020\014\022\010\n\004SPRO\020",
+      "\r\022\005\n\001V\020\016\"\034\n\010TermList\022\020\n\010termList\030\001 \003(\005\"\036" +
+      "\n\013IntegerList\022\017\n\007intList\030\001 \003(\005\".\n\016UriPag" +
+      "eMapping\022\013\n\003uri\030\001 \001(\t\022\017\n\007page_id\030\002 \001(\003B4" +
+      "\n&com.expleague.sensearch.protobuf.index" +
+      "B\nIndexUnits"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
         new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
@@ -8577,7 +8656,7 @@ public final class IndexUnits {
     internal_static_index_Page_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessage.FieldAccessorTable(
         internal_static_index_Page_descriptor,
-        new java.lang.String[] { "PageId", "Uri", "Title", "Content", "OutgoingLinks", "IncomingLinks", "Categories", "ParentId", "SubpagesIds", });
+        new java.lang.String[] { "PageId", "Uri", "Title", "Content", "OutgoingLinks", "IncomingLinks", "Categories", "ParentId", "SubpagesIds", "RootId", });
     internal_static_index_Page_SerializedText_descriptor =
       internal_static_index_Page_descriptor.getNestedTypes().get(0);
     internal_static_index_Page_SerializedText_fieldAccessorTable = new

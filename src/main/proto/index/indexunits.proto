@@ -49,6 +49,8 @@ message Page {
   // parent_id might be absent
   optional int64 parent_id = 7;
   repeated int64 subpages_ids = 8;
+
+  optional int64 root_id = 10;
 }
 
 message TermStatistics {
