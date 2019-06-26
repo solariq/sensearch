@@ -3,12 +3,10 @@ package com.expleague.sensearch.index.plain;
 import com.expleague.commons.math.vectors.Vec;
 import com.expleague.commons.math.vectors.VecTools;
 import com.expleague.commons.math.vectors.impl.vectors.ArrayVec;
-import com.expleague.commons.seq.CharSeq;
 import com.expleague.commons.seq.CharSeqTools;
 import com.expleague.sensearch.Page;
 import com.expleague.sensearch.core.Annotations.IndexRoot;
 import com.expleague.sensearch.core.IdUtils;
-import com.expleague.sensearch.core.PartOfSpeech;
 import com.expleague.sensearch.core.Term;
 import com.expleague.sensearch.core.Term.TermAndDistance;
 import com.expleague.sensearch.core.Tokenizer;
@@ -28,21 +26,20 @@ import com.expleague.sensearch.protobuf.index.IndexUnits;
 import com.expleague.sensearch.protobuf.index.IndexUnits.TermStatistics;
 import com.expleague.sensearch.protobuf.index.IndexUnits.TermStatistics.TermFrequency;
 import com.expleague.sensearch.query.Query;
+import com.expleague.sensearch.term.TermBase;
 import com.expleague.sensearch.web.suggest.SuggestInformationLoader;
 import com.google.common.collect.Streams;
-import com.google.common.primitives.Ints;
 import com.google.common.primitives.Longs;
 import com.google.inject.Inject;
 import com.google.protobuf.InvalidProtocolBufferException;
 import gnu.trove.list.TIntList;
-import gnu.trove.map.TIntObjectMap;
 import gnu.trove.map.TLongObjectMap;
-import gnu.trove.map.hash.TIntObjectHashMap;
 import gnu.trove.map.hash.TLongObjectHashMap;
 import java.io.IOException;
 import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -80,12 +77,10 @@ public class PlainIndex implements Index {
 
   private static final int SYNONYMS_COUNT = 50;
 
-  private final Map<CharSeq, Term> wordToTerms = new HashMap<>();
-  private final TIntObjectMap<Term> idToTerm = new TIntObjectHashMap<>();
-
   private final DB termStatisticsBase;
   private final DB pageBase;
-  private final DB termBase;
+
+  private final TermBase termBase;
 
   private DB suggestUnigramDb;
   private DB suggestMultigramDb;
@@ -150,10 +145,8 @@ public class PlainIndex implements Index {
         JniDBFactory.factory.open(
             indexRoot.resolve(PlainIndexBuilder.PAGE_ROOT).toFile(), DEFAULT_DB_OPTIONS);
 
-    termBase =
-        JniDBFactory.factory.open(
-            indexRoot.resolve(PlainIndexBuilder.TERM_ROOT).toFile(), DEFAULT_DB_OPTIONS);
-
+    //TODO: add lemmer
+    termBase = new TermBase(Paths.get(PlainIndexBuilder.TERM_ROOT), this, null);
 
     uriMappingDb =
         JniDBFactory.factory.open(
@@ -182,52 +175,6 @@ public class PlainIndex implements Index {
     sectionTitlesCount = indexMeta.getSectionTitlesCount();
     averageSectionTitleSize = indexMeta.getAverageSectionTitleSize();
 
-    DBIterator termIterator = termBase.iterator();
-    termIterator.seekToFirst();
-    termIterator.forEachRemaining(
-        item -> {
-          try {
-            IndexUnits.Term protoTerm = IndexUnits.Term.parseFrom(item.getValue());
-            final CharSeq word = CharSeq.intern(protoTerm.getText());
-
-            if (wordToTerms.containsKey(word)) {
-              return;
-            }
-
-            PartOfSpeech pos =
-                protoTerm.getPartOfSpeech() == IndexUnits.Term.PartOfSpeech.UNKNOWN
-                    ? null
-                    : PartOfSpeech.valueOf(protoTerm.getPartOfSpeech().name());
-
-            final IndexTerm lemmaTerm;
-
-            final int lemmaId = protoTerm.getLemmaId();
-            if (lemmaId == -1) {
-              lemmaTerm = null;
-            } else {
-              if (idToTerm.containsKey(lemmaId)) {
-                lemmaTerm = (IndexTerm) idToTerm.get(lemmaId);
-              } else {
-                CharSeq lemmaText =
-                    CharSeq.intern(
-                        IndexUnits.Term.parseFrom(termBase.get(Ints.toByteArray(lemmaId)))
-                            .getText());
-
-                lemmaTerm = new IndexTerm(this, lemmaText, lemmaId, null, pos);
-                idToTerm.put(lemmaId, lemmaTerm);
-                wordToTerms.put(lemmaText, lemmaTerm);
-              }
-            }
-
-            IndexTerm term = new IndexTerm(this, word, protoTerm.getId(), lemmaTerm, pos);
-            idToTerm.put(protoTerm.getId(), term);
-            wordToTerms.put(word, term);
-
-          } catch (InvalidProtocolBufferException e) {
-            LOG.fatal("Invalid protobuf for term with id " + Longs.fromByteArray(item.getKey()));
-            throw new RuntimeException(e);
-          }
-        });
 
     rareTermsInvIdx = new HashMap<>();
 
@@ -280,7 +227,7 @@ public class PlainIndex implements Index {
           .getBigramFrequencyList()
           .stream()
           .mapToInt(TermFrequency::getTermId)
-          .mapToObj(idToTerm::get);
+          .mapToObj(termBase::term);
     } catch (InvalidProtocolBufferException e) {
       LOG.warn(
           String.format(
@@ -362,11 +309,11 @@ public class PlainIndex implements Index {
   @Override
   public Term term(CharSequence seq) {
     final CharSequence normalized = CharSeqTools.toLowerCase(CharSeqTools.trim(seq));
-    return wordToTerms.get(CharSeq.create(normalized));
+    return termBase.term(normalized);
   }
 
   Term term(int id) {
-    return idToTerm.get(id);
+    return termBase.term(id);
   }
 
   @Override
@@ -424,7 +371,7 @@ public class PlainIndex implements Index {
     return filter
         .filtrate(termVec, PlainIndex::isWordId, synonymThreshold)
         .filter(Objects::nonNull)
-        .map(c -> new IndexTerm.IndexTermAndDistance(idToTerm.get((int) c.getId()), c.getDist()));
+        .map(c -> new IndexTerm.IndexTermAndDistance(termBase.term((int) c.getId()), c.getDist()));
   }
 
   Stream<TermAndDistance> synonymsWithDistance(Term term) {
@@ -437,14 +384,14 @@ public class PlainIndex implements Index {
     return filter
         .filtrate(termVec, PlainIndex::isWordId, SYNONYMS_COUNT)
         .filter(Objects::nonNull)
-        .map(c -> new IndexTerm.IndexTermAndDistance(idToTerm.get((int) c.getId()), c.getDist()));
+        .map(c -> new IndexTerm.IndexTermAndDistance(termBase.term((int) c.getId()), c.getDist()));
   }
 
   public Stream<Term> nearestTerms(Vec vec) {
     return embedding
         .nearest(vec, PlainIndex::isWordId)
         .filter(Objects::nonNull)
-        .map(c -> idToTerm.get((int) c.getId()));
+        .map(c -> termBase.term((int) c.getId()));
   }
 
   @Override
@@ -602,7 +549,7 @@ public class PlainIndex implements Index {
         e.printStackTrace();
       }
 
-      suggestLoader = new SuggestInformationLoader(suggestUnigramDb, suggestMultigramDb, idToTerm);
+      suggestLoader = new SuggestInformationLoader(suggestUnigramDb, suggestMultigramDb, termBase);
     }
     return suggestLoader;
   }
