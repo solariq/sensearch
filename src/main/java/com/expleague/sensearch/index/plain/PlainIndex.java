@@ -146,7 +146,7 @@ public class PlainIndex implements Index {
             indexRoot.resolve(PlainIndexBuilder.PAGE_ROOT).toFile(), DEFAULT_DB_OPTIONS);
 
     //TODO: add lemmer
-    termBase = new TermBase(Paths.get(PlainIndexBuilder.TERM_ROOT), this, null);
+    termBase = new TermBase(Paths.get(PlainIndexBuilder.TERM_ROOT), this);
 
     uriMappingDb =
         JniDBFactory.factory.open(

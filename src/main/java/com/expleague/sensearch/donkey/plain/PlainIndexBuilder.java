@@ -37,6 +37,7 @@ import com.expleague.sensearch.index.plain.PlainIndex;
 import com.expleague.sensearch.protobuf.index.IndexUnits.Page;
 import com.expleague.sensearch.protobuf.index.IndexUnits.Page.Link;
 import com.expleague.sensearch.protobuf.index.IndexUnits.Term;
+import com.expleague.sensearch.term.TermBase;
 import com.expleague.sensearch.web.suggest.SuggestInformationBuilder;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Guice;
@@ -344,10 +345,9 @@ public class PlainIndexBuilder implements IndexBuilder {
     try (
         RandomAccess<Page> pageIndex =
             new ProtobufIndex<>(indexRoot.resolve(PAGE_ROOT), Page.class);
-        RandomAccess<Term> termIndex =
-            new ProtobufIndex<>(indexRoot.resolve(TERM_ROOT), Term.class);
+        TermBase termBase = new TermBase(indexRoot.resolve(TERM_ROOT), null);
     ) {
-      StatisticsBuilder2 statisticsBuilder = new StatisticsBuilder2(termIndex);
+      StatisticsBuilder2 statisticsBuilder = new StatisticsBuilder2(termBase);
       pageIndex.forEach(statisticsBuilder::addPage);
       // now we build statistics and save it! Its not ready yet
     } catch (IOException e) {

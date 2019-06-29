@@ -1,8 +1,7 @@
 package com.expleague.sensearch.donkey.utils;
 
-import com.expleague.sensearch.donkey.randomaccess.RandomAccess;
 import com.expleague.sensearch.protobuf.index.IndexUnits.Page.SerializedText;
-import com.expleague.sensearch.protobuf.index.IndexUnits.Term;
+import com.expleague.sensearch.term.TermBase;
 import gnu.trove.map.TIntIntMap;
 import gnu.trove.map.hash.TIntIntHashMap;
 import java.util.stream.IntStream;
@@ -11,9 +10,9 @@ public class SerializedTextHelperFactory {
 
   private final TIntIntMap termIdToLemmaIdMap;
 
-  public SerializedTextHelperFactory(RandomAccess<Term> termIndex) {
+  public SerializedTextHelperFactory(TermBase termBase) {
     termIdToLemmaIdMap = new TIntIntHashMap();
-    termIndex.forEach(term -> termIdToLemmaIdMap.put(term.getId(), term.getLemmaId()));
+    termBase.stream().forEach(term -> termIdToLemmaIdMap.put(term.getId(), term.getLemmaId()));
   }
 
   public SerializedTextHelper helper(SerializedText serializedText) {
