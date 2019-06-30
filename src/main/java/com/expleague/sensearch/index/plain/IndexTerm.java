@@ -3,7 +3,7 @@ package com.expleague.sensearch.index.plain;
 import com.expleague.commons.seq.CharSeq;
 import com.expleague.sensearch.core.PartOfSpeech;
 import com.expleague.sensearch.core.Term;
-import com.expleague.sensearch.donkey.utils.TokenParser;
+import com.expleague.sensearch.donkey.term.TokenParser;
 import java.util.stream.Stream;
 import org.jetbrains.annotations.Nullable;
 

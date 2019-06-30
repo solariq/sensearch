@@ -1,6 +1,6 @@
 package com.expleague.sensearch.donkey.writers;
 
-import com.expleague.sensearch.donkey.utils.ParsedTerm;
+import com.expleague.sensearch.donkey.term.ParsedTerm;
 import com.expleague.sensearch.protobuf.index.IndexUnits.Term;
 import com.expleague.sensearch.protobuf.index.IndexUnits.Term.PartOfSpeech;
 import com.google.common.primitives.Longs;

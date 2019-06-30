@@ -1,4 +1,4 @@
-package com.expleague.sensearch.donkey.utils;
+package com.expleague.sensearch.donkey.term;
 
 import static junit.framework.TestCase.assertTrue;
 import static org.junit.Assert.assertEquals;
@@ -10,7 +10,7 @@ import com.expleague.commons.text.lemmer.PartOfSpeech;
 import com.expleague.commons.text.lemmer.WordInfo;
 import com.expleague.sensearch.core.impl.TokenizerImpl;
 import com.expleague.sensearch.core.lemmer.Lemmer;
-import com.expleague.sensearch.donkey.utils.TokenParser.Token;
+import com.expleague.sensearch.donkey.term.TokenParser.Token;
 import com.expleague.sensearch.donkey.writers.Writer;
 import java.util.Collections;
 import org.junit.Test;

@@ -5,7 +5,7 @@ import com.expleague.commons.util.cache.CacheStrategy.Type;
 import com.expleague.commons.util.cache.impl.FixedSizeCache;
 import com.expleague.sensearch.Page;
 import com.expleague.sensearch.core.Term;
-import com.expleague.sensearch.donkey.utils.TokenParser;
+import com.expleague.sensearch.donkey.term.TokenParser;
 import com.expleague.sensearch.index.IndexedPage;
 import com.expleague.sensearch.protobuf.index.IndexUnits;
 import com.google.protobuf.InvalidProtocolBufferException;

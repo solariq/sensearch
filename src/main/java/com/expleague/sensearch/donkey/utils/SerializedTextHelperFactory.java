@@ -1,6 +1,7 @@
 package com.expleague.sensearch.donkey.utils;
 
 import com.expleague.sensearch.donkey.randomaccess.ProtoTermIndex;
+import com.expleague.sensearch.donkey.term.TokenParser;
 import com.expleague.sensearch.protobuf.index.IndexUnits.Page.SerializedText;
 import java.util.Objects;
 import java.util.stream.IntStream;

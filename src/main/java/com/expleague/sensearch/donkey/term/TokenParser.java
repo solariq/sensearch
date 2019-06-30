@@ -1,4 +1,4 @@
-package com.expleague.sensearch.donkey.utils;
+package com.expleague.sensearch.donkey.term;
 
 import com.expleague.commons.seq.CharSeq;
 import com.expleague.commons.text.lemmer.LemmaInfo;

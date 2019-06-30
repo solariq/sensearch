@@ -24,11 +24,11 @@ import com.expleague.sensearch.donkey.randomaccess.RandomAccess;
 import com.expleague.sensearch.donkey.readers.LevelDbLinkReader;
 import com.expleague.sensearch.donkey.readers.Reader;
 import com.expleague.sensearch.donkey.readers.SequentialLinkReader;
+import com.expleague.sensearch.donkey.term.Dictionary;
+import com.expleague.sensearch.donkey.term.ParsedTerm;
+import com.expleague.sensearch.donkey.term.TokenParser;
 import com.expleague.sensearch.donkey.utils.BrandNewIdGenerator;
-import com.expleague.sensearch.donkey.utils.Dictionary;
 import com.expleague.sensearch.donkey.utils.ExternalSorter;
-import com.expleague.sensearch.donkey.utils.ParsedTerm;
-import com.expleague.sensearch.donkey.utils.TokenParser;
 import com.expleague.sensearch.donkey.writers.LevelDbLinkWriter;
 import com.expleague.sensearch.donkey.writers.PageWriter;
 import com.expleague.sensearch.donkey.writers.TermWriter;
@@ -279,7 +279,7 @@ public class PlainIndexBuilder implements IndexBuilder {
   }
 
   @Override
-  public void buildPageIndex() {
+  public void buildPageAndTermIndices() {
     try {
       Files.createDirectories(indexRoot.resolve(TERM_ROOT));
       Files.createDirectories(indexRoot.resolve(PAGE_ROOT));

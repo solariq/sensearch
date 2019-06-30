@@ -1,6 +1,6 @@
 package com.expleague.sensearch.donkey.plain;
 
-import com.expleague.sensearch.donkey.utils.ParsedTerm;
+import com.expleague.sensearch.donkey.term.ParsedTerm;
 import com.expleague.sensearch.protobuf.index.IndexUnits.TermStatistics;
 import com.expleague.sensearch.protobuf.index.IndexUnits.TermStatistics.TermFrequency;
 import com.google.common.annotations.VisibleForTesting;

@@ -8,11 +8,8 @@ public interface IndexBuilder {
 
   void buildIndex() throws IOException;
 
-  void buildPageIndex();
-
+  void buildPageAndTermIndices();
   void buildLinks();
-
   void buildStats();
-
   void buildEmbedding();
 }
