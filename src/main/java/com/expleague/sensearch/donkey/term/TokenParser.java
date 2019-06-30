@@ -1,9 +1,19 @@
 package com.expleague.sensearch.donkey.term;
 
+import static com.expleague.sensearch.core.TokenIdUtils.BITS_FOR_META;
+import static com.expleague.sensearch.core.TokenIdUtils.PUNCTUATION_SIZE;
+import static com.expleague.sensearch.core.TokenIdUtils.allUpperCase;
+import static com.expleague.sensearch.core.TokenIdUtils.firstUpperCase;
+import static com.expleague.sensearch.core.TokenIdUtils.setAllUpperCase;
+import static com.expleague.sensearch.core.TokenIdUtils.setFirstUpperCase;
+import static com.expleague.sensearch.core.TokenIdUtils.setPunctuation;
+import static com.expleague.sensearch.core.TokenIdUtils.toId;
+
 import com.expleague.commons.seq.CharSeq;
 import com.expleague.commons.text.lemmer.LemmaInfo;
 import com.expleague.commons.text.lemmer.WordInfo;
 import com.expleague.sensearch.core.PartOfSpeech;
+import com.expleague.sensearch.core.TokenIdUtils;
 import com.expleague.sensearch.core.Tokenizer;
 import com.expleague.sensearch.core.lemmer.Lemmer;
 import java.util.ArrayList;
@@ -13,16 +23,12 @@ import java.util.stream.Stream;
 public class TokenParser implements AutoCloseable {
 
   private static final char LEMMA_SUFFIX = '$';
+  private static int PUNCT_ID = 0;
+
+  private int id = PUNCTUATION_SIZE;
 
   private Dictionary dictionary;
 
-  private static int PUNCT_ID = 0;
-  private static final int PUNCTUATION_SIZE = 5_000;
-  private static int ID = PUNCTUATION_SIZE;
-  private final static int BITS_FOR_META = 8;
-  private final static int FIRST_UPPERCASE = 0x00000008; //0000'0000'0000'0000'0000'0000'0000'1000
-  private final static int ALL_UPPERCASE = 0x00000004;   //0000'0000'0000'0000'0000'0000'0000'0100
-  private final static int PUNCTUATION = 0x00000002;     //0000'0000'0000'0000'0000'0000'0000'0010
   private final Tokenizer tokenizer;
   private final Lemmer lemmer;
 
@@ -127,10 +133,10 @@ public class TokenParser implements AutoCloseable {
         id = PUNCT_ID;
         PUNCT_ID++;
       } else {
-        id = ID;
-        ID++;
+        id = this.id;
+        this.id++;
       }
-      if (ID >= (1 << 29)) {
+      if (this.id >= (1 << 29)) {
         throw new RuntimeException("Token limit::" + token.toString());
       }
       if (PUNCT_ID == PUNCTUATION_SIZE) {
@@ -139,13 +145,13 @@ public class TokenParser implements AutoCloseable {
     }
     id = id << BITS_FOR_META;
     if (punkt) {
-      id |= PUNCTUATION;
+      id = setPunctuation(id);
     } else {
       if (firstUp) {
-        id |= FIRST_UPPERCASE;
+        id = setFirstUpperCase(id);
       }
       if (allUp[0]) {
-        id |= ALL_UPPERCASE;
+        id = setAllUpperCase(id);
       }
     }
 
@@ -175,30 +181,6 @@ public class TokenParser implements AutoCloseable {
     }
     dictionary.addTerm(ParsedTerm.create(wordId, word, lemmaId, lemma.lemma(),
         PartOfSpeech.valueOf(lemma.pos().name())));
-  }
-
-  public static int toId(int id) {
-    return id >>> BITS_FOR_META;
-  }
-
-  public static boolean isWord(int id) {
-    return (id & PUNCTUATION) == 0;
-  }
-
-  /**
-   * @param id real id
-   * @return true if id in punctuation
-   */
-  public static boolean isPunct(int id) {
-    return id < PUNCTUATION_SIZE;
-  }
-
-  public static boolean allUpperCase(int id) {
-    return (id & ALL_UPPERCASE) != 0;
-  }
-
-  public static boolean firstUpperCase(int id) {
-    return (id & FIRST_UPPERCASE) != 0;
   }
 
   @Override
@@ -238,15 +220,15 @@ public class TokenParser implements AutoCloseable {
     }
 
     public boolean isWord() {
-      return (id & PUNCTUATION) == 0;
+      return TokenIdUtils.isWord(id);
     }
 
     public boolean allUpperCase() {
-      return (id & ALL_UPPERCASE) != 0;
+      return TokenIdUtils.allUpperCase(id);
     }
 
     public boolean firstUpperCase() {
-      return (id & FIRST_UPPERCASE) != 0;
+      return TokenIdUtils.firstUpperCase(id);
     }
   }
 }

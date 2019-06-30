@@ -8,7 +8,7 @@ import com.expleague.commons.math.vectors.impl.vectors.ArrayVec;
 import com.expleague.commons.random.FastRandom;
 import com.expleague.commons.seq.CharSeq;
 import com.expleague.ml.embedding.Embedding;
-import com.expleague.sensearch.core.IdUtils;
+import com.expleague.sensearch.core.PageIdUtils;
 import com.expleague.sensearch.core.Tokenizer;
 import com.expleague.sensearch.donkey.crawler.document.CrawlerDocument;
 import com.expleague.sensearch.donkey.utils.BrandNewIdGenerator;
@@ -62,7 +62,7 @@ public class EmbeddingBuilder implements AutoCloseable {
           if (!existingPageIds.contains(targetId)) {
             return true;
           }
-          curLinkId[0] = IdUtils.toStartLinkId(targetId);
+          curLinkId[0] = PageIdUtils.toStartLinkId(targetId);
           linkTexts.forEach(
               text -> {
                 Vec textVec = toVector(text);
@@ -80,8 +80,8 @@ public class EmbeddingBuilder implements AutoCloseable {
 
   public void startPage(long pageId) {
     existingPageIds.add(pageId);
-    curPageTitleId = IdUtils.toStartSecTitleId(pageId);
-    curPageTextId = IdUtils.toStartSecTextId(pageId);
+    curPageTitleId = PageIdUtils.toStartSecTitleId(pageId);
+    curPageTextId = PageIdUtils.toStartSecTextId(pageId);
   }
 
   public void addSection(CrawlerDocument.Section section, long sectionId) {

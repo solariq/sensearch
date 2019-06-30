@@ -6,7 +6,7 @@ import com.expleague.commons.math.vectors.impl.vectors.ArrayVec;
 import com.expleague.commons.seq.CharSeqTools;
 import com.expleague.sensearch.Page;
 import com.expleague.sensearch.core.Annotations.IndexRoot;
-import com.expleague.sensearch.core.IdUtils;
+import com.expleague.sensearch.core.PageIdUtils;
 import com.expleague.sensearch.core.Term;
 import com.expleague.sensearch.core.Term.TermAndDistance;
 import com.expleague.sensearch.core.Tokenizer;
@@ -404,7 +404,7 @@ public class PlainIndex implements Index {
     IndexedPage page = (IndexedPage) page(pageURI);
     long tmpID;
     // Title
-    tmpID = IdUtils.toStartSecTitleId(page.id());
+    tmpID = PageIdUtils.toStartSecTitleId(page.id());
     Vec pageVec = embedding.vec(tmpID);
     while (pageVec != null) {
       minTitle = Math.min(minTitle, (1.0 - VecTools.cosine(queryVec, pageVec)) / 2.0);
@@ -412,7 +412,7 @@ public class PlainIndex implements Index {
       pageVec = embedding.vec(tmpID);
     }
     // Body
-    tmpID = IdUtils.toStartSecTextId(page.id());
+    tmpID = PageIdUtils.toStartSecTextId(page.id());
     pageVec = embedding.vec(tmpID);
     while (pageVec != null) {
       minBody = Math.min(minBody, (1.0 - VecTools.cosine(queryVec, pageVec)) / 2.0);
@@ -420,7 +420,7 @@ public class PlainIndex implements Index {
       pageVec = embedding.vec(tmpID);
     }
     // Link
-    tmpID = IdUtils.toStartLinkId(page.id());
+    tmpID = PageIdUtils.toStartLinkId(page.id());
     pageVec = embedding.vec(tmpID);
     while (pageVec != null) {
       minLink = Math.min(minLink, (1.0 - VecTools.cosine(queryVec, pageVec)) / 2.0);
@@ -457,11 +457,11 @@ public class PlainIndex implements Index {
           candidates.forEach(
               candidate -> {
                 long id = candidate.getId();
-                if (IdUtils.isSecTitleId(id)) {
+                if (PageIdUtils.isSecTitleId(id)) {
                   filterDistFs.withTitle(candidate.getDist());
-                } else if (IdUtils.isSecTextId(id)) {
+                } else if (PageIdUtils.isSecTextId(id)) {
                   filterDistFs.withBody(candidate.getDist());
-                } else if (IdUtils.isLinkId(id)) {
+                } else if (PageIdUtils.isLinkId(id)) {
                   filterDistFs.withLink(candidate.getDist());
                 }
               });

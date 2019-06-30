@@ -1,6 +1,6 @@
 package com.expleague.sensearch.donkey.utils;
 
-import static com.expleague.sensearch.core.IdUtils.BITS_FOR_FEATURES;
+import static com.expleague.sensearch.core.PageIdUtils.BITS_FOR_FEATURES;
 
 import com.google.common.base.Charsets;
 import com.google.common.hash.HashFunction;

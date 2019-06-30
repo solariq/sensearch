@@ -1,6 +1,6 @@
 package com.expleague.sensearch.core;
 
-public class IdUtils {
+public class PageIdUtils {
   private static final int BITS_FOR_TYPE_OF_FEATURE = 5;
   private static final int BITS_FOR_NUMBER_OF_FEATURE = 15;
   public static final int BITS_FOR_FEATURES = BITS_FOR_TYPE_OF_FEATURE + BITS_FOR_NUMBER_OF_FEATURE;
@@ -16,19 +16,19 @@ public class IdUtils {
   private static final long toPageMask =
       ((1L << (Long.SIZE - BITS_FOR_FEATURES)) - 1) << BITS_FOR_FEATURES;
 
-  private IdUtils() {
+  private PageIdUtils() {
   }
 
   public static long toStartSecTitleId(long pageId) {
-    return pageId + IdUtils.START_SEC_TITLE_PREFIX;
+    return pageId + PageIdUtils.START_SEC_TITLE_PREFIX;
   }
 
   public static long toStartSecTextId(long pageId) {
-    return pageId + IdUtils.START_SEC_TEXT_PREFIX;
+    return pageId + PageIdUtils.START_SEC_TEXT_PREFIX;
   }
 
   public static long toStartLinkId(long pageId) {
-    return pageId + IdUtils.START_LINK_PREFIX;
+    return pageId + PageIdUtils.START_LINK_PREFIX;
   }
 
   public static long toPageId(long id) {

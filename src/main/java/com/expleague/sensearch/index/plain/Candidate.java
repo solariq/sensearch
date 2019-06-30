@@ -1,6 +1,6 @@
 package com.expleague.sensearch.index.plain;
 
-import com.expleague.sensearch.core.IdUtils;
+import com.expleague.sensearch.core.PageIdUtils;
 
 public class Candidate {
 
@@ -11,7 +11,7 @@ public class Candidate {
     public Candidate(long id, double dist) {
         this.id = id;
         this.dist = dist;
-        pageId = IdUtils.toPageId(id);
+      pageId = PageIdUtils.toPageId(id);
     }
 
     public double getDist() {
