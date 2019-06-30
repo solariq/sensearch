@@ -1,6 +1,5 @@
 package com.expleague.sensearch.donkey.randomaccess;
 
-import com.google.common.primitives.Longs;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Iterator;
@@ -13,7 +12,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 // TODO: support batch reading
-public abstract class LevelDbBasedIndex<T> implements RandomAccess<T> {
+public abstract class LevelDbBasedIndex<Key, T> implements RandomAccess<Key, T> {
   static final Options DB_OPTIONS = new Options()
       .createIfMissing(false)
       .cacheSize(1 << 25)
@@ -31,16 +30,18 @@ public abstract class LevelDbBasedIndex<T> implements RandomAccess<T> {
   }
 
   @Nullable
-  public T value(long id) {
-    byte[] bytes = dataBase.get(Longs.toByteArray(id));
+  @Override
+  public T value(Key id) {
+    byte[] bytes = dataBase.get(encodeKey(id));
     if (bytes == null || bytes.length == 0) {
       return null;
     }
     return decodeValue(bytes);
   }
 
-  public void put(long id, T value) {
-    byte[] keyBytes = Longs.toByteArray(id);
+  @Override
+  public void put(Key id, T value) {
+    byte[] keyBytes = encodeKey(id);
     byte[] valueBytes = encodeValue(value);
     dataBase.put(keyBytes, valueBytes);
   }
@@ -48,6 +49,8 @@ public abstract class LevelDbBasedIndex<T> implements RandomAccess<T> {
   protected abstract T decodeValue(byte[] bytes);
 
   protected abstract byte[] encodeValue(T value);
+
+  protected abstract byte[] encodeKey(Key key);
 
   @NotNull
   @Override

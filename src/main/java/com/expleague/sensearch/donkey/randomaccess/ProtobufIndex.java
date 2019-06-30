@@ -5,7 +5,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.nio.file.Path;
 
-public final class ProtobufIndex<T extends GeneratedMessage> extends LevelDbBasedIndex<T> {
+public abstract class ProtobufIndex<Key, T extends GeneratedMessage> extends LevelDbBasedIndex<Key, T> {
   private static final String DECODER_METHOD_NAME = "parseFrom";
   private static final String ENCODER_METHOD_NAME = "toByteArray";
 

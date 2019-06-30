@@ -15,9 +15,10 @@ import com.expleague.sensearch.core.Tokenizer;
 import com.expleague.sensearch.core.impl.TokenizerImpl;
 import com.expleague.sensearch.core.lemmer.Lemmer;
 import com.expleague.sensearch.donkey.IndexBuilder;
+import com.expleague.sensearch.donkey.builders.StatisticsBuilder2;
 import com.expleague.sensearch.donkey.crawler.Crawler;
 import com.expleague.sensearch.donkey.plain.IndexMetaBuilder.TermSegment;
-import com.expleague.sensearch.donkey.randomaccess.ProtobufIndex;
+import com.expleague.sensearch.donkey.randomaccess.ProtoPageIndex;
 import com.expleague.sensearch.donkey.randomaccess.RandomAccess;
 import com.expleague.sensearch.donkey.readers.LevelDbLinkReader;
 import com.expleague.sensearch.donkey.readers.Reader;
@@ -31,12 +32,10 @@ import com.expleague.sensearch.donkey.writers.LevelDbLinkWriter;
 import com.expleague.sensearch.donkey.writers.PageWriter;
 import com.expleague.sensearch.donkey.writers.TermWriter;
 import com.expleague.sensearch.donkey.writers.sequential.SequentialLinkWriter;
-import com.expleague.sensearch.donkey.builders.StatisticsBuilder2;
 import com.expleague.sensearch.index.Index;
 import com.expleague.sensearch.index.plain.PlainIndex;
 import com.expleague.sensearch.protobuf.index.IndexUnits.Page;
 import com.expleague.sensearch.protobuf.index.IndexUnits.Page.Link;
-import com.expleague.sensearch.protobuf.index.IndexUnits.Term;
 import com.expleague.sensearch.term.TermBase;
 import com.expleague.sensearch.web.suggest.SuggestInformationBuilder;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -317,7 +316,7 @@ public class PlainIndexBuilder implements IndexBuilder {
   private void resolveIncomingLinks() {
     try (
         Reader<Link> sequentialReader = new SequentialLinkReader(indexRoot.resolve(SORTED_LINKS));
-        RandomAccess<Page> pageIndex = new ProtobufIndex<>(indexRoot.resolve(PAGE_ROOT), Page.class)
+        RandomAccess<Long, Page> pageIndex = new ProtoPageIndex(indexRoot.resolve(PAGE_ROOT))
     ) {
       Link link = sequentialReader.read();
       if (link == null) {
@@ -343,8 +342,8 @@ public class PlainIndexBuilder implements IndexBuilder {
 
   private void buildStatistics() {
     try (
-        RandomAccess<Page> pageIndex =
-            new ProtobufIndex<>(indexRoot.resolve(PAGE_ROOT), Page.class);
+        RandomAccess<Long, Page> pageIndex =
+            new ProtoPageIndex(indexRoot.resolve(PAGE_ROOT));
         TermBase termBase = new TermBase(indexRoot.resolve(TERM_ROOT), null);
     ) {
       StatisticsBuilder2 statisticsBuilder = new StatisticsBuilder2(termBase);

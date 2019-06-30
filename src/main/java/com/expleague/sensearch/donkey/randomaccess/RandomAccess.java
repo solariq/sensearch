@@ -2,7 +2,9 @@ package com.expleague.sensearch.donkey.randomaccess;
 
 import java.io.Closeable;
 
-public interface RandomAccess<T> extends Iterable<T>, Closeable {
-  T value(long id);
-  void put(long id, T value);
+public interface RandomAccess<Key, T> extends Iterable<T>, Closeable {
+
+  T value(Key id);
+
+  void put(Key id, T value);
 }
