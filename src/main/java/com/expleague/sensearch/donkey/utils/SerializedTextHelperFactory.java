@@ -1,18 +1,16 @@
 package com.expleague.sensearch.donkey.utils;
 
+import com.expleague.sensearch.donkey.randomaccess.ProtoTermIndex;
 import com.expleague.sensearch.protobuf.index.IndexUnits.Page.SerializedText;
-import com.expleague.sensearch.term.TermBase;
-import gnu.trove.map.TIntIntMap;
-import gnu.trove.map.hash.TIntIntHashMap;
+import java.util.Objects;
 import java.util.stream.IntStream;
 
 public class SerializedTextHelperFactory {
 
-  private final TIntIntMap termIdToLemmaIdMap;
+  private final ProtoTermIndex termIndex;
 
-  public SerializedTextHelperFactory(TermBase termBase) {
-    termIdToLemmaIdMap = new TIntIntHashMap();
-    termBase.stream().forEach(term -> termIdToLemmaIdMap.put(term.getId(), term.getLemmaId()));
+  public SerializedTextHelperFactory(ProtoTermIndex termIndex) {
+    this.termIndex = termIndex;
   }
 
   public SerializedTextHelper helper(SerializedText serializedText) {
@@ -49,7 +47,7 @@ public class SerializedTextHelperFactory {
       return IntStream.of(tokenIds)
           .filter(TokenParser::isWord)
           .map(TokenParser::toId)
-          .map(termIdToLemmaIdMap::get);
+          .map(idx -> Objects.requireNonNull(termIndex.value(idx)).getLemmaId());
     }
   }
 }

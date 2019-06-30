@@ -19,6 +19,7 @@ import com.expleague.sensearch.donkey.builders.StatisticsBuilder2;
 import com.expleague.sensearch.donkey.crawler.Crawler;
 import com.expleague.sensearch.donkey.plain.IndexMetaBuilder.TermSegment;
 import com.expleague.sensearch.donkey.randomaccess.ProtoPageIndex;
+import com.expleague.sensearch.donkey.randomaccess.ProtoTermIndex;
 import com.expleague.sensearch.donkey.randomaccess.RandomAccess;
 import com.expleague.sensearch.donkey.readers.LevelDbLinkReader;
 import com.expleague.sensearch.donkey.readers.Reader;
@@ -36,7 +37,6 @@ import com.expleague.sensearch.index.Index;
 import com.expleague.sensearch.index.plain.PlainIndex;
 import com.expleague.sensearch.protobuf.index.IndexUnits.Page;
 import com.expleague.sensearch.protobuf.index.IndexUnits.Page.Link;
-import com.expleague.sensearch.term.TermBase;
 import com.expleague.sensearch.web.suggest.SuggestInformationBuilder;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Guice;
@@ -278,21 +278,31 @@ public class PlainIndexBuilder implements IndexBuilder {
     }
   }
 
-  public void buildPageIndex() throws IOException {
-    Files.createDirectories(indexRoot.resolve(TERM_ROOT));
-    Files.createDirectories(indexRoot.resolve(PAGE_ROOT));
-    Files.createDirectories(indexRoot.resolve(RAW_LINK_ROOT));
+  @Override
+  public void buildPageIndex() {
+    try {
+      Files.createDirectories(indexRoot.resolve(TERM_ROOT));
+      Files.createDirectories(indexRoot.resolve(PAGE_ROOT));
+      Files.createDirectories(indexRoot.resolve(RAW_LINK_ROOT));
 
-    try (
-        PageWriter pageWriter = new PageWriter(
-            indexRoot.resolve(PAGE_ROOT),
-            new TokenParser(new Dictionary(new TermWriter(indexRoot.resolve(TERM_ROOT))), lemmer,
-                new TokenizerImpl()),
-            new LevelDbLinkWriter(indexRoot.resolve(RAW_LINK_ROOT))
-        )
-    ) {
-      crawler.makeStream().forEach(pageWriter::write);
+      try (
+          PageWriter pageWriter = new PageWriter(
+              indexRoot.resolve(PAGE_ROOT),
+              new TokenParser(new Dictionary(new TermWriter(indexRoot.resolve(TERM_ROOT))), lemmer,
+                  new TokenizerImpl()),
+              new LevelDbLinkWriter(indexRoot.resolve(RAW_LINK_ROOT))
+          )
+      ) {
+        crawler.makeStream().forEach(pageWriter::write);
+      }
+    } catch (IOException e) {
+      throw new RuntimeException(e);
     }
+  }
+
+  @Override
+  public void buildLinks() {
+    // TODO
   }
 
   private void sortLinksByTargetId() {
@@ -340,18 +350,24 @@ public class PlainIndexBuilder implements IndexBuilder {
     }
   }
 
-  private void buildStatistics() {
+  @Override
+  public void buildStats() {
     try (
         RandomAccess<Long, Page> pageIndex =
             new ProtoPageIndex(indexRoot.resolve(PAGE_ROOT));
-        TermBase termBase = new TermBase(indexRoot.resolve(TERM_ROOT), null);
+        ProtoTermIndex termIndex = new ProtoTermIndex(indexRoot.resolve(TERM_ROOT));
     ) {
-      StatisticsBuilder2 statisticsBuilder = new StatisticsBuilder2(termBase);
+      StatisticsBuilder2 statisticsBuilder = new StatisticsBuilder2(termIndex);
       pageIndex.forEach(statisticsBuilder::addPage);
       // now we build statistics and save it! Its not ready yet
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
+  }
+
+  @Override
+  public void buildEmbedding() {
+
   }
 
   private void buildIndexInternal(Embedding<CharSeq> jmllEmbedding) throws IOException {

@@ -7,4 +7,12 @@ public interface IndexBuilder {
   void buildIndexAndEmbedding() throws IOException;
 
   void buildIndex() throws IOException;
+
+  void buildPageIndex();
+
+  void buildLinks();
+
+  void buildStats();
+
+  void buildEmbedding();
 }

@@ -1,9 +1,9 @@
 package com.expleague.sensearch.donkey.builders;
 
+import com.expleague.sensearch.donkey.randomaccess.ProtoTermIndex;
 import com.expleague.sensearch.donkey.utils.SerializedTextHelperFactory;
 import com.expleague.sensearch.donkey.utils.SerializedTextHelperFactory.SerializedTextHelper;
 import com.expleague.sensearch.protobuf.index.IndexUnits.Page;
-import com.expleague.sensearch.term.TermBase;
 import com.google.common.annotations.VisibleForTesting;
 import gnu.trove.map.TIntLongMap;
 import gnu.trove.map.TLongObjectMap;
@@ -15,9 +15,10 @@ import gnu.trove.map.hash.TLongObjectHashMap;
 public class StatisticsBuilder2 {
   private final TLongObjectMap<StatisticsAccumulator> pageStatsAccumulators;
   private final SerializedTextHelperFactory helperFactory;
-  public StatisticsBuilder2(TermBase termBase) {
+
+  public StatisticsBuilder2(ProtoTermIndex termIndex) {
     pageStatsAccumulators = new TLongObjectHashMap<>();
-    helperFactory = new SerializedTextHelperFactory(termBase);
+    helperFactory = new SerializedTextHelperFactory(termIndex);
   }
 
   public void addPage(Page page) {
