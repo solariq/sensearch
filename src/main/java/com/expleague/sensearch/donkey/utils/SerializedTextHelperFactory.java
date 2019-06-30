@@ -1,7 +1,7 @@
 package com.expleague.sensearch.donkey.utils;
 
+import com.expleague.sensearch.core.TokenIdUtils;
 import com.expleague.sensearch.donkey.randomaccess.ProtoTermIndex;
-import com.expleague.sensearch.donkey.term.TokenParser;
 import com.expleague.sensearch.protobuf.index.IndexUnits.Page.SerializedText;
 import java.util.Objects;
 import java.util.stream.IntStream;
@@ -40,14 +40,14 @@ public class SerializedTextHelperFactory {
 
     public IntStream termIdsStream() {
       return IntStream.of(tokenIds)
-          .filter(TokenParser::isWord)
-          .map(TokenParser::toId);
+          .filter(TokenIdUtils::isWord)
+          .map(TokenIdUtils::toId);
     }
 
     public IntStream lemmaIdsStream() {
       return IntStream.of(tokenIds)
-          .filter(TokenParser::isWord)
-          .map(TokenParser::toId)
+          .filter(TokenIdUtils::isWord)
+          .map(TokenIdUtils::toId)
           .map(idx -> Objects.requireNonNull(termIndex.value(idx)).getLemmaId());
     }
   }

@@ -8,6 +8,7 @@ import com.expleague.commons.seq.CharSeq;
 import com.expleague.commons.text.lemmer.LemmaInfo;
 import com.expleague.commons.text.lemmer.PartOfSpeech;
 import com.expleague.commons.text.lemmer.WordInfo;
+import com.expleague.sensearch.core.TokenIdUtils;
 import com.expleague.sensearch.core.impl.TokenizerImpl;
 import com.expleague.sensearch.core.lemmer.Lemmer;
 import com.expleague.sensearch.donkey.term.TokenParser.Token;
@@ -59,74 +60,74 @@ public class TokenParserTest {
 
     assertEquals("cats", cats.text().toString());
     assertTrue(cats.firstUpperCase());
-    assertTrue(TokenParser.firstUpperCase(cats.formId()));
+    assertTrue(TokenIdUtils.firstUpperCase(cats.formId()));
 
     assertFalse(cats.allUpperCase());
-    assertFalse(TokenParser.allUpperCase(cats.formId()));
+    assertFalse(TokenIdUtils.allUpperCase(cats.formId()));
 
     assertTrue(cats.isWord());
-    assertTrue(TokenParser.isWord(cats.formId()));
-    assertFalse(TokenParser.isPunct(cats.formId()));
+    assertTrue(TokenIdUtils.isWord(cats.formId()));
+    assertFalse(TokenIdUtils.isPunct(cats.formId()));
 
     assertEquals("cat", cat.text().toString());
 
     assertTrue(cat.firstUpperCase());
-    assertTrue(TokenParser.firstUpperCase(cat.formId()));
+    assertTrue(TokenIdUtils.firstUpperCase(cat.formId()));
 
     assertTrue(cat.allUpperCase());
-    assertTrue(TokenParser.allUpperCase(cat.formId()));
+    assertTrue(TokenIdUtils.allUpperCase(cat.formId()));
 
     assertTrue(cat.isWord());
-    assertTrue(TokenParser.isWord(cat.formId()));
-    assertFalse(TokenParser.isPunct(cat.formId()));
+    assertTrue(TokenIdUtils.isWord(cat.formId()));
+    assertFalse(TokenIdUtils.isPunct(cat.formId()));
 
     assertEquals("trash", trash.text().toString());
 
     assertFalse(trash.firstUpperCase());
-    assertFalse(TokenParser.firstUpperCase(trash.formId()));
+    assertFalse(TokenIdUtils.firstUpperCase(trash.formId()));
 
-    assertFalse(TokenParser.allUpperCase(trash.formId()));
+    assertFalse(TokenIdUtils.allUpperCase(trash.formId()));
     assertFalse(trash.allUpperCase());
 
     assertTrue(trash.isWord());
-    assertTrue(TokenParser.isWord(trash.formId()));
-    assertFalse(TokenParser.isPunct(trash.formId()));
+    assertTrue(TokenIdUtils.isWord(trash.formId()));
+    assertFalse(TokenIdUtils.isPunct(trash.formId()));
 
     assertEquals("catsss", catsss.text().toString());
 
     assertFalse(catsss.firstUpperCase());
-    assertFalse(TokenParser.firstUpperCase(catsss.formId()));
+    assertFalse(TokenIdUtils.firstUpperCase(catsss.formId()));
 
     assertFalse(catsss.allUpperCase());
-    assertFalse(TokenParser.allUpperCase(catsss.formId()));
+    assertFalse(TokenIdUtils.allUpperCase(catsss.formId()));
 
     assertTrue(catsss.isWord());
-    assertTrue(TokenParser.isWord(catsss.formId()));
-    assertFalse(TokenParser.isPunct(catsss.formId()));
+    assertTrue(TokenIdUtils.isWord(catsss.formId()));
+    assertFalse(TokenIdUtils.isPunct(catsss.formId()));
 
     assertEquals(",", comma.text().toString());
 
     assertFalse(comma.firstUpperCase());
-    assertFalse(TokenParser.firstUpperCase(comma.formId()));
+    assertFalse(TokenIdUtils.firstUpperCase(comma.formId()));
 
     assertFalse(comma.allUpperCase());
-    assertFalse(TokenParser.allUpperCase(comma.formId()));
+    assertFalse(TokenIdUtils.allUpperCase(comma.formId()));
 
     assertFalse(comma.isWord());
-    assertFalse(TokenParser.isWord(comma.formId()));
-    assertTrue(TokenParser.isPunct(comma.formId()));
+    assertFalse(TokenIdUtils.isWord(comma.formId()));
+    assertTrue(TokenIdUtils.isPunct(comma.formId()));
 
     assertEquals(" ", space.text().toString());
 
     assertFalse(space.firstUpperCase());
-    assertFalse(TokenParser.firstUpperCase(space.formId()));
+    assertFalse(TokenIdUtils.firstUpperCase(space.formId()));
 
     assertFalse(space.allUpperCase());
-    assertFalse(TokenParser.allUpperCase(space.formId()));
+    assertFalse(TokenIdUtils.allUpperCase(space.formId()));
 
     assertFalse(space.isWord());
-    assertFalse(TokenParser.isWord(space.formId()));
-    assertTrue(TokenParser.isPunct(space.formId()));
+    assertFalse(TokenIdUtils.isWord(space.formId()));
+    assertTrue(TokenIdUtils.isPunct(space.formId()));
   }
 
   @Test(expected = IllegalArgumentException.class)

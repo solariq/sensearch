@@ -5,7 +5,7 @@ import com.expleague.commons.util.cache.CacheStrategy.Type;
 import com.expleague.commons.util.cache.impl.FixedSizeCache;
 import com.expleague.sensearch.Page;
 import com.expleague.sensearch.core.Term;
-import com.expleague.sensearch.donkey.term.TokenParser;
+import com.expleague.sensearch.core.TokenIdUtils;
 import com.expleague.sensearch.index.IndexedPage;
 import com.expleague.sensearch.protobuf.index.IndexUnits;
 import com.google.protobuf.InvalidProtocolBufferException;
@@ -193,7 +193,7 @@ public class PlainPage implements IndexedPage {
   }
 
   private Term tokenIdToTerm(int tokenId) {
-    return index.term(TokenParser.toId(tokenId));
+    return index.term(TokenIdUtils.toId(tokenId));
   }
 
   private IntStream intContent(SegmentType type, boolean punct) {
@@ -202,13 +202,13 @@ public class PlainPage implements IndexedPage {
         if (punct) {
           return protoPage.getTitle().getTokenIdsList().stream().mapToInt(i -> i);
         } else {
-          return protoPage.getTitle().getTokenIdsList().stream().mapToInt(i -> i).filter(TokenParser::isWord);
+          return protoPage.getTitle().getTokenIdsList().stream().mapToInt(i -> i).filter(TokenIdUtils::isWord);
         }
       case SUB_BODY:
         if (punct) {
           return protoPage.getContent().getTokenIdsList().stream().mapToInt(i -> i);
         } else {
-          return protoPage.getContent().getTokenIdsList().stream().mapToInt(i -> i).filter(TokenParser::isWord);
+          return protoPage.getContent().getTokenIdsList().stream().mapToInt(i -> i).filter(TokenIdUtils::isWord);
         }
       case BODY:
         IntStream subpagesContent = subpages()
@@ -447,7 +447,7 @@ public class PlainPage implements IndexedPage {
       PlainPage page = (PlainPage) sourcePage;
       return protoLink.getText().getTokenIdsList().stream()
           .mapToInt(n -> n)
-          .filter(TokenParser::isWord)
+          .filter(TokenIdUtils::isWord)
           .mapToObj(page::tokenIdToTerm);
     }
 
