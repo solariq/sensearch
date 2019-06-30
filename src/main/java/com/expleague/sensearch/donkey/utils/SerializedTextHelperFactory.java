@@ -44,6 +44,10 @@ public class SerializedTextHelperFactory {
           .map(TokenIdUtils::toId);
     }
 
+    public int[] termIdsArray() {
+      return termIdsStream().toArray();
+    }
+
     public IntStream lemmaIdsStream() {
       return IntStream.of(tokenIds)
           .filter(TokenIdUtils::isWord)
