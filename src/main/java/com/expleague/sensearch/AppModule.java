@@ -24,9 +24,9 @@ import com.expleague.sensearch.core.SearchPhaseFactory;
 import com.expleague.sensearch.core.SenSeArchImpl;
 import com.expleague.sensearch.core.lemmer.Lemmer;
 import com.expleague.sensearch.core.lemmer.MultiLangLemmer;
-import com.expleague.sensearch.donkey.IndexBuilder;
+import com.expleague.sensearch.donkey.IndexCreator;
 import com.expleague.sensearch.donkey.crawler.Crawler;
-import com.expleague.sensearch.donkey.plain.PlainIndexBuilder;
+import com.expleague.sensearch.donkey.plain.PlainIndexCreator;
 import com.expleague.sensearch.experiments.wiki.CrawlerWiki;
 import com.expleague.sensearch.filter.Filter;
 import com.expleague.sensearch.filter.FilterImpl;
@@ -106,7 +106,7 @@ public class AppModule extends AbstractModule {
     bind(Embedding.class).to(EmbeddingImpl.class).in(Singleton.class);
     bind(Filter.class).to(FilterImpl.class);
     bind(Index.class).to(PlainIndex.class).in(Singleton.class);
-    bind(IndexBuilder.class).to(PlainIndexBuilder.class);
+    bind(IndexCreator.class).to(PlainIndexCreator.class);
     bind(Suggester.class).to(FastSuggester.class).in(Singleton.class);
     bind(SenSeArch.class).to(SenSeArchImpl.class);
     bind(WebCrawler.class).to(RequestCrawler.class);
@@ -121,8 +121,8 @@ public class AppModule extends AbstractModule {
     return JniDBFactory.factory.open(
         config
             .getIndexRoot()
-            .resolve(PlainIndexBuilder.EMBEDDING_ROOT)
-            .resolve(PlainIndexBuilder.VECS_ROOT)
+            .resolve(PlainIndexCreator.EMBEDDING_ROOT)
+            .resolve(PlainIndexCreator.VECS_ROOT)
             .toFile(),
         DB_OPTIONS);
   }
@@ -134,8 +134,8 @@ public class AppModule extends AbstractModule {
     return JniDBFactory.factory.open(
         config
             .getIndexRoot()
-            .resolve(PlainIndexBuilder.EMBEDDING_ROOT)
-            .resolve(PlainIndexBuilder.LSH_ROOT)
+            .resolve(PlainIndexCreator.EMBEDDING_ROOT)
+            .resolve(PlainIndexCreator.LSH_ROOT)
             .toFile(),
         DB_OPTIONS);
   }

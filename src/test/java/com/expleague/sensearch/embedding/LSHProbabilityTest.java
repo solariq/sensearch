@@ -1,7 +1,7 @@
 //package com.expleague.sensearch.embedding;
 //import com.expleague.commons.math.vectors.Vec;
 //import com.expleague.commons.math.vectors.impl.vectors.ArrayVec;
-//import com.expleague.sensearch.donkey.plain.PlainIndexBuilder;
+//import com.expleague.sensearch.donkey.plain.PlainIndexCreator;
 //import com.expleague.sensearch.index.Embedding;
 //import com.expleague.sensearch.index.plain.EmbeddingImpl;
 //import com.expleague.sensearch.index.plain.PlainIndex;
@@ -33,7 +33,7 @@
 //        randVecs = new Vec[RAND_VECS_NUMBER];
 //        Random random = new Random();
 //        for (int j = 0; j < randVecs.length; j++) {
-//            double[] randCoords = new double[PlainIndexBuilder.DEFAULT_VEC_SIZE];
+//            double[] randCoords = new double[PlainIndexCreator.DEFAULT_VEC_SIZE];
 //            for (int k = 0; k < randCoords.length; k++) {
 //                randCoords[k] = MIN_COORD_VAL + (MAX_COORD_VAL - MIN_COORD_VAL) * random.nextDouble();
 //            }

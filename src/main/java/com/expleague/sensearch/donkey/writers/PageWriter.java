@@ -57,6 +57,7 @@ public class PageWriter implements Writer<CrawlerDocument> {
     }
   }
 
+  @Override
   public void write(CrawlerDocument document) {
 //    LOGGER.info("write document::" + document.title());
     final long pageId = idGenerator.generatePageId(document.uri());

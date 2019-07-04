@@ -2,7 +2,7 @@ package com.expleague.sensearch.donkey.writers;
 
 import org.junit.Test;
 
-public class TermWriterTest {
+public class PageWriterTest {
 
   @Test
   public void write() {

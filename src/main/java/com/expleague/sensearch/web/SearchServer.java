@@ -3,7 +3,7 @@ package com.expleague.sensearch.web;
 import com.expleague.sensearch.AppModule;
 import com.expleague.sensearch.Config;
 import com.expleague.sensearch.ConfigImpl;
-import com.expleague.sensearch.donkey.IndexBuilder;
+import com.expleague.sensearch.donkey.IndexCreator;
 import com.expleague.sensearch.index.Index;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Guice;
@@ -52,12 +52,16 @@ public class SearchServer {
     Injector injector = Guice.createInjector(new AppModule(config));
 
     if (config.getBuildIndexFlag()) {
-      IndexBuilder indexBuilder = injector.getInstance(IndexBuilder.class);
+      IndexCreator indexCreator = injector.getInstance(IndexCreator.class);
       if (config.getTrainEmbeddingFlag()) {
-        indexBuilder.buildIndexAndEmbedding();
-      } else {
-        indexBuilder.buildIndex();
+        indexCreator.createWordEmbedding();
       }
+
+      indexCreator.createPagesAndTerms();
+      indexCreator.createLinks();
+      indexCreator.createStats();
+      indexCreator.createEmbedding();
+      indexCreator.createSuggest();
     }
 
     injector.getInstance(SearchServer.class).start(injector);

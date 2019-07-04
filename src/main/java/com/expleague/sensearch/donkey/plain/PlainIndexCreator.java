@@ -1,7 +1,5 @@
 package com.expleague.sensearch.donkey.plain;
 
-import com.expleague.commons.math.vectors.Vec;
-import com.expleague.commons.math.vectors.VecTools;
 import com.expleague.commons.seq.CharSeq;
 import com.expleague.commons.seq.CharSeqTools;
 import com.expleague.ml.embedding.Embedding;
@@ -14,8 +12,8 @@ import com.expleague.sensearch.core.Annotations.IndexRoot;
 import com.expleague.sensearch.core.Tokenizer;
 import com.expleague.sensearch.core.impl.TokenizerImpl;
 import com.expleague.sensearch.core.lemmer.Lemmer;
-import com.expleague.sensearch.donkey.IndexBuilder;
-import com.expleague.sensearch.donkey.builders.StatisticsBuilder2;
+import com.expleague.sensearch.donkey.IndexCreator;
+import com.expleague.sensearch.donkey.builders.StatisticsAccumulator;
 import com.expleague.sensearch.donkey.crawler.Crawler;
 import com.expleague.sensearch.donkey.plain.IndexMetaBuilder.TermSegment;
 import com.expleague.sensearch.donkey.randomaccess.ProtoPageIndex;
@@ -29,8 +27,10 @@ import com.expleague.sensearch.donkey.term.ParsedTerm;
 import com.expleague.sensearch.donkey.term.TokenParser;
 import com.expleague.sensearch.donkey.utils.BrandNewIdGenerator;
 import com.expleague.sensearch.donkey.utils.ExternalSorter;
+import com.expleague.sensearch.donkey.utils.SerializedTextHelperFactory;
 import com.expleague.sensearch.donkey.writers.LevelDbLinkWriter;
 import com.expleague.sensearch.donkey.writers.PageWriter;
+import com.expleague.sensearch.donkey.writers.StatisticsWriter;
 import com.expleague.sensearch.donkey.writers.TermWriter;
 import com.expleague.sensearch.donkey.writers.sequential.SequentialLinkWriter;
 import com.expleague.sensearch.index.Index;
@@ -47,24 +47,15 @@ import gnu.trove.map.TLongObjectMap;
 import gnu.trove.map.hash.TLongObjectHashMap;
 import gnu.trove.set.TLongSet;
 import gnu.trove.set.hash.TLongHashSet;
-import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.OutputStreamWriter;
-import java.io.Writer;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Comparator;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
-import java.util.Random;
-import java.util.Set;
-import java.util.TreeMap;
 import java.util.stream.Stream;
 import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
@@ -73,7 +64,7 @@ import org.iq80.leveldb.CompressionType;
 import org.iq80.leveldb.DB;
 import org.iq80.leveldb.Options;
 
-public class PlainIndexBuilder implements IndexBuilder {
+public class PlainIndexCreator implements IndexCreator {
 
   private static final int STATISTICS_BLOCK_SIZE = 1 << 10;
   private static final int PLAIN_PAGE_BLOCK_SIZE = 1 << 20;
@@ -102,9 +93,6 @@ public class PlainIndexBuilder implements IndexBuilder {
 
   public static final String INDEX_META_FILE = "index.meta";
   public static final int DEFAULT_VEC_SIZE = 300;
-
-  private static final int NEIGHBORS_NUM = 50;
-  private static final int NUM_OF_RANDOM_IDS = 100;
 
   // DB configurations
   private static final long DEFAULT_CACHE_SIZE = 1 << 10; // 1 KB
@@ -135,9 +123,7 @@ public class PlainIndexBuilder implements IndexBuilder {
           .errorIfExists(true)
           .compressionType(CompressionType.SNAPPY);
 
-  private static final String[] REQUIRED_WORDS = new String[]{"путин", "медведев", "александр"};
-
-  private static final Logger LOG = Logger.getLogger(PlainIndexBuilder.class);
+  private static final Logger LOG = Logger.getLogger(PlainIndexCreator.class);
   private final Crawler crawler;
   private final Lemmer lemmer;
   private final Tokenizer tokenizer = new TokenizerImpl();
@@ -145,7 +131,7 @@ public class PlainIndexBuilder implements IndexBuilder {
   private final Path embeddingVectorsPath;
 
   @Inject
-  public PlainIndexBuilder(
+  public PlainIndexCreator(
       Crawler crawler,
       @IndexRoot Path indexRoot,
       @EmbeddingVectorsPath Path embeddingVectorsPath,
@@ -157,129 +143,59 @@ public class PlainIndexBuilder implements IndexBuilder {
     this.lemmer = lemmer;
   }
 
-  private Comparator<Vec> comparator(Vec main) {
-    return (v1, v2) -> {
-      double val1 = 1. - VecTools.cosine(v1, main);
-      double val2 = 1. - VecTools.cosine(v2, main);
-      if (val1 < val2) {
-        return -1;
-      } else if (val1 > val2) {
-        return 1;
-      }
-      return 0;
-    };
-  }
-
-  private Collection<Long> nearest(TLongObjectMap<Vec> vecs, long mainId) {
-    Vec mainVec = vecs.get(mainId);
-    if (mainVec == null) {
-      return new ArrayList<>();
+  @Override
+  public void createWordEmbedding() {
+    LOG.info("training JMLL embedding...");
+    EmbeddingImpl<CharSeq> jmllEmbedding;
+    try {
+      jmllEmbedding =
+          (EmbeddingImpl<CharSeq>)
+              new JmllEmbeddingBuilder(DEFAULT_VEC_SIZE, indexRoot.resolve(TEMP_EMBEDDING_ROOT))
+                  .build(crawler.makeStream());
+      jmllEmbedding.write(new FileWriter(embeddingVectorsPath.toFile()));
+    } catch (IOException e) {
+      throw new RuntimeException(e);
     }
-    Comparator<Vec> comparator = comparator(mainVec);
-    TreeMap<Vec, Long> neighbors = new TreeMap<>(comparator);
-    vecs.forEachEntry(
-        (id, vec) -> {
-          if (neighbors.size() < NEIGHBORS_NUM) {
-            neighbors.put(vec, id);
-          } else if (comparator.compare(neighbors.lastKey(), vec) > 0) {
-            neighbors.remove(neighbors.lastKey());
-            neighbors.put(vec, id);
-          }
-          return true;
-        });
-    return neighbors.values();
   }
 
-  private void saveIds(Path root, TLongObjectMap<Vec> vecs, Set<Long> ids) throws IOException {
-    for (long mainId : ids) {
-      try (Writer out =
-          new OutputStreamWriter(new FileOutputStream(root.resolve("_" + mainId).toFile()))) {
-        for (long id : nearest(vecs, mainId)) {
-          out.write(id + " ");
+  @Override
+  public void createSuggest() {
+
+    try {
+      Files.createDirectories(indexRoot.resolve(SUGGEST_UNIGRAM_ROOT));
+
+      try (final DB suggestUnigramDb =
+          JniDBFactory.factory.open(
+              indexRoot.resolve(SUGGEST_UNIGRAM_ROOT).toFile(), STATS_DB_OPTIONS);
+          final DB suggestMultigramDb =
+              JniDBFactory.factory.open(
+                  indexRoot.resolve(SUGGEST_MULTIGRAMS_ROOT).toFile(), STATS_DB_OPTIONS);
+      ) {
+        Config config =
+            new ObjectMapper().readValue(Paths.get("./config.json").toFile(), ConfigImpl.class);
+        Injector injector = Guice.createInjector(new AppModule(config));
+
+        try (Index index = injector.getInstance(Index.class)) {
+
+          LOG.info("Building suggest...");
+          long start = System.nanoTime();
+          SuggestInformationBuilder suggestBuilder =
+              new SuggestInformationBuilder(index, config.getIndexRoot(), suggestUnigramDb,
+                  suggestMultigramDb);
+
+          suggestBuilder.build();
+
+          LOG.info(String
+              .format("Suggest index was built in %.1f sec", (System.nanoTime() - start) / 1e9));
         }
       }
-    }
-  }
-
-  private void saveLSHMetricInfo(Path root, TLongObjectMap<Vec> vecs, Set<Long> requiredIds)
-      throws IOException {
-    saveIds(root, vecs, requiredIds);
-    Random random = new Random();
-    Set<Long> randomIds = new HashSet<>();
-    for (int i = 0; i < NUM_OF_RANDOM_IDS; i++) {
-      long mainId;
-      do {
-        mainId = random.nextInt(vecs.size());
-      } while (requiredIds.contains(mainId));
-      randomIds.add(mainId);
-    }
-    saveIds(root, vecs, randomIds);
-  }
-
-  @Override
-  public void buildIndexAndEmbedding() throws IOException {
-    LOG.info("Building JMLL embedding...");
-    EmbeddingImpl<CharSeq> jmllEmbedding;
-    jmllEmbedding =
-        (EmbeddingImpl<CharSeq>)
-            new JmllEmbeddingBuilder(DEFAULT_VEC_SIZE, indexRoot.resolve(TEMP_EMBEDDING_ROOT))
-                .build(crawler.makeStream());
-    jmllEmbedding.write(new FileWriter(embeddingVectorsPath.toFile()));
-    buildIndex(jmllEmbedding);
-  }
-
-  // TODO: Make it more readable, add possibility of incomplete rebuilding
-  @Override
-  public void buildIndex() throws IOException {
-    LOG.info("Reading jmll embedding...");
-    buildIndex(
-        EmbeddingImpl.read(
-            Files.newBufferedReader(embeddingVectorsPath, Charset.forName("UTF-8")),
-            CharSeq.class));
-  }
-
-  private void buildIndex(Embedding<CharSeq> jmllEmbedding) throws IOException {
-    long startTime = System.nanoTime();
-    buildIndexInternal(jmllEmbedding);
-    buildSuggestAfterIndex();
-    LOG.info(String.format("Index build in [%.3f] seconds", (System.nanoTime() - startTime) / 1e9));
-  }
-
-  public void buildSuggestAfterIndex() throws IOException {
-
-    Files.createDirectories(indexRoot.resolve(SUGGEST_UNIGRAM_ROOT));
-
-    try (final DB suggestUnigramDb =
-        JniDBFactory.factory.open(
-            indexRoot.resolve(SUGGEST_UNIGRAM_ROOT).toFile(), STATS_DB_OPTIONS);
-        final DB suggestMultigramDb =
-            JniDBFactory.factory.open(
-                indexRoot.resolve(SUGGEST_MULTIGRAMS_ROOT).toFile(), STATS_DB_OPTIONS);
-    ) {
-      Config config =
-          new ObjectMapper().readValue(Paths.get("./config.json").toFile(), ConfigImpl.class);
-      Injector injector = Guice.createInjector(new AppModule(config));
-
-      try (Index index = injector.getInstance(Index.class)) {
-
-        LOG.info("Building suggest...");
-        long start = System.nanoTime();
-        SuggestInformationBuilder suggestBuilder =
-            new SuggestInformationBuilder(index, config.getIndexRoot(), suggestUnigramDb,
-                suggestMultigramDb);
-
-        suggestBuilder.build();
-
-        LOG.info(String
-            .format("Suggest index was built in %.1f sec", (System.nanoTime() - start) / 1e9));
-      } catch (Exception e) {
-        e.printStackTrace();
-      }
+    } catch (Exception e) {
+      throw new RuntimeException(e);
     }
   }
 
   @Override
-  public void buildPageAndTermIndices() {
+  public void createPagesAndTerms() {
     try {
       Files.createDirectories(indexRoot.resolve(TERM_ROOT));
       Files.createDirectories(indexRoot.resolve(PAGE_ROOT));
@@ -296,12 +212,15 @@ public class PlainIndexBuilder implements IndexBuilder {
         crawler.makeStream().forEach(pageWriter::write);
       }
     } catch (IOException e) {
+      removeDbFiles(indexRoot.resolve(TERM_ROOT));
+      removeDbFiles(indexRoot.resolve(PAGE_ROOT));
+      removeDbFiles(indexRoot.resolve(RAW_LINK_ROOT));
       throw new RuntimeException(e);
     }
   }
 
   @Override
-  public void buildLinks() {
+  public void createLinks() {
     // TODO
   }
 
@@ -351,23 +270,51 @@ public class PlainIndexBuilder implements IndexBuilder {
   }
 
   @Override
-  public void buildStats() {
-    try (
-        RandomAccess<Long, Page> pageIndex =
-            new ProtoPageIndex(indexRoot.resolve(PAGE_ROOT));
-        ProtoTermIndex termIndex = new ProtoTermIndex(indexRoot.resolve(TERM_ROOT));
-    ) {
-      StatisticsBuilder2 statisticsBuilder = new StatisticsBuilder2(termIndex);
-      pageIndex.forEach(statisticsBuilder::addPage);
-      // now we build statistics and save it! Its not ready yet
+  public void createStats() {
+    Path statsPath = indexRoot.resolve(TERM_STATISTICS_ROOT);
+    try {
+      Files.createDirectories(statsPath);
+
+      try (
+          RandomAccess<Long, Page> pageIndex =
+              new ProtoPageIndex(indexRoot.resolve(PAGE_ROOT));
+          ProtoTermIndex termIndex = new ProtoTermIndex(indexRoot.resolve(TERM_ROOT));
+          StatisticsWriter statsWriter = new StatisticsWriter(
+              JniDBFactory.factory.open(statsPath.toFile(), STATS_DB_OPTIONS))
+      ) {
+        StatisticsAccumulator statisticsAccumulator = new StatisticsAccumulator(
+            new SerializedTextHelperFactory(termIndex));
+        pageIndex.forEach(statisticsAccumulator::addPage);
+
+        statisticsAccumulator.termStats().forEach(statsWriter::write);
+      }
     } catch (IOException e) {
+      removeDbFiles(statsPath);
       throw new RuntimeException(e);
     }
   }
 
-  @Override
-  public void buildEmbedding() {
+  private void removeDbFiles(Path statsPath) {
+    try {
+      FileUtils.deleteDirectory(statsPath.toFile());
+    } catch (IOException e) {
+      LOG.error("Cannot delete db files", e);
+    }
+  }
 
+  @Override
+  public void createEmbedding() {
+    EmbeddingImpl<CharSeq> wordEmbedding;
+    try {
+      wordEmbedding = EmbeddingImpl.read(
+          Files.newBufferedReader(embeddingVectorsPath, Charset.forName("UTF-8")),
+          CharSeq.class);
+    } catch (IOException e) {
+      LOG.error("Cannot read embedding at path " + embeddingVectorsPath.toString(), e);
+      throw new RuntimeException(e);
+    }
+
+    // TODO
   }
 
   private void buildIndexInternal(Embedding<CharSeq> jmllEmbedding) throws IOException {
@@ -491,13 +438,6 @@ public class PlainIndexBuilder implements IndexBuilder {
 
         Path lshMetricPath = indexRoot.resolve(EMBEDDING_ROOT).resolve(LSH_METRIC_ROOT);
         Files.createDirectories(lshMetricPath);
-
-        // TODO: uncomment this
-        //        saveLSHMetricInfo(
-        //            lshMetricPath,
-        //            gloveVectors,
-        //
-        // Arrays.stream(REQUIRED_WORDS).map(idMappings::get).collect(Collectors.toSet()));
 
         LOG.info("Storing index meta...");
         // saving index-wise data

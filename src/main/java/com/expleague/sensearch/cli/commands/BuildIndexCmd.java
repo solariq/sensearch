@@ -5,15 +5,15 @@ import static com.expleague.sensearch.cli.utils.CommandLineTools.checkOptions;
 import com.expleague.sensearch.AppModule;
 import com.expleague.sensearch.ConfigImpl;
 import com.expleague.sensearch.cli.Command;
-import com.expleague.sensearch.cli.utils.SingleArgOptions;
 import com.expleague.sensearch.cli.utils.SingleArgOptions.EnumOption;
 import com.expleague.sensearch.cli.utils.SingleArgOptions.PathOption;
 import com.expleague.sensearch.cli.utils.SingleArgPredicates.ExistingPath;
-import com.expleague.sensearch.donkey.IndexBuilder;
+import com.expleague.sensearch.donkey.IndexCreator;
 import com.expleague.sensearch.donkey.crawler.Crawler;
 import com.expleague.sensearch.experiments.joom.CrawlerJoom;
 import com.expleague.sensearch.experiments.wiki.CrawlerWiki;
 import com.google.inject.Guice;
+import com.google.inject.Injector;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
@@ -102,9 +102,14 @@ public class BuildIndexCmd implements Command {
     config.setPathToZIP(DATA_PATH.value(commandLine).toString());
     config.setEmbeddingVectors(EMBEDDING_PATH.value(commandLine).toString());
     config.setTemporaryIndex(OUTPUT_PATH.value(commandLine).toString());
-    Guice.createInjector(new AppModule(config, DATA_CRAWLER.value(commandLine).crawlerClass()))
-        .getInstance(IndexBuilder.class)
-        .buildIndex();
+    Injector injector = Guice.createInjector(new AppModule(config, DATA_CRAWLER.value(commandLine).crawlerClass()));
+    IndexCreator indexCreator = injector.getInstance(IndexCreator.class);
+
+    indexCreator.createPagesAndTerms();
+    indexCreator.createLinks();
+    indexCreator.createStats();
+    indexCreator.createEmbedding();
+    indexCreator.createSuggest();
   }
 
   @Override

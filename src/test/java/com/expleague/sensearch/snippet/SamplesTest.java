@@ -2,7 +2,7 @@
 //
 //import com.expleague.commons.text.lemmer.MyStem;
 //import com.expleague.sensearch.Page;
-//import com.expleague.sensearch.core.lemmer.Lemmer;
+//import com.expleague.sensearch.core.lemmer.MultiLangLemmer;
 //import com.expleague.sensearch.query.Query;
 //import com.expleague.sensearch.utils.IndexBasedTestCase;
 //import java.io.File;
@@ -24,7 +24,7 @@
 //
 //  private SnippetsCreator sc = new SnippetsCreator(index());
 //
-//  private Lemmer lemmer;
+//  private MultiLangLemmer lemmer;
 //
 //  private List<Page> pages = new ArrayList<>();
 //  private List<Query> queries = new ArrayList<>();
@@ -34,7 +34,7 @@
 //  @Before
 //  public void prepare() {
 //    MyStem myStem = myStemForTest(SamplesTest.class.getName(), testName.getMethodName());
-//    lemmer = new Lemmer(myStem);
+//    lemmer = new MultiLangLemmer(myStem);
 //    File folder = new File("./src/test/java/com/expleague/sensearch/snippet/samples");
 //    Arrays.stream(folder.listFiles())
 //        .sorted()

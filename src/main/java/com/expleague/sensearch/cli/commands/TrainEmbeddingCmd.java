@@ -11,7 +11,7 @@ import com.expleague.sensearch.cli.utils.SingleArgOptions.PathOption;
 import com.expleague.sensearch.cli.utils.SingleArgPredicates.ExistingPath;
 import com.expleague.sensearch.donkey.crawler.Crawler;
 import com.expleague.sensearch.donkey.plain.JmllEmbeddingBuilder;
-import com.expleague.sensearch.donkey.plain.PlainIndexBuilder;
+import com.expleague.sensearch.donkey.plain.PlainIndexCreator;
 import com.expleague.sensearch.experiments.joom.CrawlerJoom;
 import com.expleague.sensearch.experiments.wiki.CrawlerWiki;
 import java.io.Writer;
@@ -42,7 +42,7 @@ public class TrainEmbeddingCmd implements Command {
   private static final IntOption VECTORS_LENGTH = IntOption.builder()
       .shortOption("l")
       .longOption("vec-length")
-      .defaultValue(PlainIndexBuilder.DEFAULT_VEC_SIZE)
+      .defaultValue(PlainIndexCreator.DEFAULT_VEC_SIZE)
       .description("Specify the length of word embeddings")
       .build();
   private static final PathOption TMP_OUTPUT_PATH = PathOption.builder()

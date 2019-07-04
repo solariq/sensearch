@@ -7,7 +7,7 @@ import com.expleague.commons.util.ArrayTools;
 import com.expleague.commons.util.cache.impl.FixedSizeCacheLong;
 import com.expleague.sensearch.core.Annotations.EmbeddingVecsDb;
 import com.expleague.sensearch.core.Annotations.UseLshFlag;
-import com.expleague.sensearch.donkey.plain.PlainIndexBuilder;
+import com.expleague.sensearch.donkey.plain.PlainIndexCreator;
 import com.expleague.sensearch.index.Embedding;
 import com.google.common.primitives.Longs;
 import com.google.inject.Inject;
@@ -165,7 +165,7 @@ public class EmbeddingImpl implements Embedding {
 
   @Override
   public int dim() {
-    return PlainIndexBuilder.DEFAULT_VEC_SIZE;
+    return PlainIndexCreator.DEFAULT_VEC_SIZE;
   }
 
   @Override

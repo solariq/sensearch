@@ -1,6 +1,6 @@
 package com.expleague.sensearch.donkey.plain;
 
-import static com.expleague.sensearch.donkey.plain.PlainIndexBuilder.DEFAULT_VEC_SIZE;
+import static com.expleague.sensearch.donkey.plain.PlainIndexCreator.DEFAULT_VEC_SIZE;
 
 import com.expleague.commons.math.vectors.Vec;
 import com.expleague.commons.math.vectors.VecTools;

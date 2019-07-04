@@ -1,38 +1,54 @@
 package com.expleague.sensearch.donkey.builders;
 
-import com.expleague.sensearch.donkey.randomaccess.ProtoTermIndex;
 import com.expleague.sensearch.donkey.utils.SerializedTextHelperFactory;
 import com.expleague.sensearch.donkey.utils.SerializedTextHelperFactory.SerializedTextHelper;
+import com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta;
 import com.expleague.sensearch.protobuf.index.IndexUnits.Page;
+import com.expleague.sensearch.protobuf.index.IndexUnits.TermStatistics;
 import com.google.common.annotations.VisibleForTesting;
 import gnu.trove.map.TIntLongMap;
 import gnu.trove.map.TLongObjectMap;
 import gnu.trove.map.hash.TIntLongHashMap;
 import gnu.trove.map.hash.TLongObjectHashMap;
+import java.util.ArrayList;
+import java.util.List;
 
 // fixme: used this name to avoid conflict with the existing builder
 // rename when old one will be deleted
-public class StatisticsBuilder2 {
-  private final TLongObjectMap<StatisticsAccumulator> pageStatsAccumulators;
+public class StatisticsAccumulator {
+
+  private final TLongObjectMap<PageStatisticsAccumulator> pageStatsAccumulators;
   private final SerializedTextHelperFactory helperFactory;
 
-  public StatisticsBuilder2(ProtoTermIndex termIndex) {
+  public StatisticsAccumulator(SerializedTextHelperFactory helperFactory) {
     pageStatsAccumulators = new TLongObjectHashMap<>();
-    helperFactory = new SerializedTextHelperFactory(termIndex);
+    this.helperFactory = helperFactory;
   }
 
   public void addPage(Page page) {
     long rootId = page.getRootId();
-    pageStatsAccumulators.putIfAbsent(rootId, new StatisticsAccumulator(rootId));
+    pageStatsAccumulators.putIfAbsent(rootId, new PageStatisticsAccumulator(rootId));
     pageStatsAccumulators.get(rootId).accumulate(page);
   }
 
-  public synchronized void build() {
-    // TODO: implement!
+  public IndexMeta indexStats() {
+    IndexMeta.Builder builder = IndexMeta.newBuilder();
+
+    // TODO
+
+    return builder.build();
+  }
+
+  public List<TermStatistics> termStats() {
+    List<TermStatistics> termStatistics = new ArrayList<>();
+
+    // TODO
+
+    return termStatistics;
   }
 
   @VisibleForTesting
-  class StatisticsAccumulator {
+  class PageStatisticsAccumulator {
     // index-wise statistics
     private int titlesCount;
     private int titleTokensCount;
@@ -44,7 +60,8 @@ public class StatisticsBuilder2 {
     private final TIntLongMap wordFrequencyMap = new TIntLongHashMap();
 
     private final long accumulatorId;
-    StatisticsAccumulator(long accumulatorId) {
+
+    PageStatisticsAccumulator(long accumulatorId) {
       this.accumulatorId = accumulatorId;
     }
 

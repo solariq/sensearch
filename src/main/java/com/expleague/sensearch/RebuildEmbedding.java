@@ -1,7 +1,7 @@
 package com.expleague.sensearch;
 
-import static com.expleague.sensearch.donkey.plain.PlainIndexBuilder.EMBEDDING_ROOT;
-import static com.expleague.sensearch.donkey.plain.PlainIndexBuilder.VECS_ROOT;
+import static com.expleague.sensearch.donkey.plain.PlainIndexCreator.EMBEDDING_ROOT;
+import static com.expleague.sensearch.donkey.plain.PlainIndexCreator.VECS_ROOT;
 
 import com.expleague.commons.seq.CharSeq;
 import com.expleague.ml.embedding.Embedding;

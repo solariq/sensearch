@@ -2,14 +2,14 @@ package com.expleague.sensearch.donkey.plain;
 
 import com.expleague.sensearch.Config;
 import com.expleague.sensearch.core.lemmer.MultiLangLemmer;
-import com.expleague.sensearch.donkey.IndexBuilder;
+import com.expleague.sensearch.donkey.IndexCreator;
 import com.expleague.sensearch.experiments.wiki.CrawlerWiki;
 import com.expleague.sensearch.utils.SensearchTestCase;
 import com.expleague.sensearch.utils.TestConfigImpl;
 import org.junit.Before;
 import org.junit.Test;
 
-public class PlainIndexBuilderTest extends SensearchTestCase {
+public class PlainIndexCreatorTest extends SensearchTestCase {
 
   private static final String INDEX_ROOT_NAME = "index";
 
@@ -23,12 +23,17 @@ public class PlainIndexBuilderTest extends SensearchTestCase {
 
   @Test
   public void completeBuildTest() throws Exception {
-    IndexBuilder indexBuilder =
-        new PlainIndexBuilder(
+    IndexCreator indexCreator =
+        new PlainIndexCreator(
             new CrawlerWiki(config.getPathToZIP()),
             config.getIndexRoot(),
             config.getEmbeddingVectors(),
                 MultiLangLemmer.getInstance());
-    indexBuilder.buildIndexAndEmbedding();
+    indexCreator.createWordEmbedding();
+    indexCreator.createPagesAndTerms();
+    indexCreator.createLinks();
+    indexCreator.createStats();
+    indexCreator.createEmbedding();
+    indexCreator.createSuggest();
   }
 }

@@ -11,7 +11,7 @@ import com.expleague.sensearch.core.Term;
 import com.expleague.sensearch.core.Term.TermAndDistance;
 import com.expleague.sensearch.core.Tokenizer;
 import com.expleague.sensearch.core.impl.TokenizerImpl;
-import com.expleague.sensearch.donkey.plain.PlainIndexBuilder;
+import com.expleague.sensearch.donkey.plain.PlainIndexCreator;
 import com.expleague.sensearch.features.Features;
 import com.expleague.sensearch.features.FeaturesForRequiredDocument;
 import com.expleague.sensearch.features.FeaturesImpl;
@@ -133,30 +133,30 @@ public class PlainIndex implements Index {
     LOG.info("Loading PlainIndex...");
     long startTime = System.nanoTime();
 
-    Path embeddingPath = indexRoot.resolve(PlainIndexBuilder.EMBEDDING_ROOT);
+    Path embeddingPath = indexRoot.resolve(PlainIndexCreator.EMBEDDING_ROOT);
     lshSynonymsMetric =
-        new LSHSynonymsMetric(embeddingPath.resolve(PlainIndexBuilder.LSH_METRIC_ROOT));
+        new LSHSynonymsMetric(embeddingPath.resolve(PlainIndexCreator.LSH_METRIC_ROOT));
 
     termStatisticsBase =
         JniDBFactory.factory.open(
-            indexRoot.resolve(PlainIndexBuilder.TERM_STATISTICS_ROOT).toFile(), DEFAULT_DB_OPTIONS);
+            indexRoot.resolve(PlainIndexCreator.TERM_STATISTICS_ROOT).toFile(), DEFAULT_DB_OPTIONS);
 
     pageBase =
         JniDBFactory.factory.open(
-            indexRoot.resolve(PlainIndexBuilder.PAGE_ROOT).toFile(), DEFAULT_DB_OPTIONS);
+            indexRoot.resolve(PlainIndexCreator.PAGE_ROOT).toFile(), DEFAULT_DB_OPTIONS);
 
     //TODO: add lemmer
-    termBase = new TermBase(Paths.get(PlainIndexBuilder.TERM_ROOT), this);
+    termBase = new TermBase(Paths.get(PlainIndexCreator.TERM_ROOT), this);
 
     uriMappingDb =
         JniDBFactory.factory.open(
-            indexRoot.resolve(PlainIndexBuilder.URI_MAPPING_ROOT).toFile(), DEFAULT_DB_OPTIONS);
+            indexRoot.resolve(PlainIndexCreator.URI_MAPPING_ROOT).toFile(), DEFAULT_DB_OPTIONS);
 
     tokenizer = new TokenizerImpl();
 
     IndexUnits.IndexMeta indexMeta =
         IndexUnits.IndexMeta.parseFrom(
-            Files.newInputStream(indexRoot.resolve(PlainIndexBuilder.INDEX_META_FILE)));
+            Files.newInputStream(indexRoot.resolve(PlainIndexCreator.INDEX_META_FILE)));
 
     if (indexMeta.getVersion() != VERSION) {
       String errorMessage =
@@ -179,11 +179,11 @@ public class PlainIndex implements Index {
     rareTermsInvIdx = new HashMap<>();
 
     // TODO: uncomment it
-//    if (Files.exists(indexRoot.resolve(PlainIndexBuilder.RARE_INV_IDX_FILE))) {
+//    if (Files.exists(indexRoot.resolve(PlainIndexCreator.RARE_INV_IDX_FILE))) {
 //      ObjectMapper mapper = new ObjectMapper();
 //      TLongObjectMap<TLongList> invIdxIds =
 //          mapper.readValue(
-//              indexRoot.resolve(PlainIndexBuilder.RARE_INV_IDX_FILE).toFile(),
+//              indexRoot.resolve(PlainIndexCreator.RARE_INV_IDX_FILE).toFile(),
 //              new TypeReference<TLongObjectMap<TLongList>>() {});
 //
 //      invIdxIds.forEachEntry(
@@ -540,10 +540,10 @@ public class PlainIndex implements Index {
       try {
         suggestUnigramDb =
             JniDBFactory.factory.open(
-                indexRoot.resolve(PlainIndexBuilder.SUGGEST_UNIGRAM_ROOT).toFile(), DEFAULT_DB_OPTIONS);
+                indexRoot.resolve(PlainIndexCreator.SUGGEST_UNIGRAM_ROOT).toFile(), DEFAULT_DB_OPTIONS);
         suggestMultigramDb =
             JniDBFactory.factory.open(
-                indexRoot.resolve(PlainIndexBuilder.SUGGEST_MULTIGRAMS_ROOT).toFile(),
+                indexRoot.resolve(PlainIndexCreator.SUGGEST_MULTIGRAMS_ROOT).toFile(),
                 DEFAULT_DB_OPTIONS);
       } catch (IOException e) {
         e.printStackTrace();

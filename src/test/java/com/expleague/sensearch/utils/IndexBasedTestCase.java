@@ -3,12 +3,16 @@ package com.expleague.sensearch.utils;
 import com.expleague.commons.text.lemmer.MyStem;
 import com.expleague.sensearch.ConfigImpl;
 import com.expleague.sensearch.core.lemmer.MultiLangLemmer;
-import com.expleague.sensearch.donkey.plain.PlainIndexBuilder;
+import com.expleague.sensearch.donkey.IndexCreator;
+import com.expleague.sensearch.donkey.plain.PlainIndexCreator;
 import com.expleague.sensearch.filter.FilterImpl;
 import com.expleague.sensearch.index.Embedding;
 import com.expleague.sensearch.index.Index;
 import com.expleague.sensearch.index.plain.EmbeddingImpl;
 import com.expleague.sensearch.index.plain.PlainIndex;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import org.apache.commons.io.FileUtils;
 import org.fusesource.leveldbjni.JniDBFactory;
 import org.iq80.leveldb.Options;
@@ -16,10 +20,6 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
 
 public abstract class IndexBasedTestCase extends CrawlerBasedTestCase {
 
@@ -51,14 +51,14 @@ public abstract class IndexBasedTestCase extends CrawlerBasedTestCase {
       buildIndex();
     }
 
-    Path embeddingPath = indexConfig.getIndexRoot().resolve(PlainIndexBuilder.EMBEDDING_ROOT);
+    Path embeddingPath = indexConfig.getIndexRoot().resolve(PlainIndexCreator.EMBEDDING_ROOT);
     embedding =
         new EmbeddingImpl(
             indexConfig.getLshNearestFlag(),
             JniDBFactory.factory.open(
-                embeddingPath.resolve(PlainIndexBuilder.VECS_ROOT).toFile(), DB_OPTIONS)//,
+                embeddingPath.resolve(PlainIndexCreator.VECS_ROOT).toFile(), DB_OPTIONS)//,
             /*JniDBFactory.factory.open(
-                embeddingPath.resolve(PlainIndexBuilder.LSH_ROOT).toFile(), DB_OPTIONS),*/
+                embeddingPath.resolve(PlainIndexCreator.LSH_ROOT).toFile(), DB_OPTIONS),*/
             /*embeddingPath*/);
     miniIndex =
         new PlainIndex(
@@ -75,9 +75,15 @@ public abstract class IndexBasedTestCase extends CrawlerBasedTestCase {
   private static void buildIndex() throws IOException {
     LOG.info("Rebuilding index...");
     MyStem myStem = myStemForTest("IndexBasedTestCase", "initIndex");
-    new PlainIndexBuilder(crawler(), indexConfig.getIndexRoot(), indexConfig.getEmbeddingVectors(),
-            MultiLangLemmer.getInstance())
-        .buildIndexAndEmbedding();
+    IndexCreator indexCreator = new PlainIndexCreator(crawler(), indexConfig.getIndexRoot(),
+        indexConfig.getEmbeddingVectors(),
+        MultiLangLemmer.getInstance());
+    indexCreator.createWordEmbedding();
+    indexCreator.createPagesAndTerms();
+    indexCreator.createLinks();
+    indexCreator.createStats();
+    indexCreator.createEmbedding();
+    indexCreator.createSuggest();
   }
 
   protected static TestConfigImpl indexConfig() {

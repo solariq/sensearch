@@ -2,7 +2,7 @@
 //
 //import com.expleague.commons.text.lemmer.MyStem;
 //import com.expleague.sensearch.Page;
-//import com.expleague.sensearch.core.lemmer.Lemmer;
+//import com.expleague.sensearch.core.lemmer.MultiLangLemmer;
 //import com.expleague.sensearch.utils.IndexBasedTestCase;
 //import java.net.URI;
 //import java.util.List;
@@ -15,7 +15,7 @@
 //
 //  private SnippetsCreator sc = new SnippetsCreator(index());
 //
-//  private Lemmer lemmer;
+//  private MultiLangLemmer lemmer;
 //  private Page d1, d2, d3;
 //
 //  @Rule public TestName testName = new TestName();
@@ -82,7 +82,7 @@
 //  @Before
 //  public void prepare() {
 //    MyStem myStem = myStemForTest(RelevanceTest.class.getName(), testName.getMethodName());
-//    lemmer = new Lemmer(myStem);
+//    lemmer = new MultiLangLemmer(myStem);
 //
 //    d1 = new TestPage("Жил-был на свете добрый волшебник. "
 //        + "Синяя машины быстрее красной. "

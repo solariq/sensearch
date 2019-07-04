@@ -171,7 +171,7 @@ class PlainPageBuilder implements AutoCloseable {
       builtPages.add(Objects.requireNonNull(parentPagesStackLocal.pollLast()).build());
     }
 
-    if (builtPages.size() >= PlainIndexBuilder.BATCH_SIZE) {
+    if (builtPages.size() >= PlainIndexCreator.BATCH_SIZE) {
       writeBatch();
     }
 
