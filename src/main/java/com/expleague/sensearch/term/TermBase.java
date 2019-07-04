@@ -14,10 +14,7 @@ import gnu.trove.map.hash.TIntObjectHashMap;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
-import java.util.stream.Stream;
 import org.apache.log4j.Logger;
 import org.fusesource.leveldbjni.JniDBFactory;
 import org.iq80.leveldb.CompressionType;
@@ -106,23 +103,6 @@ public class TermBase implements AutoCloseable {
 
   public Term term(CharSequence word) {
     return wordToTerms.get(CharSeq.intern(word));
-  }
-
-  public Stream<IndexUnits.Term> stream() {
-    List<IndexUnits.Term> terms = new LinkedList<>();
-    DBIterator termIterator = termBase.iterator();
-    termIterator.seekToFirst();
-    termIterator.forEachRemaining(
-        item -> {
-          try {
-            IndexUnits.Term protoTerm = IndexUnits.Term.parseFrom(item.getValue());
-            terms.add(protoTerm);
-          } catch (InvalidProtocolBufferException e) {
-            LOG.fatal("Invalid protobuf for term with id " + Longs.fromByteArray(item.getKey()));
-            throw new RuntimeException(e);
-          }
-        });
-    return terms.stream();
   }
 
   @Override
