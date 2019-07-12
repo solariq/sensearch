@@ -15,9 +15,12 @@ import com.expleague.sensearch.core.lemmer.Lemmer;
 import com.expleague.sensearch.donkey.IndexCreator;
 import com.expleague.sensearch.donkey.builders.StatisticsAccumulator;
 import com.expleague.sensearch.donkey.crawler.Crawler;
+import com.expleague.sensearch.donkey.embedding.EmbeddedPage;
+import com.expleague.sensearch.donkey.embedding.PageEmbedder;
 import com.expleague.sensearch.donkey.plain.IndexMetaBuilder.TermSegment;
 import com.expleague.sensearch.donkey.randomaccess.ProtoPageIndex;
 import com.expleague.sensearch.donkey.randomaccess.ProtoTermIndex;
+import com.expleague.sensearch.donkey.randomaccess.ProtoTermStatsIndex;
 import com.expleague.sensearch.donkey.randomaccess.RandomAccess;
 import com.expleague.sensearch.donkey.readers.LevelDbLinkReader;
 import com.expleague.sensearch.donkey.readers.Reader;
@@ -28,6 +31,7 @@ import com.expleague.sensearch.donkey.term.TokenParser;
 import com.expleague.sensearch.donkey.utils.BrandNewIdGenerator;
 import com.expleague.sensearch.donkey.utils.ExternalSorter;
 import com.expleague.sensearch.donkey.utils.SerializedTextHelperFactory;
+import com.expleague.sensearch.donkey.writers.EmbeddingWriter;
 import com.expleague.sensearch.donkey.writers.LevelDbLinkWriter;
 import com.expleague.sensearch.donkey.writers.PageWriter;
 import com.expleague.sensearch.donkey.writers.StatisticsWriter;
@@ -314,7 +318,24 @@ public class PlainIndexCreator implements IndexCreator {
       throw new RuntimeException(e);
     }
 
-    // TODO
+    try (
+        ProtoTermIndex termIndex = new ProtoTermIndex(indexRoot.resolve(TERM_ROOT));
+        ProtoTermStatsIndex statsIndex = new ProtoTermStatsIndex(indexRoot.resolve(TERM_STATISTICS_ROOT));
+        ProtoPageIndex pageIndex = new ProtoPageIndex(indexRoot.resolve(PAGE_ROOT));
+        DB vecDb = JniDBFactory.factory.open(indexRoot.resolve(EMBEDDING_ROOT).toFile(), EMBEDDING_DB_OPTIONS);
+        EmbeddingWriter embeddingWriter = new EmbeddingWriter(vecDb)
+    ) {
+      PageEmbedder pageEmbedder = new PageEmbedder(
+          statsIndex, termIndex, new SerializedTextHelperFactory(termIndex), wordEmbedding);
+
+      pageIndex.forEach(page -> {
+        EmbeddedPage embedded = pageEmbedder.embed(page);
+        embeddingWriter.write(embedded);
+      });
+
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
   }
 
   private void buildIndexInternal(Embedding<CharSeq> jmllEmbedding) throws IOException {
