@@ -60,7 +60,7 @@ public class SearchServer {
       indexCreator.createPagesAndTerms();
       indexCreator.createLinks();
       indexCreator.createStats();
-      indexCreator.createEmbedding();
+      indexCreator.createPageEmbedding();
       indexCreator.createSuggest();
     }
 

@@ -25,9 +25,9 @@ public class TokenParser implements AutoCloseable {
   private static final char LEMMA_SUFFIX = '$';
   private static int PUNCT_ID = 0;
 
-  private int id = PUNCTUATION_SIZE;
+  private int curTermId = PUNCTUATION_SIZE;
 
-  private Dictionary dictionary;
+  private final Dictionary dictionary;
 
   private final Tokenizer tokenizer;
   private final Lemmer lemmer;
@@ -133,10 +133,10 @@ public class TokenParser implements AutoCloseable {
         id = PUNCT_ID;
         PUNCT_ID++;
       } else {
-        id = this.id;
-        this.id++;
+        id = this.curTermId;
+        this.curTermId++;
       }
-      if (this.id >= (1 << 29)) {
+      if (this.curTermId >= (1 << 29)) {
         throw new RuntimeException("Token limit::" + token.toString());
       }
       if (PUNCT_ID == PUNCTUATION_SIZE) {
@@ -155,12 +155,11 @@ public class TokenParser implements AutoCloseable {
       }
     }
 
-    Token res = new Token(lowToken, id);
-    newTerm(res);
-    return res;
+    return createToken(lowToken, id);
   }
 
-  private void newTerm(Token token) {
+  private Token createToken(CharSeq lowText, int id) {
+    Token token = new Token(lowText, id);
     CharSeq word = CharSeq.intern(token.text());
     WordInfo parse = lemmer.parse(word);
     LemmaInfo lemma = parse.lemma();
@@ -168,7 +167,7 @@ public class TokenParser implements AutoCloseable {
     int wordId = token.id();
     if (lemma == null) {
       dictionary.addTerm(ParsedTerm.create(wordId, word, -1, null, null));
-      return;
+      return token;
     }
 
     int lemmaId;
@@ -181,6 +180,8 @@ public class TokenParser implements AutoCloseable {
     }
     dictionary.addTerm(ParsedTerm.create(wordId, word, lemmaId, lemma.lemma(),
         PartOfSpeech.valueOf(lemma.pos().name())));
+
+    return token;
   }
 
   @Override

@@ -82,7 +82,7 @@ public abstract class IndexBasedTestCase extends CrawlerBasedTestCase {
     indexCreator.createPagesAndTerms();
     indexCreator.createLinks();
     indexCreator.createStats();
-    indexCreator.createEmbedding();
+    indexCreator.createPageEmbedding();
     indexCreator.createSuggest();
   }
 

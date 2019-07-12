@@ -10,7 +10,7 @@ public interface IndexCreator {
 
   void createStats();
 
-  void createEmbedding();
+  void createPageEmbedding();
 
   void createSuggest();
 }

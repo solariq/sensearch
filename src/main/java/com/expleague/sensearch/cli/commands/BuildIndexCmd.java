@@ -108,7 +108,7 @@ public class BuildIndexCmd implements Command {
     indexCreator.createPagesAndTerms();
     indexCreator.createLinks();
     indexCreator.createStats();
-    indexCreator.createEmbedding();
+    indexCreator.createPageEmbedding();
     indexCreator.createSuggest();
   }
 

@@ -200,6 +200,8 @@ public class PlainIndexCreator implements IndexCreator {
 
   @Override
   public void createPagesAndTerms() {
+    long startTime;
+    LOG.info("Creating page and term databases...");
     try {
       Files.createDirectories(indexRoot.resolve(TERM_ROOT));
       Files.createDirectories(indexRoot.resolve(PAGE_ROOT));
@@ -213,6 +215,7 @@ public class PlainIndexCreator implements IndexCreator {
               new LevelDbLinkWriter(indexRoot.resolve(RAW_LINK_ROOT))
           )
       ) {
+        startTime = System.nanoTime();
         crawler.makeStream().forEach(pageWriter::write);
       }
     } catch (IOException e) {
@@ -221,6 +224,7 @@ public class PlainIndexCreator implements IndexCreator {
       removeDbFiles(indexRoot.resolve(RAW_LINK_ROOT));
       throw new RuntimeException(e);
     }
+    LOG.info(String.format("Page and term databases created in %.2f seconds", (System.nanoTime() - startTime) / 1e9));
   }
 
   @Override
@@ -275,6 +279,9 @@ public class PlainIndexCreator implements IndexCreator {
 
   @Override
   public void createStats() {
+    LOG.info("Creating stats...");
+    final long startTime = System.nanoTime();
+
     Path statsPath = indexRoot.resolve(TERM_STATISTICS_ROOT);
     try {
       Files.createDirectories(statsPath);
@@ -296,6 +303,8 @@ public class PlainIndexCreator implements IndexCreator {
       removeDbFiles(statsPath);
       throw new RuntimeException(e);
     }
+
+    LOG.info(String.format("Statistics created in %.2f seconds", (System.nanoTime() - startTime) / 1e9));
   }
 
   private void removeDbFiles(Path statsPath) {
@@ -307,17 +316,24 @@ public class PlainIndexCreator implements IndexCreator {
   }
 
   @Override
-  public void createEmbedding() {
+  public void createPageEmbedding() {
+    LOG.info("Creating page embedding...");
+
     EmbeddingImpl<CharSeq> wordEmbedding;
     try {
+      final long startTime = System.nanoTime();
+
       wordEmbedding = EmbeddingImpl.read(
           Files.newBufferedReader(embeddingVectorsPath, Charset.forName("UTF-8")),
           CharSeq.class);
+
+      LOG.info(String.format("Word embedding read in %.2f seconds", (System.nanoTime() - startTime) / 1e9));
     } catch (IOException e) {
       LOG.error("Cannot read embedding at path " + embeddingVectorsPath.toString(), e);
       throw new RuntimeException(e);
     }
 
+    final long startTime = System.nanoTime();
     try (
         ProtoTermIndex termIndex = new ProtoTermIndex(indexRoot.resolve(TERM_ROOT));
         ProtoTermStatsIndex statsIndex = new ProtoTermStatsIndex(indexRoot.resolve(TERM_STATISTICS_ROOT));
@@ -336,6 +352,7 @@ public class PlainIndexCreator implements IndexCreator {
     } catch (IOException e) {
       e.printStackTrace();
     }
+    LOG.info(String.format("Page embedding created in %.2f seconds", (System.nanoTime() - startTime) / 1e9));
   }
 
   private void buildIndexInternal(Embedding<CharSeq> jmllEmbedding) throws IOException {

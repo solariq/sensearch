@@ -33,7 +33,7 @@ public class PlainIndexCreatorTest extends SensearchTestCase {
     indexCreator.createPagesAndTerms();
     indexCreator.createLinks();
     indexCreator.createStats();
-    indexCreator.createEmbedding();
+    indexCreator.createPageEmbedding();
     indexCreator.createSuggest();
   }
 }
