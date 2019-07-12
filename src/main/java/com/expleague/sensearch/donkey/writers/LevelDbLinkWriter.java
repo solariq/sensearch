@@ -31,6 +31,7 @@ public class LevelDbLinkWriter implements Writer<Page.Link> {
   private final DB linksDb;
   private final BrandNewIdGenerator idGenerator = BrandNewIdGenerator.getInstance();
   private WriteBatch writeBatch;
+  private int curBatchSize;
 
   public LevelDbLinkWriter(Path outputPath) {
     this.root = outputPath;
@@ -44,18 +45,27 @@ public class LevelDbLinkWriter implements Writer<Page.Link> {
 
   public void write(Page.Link link) {
     writeBatch.put(link.toByteArray(), EMPTY_VALUE);
-    flush();
+    curBatchSize++;
+    if (curBatchSize >= BATCH_SIZE) {
+      try {
+        flush();
+      } catch (IOException e) {
+        throw new RuntimeException(e);
+      }
+    }
   }
 
   @Override
   public void close() throws IOException {
-    linksDb.write(writeBatch, WRITE_OPTIONS);
+    flush();
     linksDb.close();
   }
 
   @Override
-  public void flush() {
+  public void flush() throws IOException {
     linksDb.write(writeBatch, WRITE_OPTIONS);
+    curBatchSize = 0;
+    writeBatch.close();
     writeBatch = linksDb.createWriteBatch();
   }
 }

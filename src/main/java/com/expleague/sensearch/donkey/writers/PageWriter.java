@@ -44,6 +44,7 @@ public class PageWriter implements Writer<CrawlerDocument> {
   private final Path root;
 
   private WriteBatch writeBatch;
+  private int curBatchSize;
 
   public PageWriter(Path outputPath, TokenParser tokenParser, Writer<Page.Link> linkWriter) {
     this.root = outputPath;
@@ -116,10 +117,18 @@ public class PageWriter implements Writer<CrawlerDocument> {
       builtPages.add(Objects.requireNonNull(parentPagesStack.pop()).build());
     }
     builtPages.forEach(
-        p -> writeBatch.put(Longs.toByteArray(p.getPageId()), p.toByteArray())
+        p -> {
+          writeBatch.put(Longs.toByteArray(p.getPageId()), p.toByteArray());
+          curBatchSize++;
+        }
     );
-    pageDb.write(writeBatch, WRITE_OPTIONS);
-    writeBatch = pageDb.createWriteBatch();
+    if (curBatchSize >= BATCH_SIZE) {
+      try {
+        flush();
+      } catch (IOException e) {
+        throw new RuntimeException(e);
+      }
+    }
   }
 
   private Page.Builder processSection(Section section, long currentPageId, long sectionId, List<String> categories) {
@@ -178,7 +187,10 @@ public class PageWriter implements Writer<CrawlerDocument> {
   @Override
   public void flush() throws IOException {
     pageDb.write(writeBatch, WRITE_OPTIONS);
+    curBatchSize = 0;
+    writeBatch.close();
     writeBatch = pageDb.createWriteBatch();
+
     linkWriter.flush();
   }
 

@@ -29,6 +29,7 @@ public class TermWriter implements Writer<ParsedTerm> {
   private final DB termsDb;
   private final Path root;
   private WriteBatch writeBatch;
+  private int curBatchSize;
 
   public TermWriter(Path outputPath) {
     this.root = outputPath;
@@ -59,19 +60,26 @@ public class TermWriter implements Writer<ParsedTerm> {
         PartOfSpeech.UNKNOWN);
     builder.setLemmaId(parsedTerm.lemmaId());
     writeBatch.put(Longs.toByteArray(parsedTerm.wordId()), builder.build().toByteArray());
-    termsDb.write(writeBatch, WRITE_OPTIONS);
-    writeBatch = termsDb.createWriteBatch();
+    if (curBatchSize >= BATCH_SIZE) {
+      try {
+        flush();
+      } catch (IOException e) {
+        throw new RuntimeException(e);
+      }
+    }
   }
 
   @Override
   public void close() throws IOException {
-    termsDb.write(writeBatch, WRITE_OPTIONS);
+    flush();
     termsDb.close();
   }
 
   @Override
   public void flush() throws IOException {
     termsDb.write(writeBatch, WRITE_OPTIONS);
+    writeBatch.close();
+    curBatchSize = 0;
     writeBatch = termsDb.createWriteBatch();
   }
 }
