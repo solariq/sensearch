@@ -14,7 +14,7 @@ message IndexMeta {
   optional int32 links_count = 6;
   optional double average_link_target_title_word_count = 7;
 
-  // ttiles statistics
+  // titles statistics
   optional int32 section_titles_count = 8;
   optional double average_section_title_size = 9;
 }
@@ -51,6 +51,11 @@ message Page {
   optional int64 root_id = 10;
 }
 
+message VgramFrequency {
+  repeated int32 term_sequence = 1;
+  optional int64 sequence_frequency = 2;
+}
+
 message TermStatistics {
 
   message TermFrequency {
@@ -63,6 +68,25 @@ message TermStatistics {
   optional int64 term_frequency = 4;
 
   repeated TermFrequency bigram_frequency = 5;
+}
+
+message PageStatistics {
+  optional int32 page_id = 1;
+  optional int32 titles_count = 2;
+  optional int32 title_tokens_count = 3;
+  optional int32 content_tokens_count = 4;
+  optional int32 link_tokens_count = 5;
+
+  optional int32 incoming_links_count = 6;
+  optional int32 outgoing_links_count = 7;
+
+  optional int32 unique_targets_count = 8;
+  optional int32 target_title_tokens_count = 9;
+
+  optional int32 unique_referrers_count = 10;
+
+  repeated VgramFrequency unigrams = 11;
+  repeated VgramFrequency bigrams = 12;
 }
 
 message Term {
@@ -97,7 +121,7 @@ message TermList {
 }
 
 message IntegerList {
-	repeated int32 intList = 1;
+  repeated int32 intList = 1;
 }
 
 message UriPageMapping {

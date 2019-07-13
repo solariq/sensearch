@@ -69,7 +69,7 @@ public final class IndexUnits {
      * <code>optional int32 section_titles_count = 8;</code>
      *
      * <pre>
-     * ttiles statistics
+     * titles statistics
      * </pre>
      */
     boolean hasSectionTitlesCount();
@@ -77,7 +77,7 @@ public final class IndexUnits {
      * <code>optional int32 section_titles_count = 8;</code>
      *
      * <pre>
-     * ttiles statistics
+     * titles statistics
      * </pre>
      */
     int getSectionTitlesCount();
@@ -307,7 +307,7 @@ public final class IndexUnits {
      * <code>optional int32 section_titles_count = 8;</code>
      *
      * <pre>
-     * ttiles statistics
+     * titles statistics
      * </pre>
      */
     public boolean hasSectionTitlesCount() {
@@ -317,7 +317,7 @@ public final class IndexUnits {
      * <code>optional int32 section_titles_count = 8;</code>
      *
      * <pre>
-     * ttiles statistics
+     * titles statistics
      * </pre>
      */
     public int getSectionTitlesCount() {
@@ -851,7 +851,7 @@ public final class IndexUnits {
        * <code>optional int32 section_titles_count = 8;</code>
        *
        * <pre>
-       * ttiles statistics
+       * titles statistics
        * </pre>
        */
       public boolean hasSectionTitlesCount() {
@@ -861,7 +861,7 @@ public final class IndexUnits {
        * <code>optional int32 section_titles_count = 8;</code>
        *
        * <pre>
-       * ttiles statistics
+       * titles statistics
        * </pre>
        */
       public int getSectionTitlesCount() {
@@ -871,7 +871,7 @@ public final class IndexUnits {
        * <code>optional int32 section_titles_count = 8;</code>
        *
        * <pre>
-       * ttiles statistics
+       * titles statistics
        * </pre>
        */
       public Builder setSectionTitlesCount(int value) {
@@ -884,7 +884,7 @@ public final class IndexUnits {
        * <code>optional int32 section_titles_count = 8;</code>
        *
        * <pre>
-       * ttiles statistics
+       * titles statistics
        * </pre>
        */
       public Builder clearSectionTitlesCount() {
@@ -4548,6 +4548,558 @@ public final class IndexUnits {
     // @@protoc_insertion_point(class_scope:index.Page)
   }
 
+  public interface VgramFrequencyOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:index.VgramFrequency)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <code>repeated int32 term_sequence = 1;</code>
+     */
+    java.util.List<java.lang.Integer> getTermSequenceList();
+    /**
+     * <code>repeated int32 term_sequence = 1;</code>
+     */
+    int getTermSequenceCount();
+    /**
+     * <code>repeated int32 term_sequence = 1;</code>
+     */
+    int getTermSequence(int index);
+
+    /**
+     * <code>optional int64 sequence_frequency = 2;</code>
+     */
+    boolean hasSequenceFrequency();
+    /**
+     * <code>optional int64 sequence_frequency = 2;</code>
+     */
+    long getSequenceFrequency();
+  }
+  /**
+   * Protobuf type {@code index.VgramFrequency}
+   */
+  public static final class VgramFrequency extends
+      com.google.protobuf.GeneratedMessage implements
+      // @@protoc_insertion_point(message_implements:index.VgramFrequency)
+      VgramFrequencyOrBuilder {
+    // Use VgramFrequency.newBuilder() to construct.
+    private VgramFrequency(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
+      super(builder);
+      this.unknownFields = builder.getUnknownFields();
+    }
+    private VgramFrequency(boolean noInit) { this.unknownFields = com.google.protobuf.UnknownFieldSet.getDefaultInstance(); }
+
+    private static final VgramFrequency defaultInstance;
+    public static VgramFrequency getDefaultInstance() {
+      return defaultInstance;
+    }
+
+    public VgramFrequency getDefaultInstanceForType() {
+      return defaultInstance;
+    }
+
+    private final com.google.protobuf.UnknownFieldSet unknownFields;
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+        getUnknownFields() {
+      return this.unknownFields;
+    }
+    private VgramFrequency(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      initFields();
+      int mutable_bitField0_ = 0;
+      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder();
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            default: {
+              if (!parseUnknownField(input, unknownFields,
+                                     extensionRegistry, tag)) {
+                done = true;
+              }
+              break;
+            }
+            case 8: {
+              if (!((mutable_bitField0_ & 0x00000001) == 0x00000001)) {
+                termSequence_ = new java.util.ArrayList<java.lang.Integer>();
+                mutable_bitField0_ |= 0x00000001;
+              }
+              termSequence_.add(input.readInt32());
+              break;
+            }
+            case 10: {
+              int length = input.readRawVarint32();
+              int limit = input.pushLimit(length);
+              if (!((mutable_bitField0_ & 0x00000001) == 0x00000001) && input.getBytesUntilLimit() > 0) {
+                termSequence_ = new java.util.ArrayList<java.lang.Integer>();
+                mutable_bitField0_ |= 0x00000001;
+              }
+              while (input.getBytesUntilLimit() > 0) {
+                termSequence_.add(input.readInt32());
+              }
+              input.popLimit(limit);
+              break;
+            }
+            case 16: {
+              bitField0_ |= 0x00000001;
+              sequenceFrequency_ = input.readInt64();
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e.getMessage()).setUnfinishedMessage(this);
+      } finally {
+        if (((mutable_bitField0_ & 0x00000001) == 0x00000001)) {
+          termSequence_ = java.util.Collections.unmodifiableList(termSequence_);
+        }
+        this.unknownFields = unknownFields.build();
+        makeExtensionsImmutable();
+      }
+    }
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return com.expleague.sensearch.protobuf.index.IndexUnits.internal_static_index_VgramFrequency_descriptor;
+    }
+
+    protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return com.expleague.sensearch.protobuf.index.IndexUnits.internal_static_index_VgramFrequency_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              com.expleague.sensearch.protobuf.index.IndexUnits.VgramFrequency.class, com.expleague.sensearch.protobuf.index.IndexUnits.VgramFrequency.Builder.class);
+    }
+
+    public static com.google.protobuf.Parser<VgramFrequency> PARSER =
+        new com.google.protobuf.AbstractParser<VgramFrequency>() {
+      public VgramFrequency parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return new VgramFrequency(input, extensionRegistry);
+      }
+    };
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<VgramFrequency> getParserForType() {
+      return PARSER;
+    }
+
+    private int bitField0_;
+    public static final int TERM_SEQUENCE_FIELD_NUMBER = 1;
+    private java.util.List<java.lang.Integer> termSequence_;
+    /**
+     * <code>repeated int32 term_sequence = 1;</code>
+     */
+    public java.util.List<java.lang.Integer>
+        getTermSequenceList() {
+      return termSequence_;
+    }
+    /**
+     * <code>repeated int32 term_sequence = 1;</code>
+     */
+    public int getTermSequenceCount() {
+      return termSequence_.size();
+    }
+    /**
+     * <code>repeated int32 term_sequence = 1;</code>
+     */
+    public int getTermSequence(int index) {
+      return termSequence_.get(index);
+    }
+
+    public static final int SEQUENCE_FREQUENCY_FIELD_NUMBER = 2;
+    private long sequenceFrequency_;
+    /**
+     * <code>optional int64 sequence_frequency = 2;</code>
+     */
+    public boolean hasSequenceFrequency() {
+      return ((bitField0_ & 0x00000001) == 0x00000001);
+    }
+    /**
+     * <code>optional int64 sequence_frequency = 2;</code>
+     */
+    public long getSequenceFrequency() {
+      return sequenceFrequency_;
+    }
+
+    private void initFields() {
+      termSequence_ = java.util.Collections.emptyList();
+      sequenceFrequency_ = 0L;
+    }
+    private byte memoizedIsInitialized = -1;
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      getSerializedSize();
+      for (int i = 0; i < termSequence_.size(); i++) {
+        output.writeInt32(1, termSequence_.get(i));
+      }
+      if (((bitField0_ & 0x00000001) == 0x00000001)) {
+        output.writeInt64(2, sequenceFrequency_);
+      }
+      getUnknownFields().writeTo(output);
+    }
+
+    private int memoizedSerializedSize = -1;
+    public int getSerializedSize() {
+      int size = memoizedSerializedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      {
+        int dataSize = 0;
+        for (int i = 0; i < termSequence_.size(); i++) {
+          dataSize += com.google.protobuf.CodedOutputStream
+            .computeInt32SizeNoTag(termSequence_.get(i));
+        }
+        size += dataSize;
+        size += 1 * getTermSequenceList().size();
+      }
+      if (((bitField0_ & 0x00000001) == 0x00000001)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt64Size(2, sequenceFrequency_);
+      }
+      size += getUnknownFields().getSerializedSize();
+      memoizedSerializedSize = size;
+      return size;
+    }
+
+    private static final long serialVersionUID = 0L;
+    @java.lang.Override
+    protected java.lang.Object writeReplace()
+        throws java.io.ObjectStreamException {
+      return super.writeReplace();
+    }
+
+    public static com.expleague.sensearch.protobuf.index.IndexUnits.VgramFrequency parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.expleague.sensearch.protobuf.index.IndexUnits.VgramFrequency parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.expleague.sensearch.protobuf.index.IndexUnits.VgramFrequency parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.expleague.sensearch.protobuf.index.IndexUnits.VgramFrequency parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.expleague.sensearch.protobuf.index.IndexUnits.VgramFrequency parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return PARSER.parseFrom(input);
+    }
+    public static com.expleague.sensearch.protobuf.index.IndexUnits.VgramFrequency parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return PARSER.parseFrom(input, extensionRegistry);
+    }
+    public static com.expleague.sensearch.protobuf.index.IndexUnits.VgramFrequency parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return PARSER.parseDelimitedFrom(input);
+    }
+    public static com.expleague.sensearch.protobuf.index.IndexUnits.VgramFrequency parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return PARSER.parseDelimitedFrom(input, extensionRegistry);
+    }
+    public static com.expleague.sensearch.protobuf.index.IndexUnits.VgramFrequency parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return PARSER.parseFrom(input);
+    }
+    public static com.expleague.sensearch.protobuf.index.IndexUnits.VgramFrequency parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return PARSER.parseFrom(input, extensionRegistry);
+    }
+
+    public static Builder newBuilder() { return Builder.create(); }
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder(com.expleague.sensearch.protobuf.index.IndexUnits.VgramFrequency prototype) {
+      return newBuilder().mergeFrom(prototype);
+    }
+    public Builder toBuilder() { return newBuilder(this); }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * Protobuf type {@code index.VgramFrequency}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessage.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:index.VgramFrequency)
+        com.expleague.sensearch.protobuf.index.IndexUnits.VgramFrequencyOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return com.expleague.sensearch.protobuf.index.IndexUnits.internal_static_index_VgramFrequency_descriptor;
+      }
+
+      protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return com.expleague.sensearch.protobuf.index.IndexUnits.internal_static_index_VgramFrequency_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                com.expleague.sensearch.protobuf.index.IndexUnits.VgramFrequency.class, com.expleague.sensearch.protobuf.index.IndexUnits.VgramFrequency.Builder.class);
+      }
+
+      // Construct using com.expleague.sensearch.protobuf.index.IndexUnits.VgramFrequency.newBuilder()
+      private Builder() {
+        maybeForceBuilderInitialization();
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders) {
+        }
+      }
+      private static Builder create() {
+        return new Builder();
+      }
+
+      public Builder clear() {
+        super.clear();
+        termSequence_ = java.util.Collections.emptyList();
+        bitField0_ = (bitField0_ & ~0x00000001);
+        sequenceFrequency_ = 0L;
+        bitField0_ = (bitField0_ & ~0x00000002);
+        return this;
+      }
+
+      public Builder clone() {
+        return create().mergeFrom(buildPartial());
+      }
+
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return com.expleague.sensearch.protobuf.index.IndexUnits.internal_static_index_VgramFrequency_descriptor;
+      }
+
+      public com.expleague.sensearch.protobuf.index.IndexUnits.VgramFrequency getDefaultInstanceForType() {
+        return com.expleague.sensearch.protobuf.index.IndexUnits.VgramFrequency.getDefaultInstance();
+      }
+
+      public com.expleague.sensearch.protobuf.index.IndexUnits.VgramFrequency build() {
+        com.expleague.sensearch.protobuf.index.IndexUnits.VgramFrequency result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      public com.expleague.sensearch.protobuf.index.IndexUnits.VgramFrequency buildPartial() {
+        com.expleague.sensearch.protobuf.index.IndexUnits.VgramFrequency result = new com.expleague.sensearch.protobuf.index.IndexUnits.VgramFrequency(this);
+        int from_bitField0_ = bitField0_;
+        int to_bitField0_ = 0;
+        if (((bitField0_ & 0x00000001) == 0x00000001)) {
+          termSequence_ = java.util.Collections.unmodifiableList(termSequence_);
+          bitField0_ = (bitField0_ & ~0x00000001);
+        }
+        result.termSequence_ = termSequence_;
+        if (((from_bitField0_ & 0x00000002) == 0x00000002)) {
+          to_bitField0_ |= 0x00000001;
+        }
+        result.sequenceFrequency_ = sequenceFrequency_;
+        result.bitField0_ = to_bitField0_;
+        onBuilt();
+        return result;
+      }
+
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof com.expleague.sensearch.protobuf.index.IndexUnits.VgramFrequency) {
+          return mergeFrom((com.expleague.sensearch.protobuf.index.IndexUnits.VgramFrequency)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(com.expleague.sensearch.protobuf.index.IndexUnits.VgramFrequency other) {
+        if (other == com.expleague.sensearch.protobuf.index.IndexUnits.VgramFrequency.getDefaultInstance()) return this;
+        if (!other.termSequence_.isEmpty()) {
+          if (termSequence_.isEmpty()) {
+            termSequence_ = other.termSequence_;
+            bitField0_ = (bitField0_ & ~0x00000001);
+          } else {
+            ensureTermSequenceIsMutable();
+            termSequence_.addAll(other.termSequence_);
+          }
+          onChanged();
+        }
+        if (other.hasSequenceFrequency()) {
+          setSequenceFrequency(other.getSequenceFrequency());
+        }
+        this.mergeUnknownFields(other.getUnknownFields());
+        return this;
+      }
+
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        com.expleague.sensearch.protobuf.index.IndexUnits.VgramFrequency parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (com.expleague.sensearch.protobuf.index.IndexUnits.VgramFrequency) e.getUnfinishedMessage();
+          throw e;
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
+          }
+        }
+        return this;
+      }
+      private int bitField0_;
+
+      private java.util.List<java.lang.Integer> termSequence_ = java.util.Collections.emptyList();
+      private void ensureTermSequenceIsMutable() {
+        if (!((bitField0_ & 0x00000001) == 0x00000001)) {
+          termSequence_ = new java.util.ArrayList<java.lang.Integer>(termSequence_);
+          bitField0_ |= 0x00000001;
+         }
+      }
+      /**
+       * <code>repeated int32 term_sequence = 1;</code>
+       */
+      public java.util.List<java.lang.Integer>
+          getTermSequenceList() {
+        return java.util.Collections.unmodifiableList(termSequence_);
+      }
+      /**
+       * <code>repeated int32 term_sequence = 1;</code>
+       */
+      public int getTermSequenceCount() {
+        return termSequence_.size();
+      }
+      /**
+       * <code>repeated int32 term_sequence = 1;</code>
+       */
+      public int getTermSequence(int index) {
+        return termSequence_.get(index);
+      }
+      /**
+       * <code>repeated int32 term_sequence = 1;</code>
+       */
+      public Builder setTermSequence(
+          int index, int value) {
+        ensureTermSequenceIsMutable();
+        termSequence_.set(index, value);
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>repeated int32 term_sequence = 1;</code>
+       */
+      public Builder addTermSequence(int value) {
+        ensureTermSequenceIsMutable();
+        termSequence_.add(value);
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>repeated int32 term_sequence = 1;</code>
+       */
+      public Builder addAllTermSequence(
+          java.lang.Iterable<? extends java.lang.Integer> values) {
+        ensureTermSequenceIsMutable();
+        com.google.protobuf.AbstractMessageLite.Builder.addAll(
+            values, termSequence_);
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>repeated int32 term_sequence = 1;</code>
+       */
+      public Builder clearTermSequence() {
+        termSequence_ = java.util.Collections.emptyList();
+        bitField0_ = (bitField0_ & ~0x00000001);
+        onChanged();
+        return this;
+      }
+
+      private long sequenceFrequency_ ;
+      /**
+       * <code>optional int64 sequence_frequency = 2;</code>
+       */
+      public boolean hasSequenceFrequency() {
+        return ((bitField0_ & 0x00000002) == 0x00000002);
+      }
+      /**
+       * <code>optional int64 sequence_frequency = 2;</code>
+       */
+      public long getSequenceFrequency() {
+        return sequenceFrequency_;
+      }
+      /**
+       * <code>optional int64 sequence_frequency = 2;</code>
+       */
+      public Builder setSequenceFrequency(long value) {
+        bitField0_ |= 0x00000002;
+        sequenceFrequency_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional int64 sequence_frequency = 2;</code>
+       */
+      public Builder clearSequenceFrequency() {
+        bitField0_ = (bitField0_ & ~0x00000002);
+        sequenceFrequency_ = 0L;
+        onChanged();
+        return this;
+      }
+
+      // @@protoc_insertion_point(builder_scope:index.VgramFrequency)
+    }
+
+    static {
+      defaultInstance = new VgramFrequency(true);
+      defaultInstance.initFields();
+    }
+
+    // @@protoc_insertion_point(class_scope:index.VgramFrequency)
+  }
+
   public interface TermStatisticsOrBuilder extends
       // @@protoc_insertion_point(interface_extends:index.TermStatistics)
       com.google.protobuf.MessageOrBuilder {
@@ -4912,7 +5464,7 @@ public final class IndexUnits {
         }
         if (((bitField0_ & 0x00000002) == 0x00000002)) {
           size += com.google.protobuf.CodedOutputStream
-              .computeInt64Size(2, termFrequency_);
+            .computeInt64Size(2, termFrequency_);
         }
         size += getUnknownFields().getSerializedSize();
         memoizedSerializedSize = size;
@@ -5152,7 +5704,7 @@ public final class IndexUnits {
           return this;
         }
 
-        private long termFrequency_;
+        private long termFrequency_ ;
         /**
          * <code>optional int64 term_frequency = 2;</code>
          */
@@ -5917,7 +6469,7 @@ public final class IndexUnits {
           bigramFrequencyBuilder_ = new com.google.protobuf.RepeatedFieldBuilder<
               com.expleague.sensearch.protobuf.index.IndexUnits.TermStatistics.TermFrequency, com.expleague.sensearch.protobuf.index.IndexUnits.TermStatistics.TermFrequency.Builder, com.expleague.sensearch.protobuf.index.IndexUnits.TermStatistics.TermFrequencyOrBuilder>(
                   bigramFrequency_,
-              ((bitField0_ & 0x00000008) == 0x00000008),
+                  ((bitField0_ & 0x00000008) == 0x00000008),
                   getParentForChildren(),
                   isClean());
           bigramFrequency_ = null;
@@ -5934,6 +6486,1825 @@ public final class IndexUnits {
     }
 
     // @@protoc_insertion_point(class_scope:index.TermStatistics)
+  }
+
+  public interface PageStatisticsOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:index.PageStatistics)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <code>optional int32 page_id = 1;</code>
+     */
+    boolean hasPageId();
+    /**
+     * <code>optional int32 page_id = 1;</code>
+     */
+    int getPageId();
+
+    /**
+     * <code>optional int32 titles_count = 2;</code>
+     */
+    boolean hasTitlesCount();
+    /**
+     * <code>optional int32 titles_count = 2;</code>
+     */
+    int getTitlesCount();
+
+    /**
+     * <code>optional int32 title_tokens_count = 3;</code>
+     */
+    boolean hasTitleTokensCount();
+    /**
+     * <code>optional int32 title_tokens_count = 3;</code>
+     */
+    int getTitleTokensCount();
+
+    /**
+     * <code>optional int32 content_tokens_count = 4;</code>
+     */
+    boolean hasContentTokensCount();
+    /**
+     * <code>optional int32 content_tokens_count = 4;</code>
+     */
+    int getContentTokensCount();
+
+    /**
+     * <code>optional int32 link_tokens_count = 5;</code>
+     */
+    boolean hasLinkTokensCount();
+    /**
+     * <code>optional int32 link_tokens_count = 5;</code>
+     */
+    int getLinkTokensCount();
+
+    /**
+     * <code>optional int32 incoming_links_count = 6;</code>
+     */
+    boolean hasIncomingLinksCount();
+    /**
+     * <code>optional int32 incoming_links_count = 6;</code>
+     */
+    int getIncomingLinksCount();
+
+    /**
+     * <code>optional int32 outgoing_links_count = 7;</code>
+     */
+    boolean hasOutgoingLinksCount();
+    /**
+     * <code>optional int32 outgoing_links_count = 7;</code>
+     */
+    int getOutgoingLinksCount();
+
+    /**
+     * <code>optional int32 unique_targets_count = 8;</code>
+     */
+    boolean hasUniqueTargetsCount();
+    /**
+     * <code>optional int32 unique_targets_count = 8;</code>
+     */
+    int getUniqueTargetsCount();
+
+    /**
+     * <code>optional int32 target_title_tokens_count = 9;</code>
+     */
+    boolean hasTargetTitleTokensCount();
+    /**
+     * <code>optional int32 target_title_tokens_count = 9;</code>
+     */
+    int getTargetTitleTokensCount();
+
+    /**
+     * <code>optional int32 unique_referrers_count = 10;</code>
+     */
+    boolean hasUniqueReferrersCount();
+    /**
+     * <code>optional int32 unique_referrers_count = 10;</code>
+     */
+    int getUniqueReferrersCount();
+
+    /**
+     * <code>repeated .index.VgramFrequency unigrams = 11;</code>
+     */
+    java.util.List<com.expleague.sensearch.protobuf.index.IndexUnits.VgramFrequency> 
+        getUnigramsList();
+    /**
+     * <code>repeated .index.VgramFrequency unigrams = 11;</code>
+     */
+    com.expleague.sensearch.protobuf.index.IndexUnits.VgramFrequency getUnigrams(int index);
+    /**
+     * <code>repeated .index.VgramFrequency unigrams = 11;</code>
+     */
+    int getUnigramsCount();
+    /**
+     * <code>repeated .index.VgramFrequency unigrams = 11;</code>
+     */
+    java.util.List<? extends com.expleague.sensearch.protobuf.index.IndexUnits.VgramFrequencyOrBuilder> 
+        getUnigramsOrBuilderList();
+    /**
+     * <code>repeated .index.VgramFrequency unigrams = 11;</code>
+     */
+    com.expleague.sensearch.protobuf.index.IndexUnits.VgramFrequencyOrBuilder getUnigramsOrBuilder(
+        int index);
+
+    /**
+     * <code>repeated .index.VgramFrequency bigrams = 12;</code>
+     */
+    java.util.List<com.expleague.sensearch.protobuf.index.IndexUnits.VgramFrequency> 
+        getBigramsList();
+    /**
+     * <code>repeated .index.VgramFrequency bigrams = 12;</code>
+     */
+    com.expleague.sensearch.protobuf.index.IndexUnits.VgramFrequency getBigrams(int index);
+    /**
+     * <code>repeated .index.VgramFrequency bigrams = 12;</code>
+     */
+    int getBigramsCount();
+    /**
+     * <code>repeated .index.VgramFrequency bigrams = 12;</code>
+     */
+    java.util.List<? extends com.expleague.sensearch.protobuf.index.IndexUnits.VgramFrequencyOrBuilder> 
+        getBigramsOrBuilderList();
+    /**
+     * <code>repeated .index.VgramFrequency bigrams = 12;</code>
+     */
+    com.expleague.sensearch.protobuf.index.IndexUnits.VgramFrequencyOrBuilder getBigramsOrBuilder(
+        int index);
+  }
+  /**
+   * Protobuf type {@code index.PageStatistics}
+   */
+  public static final class PageStatistics extends
+      com.google.protobuf.GeneratedMessage implements
+      // @@protoc_insertion_point(message_implements:index.PageStatistics)
+      PageStatisticsOrBuilder {
+    // Use PageStatistics.newBuilder() to construct.
+    private PageStatistics(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
+      super(builder);
+      this.unknownFields = builder.getUnknownFields();
+    }
+    private PageStatistics(boolean noInit) { this.unknownFields = com.google.protobuf.UnknownFieldSet.getDefaultInstance(); }
+
+    private static final PageStatistics defaultInstance;
+    public static PageStatistics getDefaultInstance() {
+      return defaultInstance;
+    }
+
+    public PageStatistics getDefaultInstanceForType() {
+      return defaultInstance;
+    }
+
+    private final com.google.protobuf.UnknownFieldSet unknownFields;
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+        getUnknownFields() {
+      return this.unknownFields;
+    }
+    private PageStatistics(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      initFields();
+      int mutable_bitField0_ = 0;
+      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder();
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            default: {
+              if (!parseUnknownField(input, unknownFields,
+                                     extensionRegistry, tag)) {
+                done = true;
+              }
+              break;
+            }
+            case 8: {
+              bitField0_ |= 0x00000001;
+              pageId_ = input.readInt32();
+              break;
+            }
+            case 16: {
+              bitField0_ |= 0x00000002;
+              titlesCount_ = input.readInt32();
+              break;
+            }
+            case 24: {
+              bitField0_ |= 0x00000004;
+              titleTokensCount_ = input.readInt32();
+              break;
+            }
+            case 32: {
+              bitField0_ |= 0x00000008;
+              contentTokensCount_ = input.readInt32();
+              break;
+            }
+            case 40: {
+              bitField0_ |= 0x00000010;
+              linkTokensCount_ = input.readInt32();
+              break;
+            }
+            case 48: {
+              bitField0_ |= 0x00000020;
+              incomingLinksCount_ = input.readInt32();
+              break;
+            }
+            case 56: {
+              bitField0_ |= 0x00000040;
+              outgoingLinksCount_ = input.readInt32();
+              break;
+            }
+            case 64: {
+              bitField0_ |= 0x00000080;
+              uniqueTargetsCount_ = input.readInt32();
+              break;
+            }
+            case 72: {
+              bitField0_ |= 0x00000100;
+              targetTitleTokensCount_ = input.readInt32();
+              break;
+            }
+            case 80: {
+              bitField0_ |= 0x00000200;
+              uniqueReferrersCount_ = input.readInt32();
+              break;
+            }
+            case 90: {
+              if (!((mutable_bitField0_ & 0x00000400) == 0x00000400)) {
+                unigrams_ = new java.util.ArrayList<com.expleague.sensearch.protobuf.index.IndexUnits.VgramFrequency>();
+                mutable_bitField0_ |= 0x00000400;
+              }
+              unigrams_.add(input.readMessage(com.expleague.sensearch.protobuf.index.IndexUnits.VgramFrequency.PARSER, extensionRegistry));
+              break;
+            }
+            case 98: {
+              if (!((mutable_bitField0_ & 0x00000800) == 0x00000800)) {
+                bigrams_ = new java.util.ArrayList<com.expleague.sensearch.protobuf.index.IndexUnits.VgramFrequency>();
+                mutable_bitField0_ |= 0x00000800;
+              }
+              bigrams_.add(input.readMessage(com.expleague.sensearch.protobuf.index.IndexUnits.VgramFrequency.PARSER, extensionRegistry));
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e.getMessage()).setUnfinishedMessage(this);
+      } finally {
+        if (((mutable_bitField0_ & 0x00000400) == 0x00000400)) {
+          unigrams_ = java.util.Collections.unmodifiableList(unigrams_);
+        }
+        if (((mutable_bitField0_ & 0x00000800) == 0x00000800)) {
+          bigrams_ = java.util.Collections.unmodifiableList(bigrams_);
+        }
+        this.unknownFields = unknownFields.build();
+        makeExtensionsImmutable();
+      }
+    }
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return com.expleague.sensearch.protobuf.index.IndexUnits.internal_static_index_PageStatistics_descriptor;
+    }
+
+    protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return com.expleague.sensearch.protobuf.index.IndexUnits.internal_static_index_PageStatistics_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              com.expleague.sensearch.protobuf.index.IndexUnits.PageStatistics.class, com.expleague.sensearch.protobuf.index.IndexUnits.PageStatistics.Builder.class);
+    }
+
+    public static com.google.protobuf.Parser<PageStatistics> PARSER =
+        new com.google.protobuf.AbstractParser<PageStatistics>() {
+      public PageStatistics parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return new PageStatistics(input, extensionRegistry);
+      }
+    };
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<PageStatistics> getParserForType() {
+      return PARSER;
+    }
+
+    private int bitField0_;
+    public static final int PAGE_ID_FIELD_NUMBER = 1;
+    private int pageId_;
+    /**
+     * <code>optional int32 page_id = 1;</code>
+     */
+    public boolean hasPageId() {
+      return ((bitField0_ & 0x00000001) == 0x00000001);
+    }
+    /**
+     * <code>optional int32 page_id = 1;</code>
+     */
+    public int getPageId() {
+      return pageId_;
+    }
+
+    public static final int TITLES_COUNT_FIELD_NUMBER = 2;
+    private int titlesCount_;
+    /**
+     * <code>optional int32 titles_count = 2;</code>
+     */
+    public boolean hasTitlesCount() {
+      return ((bitField0_ & 0x00000002) == 0x00000002);
+    }
+    /**
+     * <code>optional int32 titles_count = 2;</code>
+     */
+    public int getTitlesCount() {
+      return titlesCount_;
+    }
+
+    public static final int TITLE_TOKENS_COUNT_FIELD_NUMBER = 3;
+    private int titleTokensCount_;
+    /**
+     * <code>optional int32 title_tokens_count = 3;</code>
+     */
+    public boolean hasTitleTokensCount() {
+      return ((bitField0_ & 0x00000004) == 0x00000004);
+    }
+    /**
+     * <code>optional int32 title_tokens_count = 3;</code>
+     */
+    public int getTitleTokensCount() {
+      return titleTokensCount_;
+    }
+
+    public static final int CONTENT_TOKENS_COUNT_FIELD_NUMBER = 4;
+    private int contentTokensCount_;
+    /**
+     * <code>optional int32 content_tokens_count = 4;</code>
+     */
+    public boolean hasContentTokensCount() {
+      return ((bitField0_ & 0x00000008) == 0x00000008);
+    }
+    /**
+     * <code>optional int32 content_tokens_count = 4;</code>
+     */
+    public int getContentTokensCount() {
+      return contentTokensCount_;
+    }
+
+    public static final int LINK_TOKENS_COUNT_FIELD_NUMBER = 5;
+    private int linkTokensCount_;
+    /**
+     * <code>optional int32 link_tokens_count = 5;</code>
+     */
+    public boolean hasLinkTokensCount() {
+      return ((bitField0_ & 0x00000010) == 0x00000010);
+    }
+    /**
+     * <code>optional int32 link_tokens_count = 5;</code>
+     */
+    public int getLinkTokensCount() {
+      return linkTokensCount_;
+    }
+
+    public static final int INCOMING_LINKS_COUNT_FIELD_NUMBER = 6;
+    private int incomingLinksCount_;
+    /**
+     * <code>optional int32 incoming_links_count = 6;</code>
+     */
+    public boolean hasIncomingLinksCount() {
+      return ((bitField0_ & 0x00000020) == 0x00000020);
+    }
+    /**
+     * <code>optional int32 incoming_links_count = 6;</code>
+     */
+    public int getIncomingLinksCount() {
+      return incomingLinksCount_;
+    }
+
+    public static final int OUTGOING_LINKS_COUNT_FIELD_NUMBER = 7;
+    private int outgoingLinksCount_;
+    /**
+     * <code>optional int32 outgoing_links_count = 7;</code>
+     */
+    public boolean hasOutgoingLinksCount() {
+      return ((bitField0_ & 0x00000040) == 0x00000040);
+    }
+    /**
+     * <code>optional int32 outgoing_links_count = 7;</code>
+     */
+    public int getOutgoingLinksCount() {
+      return outgoingLinksCount_;
+    }
+
+    public static final int UNIQUE_TARGETS_COUNT_FIELD_NUMBER = 8;
+    private int uniqueTargetsCount_;
+    /**
+     * <code>optional int32 unique_targets_count = 8;</code>
+     */
+    public boolean hasUniqueTargetsCount() {
+      return ((bitField0_ & 0x00000080) == 0x00000080);
+    }
+    /**
+     * <code>optional int32 unique_targets_count = 8;</code>
+     */
+    public int getUniqueTargetsCount() {
+      return uniqueTargetsCount_;
+    }
+
+    public static final int TARGET_TITLE_TOKENS_COUNT_FIELD_NUMBER = 9;
+    private int targetTitleTokensCount_;
+    /**
+     * <code>optional int32 target_title_tokens_count = 9;</code>
+     */
+    public boolean hasTargetTitleTokensCount() {
+      return ((bitField0_ & 0x00000100) == 0x00000100);
+    }
+    /**
+     * <code>optional int32 target_title_tokens_count = 9;</code>
+     */
+    public int getTargetTitleTokensCount() {
+      return targetTitleTokensCount_;
+    }
+
+    public static final int UNIQUE_REFERRERS_COUNT_FIELD_NUMBER = 10;
+    private int uniqueReferrersCount_;
+    /**
+     * <code>optional int32 unique_referrers_count = 10;</code>
+     */
+    public boolean hasUniqueReferrersCount() {
+      return ((bitField0_ & 0x00000200) == 0x00000200);
+    }
+    /**
+     * <code>optional int32 unique_referrers_count = 10;</code>
+     */
+    public int getUniqueReferrersCount() {
+      return uniqueReferrersCount_;
+    }
+
+    public static final int UNIGRAMS_FIELD_NUMBER = 11;
+    private java.util.List<com.expleague.sensearch.protobuf.index.IndexUnits.VgramFrequency> unigrams_;
+    /**
+     * <code>repeated .index.VgramFrequency unigrams = 11;</code>
+     */
+    public java.util.List<com.expleague.sensearch.protobuf.index.IndexUnits.VgramFrequency> getUnigramsList() {
+      return unigrams_;
+    }
+    /**
+     * <code>repeated .index.VgramFrequency unigrams = 11;</code>
+     */
+    public java.util.List<? extends com.expleague.sensearch.protobuf.index.IndexUnits.VgramFrequencyOrBuilder> 
+        getUnigramsOrBuilderList() {
+      return unigrams_;
+    }
+    /**
+     * <code>repeated .index.VgramFrequency unigrams = 11;</code>
+     */
+    public int getUnigramsCount() {
+      return unigrams_.size();
+    }
+    /**
+     * <code>repeated .index.VgramFrequency unigrams = 11;</code>
+     */
+    public com.expleague.sensearch.protobuf.index.IndexUnits.VgramFrequency getUnigrams(int index) {
+      return unigrams_.get(index);
+    }
+    /**
+     * <code>repeated .index.VgramFrequency unigrams = 11;</code>
+     */
+    public com.expleague.sensearch.protobuf.index.IndexUnits.VgramFrequencyOrBuilder getUnigramsOrBuilder(
+        int index) {
+      return unigrams_.get(index);
+    }
+
+    public static final int BIGRAMS_FIELD_NUMBER = 12;
+    private java.util.List<com.expleague.sensearch.protobuf.index.IndexUnits.VgramFrequency> bigrams_;
+    /**
+     * <code>repeated .index.VgramFrequency bigrams = 12;</code>
+     */
+    public java.util.List<com.expleague.sensearch.protobuf.index.IndexUnits.VgramFrequency> getBigramsList() {
+      return bigrams_;
+    }
+    /**
+     * <code>repeated .index.VgramFrequency bigrams = 12;</code>
+     */
+    public java.util.List<? extends com.expleague.sensearch.protobuf.index.IndexUnits.VgramFrequencyOrBuilder> 
+        getBigramsOrBuilderList() {
+      return bigrams_;
+    }
+    /**
+     * <code>repeated .index.VgramFrequency bigrams = 12;</code>
+     */
+    public int getBigramsCount() {
+      return bigrams_.size();
+    }
+    /**
+     * <code>repeated .index.VgramFrequency bigrams = 12;</code>
+     */
+    public com.expleague.sensearch.protobuf.index.IndexUnits.VgramFrequency getBigrams(int index) {
+      return bigrams_.get(index);
+    }
+    /**
+     * <code>repeated .index.VgramFrequency bigrams = 12;</code>
+     */
+    public com.expleague.sensearch.protobuf.index.IndexUnits.VgramFrequencyOrBuilder getBigramsOrBuilder(
+        int index) {
+      return bigrams_.get(index);
+    }
+
+    private void initFields() {
+      pageId_ = 0;
+      titlesCount_ = 0;
+      titleTokensCount_ = 0;
+      contentTokensCount_ = 0;
+      linkTokensCount_ = 0;
+      incomingLinksCount_ = 0;
+      outgoingLinksCount_ = 0;
+      uniqueTargetsCount_ = 0;
+      targetTitleTokensCount_ = 0;
+      uniqueReferrersCount_ = 0;
+      unigrams_ = java.util.Collections.emptyList();
+      bigrams_ = java.util.Collections.emptyList();
+    }
+    private byte memoizedIsInitialized = -1;
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      getSerializedSize();
+      if (((bitField0_ & 0x00000001) == 0x00000001)) {
+        output.writeInt32(1, pageId_);
+      }
+      if (((bitField0_ & 0x00000002) == 0x00000002)) {
+        output.writeInt32(2, titlesCount_);
+      }
+      if (((bitField0_ & 0x00000004) == 0x00000004)) {
+        output.writeInt32(3, titleTokensCount_);
+      }
+      if (((bitField0_ & 0x00000008) == 0x00000008)) {
+        output.writeInt32(4, contentTokensCount_);
+      }
+      if (((bitField0_ & 0x00000010) == 0x00000010)) {
+        output.writeInt32(5, linkTokensCount_);
+      }
+      if (((bitField0_ & 0x00000020) == 0x00000020)) {
+        output.writeInt32(6, incomingLinksCount_);
+      }
+      if (((bitField0_ & 0x00000040) == 0x00000040)) {
+        output.writeInt32(7, outgoingLinksCount_);
+      }
+      if (((bitField0_ & 0x00000080) == 0x00000080)) {
+        output.writeInt32(8, uniqueTargetsCount_);
+      }
+      if (((bitField0_ & 0x00000100) == 0x00000100)) {
+        output.writeInt32(9, targetTitleTokensCount_);
+      }
+      if (((bitField0_ & 0x00000200) == 0x00000200)) {
+        output.writeInt32(10, uniqueReferrersCount_);
+      }
+      for (int i = 0; i < unigrams_.size(); i++) {
+        output.writeMessage(11, unigrams_.get(i));
+      }
+      for (int i = 0; i < bigrams_.size(); i++) {
+        output.writeMessage(12, bigrams_.get(i));
+      }
+      getUnknownFields().writeTo(output);
+    }
+
+    private int memoizedSerializedSize = -1;
+    public int getSerializedSize() {
+      int size = memoizedSerializedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (((bitField0_ & 0x00000001) == 0x00000001)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt32Size(1, pageId_);
+      }
+      if (((bitField0_ & 0x00000002) == 0x00000002)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt32Size(2, titlesCount_);
+      }
+      if (((bitField0_ & 0x00000004) == 0x00000004)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt32Size(3, titleTokensCount_);
+      }
+      if (((bitField0_ & 0x00000008) == 0x00000008)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt32Size(4, contentTokensCount_);
+      }
+      if (((bitField0_ & 0x00000010) == 0x00000010)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt32Size(5, linkTokensCount_);
+      }
+      if (((bitField0_ & 0x00000020) == 0x00000020)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt32Size(6, incomingLinksCount_);
+      }
+      if (((bitField0_ & 0x00000040) == 0x00000040)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt32Size(7, outgoingLinksCount_);
+      }
+      if (((bitField0_ & 0x00000080) == 0x00000080)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt32Size(8, uniqueTargetsCount_);
+      }
+      if (((bitField0_ & 0x00000100) == 0x00000100)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt32Size(9, targetTitleTokensCount_);
+      }
+      if (((bitField0_ & 0x00000200) == 0x00000200)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt32Size(10, uniqueReferrersCount_);
+      }
+      for (int i = 0; i < unigrams_.size(); i++) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(11, unigrams_.get(i));
+      }
+      for (int i = 0; i < bigrams_.size(); i++) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(12, bigrams_.get(i));
+      }
+      size += getUnknownFields().getSerializedSize();
+      memoizedSerializedSize = size;
+      return size;
+    }
+
+    private static final long serialVersionUID = 0L;
+    @java.lang.Override
+    protected java.lang.Object writeReplace()
+        throws java.io.ObjectStreamException {
+      return super.writeReplace();
+    }
+
+    public static com.expleague.sensearch.protobuf.index.IndexUnits.PageStatistics parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.expleague.sensearch.protobuf.index.IndexUnits.PageStatistics parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.expleague.sensearch.protobuf.index.IndexUnits.PageStatistics parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.expleague.sensearch.protobuf.index.IndexUnits.PageStatistics parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.expleague.sensearch.protobuf.index.IndexUnits.PageStatistics parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return PARSER.parseFrom(input);
+    }
+    public static com.expleague.sensearch.protobuf.index.IndexUnits.PageStatistics parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return PARSER.parseFrom(input, extensionRegistry);
+    }
+    public static com.expleague.sensearch.protobuf.index.IndexUnits.PageStatistics parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return PARSER.parseDelimitedFrom(input);
+    }
+    public static com.expleague.sensearch.protobuf.index.IndexUnits.PageStatistics parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return PARSER.parseDelimitedFrom(input, extensionRegistry);
+    }
+    public static com.expleague.sensearch.protobuf.index.IndexUnits.PageStatistics parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return PARSER.parseFrom(input);
+    }
+    public static com.expleague.sensearch.protobuf.index.IndexUnits.PageStatistics parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return PARSER.parseFrom(input, extensionRegistry);
+    }
+
+    public static Builder newBuilder() { return Builder.create(); }
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder(com.expleague.sensearch.protobuf.index.IndexUnits.PageStatistics prototype) {
+      return newBuilder().mergeFrom(prototype);
+    }
+    public Builder toBuilder() { return newBuilder(this); }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * Protobuf type {@code index.PageStatistics}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessage.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:index.PageStatistics)
+        com.expleague.sensearch.protobuf.index.IndexUnits.PageStatisticsOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return com.expleague.sensearch.protobuf.index.IndexUnits.internal_static_index_PageStatistics_descriptor;
+      }
+
+      protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return com.expleague.sensearch.protobuf.index.IndexUnits.internal_static_index_PageStatistics_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                com.expleague.sensearch.protobuf.index.IndexUnits.PageStatistics.class, com.expleague.sensearch.protobuf.index.IndexUnits.PageStatistics.Builder.class);
+      }
+
+      // Construct using com.expleague.sensearch.protobuf.index.IndexUnits.PageStatistics.newBuilder()
+      private Builder() {
+        maybeForceBuilderInitialization();
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders) {
+          getUnigramsFieldBuilder();
+          getBigramsFieldBuilder();
+        }
+      }
+      private static Builder create() {
+        return new Builder();
+      }
+
+      public Builder clear() {
+        super.clear();
+        pageId_ = 0;
+        bitField0_ = (bitField0_ & ~0x00000001);
+        titlesCount_ = 0;
+        bitField0_ = (bitField0_ & ~0x00000002);
+        titleTokensCount_ = 0;
+        bitField0_ = (bitField0_ & ~0x00000004);
+        contentTokensCount_ = 0;
+        bitField0_ = (bitField0_ & ~0x00000008);
+        linkTokensCount_ = 0;
+        bitField0_ = (bitField0_ & ~0x00000010);
+        incomingLinksCount_ = 0;
+        bitField0_ = (bitField0_ & ~0x00000020);
+        outgoingLinksCount_ = 0;
+        bitField0_ = (bitField0_ & ~0x00000040);
+        uniqueTargetsCount_ = 0;
+        bitField0_ = (bitField0_ & ~0x00000080);
+        targetTitleTokensCount_ = 0;
+        bitField0_ = (bitField0_ & ~0x00000100);
+        uniqueReferrersCount_ = 0;
+        bitField0_ = (bitField0_ & ~0x00000200);
+        if (unigramsBuilder_ == null) {
+          unigrams_ = java.util.Collections.emptyList();
+          bitField0_ = (bitField0_ & ~0x00000400);
+        } else {
+          unigramsBuilder_.clear();
+        }
+        if (bigramsBuilder_ == null) {
+          bigrams_ = java.util.Collections.emptyList();
+          bitField0_ = (bitField0_ & ~0x00000800);
+        } else {
+          bigramsBuilder_.clear();
+        }
+        return this;
+      }
+
+      public Builder clone() {
+        return create().mergeFrom(buildPartial());
+      }
+
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return com.expleague.sensearch.protobuf.index.IndexUnits.internal_static_index_PageStatistics_descriptor;
+      }
+
+      public com.expleague.sensearch.protobuf.index.IndexUnits.PageStatistics getDefaultInstanceForType() {
+        return com.expleague.sensearch.protobuf.index.IndexUnits.PageStatistics.getDefaultInstance();
+      }
+
+      public com.expleague.sensearch.protobuf.index.IndexUnits.PageStatistics build() {
+        com.expleague.sensearch.protobuf.index.IndexUnits.PageStatistics result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      public com.expleague.sensearch.protobuf.index.IndexUnits.PageStatistics buildPartial() {
+        com.expleague.sensearch.protobuf.index.IndexUnits.PageStatistics result = new com.expleague.sensearch.protobuf.index.IndexUnits.PageStatistics(this);
+        int from_bitField0_ = bitField0_;
+        int to_bitField0_ = 0;
+        if (((from_bitField0_ & 0x00000001) == 0x00000001)) {
+          to_bitField0_ |= 0x00000001;
+        }
+        result.pageId_ = pageId_;
+        if (((from_bitField0_ & 0x00000002) == 0x00000002)) {
+          to_bitField0_ |= 0x00000002;
+        }
+        result.titlesCount_ = titlesCount_;
+        if (((from_bitField0_ & 0x00000004) == 0x00000004)) {
+          to_bitField0_ |= 0x00000004;
+        }
+        result.titleTokensCount_ = titleTokensCount_;
+        if (((from_bitField0_ & 0x00000008) == 0x00000008)) {
+          to_bitField0_ |= 0x00000008;
+        }
+        result.contentTokensCount_ = contentTokensCount_;
+        if (((from_bitField0_ & 0x00000010) == 0x00000010)) {
+          to_bitField0_ |= 0x00000010;
+        }
+        result.linkTokensCount_ = linkTokensCount_;
+        if (((from_bitField0_ & 0x00000020) == 0x00000020)) {
+          to_bitField0_ |= 0x00000020;
+        }
+        result.incomingLinksCount_ = incomingLinksCount_;
+        if (((from_bitField0_ & 0x00000040) == 0x00000040)) {
+          to_bitField0_ |= 0x00000040;
+        }
+        result.outgoingLinksCount_ = outgoingLinksCount_;
+        if (((from_bitField0_ & 0x00000080) == 0x00000080)) {
+          to_bitField0_ |= 0x00000080;
+        }
+        result.uniqueTargetsCount_ = uniqueTargetsCount_;
+        if (((from_bitField0_ & 0x00000100) == 0x00000100)) {
+          to_bitField0_ |= 0x00000100;
+        }
+        result.targetTitleTokensCount_ = targetTitleTokensCount_;
+        if (((from_bitField0_ & 0x00000200) == 0x00000200)) {
+          to_bitField0_ |= 0x00000200;
+        }
+        result.uniqueReferrersCount_ = uniqueReferrersCount_;
+        if (unigramsBuilder_ == null) {
+          if (((bitField0_ & 0x00000400) == 0x00000400)) {
+            unigrams_ = java.util.Collections.unmodifiableList(unigrams_);
+            bitField0_ = (bitField0_ & ~0x00000400);
+          }
+          result.unigrams_ = unigrams_;
+        } else {
+          result.unigrams_ = unigramsBuilder_.build();
+        }
+        if (bigramsBuilder_ == null) {
+          if (((bitField0_ & 0x00000800) == 0x00000800)) {
+            bigrams_ = java.util.Collections.unmodifiableList(bigrams_);
+            bitField0_ = (bitField0_ & ~0x00000800);
+          }
+          result.bigrams_ = bigrams_;
+        } else {
+          result.bigrams_ = bigramsBuilder_.build();
+        }
+        result.bitField0_ = to_bitField0_;
+        onBuilt();
+        return result;
+      }
+
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof com.expleague.sensearch.protobuf.index.IndexUnits.PageStatistics) {
+          return mergeFrom((com.expleague.sensearch.protobuf.index.IndexUnits.PageStatistics)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(com.expleague.sensearch.protobuf.index.IndexUnits.PageStatistics other) {
+        if (other == com.expleague.sensearch.protobuf.index.IndexUnits.PageStatistics.getDefaultInstance()) return this;
+        if (other.hasPageId()) {
+          setPageId(other.getPageId());
+        }
+        if (other.hasTitlesCount()) {
+          setTitlesCount(other.getTitlesCount());
+        }
+        if (other.hasTitleTokensCount()) {
+          setTitleTokensCount(other.getTitleTokensCount());
+        }
+        if (other.hasContentTokensCount()) {
+          setContentTokensCount(other.getContentTokensCount());
+        }
+        if (other.hasLinkTokensCount()) {
+          setLinkTokensCount(other.getLinkTokensCount());
+        }
+        if (other.hasIncomingLinksCount()) {
+          setIncomingLinksCount(other.getIncomingLinksCount());
+        }
+        if (other.hasOutgoingLinksCount()) {
+          setOutgoingLinksCount(other.getOutgoingLinksCount());
+        }
+        if (other.hasUniqueTargetsCount()) {
+          setUniqueTargetsCount(other.getUniqueTargetsCount());
+        }
+        if (other.hasTargetTitleTokensCount()) {
+          setTargetTitleTokensCount(other.getTargetTitleTokensCount());
+        }
+        if (other.hasUniqueReferrersCount()) {
+          setUniqueReferrersCount(other.getUniqueReferrersCount());
+        }
+        if (unigramsBuilder_ == null) {
+          if (!other.unigrams_.isEmpty()) {
+            if (unigrams_.isEmpty()) {
+              unigrams_ = other.unigrams_;
+              bitField0_ = (bitField0_ & ~0x00000400);
+            } else {
+              ensureUnigramsIsMutable();
+              unigrams_.addAll(other.unigrams_);
+            }
+            onChanged();
+          }
+        } else {
+          if (!other.unigrams_.isEmpty()) {
+            if (unigramsBuilder_.isEmpty()) {
+              unigramsBuilder_.dispose();
+              unigramsBuilder_ = null;
+              unigrams_ = other.unigrams_;
+              bitField0_ = (bitField0_ & ~0x00000400);
+              unigramsBuilder_ = 
+                com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders ?
+                   getUnigramsFieldBuilder() : null;
+            } else {
+              unigramsBuilder_.addAllMessages(other.unigrams_);
+            }
+          }
+        }
+        if (bigramsBuilder_ == null) {
+          if (!other.bigrams_.isEmpty()) {
+            if (bigrams_.isEmpty()) {
+              bigrams_ = other.bigrams_;
+              bitField0_ = (bitField0_ & ~0x00000800);
+            } else {
+              ensureBigramsIsMutable();
+              bigrams_.addAll(other.bigrams_);
+            }
+            onChanged();
+          }
+        } else {
+          if (!other.bigrams_.isEmpty()) {
+            if (bigramsBuilder_.isEmpty()) {
+              bigramsBuilder_.dispose();
+              bigramsBuilder_ = null;
+              bigrams_ = other.bigrams_;
+              bitField0_ = (bitField0_ & ~0x00000800);
+              bigramsBuilder_ = 
+                com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders ?
+                   getBigramsFieldBuilder() : null;
+            } else {
+              bigramsBuilder_.addAllMessages(other.bigrams_);
+            }
+          }
+        }
+        this.mergeUnknownFields(other.getUnknownFields());
+        return this;
+      }
+
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        com.expleague.sensearch.protobuf.index.IndexUnits.PageStatistics parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (com.expleague.sensearch.protobuf.index.IndexUnits.PageStatistics) e.getUnfinishedMessage();
+          throw e;
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
+          }
+        }
+        return this;
+      }
+      private int bitField0_;
+
+      private int pageId_ ;
+      /**
+       * <code>optional int32 page_id = 1;</code>
+       */
+      public boolean hasPageId() {
+        return ((bitField0_ & 0x00000001) == 0x00000001);
+      }
+      /**
+       * <code>optional int32 page_id = 1;</code>
+       */
+      public int getPageId() {
+        return pageId_;
+      }
+      /**
+       * <code>optional int32 page_id = 1;</code>
+       */
+      public Builder setPageId(int value) {
+        bitField0_ |= 0x00000001;
+        pageId_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional int32 page_id = 1;</code>
+       */
+      public Builder clearPageId() {
+        bitField0_ = (bitField0_ & ~0x00000001);
+        pageId_ = 0;
+        onChanged();
+        return this;
+      }
+
+      private int titlesCount_ ;
+      /**
+       * <code>optional int32 titles_count = 2;</code>
+       */
+      public boolean hasTitlesCount() {
+        return ((bitField0_ & 0x00000002) == 0x00000002);
+      }
+      /**
+       * <code>optional int32 titles_count = 2;</code>
+       */
+      public int getTitlesCount() {
+        return titlesCount_;
+      }
+      /**
+       * <code>optional int32 titles_count = 2;</code>
+       */
+      public Builder setTitlesCount(int value) {
+        bitField0_ |= 0x00000002;
+        titlesCount_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional int32 titles_count = 2;</code>
+       */
+      public Builder clearTitlesCount() {
+        bitField0_ = (bitField0_ & ~0x00000002);
+        titlesCount_ = 0;
+        onChanged();
+        return this;
+      }
+
+      private int titleTokensCount_ ;
+      /**
+       * <code>optional int32 title_tokens_count = 3;</code>
+       */
+      public boolean hasTitleTokensCount() {
+        return ((bitField0_ & 0x00000004) == 0x00000004);
+      }
+      /**
+       * <code>optional int32 title_tokens_count = 3;</code>
+       */
+      public int getTitleTokensCount() {
+        return titleTokensCount_;
+      }
+      /**
+       * <code>optional int32 title_tokens_count = 3;</code>
+       */
+      public Builder setTitleTokensCount(int value) {
+        bitField0_ |= 0x00000004;
+        titleTokensCount_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional int32 title_tokens_count = 3;</code>
+       */
+      public Builder clearTitleTokensCount() {
+        bitField0_ = (bitField0_ & ~0x00000004);
+        titleTokensCount_ = 0;
+        onChanged();
+        return this;
+      }
+
+      private int contentTokensCount_ ;
+      /**
+       * <code>optional int32 content_tokens_count = 4;</code>
+       */
+      public boolean hasContentTokensCount() {
+        return ((bitField0_ & 0x00000008) == 0x00000008);
+      }
+      /**
+       * <code>optional int32 content_tokens_count = 4;</code>
+       */
+      public int getContentTokensCount() {
+        return contentTokensCount_;
+      }
+      /**
+       * <code>optional int32 content_tokens_count = 4;</code>
+       */
+      public Builder setContentTokensCount(int value) {
+        bitField0_ |= 0x00000008;
+        contentTokensCount_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional int32 content_tokens_count = 4;</code>
+       */
+      public Builder clearContentTokensCount() {
+        bitField0_ = (bitField0_ & ~0x00000008);
+        contentTokensCount_ = 0;
+        onChanged();
+        return this;
+      }
+
+      private int linkTokensCount_ ;
+      /**
+       * <code>optional int32 link_tokens_count = 5;</code>
+       */
+      public boolean hasLinkTokensCount() {
+        return ((bitField0_ & 0x00000010) == 0x00000010);
+      }
+      /**
+       * <code>optional int32 link_tokens_count = 5;</code>
+       */
+      public int getLinkTokensCount() {
+        return linkTokensCount_;
+      }
+      /**
+       * <code>optional int32 link_tokens_count = 5;</code>
+       */
+      public Builder setLinkTokensCount(int value) {
+        bitField0_ |= 0x00000010;
+        linkTokensCount_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional int32 link_tokens_count = 5;</code>
+       */
+      public Builder clearLinkTokensCount() {
+        bitField0_ = (bitField0_ & ~0x00000010);
+        linkTokensCount_ = 0;
+        onChanged();
+        return this;
+      }
+
+      private int incomingLinksCount_ ;
+      /**
+       * <code>optional int32 incoming_links_count = 6;</code>
+       */
+      public boolean hasIncomingLinksCount() {
+        return ((bitField0_ & 0x00000020) == 0x00000020);
+      }
+      /**
+       * <code>optional int32 incoming_links_count = 6;</code>
+       */
+      public int getIncomingLinksCount() {
+        return incomingLinksCount_;
+      }
+      /**
+       * <code>optional int32 incoming_links_count = 6;</code>
+       */
+      public Builder setIncomingLinksCount(int value) {
+        bitField0_ |= 0x00000020;
+        incomingLinksCount_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional int32 incoming_links_count = 6;</code>
+       */
+      public Builder clearIncomingLinksCount() {
+        bitField0_ = (bitField0_ & ~0x00000020);
+        incomingLinksCount_ = 0;
+        onChanged();
+        return this;
+      }
+
+      private int outgoingLinksCount_ ;
+      /**
+       * <code>optional int32 outgoing_links_count = 7;</code>
+       */
+      public boolean hasOutgoingLinksCount() {
+        return ((bitField0_ & 0x00000040) == 0x00000040);
+      }
+      /**
+       * <code>optional int32 outgoing_links_count = 7;</code>
+       */
+      public int getOutgoingLinksCount() {
+        return outgoingLinksCount_;
+      }
+      /**
+       * <code>optional int32 outgoing_links_count = 7;</code>
+       */
+      public Builder setOutgoingLinksCount(int value) {
+        bitField0_ |= 0x00000040;
+        outgoingLinksCount_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional int32 outgoing_links_count = 7;</code>
+       */
+      public Builder clearOutgoingLinksCount() {
+        bitField0_ = (bitField0_ & ~0x00000040);
+        outgoingLinksCount_ = 0;
+        onChanged();
+        return this;
+      }
+
+      private int uniqueTargetsCount_ ;
+      /**
+       * <code>optional int32 unique_targets_count = 8;</code>
+       */
+      public boolean hasUniqueTargetsCount() {
+        return ((bitField0_ & 0x00000080) == 0x00000080);
+      }
+      /**
+       * <code>optional int32 unique_targets_count = 8;</code>
+       */
+      public int getUniqueTargetsCount() {
+        return uniqueTargetsCount_;
+      }
+      /**
+       * <code>optional int32 unique_targets_count = 8;</code>
+       */
+      public Builder setUniqueTargetsCount(int value) {
+        bitField0_ |= 0x00000080;
+        uniqueTargetsCount_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional int32 unique_targets_count = 8;</code>
+       */
+      public Builder clearUniqueTargetsCount() {
+        bitField0_ = (bitField0_ & ~0x00000080);
+        uniqueTargetsCount_ = 0;
+        onChanged();
+        return this;
+      }
+
+      private int targetTitleTokensCount_ ;
+      /**
+       * <code>optional int32 target_title_tokens_count = 9;</code>
+       */
+      public boolean hasTargetTitleTokensCount() {
+        return ((bitField0_ & 0x00000100) == 0x00000100);
+      }
+      /**
+       * <code>optional int32 target_title_tokens_count = 9;</code>
+       */
+      public int getTargetTitleTokensCount() {
+        return targetTitleTokensCount_;
+      }
+      /**
+       * <code>optional int32 target_title_tokens_count = 9;</code>
+       */
+      public Builder setTargetTitleTokensCount(int value) {
+        bitField0_ |= 0x00000100;
+        targetTitleTokensCount_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional int32 target_title_tokens_count = 9;</code>
+       */
+      public Builder clearTargetTitleTokensCount() {
+        bitField0_ = (bitField0_ & ~0x00000100);
+        targetTitleTokensCount_ = 0;
+        onChanged();
+        return this;
+      }
+
+      private int uniqueReferrersCount_ ;
+      /**
+       * <code>optional int32 unique_referrers_count = 10;</code>
+       */
+      public boolean hasUniqueReferrersCount() {
+        return ((bitField0_ & 0x00000200) == 0x00000200);
+      }
+      /**
+       * <code>optional int32 unique_referrers_count = 10;</code>
+       */
+      public int getUniqueReferrersCount() {
+        return uniqueReferrersCount_;
+      }
+      /**
+       * <code>optional int32 unique_referrers_count = 10;</code>
+       */
+      public Builder setUniqueReferrersCount(int value) {
+        bitField0_ |= 0x00000200;
+        uniqueReferrersCount_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional int32 unique_referrers_count = 10;</code>
+       */
+      public Builder clearUniqueReferrersCount() {
+        bitField0_ = (bitField0_ & ~0x00000200);
+        uniqueReferrersCount_ = 0;
+        onChanged();
+        return this;
+      }
+
+      private java.util.List<com.expleague.sensearch.protobuf.index.IndexUnits.VgramFrequency> unigrams_ =
+        java.util.Collections.emptyList();
+      private void ensureUnigramsIsMutable() {
+        if (!((bitField0_ & 0x00000400) == 0x00000400)) {
+          unigrams_ = new java.util.ArrayList<com.expleague.sensearch.protobuf.index.IndexUnits.VgramFrequency>(unigrams_);
+          bitField0_ |= 0x00000400;
+         }
+      }
+
+      private com.google.protobuf.RepeatedFieldBuilder<
+          com.expleague.sensearch.protobuf.index.IndexUnits.VgramFrequency, com.expleague.sensearch.protobuf.index.IndexUnits.VgramFrequency.Builder, com.expleague.sensearch.protobuf.index.IndexUnits.VgramFrequencyOrBuilder> unigramsBuilder_;
+
+      /**
+       * <code>repeated .index.VgramFrequency unigrams = 11;</code>
+       */
+      public java.util.List<com.expleague.sensearch.protobuf.index.IndexUnits.VgramFrequency> getUnigramsList() {
+        if (unigramsBuilder_ == null) {
+          return java.util.Collections.unmodifiableList(unigrams_);
+        } else {
+          return unigramsBuilder_.getMessageList();
+        }
+      }
+      /**
+       * <code>repeated .index.VgramFrequency unigrams = 11;</code>
+       */
+      public int getUnigramsCount() {
+        if (unigramsBuilder_ == null) {
+          return unigrams_.size();
+        } else {
+          return unigramsBuilder_.getCount();
+        }
+      }
+      /**
+       * <code>repeated .index.VgramFrequency unigrams = 11;</code>
+       */
+      public com.expleague.sensearch.protobuf.index.IndexUnits.VgramFrequency getUnigrams(int index) {
+        if (unigramsBuilder_ == null) {
+          return unigrams_.get(index);
+        } else {
+          return unigramsBuilder_.getMessage(index);
+        }
+      }
+      /**
+       * <code>repeated .index.VgramFrequency unigrams = 11;</code>
+       */
+      public Builder setUnigrams(
+          int index, com.expleague.sensearch.protobuf.index.IndexUnits.VgramFrequency value) {
+        if (unigramsBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureUnigramsIsMutable();
+          unigrams_.set(index, value);
+          onChanged();
+        } else {
+          unigramsBuilder_.setMessage(index, value);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .index.VgramFrequency unigrams = 11;</code>
+       */
+      public Builder setUnigrams(
+          int index, com.expleague.sensearch.protobuf.index.IndexUnits.VgramFrequency.Builder builderForValue) {
+        if (unigramsBuilder_ == null) {
+          ensureUnigramsIsMutable();
+          unigrams_.set(index, builderForValue.build());
+          onChanged();
+        } else {
+          unigramsBuilder_.setMessage(index, builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .index.VgramFrequency unigrams = 11;</code>
+       */
+      public Builder addUnigrams(com.expleague.sensearch.protobuf.index.IndexUnits.VgramFrequency value) {
+        if (unigramsBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureUnigramsIsMutable();
+          unigrams_.add(value);
+          onChanged();
+        } else {
+          unigramsBuilder_.addMessage(value);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .index.VgramFrequency unigrams = 11;</code>
+       */
+      public Builder addUnigrams(
+          int index, com.expleague.sensearch.protobuf.index.IndexUnits.VgramFrequency value) {
+        if (unigramsBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureUnigramsIsMutable();
+          unigrams_.add(index, value);
+          onChanged();
+        } else {
+          unigramsBuilder_.addMessage(index, value);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .index.VgramFrequency unigrams = 11;</code>
+       */
+      public Builder addUnigrams(
+          com.expleague.sensearch.protobuf.index.IndexUnits.VgramFrequency.Builder builderForValue) {
+        if (unigramsBuilder_ == null) {
+          ensureUnigramsIsMutable();
+          unigrams_.add(builderForValue.build());
+          onChanged();
+        } else {
+          unigramsBuilder_.addMessage(builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .index.VgramFrequency unigrams = 11;</code>
+       */
+      public Builder addUnigrams(
+          int index, com.expleague.sensearch.protobuf.index.IndexUnits.VgramFrequency.Builder builderForValue) {
+        if (unigramsBuilder_ == null) {
+          ensureUnigramsIsMutable();
+          unigrams_.add(index, builderForValue.build());
+          onChanged();
+        } else {
+          unigramsBuilder_.addMessage(index, builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .index.VgramFrequency unigrams = 11;</code>
+       */
+      public Builder addAllUnigrams(
+          java.lang.Iterable<? extends com.expleague.sensearch.protobuf.index.IndexUnits.VgramFrequency> values) {
+        if (unigramsBuilder_ == null) {
+          ensureUnigramsIsMutable();
+          com.google.protobuf.AbstractMessageLite.Builder.addAll(
+              values, unigrams_);
+          onChanged();
+        } else {
+          unigramsBuilder_.addAllMessages(values);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .index.VgramFrequency unigrams = 11;</code>
+       */
+      public Builder clearUnigrams() {
+        if (unigramsBuilder_ == null) {
+          unigrams_ = java.util.Collections.emptyList();
+          bitField0_ = (bitField0_ & ~0x00000400);
+          onChanged();
+        } else {
+          unigramsBuilder_.clear();
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .index.VgramFrequency unigrams = 11;</code>
+       */
+      public Builder removeUnigrams(int index) {
+        if (unigramsBuilder_ == null) {
+          ensureUnigramsIsMutable();
+          unigrams_.remove(index);
+          onChanged();
+        } else {
+          unigramsBuilder_.remove(index);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .index.VgramFrequency unigrams = 11;</code>
+       */
+      public com.expleague.sensearch.protobuf.index.IndexUnits.VgramFrequency.Builder getUnigramsBuilder(
+          int index) {
+        return getUnigramsFieldBuilder().getBuilder(index);
+      }
+      /**
+       * <code>repeated .index.VgramFrequency unigrams = 11;</code>
+       */
+      public com.expleague.sensearch.protobuf.index.IndexUnits.VgramFrequencyOrBuilder getUnigramsOrBuilder(
+          int index) {
+        if (unigramsBuilder_ == null) {
+          return unigrams_.get(index);  } else {
+          return unigramsBuilder_.getMessageOrBuilder(index);
+        }
+      }
+      /**
+       * <code>repeated .index.VgramFrequency unigrams = 11;</code>
+       */
+      public java.util.List<? extends com.expleague.sensearch.protobuf.index.IndexUnits.VgramFrequencyOrBuilder> 
+           getUnigramsOrBuilderList() {
+        if (unigramsBuilder_ != null) {
+          return unigramsBuilder_.getMessageOrBuilderList();
+        } else {
+          return java.util.Collections.unmodifiableList(unigrams_);
+        }
+      }
+      /**
+       * <code>repeated .index.VgramFrequency unigrams = 11;</code>
+       */
+      public com.expleague.sensearch.protobuf.index.IndexUnits.VgramFrequency.Builder addUnigramsBuilder() {
+        return getUnigramsFieldBuilder().addBuilder(
+            com.expleague.sensearch.protobuf.index.IndexUnits.VgramFrequency.getDefaultInstance());
+      }
+      /**
+       * <code>repeated .index.VgramFrequency unigrams = 11;</code>
+       */
+      public com.expleague.sensearch.protobuf.index.IndexUnits.VgramFrequency.Builder addUnigramsBuilder(
+          int index) {
+        return getUnigramsFieldBuilder().addBuilder(
+            index, com.expleague.sensearch.protobuf.index.IndexUnits.VgramFrequency.getDefaultInstance());
+      }
+      /**
+       * <code>repeated .index.VgramFrequency unigrams = 11;</code>
+       */
+      public java.util.List<com.expleague.sensearch.protobuf.index.IndexUnits.VgramFrequency.Builder> 
+           getUnigramsBuilderList() {
+        return getUnigramsFieldBuilder().getBuilderList();
+      }
+      private com.google.protobuf.RepeatedFieldBuilder<
+          com.expleague.sensearch.protobuf.index.IndexUnits.VgramFrequency, com.expleague.sensearch.protobuf.index.IndexUnits.VgramFrequency.Builder, com.expleague.sensearch.protobuf.index.IndexUnits.VgramFrequencyOrBuilder> 
+          getUnigramsFieldBuilder() {
+        if (unigramsBuilder_ == null) {
+          unigramsBuilder_ = new com.google.protobuf.RepeatedFieldBuilder<
+              com.expleague.sensearch.protobuf.index.IndexUnits.VgramFrequency, com.expleague.sensearch.protobuf.index.IndexUnits.VgramFrequency.Builder, com.expleague.sensearch.protobuf.index.IndexUnits.VgramFrequencyOrBuilder>(
+                  unigrams_,
+                  ((bitField0_ & 0x00000400) == 0x00000400),
+                  getParentForChildren(),
+                  isClean());
+          unigrams_ = null;
+        }
+        return unigramsBuilder_;
+      }
+
+      private java.util.List<com.expleague.sensearch.protobuf.index.IndexUnits.VgramFrequency> bigrams_ =
+        java.util.Collections.emptyList();
+      private void ensureBigramsIsMutable() {
+        if (!((bitField0_ & 0x00000800) == 0x00000800)) {
+          bigrams_ = new java.util.ArrayList<com.expleague.sensearch.protobuf.index.IndexUnits.VgramFrequency>(bigrams_);
+          bitField0_ |= 0x00000800;
+         }
+      }
+
+      private com.google.protobuf.RepeatedFieldBuilder<
+          com.expleague.sensearch.protobuf.index.IndexUnits.VgramFrequency, com.expleague.sensearch.protobuf.index.IndexUnits.VgramFrequency.Builder, com.expleague.sensearch.protobuf.index.IndexUnits.VgramFrequencyOrBuilder> bigramsBuilder_;
+
+      /**
+       * <code>repeated .index.VgramFrequency bigrams = 12;</code>
+       */
+      public java.util.List<com.expleague.sensearch.protobuf.index.IndexUnits.VgramFrequency> getBigramsList() {
+        if (bigramsBuilder_ == null) {
+          return java.util.Collections.unmodifiableList(bigrams_);
+        } else {
+          return bigramsBuilder_.getMessageList();
+        }
+      }
+      /**
+       * <code>repeated .index.VgramFrequency bigrams = 12;</code>
+       */
+      public int getBigramsCount() {
+        if (bigramsBuilder_ == null) {
+          return bigrams_.size();
+        } else {
+          return bigramsBuilder_.getCount();
+        }
+      }
+      /**
+       * <code>repeated .index.VgramFrequency bigrams = 12;</code>
+       */
+      public com.expleague.sensearch.protobuf.index.IndexUnits.VgramFrequency getBigrams(int index) {
+        if (bigramsBuilder_ == null) {
+          return bigrams_.get(index);
+        } else {
+          return bigramsBuilder_.getMessage(index);
+        }
+      }
+      /**
+       * <code>repeated .index.VgramFrequency bigrams = 12;</code>
+       */
+      public Builder setBigrams(
+          int index, com.expleague.sensearch.protobuf.index.IndexUnits.VgramFrequency value) {
+        if (bigramsBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureBigramsIsMutable();
+          bigrams_.set(index, value);
+          onChanged();
+        } else {
+          bigramsBuilder_.setMessage(index, value);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .index.VgramFrequency bigrams = 12;</code>
+       */
+      public Builder setBigrams(
+          int index, com.expleague.sensearch.protobuf.index.IndexUnits.VgramFrequency.Builder builderForValue) {
+        if (bigramsBuilder_ == null) {
+          ensureBigramsIsMutable();
+          bigrams_.set(index, builderForValue.build());
+          onChanged();
+        } else {
+          bigramsBuilder_.setMessage(index, builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .index.VgramFrequency bigrams = 12;</code>
+       */
+      public Builder addBigrams(com.expleague.sensearch.protobuf.index.IndexUnits.VgramFrequency value) {
+        if (bigramsBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureBigramsIsMutable();
+          bigrams_.add(value);
+          onChanged();
+        } else {
+          bigramsBuilder_.addMessage(value);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .index.VgramFrequency bigrams = 12;</code>
+       */
+      public Builder addBigrams(
+          int index, com.expleague.sensearch.protobuf.index.IndexUnits.VgramFrequency value) {
+        if (bigramsBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureBigramsIsMutable();
+          bigrams_.add(index, value);
+          onChanged();
+        } else {
+          bigramsBuilder_.addMessage(index, value);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .index.VgramFrequency bigrams = 12;</code>
+       */
+      public Builder addBigrams(
+          com.expleague.sensearch.protobuf.index.IndexUnits.VgramFrequency.Builder builderForValue) {
+        if (bigramsBuilder_ == null) {
+          ensureBigramsIsMutable();
+          bigrams_.add(builderForValue.build());
+          onChanged();
+        } else {
+          bigramsBuilder_.addMessage(builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .index.VgramFrequency bigrams = 12;</code>
+       */
+      public Builder addBigrams(
+          int index, com.expleague.sensearch.protobuf.index.IndexUnits.VgramFrequency.Builder builderForValue) {
+        if (bigramsBuilder_ == null) {
+          ensureBigramsIsMutable();
+          bigrams_.add(index, builderForValue.build());
+          onChanged();
+        } else {
+          bigramsBuilder_.addMessage(index, builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .index.VgramFrequency bigrams = 12;</code>
+       */
+      public Builder addAllBigrams(
+          java.lang.Iterable<? extends com.expleague.sensearch.protobuf.index.IndexUnits.VgramFrequency> values) {
+        if (bigramsBuilder_ == null) {
+          ensureBigramsIsMutable();
+          com.google.protobuf.AbstractMessageLite.Builder.addAll(
+              values, bigrams_);
+          onChanged();
+        } else {
+          bigramsBuilder_.addAllMessages(values);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .index.VgramFrequency bigrams = 12;</code>
+       */
+      public Builder clearBigrams() {
+        if (bigramsBuilder_ == null) {
+          bigrams_ = java.util.Collections.emptyList();
+          bitField0_ = (bitField0_ & ~0x00000800);
+          onChanged();
+        } else {
+          bigramsBuilder_.clear();
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .index.VgramFrequency bigrams = 12;</code>
+       */
+      public Builder removeBigrams(int index) {
+        if (bigramsBuilder_ == null) {
+          ensureBigramsIsMutable();
+          bigrams_.remove(index);
+          onChanged();
+        } else {
+          bigramsBuilder_.remove(index);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .index.VgramFrequency bigrams = 12;</code>
+       */
+      public com.expleague.sensearch.protobuf.index.IndexUnits.VgramFrequency.Builder getBigramsBuilder(
+          int index) {
+        return getBigramsFieldBuilder().getBuilder(index);
+      }
+      /**
+       * <code>repeated .index.VgramFrequency bigrams = 12;</code>
+       */
+      public com.expleague.sensearch.protobuf.index.IndexUnits.VgramFrequencyOrBuilder getBigramsOrBuilder(
+          int index) {
+        if (bigramsBuilder_ == null) {
+          return bigrams_.get(index);  } else {
+          return bigramsBuilder_.getMessageOrBuilder(index);
+        }
+      }
+      /**
+       * <code>repeated .index.VgramFrequency bigrams = 12;</code>
+       */
+      public java.util.List<? extends com.expleague.sensearch.protobuf.index.IndexUnits.VgramFrequencyOrBuilder> 
+           getBigramsOrBuilderList() {
+        if (bigramsBuilder_ != null) {
+          return bigramsBuilder_.getMessageOrBuilderList();
+        } else {
+          return java.util.Collections.unmodifiableList(bigrams_);
+        }
+      }
+      /**
+       * <code>repeated .index.VgramFrequency bigrams = 12;</code>
+       */
+      public com.expleague.sensearch.protobuf.index.IndexUnits.VgramFrequency.Builder addBigramsBuilder() {
+        return getBigramsFieldBuilder().addBuilder(
+            com.expleague.sensearch.protobuf.index.IndexUnits.VgramFrequency.getDefaultInstance());
+      }
+      /**
+       * <code>repeated .index.VgramFrequency bigrams = 12;</code>
+       */
+      public com.expleague.sensearch.protobuf.index.IndexUnits.VgramFrequency.Builder addBigramsBuilder(
+          int index) {
+        return getBigramsFieldBuilder().addBuilder(
+            index, com.expleague.sensearch.protobuf.index.IndexUnits.VgramFrequency.getDefaultInstance());
+      }
+      /**
+       * <code>repeated .index.VgramFrequency bigrams = 12;</code>
+       */
+      public java.util.List<com.expleague.sensearch.protobuf.index.IndexUnits.VgramFrequency.Builder> 
+           getBigramsBuilderList() {
+        return getBigramsFieldBuilder().getBuilderList();
+      }
+      private com.google.protobuf.RepeatedFieldBuilder<
+          com.expleague.sensearch.protobuf.index.IndexUnits.VgramFrequency, com.expleague.sensearch.protobuf.index.IndexUnits.VgramFrequency.Builder, com.expleague.sensearch.protobuf.index.IndexUnits.VgramFrequencyOrBuilder> 
+          getBigramsFieldBuilder() {
+        if (bigramsBuilder_ == null) {
+          bigramsBuilder_ = new com.google.protobuf.RepeatedFieldBuilder<
+              com.expleague.sensearch.protobuf.index.IndexUnits.VgramFrequency, com.expleague.sensearch.protobuf.index.IndexUnits.VgramFrequency.Builder, com.expleague.sensearch.protobuf.index.IndexUnits.VgramFrequencyOrBuilder>(
+                  bigrams_,
+                  ((bitField0_ & 0x00000800) == 0x00000800),
+                  getParentForChildren(),
+                  isClean());
+          bigrams_ = null;
+        }
+        return bigramsBuilder_;
+      }
+
+      // @@protoc_insertion_point(builder_scope:index.PageStatistics)
+    }
+
+    static {
+      defaultInstance = new PageStatistics(true);
+      defaultInstance.initFields();
+    }
+
+    // @@protoc_insertion_point(class_scope:index.PageStatistics)
   }
 
   public interface TermOrBuilder extends
@@ -8403,6 +10774,11 @@ public final class IndexUnits {
     com.google.protobuf.GeneratedMessage.FieldAccessorTable
       internal_static_index_Page_Link_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_index_VgramFrequency_descriptor;
+  private static
+    com.google.protobuf.GeneratedMessage.FieldAccessorTable
+      internal_static_index_VgramFrequency_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
     internal_static_index_TermStatistics_descriptor;
   private static
     com.google.protobuf.GeneratedMessage.FieldAccessorTable
@@ -8412,6 +10788,11 @@ public final class IndexUnits {
   private static
     com.google.protobuf.GeneratedMessage.FieldAccessorTable
       internal_static_index_TermStatistics_TermFrequency_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_index_PageStatistics_descriptor;
+  private static
+    com.google.protobuf.GeneratedMessage.FieldAccessorTable
+      internal_static_index_PageStatistics_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
     internal_static_index_Term_descriptor;
   private static
@@ -8441,39 +10822,51 @@ public final class IndexUnits {
       descriptor;
   static {
     java.lang.String[] descriptorData = {
-        "\n\020indexunits.proto\022\005index\"\321\001\n\tIndexMeta\022" +
+      "\n\020indexunits.proto\022\005index\"\321\001\n\tIndexMeta\022" +
       "\017\n\007version\030\001 \001(\005\022\023\n\013pages_count\030\002 \001(\005\022\031\n" +
       "\021average_page_size\030\003 \001(\001\022\023\n\013links_count\030" +
       "\006 \001(\005\022,\n$average_link_target_title_word_" +
       "count\030\007 \001(\001\022\034\n\024section_titles_count\030\010 \001(" +
-            "\005\022\"\n\032average_section_title_size\030\t \001(\001\"\267\003" +
-            "\n\004Page\022\017\n\007page_id\030\001 \001(\003\022\013\n\003uri\030\002 \001(\t\022)\n\005" +
-            "title\030\003 \001(\0132\032.index.Page.SerializedText\022" +
-            "+\n\007content\030\004 \001(\0132\032.index.Page.Serialized" +
-            "Text\022(\n\016outgoing_links\030\005 \003(\0132\020.index.Pag",
-        "e.Link\022(\n\016incoming_links\030\006 \003(\0132\020.index.P" +
-            "age.Link\022\022\n\ncategories\030\t \003(\t\022\021\n\tparent_i" +
-            "d\030\007 \001(\003\022\024\n\014subpages_ids\030\010 \003(\003\022\017\n\007root_id" +
-            "\030\n \001(\003\032#\n\016SerializedText\022\021\n\ttoken_ids\030\001 " +
-            "\003(\005\032r\n\004Link\022(\n\004text\030\001 \001(\0132\032.index.Page.S" +
-            "erializedText\022\026\n\016target_page_id\030\002 \001(\003\022\020\n" +
-            "\010position\030\003 \001(\003\022\026\n\016source_page_id\030\004 \001(\003\"" +
-            "\316\001\n\016TermStatistics\022\017\n\007term_id\030\001 \001(\005\022\032\n\022d" +
-            "ocument_frequency\030\002 \001(\005\022\026\n\016term_frequenc" +
-            "y\030\004 \001(\003\022=\n\020bigram_frequency\030\005 \003(\0132#.inde",
-        "x.TermStatistics.TermFrequency\0328\n\rTermFr" +
-            "equency\022\017\n\007term_id\030\001 \001(\005\022\026\n\016term_frequen" +
-            "cy\030\002 \001(\003\"\202\002\n\004Term\022\n\n\002id\030\001 \001(\005\022\020\n\010lemma_i" +
-            "d\030\002 \001(\005\022\014\n\004text\030\003 \001(\t\0220\n\016part_of_speech\030" +
-            "\004 \001(\0162\030.index.Term.PartOfSpeech\"\233\001\n\014Part" +
-            "OfSpeech\022\013\n\007UNKNOWN\020\000\022\005\n\001A\020\001\022\007\n\003ADV\020\002\022\n\n" +
-            "\006ADVPRO\020\003\022\010\n\004ANUM\020\004\022\010\n\004APRO\020\005\022\007\n\003COM\020\006\022\010" +
-            "\n\004CONJ\020\007\022\010\n\004INTJ\020\010\022\007\n\003NUM\020\t\022\010\n\004PART\020\n\022\006\n" +
-            "\002PR\020\013\022\005\n\001S\020\014\022\010\n\004SPRO\020\r\022\005\n\001V\020\016\"\034\n\010TermLis" +
-            "t\022\020\n\010termList\030\001 \003(\005\"\036\n\013IntegerList\022\017\n\007in",
-        "tList\030\001 \003(\005\".\n\016UriPageMapping\022\013\n\003uri\030\001 \001" +
-            "(\t\022\017\n\007page_id\030\002 \001(\003B4\n&com.expleague.sen" +
-            "search.protobuf.indexB\nIndexUnits"
+      "\005\022\"\n\032average_section_title_size\030\t \001(\001\"\267\003" +
+      "\n\004Page\022\017\n\007page_id\030\001 \001(\003\022\013\n\003uri\030\002 \001(\t\022)\n\005" +
+      "title\030\003 \001(\0132\032.index.Page.SerializedText\022" +
+      "+\n\007content\030\004 \001(\0132\032.index.Page.Serialized" +
+      "Text\022(\n\016outgoing_links\030\005 \003(\0132\020.index.Pag",
+      "e.Link\022(\n\016incoming_links\030\006 \003(\0132\020.index.P" +
+      "age.Link\022\022\n\ncategories\030\t \003(\t\022\021\n\tparent_i" +
+      "d\030\007 \001(\003\022\024\n\014subpages_ids\030\010 \003(\003\022\017\n\007root_id" +
+      "\030\n \001(\003\032#\n\016SerializedText\022\021\n\ttoken_ids\030\001 " +
+      "\003(\005\032r\n\004Link\022(\n\004text\030\001 \001(\0132\032.index.Page.S" +
+      "erializedText\022\026\n\016target_page_id\030\002 \001(\003\022\020\n" +
+      "\010position\030\003 \001(\003\022\026\n\016source_page_id\030\004 \001(\003\"" +
+      "C\n\016VgramFrequency\022\025\n\rterm_sequence\030\001 \003(\005" +
+      "\022\032\n\022sequence_frequency\030\002 \001(\003\"\316\001\n\016TermSta" +
+      "tistics\022\017\n\007term_id\030\001 \001(\005\022\032\n\022document_fre",
+      "quency\030\002 \001(\005\022\026\n\016term_frequency\030\004 \001(\003\022=\n\020" +
+      "bigram_frequency\030\005 \003(\0132#.index.TermStati" +
+      "stics.TermFrequency\0328\n\rTermFrequency\022\017\n\007" +
+      "term_id\030\001 \001(\005\022\026\n\016term_frequency\030\002 \001(\003\"\372\002" +
+      "\n\016PageStatistics\022\017\n\007page_id\030\001 \001(\005\022\024\n\014tit" +
+      "les_count\030\002 \001(\005\022\032\n\022title_tokens_count\030\003 " +
+      "\001(\005\022\034\n\024content_tokens_count\030\004 \001(\005\022\031\n\021lin" +
+      "k_tokens_count\030\005 \001(\005\022\034\n\024incoming_links_c" +
+      "ount\030\006 \001(\005\022\034\n\024outgoing_links_count\030\007 \001(\005" +
+      "\022\034\n\024unique_targets_count\030\010 \001(\005\022!\n\031target",
+      "_title_tokens_count\030\t \001(\005\022\036\n\026unique_refe" +
+      "rrers_count\030\n \001(\005\022\'\n\010unigrams\030\013 \003(\0132\025.in" +
+      "dex.VgramFrequency\022&\n\007bigrams\030\014 \003(\0132\025.in" +
+      "dex.VgramFrequency\"\202\002\n\004Term\022\n\n\002id\030\001 \001(\005\022" +
+      "\020\n\010lemma_id\030\002 \001(\005\022\014\n\004text\030\003 \001(\t\0220\n\016part_" +
+      "of_speech\030\004 \001(\0162\030.index.Term.PartOfSpeec" +
+      "h\"\233\001\n\014PartOfSpeech\022\013\n\007UNKNOWN\020\000\022\005\n\001A\020\001\022\007" +
+      "\n\003ADV\020\002\022\n\n\006ADVPRO\020\003\022\010\n\004ANUM\020\004\022\010\n\004APRO\020\005\022" +
+      "\007\n\003COM\020\006\022\010\n\004CONJ\020\007\022\010\n\004INTJ\020\010\022\007\n\003NUM\020\t\022\010\n" +
+      "\004PART\020\n\022\006\n\002PR\020\013\022\005\n\001S\020\014\022\010\n\004SPRO\020\r\022\005\n\001V\020\016\"",
+      "\034\n\010TermList\022\020\n\010termList\030\001 \003(\005\"\036\n\013Integer" +
+      "List\022\017\n\007intList\030\001 \003(\005\".\n\016UriPageMapping\022" +
+      "\013\n\003uri\030\001 \001(\t\022\017\n\007page_id\030\002 \001(\003B4\n&com.exp" +
+      "league.sensearch.protobuf.indexB\nIndexUn" +
+      "its"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
         new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
@@ -8492,8 +10885,7 @@ public final class IndexUnits {
     internal_static_index_IndexMeta_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessage.FieldAccessorTable(
         internal_static_index_IndexMeta_descriptor,
-        new java.lang.String[]{"Version", "PagesCount", "AveragePageSize", "LinksCount",
-            "AverageLinkTargetTitleWordCount", "SectionTitlesCount", "AverageSectionTitleSize",});
+        new java.lang.String[] { "Version", "PagesCount", "AveragePageSize", "LinksCount", "AverageLinkTargetTitleWordCount", "SectionTitlesCount", "AverageSectionTitleSize", });
     internal_static_index_Page_descriptor =
       getDescriptor().getMessageTypes().get(1);
     internal_static_index_Page_fieldAccessorTable = new
@@ -8512,38 +10904,50 @@ public final class IndexUnits {
       com.google.protobuf.GeneratedMessage.FieldAccessorTable(
         internal_static_index_Page_Link_descriptor,
         new java.lang.String[] { "Text", "TargetPageId", "Position", "SourcePageId", });
-    internal_static_index_TermStatistics_descriptor =
+    internal_static_index_VgramFrequency_descriptor =
       getDescriptor().getMessageTypes().get(2);
+    internal_static_index_VgramFrequency_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessage.FieldAccessorTable(
+        internal_static_index_VgramFrequency_descriptor,
+        new java.lang.String[] { "TermSequence", "SequenceFrequency", });
+    internal_static_index_TermStatistics_descriptor =
+      getDescriptor().getMessageTypes().get(3);
     internal_static_index_TermStatistics_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessage.FieldAccessorTable(
         internal_static_index_TermStatistics_descriptor,
-        new java.lang.String[]{"TermId", "DocumentFrequency", "TermFrequency", "BigramFrequency",});
+        new java.lang.String[] { "TermId", "DocumentFrequency", "TermFrequency", "BigramFrequency", });
     internal_static_index_TermStatistics_TermFrequency_descriptor =
       internal_static_index_TermStatistics_descriptor.getNestedTypes().get(0);
     internal_static_index_TermStatistics_TermFrequency_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessage.FieldAccessorTable(
         internal_static_index_TermStatistics_TermFrequency_descriptor,
         new java.lang.String[] { "TermId", "TermFrequency", });
+    internal_static_index_PageStatistics_descriptor =
+      getDescriptor().getMessageTypes().get(4);
+    internal_static_index_PageStatistics_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessage.FieldAccessorTable(
+        internal_static_index_PageStatistics_descriptor,
+        new java.lang.String[] { "PageId", "TitlesCount", "TitleTokensCount", "ContentTokensCount", "LinkTokensCount", "IncomingLinksCount", "OutgoingLinksCount", "UniqueTargetsCount", "TargetTitleTokensCount", "UniqueReferrersCount", "Unigrams", "Bigrams", });
     internal_static_index_Term_descriptor =
-      getDescriptor().getMessageTypes().get(3);
+      getDescriptor().getMessageTypes().get(5);
     internal_static_index_Term_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessage.FieldAccessorTable(
         internal_static_index_Term_descriptor,
         new java.lang.String[] { "Id", "LemmaId", "Text", "PartOfSpeech", });
     internal_static_index_TermList_descriptor =
-      getDescriptor().getMessageTypes().get(4);
+      getDescriptor().getMessageTypes().get(6);
     internal_static_index_TermList_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessage.FieldAccessorTable(
         internal_static_index_TermList_descriptor,
         new java.lang.String[] { "TermList", });
     internal_static_index_IntegerList_descriptor =
-      getDescriptor().getMessageTypes().get(5);
+      getDescriptor().getMessageTypes().get(7);
     internal_static_index_IntegerList_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessage.FieldAccessorTable(
         internal_static_index_IntegerList_descriptor,
         new java.lang.String[] { "IntList", });
     internal_static_index_UriPageMapping_descriptor =
-      getDescriptor().getMessageTypes().get(6);
+      getDescriptor().getMessageTypes().get(8);
     internal_static_index_UriPageMapping_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessage.FieldAccessorTable(
         internal_static_index_UriPageMapping_descriptor,
