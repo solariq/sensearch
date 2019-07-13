@@ -71,17 +71,17 @@ message TermStatistics {
 }
 
 message PageStatistics {
-  optional int32 page_id = 1;
+  optional int64 page_id = 1;
   optional int32 titles_count = 2;
-  optional int32 title_tokens_count = 3;
-  optional int32 content_tokens_count = 4;
-  optional int32 link_tokens_count = 5;
+  optional int32 title_terms_count = 3;
+  optional int32 content_terms_count = 4;
+  optional int32 link_terms_count = 5;
 
   optional int32 incoming_links_count = 6;
   optional int32 outgoing_links_count = 7;
 
   optional int32 unique_targets_count = 8;
-  optional int32 target_title_tokens_count = 9;
+  optional int32 target_title_terms_count = 9;
 
   optional int32 unique_referrers_count = 10;
 
@@ -91,7 +91,6 @@ message PageStatistics {
 
 message Term {
   optional int32 id = 1;
-  // Equals to -1 if lemma can not be extracted or lemma equals to this term
   optional int32 lemma_id = 2;
 
   optional string text = 3;

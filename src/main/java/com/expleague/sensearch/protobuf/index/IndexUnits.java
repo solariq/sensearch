@@ -6493,13 +6493,13 @@ public final class IndexUnits {
       com.google.protobuf.MessageOrBuilder {
 
     /**
-     * <code>optional int32 page_id = 1;</code>
+     * <code>optional int64 page_id = 1;</code>
      */
     boolean hasPageId();
     /**
-     * <code>optional int32 page_id = 1;</code>
+     * <code>optional int64 page_id = 1;</code>
      */
-    int getPageId();
+    long getPageId();
 
     /**
      * <code>optional int32 titles_count = 2;</code>
@@ -6511,31 +6511,31 @@ public final class IndexUnits {
     int getTitlesCount();
 
     /**
-     * <code>optional int32 title_tokens_count = 3;</code>
+     * <code>optional int32 title_terms_count = 3;</code>
      */
-    boolean hasTitleTokensCount();
+    boolean hasTitleTermsCount();
     /**
-     * <code>optional int32 title_tokens_count = 3;</code>
+     * <code>optional int32 title_terms_count = 3;</code>
      */
-    int getTitleTokensCount();
+    int getTitleTermsCount();
 
     /**
-     * <code>optional int32 content_tokens_count = 4;</code>
+     * <code>optional int32 content_terms_count = 4;</code>
      */
-    boolean hasContentTokensCount();
+    boolean hasContentTermsCount();
     /**
-     * <code>optional int32 content_tokens_count = 4;</code>
+     * <code>optional int32 content_terms_count = 4;</code>
      */
-    int getContentTokensCount();
+    int getContentTermsCount();
 
     /**
-     * <code>optional int32 link_tokens_count = 5;</code>
+     * <code>optional int32 link_terms_count = 5;</code>
      */
-    boolean hasLinkTokensCount();
+    boolean hasLinkTermsCount();
     /**
-     * <code>optional int32 link_tokens_count = 5;</code>
+     * <code>optional int32 link_terms_count = 5;</code>
      */
-    int getLinkTokensCount();
+    int getLinkTermsCount();
 
     /**
      * <code>optional int32 incoming_links_count = 6;</code>
@@ -6565,13 +6565,13 @@ public final class IndexUnits {
     int getUniqueTargetsCount();
 
     /**
-     * <code>optional int32 target_title_tokens_count = 9;</code>
+     * <code>optional int32 target_title_terms_count = 9;</code>
      */
-    boolean hasTargetTitleTokensCount();
+    boolean hasTargetTitleTermsCount();
     /**
-     * <code>optional int32 target_title_tokens_count = 9;</code>
+     * <code>optional int32 target_title_terms_count = 9;</code>
      */
-    int getTargetTitleTokensCount();
+    int getTargetTitleTermsCount();
 
     /**
      * <code>optional int32 unique_referrers_count = 10;</code>
@@ -6684,7 +6684,7 @@ public final class IndexUnits {
             }
             case 8: {
               bitField0_ |= 0x00000001;
-              pageId_ = input.readInt32();
+              pageId_ = input.readInt64();
               break;
             }
             case 16: {
@@ -6694,17 +6694,17 @@ public final class IndexUnits {
             }
             case 24: {
               bitField0_ |= 0x00000004;
-              titleTokensCount_ = input.readInt32();
+              titleTermsCount_ = input.readInt32();
               break;
             }
             case 32: {
               bitField0_ |= 0x00000008;
-              contentTokensCount_ = input.readInt32();
+              contentTermsCount_ = input.readInt32();
               break;
             }
             case 40: {
               bitField0_ |= 0x00000010;
-              linkTokensCount_ = input.readInt32();
+              linkTermsCount_ = input.readInt32();
               break;
             }
             case 48: {
@@ -6724,7 +6724,7 @@ public final class IndexUnits {
             }
             case 72: {
               bitField0_ |= 0x00000100;
-              targetTitleTokensCount_ = input.readInt32();
+              targetTitleTermsCount_ = input.readInt32();
               break;
             }
             case 80: {
@@ -6795,17 +6795,17 @@ public final class IndexUnits {
 
     private int bitField0_;
     public static final int PAGE_ID_FIELD_NUMBER = 1;
-    private int pageId_;
+    private long pageId_;
     /**
-     * <code>optional int32 page_id = 1;</code>
+     * <code>optional int64 page_id = 1;</code>
      */
     public boolean hasPageId() {
       return ((bitField0_ & 0x00000001) == 0x00000001);
     }
     /**
-     * <code>optional int32 page_id = 1;</code>
+     * <code>optional int64 page_id = 1;</code>
      */
-    public int getPageId() {
+    public long getPageId() {
       return pageId_;
     }
 
@@ -6824,49 +6824,49 @@ public final class IndexUnits {
       return titlesCount_;
     }
 
-    public static final int TITLE_TOKENS_COUNT_FIELD_NUMBER = 3;
-    private int titleTokensCount_;
+    public static final int TITLE_TERMS_COUNT_FIELD_NUMBER = 3;
+    private int titleTermsCount_;
     /**
-     * <code>optional int32 title_tokens_count = 3;</code>
+     * <code>optional int32 title_terms_count = 3;</code>
      */
-    public boolean hasTitleTokensCount() {
+    public boolean hasTitleTermsCount() {
       return ((bitField0_ & 0x00000004) == 0x00000004);
     }
     /**
-     * <code>optional int32 title_tokens_count = 3;</code>
+     * <code>optional int32 title_terms_count = 3;</code>
      */
-    public int getTitleTokensCount() {
-      return titleTokensCount_;
+    public int getTitleTermsCount() {
+      return titleTermsCount_;
     }
 
-    public static final int CONTENT_TOKENS_COUNT_FIELD_NUMBER = 4;
-    private int contentTokensCount_;
+    public static final int CONTENT_TERMS_COUNT_FIELD_NUMBER = 4;
+    private int contentTermsCount_;
     /**
-     * <code>optional int32 content_tokens_count = 4;</code>
+     * <code>optional int32 content_terms_count = 4;</code>
      */
-    public boolean hasContentTokensCount() {
+    public boolean hasContentTermsCount() {
       return ((bitField0_ & 0x00000008) == 0x00000008);
     }
     /**
-     * <code>optional int32 content_tokens_count = 4;</code>
+     * <code>optional int32 content_terms_count = 4;</code>
      */
-    public int getContentTokensCount() {
-      return contentTokensCount_;
+    public int getContentTermsCount() {
+      return contentTermsCount_;
     }
 
-    public static final int LINK_TOKENS_COUNT_FIELD_NUMBER = 5;
-    private int linkTokensCount_;
+    public static final int LINK_TERMS_COUNT_FIELD_NUMBER = 5;
+    private int linkTermsCount_;
     /**
-     * <code>optional int32 link_tokens_count = 5;</code>
+     * <code>optional int32 link_terms_count = 5;</code>
      */
-    public boolean hasLinkTokensCount() {
+    public boolean hasLinkTermsCount() {
       return ((bitField0_ & 0x00000010) == 0x00000010);
     }
     /**
-     * <code>optional int32 link_tokens_count = 5;</code>
+     * <code>optional int32 link_terms_count = 5;</code>
      */
-    public int getLinkTokensCount() {
-      return linkTokensCount_;
+    public int getLinkTermsCount() {
+      return linkTermsCount_;
     }
 
     public static final int INCOMING_LINKS_COUNT_FIELD_NUMBER = 6;
@@ -6914,19 +6914,19 @@ public final class IndexUnits {
       return uniqueTargetsCount_;
     }
 
-    public static final int TARGET_TITLE_TOKENS_COUNT_FIELD_NUMBER = 9;
-    private int targetTitleTokensCount_;
+    public static final int TARGET_TITLE_TERMS_COUNT_FIELD_NUMBER = 9;
+    private int targetTitleTermsCount_;
     /**
-     * <code>optional int32 target_title_tokens_count = 9;</code>
+     * <code>optional int32 target_title_terms_count = 9;</code>
      */
-    public boolean hasTargetTitleTokensCount() {
+    public boolean hasTargetTitleTermsCount() {
       return ((bitField0_ & 0x00000100) == 0x00000100);
     }
     /**
-     * <code>optional int32 target_title_tokens_count = 9;</code>
+     * <code>optional int32 target_title_terms_count = 9;</code>
      */
-    public int getTargetTitleTokensCount() {
-      return targetTitleTokensCount_;
+    public int getTargetTitleTermsCount() {
+      return targetTitleTermsCount_;
     }
 
     public static final int UNIQUE_REFERRERS_COUNT_FIELD_NUMBER = 10;
@@ -7015,15 +7015,15 @@ public final class IndexUnits {
     }
 
     private void initFields() {
-      pageId_ = 0;
+      pageId_ = 0L;
       titlesCount_ = 0;
-      titleTokensCount_ = 0;
-      contentTokensCount_ = 0;
-      linkTokensCount_ = 0;
+      titleTermsCount_ = 0;
+      contentTermsCount_ = 0;
+      linkTermsCount_ = 0;
       incomingLinksCount_ = 0;
       outgoingLinksCount_ = 0;
       uniqueTargetsCount_ = 0;
-      targetTitleTokensCount_ = 0;
+      targetTitleTermsCount_ = 0;
       uniqueReferrersCount_ = 0;
       unigrams_ = java.util.Collections.emptyList();
       bigrams_ = java.util.Collections.emptyList();
@@ -7042,19 +7042,19 @@ public final class IndexUnits {
                         throws java.io.IOException {
       getSerializedSize();
       if (((bitField0_ & 0x00000001) == 0x00000001)) {
-        output.writeInt32(1, pageId_);
+        output.writeInt64(1, pageId_);
       }
       if (((bitField0_ & 0x00000002) == 0x00000002)) {
         output.writeInt32(2, titlesCount_);
       }
       if (((bitField0_ & 0x00000004) == 0x00000004)) {
-        output.writeInt32(3, titleTokensCount_);
+        output.writeInt32(3, titleTermsCount_);
       }
       if (((bitField0_ & 0x00000008) == 0x00000008)) {
-        output.writeInt32(4, contentTokensCount_);
+        output.writeInt32(4, contentTermsCount_);
       }
       if (((bitField0_ & 0x00000010) == 0x00000010)) {
-        output.writeInt32(5, linkTokensCount_);
+        output.writeInt32(5, linkTermsCount_);
       }
       if (((bitField0_ & 0x00000020) == 0x00000020)) {
         output.writeInt32(6, incomingLinksCount_);
@@ -7066,7 +7066,7 @@ public final class IndexUnits {
         output.writeInt32(8, uniqueTargetsCount_);
       }
       if (((bitField0_ & 0x00000100) == 0x00000100)) {
-        output.writeInt32(9, targetTitleTokensCount_);
+        output.writeInt32(9, targetTitleTermsCount_);
       }
       if (((bitField0_ & 0x00000200) == 0x00000200)) {
         output.writeInt32(10, uniqueReferrersCount_);
@@ -7088,7 +7088,7 @@ public final class IndexUnits {
       size = 0;
       if (((bitField0_ & 0x00000001) == 0x00000001)) {
         size += com.google.protobuf.CodedOutputStream
-          .computeInt32Size(1, pageId_);
+          .computeInt64Size(1, pageId_);
       }
       if (((bitField0_ & 0x00000002) == 0x00000002)) {
         size += com.google.protobuf.CodedOutputStream
@@ -7096,15 +7096,15 @@ public final class IndexUnits {
       }
       if (((bitField0_ & 0x00000004) == 0x00000004)) {
         size += com.google.protobuf.CodedOutputStream
-          .computeInt32Size(3, titleTokensCount_);
+          .computeInt32Size(3, titleTermsCount_);
       }
       if (((bitField0_ & 0x00000008) == 0x00000008)) {
         size += com.google.protobuf.CodedOutputStream
-          .computeInt32Size(4, contentTokensCount_);
+          .computeInt32Size(4, contentTermsCount_);
       }
       if (((bitField0_ & 0x00000010) == 0x00000010)) {
         size += com.google.protobuf.CodedOutputStream
-          .computeInt32Size(5, linkTokensCount_);
+          .computeInt32Size(5, linkTermsCount_);
       }
       if (((bitField0_ & 0x00000020) == 0x00000020)) {
         size += com.google.protobuf.CodedOutputStream
@@ -7120,7 +7120,7 @@ public final class IndexUnits {
       }
       if (((bitField0_ & 0x00000100) == 0x00000100)) {
         size += com.google.protobuf.CodedOutputStream
-          .computeInt32Size(9, targetTitleTokensCount_);
+          .computeInt32Size(9, targetTitleTermsCount_);
       }
       if (((bitField0_ & 0x00000200) == 0x00000200)) {
         size += com.google.protobuf.CodedOutputStream
@@ -7253,15 +7253,15 @@ public final class IndexUnits {
 
       public Builder clear() {
         super.clear();
-        pageId_ = 0;
+        pageId_ = 0L;
         bitField0_ = (bitField0_ & ~0x00000001);
         titlesCount_ = 0;
         bitField0_ = (bitField0_ & ~0x00000002);
-        titleTokensCount_ = 0;
+        titleTermsCount_ = 0;
         bitField0_ = (bitField0_ & ~0x00000004);
-        contentTokensCount_ = 0;
+        contentTermsCount_ = 0;
         bitField0_ = (bitField0_ & ~0x00000008);
-        linkTokensCount_ = 0;
+        linkTermsCount_ = 0;
         bitField0_ = (bitField0_ & ~0x00000010);
         incomingLinksCount_ = 0;
         bitField0_ = (bitField0_ & ~0x00000020);
@@ -7269,7 +7269,7 @@ public final class IndexUnits {
         bitField0_ = (bitField0_ & ~0x00000040);
         uniqueTargetsCount_ = 0;
         bitField0_ = (bitField0_ & ~0x00000080);
-        targetTitleTokensCount_ = 0;
+        targetTitleTermsCount_ = 0;
         bitField0_ = (bitField0_ & ~0x00000100);
         uniqueReferrersCount_ = 0;
         bitField0_ = (bitField0_ & ~0x00000200);
@@ -7324,15 +7324,15 @@ public final class IndexUnits {
         if (((from_bitField0_ & 0x00000004) == 0x00000004)) {
           to_bitField0_ |= 0x00000004;
         }
-        result.titleTokensCount_ = titleTokensCount_;
+        result.titleTermsCount_ = titleTermsCount_;
         if (((from_bitField0_ & 0x00000008) == 0x00000008)) {
           to_bitField0_ |= 0x00000008;
         }
-        result.contentTokensCount_ = contentTokensCount_;
+        result.contentTermsCount_ = contentTermsCount_;
         if (((from_bitField0_ & 0x00000010) == 0x00000010)) {
           to_bitField0_ |= 0x00000010;
         }
-        result.linkTokensCount_ = linkTokensCount_;
+        result.linkTermsCount_ = linkTermsCount_;
         if (((from_bitField0_ & 0x00000020) == 0x00000020)) {
           to_bitField0_ |= 0x00000020;
         }
@@ -7348,7 +7348,7 @@ public final class IndexUnits {
         if (((from_bitField0_ & 0x00000100) == 0x00000100)) {
           to_bitField0_ |= 0x00000100;
         }
-        result.targetTitleTokensCount_ = targetTitleTokensCount_;
+        result.targetTitleTermsCount_ = targetTitleTermsCount_;
         if (((from_bitField0_ & 0x00000200) == 0x00000200)) {
           to_bitField0_ |= 0x00000200;
         }
@@ -7393,14 +7393,14 @@ public final class IndexUnits {
         if (other.hasTitlesCount()) {
           setTitlesCount(other.getTitlesCount());
         }
-        if (other.hasTitleTokensCount()) {
-          setTitleTokensCount(other.getTitleTokensCount());
+        if (other.hasTitleTermsCount()) {
+          setTitleTermsCount(other.getTitleTermsCount());
         }
-        if (other.hasContentTokensCount()) {
-          setContentTokensCount(other.getContentTokensCount());
+        if (other.hasContentTermsCount()) {
+          setContentTermsCount(other.getContentTermsCount());
         }
-        if (other.hasLinkTokensCount()) {
-          setLinkTokensCount(other.getLinkTokensCount());
+        if (other.hasLinkTermsCount()) {
+          setLinkTermsCount(other.getLinkTermsCount());
         }
         if (other.hasIncomingLinksCount()) {
           setIncomingLinksCount(other.getIncomingLinksCount());
@@ -7411,8 +7411,8 @@ public final class IndexUnits {
         if (other.hasUniqueTargetsCount()) {
           setUniqueTargetsCount(other.getUniqueTargetsCount());
         }
-        if (other.hasTargetTitleTokensCount()) {
-          setTargetTitleTokensCount(other.getTargetTitleTokensCount());
+        if (other.hasTargetTitleTermsCount()) {
+          setTargetTitleTermsCount(other.getTargetTitleTermsCount());
         }
         if (other.hasUniqueReferrersCount()) {
           setUniqueReferrersCount(other.getUniqueReferrersCount());
@@ -7496,34 +7496,34 @@ public final class IndexUnits {
       }
       private int bitField0_;
 
-      private int pageId_ ;
+      private long pageId_ ;
       /**
-       * <code>optional int32 page_id = 1;</code>
+       * <code>optional int64 page_id = 1;</code>
        */
       public boolean hasPageId() {
         return ((bitField0_ & 0x00000001) == 0x00000001);
       }
       /**
-       * <code>optional int32 page_id = 1;</code>
+       * <code>optional int64 page_id = 1;</code>
        */
-      public int getPageId() {
+      public long getPageId() {
         return pageId_;
       }
       /**
-       * <code>optional int32 page_id = 1;</code>
+       * <code>optional int64 page_id = 1;</code>
        */
-      public Builder setPageId(int value) {
+      public Builder setPageId(long value) {
         bitField0_ |= 0x00000001;
         pageId_ = value;
         onChanged();
         return this;
       }
       /**
-       * <code>optional int32 page_id = 1;</code>
+       * <code>optional int64 page_id = 1;</code>
        */
       public Builder clearPageId() {
         bitField0_ = (bitField0_ & ~0x00000001);
-        pageId_ = 0;
+        pageId_ = 0L;
         onChanged();
         return this;
       }
@@ -7560,98 +7560,98 @@ public final class IndexUnits {
         return this;
       }
 
-      private int titleTokensCount_ ;
+      private int titleTermsCount_ ;
       /**
-       * <code>optional int32 title_tokens_count = 3;</code>
+       * <code>optional int32 title_terms_count = 3;</code>
        */
-      public boolean hasTitleTokensCount() {
+      public boolean hasTitleTermsCount() {
         return ((bitField0_ & 0x00000004) == 0x00000004);
       }
       /**
-       * <code>optional int32 title_tokens_count = 3;</code>
+       * <code>optional int32 title_terms_count = 3;</code>
        */
-      public int getTitleTokensCount() {
-        return titleTokensCount_;
+      public int getTitleTermsCount() {
+        return titleTermsCount_;
       }
       /**
-       * <code>optional int32 title_tokens_count = 3;</code>
+       * <code>optional int32 title_terms_count = 3;</code>
        */
-      public Builder setTitleTokensCount(int value) {
+      public Builder setTitleTermsCount(int value) {
         bitField0_ |= 0x00000004;
-        titleTokensCount_ = value;
+        titleTermsCount_ = value;
         onChanged();
         return this;
       }
       /**
-       * <code>optional int32 title_tokens_count = 3;</code>
+       * <code>optional int32 title_terms_count = 3;</code>
        */
-      public Builder clearTitleTokensCount() {
+      public Builder clearTitleTermsCount() {
         bitField0_ = (bitField0_ & ~0x00000004);
-        titleTokensCount_ = 0;
+        titleTermsCount_ = 0;
         onChanged();
         return this;
       }
 
-      private int contentTokensCount_ ;
+      private int contentTermsCount_ ;
       /**
-       * <code>optional int32 content_tokens_count = 4;</code>
+       * <code>optional int32 content_terms_count = 4;</code>
        */
-      public boolean hasContentTokensCount() {
+      public boolean hasContentTermsCount() {
         return ((bitField0_ & 0x00000008) == 0x00000008);
       }
       /**
-       * <code>optional int32 content_tokens_count = 4;</code>
+       * <code>optional int32 content_terms_count = 4;</code>
        */
-      public int getContentTokensCount() {
-        return contentTokensCount_;
+      public int getContentTermsCount() {
+        return contentTermsCount_;
       }
       /**
-       * <code>optional int32 content_tokens_count = 4;</code>
+       * <code>optional int32 content_terms_count = 4;</code>
        */
-      public Builder setContentTokensCount(int value) {
+      public Builder setContentTermsCount(int value) {
         bitField0_ |= 0x00000008;
-        contentTokensCount_ = value;
+        contentTermsCount_ = value;
         onChanged();
         return this;
       }
       /**
-       * <code>optional int32 content_tokens_count = 4;</code>
+       * <code>optional int32 content_terms_count = 4;</code>
        */
-      public Builder clearContentTokensCount() {
+      public Builder clearContentTermsCount() {
         bitField0_ = (bitField0_ & ~0x00000008);
-        contentTokensCount_ = 0;
+        contentTermsCount_ = 0;
         onChanged();
         return this;
       }
 
-      private int linkTokensCount_ ;
+      private int linkTermsCount_ ;
       /**
-       * <code>optional int32 link_tokens_count = 5;</code>
+       * <code>optional int32 link_terms_count = 5;</code>
        */
-      public boolean hasLinkTokensCount() {
+      public boolean hasLinkTermsCount() {
         return ((bitField0_ & 0x00000010) == 0x00000010);
       }
       /**
-       * <code>optional int32 link_tokens_count = 5;</code>
+       * <code>optional int32 link_terms_count = 5;</code>
        */
-      public int getLinkTokensCount() {
-        return linkTokensCount_;
+      public int getLinkTermsCount() {
+        return linkTermsCount_;
       }
       /**
-       * <code>optional int32 link_tokens_count = 5;</code>
+       * <code>optional int32 link_terms_count = 5;</code>
        */
-      public Builder setLinkTokensCount(int value) {
+      public Builder setLinkTermsCount(int value) {
         bitField0_ |= 0x00000010;
-        linkTokensCount_ = value;
+        linkTermsCount_ = value;
         onChanged();
         return this;
       }
       /**
-       * <code>optional int32 link_tokens_count = 5;</code>
+       * <code>optional int32 link_terms_count = 5;</code>
        */
-      public Builder clearLinkTokensCount() {
+      public Builder clearLinkTermsCount() {
         bitField0_ = (bitField0_ & ~0x00000010);
-        linkTokensCount_ = 0;
+        linkTermsCount_ = 0;
         onChanged();
         return this;
       }
@@ -7752,34 +7752,34 @@ public final class IndexUnits {
         return this;
       }
 
-      private int targetTitleTokensCount_ ;
+      private int targetTitleTermsCount_ ;
       /**
-       * <code>optional int32 target_title_tokens_count = 9;</code>
+       * <code>optional int32 target_title_terms_count = 9;</code>
        */
-      public boolean hasTargetTitleTokensCount() {
+      public boolean hasTargetTitleTermsCount() {
         return ((bitField0_ & 0x00000100) == 0x00000100);
       }
       /**
-       * <code>optional int32 target_title_tokens_count = 9;</code>
+       * <code>optional int32 target_title_terms_count = 9;</code>
        */
-      public int getTargetTitleTokensCount() {
-        return targetTitleTokensCount_;
+      public int getTargetTitleTermsCount() {
+        return targetTitleTermsCount_;
       }
       /**
-       * <code>optional int32 target_title_tokens_count = 9;</code>
+       * <code>optional int32 target_title_terms_count = 9;</code>
        */
-      public Builder setTargetTitleTokensCount(int value) {
+      public Builder setTargetTitleTermsCount(int value) {
         bitField0_ |= 0x00000100;
-        targetTitleTokensCount_ = value;
+        targetTitleTermsCount_ = value;
         onChanged();
         return this;
       }
       /**
-       * <code>optional int32 target_title_tokens_count = 9;</code>
+       * <code>optional int32 target_title_terms_count = 9;</code>
        */
-      public Builder clearTargetTitleTokensCount() {
+      public Builder clearTargetTitleTermsCount() {
         bitField0_ = (bitField0_ & ~0x00000100);
-        targetTitleTokensCount_ = 0;
+        targetTitleTermsCount_ = 0;
         onChanged();
         return this;
       }
@@ -8322,18 +8322,10 @@ public final class IndexUnits {
 
     /**
      * <code>optional int32 lemma_id = 2;</code>
-     *
-     * <pre>
-     * Equals to -1 if lemma can not be extracted or lemma equals to this term
-     * </pre>
      */
     boolean hasLemmaId();
     /**
      * <code>optional int32 lemma_id = 2;</code>
-     *
-     * <pre>
-     * Equals to -1 if lemma can not be extracted or lemma equals to this term
-     * </pre>
      */
     int getLemmaId();
 
@@ -8697,20 +8689,12 @@ public final class IndexUnits {
     private int lemmaId_;
     /**
      * <code>optional int32 lemma_id = 2;</code>
-     *
-     * <pre>
-     * Equals to -1 if lemma can not be extracted or lemma equals to this term
-     * </pre>
      */
     public boolean hasLemmaId() {
       return ((bitField0_ & 0x00000002) == 0x00000002);
     }
     /**
      * <code>optional int32 lemma_id = 2;</code>
-     *
-     * <pre>
-     * Equals to -1 if lemma can not be extracted or lemma equals to this term
-     * </pre>
      */
     public int getLemmaId() {
       return lemmaId_;
@@ -9090,30 +9074,18 @@ public final class IndexUnits {
       private int lemmaId_ ;
       /**
        * <code>optional int32 lemma_id = 2;</code>
-       *
-       * <pre>
-       * Equals to -1 if lemma can not be extracted or lemma equals to this term
-       * </pre>
        */
       public boolean hasLemmaId() {
         return ((bitField0_ & 0x00000002) == 0x00000002);
       }
       /**
        * <code>optional int32 lemma_id = 2;</code>
-       *
-       * <pre>
-       * Equals to -1 if lemma can not be extracted or lemma equals to this term
-       * </pre>
        */
       public int getLemmaId() {
         return lemmaId_;
       }
       /**
        * <code>optional int32 lemma_id = 2;</code>
-       *
-       * <pre>
-       * Equals to -1 if lemma can not be extracted or lemma equals to this term
-       * </pre>
        */
       public Builder setLemmaId(int value) {
         bitField0_ |= 0x00000002;
@@ -9123,10 +9095,6 @@ public final class IndexUnits {
       }
       /**
        * <code>optional int32 lemma_id = 2;</code>
-       *
-       * <pre>
-       * Equals to -1 if lemma can not be extracted or lemma equals to this term
-       * </pre>
        */
       public Builder clearLemmaId() {
         bitField0_ = (bitField0_ & ~0x00000002);
@@ -10845,28 +10813,27 @@ public final class IndexUnits {
       "quency\030\002 \001(\005\022\026\n\016term_frequency\030\004 \001(\003\022=\n\020" +
       "bigram_frequency\030\005 \003(\0132#.index.TermStati" +
       "stics.TermFrequency\0328\n\rTermFrequency\022\017\n\007" +
-      "term_id\030\001 \001(\005\022\026\n\016term_frequency\030\002 \001(\003\"\372\002" +
-      "\n\016PageStatistics\022\017\n\007page_id\030\001 \001(\005\022\024\n\014tit" +
-      "les_count\030\002 \001(\005\022\032\n\022title_tokens_count\030\003 " +
-      "\001(\005\022\034\n\024content_tokens_count\030\004 \001(\005\022\031\n\021lin" +
-      "k_tokens_count\030\005 \001(\005\022\034\n\024incoming_links_c" +
-      "ount\030\006 \001(\005\022\034\n\024outgoing_links_count\030\007 \001(\005" +
-      "\022\034\n\024unique_targets_count\030\010 \001(\005\022!\n\031target",
-      "_title_tokens_count\030\t \001(\005\022\036\n\026unique_refe" +
-      "rrers_count\030\n \001(\005\022\'\n\010unigrams\030\013 \003(\0132\025.in" +
-      "dex.VgramFrequency\022&\n\007bigrams\030\014 \003(\0132\025.in" +
-      "dex.VgramFrequency\"\202\002\n\004Term\022\n\n\002id\030\001 \001(\005\022" +
-      "\020\n\010lemma_id\030\002 \001(\005\022\014\n\004text\030\003 \001(\t\0220\n\016part_" +
-      "of_speech\030\004 \001(\0162\030.index.Term.PartOfSpeec" +
-      "h\"\233\001\n\014PartOfSpeech\022\013\n\007UNKNOWN\020\000\022\005\n\001A\020\001\022\007" +
-      "\n\003ADV\020\002\022\n\n\006ADVPRO\020\003\022\010\n\004ANUM\020\004\022\010\n\004APRO\020\005\022" +
-      "\007\n\003COM\020\006\022\010\n\004CONJ\020\007\022\010\n\004INTJ\020\010\022\007\n\003NUM\020\t\022\010\n" +
-      "\004PART\020\n\022\006\n\002PR\020\013\022\005\n\001S\020\014\022\010\n\004SPRO\020\r\022\005\n\001V\020\016\"",
-      "\034\n\010TermList\022\020\n\010termList\030\001 \003(\005\"\036\n\013Integer" +
-      "List\022\017\n\007intList\030\001 \003(\005\".\n\016UriPageMapping\022" +
-      "\013\n\003uri\030\001 \001(\t\022\017\n\007page_id\030\002 \001(\003B4\n&com.exp" +
-      "league.sensearch.protobuf.indexB\nIndexUn" +
-      "its"
+      "term_id\030\001 \001(\005\022\026\n\016term_frequency\030\002 \001(\003\"\366\002" +
+      "\n\016PageStatistics\022\017\n\007page_id\030\001 \001(\003\022\024\n\014tit" +
+      "les_count\030\002 \001(\005\022\031\n\021title_terms_count\030\003 \001" +
+      "(\005\022\033\n\023content_terms_count\030\004 \001(\005\022\030\n\020link_" +
+      "terms_count\030\005 \001(\005\022\034\n\024incoming_links_coun" +
+      "t\030\006 \001(\005\022\034\n\024outgoing_links_count\030\007 \001(\005\022\034\n" +
+      "\024unique_targets_count\030\010 \001(\005\022 \n\030target_ti",
+      "tle_terms_count\030\t \001(\005\022\036\n\026unique_referrer" +
+      "s_count\030\n \001(\005\022\'\n\010unigrams\030\013 \003(\0132\025.index." +
+      "VgramFrequency\022&\n\007bigrams\030\014 \003(\0132\025.index." +
+      "VgramFrequency\"\202\002\n\004Term\022\n\n\002id\030\001 \001(\005\022\020\n\010l" +
+      "emma_id\030\002 \001(\005\022\014\n\004text\030\003 \001(\t\0220\n\016part_of_s" +
+      "peech\030\004 \001(\0162\030.index.Term.PartOfSpeech\"\233\001" +
+      "\n\014PartOfSpeech\022\013\n\007UNKNOWN\020\000\022\005\n\001A\020\001\022\007\n\003AD" +
+      "V\020\002\022\n\n\006ADVPRO\020\003\022\010\n\004ANUM\020\004\022\010\n\004APRO\020\005\022\007\n\003C" +
+      "OM\020\006\022\010\n\004CONJ\020\007\022\010\n\004INTJ\020\010\022\007\n\003NUM\020\t\022\010\n\004PAR" +
+      "T\020\n\022\006\n\002PR\020\013\022\005\n\001S\020\014\022\010\n\004SPRO\020\r\022\005\n\001V\020\016\"\034\n\010T",
+      "ermList\022\020\n\010termList\030\001 \003(\005\"\036\n\013IntegerList" +
+      "\022\017\n\007intList\030\001 \003(\005\".\n\016UriPageMapping\022\013\n\003u" +
+      "ri\030\001 \001(\t\022\017\n\007page_id\030\002 \001(\003B4\n&com.expleag" +
+      "ue.sensearch.protobuf.indexB\nIndexUnits"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
         new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
@@ -10927,7 +10894,7 @@ public final class IndexUnits {
     internal_static_index_PageStatistics_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessage.FieldAccessorTable(
         internal_static_index_PageStatistics_descriptor,
-        new java.lang.String[] { "PageId", "TitlesCount", "TitleTokensCount", "ContentTokensCount", "LinkTokensCount", "IncomingLinksCount", "OutgoingLinksCount", "UniqueTargetsCount", "TargetTitleTokensCount", "UniqueReferrersCount", "Unigrams", "Bigrams", });
+        new java.lang.String[] { "PageId", "TitlesCount", "TitleTermsCount", "ContentTermsCount", "LinkTermsCount", "IncomingLinksCount", "OutgoingLinksCount", "UniqueTargetsCount", "TargetTitleTermsCount", "UniqueReferrersCount", "Unigrams", "Bigrams", });
     internal_static_index_Term_descriptor =
       getDescriptor().getMessageTypes().get(5);
     internal_static_index_Term_fieldAccessorTable = new
