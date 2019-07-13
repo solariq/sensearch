@@ -13,7 +13,9 @@ import com.expleague.sensearch.core.Tokenizer;
 import com.expleague.sensearch.core.impl.TokenizerImpl;
 import com.expleague.sensearch.core.lemmer.Lemmer;
 import com.expleague.sensearch.donkey.IndexCreator;
-import com.expleague.sensearch.donkey.builders.StatisticsAccumulator;
+import com.expleague.sensearch.donkey.builders.IndexStatisticsBuilder;
+import com.expleague.sensearch.donkey.builders.PageStatisticsBuilder;
+import com.expleague.sensearch.donkey.builders.PageStatisticsBuilderFactory;
 import com.expleague.sensearch.donkey.crawler.Crawler;
 import com.expleague.sensearch.donkey.embedding.EmbeddedPage;
 import com.expleague.sensearch.donkey.embedding.PageEmbedder;
@@ -34,13 +36,13 @@ import com.expleague.sensearch.donkey.utils.SerializedTextHelperFactory;
 import com.expleague.sensearch.donkey.writers.EmbeddingWriter;
 import com.expleague.sensearch.donkey.writers.LevelDbLinkWriter;
 import com.expleague.sensearch.donkey.writers.PageWriter;
-import com.expleague.sensearch.donkey.writers.StatisticsWriter;
 import com.expleague.sensearch.donkey.writers.TermWriter;
 import com.expleague.sensearch.donkey.writers.sequential.SequentialLinkWriter;
 import com.expleague.sensearch.index.Index;
 import com.expleague.sensearch.index.plain.PlainIndex;
 import com.expleague.sensearch.protobuf.index.IndexUnits.Page;
 import com.expleague.sensearch.protobuf.index.IndexUnits.Page.Link;
+import com.expleague.sensearch.protobuf.index.IndexUnits.Term;
 import com.expleague.sensearch.web.suggest.SuggestInformationBuilder;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Guice;
@@ -221,17 +223,19 @@ public class PlainIndexCreator implements IndexCreator {
         crawler.makeStream().forEach(pageWriter::write);
       }
     } catch (Exception e) {
-      removeDbFiles(indexRoot.resolve(TERM_ROOT));
-      removeDbFiles(indexRoot.resolve(PAGE_ROOT));
-      removeDbFiles(indexRoot.resolve(RAW_LINK_ROOT));
+      cleanup(indexRoot.resolve(TERM_ROOT));
+      cleanup(indexRoot.resolve(PAGE_ROOT));
+      cleanup(indexRoot.resolve(RAW_LINK_ROOT));
       throw new RuntimeException(e);
     }
-    LOG.info(String.format("Page and term databases created in %.2f seconds", (System.nanoTime() - startTime) / 1e9));
+    LOG.info(String.format("Page and term databases created in %.2f seconds",
+        (System.nanoTime() - startTime) / 1e9));
   }
 
   @Override
   public void createLinks() {
-    // TODO
+    sortLinksByTargetId();
+    resolveIncomingLinks();
   }
 
   private void sortLinksByTargetId() {
@@ -242,7 +246,7 @@ public class PlainIndexCreator implements IndexCreator {
         SequentialLinkWriter::new,
         SequentialLinkReader::new
     );
-    removeDbFiles(indexRoot.resolve(RAW_LINK_ROOT));
+    cleanup(indexRoot.resolve(RAW_LINK_ROOT));
   }
 
   private void resolveIncomingLinks() {
@@ -279,34 +283,58 @@ public class PlainIndexCreator implements IndexCreator {
 
     Path statsPath = indexRoot.resolve(TERM_STATISTICS_ROOT);
     try {
-      Files.createDirectories(statsPath);
-
       try (
-          RandomAccess<Long, Page> pageIndex =
-              new ProtoPageIndex(indexRoot.resolve(PAGE_ROOT));
-          ProtoTermIndex termIndex = new ProtoTermIndex(indexRoot.resolve(TERM_ROOT));
-          StatisticsWriter statsWriter = new StatisticsWriter(
-              JniDBFactory.factory.open(statsPath.toFile(), STATS_DB_OPTIONS))
+          RandomAccess<Long, Page> pageIndex = new ProtoPageIndex(indexRoot.resolve(PAGE_ROOT));
+          RandomAccess<Integer, Term> termIndex = new ProtoTermIndex(indexRoot.resolve(TERM_ROOT));
       ) {
-        StatisticsAccumulator statisticsAccumulator = new StatisticsAccumulator(
+        PageStatisticsBuilderFactory builderFactory = new PageStatisticsBuilderFactory(
             new SerializedTextHelperFactory(termIndex));
-        pageIndex.forEach(statisticsAccumulator::addPage);
+        IndexStatisticsBuilder indexStatisticsBuilder = new IndexStatisticsBuilder();
 
-        statisticsAccumulator.termStats().forEach(statsWriter::write);
+        pageIndex.forEach(p -> {
+          if (p.getRootId() != p.getPageId()) {
+            return;
+          }
+          PageStatisticsBuilder pageStatisticsBuilder = builderFactory.builder(p.getPageId());
+          fullDocument(p, pageIndex)
+              .peek(pageStatisticsBuilder::addPage)
+              .map(Page::getOutgoingLinksList)
+              .flatMap(List::stream)
+              .mapToLong(Link::getTargetPageId)
+              .distinct()
+              .mapToObj(pageIndex::value)
+              .filter(Objects::nonNull)
+              .forEach(pageStatisticsBuilder::addTarget);
+          indexStatisticsBuilder.addPageStatistics(pageStatisticsBuilder.build());
+        });
       }
     } catch (Exception e) {
-      removeDbFiles(statsPath);
+      cleanup(statsPath);
       throw new RuntimeException(e);
     }
 
-    LOG.info(String.format("Statistics created in %.2f seconds", (System.nanoTime() - startTime) / 1e9));
+    LOG.info(
+        String.format("Statistics created in %.2f seconds", (System.nanoTime() - startTime) / 1e9));
   }
 
-  private void removeDbFiles(Path statsPath) {
+  private static Stream<Page> fullDocument(Page rootSection, RandomAccess<Long, Page> pageIndex) {
+    if (rootSection == null) {
+      return Stream.empty();
+    }
+
+    return Stream.concat(
+        Stream.of(rootSection),
+        rootSection.getSubpagesIdsList()
+            .stream()
+            .flatMap(id -> fullDocument(pageIndex.value(id), pageIndex))
+    );
+  }
+
+  private static void cleanup(Path path) {
     try {
-      FileUtils.deleteDirectory(statsPath.toFile());
+      FileUtils.forceDelete(path.toFile());
     } catch (IOException e) {
-      LOG.error("Cannot delete db files", e);
+      LOG.error(String.format("Cannot cleanup path: %s", path.toAbsolutePath().toString()), e);
     }
   }
 
@@ -322,7 +350,8 @@ public class PlainIndexCreator implements IndexCreator {
           Files.newBufferedReader(embeddingVectorsPath, Charset.forName("UTF-8")),
           CharSeq.class);
 
-      LOG.info(String.format("Word embedding read in %.2f seconds", (System.nanoTime() - startTime) / 1e9));
+      LOG.info(String
+          .format("Word embedding read in %.2f seconds", (System.nanoTime() - startTime) / 1e9));
     } catch (IOException e) {
       LOG.error("Cannot read embedding at path " + embeddingVectorsPath.toString(), e);
       throw new RuntimeException(e);
@@ -331,9 +360,11 @@ public class PlainIndexCreator implements IndexCreator {
     final long startTime = System.nanoTime();
     try (
         ProtoTermIndex termIndex = new ProtoTermIndex(indexRoot.resolve(TERM_ROOT));
-        ProtoTermStatsIndex statsIndex = new ProtoTermStatsIndex(indexRoot.resolve(TERM_STATISTICS_ROOT));
+        ProtoTermStatsIndex statsIndex = new ProtoTermStatsIndex(
+            indexRoot.resolve(TERM_STATISTICS_ROOT));
         ProtoPageIndex pageIndex = new ProtoPageIndex(indexRoot.resolve(PAGE_ROOT));
-        DB vecDb = JniDBFactory.factory.open(indexRoot.resolve(EMBEDDING_ROOT).toFile(), EMBEDDING_DB_OPTIONS);
+        DB vecDb = JniDBFactory.factory
+            .open(indexRoot.resolve(EMBEDDING_ROOT).toFile(), EMBEDDING_DB_OPTIONS);
         EmbeddingWriter embeddingWriter = new EmbeddingWriter(vecDb)
     ) {
       PageEmbedder pageEmbedder = new PageEmbedder(
@@ -347,7 +378,8 @@ public class PlainIndexCreator implements IndexCreator {
     } catch (IOException e) {
       e.printStackTrace();
     }
-    LOG.info(String.format("Page embedding created in %.2f seconds", (System.nanoTime() - startTime) / 1e9));
+    LOG.info(String
+        .format("Page embedding created in %.2f seconds", (System.nanoTime() - startTime) / 1e9));
   }
 
   private void buildIndexInternal(Embedding<CharSeq> jmllEmbedding) throws IOException {
