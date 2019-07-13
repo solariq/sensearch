@@ -5,6 +5,7 @@ import com.expleague.sensearch.donkey.utils.SerializedTextHelperFactory.Serializ
 import com.expleague.sensearch.protobuf.index.IndexUnits.Page;
 import com.expleague.sensearch.protobuf.index.IndexUnits.Page.Link;
 import com.expleague.sensearch.protobuf.index.IndexUnits.PageStatistics;
+import com.expleague.sensearch.protobuf.index.IndexUnits.VgramFrequency;
 import com.google.common.annotations.VisibleForTesting;
 import gnu.trove.map.TIntIntMap;
 import gnu.trove.map.TIntLongMap;
@@ -14,6 +15,8 @@ import gnu.trove.map.hash.TIntLongHashMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import gnu.trove.set.TLongSet;
 import gnu.trove.set.hash.TLongHashSet;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.stream.IntStream;
 
 @VisibleForTesting
@@ -124,9 +127,34 @@ public class PageStatisticsBuilder {
     builder.setUniqueReferrersCount(uniqueReferrers.size());
     builder.setUniqueTargetsCount(uniqueTargets.size());
 
-    // TODO: complete build
+    builder.addAllUnigrams(unigrams());
+    builder.addAllBigrams(bigrams());
 
     return builder.build();
+  }
+
+  private Iterable<VgramFrequency> unigrams() {
+    List<VgramFrequency> unigrams = new ArrayList<>();
+    wordFrequencyMap.forEachEntry(
+        (id, f) -> unigrams.add(
+            VgramFrequency.newBuilder()
+                .addTermSequence(id)
+                .setSequenceFrequency(f)
+                .build()));
+    return unigrams;
+  }
+
+  private Iterable<VgramFrequency> bigrams() {
+    List<VgramFrequency> bigrams = new ArrayList<>();
+    bigramFreqAcc.bigramsFrequencyMap.forEachEntry(
+        (idW1, fmap) -> fmap.forEachEntry((idW2, f) -> bigrams.add(
+            VgramFrequency.newBuilder()
+                .addTermSequence(idW1)
+                .addTermSequence(idW2)
+                .setSequenceFrequency(f)
+                .build()))
+    );
+    return bigrams;
   }
 
   static class BigramsFreqMapAccumulator {
