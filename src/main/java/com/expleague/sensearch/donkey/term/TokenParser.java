@@ -23,8 +23,8 @@ import java.util.stream.Stream;
 public class TokenParser implements AutoCloseable {
 
   private static final char LEMMA_SUFFIX = '$';
-  private static int PUNCT_ID = 0;
 
+  private int curPunctId = 0;
   private int curTermId = PUNCTUATION_SIZE;
 
   private final Dictionary dictionary;
@@ -130,16 +130,16 @@ public class TokenParser implements AutoCloseable {
       id = dictionary.get(lowToken);
     } else {
       if (punkt) {
-        id = PUNCT_ID;
-        PUNCT_ID++;
+        id = curPunctId;
+        curPunctId++;
       } else {
-        id = this.curTermId;
-        this.curTermId++;
+        id = curTermId;
+        curTermId++;
       }
-      if (this.curTermId >= (1 << 29)) {
+      if (curTermId >= (1 << 29)) {
         throw new RuntimeException("Token limit::" + token.toString());
       }
-      if (PUNCT_ID == PUNCTUATION_SIZE) {
+      if (curPunctId == PUNCTUATION_SIZE) {
         throw new RuntimeException("Punctuation limit::" + token.toString());
       }
     }

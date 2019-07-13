@@ -40,7 +40,6 @@ public class IndexMetaBuilderTest {
     assertEquals(1, meta.getVersion());
     assertEquals((5 + 4 + 1) / 3.0, meta.getAveragePageSize(), 1e-8);
     assertEquals(3, meta.getPagesCount());
-    assertEquals(5, meta.getVocabularySize());
     assertEquals(0, meta.getLinksCount());
     assertEquals(4, meta.getSectionTitlesCount());
     assertEquals((2 + 1) / 4.0, meta.getAverageSectionTitleSize(), 1e-8);

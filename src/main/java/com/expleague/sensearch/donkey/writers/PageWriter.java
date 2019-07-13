@@ -178,7 +178,7 @@ public class PageWriter implements Writer<CrawlerDocument> {
 
   @Override
   public void close() throws IOException {
-    pageDb.write(writeBatch, WRITE_OPTIONS);
+    flush();
     linkWriter.close();
     pageDb.close();
     tokenParser.close();

@@ -17,8 +17,6 @@ message IndexMeta {
   // ttiles statistics
   optional int32 section_titles_count = 8;
   optional double average_section_title_size = 9;
-
-  optional int32 vocabulary_size = 4;
 }
 
 message Page {
@@ -57,12 +55,11 @@ message TermStatistics {
 
   message TermFrequency {
     optional int32 term_id = 1;
-    optional int32 term_frequency = 2;
+    optional int64 term_frequency = 2;
   }
 
   optional int32 term_id = 1;
   optional int32 document_frequency = 2;
-  optional int32 document_lemma_frequency = 3;
   optional int64 term_frequency = 4;
 
   repeated TermFrequency bigram_frequency = 5;
