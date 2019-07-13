@@ -5,14 +5,14 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.nio.file.Path;
 
-public abstract class ProtobufIndex<Key, T extends GeneratedMessage> extends LevelDbBasedIndex<Key, T> {
+public abstract class ProtobufIndex<K, V extends GeneratedMessage> extends LevelDbBasedIndex<K, V> {
   private static final String DECODER_METHOD_NAME = "parseFrom";
   private static final String ENCODER_METHOD_NAME = "toByteArray";
 
-  private final Class<T> valueClass;
+  private final Class<V> valueClass;
   private final Method bytesDecoder;
   private final Method bytesEncoder;
-  public ProtobufIndex(Path root, Class<T> valueClass) {
+  public ProtobufIndex(Path root, Class<V> valueClass) {
     super(root);
     this.valueClass = valueClass;
     try {
@@ -27,7 +27,7 @@ public abstract class ProtobufIndex<Key, T extends GeneratedMessage> extends Lev
   }
 
   @Override
-  protected T decodeValue(byte[] bytes) {
+  protected V decodeValue(byte[] bytes) {
     try {
       return valueClass.cast(bytesDecoder.invoke(null, bytes));
     } catch (IllegalAccessException | InvocationTargetException e) {
@@ -36,7 +36,7 @@ public abstract class ProtobufIndex<Key, T extends GeneratedMessage> extends Lev
   }
 
   @Override
-  protected byte[] encodeValue(T value) {
+  protected byte[] encodeValue(V value) {
     try {
       return (byte[]) bytesEncoder.invoke(value);
     } catch (IllegalAccessException | InvocationTargetException e) {

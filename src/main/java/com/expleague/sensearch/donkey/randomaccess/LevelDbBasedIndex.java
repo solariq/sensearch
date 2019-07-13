@@ -12,7 +12,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 // TODO: support batch reading
-public abstract class LevelDbBasedIndex<Key, T> implements RandomAccess<Key, T> {
+public abstract class LevelDbBasedIndex<K, V> implements RandomAccess<K, V> {
   static final Options DB_OPTIONS = new Options()
       .createIfMissing(false)
       .cacheSize(1 << 25)
@@ -31,7 +31,7 @@ public abstract class LevelDbBasedIndex<Key, T> implements RandomAccess<Key, T> 
 
   @Nullable
   @Override
-  public T value(Key id) {
+  public V value(K id) {
     byte[] bytes = dataBase.get(encodeKey(id));
     if (bytes == null || bytes.length == 0) {
       return null;
@@ -40,26 +40,26 @@ public abstract class LevelDbBasedIndex<Key, T> implements RandomAccess<Key, T> 
   }
 
   @Override
-  public void put(Key id, T value) {
+  public void put(K id, V value) {
     byte[] keyBytes = encodeKey(id);
     byte[] valueBytes = encodeValue(value);
     dataBase.put(keyBytes, valueBytes);
   }
 
-  protected abstract T decodeValue(byte[] bytes);
+  protected abstract V decodeValue(byte[] bytes);
 
-  protected abstract byte[] encodeValue(T value);
+  protected abstract byte[] encodeValue(V value);
 
-  protected abstract byte[] encodeKey(Key key);
+  protected abstract byte[] encodeKey(K key);
 
   @NotNull
   @Override
-  public Iterator<T> iterator() {
+  public Iterator<V> iterator() {
     return new DbIteratorWrapper();
   }
 
   @Override
-  public void forEach(Consumer<? super T> consumer) {
+  public void forEach(Consumer<? super V> consumer) {
     DBIterator iterator = dataBase.iterator();
     iterator.seekToFirst();
     iterator.forEachRemaining(e -> consumer.accept(decodeValue(e.getValue())));
@@ -70,7 +70,7 @@ public abstract class LevelDbBasedIndex<Key, T> implements RandomAccess<Key, T> 
     dataBase.close();
   }
 
-  public class DbIteratorWrapper implements Iterator<T> {
+  public class DbIteratorWrapper implements Iterator<V> {
     private final DBIterator dbIterator;
     private DbIteratorWrapper() {
       dbIterator = dataBase.iterator();
@@ -83,12 +83,12 @@ public abstract class LevelDbBasedIndex<Key, T> implements RandomAccess<Key, T> 
     }
 
     @Override
-    public T next() {
+    public V next() {
       return decodeValue(dbIterator.next().getValue());
     }
 
     @Override
-    public void forEachRemaining(Consumer<? super T> consumer) {
+    public void forEachRemaining(Consumer<? super V> consumer) {
       dbIterator.forEachRemaining(e -> consumer.accept(decodeValue(e.getValue())));
     }
   }
