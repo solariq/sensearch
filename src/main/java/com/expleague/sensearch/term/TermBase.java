@@ -105,6 +105,10 @@ public class TermBase implements AutoCloseable {
     return wordToTerms.get(CharSeq.intern(word));
   }
 
+  public int size() {
+    return wordToTerms.size();
+  }
+
   @Override
   public void close() throws IOException {
     termBase.close();

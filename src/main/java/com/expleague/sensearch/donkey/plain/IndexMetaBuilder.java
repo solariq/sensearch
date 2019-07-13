@@ -114,7 +114,6 @@ public class IndexMetaBuilder {
         .setAverageSectionTitleSize((double) titleTokensCount / titlesCount)
         .setAveragePageSize((double) totalTokenCount / pageCount)
         .setPagesCount(pageCount)
-        .setVocabularySize(termIds.size())
         .build();
   }
 

@@ -76,6 +76,8 @@ public class PlainIndexCreator implements IndexCreator {
 
   static final int BATCH_SIZE = 1_000;
 
+  public static final int INDEX_VERSION = 20;
+
   public static final String PAGE_ROOT = "page";
   public static final String TERM_ROOT = "term";
   public static final String RAW_LINK_ROOT = "RawLinks";
@@ -218,7 +220,7 @@ public class PlainIndexCreator implements IndexCreator {
         startTime = System.nanoTime();
         crawler.makeStream().forEach(pageWriter::write);
       }
-    } catch (IOException e) {
+    } catch (Exception e) {
       removeDbFiles(indexRoot.resolve(TERM_ROOT));
       removeDbFiles(indexRoot.resolve(PAGE_ROOT));
       removeDbFiles(indexRoot.resolve(RAW_LINK_ROOT));
@@ -240,14 +242,7 @@ public class PlainIndexCreator implements IndexCreator {
         SequentialLinkWriter::new,
         SequentialLinkReader::new
     );
-    try {
-      FileUtils.forceDelete(indexRoot.resolve(RAW_LINK_ROOT).toFile());
-    } catch (IOException e) {
-      LOG.warn(String.format(
-          "Failed to remove temporary links files by given path [ %s ]",
-          indexRoot.resolve(RAW_LINK_ROOT).toAbsolutePath().toString())
-      );
-    }
+    removeDbFiles(indexRoot.resolve(RAW_LINK_ROOT));
   }
 
   private void resolveIncomingLinks() {
@@ -299,7 +294,7 @@ public class PlainIndexCreator implements IndexCreator {
 
         statisticsAccumulator.termStats().forEach(statsWriter::write);
       }
-    } catch (IOException e) {
+    } catch (Exception e) {
       removeDbFiles(statsPath);
       throw new RuntimeException(e);
     }

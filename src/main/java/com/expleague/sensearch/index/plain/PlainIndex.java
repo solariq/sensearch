@@ -166,10 +166,10 @@ public class PlainIndex implements Index {
       LOG.fatal(errorMessage);
       throw new IllegalArgumentException(errorMessage);
     }
+    vocabularySize = termBase.size();
 
     averagePageSize = indexMeta.getAveragePageSize();
     indexSize = indexMeta.getPagesCount();
-    vocabularySize = indexMeta.getVocabularySize();
     linksCount = indexMeta.getLinksCount();
     averageLinkTargetTitleWordCount = indexMeta.getAverageLinkTargetTitleWordCount();
     sectionTitlesCount = indexMeta.getSectionTitlesCount();

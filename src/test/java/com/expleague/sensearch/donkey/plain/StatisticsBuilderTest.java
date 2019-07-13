@@ -170,7 +170,7 @@ public class StatisticsBuilderTest extends SensearchTestCase {
                 bigrams.get((int) termFreq.getTermId() - 1).intValue(),
                 termFreq.getTermFrequency()));
 
-    Map<Long, Integer> freqMap =
+    Map<Long, Long> freqMap =
         bigramFrequencyList
             .stream()
                 .collect(Collectors.toMap(t -> (long) t.getTermId(), TermFrequency::getTermFrequency));
