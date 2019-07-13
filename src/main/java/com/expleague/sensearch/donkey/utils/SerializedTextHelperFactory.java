@@ -2,15 +2,17 @@ package com.expleague.sensearch.donkey.utils;
 
 import com.expleague.sensearch.core.TokenIdUtils;
 import com.expleague.sensearch.donkey.randomaccess.ProtoTermIndex;
+import com.expleague.sensearch.donkey.randomaccess.RandomAccess;
 import com.expleague.sensearch.protobuf.index.IndexUnits.Page.SerializedText;
+import com.expleague.sensearch.protobuf.index.IndexUnits.Term;
 import java.util.Objects;
 import java.util.stream.IntStream;
 
 public class SerializedTextHelperFactory {
 
-  private final ProtoTermIndex termIndex;
+  private final RandomAccess<Integer, Term> termIndex;
 
-  public SerializedTextHelperFactory(ProtoTermIndex termIndex) {
+  public SerializedTextHelperFactory(RandomAccess<Integer, Term> termIndex) {
     this.termIndex = termIndex;
   }
 
