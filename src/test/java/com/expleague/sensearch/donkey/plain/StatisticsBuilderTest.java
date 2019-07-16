@@ -49,7 +49,8 @@ public class StatisticsBuilderTest extends SensearchTestCase {
 
   private static final class ParsedTermStub extends ParsedTerm {
     ParsedTermStub(int wordId, int lemmaId) {
-      super(wordId, null, lemmaId, null, null);
+      // TODO fix it
+      super(null);
     }
   }
 

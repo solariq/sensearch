@@ -13,9 +13,10 @@ import com.expleague.commons.seq.CharSeq;
 import com.expleague.commons.text.lemmer.LemmaInfo;
 import com.expleague.commons.text.lemmer.WordInfo;
 import com.expleague.sensearch.core.PartOfSpeech;
-import com.expleague.sensearch.core.TokenIdUtils;
 import com.expleague.sensearch.core.Tokenizer;
 import com.expleague.sensearch.core.lemmer.Lemmer;
+import gnu.trove.map.TIntObjectMap;
+import gnu.trove.map.hash.TIntObjectHashMap;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
@@ -28,9 +29,9 @@ public class TokenParser implements AutoCloseable {
   private int curTermId = PUNCTUATION_SIZE;
 
   private final Dictionary dictionary;
-
   private final Tokenizer tokenizer;
   private final Lemmer lemmer;
+  private final TIntObjectMap<Token> tokenCache = new TIntObjectHashMap<>();
 
   public TokenParser(Dictionary dictionary, Lemmer lemmer, Tokenizer tokenizer) {
     this.dictionary = dictionary;
@@ -154,11 +155,22 @@ public class TokenParser implements AutoCloseable {
         id = setAllUpperCase(id);
       }
     }
-
-    return createToken(lowToken, id);
+    if (tokenCache.containsKey(id)) {
+      return tokenCache.get(id);
+    } else {
+      Token result = punkt ? createPunct(lowToken, id) : createTerm(lowToken, id);
+      tokenCache.put(id, result);
+      return result;
+    }
   }
 
-  private Token createToken(CharSeq lowText, int id) {
+  private Token createPunct(CharSeq lowToken, int id) {
+    Token token = new Token(lowToken, id);
+    dictionary.addTerm(new ParsedTerm(token));
+    return token;
+  }
+
+  private Token createTerm(CharSeq lowText, int id) {
     Token token = new Token(lowText, id);
     CharSeq word = CharSeq.intern(token.text());
     WordInfo parse = lemmer.parse(word);
@@ -166,20 +178,19 @@ public class TokenParser implements AutoCloseable {
 
     int wordId = token.id();
     if (lemma == null) {
-      dictionary.addTerm(ParsedTerm.create(wordId, word, -1, null, null));
+      dictionary.addTerm(new ParsedTerm(token));
       return token;
     }
 
-    int lemmaId;
+    Token lemmaToken;
     if (dictionary.contains(lemma.lemma())) {
-      lemmaId = dictionary.get(lemma.lemma());
-    } else if (token.text.last() == LEMMA_SUFFIX) {
-      lemmaId = token.id();
+      lemmaToken = tokenCache.get(dictionary.get(lemma.lemma()));
+    } else if (token.text().charAt(token.text().length() - 1) == LEMMA_SUFFIX) {
+      lemmaToken = token;
     } else {
-      lemmaId = addToken(lemma.lemma() + String.valueOf(LEMMA_SUFFIX)).id();
+      lemmaToken = addToken(lemma.lemma() + String.valueOf(LEMMA_SUFFIX));
     }
-    dictionary.addTerm(ParsedTerm.create(wordId, word, lemmaId, lemma.lemma(),
-        PartOfSpeech.valueOf(lemma.pos().name())));
+    dictionary.addTerm(new ParsedTerm(token, lemmaToken, PartOfSpeech.valueOf(lemma.pos().name())));
 
     return token;
   }
@@ -189,47 +200,4 @@ public class TokenParser implements AutoCloseable {
     dictionary.close();
   }
 
-  public static class Token {
-
-    private final CharSeq text;
-    private final int id;
-
-    public Token(CharSeq text, int id) {
-      this.text = text;
-      this.id = id;
-    }
-
-    /**
-     * @return id without META-data
-     */
-    public int id() {
-      return (id >>> BITS_FOR_META);
-    }
-
-    /**
-     * @return id with META-data
-     */
-    public int formId() {
-      return id;
-    }
-
-    /**
-     * @return lowercase text
-     */
-    public CharSequence text() {
-      return text;
-    }
-
-    public boolean isWord() {
-      return TokenIdUtils.isWord(id);
-    }
-
-    public boolean allUpperCase() {
-      return TokenIdUtils.allUpperCase(id);
-    }
-
-    public boolean firstUpperCase() {
-      return TokenIdUtils.firstUpperCase(id);
-    }
-  }
 }

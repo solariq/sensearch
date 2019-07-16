@@ -29,8 +29,8 @@ public class Dictionary implements AutoCloseable {
 
   void addTerm(ParsedTerm term) {
     if (!termToIntMap.containsKey(term.word())) {
-      termToIntMap.put(term.word(), term.wordId());
-      intToTermMap.put(term.wordId(), term.word());
+      termToIntMap.put(CharSeq.create(term.word()), term.wordId());
+      intToTermMap.put(term.wordId(), CharSeq.create(term.word()));
       termWriter.write(term);
     }
   }

@@ -11,7 +11,6 @@ import com.expleague.commons.text.lemmer.WordInfo;
 import com.expleague.sensearch.core.TokenIdUtils;
 import com.expleague.sensearch.core.impl.TokenizerImpl;
 import com.expleague.sensearch.core.lemmer.Lemmer;
-import com.expleague.sensearch.donkey.term.TokenParser.Token;
 import com.expleague.sensearch.donkey.writers.Writer;
 import java.util.Collections;
 import org.junit.Test;

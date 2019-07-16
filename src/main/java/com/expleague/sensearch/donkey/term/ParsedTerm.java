@@ -1,6 +1,5 @@
 package com.expleague.sensearch.donkey.term;
 
-import com.expleague.commons.seq.CharSeq;
 import com.expleague.sensearch.core.PartOfSpeech;
 import javax.annotation.Nullable;
 
@@ -8,40 +7,37 @@ public class ParsedTerm {
 
   private static final String LEMMA_SUFFIX = "$";
 
-  private final int wordId;
-  private final CharSeq word;
-
-  private final int lemmaId;
-  private final CharSeq lemma;
-
+  private final Token termToken;
+  private final Token lemmaToken;
   private final PartOfSpeech posTag;
 
-  protected ParsedTerm(int wordId, CharSeq word, int lemmaId, CharSeq lemma, PartOfSpeech posTag) {
-    this.wordId = wordId;
-    this.word = word;
-    this.lemmaId = lemmaId;
-    this.lemma = lemma;
+  public ParsedTerm(Token termToken, Token lemmaToken, PartOfSpeech posTag) {
+    this.termToken = termToken;
+    this.lemmaToken = lemmaToken;
     this.posTag = posTag;
   }
 
-  public static ParsedTerm create(int wordId, CharSeq word, int lemmaId, CharSeq lemma, PartOfSpeech posTag) {
-    return new ParsedTerm(wordId, word, lemmaId, lemma, posTag);
+  public ParsedTerm(Token termToken) {
+    this.termToken = termToken;
+    this.lemmaToken = null;
+    this.posTag = null;
   }
 
-  public CharSeq lemma() {
-    return lemma;
+  @Nullable
+  public CharSequence lemma() {
+    return lemmaToken == null ? null : lemmaToken.text();
   }
 
   public int lemmaId() {
-    return lemmaId;
+    return lemmaToken == null ? -1 : lemmaToken.id();
   }
 
-  public CharSeq word() {
-    return word;
+  public CharSequence word() {
+    return termToken.text();
   }
 
   public int wordId() {
-    return wordId;
+    return termToken.id();
   }
 
   @Nullable
@@ -54,6 +50,6 @@ public class ParsedTerm {
   }
 
   public boolean hasLemma() {
-    return lemmaId != -1;
+    return lemmaToken != null;
   }
 }

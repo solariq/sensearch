@@ -58,10 +58,10 @@ public class SearchServer {
       }
 
       indexCreator.createPagesAndTerms();
-      indexCreator.createLinks();
-      indexCreator.createStats();
-      indexCreator.createPageEmbedding();
-      indexCreator.createSuggest();
+//      indexCreator.createLinks();
+//      indexCreator.createStats();
+//      indexCreator.createPageEmbedding();
+//      indexCreator.createSuggest();
     }
 
     injector.getInstance(SearchServer.class).start(injector);

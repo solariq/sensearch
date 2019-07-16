@@ -8,7 +8,7 @@
   "pathToZIP": "../WikiDocs/Mini_Wiki_categories.zip",
 
   "pathToMetrics": "./resources/Metrics",
-  "buildIndexFlag": "false",
+  "buildIndexFlag": "true",
   "trainEmbeddingFlag": "false",
   "lshNearestFlag": "true",
   "maxFilterItems": "50",
