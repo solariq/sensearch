@@ -176,6 +176,7 @@ public class PageStatisticsBuilder {
       if (!hasPreviousWord) {
         hasPreviousWord = true;
         previousWordId = wordId;
+        return;
       }
 
       bigramsFrequencyMap.putIfAbsent(previousWordId, new TIntIntHashMap());
