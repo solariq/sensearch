@@ -10,9 +10,11 @@ import com.google.common.annotations.VisibleForTesting;
 import gnu.trove.map.TIntIntMap;
 import gnu.trove.map.TIntLongMap;
 import gnu.trove.map.TIntObjectMap;
+import gnu.trove.map.TLongIntMap;
 import gnu.trove.map.hash.TIntIntHashMap;
 import gnu.trove.map.hash.TIntLongHashMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
+import gnu.trove.map.hash.TLongIntHashMap;
 import gnu.trove.set.TLongSet;
 import gnu.trove.set.hash.TLongHashSet;
 import java.util.ArrayList;
@@ -36,8 +38,8 @@ public class PageStatisticsBuilder {
   private final BigramsFreqMapAccumulator bigramFreqAcc = new BigramsFreqMapAccumulator();
 
   private final TLongSet knownTargets = new TLongHashSet();
-  private final TLongSet uniqueTargets = new TLongHashSet();
-  private final TLongSet uniqueReferrers = new TLongHashSet();
+  private final TLongIntMap uniqueTargets = new TLongIntHashMap();
+  private final TLongIntMap uniqueReferrers = new TLongIntHashMap();
 
   private final SerializedTextHelperFactory textHelperFactory;
   private final long pageId;
@@ -60,9 +62,10 @@ public class PageStatisticsBuilder {
     }
 
     if (page.getIncomingLinksList().stream().anyMatch(l -> l.getSourcePageId() == pageId)) {
-      targetTitleTermsCount += (int) textHelperFactory.helper(page.getTitle())
-          .termIdsStream()
-          .count();
+      targetTitleTermsCount += uniqueTargets.get(page.getPageId()) *
+          (int) textHelperFactory.helper(page.getTitle())
+              .termIdsStream()
+              .count();
     }
   }
 
@@ -73,11 +76,11 @@ public class PageStatisticsBuilder {
 
     incomingLinksCount += (int) page.getIncomingLinksList().stream()
         .mapToLong(Link::getSourcePageId)
-        .peek(uniqueReferrers::add)
+        .peek(r -> uniqueReferrers.adjustOrPutValue(r, 1, 1))
         .count();
     outgoingLinksCount += (int) page.getOutgoingLinksList().stream()
         .mapToLong(Link::getTargetPageId)
-        .peek(uniqueTargets::add)
+        .peek(t -> uniqueTargets.adjustOrPutValue(t, 1, 1))
         .count();
     titlesCount++;
 
