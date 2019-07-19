@@ -54,6 +54,11 @@ public class IndexStatisticsBuilder {
     incomingLinksCount += pageStatistics.getIncomingLinksCount();
     uniqueReferrersCount += pageStatistics.getUniqueReferrersCount();
 
+    processUnigrams(pageStatistics);
+    processBigrams(pageStatistics);
+  }
+
+  private void processUnigrams(PageStatistics pageStatistics) {
     pageStatistics.getUnigramsList().stream()
         .peek(vgf ->
             wordFrequencyMap.adjustOrPutValue(vgf.getTermSequence(0),
@@ -63,7 +68,9 @@ public class IndexStatisticsBuilder {
         .mapToInt(vgf -> vgf.getTermSequence(0))
         .distinct()
         .forEach(id -> documentFrequencyMap.adjustOrPutValue(id, 1, 1));
+  }
 
+  private void processBigrams(PageStatistics pageStatistics) {
     pageStatistics.getBigramsList().forEach(
         vgf -> {
           int firstWordId = vgf.getTermSequence(0);
