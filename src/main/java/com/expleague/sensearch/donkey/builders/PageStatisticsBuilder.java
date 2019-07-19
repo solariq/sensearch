@@ -149,7 +149,7 @@ public class PageStatisticsBuilder {
 
   private Iterable<VgramFrequency> bigrams() {
     List<VgramFrequency> bigrams = new ArrayList<>();
-    bigramFreqAcc.bigramsFrequencyMap.forEachEntry(
+    bigramFreqAcc.bigramsFrequencyMap().forEachEntry(
         (idW1, fmap) -> fmap.forEachEntry((idW2, f) -> bigrams.add(
             VgramFrequency.newBuilder()
                 .addTermSequence(idW1)
