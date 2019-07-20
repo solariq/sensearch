@@ -7,16 +7,16 @@ option java_outer_classname = "IndexUnits";
 
 message IndexMeta {
   optional int32 version = 1;
-  optional int32 pages_count = 2;
-  optional double average_page_size = 3;
+  optional int32 documents_count = 2;
+  optional int32 titles_count = 3;
+
+  optional int64 title_terms_count = 4;
+  optional int64 content_terms_count = 5;
+  optional int64 link_terms_count = 6;
 
   // link statistics
-  optional int32 links_count = 6;
-  optional double average_link_target_title_word_count = 7;
-
-  // titles statistics
-  optional int32 section_titles_count = 8;
-  optional double average_section_title_size = 9;
+  optional int32 links_count = 7;
+  optional int64 target_title_terms_count = 8;
 }
 
 message Page {
