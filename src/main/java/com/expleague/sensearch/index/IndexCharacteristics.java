@@ -33,15 +33,15 @@ public interface IndexCharacteristics extends TermStatisticsBase {
   /**
    * @return the overall count of terms that forms anchor text of a link.
    * Since links are usually part of a document content, this number already is
-   * taken into account in the content terms count
+   * taken into account in the content terms count. This number divided by
+   * links count will give the average length in terms of a link anchor text
    */
   long linkTermsCount();
 
-  // TODO: Do we actually need two of these methods?
-  // probably these numbers should be the same IF we don't have links
-  // going outside of a collection
-  int incomingLinksCount();
-  int outgoingLinksCount();
+  /**
+   * @return the overall count of links in all documents in the index
+   */
+  int linksCount();
 
   /**
    * @return the overall count of title terms of referred pages.
