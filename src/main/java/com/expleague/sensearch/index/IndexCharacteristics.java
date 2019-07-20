@@ -1,6 +1,8 @@
 package com.expleague.sensearch.index;
 
-public interface IndexCharacteristics extends TermStatisticsBase {
+import java.nio.file.Path;
+
+public interface IndexCharacteristics {
   long version();
   int embeddingVectorLength();
 
@@ -50,4 +52,6 @@ public interface IndexCharacteristics extends TermStatisticsBase {
    * the outgoing links count will give the average length of referred title
    */
   int targetTitleTermsCount();
+
+  void saveTo(Path to);
 }
