@@ -39,8 +39,8 @@ public class ExternalSorter {
     Path outputRoot = outputPath.normalize().getParent();
     Path tmpOutputRoot;
     try {
-      tmpOutputRoot = Files.createTempDirectory(outputPath, ".SorterTmp");
-      Files.createDirectories(tmpOutputRoot);
+      Files.createDirectories(outputRoot);
+      tmpOutputRoot = Files.createTempDirectory(outputRoot, ".SorterTmp");
     } catch (IOException e) {
       throw new RuntimeException(
           String.format("External sorting crushed: failed to create temporary directory"

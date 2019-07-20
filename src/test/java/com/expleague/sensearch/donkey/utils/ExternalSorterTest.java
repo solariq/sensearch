@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Comparator;
+import java.util.NoSuchElementException;
 import java.util.Random;
 import java.util.Scanner;
 import org.junit.Assert;
@@ -33,7 +34,11 @@ public class ExternalSorterTest extends SensearchTestCase {
 
     @Override
     public Long read() {
-      return scanner.nextLong();
+      try {
+        return scanner.nextLong();
+      } catch (NoSuchElementException e) {
+        return null;
+      }
     }
 
     @Override
