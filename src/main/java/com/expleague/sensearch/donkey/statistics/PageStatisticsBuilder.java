@@ -1,4 +1,4 @@
-package com.expleague.sensearch.donkey.builders;
+package com.expleague.sensearch.donkey.statistics;
 
 import com.expleague.sensearch.donkey.utils.SerializedTextHelperFactory;
 import com.expleague.sensearch.donkey.utils.SerializedTextHelperFactory.SerializedTextHelper;

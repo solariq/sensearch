@@ -1,9 +1,10 @@
-package com.expleague.sensearch.donkey.builders;
+package com.expleague.sensearch.donkey.statistics;
 
 import com.expleague.sensearch.index.IndexCharacteristics;
 import java.nio.file.Path;
 
 public class PlainIndexCharacteristics implements IndexCharacteristics {
+
 
   public static IndexCharacteristics readFrom(Path from) {
     return null;

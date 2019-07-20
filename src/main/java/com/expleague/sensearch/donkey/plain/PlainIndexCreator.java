@@ -13,16 +13,16 @@ import com.expleague.sensearch.core.Tokenizer;
 import com.expleague.sensearch.core.impl.TokenizerImpl;
 import com.expleague.sensearch.core.lemmer.Lemmer;
 import com.expleague.sensearch.donkey.IndexCreator;
-import com.expleague.sensearch.donkey.builders.IndexStatisticsBuilder;
-import com.expleague.sensearch.donkey.builders.PageStatisticsBuilder;
-import com.expleague.sensearch.donkey.builders.PageStatisticsBuilderFactory;
+import com.expleague.sensearch.donkey.statistics.IndexStatisticsBuilder;
+import com.expleague.sensearch.donkey.statistics.PageStatisticsBuilder;
+import com.expleague.sensearch.donkey.statistics.PageStatisticsBuilderFactory;
 import com.expleague.sensearch.donkey.crawler.Crawler;
 import com.expleague.sensearch.donkey.embedding.EmbeddedPage;
 import com.expleague.sensearch.donkey.embedding.PageEmbedder;
 import com.expleague.sensearch.donkey.plain.IndexMetaBuilder.TermSegment;
 import com.expleague.sensearch.donkey.randomaccess.ProtoPageIndex;
 import com.expleague.sensearch.donkey.randomaccess.ProtoTermIndex;
-import com.expleague.sensearch.donkey.randomaccess.ProtoTermStatsIndex;
+import com.expleague.sensearch.donkey.randomaccess.ProtoTermStatisticsIndex;
 import com.expleague.sensearch.donkey.randomaccess.RandomAccess;
 import com.expleague.sensearch.donkey.readers.LevelDbLinkReader;
 import com.expleague.sensearch.donkey.readers.Reader;
@@ -360,7 +360,7 @@ public class PlainIndexCreator implements IndexCreator {
     final long startTime = System.nanoTime();
     try (
         ProtoTermIndex termIndex = new ProtoTermIndex(indexRoot.resolve(TERM_ROOT));
-        ProtoTermStatsIndex statsIndex = new ProtoTermStatsIndex(
+        ProtoTermStatisticsIndex statsIndex = new ProtoTermStatisticsIndex(
             indexRoot.resolve(TERM_STATISTICS_ROOT));
         ProtoPageIndex pageIndex = new ProtoPageIndex(indexRoot.resolve(PAGE_ROOT));
         DB vecDb = JniDBFactory.factory

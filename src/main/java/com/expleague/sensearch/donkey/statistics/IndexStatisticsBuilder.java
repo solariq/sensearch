@@ -1,4 +1,4 @@
-package com.expleague.sensearch.donkey.builders;
+package com.expleague.sensearch.donkey.statistics;
 
 import com.expleague.sensearch.protobuf.index.IndexUnits.PageStatistics;
 import gnu.trove.map.TIntIntMap;
@@ -86,7 +86,7 @@ public class IndexStatisticsBuilder {
     );
   }
 
-  public void build() {
-
+  public PlainIndexCharacteristics build() {
+    return null;
   }
 }

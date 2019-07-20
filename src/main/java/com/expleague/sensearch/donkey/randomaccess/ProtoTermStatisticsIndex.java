@@ -7,11 +7,11 @@ import gnu.trove.map.hash.TIntObjectHashMap;
 import java.nio.file.Path;
 import org.jetbrains.annotations.Nullable;
 
-public class ProtoTermStatsIndex extends ProtobufIndex<Integer, TermStatistics> {
+public class ProtoTermStatisticsIndex extends ProtobufIndex<Integer, TermStatistics> {
 
   private final TIntObjectMap<TermStatistics> idToStats = new TIntObjectHashMap<>();
 
-  public ProtoTermStatsIndex(Path root) {
+  public ProtoTermStatisticsIndex(Path root) {
     super(root, TermStatistics.class);
     forEach(stats -> idToStats.put(stats.getTermId(), stats));
   }

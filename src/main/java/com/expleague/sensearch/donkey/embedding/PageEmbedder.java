@@ -8,7 +8,7 @@ import com.expleague.commons.math.vectors.impl.vectors.ArrayVec;
 import com.expleague.commons.seq.CharSeq;
 import com.expleague.ml.embedding.Embedding;
 import com.expleague.sensearch.donkey.randomaccess.ProtoTermIndex;
-import com.expleague.sensearch.donkey.randomaccess.ProtoTermStatsIndex;
+import com.expleague.sensearch.donkey.randomaccess.ProtoTermStatisticsIndex;
 import com.expleague.sensearch.donkey.utils.SerializedTextHelperFactory;
 import com.expleague.sensearch.donkey.utils.SerializedTextHelperFactory.SerializedTextHelper;
 import com.expleague.sensearch.protobuf.index.IndexUnits.Page;
@@ -20,12 +20,12 @@ import java.util.Objects;
 public class PageEmbedder {
 
   private final SerializedTextHelperFactory helperFactory;
-  private final ProtoTermStatsIndex statsIndex;
+  private final ProtoTermStatisticsIndex statsIndex;
   private final Embedding<CharSeq> embedding;
   private final ProtoTermIndex termIndex;
 
   public PageEmbedder(
-      ProtoTermStatsIndex statsIndex,
+      ProtoTermStatisticsIndex statsIndex,
       ProtoTermIndex termIndex,
       SerializedTextHelperFactory helperFactory,
       Embedding<CharSeq> embedding) {
