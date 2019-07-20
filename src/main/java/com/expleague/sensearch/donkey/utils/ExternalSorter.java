@@ -106,7 +106,10 @@ public class ExternalSorter {
   private static <T> List<T> readObjects(Reader<T> source, int limit) {
     List<T> objectsList = new ArrayList<>();
     T object;
-    while ((object = source.read()) != null && objectsList.size() <= limit) {
+    while ((object = source.read()) != null && objectsList.size() < limit - 1) {
+      objectsList.add(object);
+    }
+    if (object != null) {
       objectsList.add(object);
     }
     return objectsList;
