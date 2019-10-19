@@ -46,6 +46,10 @@ public class IndexMetaBuilder {
     IndexMetaBuilderState state = localState.get();
     state.termIds.add(termId);
     switch (termSegment) {
+      case LINK_TEXT:
+        state.linkTokenCount++;
+        state.totalTokenCount++;
+        break;
       case SECTION_TITLE:
         state.titleTokensCount++;
       case TEXT:
@@ -82,6 +86,7 @@ public class IndexMetaBuilder {
     int pageCount = allStates.stream().mapToInt(state -> state.pageCount).sum();
     int titleTokensCount = allStates.stream().mapToInt(state -> state.titleTokensCount).sum();
     int totalTokenCount = allStates.stream().mapToInt(state -> state.totalTokenCount).sum();
+    int totalLinkTokenCount = allStates.stream().mapToInt(state -> state.linkTokenCount).sum();
 
     int[] linkTargetTitleTokensCount = new int[]{0};
     int[] linksCount = new int[]{0};
@@ -108,25 +113,28 @@ public class IndexMetaBuilder {
 
     return IndexMeta.newBuilder()
         .setVersion(version)
+        .setDocumentsCount(pageCount)
+        .setTitlesCount(titlesCount)
+        .setTitleTermsCount(titleTokensCount)
+        .setContentTermsCount(totalTokenCount)
+        .setLinkTermsCount(totalLinkTokenCount)
         .setLinksCount(linksCount[0])
-        .setAverageLinkTargetTitleWordCount((double) linkTargetTitleTokensCount[0] / linksCount[0])
-        .setSectionTitlesCount(titlesCount)
-        .setAverageSectionTitleSize((double) titleTokensCount / titlesCount)
-        .setAveragePageSize((double) totalTokenCount / pageCount)
-        .setPagesCount(pageCount)
+        .setTargetTitleTermsCount(linkTargetTitleTokensCount[0])
         .build();
   }
 
   public enum TermSegment {
     SECTION_TITLE,
+    LINK_TEXT,
     TEXT
   }
 
-  private class IndexMetaBuilderState {
+  private static class IndexMetaBuilderState {
     int titleTokensCount = 0;
     int titlesCount = 0;
     int totalTokenCount = 0;
     int pageCount = 0;
+    int linkTokenCount = 0;
     boolean isProcessingPage = false;
     final TLongSet termIds = new TLongHashSet();
     final TLongIntMap incomingLinksCounts = new TLongIntHashMap();

@@ -53,9 +53,11 @@ import gnu.trove.map.TLongObjectMap;
 import gnu.trove.map.hash.TLongObjectHashMap;
 import gnu.trove.set.TLongSet;
 import gnu.trove.set.hash.TLongHashSet;
+
 import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -63,6 +65,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Stream;
+
 import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 import org.fusesource.leveldbjni.JniDBFactory;
@@ -173,11 +176,11 @@ public class PlainIndexCreator implements IndexCreator {
       Files.createDirectories(indexRoot.resolve(SUGGEST_UNIGRAM_ROOT));
 
       try (final DB suggestUnigramDb =
-          JniDBFactory.factory.open(
-              indexRoot.resolve(SUGGEST_UNIGRAM_ROOT).toFile(), STATS_DB_OPTIONS);
-          final DB suggestMultigramDb =
-              JniDBFactory.factory.open(
-                  indexRoot.resolve(SUGGEST_MULTIGRAMS_ROOT).toFile(), STATS_DB_OPTIONS);
+               JniDBFactory.factory.open(
+                   indexRoot.resolve(SUGGEST_UNIGRAM_ROOT).toFile(), STATS_DB_OPTIONS);
+           final DB suggestMultigramDb =
+               JniDBFactory.factory.open(
+                   indexRoot.resolve(SUGGEST_MULTIGRAMS_ROOT).toFile(), STATS_DB_OPTIONS);
       ) {
         Config config =
             new ObjectMapper().readValue(Paths.get("./config.json").toFile(), ConfigImpl.class);
@@ -347,7 +350,7 @@ public class PlainIndexCreator implements IndexCreator {
       final long startTime = System.nanoTime();
 
       wordEmbedding = EmbeddingImpl.read(
-          Files.newBufferedReader(embeddingVectorsPath, Charset.forName("UTF-8")),
+          Files.newBufferedReader(embeddingVectorsPath, StandardCharsets.UTF_8),
           CharSeq.class);
 
       LOG.info(String
@@ -392,27 +395,27 @@ public class PlainIndexCreator implements IndexCreator {
 
     final TLongSet knownPageIds = new TLongHashSet();
     try (final PlainPageBuilder plainPageBuilder =
-        new PlainPageBuilder(
-            JniDBFactory.factory.open(indexRoot.resolve(PAGE_ROOT).toFile(), PAGE_DB_OPTIONS),
-            indexRoot.resolve(PAGE_ROOT).resolve("TMP"));
-        final TermWriter termWriter = new TermWriter(indexRoot.resolve(TERM_ROOT));
-        final StatisticsBuilder statisticsBuilder =
-            new StatisticsBuilder(indexRoot.resolve(TERM_STATISTICS_ROOT));
-        final EmbeddingBuilder embeddingBuilder =
-            new EmbeddingBuilder(
-                JniDBFactory.factory.open(
-                    indexRoot.resolve(EMBEDDING_ROOT).resolve(VECS_ROOT).toFile(),
-                    EMBEDDING_DB_OPTIONS),
+             new PlainPageBuilder(
+                 JniDBFactory.factory.open(indexRoot.resolve(PAGE_ROOT).toFile(), PAGE_DB_OPTIONS),
+                 indexRoot.resolve(PAGE_ROOT).resolve("TMP"));
+         final TermWriter termWriter = new TermWriter(indexRoot.resolve(TERM_ROOT));
+         final StatisticsBuilder statisticsBuilder =
+             new StatisticsBuilder(indexRoot.resolve(TERM_STATISTICS_ROOT));
+         final EmbeddingBuilder embeddingBuilder =
+             new EmbeddingBuilder(
+                 JniDBFactory.factory.open(
+                     indexRoot.resolve(EMBEDDING_ROOT).resolve(VECS_ROOT).toFile(),
+                     EMBEDDING_DB_OPTIONS),
                 /*JniDBFactory.factory.open(
                     indexRoot.resolve(EMBEDDING_ROOT).resolve(LSH_ROOT).toFile(),
                     EMBEDDING_DB_OPTIONS),
                 indexRoot.resolve(EMBEDDING_ROOT),*/
-                jmllEmbedding,
-                tokenizer);
-        final UriMappingBuilder uriMappingBuilder =
-            new UriMappingBuilder(
-                JniDBFactory.factory.open(
-                    indexRoot.resolve(URI_MAPPING_ROOT).toFile(), URI_DB_OPTIONS))) {
+                 jmllEmbedding,
+                 tokenizer);
+         final UriMappingBuilder uriMappingBuilder =
+             new UriMappingBuilder(
+                 JniDBFactory.factory.open(
+                     indexRoot.resolve(URI_MAPPING_ROOT).toFile(), URI_DB_OPTIONS))) {
 
       EmbeddingImpl<CharSeq> jmllEmbedding1 = (EmbeddingImpl<CharSeq>) jmllEmbedding;
       for (int i = 0; i < jmllEmbedding1.vocabSize(); i++) {
@@ -460,9 +463,9 @@ public class PlainIndexCreator implements IndexCreator {
                             uriMappingBuilder.addSection(s.uri(), sectionId);
 
                             List<CharSequence> sectionTitles = s.titles();
-                            String sectionTitle =
-                                sectionTitles.get(sectionTitles.size() - 1).toString();
+                            String sectionTitle = sectionTitles.get(sectionTitles.size() - 1).toString();
 
+                            // Добавить обработку линок
                             final CharSequence TITLE_STOP = "@@@STOP_TITLE777@@@";
                             boolean[] isTitle = {true};
                             Stream.concat(
@@ -483,7 +486,7 @@ public class PlainIndexCreator implements IndexCreator {
                                       if (jmllEmbedding.apply(CharSeq.compact(word)) == null) {
                                         rareTermsInvIdx
                                             .putIfAbsent(termLemmaId.id, new TLongArrayList());
-                                        rareTermsInvIdx.get(termLemmaId.id).add(pageId);
+                                        rareTermsInvIdx.get(termLemmaId.id).add(xpageId);
                                       }
                                       */
                                       statisticsBuilder.enrich(parsedTerm);

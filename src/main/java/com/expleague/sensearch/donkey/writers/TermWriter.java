@@ -4,8 +4,10 @@ import com.expleague.sensearch.donkey.term.ParsedTerm;
 import com.expleague.sensearch.protobuf.index.IndexUnits.Term;
 import com.expleague.sensearch.protobuf.index.IndexUnits.Term.PartOfSpeech;
 import com.google.common.primitives.Longs;
+
 import java.io.IOException;
 import java.nio.file.Path;
+
 import org.fusesource.leveldbjni.JniDBFactory;
 import org.iq80.leveldb.DB;
 import org.iq80.leveldb.Options;
