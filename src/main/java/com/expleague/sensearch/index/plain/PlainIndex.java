@@ -168,12 +168,19 @@ public class PlainIndex implements Index {
     }
     vocabularySize = termBase.size();
 
-    averagePageSize = indexMeta.getAveragePageSize();
-    indexSize = indexMeta.getPagesCount();
+    averagePageSize = (double) indexMeta.getContentTermsCount() / indexMeta.getDocumentsCount();
+    indexSize = indexMeta.getDocumentsCount();
     linksCount = indexMeta.getLinksCount();
-    averageLinkTargetTitleWordCount = indexMeta.getAverageLinkTargetTitleWordCount();
-    sectionTitlesCount = indexMeta.getSectionTitlesCount();
-    averageSectionTitleSize = indexMeta.getAverageSectionTitleSize();
+    averageLinkTargetTitleWordCount = (double) indexMeta.getTargetTitleTermsCount() / indexMeta.getLinksCount();
+    sectionTitlesCount = indexMeta.getTitlesCount();
+    averageSectionTitleSize = (double) indexMeta.getTitleTermsCount() / indexMeta.getTitlesCount();
+
+//    averagePageSize = indexMeta.getAveragePageSize();
+//    indexSize = indexMeta.getPagesCount();
+//    linksCount = indexMeta.getLinksCount();
+//    averageLinkTargetTitleWordCount = indexMeta.getAverageLinkTargetTitleWordCount();
+//    sectionTitlesCount = indexMeta.getSectionTitlesCount();
+//    averageSectionTitleSize = indexMeta.getAverageSectionTitleSize();
 
 
     rareTermsInvIdx = new HashMap<>();

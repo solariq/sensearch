@@ -465,7 +465,7 @@ public class PlainIndexCreator implements IndexCreator {
                             List<CharSequence> sectionTitles = s.titles();
                             String sectionTitle = sectionTitles.get(sectionTitles.size() - 1).toString();
 
-                            // Добавить обработку линок
+                            //TODO Добавить обработку линок
                             final CharSequence TITLE_STOP = "@@@STOP_TITLE777@@@";
                             boolean[] isTitle = {true};
                             Stream.concat(

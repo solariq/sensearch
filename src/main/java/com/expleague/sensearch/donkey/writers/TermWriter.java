@@ -36,13 +36,14 @@ public class TermWriter implements Writer<ParsedTerm> {
   public TermWriter(Path outputPath) {
     this.root = outputPath;
     try {
-      termsDb = JniDBFactory.factory.open(outputPath.toFile(), DB_OPTIONS);
+      termsDb = JniDBFactory.factory.open(root.toFile(), DB_OPTIONS);
       writeBatch = termsDb.createWriteBatch();
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
   }
 
+  @SuppressWarnings("ConstantConditions")
   public void write(ParsedTerm parsedTerm) {
     Term.Builder builder = Term.newBuilder();
 
@@ -66,6 +67,7 @@ public class TermWriter implements Writer<ParsedTerm> {
       try {
         flush();
       } catch (IOException e) {
+        LOGGER.error(e.getMessage());
         throw new RuntimeException(e);
       }
     }
