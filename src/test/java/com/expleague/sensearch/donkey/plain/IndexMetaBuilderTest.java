@@ -38,10 +38,12 @@ public class IndexMetaBuilderTest {
 
     IndexMeta meta = metaBuilder.build();
     assertEquals(1, meta.getVersion());
-    assertEquals((5 + 4 + 1) / 3.0, meta.getAveragePageSize(), 1e-8);
-    assertEquals(3, meta.getPagesCount());
+    assertEquals(3, meta.getDocumentsCount());
+    assertEquals(7, meta.getContentTermsCount());
+    assertEquals(4, meta.getTitlesCount());
+    assertEquals(3, meta.getTitleTermsCount());
     assertEquals(0, meta.getLinksCount());
-    assertEquals(4, meta.getSectionTitlesCount());
-    assertEquals((2 + 1) / 4.0, meta.getAverageSectionTitleSize(), 1e-8);
+    assertEquals(0, meta.getTargetTitleTermsCount());
+    assertEquals(0, meta.getLinkTermsCount());
   }
 }

@@ -175,13 +175,6 @@ public class PlainIndex implements Index {
     sectionTitlesCount = indexMeta.getTitlesCount();
     averageSectionTitleSize = (double) indexMeta.getTitleTermsCount() / indexMeta.getTitlesCount();
 
-//    averagePageSize = indexMeta.getAveragePageSize();
-//    indexSize = indexMeta.getPagesCount();
-//    linksCount = indexMeta.getLinksCount();
-//    averageLinkTargetTitleWordCount = indexMeta.getAverageLinkTargetTitleWordCount();
-//    sectionTitlesCount = indexMeta.getSectionTitlesCount();
-//    averageSectionTitleSize = indexMeta.getAverageSectionTitleSize();
-
 
     rareTermsInvIdx = new HashMap<>();
 

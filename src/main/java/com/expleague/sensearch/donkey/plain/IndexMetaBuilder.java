@@ -52,6 +52,7 @@ public class IndexMetaBuilder {
         break;
       case SECTION_TITLE:
         state.titleTokensCount++;
+        break;
       case TEXT:
         state.totalTokenCount++;
     }
