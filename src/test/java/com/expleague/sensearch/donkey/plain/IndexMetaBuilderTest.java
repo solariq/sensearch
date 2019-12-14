@@ -2,7 +2,7 @@ package com.expleague.sensearch.donkey.plain;
 
 import static org.junit.Assert.assertEquals;
 
-import com.expleague.sensearch.donkey.plain.IndexMetaBuilder.TermSegment;
+import com.expleague.sensearch.donkey.plain.IndexMetaWriter.TermSegment;
 import com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta;
 import org.junit.Test;
 
@@ -12,7 +12,7 @@ public class IndexMetaBuilderTest {
   // TODO test addSection
   @Test
   public void test() {
-    IndexMetaBuilder metaBuilder = new IndexMetaBuilder(1);
+    IndexMetaWriter metaBuilder = new IndexMetaWriter(1);
     metaBuilder.startPage(1, 1); //Title
     metaBuilder.addTerm(-1, TermSegment.TEXT);
     metaBuilder.addTerm(-1, TermSegment.SECTION_TITLE);

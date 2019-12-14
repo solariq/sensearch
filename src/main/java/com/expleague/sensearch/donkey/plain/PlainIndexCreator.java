@@ -19,7 +19,7 @@ import com.expleague.sensearch.donkey.statistics.PageStatisticsBuilderFactory;
 import com.expleague.sensearch.donkey.crawler.Crawler;
 import com.expleague.sensearch.donkey.embedding.EmbeddedPage;
 import com.expleague.sensearch.donkey.embedding.PageEmbedder;
-import com.expleague.sensearch.donkey.plain.IndexMetaBuilder.TermSegment;
+import com.expleague.sensearch.donkey.plain.IndexMetaWriter.TermSegment;
 import com.expleague.sensearch.donkey.randomaccess.ProtoPageIndex;
 import com.expleague.sensearch.donkey.randomaccess.ProtoTermIndex;
 import com.expleague.sensearch.donkey.randomaccess.ProtoTermStatisticsIndex;
@@ -56,7 +56,6 @@ import gnu.trove.set.hash.TLongHashSet;
 
 import java.io.FileWriter;
 import java.io.IOException;
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -103,7 +102,7 @@ public class PlainIndexCreator implements IndexCreator {
   public static final String SUGGEST_MULTIGRAMS_ROOT = "suggest/multigram_freq_norm";
 
   public static final String INDEX_META_FILE = "index.meta";
-  public static final int DEFAULT_VEC_SIZE = 300;
+  public static final int DEFAULT_VEC_SIZE = 192;
 
   // DB configurations
   private static final long DEFAULT_CACHE_SIZE = 1 << 10; // 1 KB
@@ -285,32 +284,30 @@ public class PlainIndexCreator implements IndexCreator {
     final long startTime = System.nanoTime();
 
     Path statsPath = indexRoot.resolve(TERM_STATISTICS_ROOT);
-    try {
-      try (
-          RandomAccess<Long, Page> pageIndex = new ProtoPageIndex(indexRoot.resolve(PAGE_ROOT));
-          RandomAccess<Integer, Term> termIndex = new ProtoTermIndex(indexRoot.resolve(TERM_ROOT));
-      ) {
-        PageStatisticsBuilderFactory builderFactory = new PageStatisticsBuilderFactory(
-            new SerializedTextHelperFactory(termIndex));
-        IndexStatisticsBuilder indexStatisticsBuilder = new IndexStatisticsBuilder();
+    try (
+        RandomAccess<Long, Page> pageIndex = new ProtoPageIndex(indexRoot.resolve(PAGE_ROOT));
+        RandomAccess<Integer, Term> termIndex = new ProtoTermIndex(indexRoot.resolve(TERM_ROOT))
+    ) {
+      PageStatisticsBuilderFactory builderFactory = new PageStatisticsBuilderFactory(
+          new SerializedTextHelperFactory(termIndex));
+      IndexStatisticsBuilder indexStatisticsBuilder = new IndexStatisticsBuilder();
 
-        pageIndex.forEach(p -> {
-          if (p.getRootId() != p.getPageId()) {
-            return;
-          }
-          PageStatisticsBuilder pageStatisticsBuilder = builderFactory.builder(p.getPageId());
-          fullDocument(p, pageIndex)
-              .peek(pageStatisticsBuilder::addPage)
-              .map(Page::getOutgoingLinksList)
-              .flatMap(List::stream)
-              .mapToLong(Link::getTargetPageId)
-              .distinct()
-              .mapToObj(pageIndex::value)
-              .filter(Objects::nonNull)
-              .forEach(pageStatisticsBuilder::addTarget);
-          indexStatisticsBuilder.addPageStatistics(pageStatisticsBuilder.build());
-        });
-      }
+      pageIndex.forEach(p -> {
+        if (p.getRootId() != p.getPageId()) {
+          return;
+        }
+        PageStatisticsBuilder pageStatisticsBuilder = builderFactory.builder(p.getPageId());
+        fullDocument(p, pageIndex)
+            .peek(pageStatisticsBuilder::addPage)
+            .map(Page::getOutgoingLinksList)
+            .flatMap(List::stream)
+            .mapToLong(Link::getTargetPageId)
+            .distinct()
+            .mapToObj(pageIndex::value)
+            .filter(Objects::nonNull)
+            .forEach(pageStatisticsBuilder::addTarget);
+        indexStatisticsBuilder.addPageStatistics(pageStatisticsBuilder.build());
+      });
     } catch (Exception e) {
       cleanup(statsPath);
       throw new RuntimeException(e);
@@ -422,7 +419,7 @@ public class PlainIndexCreator implements IndexCreator {
 //        ParsedTerm parsedTerm = termParser.parseTerm(jmllEmbedding1.getObj(i));
 //        embeddingBuilder.addTerm(parsedTerm.wordId(), jmllEmbedding1.apply(parsedTerm.word()));
       }
-      IndexMetaBuilder indexMetaBuilder = new IndexMetaBuilder(PlainIndex.VERSION);
+      IndexMetaWriter indexMetaWriter = new IndexMetaWriter(PlainIndex.VERSION);
 
       LOG.info("Creating mappings from wiki ids to raw index ids...");
 
@@ -446,7 +443,7 @@ public class PlainIndexCreator implements IndexCreator {
                   // knownPageIds.add(uri);
                   plainPageBuilder.startPage(pageId, doc.categories(), doc.uri());
                   statisticsBuilder.startPage();
-                  indexMetaBuilder.startPage(
+                  indexMetaWriter.startPage(
                       pageId, (int) tokenizer.parseTextToWords(doc.title()).count());
                   embeddingBuilder.startPage(pageId);
                   doc.sections()
@@ -455,10 +452,10 @@ public class PlainIndexCreator implements IndexCreator {
                             long sectionId = idGenerator.generatePageId(s.uri());
                             knownPageIds.add(sectionId);
 
-                            s.links().forEach(indexMetaBuilder::addLink);
+                            s.links().forEach(indexMetaWriter::addLink);
 
                             plainPageBuilder.addSection(s, sectionId);
-                            indexMetaBuilder.addSection(sectionId);
+                            indexMetaWriter.addSection(sectionId);
                             embeddingBuilder.addSection(s, sectionId);
                             uriMappingBuilder.addSection(s.uri(), sectionId);
 
@@ -490,7 +487,7 @@ public class PlainIndexCreator implements IndexCreator {
                                       }
                                       */
                                       statisticsBuilder.enrich(parsedTerm);
-                                      indexMetaBuilder.addTerm(
+                                      indexMetaWriter.addTerm(
                                           parsedTerm.wordId(),
                                           isTitle[0]
                                               ? TermSegment.SECTION_TITLE
@@ -499,7 +496,7 @@ public class PlainIndexCreator implements IndexCreator {
                           });
 
                   embeddingBuilder.endPage();
-                  indexMetaBuilder.endPage();
+                  indexMetaWriter.endPage();
                   statisticsBuilder.endPage();
                   plainPageBuilder.endPage();
                 });
@@ -509,7 +506,7 @@ public class PlainIndexCreator implements IndexCreator {
 
         LOG.info("Storing index meta...");
         // saving index-wise data
-        indexMetaBuilder.build().writeTo(Files.newOutputStream(indexRoot.resolve(INDEX_META_FILE)));
+        indexMetaWriter.build().writeTo(Files.newOutputStream(indexRoot.resolve(INDEX_META_FILE)));
 
         {
           ObjectMapper mapper = new ObjectMapper();

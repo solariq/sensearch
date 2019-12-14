@@ -2,6 +2,7 @@ package com.expleague.sensearch.donkey.plain;
 
 import com.expleague.sensearch.donkey.crawler.document.CrawlerDocument.Link;
 import com.expleague.sensearch.donkey.utils.BrandNewIdGenerator;
+import com.expleague.sensearch.donkey.writers.Writer;
 import com.expleague.sensearch.protobuf.index.IndexUnits.IndexMeta;
 import gnu.trove.map.TLongIntMap;
 import gnu.trove.map.hash.TLongIntHashMap;
@@ -12,9 +13,9 @@ import java.util.Collections;
 import java.util.List;
 import org.apache.log4j.Logger;
 
-public class IndexMetaBuilder {
+public class IndexMetaWriter {
 
-  private static final Logger LOG = Logger.getLogger(IndexMetaBuilder.class);
+  private static final Logger LOG = Logger.getLogger(IndexMetaWriter.class);
 
   private final int version;
 
@@ -27,7 +28,7 @@ public class IndexMetaBuilder {
             return state;
           });
 
-  public IndexMetaBuilder(int version) {
+  public IndexMetaWriter(int version) {
     this.version = version;
   }
 

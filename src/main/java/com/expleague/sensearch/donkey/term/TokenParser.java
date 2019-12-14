@@ -54,7 +54,7 @@ public class TokenParser implements AutoCloseable {
     for (int i = 0; i < originalText.length(); i++) {
       upper = allUpperCase(ids[id]);
       if (w.charAt(j) != originalText.charAt(i)) {
-        if (upper || j == 0 || Character.toUpperCase(w.charAt(j)) != originalText.charAt(i)) {
+        if (upper || j == 0 || w.charAt(j) != Character.toLowerCase(originalText.charAt(i))) {
           check = false;
           break;
         }
