@@ -66,11 +66,12 @@ import java.util.Objects;
 import java.util.stream.Stream;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.log4j.Logger;
 import org.fusesource.leveldbjni.JniDBFactory;
 import org.iq80.leveldb.CompressionType;
 import org.iq80.leveldb.DB;
 import org.iq80.leveldb.Options;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class PlainIndexCreator implements IndexCreator {
 
@@ -102,7 +103,7 @@ public class PlainIndexCreator implements IndexCreator {
   public static final String SUGGEST_MULTIGRAMS_ROOT = "suggest/multigram_freq_norm";
 
   public static final String INDEX_META_FILE = "index.meta";
-  public static final int DEFAULT_VEC_SIZE = 192;
+  public static final int DEFAULT_VEC_SIZE = 130;
 
   // DB configurations
   private static final long DEFAULT_CACHE_SIZE = 1 << 10; // 1 KB
@@ -133,7 +134,7 @@ public class PlainIndexCreator implements IndexCreator {
           .errorIfExists(true)
           .compressionType(CompressionType.SNAPPY);
 
-  private static final Logger LOG = Logger.getLogger(PlainIndexCreator.class);
+  private static final Logger LOG = LoggerFactory.getLogger(PlainIndexCreator.class);
   private final Crawler crawler;
   private final Lemmer lemmer;
   private final Tokenizer tokenizer = new TokenizerImpl();

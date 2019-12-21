@@ -134,11 +134,11 @@ public class PageWriter implements Writer<CrawlerDocument> {
   private Page.Builder processSection(Section section, long currentPageId, long sectionId, List<String> categories) {
 
     SerializedText sectionContent = serializeText(tokenParser.parse(section.text()));
-    tokenParser.check(section.text(), toIntArray(sectionContent));
+//    tokenParser.check(section.text(), toIntArray(sectionContent));
 
     SerializedText sectionTitle = serializeText(tokenParser.parse(section.title()));
 
-    tokenParser.check(section.title(), toIntArray(sectionTitle));
+//    tokenParser.check(section.title(), toIntArray(sectionTitle));
 
     Page.Builder pageBuilder =
         Page.newBuilder()
@@ -154,8 +154,7 @@ public class PageWriter implements Writer<CrawlerDocument> {
         .filter(l -> l.targetId() != currentPageId)
         .map(l -> {
           SerializedText sectionLink = serializeText(tokenParser.parse(l.link().text()));
-          tokenParser.check(l.link.text(), toIntArray(sectionLink));
-
+//          tokenParser.check(l.link.text(), toIntArray(sectionLink));
           // TODO: remove offsets maybe?
           return Page.Link.newBuilder()
               .setPosition(l.link().textOffset())
